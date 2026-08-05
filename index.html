@@ -1,6 +1,6 @@
 <html lang="zh-Hant"><head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
@@ -41,7 +41,7 @@
       z-index: -1;
     }
     body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif; background: transparent; color: #111; height: 100vh; overflow: hidden; }
-    html { background: transparent; }
+    html { background: #f7e8ef; }
     .scroll-shell { height: 100vh; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-top: env(safe-area-inset-top); background: transparent; }
     .container { max-width: 480px; margin: 0 auto; padding: 16px 16px 120px 16px; }
 
@@ -441,6 +441,7 @@ html.theme-dark {
   --team1-color: #6aaff5;
   --team2-color: #f5c84a;
 }
+html.theme-dark { background: #111116; }
 html.theme-dark body { color: #f0f0f2; }
 html.theme-dark .bg-fixed { background: linear-gradient(rgba(0,0,0,0.52),rgba(0,0,0,0.52)), url("assets/bg/bg_trip_mobile.webp") center center / cover no-repeat; }
 html.theme-dark .header { background: transparent; border: none; box-shadow: none; backdrop-filter: none; -webkit-backdrop-filter: none; }
@@ -602,28 +603,31 @@ body.expenses-view-active .container {
 
   
 
-/* Phase 1 · iOS native shell */
+/* Phase 1 · iOS native shell · refinement 7.0.1 */
 :root {
-  --tabbar-h: 78px;
-  --compact-header-h: 54px;
+  --tabbar-h: 72px;
+  --compact-header-h: 58px;
   --compact-header-top: env(safe-area-inset-top, 0px);
 }
 
 body {
   overscroll-behavior: none;
   -webkit-tap-highlight-color: transparent;
+  min-height: 100dvh;
 }
 
 .scroll-shell {
-  scroll-padding-top: calc(var(--compact-header-h) + env(safe-area-inset-top, 0px) + 12px);
+  height: 100dvh;
+  scroll-padding-top: calc(var(--compact-header-h) + env(safe-area-inset-top, 0px) + 10px);
   overscroll-behavior-y: contain;
 }
 
 .container {
-  padding-bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom, 0px) + 38px);
+  padding-bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom, 0px) + 60px);
 }
 
-/* iOS large-title collapse surface */
+/* Compact iOS navigation title. The date sits below the centred title instead
+   of being squeezed into a right-side pill. */
 .ios-compact-header {
   position: fixed;
   top: 0;
@@ -634,15 +638,15 @@ body {
   padding-top: env(safe-area-inset-top, 0px);
   box-sizing: border-box;
   color: #111;
-  background: linear-gradient(180deg, rgba(250,250,252,0.82), rgba(247,247,249,0.64));
-  border-bottom: 1px solid rgba(255,255,255,0.52);
-  box-shadow: 0 7px 24px rgba(15,23,42,0.08);
-  backdrop-filter: blur(28px) saturate(175%);
-  -webkit-backdrop-filter: blur(28px) saturate(175%);
+  background: rgba(248,248,250,0.80);
+  border-bottom: 0.5px solid rgba(60,60,67,0.18);
+  box-shadow: none;
+  backdrop-filter: blur(24px) saturate(160%);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
   opacity: 0;
-  transform: translate3d(0, -18px, 0);
+  transform: translate3d(0,-4px,0);
   pointer-events: none;
-  transition: opacity 0.22s ease, transform 0.32s cubic-bezier(0.22,0.9,0.26,1);
+  transition: opacity 0.18s ease, transform 0.22s ease;
 }
 
 .ios-compact-header.is-visible {
@@ -654,81 +658,74 @@ body {
   width: min(100%, 480px);
   min-height: var(--compact-header-h);
   margin: 0 auto;
-  padding: 6px 17px 7px;
+  padding: 5px 18px 6px;
   box-sizing: border-box;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+  justify-content: center;
 }
 
-.ios-compact-copy { min-width: 0; }
-.ios-compact-kicker {
-  font-size: calc(10px * var(--font-scale));
-  line-height: 1.05;
-  color: rgba(17,17,17,0.52);
-  font-weight: 750;
-  letter-spacing: 0.02em;
+.ios-compact-copy {
+  width: 100%;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
 }
 .ios-compact-title {
-  max-width: 270px;
+  order: 1;
+  max-width: calc(100vw - 44px);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   font-size: calc(16px * var(--font-scale));
-  line-height: 1.2;
-  font-weight: 800;
-  letter-spacing: -0.015em;
+  line-height: 1.18;
+  font-weight: 680;
+  letter-spacing: -0.012em;
 }
-.ios-compact-context {
-  flex: 0 0 auto;
-  max-width: 124px;
+.ios-compact-kicker {
+  order: 2;
+  max-width: calc(100vw - 54px);
+  margin-top: 2px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  padding: 5px 9px;
-  border: 1px solid rgba(255,255,255,0.62);
-  border-radius: 999px;
-  background: rgba(255,255,255,0.42);
-  color: rgba(17,17,17,0.65);
   font-size: calc(10px * var(--font-scale));
-  font-weight: 750;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.74);
+  line-height: 1.1;
+  color: rgba(60,60,67,0.60);
+  font-weight: 520;
+  letter-spacing: 0;
 }
+.ios-compact-context { display: none !important; }
 
-/* Day selector becomes a translucent sticky rail only after it reaches the top */
+/* The day pills remain visually independent. There is no full-width frosted
+   rail behind them, including when the selector becomes sticky. */
 .day-tabs {
   position: sticky;
   top: calc(var(--compact-header-h) + env(safe-area-inset-top, 0px));
   z-index: 1200;
-  margin: 14px -16px 10px;
-  padding: 8px 16px 9px;
+  margin: 14px 0 10px;
+  padding: 7px 0 8px;
   scrollbar-width: none;
-  background: linear-gradient(180deg, rgba(250,250,252,0.78), rgba(247,247,249,0.54));
-  border-top: 1px solid rgba(255,255,255,0.30);
-  border-bottom: 1px solid rgba(255,255,255,0.44);
-  box-shadow: 0 8px 18px rgba(15,23,42,0.045);
-  backdrop-filter: blur(24px) saturate(165%);
-  -webkit-backdrop-filter: blur(24px) saturate(165%);
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }
 .day-tabs::-webkit-scrollbar { display: none; }
 .day-tab {
   min-height: 34px;
-  border-color: rgba(255,255,255,0.64);
-  background: rgba(255,255,255,0.44);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.76);
+  border-color: rgba(255,255,255,0.72);
+  background: rgba(248,248,250,0.88);
+  box-shadow: 0 2px 8px rgba(15,23,42,0.07), inset 0 1px 0 rgba(255,255,255,0.86);
+  backdrop-filter: blur(18px) saturate(145%);
+  -webkit-backdrop-filter: blur(18px) saturate(145%);
   transition: transform 0.16s ease, background 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease;
 }
 .day-tab:active { transform: scale(0.96); }
-.day-tab.active { box-shadow: 0 5px 14px rgba(15,23,42,0.10), inset 0 1px 0 rgba(255,255,255,0.72); }
-
-/* Native-feeling view transitions */
-.app-view { transform-origin: 50% 0; }
-.app-view.view-entering { animation: travel-view-enter 0.30s cubic-bezier(0.22,0.9,0.26,1) both; }
-@keyframes travel-view-enter {
-  from { opacity: 0; transform: translate3d(12px,5px,0) scale(0.992); }
-  to { opacity: 1; transform: translate3d(0,0,0) scale(1); }
-}
+.day-tab.active { box-shadow: 0 4px 12px rgba(15,23,42,0.10), inset 0 1px 0 rgba(255,255,255,0.82); }
 
 /* Main cards belong to the itinerary tab, not every tab */
 body:not(.view-itinerary) #team-bar,
@@ -738,16 +735,17 @@ body:not(.view-itinerary) #footer-note {
   display: none !important;
 }
 
-/* Liquid Glass bottom tab bar */
+/* Floating Liquid Glass tab bar, lifted clear of the iPhone home indicator and
+   rounded display corners. */
 .bottom-nav {
   position: fixed;
   left: 12px;
   right: 12px;
-  bottom: calc(env(safe-area-inset-bottom, 0px) + 8px);
+  bottom: max(16px, calc(env(safe-area-inset-bottom, 0px) + 12px));
   z-index: 1500;
   width: auto;
   max-width: 456px;
-  min-height: 64px;
+  min-height: 62px;
   margin: 0 auto;
   padding: 6px;
   box-sizing: border-box;
@@ -755,10 +753,10 @@ body:not(.view-itinerary) #footer-note {
   align-items: stretch;
   gap: 4px;
   overflow: hidden;
-  border: 1px solid rgba(255,255,255,0.52);
+  border: 1px solid rgba(255,255,255,0.56);
   border-radius: 27px;
-  background: linear-gradient(180deg, rgba(255,255,255,0.62), rgba(244,247,249,0.44));
-  box-shadow: 0 17px 40px rgba(20,39,55,0.16), 0 3px 12px rgba(20,39,55,0.08), inset 0 1px 0 rgba(255,255,255,0.96), inset 0 -1px 0 rgba(255,255,255,0.26);
+  background: linear-gradient(180deg, rgba(255,255,255,0.68), rgba(244,247,249,0.50));
+  box-shadow: 0 16px 38px rgba(20,39,55,0.17), 0 3px 10px rgba(20,39,55,0.08), inset 0 1px 0 rgba(255,255,255,0.96), inset 0 -1px 0 rgba(255,255,255,0.28);
   backdrop-filter: blur(30px) saturate(185%);
   -webkit-backdrop-filter: blur(30px) saturate(185%);
   isolation: isolate;
@@ -776,14 +774,14 @@ body:not(.view-itinerary) #footer-note {
 .bottom-nav.is-keyboard-open {
   opacity: 0;
   pointer-events: none;
-  transform: translate3d(0, calc(100% + env(safe-area-inset-bottom, 0px) + 24px), 0);
+  transform: translate3d(0, calc(100% + env(safe-area-inset-bottom, 0px) + 32px), 0);
 }
 .bottom-nav-item {
   position: relative;
   z-index: 1;
   flex: 1 1 0;
   min-width: 0;
-  min-height: 50px;
+  min-height: 48px;
   padding: 4px 4px 3px;
   border: 0;
   border-radius: 21px;
@@ -814,7 +812,7 @@ body:not(.view-itinerary) #footer-note {
   color: currentColor;
   font-size: calc(10px * var(--font-scale));
   line-height: 1.05;
-  font-weight: 800;
+  font-weight: 760;
 }
 .bottom-nav-indicator {
   position: absolute;
@@ -833,28 +831,29 @@ body:not(.view-itinerary) #footer-note {
   will-change: transform,width;
 }
 
-/* Convert itinerary and snack detail popup into an iOS bottom sheet */
+/* Floating iOS sheet. It clears the home indicator and keeps all four rounded
+   corners visible instead of disappearing into the bottom edge. */
 .modal-backdrop {
   z-index: 2200;
   align-items: flex-end;
   justify-content: center;
-  padding: calc(18px + env(safe-area-inset-top, 0px)) 0 0;
+  box-sizing: border-box;
+  padding: calc(18px + env(safe-area-inset-top, 0px)) 10px max(14px, calc(env(safe-area-inset-bottom, 0px) + 12px));
   background: rgba(7,10,15,0.38);
   backdrop-filter: blur(2px);
   -webkit-backdrop-filter: blur(2px);
 }
-.modal-backdrop.active .modal { animation: travel-sheet-up 0.38s cubic-bezier(0.22,0.9,0.26,1) both; }
+.modal-backdrop.active .modal { animation: travel-sheet-up 0.32s cubic-bezier(0.22,0.9,0.26,1) both; }
 .modal {
-  width: min(100%, 480px);
-  max-width: 480px;
-  max-height: calc(92dvh - env(safe-area-inset-top, 0px));
+  width: min(100%, 460px);
+  max-width: 460px;
+  max-height: calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 54px);
   margin: 0;
-  padding: 26px 16px calc(14px + env(safe-area-inset-bottom, 0px));
-  border: 1px solid rgba(255,255,255,0.58);
-  border-bottom: 0;
-  border-radius: 28px 28px 0 0;
-  background: rgba(250,250,252,0.94);
-  box-shadow: 0 -18px 48px rgba(15,23,42,0.26), inset 0 1px 0 rgba(255,255,255,0.94);
+  padding: 26px 16px 18px;
+  border: 1px solid rgba(255,255,255,0.62);
+  border-radius: 28px;
+  background: rgba(250,250,252,0.96);
+  box-shadow: 0 18px 52px rgba(15,23,42,0.30), inset 0 1px 0 rgba(255,255,255,0.94);
   backdrop-filter: blur(30px) saturate(170%);
   -webkit-backdrop-filter: blur(30px) saturate(170%);
 }
@@ -869,49 +868,50 @@ body:not(.view-itinerary) #footer-note {
   background: rgba(80,80,88,0.25);
   transform: translateX(-50%);
 }
-.modal.is-booked::after { border-radius: 0; }
+.modal.is-booked::after { border-radius: 0 0 28px 28px; }
 .modal-img-wrapper { margin-top: 0; }
+.modal-actions { padding-bottom: 0; }
+.modal-link-btn, .modal-close-btn { min-height: 42px; }
 @keyframes travel-sheet-up {
-  from { opacity: 0.35; transform: translate3d(0,34px,0) scale(0.985); }
+  from { opacity: 0.55; transform: translate3d(0,24px,0) scale(0.99); }
   to { opacity: 1; transform: translate3d(0,0,0) scale(1); }
 }
 
 @media (min-width: 640px) {
   .modal-backdrop { align-items: center; padding: 24px; }
-  .modal { width: min(92%, 440px); border-bottom: 1px solid rgba(255,255,255,0.58); border-radius: 28px; padding-bottom: 16px; }
-  .modal.is-booked::after { border-radius: 0 0 28px 28px; }
+  .modal { width: min(92%, 440px); max-height: calc(100dvh - 48px); }
 }
 
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  .bottom-nav, .ios-compact-header, .day-tabs { background: rgba(248,248,250,0.97); }
+  .bottom-nav, .ios-compact-header { background: rgba(248,248,250,0.97); }
+  .day-tab { background: rgba(248,248,250,0.98); }
 }
 
 html.theme-dark .ios-compact-header,
 html:not(.theme-light):not(.theme-dark) .ios-compact-header {
   color: #f4f4f7;
-  background: linear-gradient(180deg, rgba(28,28,34,0.90), rgba(25,25,31,0.74));
+  background: rgba(27,27,33,0.84);
   border-bottom-color: rgba(255,255,255,0.10);
-  box-shadow: 0 8px 26px rgba(0,0,0,0.34);
+  box-shadow: none;
 }
 html.theme-dark .ios-compact-kicker,
 html:not(.theme-light):not(.theme-dark) .ios-compact-kicker { color: rgba(235,235,242,0.54); }
-html.theme-dark .ios-compact-context,
-html:not(.theme-light):not(.theme-dark) .ios-compact-context {
-  color: rgba(240,240,245,0.72);
-  background: rgba(255,255,255,0.07);
-  border-color: rgba(255,255,255,0.10);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
-}
 html.theme-dark .day-tabs,
 html:not(.theme-light):not(.theme-dark) .day-tabs {
-  background: linear-gradient(180deg, rgba(28,28,34,0.84), rgba(25,25,31,0.66));
-  border-color: rgba(255,255,255,0.08);
-  box-shadow: 0 9px 22px rgba(0,0,0,0.20);
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+html.theme-dark .day-tab,
+html:not(.theme-light):not(.theme-dark) .day-tab {
+  background: rgba(38,38,46,0.88);
+  border-color: rgba(255,255,255,0.12);
+  box-shadow: 0 3px 10px rgba(0,0,0,0.20), inset 0 1px 0 rgba(255,255,255,0.08);
 }
 html.theme-dark .bottom-nav,
 html:not(.theme-light):not(.theme-dark) .bottom-nav {
   border-color: rgba(255,255,255,0.14);
-  background: linear-gradient(180deg, rgba(45,45,54,0.78), rgba(28,28,35,0.64));
+  background: linear-gradient(180deg, rgba(45,45,54,0.82), rgba(28,28,35,0.70));
   box-shadow: 0 18px 44px rgba(0,0,0,0.44), 0 3px 12px rgba(0,0,0,0.26), inset 0 1px 0 rgba(255,255,255,0.18), inset 0 -1px 0 rgba(255,255,255,0.05);
 }
 html.theme-dark .bottom-nav-item,
@@ -926,17 +926,19 @@ html:not(.theme-light):not(.theme-dark) .bottom-nav-indicator {
 }
 html.theme-dark .modal,
 html:not(.theme-light):not(.theme-dark) .modal {
-  background: rgba(27,27,34,0.96);
+  background: rgba(27,27,34,0.97);
   border-color: rgba(255,255,255,0.10);
-  box-shadow: 0 -22px 54px rgba(0,0,0,0.54), inset 0 1px 0 rgba(255,255,255,0.08);
+  box-shadow: 0 18px 54px rgba(0,0,0,0.56), inset 0 1px 0 rgba(255,255,255,0.08);
 }
 html.theme-dark .modal::before,
 html:not(.theme-light):not(.theme-dark) .modal::before { background: rgba(225,225,235,0.24); }
 
 @media (max-width: 390px) {
-  .bottom-nav { left: 8px; right: 8px; gap: 2px; padding: 5px; }
+  .bottom-nav { left: 10px; right: 10px; gap: 2px; padding: 5px; }
   .bottom-nav-item { padding-left: 2px; padding-right: 2px; }
-  .ios-compact-title { max-width: 220px; }
+  .ios-compact-title { max-width: calc(100vw - 36px); }
+  .ios-compact-kicker { max-width: calc(100vw - 46px); }
+  .modal-backdrop { padding-left: 8px; padding-right: 8px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -952,13 +954,13 @@ html:not(.theme-light):not(.theme-dark) .modal::before { background: rgba(225,22
   </style>
             <link rel="apple-touch-icon" href="assets/icon/trip_icon.png">
   <link rel="icon" type="image/png" href="assets/icon/trip_icon.png">
-  <link rel="manifest" href="manifest.json?v=7.0.0">
-  <meta name="theme-color" content="#f5f5f7">
+  <link rel="manifest" href="manifest.json?v=7.0.1">
+  <meta name="theme-color" content="#f7e8ef">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="關嘉露西生日之旅">
-  <link rel="stylesheet" href="assets/css/expenses.css?v=7.0.0">
+  <link rel="stylesheet" href="assets/css/expenses.css?v=7.0.1">
 </head>
 <body>
 <div class="bg-fixed"></div>
@@ -1041,7 +1043,7 @@ html:not(.theme-light):not(.theme-dark) .modal::before { background: rgba(225,22
   <div id="expenses-root"></div>
 </div>
 <div class="footer-note" id="footer-note"></div>
-<div class="app-version-note" id="app-version-note">v7.0.0</div>
+<div class="app-version-note" id="app-version-note">v7.0.1</div>
 
 
   </div>
@@ -1862,7 +1864,7 @@ let currentAppView="itinerary";
 let baseTripTitle="旅程";
 let collapseRaf=0;
 
-const APP_VERSION = "7.0.0";
+const APP_VERSION = "7.0.1";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 window.EXPENSES_MODULE_VERSION = EXPENSES_MODULE_VERSION;
@@ -1943,13 +1945,13 @@ function updateCompactHeader(){
   if(!compactTitle) return;
   if(currentAppView==="itinerary"){
     const dayContext=getActiveDayContext();
-    compactKicker.textContent=baseTripTitle||"旅程";
     compactTitle.textContent=dayContext.title||"行程";
-    compactContext.textContent=dayContext.context||"";
-    compactContext.style.display=dayContext.context?"block":"none";
+    compactKicker.textContent=dayContext.context||baseTripTitle||"旅程";
   }else{
-    compactKicker.textContent=baseTripTitle||"旅程";
     compactTitle.textContent=viewLabels[currentAppView]||"旅程";
+    compactKicker.textContent=baseTripTitle||"旅程";
+  }
+  if(compactContext){
     compactContext.textContent="";
     compactContext.style.display="none";
   }
@@ -1982,11 +1984,10 @@ function updateBottomNavIndicator(){
 }
 
 function animateView(viewEl){
+  // Intentionally no parent animation: iOS Safari briefly drops backdrop-filter
+  // layers when a newly displayed parent is transformed or faded.
   if(!viewEl) return;
   viewEl.classList.remove("view-entering");
-  void viewEl.offsetWidth;
-  viewEl.classList.add("view-entering");
-  window.setTimeout(()=>viewEl.classList.remove("view-entering"),360);
 }
 
 function setView(v,{restoreScroll=true}={}){
@@ -2041,7 +2042,7 @@ if(window.visualViewport&&bottomNav){
 // Android / Chrome PWA support. Network-only service worker, no aggressive cache.
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("./sw.js?v=1.5.0").catch(() => {});
+    navigator.serviceWorker.register("./sw.js?v=1.5.1").catch(() => {});
   });
 }
 
