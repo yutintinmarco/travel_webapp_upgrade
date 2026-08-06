@@ -4715,3 +4715,32 @@ html:not(.theme-light):not(.theme-dark) .expenses-module .expense-form-body .spl
     grid-template-columns: 1fr !important;
   }
 }
+
+
+/* Expense UI Phase 1 · app shell integration v7.1.2 */
+.expenses-module .expense-management-card { padding: 0 !important; overflow: hidden; }
+.expenses-module .expense-management-entry { width:100%; min-height:68px; padding:12px 14px; display:grid; grid-template-columns:36px minmax(0,1fr) auto; gap:10px; align-items:center; border:0; background:transparent; color:var(--expense-text); text-align:left; -webkit-appearance:none; appearance:none; }
+.expenses-module .expense-management-entry:active { opacity:.62; }
+.expenses-module .expense-management-icon { width:31px; height:31px; display:grid; place-items:center; border-radius:9px; background:#7c7c82; color:#fff; font-size:17px; font-weight:800; }
+.expenses-module .expense-management-entry > span:nth-child(2) { min-width:0; display:grid; gap:2px; }
+.expenses-module .expense-management-entry strong { font-size:calc(13px * var(--font-scale)); line-height:1.25; }
+.expenses-module .expense-management-entry small { color:var(--expense-muted); font-size:calc(10px * var(--font-scale)); line-height:1.35; }
+.expenses-module .expense-management-chevron { color:var(--expense-muted); font-size:27px; font-weight:300; }
+
+/* Standard informational sheets use one 72% detent. Large form and management
+   sheets use a 92% detent so fields and fixed actions stay above the home indicator. */
+.expenses-module .expense-presentation-sheet > .modal-card {
+  height:min(72dvh, calc(100dvh - env(safe-area-inset-top,0px) - 12px)) !important;
+  min-height:0 !important;
+  max-height:min(72dvh, calc(100dvh - env(safe-area-inset-top,0px) - 12px)) !important;
+}
+.expenses-module .expense-presentation-sheet[data-sheet-size="large"] > .modal-card {
+  height:min(92dvh, calc(100dvh - env(safe-area-inset-top,0px) - 8px)) !important;
+  max-height:min(92dvh, calc(100dvh - env(safe-area-inset-top,0px) - 8px)) !important;
+}
+.expenses-module .expense-presentation-sheet > .modal-card { padding-bottom:max(12px,env(safe-area-inset-bottom,0px)) !important; }
+.expenses-module .expense-presentation-sheet .modal-body-scroll { min-height:0 !important; flex:1 1 auto !important; overflow:auto !important; }
+@media(min-width:700px){
+  .expenses-module .expense-presentation-sheet > .modal-card { height:min(72dvh,720px) !important; max-height:min(72dvh,720px) !important; }
+  .expenses-module .expense-presentation-sheet[data-sheet-size="large"] > .modal-card { height:min(88dvh,820px) !important; max-height:min(88dvh,820px) !important; }
+}

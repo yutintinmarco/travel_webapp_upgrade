@@ -118,6 +118,14 @@ function mountExpensesHtml(root) {
         <h2>最近支出</h2>
         <div id="recentExpenseList"></div>
       </section>
+
+      <section class="card expense-management-card">
+        <button type="button" id="expenseManagementEntry" class="expense-management-entry">
+          <span class="expense-management-icon">⚙︎</span>
+          <span><strong>支出管理</strong><small>匯率、分帳成員、備份、已刪除項目及操作記錄</small></span>
+          <span class="expense-management-chevron">›</span>
+        </button>
+      </section>
     </section>
 
     <section class="expenses-panel" data-expenses-panel="details">
@@ -161,17 +169,14 @@ function mountExpensesHtml(root) {
           <h2>支出設定</h2>
         </div>
       </div>
-      <p class="hint expense-inline-settings-hint">帳戶、成員、匯率、權限及資料管理。</p>
+      <p class="hint expense-inline-settings-hint">匯率、分帳成員、備份及支出資料管理。</p>
       <div class="settings-menu-grid expense-inline-settings-grid">
-        <button type="button" class="settings-menu-btn" data-settings-open="account"><span>👤</span><strong>帳戶與登入</strong><small>Google 帳戶及同步狀態</small></button>
         <button type="button" class="settings-menu-btn" data-settings-open="members"><span>👥</span><strong>成員管理</strong><small>新增或移除分帳成員</small></button>
         <button type="button" class="settings-menu-btn" data-settings-open="rates" data-admin-only="true"><span>💱</span><strong>匯率設定</strong><small>基準貨幣及旅程匯率</small></button>
-        <button type="button" class="settings-menu-btn" data-settings-open="access" data-admin-only="true"><span>🔐</span><strong>權限管理</strong><small>可使用此旅程的帳戶</small></button>
         <button type="button" class="settings-menu-btn" data-settings-open="lock" data-admin-only="true"><span>🔒</span><strong>鎖定旅程</strong><small>停止新增及修改支出</small></button>
         <button type="button" class="settings-menu-btn" data-settings-open="backup"><span>📦</span><strong>資料備份</strong><small>匯出 Excel 或 JSON</small></button>
         <button type="button" class="settings-menu-btn" data-settings-open="deleted"><span>🗑️</span><strong>已刪除項目</strong><small>查看及還原支出</small></button>
         <button type="button" class="settings-menu-btn" data-settings-open="logs"><span>🧾</span><strong>操作記錄</strong><small>主要修改及找數紀錄</small></button>
-        <button type="button" class="settings-menu-btn" data-settings-open="about"><span>ℹ️</span><strong>關於本 App</strong><small>版本及系統資料</small></button>
       </div>
     </section>
   </section>
@@ -498,6 +503,15 @@ export function initExpensesModule(tripData) {
   const root = document.getElementById("expenses-root");
   if (!root) return;
   mountExpensesHtml(root);
+  const moduleShell = root.querySelector(".expenses-module");
+  let modalPortal = document.getElementById("expenses-modal-portal");
+  if (!modalPortal) {
+    modalPortal = document.createElement("div");
+    modalPortal.id = "expenses-modal-portal";
+    modalPortal.className = "expenses-module expenses-modal-portal";
+    document.body.appendChild(modalPortal);
+  }
+  moduleShell?.querySelectorAll(":scope > .modal").forEach(modal => modalPortal.appendChild(modal));
   expensesModuleStarted = true;
 
 
@@ -3957,6 +3971,7 @@ assignExpensePresentationMetadata();
 configureExpensePresentations();
 setupExpenseInnerTabs();
 expenseSettingsBack?.addEventListener("click", hideExpenseSettingsInline);
+document.getElementById("expenseManagementEntry")?.addEventListener("click",()=>openSettingModal("root"));
 
 function handleExpenseUiAction(action) {
   if (!action) return;
@@ -3967,6 +3982,7 @@ function handleExpenseUiAction(action) {
     openExpenseFormModal("完整新增支出");
   }
   if (action === "settings") openSettingModal("root");
+  if (action.startsWith("setting:")) openSettingModal(action.slice(8));
 }
 window.addEventListener("expense-ui-action", event => handleExpenseUiAction(event?.detail?.action));
 if (window.__pendingExpenseUiAction) {

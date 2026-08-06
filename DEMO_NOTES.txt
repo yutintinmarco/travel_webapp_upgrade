@@ -1,14 +1,12 @@
-Travel Webapp Expense UI Phase 1 v7.1.1 demo
+Travel Webapp Expense UI Phase 1 v7.1.2 Demo
 
-This lightweight package uses demo data and placeholder assets.
+This lightweight build uses demo data and placeholder assets.
 
-Refinements in v7.1.1
-
-1. The expense page now keeps the same trip title and left-side header as the other main sections.
-2. Expense actions remain on the right without introducing a separate expense page identity.
-3. All popup presentations are bottom-attached interactive sheets rather than centred cards or separate full-screen navigation.
-4. The root expense settings screen now appears inside the existing expense page using the same glass-card language.
-5. Settings tools open from that page as bottom sheets.
-6. The full-add form has clearer field grouping, consistent spacing, a two-column amount/currency row and safer footer spacing.
-7. Existing Firebase, calculation, split, settlement, OCR, Excel, JSON, audit log and permission logic is retained.
-8. Itinerary Phase 1 features from v7.0.8 remain unchanged.
+Changes:
+1. Added fifth bottom tab: 我的.
+2. Moved font size and theme controls from the top bar into 我的.
+3. Removed expense-specific top bar actions.
+4. Added global account and trip-management entries in 我的.
+5. Added 支出管理 inside the expense overview.
+6. Standard sheets use 72% height; large form sheets use 92%.
+7. Existing expense calculation, Firebase, OCR, export and settlement logic is retained.

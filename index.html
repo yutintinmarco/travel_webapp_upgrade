@@ -608,7 +608,7 @@ body.expenses-view-active .container {
 
   
 
-/* Phase 1 · iOS native shell · refinement 7.1.1 */
+/* Phase 1 · iOS native shell · refinement 7.1.2 */
 :root {
   --tabbar-h: 72px;
   --compact-header-h: 58px;
@@ -1338,7 +1338,7 @@ html.theme-dark .inline-action-btn.secondary { background: rgba(255,255,255,0.08
 
   
 
-/* Phase 1 · v7.1.1 · full-bleed root canvas, fixed day grid and interactive iOS sheet */
+/* Phase 1 · v7.1.2 · full-bleed root canvas, fixed day grid and interactive iOS sheet */
 
 /* Let the root background paint the WebKit canvas itself. Do not tint the
    status-bar region with theme-color; content alone observes the safe area. */
@@ -1485,7 +1485,7 @@ html:not(.theme-light):not(.theme-dark) .sheet-grabber { background: rgba(235,23
 }
 
 
-/* Phase 1 · v7.1.1 · browser chrome, tighter large title and visual cleanup */
+/* Phase 1 · v7.1.2 · browser chrome, tighter large title and visual cleanup */
 
 /* Safari browser mode derives its top chrome tint from the root canvas on
    recent iOS releases. Keep the installed Web App full bleed, but use a
@@ -1551,7 +1551,7 @@ html:not(.theme-light):not(.theme-dark) .day-tab.city-both.active {
 }
 
 
-/* Phase 1 · v7.1.1 · harmonised disclosure, clear flight details and balanced dark glass */
+/* Phase 1 · v7.1.2 · harmonised disclosure, clear flight details and balanced dark glass */
 
 /* The disclosure returns to intrinsic grid-track expansion so its final
    height always includes the complete action row. Opening and closing use one
@@ -1640,7 +1640,7 @@ html:not(.theme-light):not(.theme-dark) .bottom-nav-item svg {
 
 
 
-/* Phase 1 · v7.1.1 · restore original itinerary glass and original flight palette */
+/* Phase 1 · v7.1.2 · restore original itinerary glass and original flight palette */
 
 /* Flight and weather are part of the itinerary overview. Their outer surface
    deliberately matches the untouched itinerary cards from the original app. */
@@ -1782,12 +1782,68 @@ body.expenses-view-active .ios-compact-copy {
   stroke-linejoin: round;
 }
 html.theme-dark .expense-compact-action { color: #64a8ff; }
+
+
+/* App shell refinement v7.1.2 · shared top bar + My hub */
+.expense-header-actions,
+.expense-compact-actions { display: none !important; }
+body.expenses-view-active #today-chip,
+body.expenses-view-active .font-controls { display: flex !important; }
+body.expenses-view-active #status-square { display: none !important; }
+.header-right { gap: 7px; }
+.profile-theme-compat { position: absolute !important; width: 1px !important; height: 1px !important; opacity: 0 !important; pointer-events: none !important; overflow: hidden !important; }
+#profile-view { padding-bottom: calc(118px + env(safe-area-inset-bottom, 0px)); }
+.profile-card {
+  margin: 0 0 12px;
+  padding: 15px;
+  border: 1px solid rgba(255,255,255,0.68);
+  border-radius: 18px;
+  background: rgba(255,255,255,0.56);
+  box-shadow: 0 9px 24px rgba(45,30,38,0.10), inset 0 1px 0 rgba(255,255,255,0.30);
+  backdrop-filter: blur(24px) saturate(1.12);
+  -webkit-backdrop-filter: blur(24px) saturate(1.12);
+}
+.profile-card-heading { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:9px; }
+.profile-card-heading h2 { margin:1px 0 0; font-size:calc(19px * var(--font-scale)); color:var(--label-primary); }
+.profile-eyebrow,.profile-section-title { color:var(--label-secondary); font-size:calc(10px * var(--font-scale)); font-weight:760; letter-spacing:.04em; text-transform:uppercase; }
+.profile-section-title { margin:1px 2px 8px; }
+.profile-avatar { width:42px; height:42px; border-radius:50%; display:grid; place-items:center; background:linear-gradient(145deg,#77b7ff,#4a86d8); color:#fff; font-weight:800; box-shadow:0 6px 14px rgba(50,104,174,.24), inset 0 1px 0 rgba(255,255,255,.35); }
+.profile-row,.profile-setting-row {
+  width:100%; min-height:58px; padding:9px 2px; border:0; border-top:1px solid var(--separator); background:transparent; color:var(--label-primary); display:grid; grid-template-columns:36px minmax(0,1fr) auto; gap:10px; align-items:center; text-align:left; -webkit-appearance:none; appearance:none;
+}
+.profile-card > .profile-section-title + .profile-row,
+.profile-card-heading + .profile-row { border-top:0; }
+.profile-row:active { opacity:.64; }
+.profile-row-icon { width:31px; height:31px; border-radius:9px; display:grid; place-items:center; color:#fff; font-size:15px; font-weight:760; }
+.profile-icon-blue{background:#1687f8}.profile-icon-orange{background:#ff9f0a}.profile-icon-purple{background:#8e5bd9}.profile-icon-green{background:#32a852}.profile-icon-red{background:#ff453a}.profile-icon-grey{background:#7c7c82}
+.profile-row-copy { min-width:0; display:grid; gap:2px; }
+.profile-row-copy strong,.profile-setting-label strong { color:var(--label-primary); font-size:calc(13px * var(--font-scale)); line-height:1.25; }
+.profile-row-copy small,.profile-setting-label small { color:var(--label-secondary); font-size:calc(10px * var(--font-scale)); line-height:1.35; }
+.profile-chevron { color:var(--label-tertiary); font-size:27px; font-weight:300; line-height:1; }
+.profile-status-pill { padding:4px 8px; border-radius:999px; background:rgba(120,120,128,.12); color:var(--label-secondary); font-size:10px; font-weight:700; }
+.profile-row-disabled { opacity:.62; }
+.profile-stepper { display:flex; overflow:hidden; border:1px solid var(--separator); border-radius:10px; background:rgba(255,255,255,.36); }
+.profile-stepper-btn { min-width:45px; min-height:34px; padding:0 10px; border:0; background:transparent; color:#007aff; font-weight:740; font-size:12px; }
+.profile-stepper-btn + .profile-stepper-btn { border-left:1px solid var(--separator); }
+.profile-setting-block { padding:11px 2px 2px; border-top:1px solid var(--separator); }
+.profile-setting-label { display:grid; grid-template-columns:36px 1fr; gap:10px; align-items:center; }
+.profile-setting-label > span:last-child { display:grid; gap:2px; }
+.profile-theme-segment { margin:11px 0 2px 41px; padding:3px; display:grid; grid-template-columns:repeat(3,1fr); gap:3px; border-radius:11px; background:rgba(118,118,128,.12); }
+.profile-theme-segment button { min-height:33px; padding:5px; border:0; border-radius:8px; background:transparent; color:var(--label-secondary); font-size:calc(11px * var(--font-scale)); font-weight:700; }
+.profile-theme-segment button.active { background:rgba(255,255,255,.86); color:var(--label-primary); box-shadow:0 1px 4px rgba(0,0,0,.12); }
+.profile-meta-row { display:flex; justify-content:space-between; padding:11px 2px 2px; border-top:1px solid var(--separator); color:var(--label-secondary); font-size:calc(11px * var(--font-scale)); }
+.profile-meta-row strong { color:var(--label-primary); }
+html.theme-dark .profile-card,html:not(.theme-light):not(.theme-dark) .profile-card { background:rgba(24,24,31,.60); border-color:rgba(255,255,255,.09); box-shadow:0 10px 26px rgba(0,0,0,.32),inset 0 1px 0 rgba(255,255,255,.05); }
+html.theme-dark .profile-stepper,html:not(.theme-light):not(.theme-dark) .profile-stepper { background:rgba(255,255,255,.05); }
+html.theme-dark .profile-theme-segment button.active,html:not(.theme-light):not(.theme-dark) .profile-theme-segment button.active { background:rgba(99,99,102,.78); color:#fff; box-shadow:0 1px 4px rgba(0,0,0,.34); }
+@media(max-width:370px){.profile-theme-segment{margin-left:0}.profile-row-copy small{font-size:9.5px}.bottom-nav-item span{font-size:calc(9px * var(--font-scale));}}
+
 </style>
             <link rel="apple-touch-icon" href="assets/icon/trip_icon.png">
   <link rel="icon" type="image/png" href="assets/icon/trip_icon.png">
-  <link rel="manifest" href="manifest.json?v=7.1.1">
+  <link rel="manifest" href="manifest.json?v=7.1.2">
   <meta name="apple-mobile-web-app-title" content="關嘉露西生日之旅">
-  <link rel="stylesheet" href="assets/css/expenses.css?v=7.1.1">
+  <link rel="stylesheet" href="assets/css/expenses.css?v=7.1.2">
 </head>
 <body>
 <div class="bg-fixed"></div>
@@ -1798,10 +1854,6 @@ html.theme-dark .expense-compact-action { color: #64a8ff; }
       <div class="ios-compact-title" id="ios-compact-title">旅程</div>
     </div>
     <div class="ios-compact-context" id="ios-compact-context"></div>
-    <div class="expense-compact-actions" id="expense-compact-actions" aria-label="支出操作">
-      <button class="expense-compact-action" id="expense-compact-add" type="button" aria-label="新增支出"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
-      <button class="expense-compact-action" id="expense-compact-settings" type="button" aria-label="支出設定"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.34 1.87l.06.06-2.12 2.12-.06-.06a1.7 1.7 0 00-1.87-.34 1.7 1.7 0 00-1.03 1.55V20.3h-3v-.09a1.7 1.7 0 00-1.03-1.55 1.7 1.7 0 00-1.87.34l-.06.06-2.12-2.12.06-.06A1.7 1.7 0 007.05 15a1.7 1.7 0 00-1.55-1.03H5.4v-3h.09A1.7 1.7 0 007.05 9a1.7 1.7 0 00-.34-1.87l-.06-.06 2.12-2.12.06.06a1.7 1.7 0 001.87.34A1.7 1.7 0 0011.73 3.8V3.7h3v.09a1.7 1.7 0 001.03 1.55 1.7 1.7 0 001.87-.34l.06-.06 2.12 2.12-.06.06A1.7 1.7 0 0019.4 9a1.7 1.7 0 001.55 1.03h.09v3h-.09A1.7 1.7 0 0019.4 15z"/></svg></button>
-    </div>
   </div>
 </header>
 <div class="scroll-shell" id="scroll-shell">
@@ -1814,17 +1866,8 @@ html.theme-dark .expense-compact-action { color: #64a8ff; }
           <div class="header-title-main" id="header-title-main">行程</div>
         </div>
         <div class="header-right">
-          <div class="expense-header-actions" id="expense-header-actions" aria-label="支出操作">
-            <button class="expense-header-action" id="expense-header-add" type="button" aria-label="新增支出"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
-            <button class="expense-header-action" id="expense-header-settings" type="button" aria-label="支出設定"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.34 1.87l.06.06-2.12 2.12-.06-.06a1.7 1.7 0 00-1.87-.34 1.7 1.7 0 00-1.03 1.55V20.3h-3v-.09a1.7 1.7 0 00-1.03-1.55 1.7 1.7 0 00-1.87.34l-.06.06-2.12-2.12.06-.06A1.7 1.7 0 007.05 15a1.7 1.7 0 00-1.55-1.03H5.4v-3h.09A1.7 1.7 0 007.05 9a1.7 1.7 0 00-.34-1.87l-.06-.06 2.12-2.12.06.06a1.7 1.7 0 001.87.34A1.7 1.7 0 0011.73 3.8V3.7h3v.09a1.7 1.7 0 001.03 1.55 1.7 1.7 0 001.87-.34l.06-.06 2.12 2.12-.06.06A1.7 1.7 0 0019.4 9a1.7 1.7 0 001.55 1.03h.09v3h-.09A1.7 1.7 0 0019.4 15z"/></svg></button>
-          </div>
           <div id="today-chip" class="today-chip">載入行程中…</div>
-          <div class="font-controls">
-            <button class="font-btn" id="font-smaller">A−</button>
-            <button class="font-btn" id="font-larger">A+</button>
-            <button class="theme-btn" id="theme-btn" type="button" title="切換主題" data-theme="auto"></button>
-            <button class="refresh-btn" id="refresh-btn" type="button" aria-label="Refresh"><svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;flex-shrink:0;"><path d="M13 7.5a5.5 5.5 0 1 1-1.17-3.4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><polyline points="8.5,1.5 11.8,4.1 9.2,6.8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg></button>
-          </div>
+          <button class="refresh-btn" id="refresh-btn" type="button" aria-label="重新載入"><svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;flex-shrink:0;"><path d="M13 7.5a5.5 5.5 0 1 1-1.17-3.4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><polyline points="8.5,1.5 11.8,4.1 9.2,6.8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg></button>
         </div>
       </div>
       <div class="header-sub-row">
@@ -1877,8 +1920,75 @@ html.theme-dark .expense-compact-action { color: #64a8ff; }
 <div id="expenses-view" class="app-view" style="display:none;">
   <div id="expenses-root"></div>
 </div>
+
+<div id="profile-view" class="app-view" style="display:none;">
+  <section class="profile-card profile-identity-card">
+    <div class="profile-card-heading">
+      <div>
+        <div class="profile-eyebrow">帳戶與身份</div>
+        <h2>我的</h2>
+      </div>
+      <div class="profile-avatar" aria-hidden="true">M</div>
+    </div>
+    <button class="profile-row" id="my-account-btn" type="button">
+      <span class="profile-row-icon profile-icon-blue">👤</span>
+      <span class="profile-row-copy"><strong>帳戶與登入</strong><small>Google 帳戶、同步狀態及目前身份</small></span>
+      <span class="profile-chevron">›</span>
+    </button>
+  </section>
+
+  <section class="profile-card">
+    <div class="profile-section-title">外觀與顯示</div>
+    <div class="profile-setting-row profile-font-row">
+      <span class="profile-row-icon profile-icon-orange">Aa</span>
+      <span class="profile-row-copy"><strong>文字大小</strong><small id="font-scale-label">標準</small></span>
+      <div class="profile-stepper" aria-label="文字大小">
+        <button class="profile-stepper-btn" id="font-smaller" type="button" aria-label="縮小文字">A−</button>
+        <button class="profile-stepper-btn" id="font-larger" type="button" aria-label="放大文字">A＋</button>
+      </div>
+    </div>
+    <div class="profile-setting-block">
+      <div class="profile-setting-label"><span class="profile-row-icon profile-icon-purple">◐</span><span><strong>顯示模式</strong><small>套用至整個 App</small></span></div>
+      <div class="profile-theme-segment" id="profile-theme-segment" role="group" aria-label="顯示模式">
+        <button type="button" data-theme-choice="auto">自動</button>
+        <button type="button" data-theme-choice="light">淺色</button>
+        <button type="button" data-theme-choice="dark">深色</button>
+      </div>
+      <button class="theme-btn profile-theme-compat" id="theme-btn" type="button" title="切換主題" data-theme="auto" aria-hidden="true" tabindex="-1"></button>
+    </div>
+  </section>
+
+  <section class="profile-card">
+    <div class="profile-section-title">旅程管理</div>
+    <button class="profile-row" type="button" data-global-setting="access">
+      <span class="profile-row-icon profile-icon-green">🔐</span>
+      <span class="profile-row-copy"><strong>旅程權限</strong><small>管理可查看及使用旅程嘅帳戶</small></span>
+      <span class="profile-chevron">›</span>
+    </button>
+    <button class="profile-row" type="button" data-global-setting="lock">
+      <span class="profile-row-icon profile-icon-red">🔒</span>
+      <span class="profile-row-copy"><strong>旅程鎖定</strong><small>目前先沿用支出模組鎖定功能</small></span>
+      <span class="profile-chevron">›</span>
+    </button>
+    <button class="profile-row profile-row-disabled" type="button" disabled>
+      <span class="profile-row-icon profile-icon-grey">⇅</span>
+      <span class="profile-row-copy"><strong>行程匯入與匯出</strong><small>Phase 2 啟用 Firebase 行程資料後提供</small></span>
+      <span class="profile-status-pill">稍後</span>
+    </button>
+  </section>
+
+  <section class="profile-card">
+    <div class="profile-section-title">App 與資料</div>
+    <button class="profile-row" type="button" data-global-setting="about">
+      <span class="profile-row-icon profile-icon-grey">ⓘ</span>
+      <span class="profile-row-copy"><strong>關於本 App</strong><small>版本、系統資料及使用說明</small></span>
+      <span class="profile-chevron">›</span>
+    </button>
+    <div class="profile-meta-row"><span>目前版本</span><strong>v7.1.2</strong></div>
+  </section>
+</div>
 <div class="footer-note" id="footer-note"></div>
-<div class="app-version-note" id="app-version-note">v7.1.1</div>
+<div class="app-version-note" id="app-version-note">v7.1.2</div>
 
 
   </div>
@@ -1900,6 +2010,10 @@ html.theme-dark .expense-compact-action { color: #64a8ff; }
     <button class="bottom-nav-item" id="bt-info" type="button" data-view="info" aria-label="旅程資料" style="display:none;">
       <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 3h8l4 4v14H7a2 2 0 01-2-2V5a2 2 0 012-2z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M14 3v5h5M9 12h6M9 16h6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
       <span>旅程</span>
+    </button>
+    <button class="bottom-nav-item" id="bt-profile" type="button" data-view="profile" aria-label="我的">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="8" r="3.2" stroke="currentColor" stroke-width="1.7"/><path d="M5.5 20c.8-4 3-6 6.5-6s5.7 2 6.5 6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+      <span>我的</span>
     </button>
   </nav>
 </div>
@@ -1953,6 +2067,7 @@ function getCurrentAppView(){
     if(document.body.classList.contains("expenses-view-active")) return "expenses";
     if(document.getElementById("snacks-view")?.style.display==="block") return "snacks";
     if(document.getElementById("info-view")?.style.display==="block") return "info";
+    if(document.getElementById("profile-view")?.style.display==="block") return "profile";
   }catch(e){}
   return "itinerary";
 }
@@ -1962,9 +2077,16 @@ function rememberCurrentAppView(){
 document.getElementById("refresh-btn").addEventListener("click",()=>{rememberCurrentAppView();location.reload(true);});
 const FMIN=0.85,FMAX=1.30,FSTEP=0.08;
 function applyFont(s){s=clamp(s,FMIN,FMAX);document.documentElement.style.setProperty("--font-scale",s);try{localStorage.setItem("trip_font_scale",s);}catch(e){}return s;}
+function updateFontScaleLabel(){
+  const label=document.getElementById("font-scale-label");
+  if(!label)return;
+  const diff=fs-1;
+  label.textContent=Math.abs(diff)<0.035?"標準":diff<0?"較小":diff>0.18?"最大":"較大";
+}
 let fs=applyFont(parseFloat(localStorage.getItem("trip_font_scale"))||1);
-document.getElementById("font-smaller").addEventListener("click",()=>{fs=applyFont(fs-FSTEP);});
-document.getElementById("font-larger").addEventListener("click",()=>{fs=applyFont(fs+FSTEP);});
+updateFontScaleLabel();
+document.getElementById("font-smaller")?.addEventListener("click",()=>{fs=applyFont(fs-FSTEP);updateFontScaleLabel();});
+document.getElementById("font-larger")?.addEventListener("click",()=>{fs=applyFont(fs+FSTEP);updateFontScaleLabel();});
 
 // Theme toggle: auto → light → dark → auto
 const THEMES=["auto","light","dark"];
@@ -1996,6 +2118,10 @@ function applyTheme(t){
     }
     const btn=document.getElementById("theme-btn");
     if(btn){btn.setAttribute("data-theme",t);btn.innerHTML=THEME_ICONS[t]||THEME_ICONS["auto"];}
+    document.querySelectorAll("[data-theme-choice]").forEach(choice=>{
+      choice.classList.toggle("active",choice.dataset.themeChoice===t);
+      choice.setAttribute("aria-pressed",choice.dataset.themeChoice===t?"true":"false");
+    });
     const isDark=document.documentElement.classList.contains("theme-dark") || (!document.documentElement.classList.contains("theme-light") && window.matchMedia?.("(prefers-color-scheme: dark)").matches);
     localStorage.setItem("trip_theme",t);
   }catch(e){}
@@ -2008,6 +2134,13 @@ if(themeBtn)themeBtn.addEventListener("click",()=>{
   currentTheme=THEMES[(THEMES.indexOf(currentTheme)+1)%THEMES.length];
   applyTheme(currentTheme);
 });
+document.querySelectorAll("[data-theme-choice]").forEach(choice=>{
+  choice.addEventListener("click",()=>{
+    currentTheme=choice.dataset.themeChoice||"auto";
+    applyTheme(currentTheme);
+  });
+});
+applyTheme(currentTheme);
 
 // Pull to refresh
 const ss=document.getElementById("scroll-shell"),pi=document.getElementById("pull-indicator");
@@ -2910,8 +3043,8 @@ function render(data){
 }
 
 // Phase 1 app shell navigation
-const ivw=document.getElementById("itinerary-view"),svw=document.getElementById("snacks-view"),infvw=document.getElementById("info-view"),expvw=document.getElementById("expenses-view");
-const bti=document.getElementById("bt-itinerary"),bts=document.getElementById("bt-snacks"),btinfo=document.getElementById("bt-info"),btexp=document.getElementById("bt-expenses");
+const ivw=document.getElementById("itinerary-view"),svw=document.getElementById("snacks-view"),infvw=document.getElementById("info-view"),expvw=document.getElementById("expenses-view"),profilevw=document.getElementById("profile-view");
+const bti=document.getElementById("bt-itinerary"),bts=document.getElementById("bt-snacks"),btinfo=document.getElementById("bt-info"),btexp=document.getElementById("bt-expenses"),btprofile=document.getElementById("bt-profile");
 const scrollShell=document.getElementById("scroll-shell");
 const compactHeader=document.getElementById("ios-compact-header");
 const compactKicker=document.getElementById("ios-compact-kicker");
@@ -2921,19 +3054,15 @@ const bottomNav=document.getElementById("bottom-nav");
 const headerTitleSmallEl=document.getElementById("header-title-small");
 const headerTitleMainEl=document.getElementById("header-title-main");
 const headerSubEl=document.getElementById("header-sub");
-const expenseHeaderAdd=document.getElementById("expense-header-add");
-const expenseHeaderSettings=document.getElementById("expense-header-settings");
-const expenseCompactAdd=document.getElementById("expense-compact-add");
-const expenseCompactSettings=document.getElementById("expense-compact-settings");
-const viewElements={itinerary:ivw,snacks:svw,info:infvw,expenses:expvw};
-const viewButtons={itinerary:bti,snacks:bts,info:btinfo,expenses:btexp};
-const viewLabels={itinerary:"行程",snacks:"收藏",expenses:"支出",info:"旅程資料"};
-const viewScrollPositions={itinerary:0,snacks:0,info:0,expenses:0};
+const viewElements={itinerary:ivw,snacks:svw,info:infvw,expenses:expvw,profile:profilevw};
+const viewButtons={itinerary:bti,snacks:bts,info:btinfo,expenses:btexp,profile:btprofile};
+const viewLabels={itinerary:"行程",snacks:"收藏",expenses:"支出",info:"旅程資料",profile:"我的"};
+const viewScrollPositions={itinerary:0,snacks:0,info:0,expenses:0,profile:0};
 let currentAppView="itinerary";
 let baseTripTitle="旅程";
 let collapseRaf=0;
 
-const APP_VERSION = "7.1.1";
+const APP_VERSION = "7.1.2";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 window.EXPENSES_MODULE_VERSION = EXPENSES_MODULE_VERSION;
@@ -3106,7 +3235,7 @@ function setView(v,{restoreScroll=true}={}){
     view.classList.toggle("active-view",active);
   });
 
-  document.body.classList.remove("view-itinerary","view-snacks","view-info","view-expenses");
+  document.body.classList.remove("view-itinerary","view-snacks","view-info","view-expenses","view-profile");
   document.body.classList.add(`view-${v}`);
   document.body.classList.toggle("expenses-view-active",v==="expenses");
   if(v==="expenses") initExpensesViewSafe();
@@ -3129,15 +3258,17 @@ bti.addEventListener("click",()=>setView("itinerary"));
 bts.addEventListener("click",()=>setView("snacks"));
 btinfo.addEventListener("click",()=>setView("info"));
 btexp.addEventListener("click",()=>setView("expenses"));
+btprofile.addEventListener("click",()=>setView("profile"));
 function dispatchExpenseUiAction(action){
   initExpensesViewSafe();
   window.__pendingExpenseUiAction=action;
   window.dispatchEvent(new CustomEvent("expense-ui-action",{detail:{action}}));
 }
-expenseHeaderAdd?.addEventListener("click",()=>dispatchExpenseUiAction("add"));
-expenseHeaderSettings?.addEventListener("click",()=>dispatchExpenseUiAction("settings"));
-expenseCompactAdd?.addEventListener("click",()=>dispatchExpenseUiAction("add"));
-expenseCompactSettings?.addEventListener("click",()=>dispatchExpenseUiAction("settings"));
+
+document.getElementById("my-account-btn")?.addEventListener("click",()=>dispatchExpenseUiAction("setting:account"));
+document.querySelectorAll("[data-global-setting]").forEach(button=>{
+  button.addEventListener("click",()=>dispatchExpenseUiAction(`setting:${button.dataset.globalSetting}`));
+});
 scrollShell?.addEventListener("scroll",scheduleCollapseUpdate,{passive:true});
 window.addEventListener("resize",()=>{updateBottomNavIndicator();scheduleCollapseUpdate();},{passive:true});
 window.addEventListener("orientationchange",()=>setTimeout(()=>{updateBottomNavIndicator();scheduleCollapseUpdate();},220),{passive:true});
@@ -3161,7 +3292,7 @@ if ("serviceWorker" in navigator) {
 // Load
 fetch(getTripJsonUrl())
   .then(r=>{if(!r.ok)throw new Error("HTTP "+r.status);return r.json();})
-  .then(data=>{window.tripData=data;render(data);renderWeather(data);renderInfo(data);updateCompactHeader();requestAnimationFrame(()=>{updateBottomNavIndicator();updateCollapsingChrome();});try{const saved=sessionStorage.getItem("trip_current_view"); if(["itinerary","snacks","info","expenses"].includes(saved)) setView(saved,{restoreScroll:false}); else setView("itinerary",{restoreScroll:false});}catch(e){setView("itinerary",{restoreScroll:false});}})
+  .then(data=>{window.tripData=data;render(data);renderWeather(data);renderInfo(data);updateCompactHeader();requestAnimationFrame(()=>{updateBottomNavIndicator();updateCollapsingChrome();});try{const saved=sessionStorage.getItem("trip_current_view"); if(["itinerary","snacks","info","expenses","profile"].includes(saved)) setView(saved,{restoreScroll:false}); else setView("itinerary",{restoreScroll:false});}catch(e){setView("itinerary",{restoreScroll:false});}})
   .catch(()=>{document.getElementById("today-chip").textContent="無法載入行程資料";document.getElementById("header-title-main").textContent="無法載入行程資料";});
 </script>
 
