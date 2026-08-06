@@ -608,7 +608,7 @@ body.expenses-view-active .container {
 
   
 
-/* Phase 1 · iOS native shell · refinement 7.0.3 */
+/* Phase 1 · iOS native shell · refinement 7.0.4 */
 :root {
   --tabbar-h: 72px;
   --compact-header-h: 58px;
@@ -1308,7 +1308,7 @@ html.theme-dark .inline-action-btn.secondary { background: rgba(255,255,255,0.08
 
   
 
-/* Phase 1 · v7.0.3 · full-bleed root canvas, fixed day grid and interactive iOS sheet */
+/* Phase 1 · v7.0.4 · full-bleed root canvas, fixed day grid and interactive iOS sheet */
 
 /* Let the root background paint the WebKit canvas itself. Do not tint the
    status-bar region with theme-color; content alone observes the safe area. */
@@ -1453,12 +1453,79 @@ html:not(.theme-light):not(.theme-dark) .sheet-grabber { background: rgba(235,23
   .modal-backdrop,
   .modal-backdrop .modal { transition-duration: .01ms !important; }
 }
+
+
+/* Phase 1 · v7.0.4 · browser chrome, tighter large title and visual cleanup */
+
+/* Safari browser mode derives its top chrome tint from the root canvas on
+   recent iOS releases. Keep the installed Web App full bleed, but use a
+   neutral browser canvas instead of the former pink fallback. */
+html:not(.is-standalone) {
+  background-color: #f8f8fa !important;
+}
+html.theme-dark:not(.is-standalone),
+html:not(.theme-light):not(.theme-dark):not(.is-standalone) {
+  background-color: #0c0c10 !important;
+}
+
+/* The pull-to-refresh label must not reserve an invisible line above the large
+   title. The foreground title now sits closer to the safe-area boundary. */
+.container {
+  position: relative;
+  padding-top: calc(8px + env(safe-area-inset-top, 0px)) !important;
+}
+.header {
+  padding-top: 4px !important;
+}
+.pull-indicator {
+  position: absolute;
+  top: calc(3px + env(safe-area-inset-top, 0px));
+  left: 18px;
+  right: 18px;
+  height: auto;
+  margin: 0 !important;
+  pointer-events: none;
+}
+
+/* Dim the page behind the Saved sheet without applying a full-screen blur.
+   Removing that compositor layer prevents a one-second frosted after-image
+   when the interactive sheet is dismissed. */
+.modal-backdrop,
+.modal-backdrop.active,
+.modal-backdrop.is-dragging,
+.modal-backdrop.is-closing {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Day 4 spans Kyoto and Osaka. Use two background layers for a true gradient
+   border, avoiding the clipped pseudo-element used in the compact six-column
+   grid. */
+.day-tab.city-both.active {
+  border: 1px solid transparent !important;
+  background:
+    linear-gradient(to right, #d4ecd4, #fce8d4) padding-box,
+    linear-gradient(to right, #5a9e5a, #e06040) border-box !important;
+  color: #3a3a2a !important;
+}
+.day-tab.city-both.active::before {
+  display: none !important;
+}
+html.theme-dark .day-tab.city-both.active,
+html:not(.theme-light):not(.theme-dark) .day-tab.city-both.active {
+  border: 1px solid transparent !important;
+  background:
+    linear-gradient(to right, rgba(38,80,38,.88), rgba(110,46,20,.88)) padding-box,
+    linear-gradient(to right, #72bd72, #ef7656) border-box !important;
+  color: #f0f0f2 !important;
+}
+
 </style>
             <link rel="apple-touch-icon" href="assets/icon/trip_icon.png">
   <link rel="icon" type="image/png" href="assets/icon/trip_icon.png">
-  <link rel="manifest" href="manifest.json?v=7.0.3">
+  <link rel="manifest" href="manifest.json?v=7.0.4">
   <meta name="apple-mobile-web-app-title" content="關嘉露西生日之旅">
-  <link rel="stylesheet" href="assets/css/expenses.css?v=7.0.3">
+  <link rel="stylesheet" href="assets/css/expenses.css?v=7.0.4">
 </head>
 <body>
 <div class="bg-fixed"></div>
@@ -1541,7 +1608,7 @@ html:not(.theme-light):not(.theme-dark) .sheet-grabber { background: rgba(235,23
   <div id="expenses-root"></div>
 </div>
 <div class="footer-note" id="footer-note"></div>
-<div class="app-version-note" id="app-version-note">v7.0.3</div>
+<div class="app-version-note" id="app-version-note">v7.0.4</div>
 
 
   </div>
@@ -2503,7 +2570,7 @@ let currentAppView="itinerary";
 let baseTripTitle="旅程";
 let collapseRaf=0;
 
-const APP_VERSION = "7.0.3";
+const APP_VERSION = "7.0.4";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 window.EXPENSES_MODULE_VERSION = EXPENSES_MODULE_VERSION;

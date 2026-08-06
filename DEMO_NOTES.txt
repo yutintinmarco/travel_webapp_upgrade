@@ -1,4 +1,4 @@
-Travel Webapp Phase 1 v7.0.3 demo
+Travel Webapp Phase 1 v7.0.4 demo
 
 This lightweight package uses demo assets.
 
@@ -11,3 +11,10 @@ Changes in this build:
 6. Sheet backdrop follows the gesture and snaps back below the dismissal threshold.
 
 For iOS Home Screen testing after manifest/status-bar changes, remove the old icon and add the web app to the Home Screen again.
+
+
+v7.0.4 refinements:
+• Neutral Safari browser top chrome while retaining full-bleed standalone mode
+• Large title moved upward; hidden pull-to-refresh label no longer consumes space
+• Saved-sheet dismissal no longer leaves a delayed backdrop blur
+• Day 4 Kyoto/Osaka gradient border restored
