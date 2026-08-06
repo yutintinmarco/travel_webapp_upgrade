@@ -28,6 +28,7 @@ import {
 function mountExpensesHtml(root) {
   root.innerHTML = `<div class="expenses-module">
 <main class="expenses-app">
+  <div id="expensePrimaryContent" class="expense-primary-content">
     <section class="expense-snapshot-card" id="expenseSnapshotCard">
       <div class="snapshot-layout">
         <div class="snapshot-left">
@@ -147,51 +148,36 @@ function mountExpensesHtml(root) {
       <span id="syncStatus">Connecting...</span>
       <span id="tripStatusText" class="hidden"></span>
     </div>
+  </div>
+
+  <section id="expenseSettingsInline" class="expense-settings-inline hidden" aria-label="支出設定">
+    <section class="card expense-inline-settings-card">
+      <div class="expense-inline-settings-heading">
+        <button type="button" id="expenseSettingsBack" class="expense-inline-back" aria-label="返回支出">
+          <svg viewBox="0 0 18 28" aria-hidden="true"><path d="M15 2L3 14l12 12"/></svg>
+          <span>返回</span>
+        </button>
+        <div>
+          <h2>支出設定</h2>
+        </div>
+      </div>
+      <p class="hint expense-inline-settings-hint">帳戶、成員、匯率、權限及資料管理。</p>
+      <div class="settings-menu-grid expense-inline-settings-grid">
+        <button type="button" class="settings-menu-btn" data-settings-open="account"><span>👤</span><strong>帳戶與登入</strong><small>Google 帳戶及同步狀態</small></button>
+        <button type="button" class="settings-menu-btn" data-settings-open="members"><span>👥</span><strong>成員管理</strong><small>新增或移除分帳成員</small></button>
+        <button type="button" class="settings-menu-btn" data-settings-open="rates" data-admin-only="true"><span>💱</span><strong>匯率設定</strong><small>基準貨幣及旅程匯率</small></button>
+        <button type="button" class="settings-menu-btn" data-settings-open="access" data-admin-only="true"><span>🔐</span><strong>權限管理</strong><small>可使用此旅程的帳戶</small></button>
+        <button type="button" class="settings-menu-btn" data-settings-open="lock" data-admin-only="true"><span>🔒</span><strong>鎖定旅程</strong><small>停止新增及修改支出</small></button>
+        <button type="button" class="settings-menu-btn" data-settings-open="backup"><span>📦</span><strong>資料備份</strong><small>匯出 Excel 或 JSON</small></button>
+        <button type="button" class="settings-menu-btn" data-settings-open="deleted"><span>🗑️</span><strong>已刪除項目</strong><small>查看及還原支出</small></button>
+        <button type="button" class="settings-menu-btn" data-settings-open="logs"><span>🧾</span><strong>操作記錄</strong><small>主要修改及找數紀錄</small></button>
+        <button type="button" class="settings-menu-btn" data-settings-open="about"><span>ℹ️</span><strong>關於本 App</strong><small>版本及系統資料</small></button>
+      </div>
+    </section>
+  </section>
 
 </main>
 
-
-  <div id="expenseSettingsPage" class="modal expense-presentation-push hidden" data-presentation="push" data-back-label="支出">
-    <div class="modal-card expense-push-card">
-      <div class="modal-heading-row expense-nav-heading">
-        <h3><span>支出設定</span></h3>
-      </div>
-      <div class="modal-body-scroll expense-settings-scroll">
-        <section class="expense-settings-group">
-          <div class="expense-settings-group-title">帳戶</div>
-          <div class="settings-menu-grid">
-            <button type="button" class="settings-menu-btn setting-icon-account" data-settings-open="account"><span>person.crop.circle</span><strong>帳戶與登入</strong><small>Google 帳戶及同步狀態</small><i></i></button>
-            <button type="button" class="settings-menu-btn setting-icon-members" data-settings-open="members"><span>person.2.fill</span><strong>成員管理</strong><small>新增或移除分帳成員</small><i></i></button>
-          </div>
-        </section>
-
-        <section class="expense-settings-group">
-          <div class="expense-settings-group-title">旅程設定</div>
-          <div class="settings-menu-grid">
-            <button type="button" class="settings-menu-btn setting-icon-rates" data-settings-open="rates" data-admin-only="true"><span>arrow.left.arrow.right</span><strong>匯率設定</strong><small>基準貨幣及旅程匯率</small><i></i></button>
-            <button type="button" class="settings-menu-btn setting-icon-access" data-settings-open="access" data-admin-only="true"><span>lock.shield.fill</span><strong>權限管理</strong><small>可使用此旅程的帳戶</small><i></i></button>
-            <button type="button" class="settings-menu-btn setting-icon-lock" data-settings-open="lock" data-admin-only="true"><span>lock.fill</span><strong>鎖定旅程</strong><small>停止新增及修改支出</small><i></i></button>
-          </div>
-        </section>
-
-        <section class="expense-settings-group">
-          <div class="expense-settings-group-title">資料</div>
-          <div class="settings-menu-grid">
-            <button type="button" class="settings-menu-btn setting-icon-backup" data-settings-open="backup"><span>square.and.arrow.up</span><strong>資料備份</strong><small>匯出 Excel 或 JSON</small><i></i></button>
-            <button type="button" class="settings-menu-btn setting-icon-deleted" data-settings-open="deleted"><span>trash.fill</span><strong>已刪除項目</strong><small>查看及還原支出</small><i></i></button>
-            <button type="button" class="settings-menu-btn setting-icon-logs" data-settings-open="logs"><span>clock.arrow.circlepath</span><strong>操作記錄</strong><small>主要修改及找數紀錄</small><i></i></button>
-          </div>
-        </section>
-
-        <section class="expense-settings-group">
-          <div class="expense-settings-group-title">關於</div>
-          <div class="settings-menu-grid">
-            <button type="button" class="settings-menu-btn setting-icon-about" data-settings-open="about"><span>info.circle.fill</span><strong>關於本 App</strong><small>版本及系統資料</small><i></i></button>
-          </div>
-        </section>
-      </div>
-    </div>
-  </div>
 
   <div id="expenseFormModal" class="modal expense-presentation-sheet hidden" data-presentation="sheet" data-sheet-size="large">
     <div class="modal-card expense-form-modal-card">
@@ -199,7 +185,7 @@ function mountExpensesHtml(root) {
         <h3 id="expenseFormModalTitle"><span class="modal-title-icon">➕</span><span>完整新增支出</span></h3>
       </div>
       <form id="expenseForm" class="modal-form modal-form-with-footer">
-        <div class="modal-body-scroll">
+        <div class="modal-body-scroll expense-form-body">
           <label>
             日期
             <input type="date" id="date" required />
@@ -210,22 +196,24 @@ function mountExpensesHtml(root) {
             <input type="text" id="title" placeholder="例如：Lunch / Taxi" required />
           </label>
 
-          <label>
-            金額
-            <input type="number" id="amount" step="0.01" min="0" required />
-          </label>
+          <div class="expense-form-two-col">
+            <label>
+              金額
+              <input type="number" id="amount" step="0.01" min="0" required />
+            </label>
 
-          <label>
-            貨幣
-            <select id="currency">
-              <option value="HKD">HKD</option>
-              <option value="JPY">JPY</option>
-              <option value="CNY">CNY</option>
-              <option value="TWD">TWD</option>
-              <option value="KRW">KRW</option>
-              <option value="USD">USD</option>
-            </select>
-          </label>
+            <label>
+              貨幣
+              <select id="currency">
+                <option value="HKD">HKD</option>
+                <option value="JPY">JPY</option>
+                <option value="CNY">CNY</option>
+                <option value="TWD">TWD</option>
+                <option value="KRW">KRW</option>
+                <option value="USD">USD</option>
+              </select>
+            </label>
+          </div>
 
           <label>
             付款人
@@ -349,7 +337,7 @@ function mountExpensesHtml(root) {
     </div>
   </div>
 
-  <div id="ratesSettingsModal" class="modal expense-presentation-push hidden" data-presentation="push">
+  <div id="ratesSettingsModal" class="modal expense-presentation-sheet hidden" data-presentation="sheet" data-sheet-size="large">
     <div class="modal-card">
       <div class="modal-heading-row"><h3><span class="modal-title-icon">💱</span><span>匯率設定</span></h3></div>
       <div class="modal-body-scroll">
@@ -375,7 +363,7 @@ function mountExpensesHtml(root) {
     </div>
   </div>
 
-  <div id="membersSettingsModal" class="modal expense-presentation-push hidden" data-presentation="push">
+  <div id="membersSettingsModal" class="modal expense-presentation-sheet hidden" data-presentation="sheet" data-sheet-size="large">
     <div class="modal-card">
       <div class="modal-heading-row"><h3><span class="modal-title-icon">👥</span><span>成員管理</span></h3></div>
       <div class="modal-body-scroll">
@@ -391,7 +379,7 @@ function mountExpensesHtml(root) {
     </div>
   </div>
 
-  <div id="accessSettingsModal" class="modal expense-presentation-push hidden" data-presentation="push">
+  <div id="accessSettingsModal" class="modal expense-presentation-sheet hidden" data-presentation="sheet" data-sheet-size="large">
     <div class="modal-card">
       <div class="modal-heading-row"><h3><span class="modal-title-icon">🔐</span><span>權限管理</span></h3></div>
       <div class="modal-body-scroll">
@@ -434,7 +422,7 @@ function mountExpensesHtml(root) {
     </div>
   </div>
 
-  <div id="deletedItemsModal" class="modal expense-presentation-push hidden" data-presentation="push">
+  <div id="deletedItemsModal" class="modal expense-presentation-sheet hidden" data-presentation="sheet" data-sheet-size="large">
     <div class="modal-card">
       <div class="modal-heading-row"><h3><span class="modal-title-icon">🗑️</span><span>已刪除項目</span></h3></div>
       <div class="modal-body-scroll">
@@ -445,7 +433,7 @@ function mountExpensesHtml(root) {
     </div>
   </div>
 
-  <div id="activityLogModal" class="modal expense-presentation-push hidden" data-presentation="push">
+  <div id="activityLogModal" class="modal expense-presentation-sheet hidden" data-presentation="sheet" data-sheet-size="large">
     <div class="modal-card">
       <div class="modal-heading-row"><h3><span class="modal-title-icon">🧾</span><span>操作記錄</span></h3></div>
       <div class="modal-body-scroll">
@@ -622,7 +610,9 @@ const settlementActionContent = document.getElementById("settlementActionContent
 const closeSettlementActionModalBtn = document.getElementById("closeSettlementActionModalBtn");
 const accessNoAdminHint = document.getElementById("accessNoAdminHint");
 const lockNoAdminHint = document.getElementById("lockNoAdminHint");
-const expenseSettingsPage = document.getElementById("expenseSettingsPage");
+const expensePrimaryContent = document.getElementById("expensePrimaryContent");
+const expenseSettingsInline = document.getElementById("expenseSettingsInline");
+const expenseSettingsBack = document.getElementById("expenseSettingsBack");
 let activeExpenseDrag = null;
 
 
@@ -1684,9 +1674,24 @@ function closeSettlementActionModal() {
   closeExpenseModal(settlementActionModal);
 }
 
+function showExpenseSettingsInline() {
+  if (!expensePrimaryContent || !expenseSettingsInline) return;
+  expensePrimaryContent.classList.add("hidden");
+  expenseSettingsInline.classList.remove("hidden");
+  const shell = document.getElementById("scroll-shell");
+  if (shell) shell.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function hideExpenseSettingsInline() {
+  if (!expensePrimaryContent || !expenseSettingsInline) return;
+  expenseSettingsInline.classList.add("hidden");
+  expensePrimaryContent.classList.remove("hidden");
+  const shell = document.getElementById("scroll-shell");
+  if (shell) shell.scrollTo({ top: 0, behavior: "smooth" });
+}
+
 function getSettingModalId(key) {
   return {
-    root: "expenseSettingsPage",
     account: "accountSettingsModal",
     members: "membersSettingsModal",
     rates: "ratesSettingsModal",
@@ -1700,6 +1705,10 @@ function getSettingModalId(key) {
 }
 
 function openSettingModal(key) {
+  if (key === "root") {
+    showExpenseSettingsInline();
+    return;
+  }
   const id = getSettingModalId(key);
   if (!id) return;
   if (key === "deleted") renderDeletedExpenses();
@@ -1708,18 +1717,20 @@ function openSettingModal(key) {
 }
 
 function assignExpensePresentationMetadata() {
-  const pushIds = ["expenseSettingsPage", "ratesSettingsModal", "membersSettingsModal", "accessSettingsModal", "deletedItemsModal", "activityLogModal"];
-  const largeSheetIds = ["expenseFormModal", "ocrPreviewModal"];
+  const largeSheetIds = [
+    "expenseFormModal",
+    "ocrPreviewModal",
+    "ratesSettingsModal",
+    "membersSettingsModal",
+    "accessSettingsModal",
+    "deletedItemsModal",
+    "activityLogModal"
+  ];
   document.querySelectorAll(".expenses-module .modal").forEach(modal => {
-    if (pushIds.includes(modal.id)) {
-      modal.dataset.presentation = "push";
-      modal.classList.add("expense-presentation-push");
-      modal.dataset.backLabel = modal.id === "expenseSettingsPage" ? "支出" : "設定";
-    } else {
-      modal.dataset.presentation = "sheet";
-      modal.classList.add("expense-presentation-sheet");
-      modal.dataset.sheetSize = largeSheetIds.includes(modal.id) ? "large" : (modal.dataset.sheetSize || "medium");
-    }
+    modal.dataset.presentation = "sheet";
+    modal.classList.remove("expense-presentation-push");
+    modal.classList.add("expense-presentation-sheet");
+    modal.dataset.sheetSize = largeSheetIds.includes(modal.id) ? "large" : (modal.dataset.sheetSize || "medium");
   });
 }
 
@@ -3945,6 +3956,7 @@ async function runReceiptOCR() {
 assignExpensePresentationMetadata();
 configureExpensePresentations();
 setupExpenseInnerTabs();
+expenseSettingsBack?.addEventListener("click", hideExpenseSettingsInline);
 
 function handleExpenseUiAction(action) {
   if (!action) return;

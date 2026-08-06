@@ -1,16 +1,14 @@
-Travel Webapp Expense UI Phase 1 v7.1.0 demo
+Travel Webapp Expense UI Phase 1 v7.1.1 demo
 
 This lightweight package uses demo data and placeholder assets.
 
-Expense UI Phase 1 changes
+Refinements in v7.1.1
 
-1. Expenses large title now uses dedicated Add and Settings actions.
-2. Compact navigation also keeps Add and Settings available after scrolling.
-3. Internal navigation is a four item iOS segmented control: Overview, Details, Settlement and Analytics.
-4. Expense settings use grouped navigation rows rather than one dashboard style popup.
-5. Full add, OCR, expense detail, settlement, account, backup, lock and about use interactive bottom sheets.
-6. Sheets support drag down dismissal, velocity dismissal, backdrop fade and spring return.
-7. Members, rates, access, deleted items and activity logs use full page push navigation.
-8. Light and dark materials, inputs, separators and modal sizing share one presentation system.
-9. Existing Firebase, calculation, split, settlement, OCR, Excel, JSON, audit log and permission logic is retained.
-10. Itinerary Phase 1 features from v7.0.8 remain unchanged.
+1. The expense page now keeps the same trip title and left-side header as the other main sections.
+2. Expense actions remain on the right without introducing a separate expense page identity.
+3. All popup presentations are bottom-attached interactive sheets rather than centred cards or separate full-screen navigation.
+4. The root expense settings screen now appears inside the existing expense page using the same glass-card language.
+5. Settings tools open from that page as bottom sheets.
+6. The full-add form has clearer field grouping, consistent spacing, a two-column amount/currency row and safer footer spacing.
+7. Existing Firebase, calculation, split, settlement, OCR, Excel, JSON, audit log and permission logic is retained.
+8. Itinerary Phase 1 features from v7.0.8 remain unchanged.

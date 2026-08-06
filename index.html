@@ -608,7 +608,7 @@ body.expenses-view-active .container {
 
   
 
-/* Phase 1 · iOS native shell · refinement 7.1.0 */
+/* Phase 1 · iOS native shell · refinement 7.1.1 */
 :root {
   --tabbar-h: 72px;
   --compact-header-h: 58px;
@@ -1338,7 +1338,7 @@ html.theme-dark .inline-action-btn.secondary { background: rgba(255,255,255,0.08
 
   
 
-/* Phase 1 · v7.1.0 · full-bleed root canvas, fixed day grid and interactive iOS sheet */
+/* Phase 1 · v7.1.1 · full-bleed root canvas, fixed day grid and interactive iOS sheet */
 
 /* Let the root background paint the WebKit canvas itself. Do not tint the
    status-bar region with theme-color; content alone observes the safe area. */
@@ -1485,7 +1485,7 @@ html:not(.theme-light):not(.theme-dark) .sheet-grabber { background: rgba(235,23
 }
 
 
-/* Phase 1 · v7.1.0 · browser chrome, tighter large title and visual cleanup */
+/* Phase 1 · v7.1.1 · browser chrome, tighter large title and visual cleanup */
 
 /* Safari browser mode derives its top chrome tint from the root canvas on
    recent iOS releases. Keep the installed Web App full bleed, but use a
@@ -1551,7 +1551,7 @@ html:not(.theme-light):not(.theme-dark) .day-tab.city-both.active {
 }
 
 
-/* Phase 1 · v7.1.0 · harmonised disclosure, clear flight details and balanced dark glass */
+/* Phase 1 · v7.1.1 · harmonised disclosure, clear flight details and balanced dark glass */
 
 /* The disclosure returns to intrinsic grid-track expansion so its final
    height always includes the complete action row. Opening and closing use one
@@ -1640,7 +1640,7 @@ html:not(.theme-light):not(.theme-dark) .bottom-nav-item svg {
 
 
 
-/* Phase 1 · v7.1.0 · restore original itinerary glass and original flight palette */
+/* Phase 1 · v7.1.1 · restore original itinerary glass and original flight palette */
 
 /* Flight and weather are part of the itinerary overview. Their outer surface
    deliberately matches the untouched itinerary cards from the original app. */
@@ -1785,9 +1785,9 @@ html.theme-dark .expense-compact-action { color: #64a8ff; }
 </style>
             <link rel="apple-touch-icon" href="assets/icon/trip_icon.png">
   <link rel="icon" type="image/png" href="assets/icon/trip_icon.png">
-  <link rel="manifest" href="manifest.json?v=7.1.0">
+  <link rel="manifest" href="manifest.json?v=7.1.1">
   <meta name="apple-mobile-web-app-title" content="關嘉露西生日之旅">
-  <link rel="stylesheet" href="assets/css/expenses.css?v=7.1.0">
+  <link rel="stylesheet" href="assets/css/expenses.css?v=7.1.1">
 </head>
 <body>
 <div class="bg-fixed"></div>
@@ -1878,7 +1878,7 @@ html.theme-dark .expense-compact-action { color: #64a8ff; }
   <div id="expenses-root"></div>
 </div>
 <div class="footer-note" id="footer-note"></div>
-<div class="app-version-note" id="app-version-note">v7.1.0</div>
+<div class="app-version-note" id="app-version-note">v7.1.1</div>
 
 
   </div>
@@ -2933,7 +2933,7 @@ let currentAppView="itinerary";
 let baseTripTitle="旅程";
 let collapseRaf=0;
 
-const APP_VERSION = "7.1.0";
+const APP_VERSION = "7.1.1";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 window.EXPENSES_MODULE_VERSION = EXPENSES_MODULE_VERSION;
@@ -3013,12 +3013,6 @@ function getActiveDayContext(){
 
 function updateLargeHeaderForView(){
   const meta=window.tripData?.meta||{};
-  if(currentAppView==="expenses"){
-    if(headerTitleSmallEl) headerTitleSmallEl.textContent=baseTripTitle||meta.titleSmall||"旅程";
-    if(headerTitleMainEl) headerTitleMainEl.textContent="支出";
-    if(headerSubEl) headerSubEl.textContent="共同支出、分帳與結算";
-    return;
-  }
   if(headerTitleSmallEl) headerTitleSmallEl.textContent=meta.titleSmall||"My Trip";
   if(headerTitleMainEl) headerTitleMainEl.innerHTML=meta.titleMain||baseTripTitle||"行程";
   if(headerSubEl){
@@ -3160,7 +3154,7 @@ if(window.visualViewport&&bottomNav){
 // Android / Chrome PWA support. Network-only service worker, no aggressive cache.
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("./sw.js?v=1.6.0").catch(() => {});
+    navigator.serviceWorker.register("./sw.js?v=1.6.1").catch(() => {});
   });
 }
 
