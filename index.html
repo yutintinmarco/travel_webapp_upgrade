@@ -603,7 +603,7 @@ body.expenses-view-active .container {
 
   
 
-/* Phase 1 · iOS native shell · refinement 7.0.1 */
+/* Phase 1 · iOS native shell · refinement 7.0.2 */
 :root {
   --tabbar-h: 72px;
   --compact-header-h: 58px;
@@ -951,16 +951,367 @@ html:not(.theme-light):not(.theme-dark) .modal::before { background: rgba(225,22
   .modal-backdrop.active .modal { animation: none !important; }
 }
 
+
+/* Phase 1 · native interaction refinement · 7.0.2 */
+:root {
+  --app-canvas: #f2dce6;
+  --app-canvas-solid: #f7eef2;
+  --app-background:
+    linear-gradient(180deg, rgba(252,247,249,0.34), rgba(246,238,242,0.56)),
+    url("assets/bg/bg_trip_mobile.webp") center top / cover no-repeat;
+  --surface-primary: rgba(255,255,255,0.58);
+  --surface-secondary: rgba(255,255,255,0.38);
+  --surface-solid: rgba(250,250,252,0.96);
+  --label-primary: #111114;
+  --label-secondary: rgba(60,60,67,0.72);
+  --label-tertiary: rgba(60,60,67,0.50);
+  --separator: rgba(60,60,67,0.16);
+  --hairline: rgba(255,255,255,0.62);
+  --material-shadow: 0 12px 30px rgba(45,30,38,0.12);
+  --nav-material: rgba(248,248,250,0.78);
+  --sticky-material: rgba(247,243,246,0.86);
+  color-scheme: light;
+}
+html.theme-dark {
+  --app-canvas: #0c0c10;
+  --app-canvas-solid: #111116;
+  --app-background:
+    linear-gradient(180deg, rgba(9,9,13,0.78), rgba(13,13,18,0.88)),
+    url("assets/bg/bg_trip_mobile.webp") center top / cover no-repeat;
+  --surface-primary: rgba(31,31,38,0.78);
+  --surface-secondary: rgba(38,38,46,0.62);
+  --surface-solid: rgba(27,27,33,0.97);
+  --label-primary: #f5f5f7;
+  --label-secondary: rgba(235,235,245,0.70);
+  --label-tertiary: rgba(235,235,245,0.46);
+  --separator: rgba(255,255,255,0.11);
+  --hairline: rgba(255,255,255,0.10);
+  --material-shadow: 0 16px 36px rgba(0,0,0,0.34);
+  --nav-material: rgba(24,24,30,0.82);
+  --sticky-material: rgba(20,20,26,0.90);
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: dark) {
+  html:not(.theme-light):not(.theme-dark) {
+    --app-canvas: #0c0c10;
+    --app-canvas-solid: #111116;
+    --app-background:
+      linear-gradient(180deg, rgba(9,9,13,0.78), rgba(13,13,18,0.88)),
+      url("assets/bg/bg_trip_mobile.webp") center top / cover no-repeat;
+    --surface-primary: rgba(31,31,38,0.78);
+    --surface-secondary: rgba(38,38,46,0.62);
+    --surface-solid: rgba(27,27,33,0.97);
+    --label-primary: #f5f5f7;
+    --label-secondary: rgba(235,235,245,0.70);
+    --label-tertiary: rgba(235,235,245,0.46);
+    --separator: rgba(255,255,255,0.11);
+    --hairline: rgba(255,255,255,0.10);
+    --material-shadow: 0 16px 36px rgba(0,0,0,0.34);
+    --nav-material: rgba(24,24,30,0.82);
+    --sticky-material: rgba(20,20,26,0.90);
+    color-scheme: dark;
+  }
+}
+
+/* Paint the entire physical viewport, including the status-bar safe area.
+   Content still observes safe-area-inset-top. Avoid a negative stacking layer,
+   which can expose the WebKit canvas colour around Dynamic Island. */
+html {
+  min-height: 100%;
+  background-color: var(--app-canvas);
+}
+body {
+  position: relative;
+  isolation: isolate;
+  min-height: 100dvh;
+  background: var(--app-canvas);
+  color: var(--label-primary);
+}
+.bg-fixed {
+  display: block;
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: var(--app-background);
+  background-attachment: fixed;
+  transform: translateZ(0);
+}
+.scroll-shell {
+  position: relative;
+  z-index: 1;
+  background: transparent;
+}
+
+/* Shared, deliberate light and dark surfaces */
+.card,
+.info-team-card {
+  color: var(--label-primary);
+  background: var(--surface-primary);
+  border-color: var(--hairline);
+  box-shadow: var(--material-shadow), inset 0 1px 0 rgba(255,255,255,0.16);
+}
+.header-title-small,
+.header-title-main,
+.section-title,
+.content-title,
+.weather-title,
+.info-row-value,
+.info-hotel-name { color: var(--label-primary); text-shadow: none; }
+.header-sub-text,
+.section-sub,
+.content-note,
+.trip-row,
+.weather-today,
+.weather-sun,
+.info-row-label,
+.info-hotel-addr,
+.info-hotel-dates { color: var(--label-secondary); text-shadow: none; }
+.today-chip,
+.font-btn,
+.refresh-btn,
+.theme-btn,
+.team-btn,
+.city-tab,
+.weather-day,
+.snack-filter-btn,
+.info-copy-btn,
+.info-mini-copy {
+  background: var(--surface-secondary);
+  color: var(--label-primary);
+  border-color: var(--separator);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.10);
+}
+html.theme-dark .today-chip,
+html.theme-dark .font-btn,
+html.theme-dark .refresh-btn,
+html.theme-dark .theme-btn,
+html.theme-dark .team-btn,
+html.theme-dark .city-tab,
+html.theme-dark .weather-day,
+html.theme-dark .snack-filter-btn,
+html.theme-dark .info-copy-btn,
+html.theme-dark .info-mini-copy {
+  background: rgba(44,44,52,0.70);
+  color: rgba(245,245,247,0.90);
+  border-color: rgba(255,255,255,0.12);
+}
+html.theme-dark .card,
+html.theme-dark .info-team-card {
+  background: var(--surface-primary);
+  border-color: var(--hairline);
+  box-shadow: var(--material-shadow), inset 0 1px 0 rgba(255,255,255,0.06);
+}
+html.theme-dark .timeline-item {
+  background: rgba(31,31,38,0.76);
+  border-color: rgba(255,255,255,0.09);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.24), inset 0 1px 0 rgba(255,255,255,0.04);
+}
+html.theme-dark .timeline-item.who-team1 { background: linear-gradient(180deg, rgba(39,47,60,0.86), rgba(31,31,38,0.78)); }
+html.theme-dark .timeline-item.who-team2 { background: linear-gradient(180deg, rgba(57,48,32,0.82), rgba(31,31,38,0.78)); }
+html.theme-dark .timeline-item.is-booked { background: linear-gradient(180deg, rgba(31,31,38,0.80), rgba(27,61,39,0.72)); }
+html.theme-dark .snack-item { background: rgba(31,31,38,0.78); }
+html.theme-dark .bottom-nav {
+  background: linear-gradient(180deg, rgba(49,49,58,0.84), rgba(26,26,32,0.78));
+  border-color: rgba(255,255,255,0.13);
+}
+
+/* Itinerary detail is primary content, so it expands in place rather than
+   opening a modal sheet. */
+.timeline-item.itinerary-item {
+  display: block;
+  padding: 0;
+  overflow: hidden;
+  transition: background-color .22s ease, border-color .22s ease, box-shadow .22s ease;
+}
+.itinerary-summary {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 11px 10px;
+  min-height: 44px;
+  box-sizing: border-box;
+}
+.itinerary-item.clickable .itinerary-summary { cursor: pointer; }
+.itinerary-item.clickable .itinerary-summary:active { background: rgba(127,127,127,0.07); }
+.itinerary-summary .content { min-width: 0; }
+.detail-chevron {
+  width: 18px;
+  height: 22px;
+  margin-left: 2px;
+  flex: 0 0 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--label-tertiary);
+  transition: transform .30s cubic-bezier(.22,.9,.26,1), color .2s ease;
+}
+.detail-chevron svg { width: 15px; height: 15px; display: block; }
+.itinerary-item.expanded .detail-chevron { transform: rotate(180deg); color: var(--label-secondary); }
+.inline-detail-shell {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows .38s cubic-bezier(.22,.9,.26,1);
+}
+.inline-detail-clip { min-height: 0; overflow: hidden; }
+.inline-detail-content {
+  opacity: 0;
+  transform: translate3d(0,-8px,0);
+  padding: 0 12px 0;
+  border-top: 0 solid transparent;
+  transition: opacity .20s ease, transform .34s cubic-bezier(.22,.9,.26,1), padding .34s cubic-bezier(.22,.9,.26,1), border-color .24s ease;
+}
+.itinerary-item.expanded .inline-detail-shell { grid-template-rows: 1fr; }
+.itinerary-item.expanded .inline-detail-content {
+  opacity: 1;
+  transform: translate3d(0,0,0);
+  padding: 12px 12px 14px;
+  border-top-width: .5px;
+  border-top-color: var(--separator);
+}
+.inline-gallery {
+  margin: 0 -2px 11px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  border-radius: 15px;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+}
+.inline-gallery::-webkit-scrollbar { display: none; }
+.inline-gallery-track { display: flex; gap: 8px; }
+.inline-gallery img {
+  flex: 0 0 100%;
+  width: 100%;
+  height: 190px;
+  object-fit: cover;
+  display: block;
+  border-radius: 15px;
+  scroll-snap-align: center;
+  background: var(--surface-secondary);
+}
+.inline-detail-body {
+  color: var(--label-secondary);
+  font-size: calc(12px * var(--font-scale));
+  line-height: 1.58;
+}
+.inline-detail-body > div + div { margin-top: 5px; }
+.inline-detail-actions {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  margin-top: 12px;
+  padding-bottom: 1px;
+  scrollbar-width: none;
+}
+.inline-detail-actions::-webkit-scrollbar { display: none; }
+.inline-action-btn {
+  flex: 1 0 auto;
+  min-height: 40px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 12px;
+  background: #111114;
+  color: #fff;
+  font: inherit;
+  font-size: calc(12px * var(--font-scale));
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  -webkit-appearance: none;
+}
+.inline-action-btn.secondary { background: var(--surface-secondary); color: var(--label-primary); border: 1px solid var(--separator); }
+html.theme-dark .inline-action-btn { background: rgba(245,245,247,0.92); color: #111114; }
+html.theme-dark .inline-action-btn.secondary { background: rgba(255,255,255,0.08); color: #f5f5f7; border-color: rgba(255,255,255,0.12); }
+
+/* Day selector is visually free in the document. Only after it actually sticks
+   does a flat material layer prevent content showing through between pills. */
+.day-tabs {
+  isolation: isolate;
+  transition: box-shadow .18s ease;
+}
+.day-tabs::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  left: 50%;
+  top: 0;
+  width: 100vw;
+  height: 100%;
+  transform: translateX(-50%);
+  background: transparent;
+  border-bottom: .5px solid transparent;
+  backdrop-filter: blur(0);
+  -webkit-backdrop-filter: blur(0);
+  transition: background .20s ease, border-color .20s ease, backdrop-filter .20s ease;
+  pointer-events: none;
+}
+.day-tabs.is-stuck::before {
+  background: var(--sticky-material);
+  border-bottom-color: var(--separator);
+  backdrop-filter: blur(24px) saturate(155%);
+  -webkit-backdrop-filter: blur(24px) saturate(155%);
+}
+
+/* Scroll-linked large-title transition. No threshold-triggered bar animation. */
+.ios-compact-header {
+  opacity: 0;
+  transform: translate3d(0,-7px,0);
+  transition: none;
+  background: var(--nav-material);
+  border-bottom-color: var(--separator);
+}
+.ios-compact-header.is-visible { opacity: inherit; transform: inherit; }
+.header {
+  transform-origin: 42px 28px;
+  will-change: transform, opacity;
+}
+.header-title-main,
+.header-title-small,
+.header-sub-row,
+.header-right { will-change: transform, opacity; }
+
+/* The remaining modal is for the Saved/Food list only. Its sheet now properly
+   attaches to the bottom and doesn't advertise a fake drag handle. */
+.modal-backdrop {
+  padding: calc(12px + env(safe-area-inset-top,0px)) 0 0;
+}
+.modal {
+  width: min(100%, 480px);
+  max-width: 480px;
+  max-height: calc(100dvh - env(safe-area-inset-top,0px) - 12px);
+  padding: 18px 16px calc(16px + env(safe-area-inset-bottom,0px));
+  border-radius: 28px 28px 0 0;
+  border-left: 0;
+  border-right: 0;
+  border-bottom: 0;
+}
+.modal::before { display: none; }
+.modal.is-booked::after { border-radius: 0; }
+@media (min-width: 640px) {
+  .modal-backdrop { padding: 24px; }
+  .modal { width: min(92%,440px); border: 1px solid var(--hairline); border-radius: 28px; padding-bottom: 18px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .inline-detail-shell,
+  .inline-detail-content,
+  .detail-chevron { transition: none !important; }
+}
+
   </style>
             <link rel="apple-touch-icon" href="assets/icon/trip_icon.png">
   <link rel="icon" type="image/png" href="assets/icon/trip_icon.png">
-  <link rel="manifest" href="manifest.json?v=7.0.1">
-  <meta name="theme-color" content="#f7e8ef">
+  <link rel="manifest" href="manifest.json?v=7.0.2">
+  <meta id="theme-color-meta" name="theme-color" content="#f2dce6">
+  <script>(function(){var m=document.getElementById("theme-color-meta");if(m&&document.documentElement.classList.contains("theme-dark"))m.setAttribute("content","#0c0c10");})();</script>
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="關嘉露西生日之旅">
-  <link rel="stylesheet" href="assets/css/expenses.css?v=7.0.1">
+  <link rel="stylesheet" href="assets/css/expenses.css?v=7.0.2">
 </head>
 <body>
 <div class="bg-fixed"></div>
@@ -1043,7 +1394,7 @@ html:not(.theme-light):not(.theme-dark) .modal::before { background: rgba(225,22
   <div id="expenses-root"></div>
 </div>
 <div class="footer-note" id="footer-note"></div>
-<div class="app-version-note" id="app-version-note">v7.0.1</div>
+<div class="app-version-note" id="app-version-note">v7.0.2</div>
 
 
   </div>
@@ -1160,6 +1511,9 @@ function applyTheme(t){
     }
     const btn=document.getElementById("theme-btn");
     if(btn){btn.setAttribute("data-theme",t);btn.innerHTML=THEME_ICONS[t]||THEME_ICONS["auto"];}
+    const isDark=document.documentElement.classList.contains("theme-dark") || (!document.documentElement.classList.contains("theme-light") && window.matchMedia?.("(prefers-color-scheme: dark)").matches);
+    const themeMeta=document.getElementById("theme-color-meta");
+    if(themeMeta)themeMeta.setAttribute("content",isDark?"#0c0c10":"#f2dce6");
     localStorage.setItem("trip_theme",t);
   }catch(e){}
 }
@@ -1256,47 +1610,82 @@ function renderWeather(data){
   fetchCity(activeKey,cities[activeKey],datesForCity(activeKey));
 }
 
-// Modal
+// Detail interactions
 let curMaps="",curDP="",curBook="",curGal=[],curGalIdx=0,scrollY=0;
 function lockScroll(){scrollY=ss.scrollTop;ss.style.overflowY="hidden";}
 function unlockScroll(){ss.style.overflowY="auto";ss.scrollTop=scrollY;}
 function renderDots(){const el=document.getElementById("detail-dots");el.innerHTML="";curGal.forEach((_,i)=>{const d=document.createElement("div");d.className="modal-dot"+(i===curGalIdx?" active":"");d.addEventListener("click",()=>{curGalIdx=i;updateImg();});el.appendChild(d);});}
 function updateImg(){const img=document.getElementById("detail-img");img.classList.add("fade-out");setTimeout(()=>{img.src=curGal[curGalIdx];renderDots();img.classList.remove("fade-out");img.classList.add("fade-in");setTimeout(()=>img.classList.remove("fade-in"),220);},120);}
 
+function appendInlineDetails(itemEl,item,gallery){
+  const shell=document.createElement("div");shell.className="inline-detail-shell";
+  const clip=document.createElement("div");clip.className="inline-detail-clip";
+  const detail=document.createElement("div");detail.className="inline-detail-content";
+
+  if(gallery?.length){
+    const galleryEl=document.createElement("div");galleryEl.className="inline-gallery";
+    const track=document.createElement("div");track.className="inline-gallery-track";
+    gallery.forEach((src,index)=>{const img=document.createElement("img");img.src=src;img.alt=`${item.title||"行程"} ${index+1}`;img.loading="lazy";track.appendChild(img);});
+    galleryEl.appendChild(track);detail.appendChild(galleryEl);
+  }
+
+  const body=document.createElement("div");body.className="inline-detail-body";
+  if(item.detailLines?.length){item.detailLines.forEach(line=>{const row=document.createElement("div");row.textContent=line;body.appendChild(row);});}
+  else if(item.detail){body.textContent=item.detail;}
+  if(body.textContent.trim())detail.appendChild(body);
+
+  const actions=document.createElement("div");actions.className="inline-detail-actions";
+  const addAction=(label,url,secondary=false)=>{if(!url)return;const a=document.createElement("a");a.className=`inline-action-btn${secondary?" secondary":""}`;a.href=url;a.target="_blank";a.rel="noopener";a.textContent=label;a.addEventListener("click",e=>e.stopPropagation());actions.appendChild(a);};
+  addAction("Google 地圖",item.maps,false);
+  addAction("官方網頁",item.dianping,true);
+  addAction("查看預訂",item.booking?.pdf||item.bookingPdf,true);
+  if(actions.childElementCount)detail.appendChild(actions);
+
+  clip.appendChild(detail);shell.appendChild(clip);itemEl.appendChild(shell);
+}
+
+function openSavedItemModal(item){
+  document.getElementById("detail-title").textContent=item.getAttribute("data-title")||"";
+  document.getElementById("detail-time").textContent=item.getAttribute("data-time")||"";
+  const lr=item.getAttribute("data-detail-lines"),body=document.getElementById("detail-body");
+  const htmlDetail=item.getAttribute("data-detail-html");
+  if(htmlDetail){body.innerHTML=htmlDetail;}
+  else if(lr){try{body.innerHTML=JSON.parse(lr).map(l=>`<div>${l}</div>`).join("");}catch(e){body.textContent=item.getAttribute("data-detail")||"";}}
+  else body.textContent=item.getAttribute("data-detail")||"";
+  curMaps=item.getAttribute("data-maps")||"";curDP=item.getAttribute("data-dianping")||"";curBook=item.getAttribute("data-booking-pdf")||"";
+  const gr=item.getAttribute("data-gallery");let gal=[];
+  if(gr){try{gal=normGallery(JSON.parse(gr));}catch(e){gal=normGallery(gr);}}
+  const wrap=document.getElementById("detail-img-wrapper"),dots=document.getElementById("detail-dots");
+  if(gal.length){curGal=gal;curGalIdx=0;wrap.style.display="block";dots.style.display="flex";updateImg();}
+  else{curGal=[];wrap.style.display="none";dots.style.display="none";document.getElementById("detail-img").src="";}
+  document.getElementById("detail-maps-btn").style.display=curMaps?"inline-block":"none";
+  document.getElementById("detail-dianping-btn").style.display=curDP?"inline-block":"none";
+  document.getElementById("detail-booking-btn").style.display=curBook?"inline-block":"none";
+  const modalEl=document.querySelector("#detail-backdrop .modal");
+  modalEl?.classList.remove("is-booked");modalEl?.classList.add("snack-modal");
+  if(modalEl){modalEl.style.borderColor="";modalEl.style.borderWidth="";modalEl.style.borderStyle="";}
+  document.getElementById("detail-backdrop").classList.add("active");lockScroll();
+}
+
 function setupClicks(){
-  document.querySelectorAll(".timeline-item.clickable").forEach(item=>{
-    const clone=item.cloneNode(true);item.parentNode?.replaceChild(clone,item);
-    clone.addEventListener("click",()=>{
-      document.getElementById("detail-title").textContent=clone.getAttribute("data-title")||"";
-      document.getElementById("detail-time").textContent=clone.getAttribute("data-time")||"";
-      const lr=clone.getAttribute("data-detail-lines"),body=document.getElementById("detail-body");
-      const htmlDetail=clone.getAttribute("data-detail-html");
-      if(htmlDetail){body.innerHTML=htmlDetail;}
-      else if(lr){try{body.innerHTML=JSON.parse(lr).map(l=>`<div>${l}</div>`).join("");}catch(e){body.textContent=clone.getAttribute("data-detail")||"";}}
-      else body.textContent=clone.getAttribute("data-detail")||"";
-      curMaps=clone.getAttribute("data-maps")||"";curDP=clone.getAttribute("data-dianping")||"";curBook=clone.getAttribute("data-booking-pdf")||"";
-      const gr=clone.getAttribute("data-gallery");let gal=[];
-      if(gr){try{gal=normGallery(JSON.parse(gr));}catch(e){gal=normGallery(gr);}}
-      const wrap=document.getElementById("detail-img-wrapper"),dots=document.getElementById("detail-dots");
-      if(gal.length){curGal=gal;curGalIdx=0;wrap.style.display="block";dots.style.display="flex";updateImg();}
-      else{curGal=[];wrap.style.display="none";dots.style.display="none";document.getElementById("detail-img").src="";}
-      document.getElementById("detail-maps-btn").style.display=curMaps?"inline-block":"none";
-      document.getElementById("detail-dianping-btn").style.display=curDP?"inline-block":"none";
-      document.getElementById("detail-booking-btn").style.display=curBook?"inline-block":"none";
-      // Team colour border on modal — dynamic, works for any traveller key
-      const modalEl=document.querySelector("#detail-backdrop .modal");
-      const isBooked=clone.getAttribute("data-booked")==="true";
-      const isSnack=clone.classList.contains("snack-item");
-      if(modalEl){
-        modalEl.classList.toggle("is-booked",isBooked);
-        modalEl.classList.toggle("snack-modal",isSnack);
-      }
-      const whoVal=clone.getAttribute("data-who")||"all";
-      const travCol=window.tripData?.meta?.travellers?.[whoVal]?.color;
-      if(travCol){modalEl.style.borderColor=travCol;modalEl.style.borderWidth="2px";modalEl.style.borderStyle="solid";}
-      else{modalEl.style.borderColor="";modalEl.style.borderWidth="";modalEl.style.borderStyle="";}
-      document.getElementById("detail-backdrop").classList.add("active");lockScroll();
-    });
+  document.querySelectorAll(".itinerary-item.clickable").forEach(item=>{
+    const summary=item.querySelector(".itinerary-summary");
+    if(!summary||summary.dataset.bound==="true")return;
+    summary.dataset.bound="true";
+    summary.setAttribute("role","button");summary.setAttribute("tabindex","0");summary.setAttribute("aria-expanded","false");
+    const toggle=()=>{
+      const willOpen=!item.classList.contains("expanded");
+      document.querySelectorAll(".itinerary-item.expanded").forEach(other=>{if(other!==item){other.classList.remove("expanded");other.querySelector(".itinerary-summary")?.setAttribute("aria-expanded","false");}});
+      item.classList.toggle("expanded",willOpen);summary.setAttribute("aria-expanded",willOpen?"true":"false");
+      if(willOpen)setTimeout(()=>item.scrollIntoView({behavior:"smooth",block:"nearest"}),220);
+    };
+    summary.addEventListener("click",toggle);
+    summary.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();toggle();}});
+  });
+
+  document.querySelectorAll(".snack-item.clickable").forEach(item=>{
+    if(item.dataset.bound==="true")return;item.dataset.bound="true";
+    item.addEventListener("click",()=>openSavedItemModal(item));
   });
 }
 
@@ -1799,33 +2188,33 @@ function render(data){
     if(day.subtitle){const sub=document.createElement("div");sub.className="section-sub";sub.textContent=day.subtitle;content.appendChild(sub);}
 
     (day.items||[]).forEach(item=>{
-      const el=document.createElement("div");el.className="timeline-item";
+      const el=document.createElement("div");el.className="timeline-item itinerary-item";
       if(item.booked)el.classList.add("is-booked");
       const who=item.who||"all";el.setAttribute("data-who",who);
       if(who!=="all"&&travellers[who]?.color){el.style.borderLeft=`3px solid ${travellers[who].color}`;}
+      let itemGallery=[];
       if(item.popup){
         el.classList.add("clickable");
-        el.setAttribute("data-title",item.title||"");el.setAttribute("data-time",item.time||"");el.setAttribute("data-detail",item.detail||"");
-        el.setAttribute("data-who",who);
-        if(item.detailLines)el.setAttribute("data-detail-lines",JSON.stringify(item.detailLines));
-        if(item.booked)el.setAttribute("data-booked","true");
-        el.setAttribute("data-maps",item.maps||"");
-        const mg=getGalleryForItem(item,day,ck,matchedCities,meta);
-        if(mg.length)el.setAttribute("data-gallery",JSON.stringify(mg));
-        if(item.dianping)el.setAttribute("data-dianping",item.dianping);
-        if(item.booking?.pdf)el.setAttribute("data-booking-pdf",item.booking.pdf);
-        else if(item.bookingPdf)el.setAttribute("data-booking-pdf",item.bookingPdf);
+        itemGallery=getGalleryForItem(item,day,ck,matchedCities,meta);
       }
+
+      const summary=document.createElement("div");summary.className="itinerary-summary";
       const cw=document.createElement("div");cw.className="content";
       const noteRow=document.createElement("div");noteRow.className="content-note-row";
       if(item.note){const n=document.createElement("div");n.className="content-note";n.textContent=item.note;noteRow.appendChild(n);}
       if(item.booked){const b=document.createElement("div");b.className="booked-badge";b.textContent="✓ 已預約";noteRow.appendChild(b);}
       if(who!=="all"&&travellers[who]){const tag=document.createElement("div");tag.className="who-tag";const tc=travellers[who].color||"#888";tag.style.setProperty("--badge-color",tc);tag.textContent=travellers[who].label||who;noteRow.appendChild(tag);}
-      cw.innerHTML=`<div class="content-title">${item.title||""}</div>`;
-      cw.appendChild(noteRow);
+      const title=document.createElement("div");title.className="content-title";title.textContent=item.title||"";cw.append(title,noteRow);
       const timeEl=document.createElement("div");timeEl.className="time";timeEl.textContent=item.time||"";
       const iconEl=document.createElement("div");iconEl.className="icon";iconEl.textContent=item.icon||"";
-      el.append(timeEl,iconEl,cw);content.appendChild(el);
+      summary.append(timeEl,iconEl,cw);
+      if(item.popup){
+        const chevron=document.createElement("div");chevron.className="detail-chevron";chevron.setAttribute("aria-hidden","true");chevron.innerHTML='<svg viewBox="0 0 20 20" fill="none"><path d="M5.5 7.5L10 12l4.5-4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+        summary.appendChild(chevron);
+      }
+      el.appendChild(summary);
+      if(item.popup)appendInlineDetails(el,item,itemGallery);
+      content.appendChild(el);
     });
     conEl.appendChild(content);
   });
@@ -1864,7 +2253,7 @@ let currentAppView="itinerary";
 let baseTripTitle="旅程";
 let collapseRaf=0;
 
-const APP_VERSION = "7.0.1";
+const APP_VERSION = "7.0.2";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 window.EXPENSES_MODULE_VERSION = EXPENSES_MODULE_VERSION;
@@ -1960,12 +2349,34 @@ function updateCompactHeader(){
 function updateCollapsingChrome(){
   collapseRaf=0;
   if(!scrollShell||!compactHeader) return;
+  const y=Math.max(0,scrollShell.scrollTop||0);
+  const start=18,end=106;
+  const progress=clamp((y-start)/(end-start),0,1);
+  document.documentElement.style.setProperty("--collapse-progress",progress.toFixed(4));
+  compactHeader.style.opacity=String(progress);
+  compactHeader.style.transform=`translate3d(0,${(-7*(1-progress)).toFixed(2)}px,0)`;
+  compactHeader.setAttribute("aria-hidden",progress<0.08?"true":"false");
+  compactHeader.style.pointerEvents=progress>0.92?"auto":"none";
+
   const largeHeader=document.querySelector(".header");
-  const headerBottom=largeHeader?.getBoundingClientRect().bottom||9999;
-  const safeTop=parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--compact-header-top"))||0;
-  const shouldShow=headerBottom<=safeTop+18 || scrollShell.scrollTop>94;
-  compactHeader.classList.toggle("is-visible",shouldShow);
-  compactHeader.setAttribute("aria-hidden",shouldShow?"false":"true");
+  if(largeHeader){
+    const eased=1-Math.pow(1-progress,2);
+    largeHeader.style.opacity=String(1-progress*0.82);
+    largeHeader.style.transform=`translate3d(0,${(-10*eased).toFixed(2)}px,0) scale(${(1-0.018*eased).toFixed(4)})`;
+    const main=largeHeader.querySelector(".header-title-main");
+    const small=largeHeader.querySelector(".header-title-small");
+    const sub=largeHeader.querySelector(".header-sub-row");
+    if(main)main.style.transform=`translate3d(0,${(-5*eased).toFixed(2)}px,0)`;
+    if(small)small.style.opacity=String(1-progress*0.70);
+    if(sub)sub.style.opacity=String(1-progress*0.88);
+  }
+
+  const dayTabs=document.getElementById("day-tabs");
+  if(dayTabs&&currentAppView==="itinerary"){
+    const stickyTop=(parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--compact-header-h"))||58)+(parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--compact-header-top"))||0);
+    const isStuck=dayTabs.getBoundingClientRect().top<=stickyTop+0.75 && y>4;
+    dayTabs.classList.toggle("is-stuck",isStuck);
+  }else dayTabs?.classList.remove("is-stuck");
 }
 function scheduleCollapseUpdate(){
   if(collapseRaf) return;
@@ -2042,7 +2453,7 @@ if(window.visualViewport&&bottomNav){
 // Android / Chrome PWA support. Network-only service worker, no aggressive cache.
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("./sw.js?v=1.5.1").catch(() => {});
+    navigator.serviceWorker.register("./sw.js?v=1.5.2").catch(() => {});
   });
 }
 

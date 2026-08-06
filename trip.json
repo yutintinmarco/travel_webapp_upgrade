@@ -145,68 +145,66 @@
     "galleryDefaults": {
       "byIcon": {
         "✈️": [
-          "assets/gallery/default_airport.jpg"
+          "assets/gallery/demo_transport.svg"
         ],
         "🚆": [
-          "assets/gallery/default_transport.jpg"
+          "assets/gallery/demo_transport.svg"
         ],
         "🍽️": [
-          "assets/gallery/default_food.jpg"
+          "assets/gallery/demo_food.svg"
         ],
         "🥩": [
-          "assets/gallery/default_food.jpg"
+          "assets/gallery/demo_city.svg"
         ],
         "☕": [
-          "assets/gallery/default_cafe.jpg"
+          "assets/gallery/demo_food.svg"
         ],
         "🍵": [
-          "assets/gallery/default_cafe.jpg"
+          "assets/gallery/demo_city.svg"
         ],
         "🛍️": [
-          "assets/gallery/default_shopping.jpg"
+          "assets/gallery/demo_shop.svg"
         ],
         "🛒": [
-          "assets/gallery/default_shopping.jpg"
+          "assets/gallery/demo_city.svg"
         ],
         "🎮": [
-          "assets/gallery/default_kyoto.jpg"
+          "assets/gallery/demo_shop.svg"
         ],
         "⛩️": [
-          "assets/gallery/default_temple.jpg"
+          "assets/gallery/demo_nature.svg"
         ],
         "🏯": [
-          "assets/gallery/default_temple.jpg"
+          "assets/gallery/demo_nature.svg"
         ],
         "🥟": [
-          "assets/gallery/default_food.jpg"
+          "assets/gallery/demo_city.svg"
         ],
         "🐾": [
-          "assets/gallery/default_kobe.jpg"
+          "assets/gallery/demo_city.svg"
         ],
         "🌃": [
-          "assets/gallery/default_kobe.jpg"
+          "assets/gallery/demo_city.svg"
         ],
         "🎂": [
-          "assets/gallery/default_food.jpg"
+          "assets/gallery/demo_city.svg"
         ],
         "🍡": [
-          "assets/gallery/default_food.jpg"
+          "assets/gallery/demo_food.svg"
         ]
       },
       "byCity": {
         "kyoto": [
-          "assets/gallery/default_kyoto.jpg"
+          "assets/gallery/demo_city.svg"
         ],
         "osaka": [
-          "assets/gallery/default_osaka.jpg"
+          "assets/gallery/demo_city.svg"
         ],
         "kobe": [
-          "assets/gallery/default_kobe.jpg"
+          "assets/gallery/demo_city.svg"
         ]
       },
-      "fallback": [
-        "assets/gallery/default_trip.jpg"
-      ]
+      "fallback": "assets/gallery/demo_city.svg"
     }
   },
   "days": [
@@ -228,7 +226,7 @@
           "detail": "Team Ian 乘搭 CX566 於 23/5 01:55 由香港出發，06:40 抵達關西國際機場。",
           "maps": "https://www.google.com/maps/search/?api=1&query=Kansai+International+Airport",
           "gallery": [
-            "assets/gallery/kix.jpg"
+            "assets/gallery/demo_transport.svg"
           ]
         },
         {
@@ -241,7 +239,7 @@
           "detail": "抵達後前往京都市區，交通可按實際時間選擇 Haruka 特急或巴士。",
           "maps": "https://www.google.com/maps/search/?api=1&query=Kyoto+Station",
           "gallery": [
-            "assets/gallery/kyoto_station.jpg"
+            "assets/gallery/demo_transport.svg"
           ]
         },
         {
@@ -254,9 +252,9 @@
           "detail": "錦市場有各式小食、豆腐、醃菜及串燒，適合作為第一日輕鬆行程。",
           "maps": "https://www.google.com/maps/search/?api=1&query=Nishiki+Market+Kyoto",
           "gallery": [
-            "assets/gallery/nishiki_market_01.jpg",
-            "assets/gallery/nishiki_market_02.jpg",
-            "assets/gallery/nishiki_market_03.jpg"
+            "assets/gallery/demo_shop.svg",
+            "assets/gallery/demo_food.svg",
+            "assets/gallery/demo_nature.svg"
           ]
         },
         {
@@ -269,8 +267,9 @@
           "detail": "Pokémon Center Kyoto，適合購物及打卡。",
           "maps": "https://www.google.com/maps/search/?api=1&query=Pokemon+Center+Kyoto",
           "gallery": [
-            "assets/gallery/Pokemon_Center_Kyoto_01.jpg",
-            "assets/gallery/Pokemon_Center_Kyoto_02.jpg"
+            "assets/gallery/demo_shop.svg",
+            "assets/gallery/demo_food.svg",
+            "assets/gallery/demo_nature.svg"
           ]
         },
         {
@@ -283,7 +282,7 @@
           "detail": "Team Edan 乘搭 CX506 於 23/5 10:25 由香港起飛，15:10 抵達關西機場。抵達後按當日安排與大隊合流。",
           "maps": "https://www.google.com/maps/search/?api=1&query=Kansai+International+Airport",
           "gallery": [
-            "assets/gallery/kix.jpg"
+            "assets/gallery/demo_transport.svg"
           ]
         },
         {
@@ -296,7 +295,7 @@
           "detail": "抵達後前往京都市區，交通可按實際時間選擇 Haruka 特急或巴士。",
           "maps": "https://www.google.com/maps/search/?api=1&query=Kyoto+Station",
           "gallery": [
-            "assets/gallery/kyoto_station.jpg"
+            "assets/gallery/demo_transport.svg"
           ]
         },
         {
@@ -309,7 +308,7 @@
           "detail": "AEON Mall KYOTO 可購物、補給日用品，亦適合第一日較輕鬆安排。",
           "maps": "https://www.google.com/maps/search/?api=1&query=AEON+Mall+KYOTO",
           "gallery": [
-            "assets/gallery/default_shopping.jpg"
+            "assets/gallery/demo_city.svg"
           ]
         },
         {
@@ -323,9 +322,9 @@
           "maps": "https://maps.app.goo.gl/favccBogyy6thvew5",
           "booked": true,
           "gallery": [
-            "assets/gallery/sumibi_00.webp",
-            "assets/gallery/sumibi_01.webp",
-            "assets/gallery/sumibi_02.webp"
+            "assets/gallery/demo_food.svg",
+            "assets/gallery/demo_city.svg",
+            "assets/gallery/demo_nature.svg"
           ]
         },
         {
@@ -338,9 +337,9 @@
           "who": "all",
           "popup": true,
           "gallery": [
-            "assets/gallery/daiwa_01.webp",
-            "assets/gallery/daiwa_02.webp",
-            "assets/gallery/daiwa_03.webp"
+            "assets/gallery/demo_hotel.svg",
+            "assets/gallery/demo_food.svg",
+            "assets/gallery/demo_nature.svg"
           ]
         }
       ]
@@ -363,7 +362,7 @@
           "detail": "早上由京都出發前往宇治。",
           "maps": "https://www.google.com/maps/search/?api=1&query=Uji+Station+Kyoto",
           "gallery": [
-            "assets/gallery/uji_station.jpg"
+            "assets/gallery/demo_transport.svg"
           ]
         },
         {
@@ -377,8 +376,9 @@
           "maps": "https://www.google.com/maps/search/?api=1&query=Byodoin+Temple+Uji",
           "dianping": "https://www.byodoin.or.jp/ch2/",
           "gallery": [
-            "assets/gallery/byodoin_01.jpg",
-            "assets/gallery/byodoin_02.jpg"
+            "assets/gallery/demo_nature.svg",
+            "assets/gallery/demo_food.svg",
+            "assets/gallery/demo_nature.svg"
           ]
         },
         {
@@ -391,7 +391,7 @@
           "detail": "中村藤吉平等院店，適合食抹茶甜品或稍作休息。",
           "maps": "https://www.google.com/maps/search/?api=1&query=Nakamura+Tokichi+Byodoin+Uji",
           "gallery": [
-            "assets/gallery/byodointea_01.jpg"
+            "assets/gallery/demo_city.svg"
           ]
         },
         {
@@ -418,9 +418,9 @@
             "pdf": "assets/pdf/nintendo_museum_ticket.png"
           },
           "gallery": [
-            "assets/gallery/nintendo_museum_01.jpg",
-            "assets/gallery/nintendo_museum_02.jpg",
-            "assets/gallery/nintendo_museum_03.jpg"
+            "assets/gallery/demo_shop.svg",
+            "assets/gallery/demo_food.svg",
+            "assets/gallery/demo_nature.svg"
           ]
         },
         {
@@ -443,7 +443,7 @@
           "detail": "伏見稻荷大社，視乎體力可只行山腳一段鳥居。",
           "maps": "https://www.google.com/maps/search/?api=1&query=Fushimi+Inari+Taisha",
           "gallery": [
-            "assets/gallery/fushimi_inari.jpg"
+            "assets/gallery/demo_nature.svg"
           ]
         },
         {
@@ -457,9 +457,9 @@
           "maps": "https://maps.app.goo.gl/6WRg1gPa91CGdBqa7",
           "booked": true,
           "gallery": [
-            "assets/gallery/eel_01.webp",
-            "assets/gallery/eel_02.webp",
-            "assets/gallery/eel_03.webp"
+            "assets/gallery/demo_food.svg",
+            "assets/gallery/demo_city.svg",
+            "assets/gallery/demo_nature.svg"
           ]
         },
         {
@@ -472,7 +472,7 @@
           "detail": "由伏見稻荷一帶返回晚餐地點，預留交通及步行時間。",
           "maps": "https://www.google.com/maps/search/?api=1&query=Kyoto+Station",
           "gallery": [
-            "assets/gallery/kyoto_station.jpg"
+            "assets/gallery/demo_transport.svg"
           ]
         },
         {
@@ -485,9 +485,9 @@
           "who": "all",
           "popup": true,
           "gallery": [
-            "assets/gallery/daiwa_01.webp",
-            "assets/gallery/daiwa_02.webp",
-            "assets/gallery/daiwa_03.webp"
+            "assets/gallery/demo_hotel.svg",
+            "assets/gallery/demo_food.svg",
+            "assets/gallery/demo_nature.svg"
           ]
         }
       ]
@@ -510,7 +510,7 @@
           "detail": "上午安排大丸、Hands、商店街及 JINS 一帶購物。",
           "maps": "https://www.google.com/maps/search/?api=1&query=Daimaru+Kyoto+Hands+JINS",
           "gallery": [
-            "assets/gallery/default_shopping.jpg"
+            "assets/gallery/demo_shop.svg"
           ]
         },
         {
@@ -524,8 +524,9 @@
           "maps": "https://www.google.com/maps/search/?api=1&query=Kobe+Beef+Mouriya+Gion",
           "booked": true,
           "gallery": [
-            "assets/gallery/mouriya_01.jpg",
-            "assets/gallery/mouriya_02.jpg"
+            "assets/gallery/demo_city.svg",
+            "assets/gallery/demo_food.svg",
+            "assets/gallery/demo_nature.svg"
           ]
         },
         {
@@ -548,8 +549,9 @@
           "detail": "銀閣寺及周邊散步，視乎時間可順行哲學之道一小段。",
           "maps": "https://www.google.com/maps/search/?api=1&query=Ginkakuji+Kyoto",
           "gallery": [
-            "assets/gallery/ginkakuji_01.webp",
-            "assets/gallery/ginkakuji_02.jpg"
+            "assets/gallery/demo_nature.svg",
+            "assets/gallery/demo_food.svg",
+            "assets/gallery/demo_nature.svg"
           ]
         },
         {
@@ -563,10 +565,9 @@
           "maps": "https://maps.app.goo.gl/dT4zWjnRvvZLHP7t7",
           "dianping": "https://tabelog.com/kyoto/A2601/A260302/26000716/",
           "gallery": [
-            "assets/gallery/ramen_01.webp",
-            "assets/gallery/ramen_02.webp",
-            "assets/gallery/ramen_03.webp",
-            "assets/gallery/ramen_04.webp"
+            "assets/gallery/demo_food.svg",
+            "assets/gallery/demo_city.svg",
+            "assets/gallery/demo_nature.svg"
           ]
         },
         {
@@ -579,9 +580,9 @@
           "who": "all",
           "popup": true,
           "gallery": [
-            "assets/gallery/daiwa_01.webp",
-            "assets/gallery/daiwa_02.webp",
-            "assets/gallery/daiwa_03.webp"
+            "assets/gallery/demo_hotel.svg",
+            "assets/gallery/demo_food.svg",
+            "assets/gallery/demo_nature.svg"
           ]
         }
       ]
@@ -614,8 +615,9 @@
           "detail": "金閣寺是京都經典景點，建議早上前往。",
           "maps": "https://www.google.com/maps/search/?api=1&query=Kinkakuji+Kyoto",
           "gallery": [
-            "assets/gallery/kinkakuji_01.jpg",
-            "assets/gallery/kinkakuji_02.jpg"
+            "assets/gallery/demo_nature.svg",
+            "assets/gallery/demo_food.svg",
+            "assets/gallery/demo_nature.svg"
           ]
         },
         {
@@ -628,7 +630,7 @@
           "detail": "由京都移動至大阪，按實際位置選擇 JR 或其他交通。",
           "maps": "https://www.google.com/maps/search/?api=1&query=Osaka+Station",
           "gallery": [
-            "assets/gallery/dotonbori.jpg"
+            "assets/gallery/demo_transport.svg"
           ]
         },
         {
@@ -641,9 +643,9 @@
           "detail": "下午安排心齋橋、難波一帶自由行，購物及打卡。",
           "maps": "https://www.google.com/maps/search/?api=1&query=Shinsaibashi+Namba+Osaka",
           "gallery": [
-            "assets/gallery/dotonbori_01.webp",
-            "assets/gallery/dotonbori_02.jpg",
-            "assets/gallery/dotonbori_03.jpg"
+            "assets/gallery/demo_shop.svg",
+            "assets/gallery/demo_food.svg",
+            "assets/gallery/demo_nature.svg"
           ]
         },
         {
@@ -656,9 +658,9 @@
           "detail": "下午安排心齋橋、難波一帶自由行，購物及打卡。",
           "maps": "https://www.google.com/maps/search/?api=1&query=Shinsaibashi+Namba+Osaka",
           "gallery": [
-            "assets/gallery/dotonbori_01.webp",
-            "assets/gallery/dotonbori_02.jpg",
-            "assets/gallery/dotonbori_03.jpg"
+            "assets/gallery/demo_shop.svg",
+            "assets/gallery/demo_food.svg",
+            "assets/gallery/demo_nature.svg"
           ]
         },
         {
@@ -672,8 +674,9 @@
           "detail": "Day 4 晚餐安排国産牛焼肉食べ放題 あぶりや千日前店。位置在千日前一帶，配合心齋橋 / 難波自由行後前往較順路。",
           "maps": "https://maps.app.goo.gl/fsFQfW9Vvd63mvYa6",
           "gallery": [
-            "assets/gallery/beef_01.jpg",
-            "assets/gallery/beef_02.jpg"
+            "assets/gallery/demo_city.svg",
+            "assets/gallery/demo_food.svg",
+            "assets/gallery/demo_nature.svg"
           ]
         },
         {
@@ -686,10 +689,9 @@
           "who": "all",
           "popup": true,
           "gallery": [
-            "assets/gallery/apartment_01.webp",
-            "assets/gallery/apartment_02.webp",
-            "assets/gallery/apartment_03.webp",
-            "assets/gallery/apartment_04.webp"
+            "assets/gallery/demo_hotel.svg",
+            "assets/gallery/demo_food.svg",
+            "assets/gallery/demo_nature.svg"
           ]
         }
       ],
@@ -716,7 +718,7 @@
           "detail": "由大阪出發前往神戶。建議先前往神戶動物王國，因為動物王國收得較早，之後再到神戶市區及海邊夜景收尾。",
           "maps": "https://www.google.com/maps/search/?api=1&query=Kobe+Animal+Kingdom",
           "gallery": [
-            "assets/gallery/default_transport.jpg"
+            "assets/gallery/demo_transport.svg"
           ]
         },
         {
@@ -730,9 +732,9 @@
           "maps": "https://www.google.com/maps/search/?api=1&query=Kobe+Animal+Kingdom",
           "dianping": "https://www.kobe-oukoku.com/en",
           "gallery": [
-            "assets/gallery/kobe_animal_kingdom_01.jpg",
-            "assets/gallery/kobe_animal_kingdom_02.jpg",
-            "assets/gallery/kobe_animal_kingdom_03.jpg"
+            "assets/gallery/demo_city.svg",
+            "assets/gallery/demo_food.svg",
+            "assets/gallery/demo_nature.svg"
           ]
         },
         {
@@ -745,7 +747,7 @@
           "detail": "由神戶動物王國一帶返回三宮 / 元町。",
           "maps": "https://www.google.com/maps/search/?api=1&query=Sannomiya+Motomachi+Kobe",
           "gallery": [
-            "assets/gallery/nankinmachi.jpg"
+            "assets/gallery/demo_transport.svg"
           ]
         },
         {
@@ -759,9 +761,9 @@
           "detail": "午餐安排かに道楽神戸三宮店。由神戶動物王國返回三宮一帶後用餐，之後再去南京町 / 元町散策。",
           "maps": "https://maps.app.goo.gl/HDB9xaeu5mUnbtow8",
           "gallery": [
-            "assets/gallery/crab_01.jpg",
-            "assets/gallery/crab_02.jpg",
-            "assets/gallery/crab_03.webp"
+            "assets/gallery/demo_city.svg",
+            "assets/gallery/demo_food.svg",
+            "assets/gallery/demo_nature.svg"
           ]
         },
         {
@@ -774,7 +776,7 @@
           "detail": "南京町是神戶代表性中華街，適合小食、散步及拍照；之後可步行或短程交通前往 Harborland。",
           "maps": "https://www.google.com/maps/search/?api=1&query=Nankinmachi+Kobe",
           "gallery": [
-            "assets/gallery/nankinmachi.jpg"
+            "assets/gallery/demo_city.svg"
           ]
         },
         {
@@ -787,8 +789,9 @@
           "detail": "神戶 Harborland / umie / MOSAIC 適合購物、咖啡、晚餐及海邊散步，傍晚至夜晚景色較好。",
           "maps": "https://www.google.com/maps/search/?api=1&query=Kobe+Harborland+umie+MOSAIC",
           "gallery": [
-            "assets/gallery/kobe_harborland.jpg",
-            "assets/gallery/kobe_port_tower.jpg"
+            "assets/gallery/demo_shop.svg",
+            "assets/gallery/demo_food.svg",
+            "assets/gallery/demo_nature.svg"
           ]
         },
         {
@@ -801,8 +804,9 @@
           "detail": "可於 MOSAIC 或 Harborland 一帶晚餐，餐廳選擇較多，亦方便晚餐後到海邊睇夜景。",
           "maps": "https://www.google.com/maps/search/?api=1&query=Kobe+Harborland+MOSAIC+restaurants",
           "gallery": [
-            "assets/gallery/kobe_harborland.jpg",
-            "assets/gallery/kobe_port_tower.jpg"
+            "assets/gallery/demo_food.svg",
+            "assets/gallery/demo_city.svg",
+            "assets/gallery/demo_nature.svg"
           ]
         },
         {
@@ -815,8 +819,9 @@
           "detail": "Meriken Park 是神戶港代表地標之一，可欣賞 Kobe Port Tower、海事博物館及港灣夜景。",
           "maps": "https://www.google.com/maps/search/?api=1&query=Meriken+Park+Kobe+Port+Tower",
           "gallery": [
-            "assets/gallery/kobe_port_tower.jpg",
-            "assets/gallery/kobe_harborland.jpg"
+            "assets/gallery/demo_city.svg",
+            "assets/gallery/demo_food.svg",
+            "assets/gallery/demo_nature.svg"
           ]
         },
         {
@@ -829,7 +834,7 @@
           "detail": "由神戶返回大阪。時間可按晚餐及夜景實際情況調整。",
           "maps": "https://www.google.com/maps/search/?api=1&query=Osaka+Station",
           "gallery": [
-            "assets/gallery/default_transport.jpg"
+            "assets/gallery/demo_transport.svg"
           ]
         },
         {
@@ -842,10 +847,9 @@
           "who": "all",
           "popup": true,
           "gallery": [
-            "assets/gallery/apartment_01.webp",
-            "assets/gallery/apartment_02.webp",
-            "assets/gallery/apartment_03.webp",
-            "assets/gallery/apartment_04.webp"
+            "assets/gallery/demo_hotel.svg",
+            "assets/gallery/demo_food.svg",
+            "assets/gallery/demo_nature.svg"
           ]
         }
       ]
@@ -868,7 +872,7 @@
           "detail": "晨早買餸。",
           "maps": "https://maps.app.goo.gl/gHhYGkgWEd9Cbh4Y7",
           "gallery": [
-            "assets/gallery/market_01.jpg"
+            "assets/gallery/demo_shop.svg"
           ]
         },
         {
@@ -881,7 +885,7 @@
           "detail": "上午安排天王寺 Q’s Mall，視乎航班時間作最後購物。",
           "maps": "https://www.google.com/maps/search/?api=1&query=Abeno+Q's+Mall+Tennoji+Osaka",
           "gallery": [
-            "assets/gallery/abeno_qs_mall.jpg"
+            "assets/gallery/demo_shop.svg"
           ]
         },
         {
@@ -894,7 +898,7 @@
           "detail": "下午前往關西機場，建議預留充足交通及辦理登機時間。",
           "maps": "https://www.google.com/maps/search/?api=1&query=Kansai+International+Airport",
           "gallery": [
-            "assets/gallery/kix.jpg"
+            "assets/gallery/demo_transport.svg"
           ]
         },
         {
@@ -907,7 +911,7 @@
           "detail": "Team Ian 乘搭 CX595 於 28/5 18:30 由大阪回港，21:40 抵達香港。",
           "maps": "https://www.google.com/maps/search/?api=1&query=Kansai+International+Airport",
           "gallery": [
-            "assets/gallery/kix.jpg"
+            "assets/gallery/demo_transport.svg"
           ]
         },
         {
@@ -920,7 +924,7 @@
           "detail": "Team Edan 乘搭 CX569 於 28/5 19:25 由大阪關西機場起飛，22:40 抵達香港。建議預留充足時間前往關西機場辦理登機。",
           "maps": "https://www.google.com/maps/search/?api=1&query=Kansai+International+Airport",
           "gallery": [
-            "assets/gallery/kix.jpg"
+            "assets/gallery/demo_transport.svg"
           ]
         }
       ]
@@ -952,9 +956,8 @@
         "opening": "上午至下午",
         "maps": "https://www.google.com/maps/search/?api=1&query=Konnamonja+Kyoto+Nishiki+Market",
         "gallery": [
-          "assets/gallery/nishiki_market_01.jpg",
-          "assets/gallery/nishiki_market_02.jpg",
-          "assets/gallery/nishiki_market_03.jpg"
+          "assets/gallery/demo_food.svg",
+          "assets/gallery/demo_city.svg"
         ]
       },
       {
@@ -979,9 +982,8 @@
         "opening": "多數店舖約 09:00-18:00",
         "maps": "https://www.google.com/maps/search/?api=1&query=Nishiki+Market+Kyoto",
         "gallery": [
-          "assets/gallery/nishiki_market_01.jpg",
-          "assets/gallery/nishiki_market_02.jpg",
-          "assets/gallery/nishiki_market_03.jpg"
+          "assets/gallery/demo_food.svg",
+          "assets/gallery/demo_city.svg"
         ]
       },
       {
@@ -1007,7 +1009,7 @@
         "opening": "下午茶",
         "maps": "https://www.google.com/maps/search/?api=1&query=Gion+Tsujiri+Kyoto",
         "gallery": [
-          "assets/gallery/default_cafe.jpg"
+          "assets/gallery/demo_food.svg"
         ]
       },
       {
@@ -1031,7 +1033,7 @@
         "opening": "晚餐 / 宵夜",
         "maps": "https://www.google.com/maps/search/?api=1&query=Tenkaippin+Kyoto",
         "gallery": [
-          "assets/gallery/default_food.jpg"
+          "assets/gallery/demo_food.svg"
         ]
       },
       {
@@ -1056,7 +1058,7 @@
         "opening": "上午 / 下午茶",
         "maps": "https://www.google.com/maps/search/?api=1&query=Nakamura+Tokichi+Uji",
         "gallery": [
-          "assets/gallery/byodointea_01.jpg"
+          "assets/gallery/demo_food.svg"
         ]
       },
       {
@@ -1081,8 +1083,8 @@
         "opening": "午餐 / 下午茶",
         "maps": "https://www.google.com/maps/search/?api=1&query=Itoh+Kyuemon+Uji",
         "gallery": [
-          "assets/gallery/byodointea_01.jpg",
-          "assets/gallery/byodoin_01.jpg"
+          "assets/gallery/demo_food.svg",
+          "assets/gallery/demo_city.svg"
         ]
       },
       {
@@ -1107,7 +1109,7 @@
         "opening": "下午茶",
         "maps": "https://www.google.com/maps/search/?api=1&query=Tsujiri+Uji+Main+Store",
         "gallery": [
-          "assets/gallery/default_cafe.jpg"
+          "assets/gallery/demo_food.svg"
         ]
       },
       {
@@ -1132,9 +1134,8 @@
         "opening": "下午至晚上",
         "maps": "https://www.google.com/maps/search/?api=1&query=Takoyaki+Doraku+Wanaka+Dotonbori",
         "gallery": [
-          "assets/gallery/dotonbori_01.webp",
-          "assets/gallery/dotonbori_02.jpg",
-          "assets/gallery/dotonbori_03.jpg"
+          "assets/gallery/demo_food.svg",
+          "assets/gallery/demo_city.svg"
         ]
       },
       {
@@ -1159,7 +1160,7 @@
         "opening": "晚餐",
         "maps": "https://www.google.com/maps/search/?api=1&query=Creo+Ru+Dotonbori",
         "gallery": [
-          "assets/gallery/dotonbori.jpg"
+          "assets/gallery/demo_food.svg"
         ]
       },
       {
@@ -1184,7 +1185,7 @@
         "opening": "午餐 / 晚餐",
         "maps": "https://www.google.com/maps/search/?api=1&query=Mizuno+Okonomiyaki+Osaka",
         "gallery": [
-          "assets/gallery/dotonbori.jpg"
+          "assets/gallery/demo_food.svg"
         ]
       },
       {
@@ -1209,7 +1210,7 @@
         "opening": "晚餐 / 宵夜",
         "maps": "https://www.google.com/maps/search/?api=1&query=Kushikatsu+Daruma+Namba+Osaka",
         "gallery": [
-          "assets/gallery/dotonbori_02.jpg"
+          "assets/gallery/demo_food.svg"
         ]
       },
       {
@@ -1234,7 +1235,7 @@
         "opening": "回程前",
         "maps": "https://www.google.com/maps/search/?api=1&query=551+Horai+Osaka",
         "gallery": [
-          "assets/gallery/default_food.jpg"
+          "assets/gallery/demo_food.svg"
         ]
       },
       {
@@ -1259,7 +1260,7 @@
         "opening": "早餐",
         "maps": "https://maps.app.goo.gl/gHhYGkgWEd9Cbh4Y7",
         "gallery": [
-          "assets/gallery/market_01.jpg"
+          "assets/gallery/demo_food.svg"
         ]
       },
       {
@@ -1284,7 +1285,7 @@
         "opening": "下午",
         "maps": "https://www.google.com/maps/search/?api=1&query=Roushouki+Kobe+Nankinmachi",
         "gallery": [
-          "assets/gallery/nankinmachi.jpg"
+          "assets/gallery/demo_food.svg"
         ]
       },
       {
@@ -1309,7 +1310,7 @@
         "opening": "下午 / 晚餐前",
         "maps": "https://www.google.com/maps/search/?api=1&query=Ganso+Gyozaen+Kobe",
         "gallery": [
-          "assets/gallery/nankinmachi.jpg"
+          "assets/gallery/demo_food.svg"
         ]
       },
       {
@@ -1334,7 +1335,7 @@
         "opening": "下午",
         "maps": "https://www.google.com/maps/search/?api=1&query=Kobe+beef+croquette+Motomachi+Kobe",
         "gallery": [
-          "assets/gallery/nankinmachi.jpg"
+          "assets/gallery/demo_food.svg"
         ]
       },
       {
@@ -1359,7 +1360,7 @@
         "opening": "下午",
         "maps": "https://www.google.com/maps/search/?api=1&query=Kobe+Milk+Nankinmachi",
         "gallery": [
-          "assets/gallery/default_cafe.jpg"
+          "assets/gallery/demo_food.svg"
         ]
       },
       {
@@ -1385,8 +1386,8 @@
         "opening": "晚餐後",
         "maps": "https://www.google.com/maps/search/?api=1&query=Kobe+Harborland+MOSAIC+cafe",
         "gallery": [
-          "assets/gallery/kobe_harborland.jpg",
-          "assets/gallery/kobe_port_tower.jpg"
+          "assets/gallery/demo_food.svg",
+          "assets/gallery/demo_city.svg"
         ]
       }
     ]

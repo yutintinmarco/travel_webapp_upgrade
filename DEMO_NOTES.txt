@@ -1,0 +1,12 @@
+Travel Webapp Phase 1 v7.0.2 demo package
+
+This package uses lightweight local placeholder images for UI testing.
+The itinerary structure and features remain representative, but the original production photo library is not included.
+
+Main refinements:
+1. Full viewport background and safe area painting
+2. Deliberate light and dark UI themes
+3. Inline expanding itinerary details
+4. Sticky day selector material only when stuck
+5. Scroll linked large title transition
+6. Saved item sheet attached to the screen bottom
