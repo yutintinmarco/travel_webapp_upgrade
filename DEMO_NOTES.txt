@@ -1,20 +1,13 @@
-Travel Webapp Phase 1 v7.0.4 demo
+Travel Webapp Phase 1 v7.0.5 demo
 
-This lightweight package uses demo assets.
+This lightweight package uses demo data and placeholder assets.
 
-Changes in this build:
-1. Root canvas and background are full bleed; theme-color tinting is removed.
-2. Safe-area padding applies to foreground content, not the page background.
-3. Six-day selector is a fixed equal-width grid aligned to the compact title.
-4. Longer trips automatically fall back to horizontal day scrolling.
-5. Saved-item sheet supports interactive downward drag and swipe dismissal.
-6. Sheet backdrop follows the gesture and snaps back below the dismissal threshold.
+Current Phase 1 refinements:
+1. Full bleed standalone PWA canvas with safe area foreground spacing.
+2. Six day fixed grid selector and interactive saved item sheet.
+3. Exact height itinerary disclosure animation using the Web Animations API.
+4. Team filter labels retain their traveller accent colours in light and dark modes.
+5. Dark bottom navigation uses a balanced material sheen without a left side white flare.
+6. Day 4 Kyoto and Osaka gradient border remains restored.
 
-For iOS Home Screen testing after manifest/status-bar changes, remove the old icon and add the web app to the Home Screen again.
-
-
-v7.0.4 refinements:
-• Neutral Safari browser top chrome while retaining full-bleed standalone mode
-• Large title moved upward; hidden pull-to-refresh label no longer consumes space
-• Saved-sheet dismissal no longer leaves a delayed backdrop blur
-• Day 4 Kyoto/Osaka gradient border restored
+For iOS Home Screen testing after manifest or status bar changes, remove the old icon and add the web app to the Home Screen again.

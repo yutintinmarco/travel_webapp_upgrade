@@ -608,7 +608,7 @@ body.expenses-view-active .container {
 
   
 
-/* Phase 1 · iOS native shell · refinement 7.0.4 */
+/* Phase 1 · iOS native shell · refinement 7.0.5 */
 :root {
   --tabbar-h: 72px;
   --compact-header-h: 58px;
@@ -1308,7 +1308,7 @@ html.theme-dark .inline-action-btn.secondary { background: rgba(255,255,255,0.08
 
   
 
-/* Phase 1 · v7.0.4 · full-bleed root canvas, fixed day grid and interactive iOS sheet */
+/* Phase 1 · v7.0.5 · full-bleed root canvas, fixed day grid and interactive iOS sheet */
 
 /* Let the root background paint the WebKit canvas itself. Do not tint the
    status-bar region with theme-color; content alone observes the safe area. */
@@ -1455,7 +1455,7 @@ html:not(.theme-light):not(.theme-dark) .sheet-grabber { background: rgba(235,23
 }
 
 
-/* Phase 1 · v7.0.4 · browser chrome, tighter large title and visual cleanup */
+/* Phase 1 · v7.0.5 · browser chrome, tighter large title and visual cleanup */
 
 /* Safari browser mode derives its top chrome tint from the root canvas on
    recent iOS releases. Keep the installed Web App full bleed, but use a
@@ -1520,12 +1520,76 @@ html:not(.theme-light):not(.theme-dark) .day-tab.city-both.active {
   color: #f0f0f2 !important;
 }
 
+
+/* Phase 1 · v7.0.5 · smoother disclosure, clearer team filters and balanced dark glass */
+
+/* Exact pixel height is animated by JavaScript. Avoid grid track animation on
+   iOS Safari because image compositing and simultaneous scroll correction can
+   make the disclosure stutter. */
+.inline-detail-shell {
+  display: block !important;
+  height: 0;
+  overflow: hidden;
+  will-change: height;
+  transform: translateZ(0);
+  contain: paint;
+}
+.itinerary-item.expanded .inline-detail-shell {
+  grid-template-rows: none !important;
+}
+.inline-detail-content {
+  transform: translate3d(0,-5px,0);
+  transition:
+    opacity .22s ease-out,
+    transform .32s cubic-bezier(.32,.72,0,1),
+    padding .32s cubic-bezier(.32,.72,0,1),
+    border-color .20s ease-out !important;
+}
+.itinerary-item.is-detail-animating {
+  pointer-events: none;
+}
+
+/* Inactive team filters should still retain their identity instead of falling
+   back to low-contrast secondary grey. */
+.team-btn[data-team]:not([data-team="all"]) {
+  color: var(--team-accent, #286da8);
+  border-color: color-mix(in srgb, var(--team-accent, #286da8) 52%, rgba(120,120,128,.30));
+  background: color-mix(in srgb, var(--team-accent, #286da8) 9%, rgba(255,255,255,.78));
+  font-weight: 650;
+}
+html.theme-dark .team-btn[data-team]:not([data-team="all"]),
+html:not(.theme-light):not(.theme-dark) .team-btn[data-team]:not([data-team="all"]) {
+  color: color-mix(in srgb, var(--team-accent, #6aaff5) 80%, #ffffff);
+  border-color: color-mix(in srgb, var(--team-accent, #6aaff5) 55%, rgba(255,255,255,.18));
+  background: color-mix(in srgb, var(--team-accent, #6aaff5) 16%, rgba(34,34,41,.78));
+}
+
+/* The light-mode asymmetric highlight looked like a white patch on the left in
+   dark mode. Use a restrained, even top sheen across the whole material. */
+html.theme-dark .bottom-nav::before,
+html:not(.theme-light):not(.theme-dark) .bottom-nav::before {
+  background: linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.015) 46%, transparent 78%) !important;
+}
+html.theme-dark .bottom-nav-indicator,
+html:not(.theme-light):not(.theme-dark) .bottom-nav-indicator {
+  background: linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.065)) !important;
+}
+html.theme-dark .bottom-nav-item svg,
+html:not(.theme-light):not(.theme-dark) .bottom-nav-item svg {
+  filter: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .inline-detail-shell,
+  .inline-detail-content { transition: none !important; }
+}
+
 </style>
             <link rel="apple-touch-icon" href="assets/icon/trip_icon.png">
   <link rel="icon" type="image/png" href="assets/icon/trip_icon.png">
-  <link rel="manifest" href="manifest.json?v=7.0.4">
+  <link rel="manifest" href="manifest.json?v=7.0.5">
   <meta name="apple-mobile-web-app-title" content="關嘉露西生日之旅">
-  <link rel="stylesheet" href="assets/css/expenses.css?v=7.0.4">
+  <link rel="stylesheet" href="assets/css/expenses.css?v=7.0.5">
 </head>
 <body>
 <div class="bg-fixed"></div>
@@ -1608,7 +1672,7 @@ html:not(.theme-light):not(.theme-dark) .day-tab.city-both.active {
   <div id="expenses-root"></div>
 </div>
 <div class="footer-note" id="footer-note"></div>
-<div class="app-version-note" id="app-version-note">v7.0.4</div>
+<div class="app-version-note" id="app-version-note">v7.0.5</div>
 
 
   </div>
@@ -1880,6 +1944,44 @@ function openSavedItemModal(item){
   openSavedItemSheet();
 }
 
+function animateItineraryDetail(item,open){
+  const shell=item.querySelector(".inline-detail-shell");
+  const content=item.querySelector(".inline-detail-content");
+  const summary=item.querySelector(".itinerary-summary");
+  if(!shell||!content)return Promise.resolve();
+
+  if(item._detailAnimation){
+    try{item._detailAnimation.cancel();}catch(e){}
+    item._detailAnimation=null;
+  }
+
+  const from=Math.max(0,shell.getBoundingClientRect().height);
+  if(open)item.classList.add("expanded");
+  const target=open?Math.max(content.scrollHeight,content.getBoundingClientRect().height):0;
+  if(!open)item.classList.remove("expanded");
+  summary?.setAttribute("aria-expanded",open?"true":"false");
+  item.classList.add("is-detail-animating");
+  shell.style.height=`${from}px`;
+
+  if(window.matchMedia?.("(prefers-reduced-motion: reduce)").matches){
+    shell.style.height=open?"auto":"0px";
+    item.classList.remove("is-detail-animating");
+    return Promise.resolve();
+  }
+
+  const animation=shell.animate(
+    [{height:`${from}px`},{height:`${target}px`}],
+    {duration:open?360:300,easing:"cubic-bezier(.32,.72,0,1)",fill:"forwards"}
+  );
+  item._detailAnimation=animation;
+  return animation.finished.catch(()=>{}).then(()=>{
+    if(item._detailAnimation!==animation)return;
+    item._detailAnimation=null;
+    shell.style.height=open?"auto":"0px";
+    item.classList.remove("is-detail-animating");
+  });
+}
+
 function setupClicks(){
   document.querySelectorAll(".itinerary-item.clickable").forEach(item=>{
     const summary=item.querySelector(".itinerary-summary");
@@ -1887,10 +1989,21 @@ function setupClicks(){
     summary.dataset.bound="true";
     summary.setAttribute("role","button");summary.setAttribute("tabindex","0");summary.setAttribute("aria-expanded","false");
     const toggle=()=>{
+      if(item.classList.contains("is-detail-animating"))return;
       const willOpen=!item.classList.contains("expanded");
-      document.querySelectorAll(".itinerary-item.expanded").forEach(other=>{if(other!==item){other.classList.remove("expanded");other.querySelector(".itinerary-summary")?.setAttribute("aria-expanded","false");}});
-      item.classList.toggle("expanded",willOpen);summary.setAttribute("aria-expanded",willOpen?"true":"false");
-      if(willOpen)setTimeout(()=>item.scrollIntoView({behavior:"smooth",block:"nearest"}),220);
+      const oldItems=[...document.querySelectorAll(".itinerary-item.expanded")].filter(other=>other!==item);
+      oldItems.forEach(other=>animateItineraryDetail(other,false));
+      animateItineraryDetail(item,willOpen).then(()=>{
+        if(!willOpen)return;
+        const shell=item.querySelector(".inline-detail-shell");
+        const viewport=document.getElementById("scroll-shell")||document.scrollingElement;
+        if(!shell||!viewport)return;
+        const rect=item.getBoundingClientRect();
+        const bottomLimit=window.innerHeight-Math.max(92,parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--bottom-nav-space"))||92);
+        if(rect.bottom>bottomLimit){
+          viewport.scrollBy({top:Math.min(rect.bottom-bottomLimit+14,180),behavior:"smooth"});
+        }
+      });
     };
     summary.addEventListener("click",toggle);
     summary.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();toggle();}});
@@ -2425,6 +2538,7 @@ function render(data){
       const ti=travellers[tk];
       const btn=document.createElement("button");
       btn.className="team-btn";btn.dataset.team=tk;btn.dataset.color=ti.color||"#888";
+      btn.style.setProperty("--team-accent",ti.color||"#888");
       btn.textContent=ti.label||tk;
       teamBar.appendChild(btn);
     });
@@ -2570,7 +2684,7 @@ let currentAppView="itinerary";
 let baseTripTitle="旅程";
 let collapseRaf=0;
 
-const APP_VERSION = "7.0.4";
+const APP_VERSION = "7.0.5";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 window.EXPENSES_MODULE_VERSION = EXPENSES_MODULE_VERSION;
