@@ -1,4 +1,4 @@
-Travel Webapp Phase 1 v7.0.6 demo
+Travel Webapp Phase 1 v7.0.7 demo
 
 This lightweight package uses demo data and placeholder assets.
 
@@ -12,3 +12,5 @@ Current Phase 1 refinements:
 7. Day 4 Kyoto and Osaka gradient border remains restored.
 
 For iOS Home Screen testing after manifest or status bar changes, remove the old icon and add the web app to the Home Screen again.
+
+Restored original itinerary glass for flight and weather cards and original flight text colours.
