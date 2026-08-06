@@ -608,7 +608,7 @@ body.expenses-view-active .container {
 
   
 
-/* Phase 1 · iOS native shell · refinement 7.0.8 */
+/* Phase 1 · iOS native shell · refinement 7.1.0 */
 :root {
   --tabbar-h: 72px;
   --compact-header-h: 58px;
@@ -1338,7 +1338,7 @@ html.theme-dark .inline-action-btn.secondary { background: rgba(255,255,255,0.08
 
   
 
-/* Phase 1 · v7.0.8 · full-bleed root canvas, fixed day grid and interactive iOS sheet */
+/* Phase 1 · v7.1.0 · full-bleed root canvas, fixed day grid and interactive iOS sheet */
 
 /* Let the root background paint the WebKit canvas itself. Do not tint the
    status-bar region with theme-color; content alone observes the safe area. */
@@ -1485,7 +1485,7 @@ html:not(.theme-light):not(.theme-dark) .sheet-grabber { background: rgba(235,23
 }
 
 
-/* Phase 1 · v7.0.8 · browser chrome, tighter large title and visual cleanup */
+/* Phase 1 · v7.1.0 · browser chrome, tighter large title and visual cleanup */
 
 /* Safari browser mode derives its top chrome tint from the root canvas on
    recent iOS releases. Keep the installed Web App full bleed, but use a
@@ -1551,7 +1551,7 @@ html:not(.theme-light):not(.theme-dark) .day-tab.city-both.active {
 }
 
 
-/* Phase 1 · v7.0.8 · harmonised disclosure, clear flight details and balanced dark glass */
+/* Phase 1 · v7.1.0 · harmonised disclosure, clear flight details and balanced dark glass */
 
 /* The disclosure returns to intrinsic grid-track expansion so its final
    height always includes the complete action row. Opening and closing use one
@@ -1640,7 +1640,7 @@ html:not(.theme-light):not(.theme-dark) .bottom-nav-item svg {
 
 
 
-/* Phase 1 · v7.0.8 · restore original itinerary glass and original flight palette */
+/* Phase 1 · v7.1.0 · restore original itinerary glass and original flight palette */
 
 /* Flight and weather are part of the itinerary overview. Their outer surface
    deliberately matches the untouched itinerary cards from the original app. */
@@ -1701,12 +1701,93 @@ html:not(.theme-light):not(.theme-dark) #flight-card .trip-col-sub {
   font-weight: 400 !important;
 }
 
+
+
+/* Expense UI Phase 1 · global iOS large-title actions */
+.expense-header-actions {
+  display: none;
+  align-items: center;
+  gap: 9px;
+}
+.expense-header-action {
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.54);
+  background: rgba(255,255,255,0.52);
+  color: #007aff;
+  box-shadow: 0 6px 16px rgba(15,23,42,0.08), inset 0 1px 0 rgba(255,255,255,0.22);
+  backdrop-filter: blur(22px) saturate(1.25);
+  -webkit-backdrop-filter: blur(22px) saturate(1.25);
+}
+.expense-header-action svg {
+  width: 19px;
+  height: 19px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+body.expenses-view-active .expense-header-actions { display: flex; }
+body.expenses-view-active #today-chip,
+body.expenses-view-active .font-controls { display: none !important; }
+body.expenses-view-active .header-sub-row { margin-top: 4px; }
+body.expenses-view-active #status-square { display: none !important; }
+html.theme-dark .expense-header-action {
+  background: rgba(44,44,52,0.72);
+  border-color: rgba(255,255,255,0.10);
+  color: #64a8ff;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.05);
+}
+
+
+.ios-compact-header-inner { position: relative; }
+.expense-compact-actions {
+  position: absolute;
+  right: 10px;
+  bottom: 8px;
+  display: none;
+  align-items: center;
+  gap: 4px;
+}
+body.expenses-view-active .expense-compact-actions { display: flex; }
+body.expenses-view-active .ios-compact-copy {
+  max-width: calc(100% - 126px);
+}
+.expense-compact-action {
+  width: 30px;
+  height: 30px;
+  min-width: 30px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: #007aff;
+  box-shadow: none;
+}
+.expense-compact-action svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+html.theme-dark .expense-compact-action { color: #64a8ff; }
 </style>
             <link rel="apple-touch-icon" href="assets/icon/trip_icon.png">
   <link rel="icon" type="image/png" href="assets/icon/trip_icon.png">
-  <link rel="manifest" href="manifest.json?v=7.0.8">
+  <link rel="manifest" href="manifest.json?v=7.1.0">
   <meta name="apple-mobile-web-app-title" content="關嘉露西生日之旅">
-  <link rel="stylesheet" href="assets/css/expenses.css?v=7.0.8">
+  <link rel="stylesheet" href="assets/css/expenses.css?v=7.1.0">
 </head>
 <body>
 <div class="bg-fixed"></div>
@@ -1717,6 +1798,10 @@ html:not(.theme-light):not(.theme-dark) #flight-card .trip-col-sub {
       <div class="ios-compact-title" id="ios-compact-title">旅程</div>
     </div>
     <div class="ios-compact-context" id="ios-compact-context"></div>
+    <div class="expense-compact-actions" id="expense-compact-actions" aria-label="支出操作">
+      <button class="expense-compact-action" id="expense-compact-add" type="button" aria-label="新增支出"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
+      <button class="expense-compact-action" id="expense-compact-settings" type="button" aria-label="支出設定"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.34 1.87l.06.06-2.12 2.12-.06-.06a1.7 1.7 0 00-1.87-.34 1.7 1.7 0 00-1.03 1.55V20.3h-3v-.09a1.7 1.7 0 00-1.03-1.55 1.7 1.7 0 00-1.87.34l-.06.06-2.12-2.12.06-.06A1.7 1.7 0 007.05 15a1.7 1.7 0 00-1.55-1.03H5.4v-3h.09A1.7 1.7 0 007.05 9a1.7 1.7 0 00-.34-1.87l-.06-.06 2.12-2.12.06.06a1.7 1.7 0 001.87.34A1.7 1.7 0 0011.73 3.8V3.7h3v.09a1.7 1.7 0 001.03 1.55 1.7 1.7 0 001.87-.34l.06-.06 2.12 2.12-.06.06A1.7 1.7 0 0019.4 9a1.7 1.7 0 001.55 1.03h.09v3h-.09A1.7 1.7 0 0019.4 15z"/></svg></button>
+    </div>
   </div>
 </header>
 <div class="scroll-shell" id="scroll-shell">
@@ -1729,6 +1814,10 @@ html:not(.theme-light):not(.theme-dark) #flight-card .trip-col-sub {
           <div class="header-title-main" id="header-title-main">行程</div>
         </div>
         <div class="header-right">
+          <div class="expense-header-actions" id="expense-header-actions" aria-label="支出操作">
+            <button class="expense-header-action" id="expense-header-add" type="button" aria-label="新增支出"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
+            <button class="expense-header-action" id="expense-header-settings" type="button" aria-label="支出設定"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.34 1.87l.06.06-2.12 2.12-.06-.06a1.7 1.7 0 00-1.87-.34 1.7 1.7 0 00-1.03 1.55V20.3h-3v-.09a1.7 1.7 0 00-1.03-1.55 1.7 1.7 0 00-1.87.34l-.06.06-2.12-2.12.06-.06A1.7 1.7 0 007.05 15a1.7 1.7 0 00-1.55-1.03H5.4v-3h.09A1.7 1.7 0 007.05 9a1.7 1.7 0 00-.34-1.87l-.06-.06 2.12-2.12.06.06a1.7 1.7 0 001.87.34A1.7 1.7 0 0011.73 3.8V3.7h3v.09a1.7 1.7 0 001.03 1.55 1.7 1.7 0 001.87-.34l.06-.06 2.12 2.12-.06.06A1.7 1.7 0 0019.4 9a1.7 1.7 0 001.55 1.03h.09v3h-.09A1.7 1.7 0 0019.4 15z"/></svg></button>
+          </div>
           <div id="today-chip" class="today-chip">載入行程中…</div>
           <div class="font-controls">
             <button class="font-btn" id="font-smaller">A−</button>
@@ -1789,7 +1878,7 @@ html:not(.theme-light):not(.theme-dark) #flight-card .trip-col-sub {
   <div id="expenses-root"></div>
 </div>
 <div class="footer-note" id="footer-note"></div>
-<div class="app-version-note" id="app-version-note">v7.0.8</div>
+<div class="app-version-note" id="app-version-note">v7.1.0</div>
 
 
   </div>
@@ -2829,6 +2918,13 @@ const compactKicker=document.getElementById("ios-compact-kicker");
 const compactTitle=document.getElementById("ios-compact-title");
 const compactContext=document.getElementById("ios-compact-context");
 const bottomNav=document.getElementById("bottom-nav");
+const headerTitleSmallEl=document.getElementById("header-title-small");
+const headerTitleMainEl=document.getElementById("header-title-main");
+const headerSubEl=document.getElementById("header-sub");
+const expenseHeaderAdd=document.getElementById("expense-header-add");
+const expenseHeaderSettings=document.getElementById("expense-header-settings");
+const expenseCompactAdd=document.getElementById("expense-compact-add");
+const expenseCompactSettings=document.getElementById("expense-compact-settings");
 const viewElements={itinerary:ivw,snacks:svw,info:infvw,expenses:expvw};
 const viewButtons={itinerary:bti,snacks:bts,info:btinfo,expenses:btexp};
 const viewLabels={itinerary:"行程",snacks:"收藏",expenses:"支出",info:"旅程資料"};
@@ -2837,7 +2933,7 @@ let currentAppView="itinerary";
 let baseTripTitle="旅程";
 let collapseRaf=0;
 
-const APP_VERSION = "7.0.8";
+const APP_VERSION = "7.1.0";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 window.EXPENSES_MODULE_VERSION = EXPENSES_MODULE_VERSION;
@@ -2912,6 +3008,23 @@ function getActiveDayContext(){
     title:day.label||`Day ${idx+1}`,
     context:[day.date,day.title].filter(Boolean).join(" · ")
   };
+}
+
+
+function updateLargeHeaderForView(){
+  const meta=window.tripData?.meta||{};
+  if(currentAppView==="expenses"){
+    if(headerTitleSmallEl) headerTitleSmallEl.textContent=baseTripTitle||meta.titleSmall||"旅程";
+    if(headerTitleMainEl) headerTitleMainEl.textContent="支出";
+    if(headerSubEl) headerSubEl.textContent="共同支出、分帳與結算";
+    return;
+  }
+  if(headerTitleSmallEl) headerTitleSmallEl.textContent=meta.titleSmall||"My Trip";
+  if(headerTitleMainEl) headerTitleMainEl.innerHTML=meta.titleMain||baseTripTitle||"行程";
+  if(headerSubEl){
+    const subLines=[meta.dateRange,meta.route].filter(Boolean);
+    headerSubEl.innerHTML=subLines.join("<br/>");
+  }
 }
 
 function updateCompactHeader(){
@@ -3004,6 +3117,7 @@ function setView(v,{restoreScroll=true}={}){
   document.body.classList.toggle("expenses-view-active",v==="expenses");
   if(v==="expenses") initExpensesViewSafe();
 
+  updateLargeHeaderForView();
   updateCompactHeader();
   animateView(viewElements[v]);
   requestAnimationFrame(()=>{
@@ -3021,6 +3135,15 @@ bti.addEventListener("click",()=>setView("itinerary"));
 bts.addEventListener("click",()=>setView("snacks"));
 btinfo.addEventListener("click",()=>setView("info"));
 btexp.addEventListener("click",()=>setView("expenses"));
+function dispatchExpenseUiAction(action){
+  initExpensesViewSafe();
+  window.__pendingExpenseUiAction=action;
+  window.dispatchEvent(new CustomEvent("expense-ui-action",{detail:{action}}));
+}
+expenseHeaderAdd?.addEventListener("click",()=>dispatchExpenseUiAction("add"));
+expenseHeaderSettings?.addEventListener("click",()=>dispatchExpenseUiAction("settings"));
+expenseCompactAdd?.addEventListener("click",()=>dispatchExpenseUiAction("add"));
+expenseCompactSettings?.addEventListener("click",()=>dispatchExpenseUiAction("settings"));
 scrollShell?.addEventListener("scroll",scheduleCollapseUpdate,{passive:true});
 window.addEventListener("resize",()=>{updateBottomNavIndicator();scheduleCollapseUpdate();},{passive:true});
 window.addEventListener("orientationchange",()=>setTimeout(()=>{updateBottomNavIndicator();scheduleCollapseUpdate();},220),{passive:true});
@@ -3037,7 +3160,7 @@ if(window.visualViewport&&bottomNav){
 // Android / Chrome PWA support. Network-only service worker, no aggressive cache.
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("./sw.js?v=1.5.6").catch(() => {});
+    navigator.serviceWorker.register("./sw.js?v=1.6.0").catch(() => {});
   });
 }
 

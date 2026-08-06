@@ -1,19 +1,16 @@
-Travel Webapp Phase 1 v7.0.8 demo
+Travel Webapp Expense UI Phase 1 v7.1.0 demo
 
 This lightweight package uses demo data and placeholder assets.
 
-Current Phase 1 refinements:
-1. Full bleed standalone PWA canvas with safe area foreground spacing.
-2. Six day fixed grid selector and interactive saved item sheet.
-3. Itinerary details use intrinsic grid expansion again, so the complete Google Maps action remains visible.
-4. Opening and closing share one coordinated spring curve, with scrolling deferred until the expansion finishes.
-5. Flight direction, CX flight number, route and time use stronger primary text contrast.
-6. Team filter accents and the balanced dark bottom navigation remain preserved.
-7. Day 4 Kyoto and Osaka gradient border remains restored.
+Expense UI Phase 1 changes
 
-For iOS Home Screen testing after manifest or status bar changes, remove the old icon and add the web app to the Home Screen again.
-
-Restored original itinerary glass for flight and weather cards and original flight text colours.
-
-
-v7.0.8: Restored page indicator dots below inline itinerary galleries. Dots appear only when more than one image exists and follow swipe position.
+1. Expenses large title now uses dedicated Add and Settings actions.
+2. Compact navigation also keeps Add and Settings available after scrolling.
+3. Internal navigation is a four item iOS segmented control: Overview, Details, Settlement and Analytics.
+4. Expense settings use grouped navigation rows rather than one dashboard style popup.
+5. Full add, OCR, expense detail, settlement, account, backup, lock and about use interactive bottom sheets.
+6. Sheets support drag down dismissal, velocity dismissal, backdrop fade and spring return.
+7. Members, rates, access, deleted items and activity logs use full page push navigation.
+8. Light and dark materials, inputs, separators and modal sizing share one presentation system.
+9. Existing Firebase, calculation, split, settlement, OCR, Excel, JSON, audit log and permission logic is retained.
+10. Itinerary Phase 1 features from v7.0.8 remain unchanged.

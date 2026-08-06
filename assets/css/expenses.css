@@ -3886,3 +3886,578 @@ html:not(.theme-light):not(.theme-dark) .expenses-module .modal-title-icon {
   background: rgba(255,255,255,0.10);
   box-shadow: inset 0 0 0 1px rgba(255,255,255,0.10);
 }
+
+
+/* ==========================================================================\n   Expense UI Phase 1 · iOS presentation layer · v7.1.0\n   Business logic and Firebase structures remain untouched.\n   ========================================================================== */
+.expenses-module {
+  --expense-canvas: rgba(242,242,247,0.72);
+  --expense-group-surface: rgba(255,255,255,0.72);
+  --expense-elevated-surface: rgba(255,255,255,0.94);
+  --expense-segment-surface: rgba(118,118,128,0.16);
+  --expense-segment-active: rgba(255,255,255,0.96);
+  --expense-nav-blue: #007aff;
+  --expense-separator-native: rgba(60,60,67,0.18);
+  --expense-sheet-shadow: 0 -16px 48px rgba(0,0,0,0.18);
+  --expense-spring: cubic-bezier(.22,.86,.28,1);
+}
+
+.expenses-module .expenses-app {
+  max-width: 620px !important;
+  padding: 0 0 calc(124px + env(safe-area-inset-bottom, 0px)) !important;
+}
+
+/* Native four-way segmented control */
+.expenses-module .expenses-inner-tabs {
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 2px !important;
+  width: 100% !important;
+  margin: 10px 0 12px !important;
+  padding: 2px !important;
+  border-radius: 10px !important;
+  background: var(--expense-segment-surface) !important;
+  border: 0 !important;
+  box-shadow: inset 0 0 0 0.5px rgba(60,60,67,0.08) !important;
+  overflow: hidden !important;
+}
+.expenses-module .expenses-inner-tab {
+  width: 100% !important;
+  height: 30px !important;
+  min-height: 30px !important;
+  padding: 0 4px !important;
+  border: 0 !important;
+  border-radius: 8px !important;
+  background: transparent !important;
+  color: var(--expense-text) !important;
+  font-size: calc(12px * var(--font-scale)) !important;
+  font-weight: 600 !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+.expenses-module .expenses-inner-tab.active {
+  background: var(--expense-segment-active) !important;
+  color: var(--expense-text) !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.18), 0 0 0 0.5px rgba(60,60,67,0.12) !important;
+  font-weight: 650 !important;
+}
+
+/* Align expense surfaces with the itinerary card material. */
+.expenses-module .card,
+.expenses-module .expense-snapshot-card {
+  background: rgba(255,255,255,0.30) !important;
+  border: 1px solid rgba(255,255,255,0.60) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 10px 24px rgba(15,23,42,0.10), inset 0 1px 0 rgba(255,255,255,0.18) !important;
+  backdrop-filter: blur(28px) saturate(1.12) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(1.12) !important;
+}
+.expenses-module .expense-snapshot-card {
+  padding: 13px 14px !important;
+  margin-bottom: 10px !important;
+}
+.expenses-module .snapshot-hero-amount,
+.expenses-module .expense-row-side strong,
+.expenses-module .analytics-total-card strong {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.025em;
+}
+
+/* Grouped, compact forms closer to iOS Settings and Wallet. */
+.expenses-module input,
+.expenses-module select,
+.expenses-module textarea {
+  background: rgba(255,255,255,0.74) !important;
+  border-color: rgba(60,60,67,0.16) !important;
+  border-radius: 12px !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.42) !important;
+}
+.expenses-module button:active {
+  transform: scale(0.985) !important;
+  opacity: 0.82;
+}
+.expenses-module .quick-add-main-btn,
+.expenses-module #submitBtn,
+.expenses-module #ocrScanBtn,
+.expenses-module #confirmAiFillBtn {
+  border-radius: 13px !important;
+  min-height: 46px !important;
+}
+
+/* iOS grouped settings list */
+.expenses-module .expense-settings-scroll {
+  padding: 18px 16px calc(42px + env(safe-area-inset-bottom, 0px)) !important;
+  background: rgba(242,242,247,0.94);
+}
+.expenses-module .expense-settings-group {
+  margin: 0 0 22px;
+}
+.expenses-module .expense-settings-group-title {
+  margin: 0 12px 7px;
+  color: var(--expense-muted);
+  font-size: calc(12px * var(--font-scale));
+  line-height: 1.25;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.expenses-module .settings-menu-grid {
+  display: grid !important;
+  gap: 0 !important;
+  overflow: hidden;
+  border-radius: 16px;
+  border: 0.5px solid var(--expense-separator-native);
+  background: rgba(255,255,255,0.90);
+  box-shadow: none !important;
+}
+.expenses-module .settings-menu-btn {
+  position: relative;
+  width: 100% !important;
+  min-height: 58px !important;
+  display: grid !important;
+  grid-template-columns: 32px minmax(0,1fr) 12px !important;
+  grid-template-rows: auto auto !important;
+  column-gap: 11px !important;
+  align-items: center !important;
+  padding: 8px 14px 8px 12px !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  color: var(--expense-text) !important;
+  box-shadow: none !important;
+  text-align: left !important;
+}
+.expenses-module .settings-menu-btn:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  left: 55px;
+  right: 0;
+  bottom: 0;
+  height: 0.5px;
+  background: var(--expense-separator-native);
+}
+.expenses-module .settings-menu-btn > span {
+  grid-row: 1 / span 2 !important;
+  width: 29px;
+  height: 29px;
+  border-radius: 7px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  font-size: 0 !important;
+  color: #fff;
+}
+.expenses-module .settings-menu-btn > span::before {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+  font-size: 15px;
+  font-weight: 800;
+  line-height: 1;
+}
+.expenses-module .setting-icon-account > span { background: #8e8e93; }
+.expenses-module .setting-icon-account > span::before { content: "●"; }
+.expenses-module .setting-icon-members > span { background: #5ac8fa; }
+.expenses-module .setting-icon-members > span::before { content: "●●"; font-size: 9px; letter-spacing: -3px; }
+.expenses-module .setting-icon-rates > span { background: #34c759; }
+.expenses-module .setting-icon-rates > span::before { content: "↔"; }
+.expenses-module .setting-icon-access > span { background: #5856d6; }
+.expenses-module .setting-icon-access > span::before { content: "◆"; font-size: 12px; }
+.expenses-module .setting-icon-lock > span { background: #ff9500; }
+.expenses-module .setting-icon-lock > span::before { content: "▣"; font-size: 13px; }
+.expenses-module .setting-icon-backup > span { background: #007aff; }
+.expenses-module .setting-icon-backup > span::before { content: "↑"; }
+.expenses-module .setting-icon-deleted > span { background: #ff3b30; }
+.expenses-module .setting-icon-deleted > span::before { content: "×"; font-size: 19px; }
+.expenses-module .setting-icon-logs > span { background: #af52de; }
+.expenses-module .setting-icon-logs > span::before { content: "↻"; }
+.expenses-module .setting-icon-about > span { background: #8e8e93; }
+.expenses-module .setting-icon-about > span::before { content: "i"; font-family: Georgia, serif; }
+.expenses-module .settings-menu-btn > strong {
+  grid-column: 2 !important;
+  align-self: end;
+  font-size: calc(14px * var(--font-scale)) !important;
+  line-height: 1.2 !important;
+  font-weight: 500 !important;
+}
+.expenses-module .settings-menu-btn > small {
+  grid-column: 2 !important;
+  align-self: start;
+  margin-top: 2px !important;
+  color: var(--expense-muted) !important;
+  font-size: calc(11px * var(--font-scale)) !important;
+  line-height: 1.2 !important;
+}
+.expenses-module .settings-menu-btn > i {
+  grid-column: 3;
+  grid-row: 1 / span 2;
+  width: 8px;
+  height: 8px;
+  border-top: 1.6px solid rgba(60,60,67,0.38);
+  border-right: 1.6px solid rgba(60,60,67,0.38);
+  transform: rotate(45deg);
+  justify-self: end;
+}
+
+/* Shared modal backdrop and animation state */
+html.expenses-modal-open,
+body.expenses-modal-open {
+  overscroll-behavior: none !important;
+}
+.expenses-module .modal {
+  --expense-sheet-y: 0px;
+  --expense-backdrop-progress: 1;
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 9999 !important;
+  display: flex !important;
+  width: 100% !important;
+  height: 100dvh !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  background: rgba(0,0,0,calc(0.34 * var(--expense-backdrop-progress))) !important;
+  opacity: 0;
+  pointer-events: none;
+  overflow: hidden !important;
+  transition: opacity 0.24s ease, background-color 0.24s ease !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+.expenses-module .modal.hidden {
+  display: none !important;
+}
+.expenses-module .modal.is-open,
+.expenses-module .modal.is-closing {
+  pointer-events: auto;
+}
+.expenses-module .modal.is-open {
+  opacity: 1;
+}
+.expenses-module .modal.is-closing {
+  opacity: 0;
+}
+
+/* Bottom sheets */
+.expenses-module .expense-presentation-sheet {
+  align-items: flex-end !important;
+  justify-content: center !important;
+}
+.expenses-module .expense-presentation-sheet > .modal-card {
+  width: min(100%, 640px) !important;
+  max-width: 640px !important;
+  min-height: 0 !important;
+  max-height: min(82dvh, 760px) !important;
+  margin: 0 auto !important;
+  padding: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0 !important;
+  overflow: hidden !important;
+  color: var(--expense-text) !important;
+  background: rgba(248,248,250,0.96) !important;
+  border: 0.5px solid rgba(255,255,255,0.62) !important;
+  border-bottom: 0 !important;
+  border-radius: 24px 24px 0 0 !important;
+  box-shadow: var(--expense-sheet-shadow) !important;
+  transform: translate3d(0,calc(100% + 32px),0) !important;
+  transition: transform 0.42s var(--expense-spring) !important;
+  will-change: transform;
+  backdrop-filter: blur(36px) saturate(1.35) !important;
+  -webkit-backdrop-filter: blur(36px) saturate(1.35) !important;
+}
+.expenses-module .expense-presentation-sheet[data-sheet-size="large"] > .modal-card {
+  max-height: calc(100dvh - max(10px, env(safe-area-inset-top, 0px))) !important;
+}
+.expenses-module .expense-presentation-sheet.is-open > .modal-card {
+  transform: translate3d(0,var(--expense-sheet-y),0) !important;
+}
+.expenses-module .expense-presentation-sheet.is-closing > .modal-card {
+  transform: translate3d(0,calc(100% + 32px),0) !important;
+}
+.expenses-module .expense-presentation-sheet.is-dragging > .modal-card {
+  transition: none !important;
+}
+.expenses-module .expense-sheet-grabber-zone {
+  flex: 0 0 18px;
+  height: 18px;
+  display: grid;
+  place-items: center;
+  touch-action: none;
+  cursor: grab;
+}
+.expenses-module .expense-sheet-grabber {
+  width: 36px;
+  height: 5px;
+  border-radius: 999px;
+  background: rgba(60,60,67,0.28);
+}
+.expenses-module .expense-presentation-sheet .modal-heading-row {
+  position: relative !important;
+  flex: 0 0 auto;
+  min-height: 48px;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin: 0 !important;
+  padding: 0 52px 8px !important;
+  border-bottom: 0.5px solid var(--expense-separator-native);
+}
+.expenses-module .expense-presentation-sheet .modal-heading-row h3 {
+  margin: 0 !important;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: center;
+  font-size: calc(15px * var(--font-scale)) !important;
+  font-weight: 650 !important;
+}
+.expenses-module .modal-title-icon {
+  display: none !important;
+}
+.expenses-module .expense-sheet-close {
+  position: absolute;
+  right: 12px;
+  top: 4px;
+  width: 32px !important;
+  height: 32px !important;
+  min-width: 32px !important;
+  min-height: 32px !important;
+  padding: 0 !important;
+  display: grid !important;
+  place-items: center;
+  border-radius: 999px !important;
+  background: rgba(118,118,128,0.14) !important;
+  color: var(--expense-text) !important;
+  border: 0 !important;
+}
+.expenses-module .expense-sheet-close svg {
+  width: 13px;
+  height: 13px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+}
+.expenses-module .expense-presentation-sheet .modal-body-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto !important;
+  overscroll-behavior: contain;
+  padding: 14px 16px 18px !important;
+  -webkit-overflow-scrolling: touch;
+}
+.expenses-module .expense-presentation-sheet .modal-form {
+  min-height: 0;
+  display: flex !important;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 0 !important;
+  overflow: hidden;
+}
+.expenses-module .expense-presentation-sheet .modal-footer-actions,
+.expenses-module .expense-presentation-sheet .sticky-modal-actions {
+  position: static !important;
+  flex: 0 0 auto;
+  display: grid !important;
+  gap: 8px !important;
+  margin: 0 !important;
+  padding: 10px 16px calc(10px + env(safe-area-inset-bottom, 0px)) !important;
+  border-top: 0.5px solid var(--expense-separator-native) !important;
+  background: rgba(248,248,250,0.90) !important;
+  box-shadow: none !important;
+  backdrop-filter: blur(22px) saturate(1.2) !important;
+  -webkit-backdrop-filter: blur(22px) saturate(1.2) !important;
+}
+.expenses-module .expense-presentation-sheet .modal-footer-actions:has(> .modal-close-btn:only-child),
+.expenses-module .expense-presentation-sheet .modal-footer-actions:empty {
+  display: none !important;
+}
+.expenses-module .expense-presentation-sheet .modal-footer-actions > .modal-close-btn {
+  display: none !important;
+}
+
+/* Full-page push navigation for management screens */
+.expenses-module .expense-presentation-push {
+  align-items: stretch !important;
+  justify-content: stretch !important;
+  background: rgba(242,242,247,1) !important;
+}
+.expenses-module .expense-presentation-push > .modal-card {
+  width: 100% !important;
+  max-width: none !important;
+  height: 100dvh !important;
+  max-height: 100dvh !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0 !important;
+  overflow: hidden !important;
+  color: var(--expense-text) !important;
+  background: rgba(242,242,247,0.98) !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  transform: translate3d(100%,0,0) !important;
+  transition: transform 0.36s var(--expense-spring) !important;
+  will-change: transform;
+}
+.expenses-module .expense-presentation-push.is-open > .modal-card {
+  transform: translate3d(0,0,0) !important;
+}
+.expenses-module .expense-presentation-push.is-closing > .modal-card {
+  transform: translate3d(100%,0,0) !important;
+}
+.expenses-module .expense-presentation-push .modal-heading-row {
+  position: relative !important;
+  flex: 0 0 auto;
+  min-height: calc(44px + env(safe-area-inset-top, 0px));
+  display: flex !important;
+  align-items: flex-end !important;
+  justify-content: center !important;
+  margin: 0 !important;
+  padding: env(safe-area-inset-top, 0px) 70px 11px !important;
+  border-bottom: 0.5px solid var(--expense-separator-native);
+  background: rgba(249,249,251,0.86);
+  backdrop-filter: blur(26px) saturate(1.4);
+  -webkit-backdrop-filter: blur(26px) saturate(1.4);
+}
+.expenses-module .expense-presentation-push .modal-heading-row h3 {
+  margin: 0 !important;
+  text-align: center;
+  font-size: calc(17px * var(--font-scale)) !important;
+  font-weight: 650 !important;
+  line-height: 1.25;
+}
+.expenses-module .expense-nav-back {
+  position: absolute;
+  left: 8px;
+  bottom: 4px;
+  width: auto !important;
+  min-width: 0 !important;
+  min-height: 36px !important;
+  display: inline-flex !important;
+  align-items: center;
+  gap: 1px;
+  padding: 0 8px 0 3px !important;
+  border: 0 !important;
+  background: transparent !important;
+  color: var(--expense-nav-blue) !important;
+  font-size: calc(16px * var(--font-scale)) !important;
+  font-weight: 400 !important;
+}
+.expenses-module .expense-nav-back svg {
+  width: 10px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.expenses-module .expense-presentation-push .modal-body-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto !important;
+  padding: 18px 16px calc(36px + env(safe-area-inset-bottom, 0px)) !important;
+  -webkit-overflow-scrolling: touch;
+}
+.expenses-module .expense-presentation-push .modal-footer-actions {
+  display: none !important;
+}
+
+/* Dark mode is an intentional material system rather than a black overlay. */
+html.theme-dark .expenses-module,
+html:not(.theme-light):not(.theme-dark) .expenses-module {
+  --expense-canvas: rgba(0,0,0,0.80);
+  --expense-group-surface: rgba(28,28,30,0.92);
+  --expense-elevated-surface: rgba(36,36,38,0.96);
+  --expense-segment-surface: rgba(118,118,128,0.24);
+  --expense-segment-active: rgba(99,99,102,0.78);
+  --expense-separator-native: rgba(84,84,88,0.65);
+  --expense-sheet-shadow: 0 -18px 56px rgba(0,0,0,0.56);
+}
+html.theme-dark .expenses-module .card,
+html.theme-dark .expenses-module .expense-snapshot-card,
+html:not(.theme-light):not(.theme-dark) .expenses-module .card,
+html:not(.theme-light):not(.theme-dark) .expenses-module .expense-snapshot-card {
+  background: rgba(24,24,30,0.62) !important;
+  border-color: rgba(255,255,255,0.09) !important;
+  box-shadow: 0 10px 28px rgba(0,0,0,0.40), inset 0 1px 0 rgba(255,255,255,0.06) !important;
+}
+html.theme-dark .expenses-module input,
+html.theme-dark .expenses-module select,
+html.theme-dark .expenses-module textarea,
+html:not(.theme-light):not(.theme-dark) .expenses-module input,
+html:not(.theme-light):not(.theme-dark) .expenses-module select,
+html:not(.theme-light):not(.theme-dark) .expenses-module textarea {
+  background: rgba(44,44,48,0.92) !important;
+  border-color: rgba(84,84,88,0.72) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.05) !important;
+}
+html.theme-dark .expenses-module .expense-settings-scroll,
+html.theme-dark .expenses-module .expense-presentation-push,
+html.theme-dark .expenses-module .expense-presentation-push > .modal-card,
+html:not(.theme-light):not(.theme-dark) .expenses-module .expense-settings-scroll,
+html:not(.theme-light):not(.theme-dark) .expenses-module .expense-presentation-push,
+html:not(.theme-light):not(.theme-dark) .expenses-module .expense-presentation-push > .modal-card {
+  background: rgba(0,0,0,0.98) !important;
+}
+html.theme-dark .expenses-module .settings-menu-grid,
+html:not(.theme-light):not(.theme-dark) .expenses-module .settings-menu-grid {
+  background: rgba(28,28,30,0.96) !important;
+}
+html.theme-dark .expenses-module .expense-presentation-sheet > .modal-card,
+html:not(.theme-light):not(.theme-dark) .expenses-module .expense-presentation-sheet > .modal-card {
+  background: rgba(28,28,30,0.97) !important;
+  border-color: rgba(255,255,255,0.08) !important;
+}
+html.theme-dark .expenses-module .expense-presentation-sheet .modal-footer-actions,
+html.theme-dark .expenses-module .expense-presentation-sheet .sticky-modal-actions,
+html:not(.theme-light):not(.theme-dark) .expenses-module .expense-presentation-sheet .modal-footer-actions,
+html:not(.theme-light):not(.theme-dark) .expenses-module .expense-presentation-sheet .sticky-modal-actions {
+  background: rgba(28,28,30,0.91) !important;
+}
+html.theme-dark .expenses-module .expense-presentation-push .modal-heading-row,
+html:not(.theme-light):not(.theme-dark) .expenses-module .expense-presentation-push .modal-heading-row {
+  background: rgba(20,20,22,0.86) !important;
+}
+html.theme-dark .expenses-module .expense-sheet-grabber,
+html:not(.theme-light):not(.theme-dark) .expenses-module .expense-sheet-grabber {
+  background: rgba(235,235,245,0.28);
+}
+
+@media (min-width: 700px) {
+  .expenses-module .expense-presentation-push > .modal-card {
+    width: min(100%, 680px) !important;
+    margin: 0 auto !important;
+    box-shadow: 0 0 60px rgba(0,0,0,0.16) !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .expenses-module .modal,
+  .expenses-module .modal-card {
+    transition-duration: 0.01ms !important;
+  }
+}
+
+
+/* Expense UI Phase 1 touch arbitration */
+html.expenses-modal-open,
+body.expenses-modal-open {
+  touch-action: auto !important;
+}
+.expenses-module .expense-presentation-sheet > .modal-card,
+.expenses-module .expense-presentation-push > .modal-card {
+  touch-action: pan-y;
+}
+.expenses-module .expense-sheet-grabber-zone {
+  touch-action: none !important;
+}
+
+/* Dark segmented control must stay neutral, not reuse the trip accent. */
+html.theme-dark .expenses-module .expenses-inner-tab.active,
+html:not(.theme-light):not(.theme-dark) .expenses-module .expenses-inner-tab.active {
+  background: rgba(99,99,102,0.78) !important;
+  border-color: transparent !important;
+  color: #fff !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.42), 0 0 0 0.5px rgba(255,255,255,0.08) !important;
+}
