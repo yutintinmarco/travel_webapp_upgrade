@@ -1777,7 +1777,19 @@ function setupExpenseInnerTabs() {
   });
 }
 
+function publishAuthState(user) {
+  const safeUser = user ? {
+    uid: user.uid || "",
+    displayName: user.displayName || "",
+    email: user.email || "",
+    photoURL: user.photoURL || ""
+  } : null;
+  window.__expenseAuthUser = safeUser;
+  window.dispatchEvent(new CustomEvent("expense-auth-state", { detail: { user: safeUser } }));
+}
+
 function setAuthUI(user) {
+  publishAuthState(user);
   if (user) {
     googleSignInBtn.classList.add("hidden");
     signOutBtn.classList.remove("hidden");

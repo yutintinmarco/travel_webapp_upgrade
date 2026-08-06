@@ -608,7 +608,7 @@ body.expenses-view-active .container {
 
   
 
-/* Phase 1 · iOS native shell · refinement 7.1.2 */
+/* Phase 1 · iOS native shell · refinement 7.1.3 */
 :root {
   --tabbar-h: 72px;
   --compact-header-h: 58px;
@@ -1338,7 +1338,7 @@ html.theme-dark .inline-action-btn.secondary { background: rgba(255,255,255,0.08
 
   
 
-/* Phase 1 · v7.1.2 · full-bleed root canvas, fixed day grid and interactive iOS sheet */
+/* Phase 1 · v7.1.3 · full-bleed root canvas, fixed day grid and interactive iOS sheet */
 
 /* Let the root background paint the WebKit canvas itself. Do not tint the
    status-bar region with theme-color; content alone observes the safe area. */
@@ -1485,7 +1485,7 @@ html:not(.theme-light):not(.theme-dark) .sheet-grabber { background: rgba(235,23
 }
 
 
-/* Phase 1 · v7.1.2 · browser chrome, tighter large title and visual cleanup */
+/* Phase 1 · v7.1.3 · browser chrome, tighter large title and visual cleanup */
 
 /* Safari browser mode derives its top chrome tint from the root canvas on
    recent iOS releases. Keep the installed Web App full bleed, but use a
@@ -1551,7 +1551,7 @@ html:not(.theme-light):not(.theme-dark) .day-tab.city-both.active {
 }
 
 
-/* Phase 1 · v7.1.2 · harmonised disclosure, clear flight details and balanced dark glass */
+/* Phase 1 · v7.1.3 · harmonised disclosure, clear flight details and balanced dark glass */
 
 /* The disclosure returns to intrinsic grid-track expansion so its final
    height always includes the complete action row. Opening and closing use one
@@ -1640,7 +1640,7 @@ html:not(.theme-light):not(.theme-dark) .bottom-nav-item svg {
 
 
 
-/* Phase 1 · v7.1.2 · restore original itinerary glass and original flight palette */
+/* Phase 1 · v7.1.3 · restore original itinerary glass and original flight palette */
 
 /* Flight and weather are part of the itinerary overview. Their outer surface
    deliberately matches the untouched itinerary cards from the original app. */
@@ -1784,7 +1784,7 @@ body.expenses-view-active .ios-compact-copy {
 html.theme-dark .expense-compact-action { color: #64a8ff; }
 
 
-/* App shell refinement v7.1.2 · shared top bar + My hub */
+/* App shell refinement v7.1.3 · shared top bar + My hub */
 .expense-header-actions,
 .expense-compact-actions { display: none !important; }
 body.expenses-view-active #today-chip,
@@ -1807,7 +1807,15 @@ body.expenses-view-active #status-square { display: none !important; }
 .profile-card-heading h2 { margin:1px 0 0; font-size:calc(19px * var(--font-scale)); color:var(--label-primary); }
 .profile-eyebrow,.profile-section-title { color:var(--label-secondary); font-size:calc(10px * var(--font-scale)); font-weight:760; letter-spacing:.04em; text-transform:uppercase; }
 .profile-section-title { margin:1px 2px 8px; }
-.profile-avatar { width:42px; height:42px; border-radius:50%; display:grid; place-items:center; background:linear-gradient(145deg,#77b7ff,#4a86d8); color:#fff; font-weight:800; box-shadow:0 6px 14px rgba(50,104,174,.24), inset 0 1px 0 rgba(255,255,255,.35); }
+.profile-user-card { display:flex; align-items:center; gap:12px; margin:2px 0 7px; padding:11px 12px; border-radius:14px; background:rgba(118,118,128,.075); border:1px solid rgba(255,255,255,.18); }
+.profile-avatar { width:42px; height:42px; flex:0 0 auto; overflow:hidden; border-radius:50%; display:grid; place-items:center; background:rgba(0,122,255,.12); color:#1478d4; font-weight:800; box-shadow:inset 0 1px 0 rgba(255,255,255,.34); }
+.profile-avatar img { width:100%; height:100%; object-fit:cover; display:block; }
+.profile-avatar svg { width:21px; height:21px; display:block; }
+.profile-avatar.is-signed-in { background:rgba(255,255,255,.55); color:var(--label-primary); box-shadow:0 3px 10px rgba(0,0,0,.10), inset 0 0 0 .5px rgba(255,255,255,.55); }
+.profile-user-main { display:grid; gap:2px; min-width:0; flex:1; }
+.profile-user-name { overflow:hidden; color:var(--label-primary); font-size:calc(13px * var(--font-scale)); font-weight:790; text-overflow:ellipsis; white-space:nowrap; }
+.profile-user-email { overflow:hidden; color:var(--label-secondary); font-size:calc(10.5px * var(--font-scale)); text-overflow:ellipsis; white-space:nowrap; }
+.profile-auth-status { flex:0 0 auto; }
 .profile-row,.profile-setting-row {
   width:100%; min-height:58px; padding:9px 2px; border:0; border-top:1px solid var(--separator); background:transparent; color:var(--label-primary); display:grid; grid-template-columns:36px minmax(0,1fr) auto; gap:10px; align-items:center; text-align:left; -webkit-appearance:none; appearance:none;
 }
@@ -1834,6 +1842,9 @@ body.expenses-view-active #status-square { display: none !important; }
 .profile-meta-row { display:flex; justify-content:space-between; padding:11px 2px 2px; border-top:1px solid var(--separator); color:var(--label-secondary); font-size:calc(11px * var(--font-scale)); }
 .profile-meta-row strong { color:var(--label-primary); }
 html.theme-dark .profile-card,html:not(.theme-light):not(.theme-dark) .profile-card { background:rgba(24,24,31,.60); border-color:rgba(255,255,255,.09); box-shadow:0 10px 26px rgba(0,0,0,.32),inset 0 1px 0 rgba(255,255,255,.05); }
+html.theme-dark .profile-user-card,html:not(.theme-light):not(.theme-dark) .profile-user-card { background:rgba(255,255,255,.055); border-color:rgba(255,255,255,.075); }
+html.theme-dark .profile-avatar,html:not(.theme-light):not(.theme-dark) .profile-avatar { background:rgba(77,163,255,.14); color:#73b8ff; box-shadow:inset 0 1px 0 rgba(255,255,255,.08); }
+html.theme-dark .profile-avatar.is-signed-in,html:not(.theme-light):not(.theme-dark) .profile-avatar.is-signed-in { background:rgba(255,255,255,.09); box-shadow:0 3px 12px rgba(0,0,0,.28),inset 0 0 0 .5px rgba(255,255,255,.12); }
 html.theme-dark .profile-stepper,html:not(.theme-light):not(.theme-dark) .profile-stepper { background:rgba(255,255,255,.05); }
 html.theme-dark .profile-theme-segment button.active,html:not(.theme-light):not(.theme-dark) .profile-theme-segment button.active { background:rgba(99,99,102,.78); color:#fff; box-shadow:0 1px 4px rgba(0,0,0,.34); }
 @media(max-width:370px){.profile-theme-segment{margin-left:0}.profile-row-copy small{font-size:9.5px}.bottom-nav-item span{font-size:calc(9px * var(--font-scale));}}
@@ -1841,9 +1852,9 @@ html.theme-dark .profile-theme-segment button.active,html:not(.theme-light):not(
 </style>
             <link rel="apple-touch-icon" href="assets/icon/trip_icon.png">
   <link rel="icon" type="image/png" href="assets/icon/trip_icon.png">
-  <link rel="manifest" href="manifest.json?v=7.1.2">
+  <link rel="manifest" href="manifest.json?v=7.1.3">
   <meta name="apple-mobile-web-app-title" content="關嘉露西生日之旅">
-  <link rel="stylesheet" href="assets/css/expenses.css?v=7.1.2">
+  <link rel="stylesheet" href="assets/css/expenses.css?v=7.1.3">
 </head>
 <body>
 <div class="bg-fixed"></div>
@@ -1928,11 +1939,20 @@ html.theme-dark .profile-theme-segment button.active,html:not(.theme-light):not(
         <div class="profile-eyebrow">帳戶與身份</div>
         <h2>我的</h2>
       </div>
-      <div class="profile-avatar" aria-hidden="true">M</div>
+    </div>
+    <div class="profile-user-card" id="profile-user-card">
+      <span class="profile-avatar" id="profile-avatar" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M12 12.2a4.1 4.1 0 1 0 0-8.2 4.1 4.1 0 0 0 0 8.2Z" stroke="currentColor" stroke-width="1.8"/><path d="M4.8 20c.65-3.55 3.28-5.55 7.2-5.55s6.55 2 7.2 5.55" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </span>
+      <span class="profile-user-main">
+        <span class="profile-user-name" id="profile-user-name">尚未登入</span>
+        <span class="profile-user-email" id="profile-user-email">使用 Google 帳戶登入後顯示資料</span>
+      </span>
+      <span class="profile-status-pill profile-auth-status" id="profile-auth-status">未登入</span>
     </div>
     <button class="profile-row" id="my-account-btn" type="button">
       <span class="profile-row-icon profile-icon-blue">👤</span>
-      <span class="profile-row-copy"><strong>帳戶與登入</strong><small>Google 帳戶、同步狀態及目前身份</small></span>
+      <span class="profile-row-copy"><strong id="profile-account-action-title">登入 Google 帳戶</strong><small id="profile-account-action-subtitle">登入後同步支出及顯示目前身份</small></span>
       <span class="profile-chevron">›</span>
     </button>
   </section>
@@ -1984,11 +2004,11 @@ html.theme-dark .profile-theme-segment button.active,html:not(.theme-light):not(
       <span class="profile-row-copy"><strong>關於本 App</strong><small>版本、系統資料及使用說明</small></span>
       <span class="profile-chevron">›</span>
     </button>
-    <div class="profile-meta-row"><span>目前版本</span><strong>v7.1.2</strong></div>
+    <div class="profile-meta-row"><span>目前版本</span><strong>v7.1.3</strong></div>
   </section>
 </div>
 <div class="footer-note" id="footer-note"></div>
-<div class="app-version-note" id="app-version-note">v7.1.2</div>
+<div class="app-version-note" id="app-version-note">v7.1.3</div>
 
 
   </div>
@@ -3062,7 +3082,7 @@ let currentAppView="itinerary";
 let baseTripTitle="旅程";
 let collapseRaf=0;
 
-const APP_VERSION = "7.1.2";
+const APP_VERSION = "7.1.3";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 window.EXPENSES_MODULE_VERSION = EXPENSES_MODULE_VERSION;
@@ -3238,7 +3258,7 @@ function setView(v,{restoreScroll=true}={}){
   document.body.classList.remove("view-itinerary","view-snacks","view-info","view-expenses","view-profile");
   document.body.classList.add(`view-${v}`);
   document.body.classList.toggle("expenses-view-active",v==="expenses");
-  if(v==="expenses") initExpensesViewSafe();
+  if(v==="expenses"||v==="profile") initExpensesViewSafe();
 
   updateLargeHeaderForView();
   updateCompactHeader();
@@ -3259,6 +3279,56 @@ bts.addEventListener("click",()=>setView("snacks"));
 btinfo.addEventListener("click",()=>setView("info"));
 btexp.addEventListener("click",()=>setView("expenses"));
 btprofile.addEventListener("click",()=>setView("profile"));
+
+const signedOutProfileIcon = `<svg viewBox="0 0 24 24" fill="none"><path d="M12 12.2a4.1 4.1 0 1 0 0-8.2 4.1 4.1 0 0 0 0 8.2Z" stroke="currentColor" stroke-width="1.8"/><path d="M4.8 20c.65-3.55 3.28-5.55 7.2-5.55s6.55 2 7.2 5.55" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>`;
+function profileInitials(user){
+  const source=String(user?.displayName||user?.email||"U").trim();
+  return (source.slice(0,1)||"U").toUpperCase();
+}
+function renderProfileAuthState(user){
+  const avatar=document.getElementById("profile-avatar");
+  const name=document.getElementById("profile-user-name");
+  const email=document.getElementById("profile-user-email");
+  const status=document.getElementById("profile-auth-status");
+  const actionTitle=document.getElementById("profile-account-action-title");
+  const actionSubtitle=document.getElementById("profile-account-action-subtitle");
+  if(!avatar||!name||!email||!status) return;
+
+  avatar.replaceChildren();
+  avatar.classList.toggle("is-signed-in",!!user);
+  if(!user){
+    avatar.innerHTML=signedOutProfileIcon;
+    name.textContent="尚未登入";
+    email.textContent="使用 Google 帳戶登入後顯示資料";
+    status.textContent="未登入";
+    if(actionTitle) actionTitle.textContent="登入 Google 帳戶";
+    if(actionSubtitle) actionSubtitle.textContent="登入後同步支出及顯示目前身份";
+    return;
+  }
+
+  const fallback=()=>{
+    avatar.replaceChildren();
+    avatar.textContent=profileInitials(user);
+  };
+  if(user.photoURL){
+    const img=document.createElement("img");
+    img.alt="";
+    img.src=user.photoURL;
+    img.referrerPolicy="no-referrer";
+    img.addEventListener("error",fallback,{once:true});
+    avatar.appendChild(img);
+  }else{
+    fallback();
+  }
+  name.textContent=user.displayName||"Google 使用者";
+  email.textContent=user.email||"已連接 Google 帳戶";
+  status.textContent="已登入";
+  if(actionTitle) actionTitle.textContent="帳戶與登入";
+  if(actionSubtitle) actionSubtitle.textContent="查看 Google 帳戶、同步狀態及目前身份";
+}
+window.addEventListener("expense-auth-state",event=>renderProfileAuthState(event.detail?.user||null));
+renderProfileAuthState(null);
+
 function dispatchExpenseUiAction(action){
   initExpensesViewSafe();
   window.__pendingExpenseUiAction=action;
