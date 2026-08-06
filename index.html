@@ -1,6 +1,9 @@
 <html lang="zh-Hant"><head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
@@ -10,6 +13,8 @@
     try{
       var savedTheme=localStorage.getItem("trip_theme")||"auto";
       var root=document.documentElement;
+      var standalone=(window.matchMedia&&window.matchMedia("(display-mode: standalone)").matches)||window.navigator.standalone===true;
+      root.classList.toggle("is-standalone",!!standalone);
       root.classList.remove("theme-light","theme-dark");
       if(savedTheme==="dark"){root.classList.add("theme-dark");return;}
       if(savedTheme==="light"){root.classList.add("theme-light");return;}
@@ -603,7 +608,7 @@ body.expenses-view-active .container {
 
   
 
-/* Phase 1 · iOS native shell · refinement 7.0.2 */
+/* Phase 1 · iOS native shell · refinement 7.0.3 */
 :root {
   --tabbar-h: 72px;
   --compact-header-h: 58px;
@@ -1301,17 +1306,159 @@ html.theme-dark .inline-action-btn.secondary { background: rgba(255,255,255,0.08
   .detail-chevron { transition: none !important; }
 }
 
-  </style>
+  
+
+/* Phase 1 · v7.0.3 · full-bleed root canvas, fixed day grid and interactive iOS sheet */
+
+/* Let the root background paint the WebKit canvas itself. Do not tint the
+   status-bar region with theme-color; content alone observes the safe area. */
+html {
+  width: 100%;
+  min-height: 100%;
+  background-color: var(--app-canvas) !important;
+  background-image: var(--app-background) !important;
+  background-position: center top !important;
+  background-size: cover !important;
+  background-repeat: no-repeat !important;
+  background-attachment: fixed !important;
+}
+body {
+  width: 100%;
+  min-height: 100%;
+  min-height: 100dvh;
+  background: transparent !important;
+}
+.bg-fixed {
+  /* Secondary full-bleed painter for iOS standalone layout viewports. The
+     negative safe-area offsets extend it beyond the layout viewport rather
+     than leaving the system strip to a flat fallback colour. */
+  display: block !important;
+  top: calc(-1 * env(safe-area-inset-top, 0px)) !important;
+  right: 0 !important;
+  bottom: calc(-1 * env(safe-area-inset-bottom, 0px)) !important;
+  left: 0 !important;
+  background: var(--app-background) !important;
+  background-position: center top !important;
+  background-size: cover !important;
+  z-index: 0 !important;
+}
+.scroll-shell {
+  padding-top: 0 !important;
+  min-height: 100dvh;
+}
+.container {
+  /* Background is edge-to-edge; only foreground content clears the island. */
+  padding-top: calc(16px + env(safe-area-inset-top, 0px)) !important;
+}
+html.is-standalone .scroll-shell { min-height: 100dvh; }
+
+/* The selector is navigation chrome, not a content card. Six or seven days
+   share the available width and align to the compact title's 18px inset. */
+.day-tabs {
+  width: 100vw;
+  box-sizing: border-box;
+  margin-left: calc(50% - 50vw) !important;
+  margin-right: calc(50% - 50vw) !important;
+  padding-left: max(18px, calc((100vw - 480px) / 2 + 18px)) !important;
+  padding-right: max(18px, calc((100vw - 480px) / 2 + 18px)) !important;
+  display: grid !important;
+  grid-template-columns: repeat(var(--day-count, 6), minmax(0,1fr));
+  gap: 5px !important;
+  overflow: visible !important;
+  overscroll-behavior-x: none;
+}
+.day-tabs:not(.is-scrollable-days) .day-tab {
+  min-width: 0 !important;
+  width: 100%;
+  padding-left: 2px !important;
+  padding-right: 2px !important;
+  font-size: calc(10.5px * var(--font-scale));
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.day-tabs.is-scrollable-days {
+  display: flex !important;
+  overflow-x: auto !important;
+  padding-right: max(18px, calc((100vw - 480px) / 2 + 18px)) !important;
+  scrollbar-width: none;
+}
+.day-tabs.is-scrollable-days .day-tab { flex: 0 0 auto; min-width: 52px; }
+
+/* Interactive bottom sheet. It is always mounted so opening and closing can
+   animate, but is inert and invisible while inactive. */
+.modal-backdrop {
+  display: flex !important;
+  visibility: hidden;
+  opacity: 1;
+  pointer-events: none;
+  background-color: rgba(0,0,0,0);
+  transition: background-color .28s ease, visibility 0s linear .42s;
+  overscroll-behavior: none;
+}
+.modal-backdrop.active {
+  visibility: visible;
+  pointer-events: auto;
+  background-color: rgba(0,0,0,.42);
+  transition: background-color .28s ease, visibility 0s linear 0s;
+}
+.modal-backdrop .modal {
+  transform: translate3d(0,105%,0);
+  transition: transform .42s cubic-bezier(.32,.72,0,1);
+  will-change: transform;
+  touch-action: pan-y;
+}
+.modal-backdrop.active .modal {
+  animation: none !important;
+  transform: translate3d(0,0,0);
+}
+.modal-backdrop.is-dragging .modal,
+.modal-backdrop.is-closing .modal { transition: none; }
+.sheet-grabber-zone {
+  height: 28px;
+  margin: -13px -16px 1px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.sheet-grabber-zone:active { cursor: grabbing; }
+.sheet-grabber {
+  display: block;
+  width: 36px;
+  height: 5px;
+  border-radius: 999px;
+  background: rgba(60,60,67,.28);
+}
+html.theme-dark .sheet-grabber,
+html:not(.theme-light):not(.theme-dark) .sheet-grabber { background: rgba(235,235,245,.26); }
+.modal.snack-modal .modal-body {
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+}
+@media (min-width: 640px) {
+  .day-tabs {
+    width: min(100%,480px);
+    margin-left: auto !important;
+    margin-right: auto !important;
+    padding-left: 18px !important;
+    padding-right: 18px !important;
+  }
+  .modal-backdrop .modal { transform: translate3d(0,28px,0) scale(.985); opacity: 0; }
+  .modal-backdrop.active .modal { transform: translate3d(0,0,0) scale(1); opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .modal-backdrop,
+  .modal-backdrop .modal { transition-duration: .01ms !important; }
+}
+</style>
             <link rel="apple-touch-icon" href="assets/icon/trip_icon.png">
   <link rel="icon" type="image/png" href="assets/icon/trip_icon.png">
-  <link rel="manifest" href="manifest.json?v=7.0.2">
-  <meta id="theme-color-meta" name="theme-color" content="#f2dce6">
-  <script>(function(){var m=document.getElementById("theme-color-meta");if(m&&document.documentElement.classList.contains("theme-dark"))m.setAttribute("content","#0c0c10");})();</script>
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="manifest" href="manifest.json?v=7.0.3">
   <meta name="apple-mobile-web-app-title" content="關嘉露西生日之旅">
-  <link rel="stylesheet" href="assets/css/expenses.css?v=7.0.2">
+  <link rel="stylesheet" href="assets/css/expenses.css?v=7.0.3">
 </head>
 <body>
 <div class="bg-fixed"></div>
@@ -1394,7 +1541,7 @@ html.theme-dark .inline-action-btn.secondary { background: rgba(255,255,255,0.08
   <div id="expenses-root"></div>
 </div>
 <div class="footer-note" id="footer-note"></div>
-<div class="app-version-note" id="app-version-note">v7.0.2</div>
+<div class="app-version-note" id="app-version-note">v7.0.3</div>
 
 
   </div>
@@ -1420,8 +1567,9 @@ html.theme-dark .inline-action-btn.secondary { background: rgba(255,255,255,0.08
   </nav>
 </div>
 
-<div class="modal-backdrop" id="detail-backdrop">
-  <div class="modal">
+<div class="modal-backdrop" id="detail-backdrop" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="detail-title">
+    <div class="sheet-grabber-zone" id="detail-sheet-grabber" aria-hidden="true"><span class="sheet-grabber"></span></div>
     <div class="modal-img-wrapper" id="detail-img-wrapper" style="display:none;">
       <img id="detail-img" src="" alt="photo">
       <div class="modal-dots" id="detail-dots" style="display:none;"></div>
@@ -1512,8 +1660,6 @@ function applyTheme(t){
     const btn=document.getElementById("theme-btn");
     if(btn){btn.setAttribute("data-theme",t);btn.innerHTML=THEME_ICONS[t]||THEME_ICONS["auto"];}
     const isDark=document.documentElement.classList.contains("theme-dark") || (!document.documentElement.classList.contains("theme-light") && window.matchMedia?.("(prefers-color-scheme: dark)").matches);
-    const themeMeta=document.getElementById("theme-color-meta");
-    if(themeMeta)themeMeta.setAttribute("content",isDark?"#0c0c10":"#f2dce6");
     localStorage.setItem("trip_theme",t);
   }catch(e){}
 }
@@ -1664,7 +1810,7 @@ function openSavedItemModal(item){
   const modalEl=document.querySelector("#detail-backdrop .modal");
   modalEl?.classList.remove("is-booked");modalEl?.classList.add("snack-modal");
   if(modalEl){modalEl.style.borderColor="";modalEl.style.borderWidth="";modalEl.style.borderStyle="";}
-  document.getElementById("detail-backdrop").classList.add("active");lockScroll();
+  openSavedItemSheet();
 }
 
 function setupClicks(){
@@ -1696,9 +1842,111 @@ iw.addEventListener("touchstart",e=>{tx=e.touches[0].clientX;ty=e.touches[0].cli
 iw.addEventListener("touchmove",e=>{ex=e.touches[0].clientX;ey=e.touches[0].clientY;},{passive:true});
 iw.addEventListener("touchend",()=>{const dx=ex-tx,dy=ey-ty;if(Math.abs(dx)<40||Math.abs(dx)<=Math.abs(dy)||!curGal.length)return;curGalIdx=dx<0?(curGalIdx+1)%curGal.length:(curGalIdx-1+curGal.length)%curGal.length;updateImg();});
 document.getElementById("detail-img").addEventListener("click",e=>{if(!curGal.length)return;const r=e.target.getBoundingClientRect();curGalIdx=(e.clientX-r.left)<r.width/2?(curGalIdx-1+curGal.length)%curGal.length:(curGalIdx+1)%curGal.length;updateImg();});
-document.getElementById("detail-close").addEventListener("click",()=>{document.getElementById("detail-backdrop").classList.remove("active");unlockScroll();});
-document.getElementById("detail-backdrop").addEventListener("click",e=>{if(e.target===document.getElementById("detail-backdrop")){document.getElementById("detail-backdrop").classList.remove("active");unlockScroll();}});
-document.getElementById("detail-backdrop").addEventListener("touchmove",e=>e.preventDefault(),{passive:false});
+const savedSheetBackdrop=document.getElementById("detail-backdrop");
+const savedSheet=savedSheetBackdrop?.querySelector(".modal");
+const savedSheetGrabber=document.getElementById("detail-sheet-grabber");
+const savedSheetBody=document.getElementById("detail-body");
+let sheetTouch=null;
+let sheetCloseTimer=0;
+
+function setSavedSheetOffset(y,{animate=false}={}){
+  if(!savedSheet||!savedSheetBackdrop)return;
+  const offset=Math.max(0,Number(y)||0);
+  savedSheet.style.transition=animate?"transform .38s cubic-bezier(.22,.86,.26,1)":"none";
+  savedSheet.style.transform=`translate3d(0,${offset}px,0)`;
+  const h=Math.max(savedSheet.getBoundingClientRect().height,1);
+  const progress=Math.min(1,offset/h);
+  savedSheetBackdrop.style.backgroundColor=`rgba(0,0,0,${(0.42*(1-progress)).toFixed(3)})`;
+}
+function resetSavedSheetVisuals(){
+  if(!savedSheet||!savedSheetBackdrop)return;
+  savedSheet.style.transition="";
+  savedSheet.style.transform="";
+  savedSheetBackdrop.style.backgroundColor="";
+  savedSheetBackdrop.classList.remove("is-dragging","is-closing");
+}
+function openSavedItemSheet(){
+  if(!savedSheetBackdrop||!savedSheet)return;
+  clearTimeout(sheetCloseTimer);
+  resetSavedSheetVisuals();
+  savedSheetBackdrop.setAttribute("aria-hidden","false");
+  lockScroll();
+  requestAnimationFrame(()=>savedSheetBackdrop.classList.add("active"));
+}
+function closeSavedItemSheet({velocity=0}={}){
+  if(!savedSheetBackdrop?.classList.contains("active")||!savedSheet)return;
+  savedSheetBackdrop.classList.remove("is-dragging");
+  savedSheetBackdrop.classList.add("is-closing");
+  const distance=Math.max(window.innerHeight,savedSheet.getBoundingClientRect().height+80);
+  const duration=Math.max(180,Math.min(360,300-Math.max(0,velocity)*90));
+  savedSheet.style.transition=`transform ${duration}ms cubic-bezier(.32,.72,0,1)`;
+  savedSheet.style.transform=`translate3d(0,${distance}px,0)`;
+  savedSheetBackdrop.style.transition=`background-color ${Math.min(duration,260)}ms ease, visibility 0s linear ${duration}ms`;
+  savedSheetBackdrop.style.backgroundColor="rgba(0,0,0,0)";
+  clearTimeout(sheetCloseTimer);
+  sheetCloseTimer=setTimeout(()=>{
+    savedSheetBackdrop.classList.remove("active","is-closing");
+    savedSheetBackdrop.setAttribute("aria-hidden","true");
+    resetSavedSheetVisuals();
+    savedSheetBackdrop.style.transition="";
+    unlockScroll();
+  },duration+24);
+}
+function canStartSheetDrag(target){
+  if(target?.closest?.(".sheet-grabber-zone"))return true;
+  if(target?.closest?.("button,a,.modal-dots,.modal-img-wrapper"))return false;
+  return !savedSheetBody||savedSheetBody.scrollTop<=0;
+}
+function beginSheetTouch(e){
+  if(!savedSheetBackdrop?.classList.contains("active")||e.touches?.length!==1)return;
+  const t=e.touches[0];
+  sheetTouch={
+    startX:t.clientX,startY:t.clientY,lastY:t.clientY,lastTime:performance.now(),
+    startTime:performance.now(),offset:0,velocity:0,dragging:false,
+    allowed:canStartSheetDrag(e.target),fromGrabber:!!e.target?.closest?.(".sheet-grabber-zone")
+  };
+}
+function moveSheetTouch(e){
+  if(!sheetTouch||!sheetTouch.allowed||e.touches?.length!==1)return;
+  const t=e.touches[0],dx=t.clientX-sheetTouch.startX,dy=t.clientY-sheetTouch.startY;
+  if(!sheetTouch.dragging){
+    if(dy<=3||Math.abs(dx)>Math.abs(dy))return;
+    if(!sheetTouch.fromGrabber&&savedSheetBody&&savedSheetBody.scrollTop>0){sheetTouch.allowed=false;return;}
+    sheetTouch.dragging=true;
+    savedSheetBackdrop.classList.add("is-dragging");
+  }
+  e.preventDefault();
+  const now=performance.now(),dt=Math.max(1,now-sheetTouch.lastTime);
+  const instant=(t.clientY-sheetTouch.lastY)/dt;
+  sheetTouch.velocity=sheetTouch.velocity*0.72+instant*0.28;
+  sheetTouch.lastY=t.clientY;sheetTouch.lastTime=now;
+  sheetTouch.offset=Math.max(0,dy);
+  setSavedSheetOffset(sheetTouch.offset);
+}
+function endSheetTouch(){
+  if(!sheetTouch)return;
+  const state=sheetTouch;sheetTouch=null;
+  if(!state.dragging)return;
+  const h=Math.max(savedSheet?.getBoundingClientRect().height||0,1);
+  const dismiss=state.offset>Math.min(170,h*0.30)||state.velocity>0.62;
+  if(dismiss){closeSavedItemSheet({velocity:state.velocity});return;}
+  savedSheetBackdrop?.classList.remove("is-dragging");
+  setSavedSheetOffset(0,{animate:true});
+  setTimeout(resetSavedSheetVisuals,400);
+}
+function cancelSheetTouch(){
+  if(!sheetTouch)return;sheetTouch=null;
+  savedSheetBackdrop?.classList.remove("is-dragging");
+  setSavedSheetOffset(0,{animate:true});
+  setTimeout(resetSavedSheetVisuals,400);
+}
+
+savedSheet?.addEventListener("touchstart",beginSheetTouch,{passive:true});
+savedSheet?.addEventListener("touchmove",moveSheetTouch,{passive:false});
+savedSheet?.addEventListener("touchend",endSheetTouch,{passive:true});
+savedSheet?.addEventListener("touchcancel",cancelSheetTouch,{passive:true});
+document.getElementById("detail-close").addEventListener("click",()=>closeSavedItemSheet());
+savedSheetBackdrop?.addEventListener("click",e=>{if(e.target===savedSheetBackdrop)closeSavedItemSheet();});
 document.getElementById("detail-maps-btn").addEventListener("click",()=>{if(curMaps)window.open(curMaps,"_blank");});
 document.getElementById("detail-dianping-btn").addEventListener("click",()=>{if(curDP)window.open(curDP,"_blank");});
 document.getElementById("detail-booking-btn").addEventListener("click",()=>{if(curBook)window.open(curBook,"_blank");});
@@ -2149,6 +2397,8 @@ function render(data){
   const tabsEl=document.getElementById("day-tabs"),conEl=document.getElementById("day-contents");
   tabsEl.innerHTML="";conEl.innerHTML="";
   if(!data.days?.length)return;
+  tabsEl.style.setProperty("--day-count",String(data.days.length));
+  tabsEl.classList.toggle("is-scrollable-days",data.days.length>7);
   const cityKeys=Object.keys(cities);
 
   data.days.forEach((day,idx)=>{
@@ -2225,7 +2475,7 @@ function render(data){
       document.querySelectorAll(".day-content").forEach(c=>c.classList.remove("active"));
       tab.classList.add("active");
       document.querySelector(`.day-content[data-day-index="${tab.dataset.dayIndex}"]`)?.classList.add("active");
-      tab.scrollIntoView({behavior:"smooth",block:"nearest",inline:"center"});
+      if(tabsEl.classList.contains("is-scrollable-days")) tab.scrollIntoView({behavior:"smooth",block:"nearest",inline:"center"});
       updateCompactHeader();
       updateNowIndicator();
     });
@@ -2253,7 +2503,7 @@ let currentAppView="itinerary";
 let baseTripTitle="旅程";
 let collapseRaf=0;
 
-const APP_VERSION = "7.0.2";
+const APP_VERSION = "7.0.3";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 window.EXPENSES_MODULE_VERSION = EXPENSES_MODULE_VERSION;
@@ -2453,7 +2703,7 @@ if(window.visualViewport&&bottomNav){
 // Android / Chrome PWA support. Network-only service worker, no aggressive cache.
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("./sw.js?v=1.5.2").catch(() => {});
+    navigator.serviceWorker.register("./sw.js?v=1.5.3").catch(() => {});
   });
 }
 

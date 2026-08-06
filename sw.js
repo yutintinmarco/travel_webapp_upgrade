@@ -1,4 +1,4 @@
-const SW_VERSION = "pwa-1.5.2";
+const SW_VERSION = "pwa-1.5.3";
 
 self.addEventListener("install", (event) => {
   self.skipWaiting();

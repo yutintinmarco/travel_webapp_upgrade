@@ -1,12 +1,13 @@
-Travel Webapp Phase 1 v7.0.2 demo package
+Travel Webapp Phase 1 v7.0.3 demo
 
-This package uses lightweight local placeholder images for UI testing.
-The itinerary structure and features remain representative, but the original production photo library is not included.
+This lightweight package uses demo assets.
 
-Main refinements:
-1. Full viewport background and safe area painting
-2. Deliberate light and dark UI themes
-3. Inline expanding itinerary details
-4. Sticky day selector material only when stuck
-5. Scroll linked large title transition
-6. Saved item sheet attached to the screen bottom
+Changes in this build:
+1. Root canvas and background are full bleed; theme-color tinting is removed.
+2. Safe-area padding applies to foreground content, not the page background.
+3. Six-day selector is a fixed equal-width grid aligned to the compact title.
+4. Longer trips automatically fall back to horizontal day scrolling.
+5. Saved-item sheet supports interactive downward drag and swipe dismissal.
+6. Sheet backdrop follows the gesture and snaps back below the dismissal threshold.
+
+For iOS Home Screen testing after manifest/status-bar changes, remove the old icon and add the web app to the Home Screen again.
