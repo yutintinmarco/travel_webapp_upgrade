@@ -608,7 +608,7 @@ body.expenses-view-active .container {
 
   
 
-/* Phase 1 · iOS native shell · refinement 7.0.5 */
+/* Phase 1 · iOS native shell · refinement 7.0.6 */
 :root {
   --tabbar-h: 72px;
   --compact-header-h: 58px;
@@ -1308,7 +1308,7 @@ html.theme-dark .inline-action-btn.secondary { background: rgba(255,255,255,0.08
 
   
 
-/* Phase 1 · v7.0.5 · full-bleed root canvas, fixed day grid and interactive iOS sheet */
+/* Phase 1 · v7.0.6 · full-bleed root canvas, fixed day grid and interactive iOS sheet */
 
 /* Let the root background paint the WebKit canvas itself. Do not tint the
    status-bar region with theme-color; content alone observes the safe area. */
@@ -1455,7 +1455,7 @@ html:not(.theme-light):not(.theme-dark) .sheet-grabber { background: rgba(235,23
 }
 
 
-/* Phase 1 · v7.0.5 · browser chrome, tighter large title and visual cleanup */
+/* Phase 1 · v7.0.6 · browser chrome, tighter large title and visual cleanup */
 
 /* Safari browser mode derives its top chrome tint from the root canvas on
    recent iOS releases. Keep the installed Web App full bleed, but use a
@@ -1521,32 +1521,56 @@ html:not(.theme-light):not(.theme-dark) .day-tab.city-both.active {
 }
 
 
-/* Phase 1 · v7.0.5 · smoother disclosure, clearer team filters and balanced dark glass */
+/* Phase 1 · v7.0.6 · harmonised disclosure, clear flight details and balanced dark glass */
 
-/* Exact pixel height is animated by JavaScript. Avoid grid track animation on
-   iOS Safari because image compositing and simultaneous scroll correction can
-   make the disclosure stutter. */
+/* The disclosure returns to intrinsic grid-track expansion so its final
+   height always includes the complete action row. Opening and closing use one
+   shared spring curve, while detail content fades slightly after the card begins
+   to expand and immediately before it contracts. */
 .inline-detail-shell {
-  display: block !important;
-  height: 0;
-  overflow: hidden;
-  will-change: height;
-  transform: translateZ(0);
-  contain: paint;
+  display: grid;
+  grid-template-rows: 0fr;
+  overflow: visible;
+  transition: grid-template-rows .36s cubic-bezier(.22,.86,.26,1);
 }
 .itinerary-item.expanded .inline-detail-shell {
-  grid-template-rows: none !important;
+  grid-template-rows: 1fr;
 }
 .inline-detail-content {
-  transform: translate3d(0,-5px,0);
   transition:
-    opacity .22s ease-out,
-    transform .32s cubic-bezier(.32,.72,0,1),
-    padding .32s cubic-bezier(.32,.72,0,1),
+    opacity .14s ease-out,
+    transform .32s cubic-bezier(.22,.86,.26,1),
+    padding .34s cubic-bezier(.22,.86,.26,1),
     border-color .20s ease-out !important;
 }
-.itinerary-item.is-detail-animating {
+.itinerary-item.expanded .inline-detail-content {
+  transition:
+    opacity .20s ease-out .055s,
+    transform .34s cubic-bezier(.22,.86,.26,1),
+    padding .34s cubic-bezier(.22,.86,.26,1),
+    border-color .20s ease-out !important;
+}
+.inline-detail-actions {
+  padding-bottom: 3px;
+}
+.itinerary-item.is-detail-transitioning .itinerary-summary {
   pointer-events: none;
+}
+
+/* Flight information is primary trip data. Keep route, flight number and time
+   clearly legible instead of inheriting the generic secondary-label grey. */
+#flight-card .trip-row { color: var(--label-primary); }
+#flight-card .trip-col-title {
+  color: color-mix(in srgb, var(--label-primary) 76%, transparent);
+  font-weight: 700;
+}
+#flight-card .trip-col-main {
+  color: var(--label-primary);
+  font-weight: 700;
+}
+#flight-card .trip-col-sub {
+  color: color-mix(in srgb, var(--label-primary) 86%, transparent);
+  font-weight: 550;
 }
 
 /* Inactive team filters should still retain their identity instead of falling
@@ -1587,9 +1611,9 @@ html:not(.theme-light):not(.theme-dark) .bottom-nav-item svg {
 </style>
             <link rel="apple-touch-icon" href="assets/icon/trip_icon.png">
   <link rel="icon" type="image/png" href="assets/icon/trip_icon.png">
-  <link rel="manifest" href="manifest.json?v=7.0.5">
+  <link rel="manifest" href="manifest.json?v=7.0.6">
   <meta name="apple-mobile-web-app-title" content="關嘉露西生日之旅">
-  <link rel="stylesheet" href="assets/css/expenses.css?v=7.0.5">
+  <link rel="stylesheet" href="assets/css/expenses.css?v=7.0.6">
 </head>
 <body>
 <div class="bg-fixed"></div>
@@ -1672,7 +1696,7 @@ html:not(.theme-light):not(.theme-dark) .bottom-nav-item svg {
   <div id="expenses-root"></div>
 </div>
 <div class="footer-note" id="footer-note"></div>
-<div class="app-version-note" id="app-version-note">v7.0.5</div>
+<div class="app-version-note" id="app-version-note">v7.0.6</div>
 
 
   </div>
@@ -1944,66 +1968,49 @@ function openSavedItemModal(item){
   openSavedItemSheet();
 }
 
-function animateItineraryDetail(item,open){
-  const shell=item.querySelector(".inline-detail-shell");
-  const content=item.querySelector(".inline-detail-content");
-  const summary=item.querySelector(".itinerary-summary");
-  if(!shell||!content)return Promise.resolve();
-
-  if(item._detailAnimation){
-    try{item._detailAnimation.cancel();}catch(e){}
-    item._detailAnimation=null;
-  }
-
-  const from=Math.max(0,shell.getBoundingClientRect().height);
-  if(open)item.classList.add("expanded");
-  const target=open?Math.max(content.scrollHeight,content.getBoundingClientRect().height):0;
-  if(!open)item.classList.remove("expanded");
-  summary?.setAttribute("aria-expanded",open?"true":"false");
-  item.classList.add("is-detail-animating");
-  shell.style.height=`${from}px`;
-
-  if(window.matchMedia?.("(prefers-reduced-motion: reduce)").matches){
-    shell.style.height=open?"auto":"0px";
-    item.classList.remove("is-detail-animating");
-    return Promise.resolve();
-  }
-
-  const animation=shell.animate(
-    [{height:`${from}px`},{height:`${target}px`}],
-    {duration:open?360:300,easing:"cubic-bezier(.32,.72,0,1)",fill:"forwards"}
-  );
-  item._detailAnimation=animation;
-  return animation.finished.catch(()=>{}).then(()=>{
-    if(item._detailAnimation!==animation)return;
-    item._detailAnimation=null;
-    shell.style.height=open?"auto":"0px";
-    item.classList.remove("is-detail-animating");
-  });
-}
-
 function setupClicks(){
   document.querySelectorAll(".itinerary-item.clickable").forEach(item=>{
     const summary=item.querySelector(".itinerary-summary");
-    if(!summary||summary.dataset.bound==="true")return;
+    const shell=item.querySelector(".inline-detail-shell");
+    if(!summary||!shell||summary.dataset.bound==="true")return;
     summary.dataset.bound="true";
     summary.setAttribute("role","button");summary.setAttribute("tabindex","0");summary.setAttribute("aria-expanded","false");
+
+    const finishTransition=()=>{
+      item.classList.remove("is-detail-transitioning");
+      if(!item.classList.contains("expanded"))return;
+      const viewport=document.getElementById("scroll-shell")||document.scrollingElement;
+      if(!viewport)return;
+      const rect=item.getBoundingClientRect();
+      const navSpace=Math.max(92,parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--bottom-nav-space"))||92);
+      const bottomLimit=window.innerHeight-navSpace;
+      if(rect.bottom>bottomLimit){
+        viewport.scrollBy({top:Math.min(rect.bottom-bottomLimit+12,160),behavior:"smooth"});
+      }
+    };
+
+    shell.addEventListener("transitionend",e=>{
+      if(e.target===shell&&e.propertyName==="grid-template-rows")finishTransition();
+    });
+
     const toggle=()=>{
-      if(item.classList.contains("is-detail-animating"))return;
+      if(item.classList.contains("is-detail-transitioning"))return;
       const willOpen=!item.classList.contains("expanded");
       const oldItems=[...document.querySelectorAll(".itinerary-item.expanded")].filter(other=>other!==item);
-      oldItems.forEach(other=>animateItineraryDetail(other,false));
-      animateItineraryDetail(item,willOpen).then(()=>{
-        if(!willOpen)return;
-        const shell=item.querySelector(".inline-detail-shell");
-        const viewport=document.getElementById("scroll-shell")||document.scrollingElement;
-        if(!shell||!viewport)return;
-        const rect=item.getBoundingClientRect();
-        const bottomLimit=window.innerHeight-Math.max(92,parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--bottom-nav-space"))||92);
-        if(rect.bottom>bottomLimit){
-          viewport.scrollBy({top:Math.min(rect.bottom-bottomLimit+14,180),behavior:"smooth"});
-        }
+
+      oldItems.forEach(other=>{
+        other.classList.add("is-detail-transitioning");
+        other.classList.remove("expanded");
+        other.querySelector(".itinerary-summary")?.setAttribute("aria-expanded","false");
+        window.setTimeout(()=>other.classList.remove("is-detail-transitioning"),430);
       });
+
+      item.classList.add("is-detail-transitioning");
+      item.classList.toggle("expanded",willOpen);
+      summary.setAttribute("aria-expanded",willOpen?"true":"false");
+      window.setTimeout(()=>{
+        if(item.classList.contains("is-detail-transitioning"))finishTransition();
+      },430);
     };
     summary.addEventListener("click",toggle);
     summary.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();toggle();}});
@@ -2684,7 +2691,7 @@ let currentAppView="itinerary";
 let baseTripTitle="旅程";
 let collapseRaf=0;
 
-const APP_VERSION = "7.0.5";
+const APP_VERSION = "7.0.6";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 window.EXPENSES_MODULE_VERSION = EXPENSES_MODULE_VERSION;
@@ -2884,7 +2891,7 @@ if(window.visualViewport&&bottomNav){
 // Android / Chrome PWA support. Network-only service worker, no aggressive cache.
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("./sw.js?v=1.5.3").catch(() => {});
+    navigator.serviceWorker.register("./sw.js?v=1.5.6").catch(() => {});
   });
 }
 

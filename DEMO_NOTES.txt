@@ -1,13 +1,14 @@
-Travel Webapp Phase 1 v7.0.5 demo
+Travel Webapp Phase 1 v7.0.6 demo
 
 This lightweight package uses demo data and placeholder assets.
 
 Current Phase 1 refinements:
 1. Full bleed standalone PWA canvas with safe area foreground spacing.
 2. Six day fixed grid selector and interactive saved item sheet.
-3. Exact height itinerary disclosure animation using the Web Animations API.
-4. Team filter labels retain their traveller accent colours in light and dark modes.
-5. Dark bottom navigation uses a balanced material sheen without a left side white flare.
-6. Day 4 Kyoto and Osaka gradient border remains restored.
+3. Itinerary details use intrinsic grid expansion again, so the complete Google Maps action remains visible.
+4. Opening and closing share one coordinated spring curve, with scrolling deferred until the expansion finishes.
+5. Flight direction, CX flight number, route and time use stronger primary text contrast.
+6. Team filter accents and the balanced dark bottom navigation remain preserved.
+7. Day 4 Kyoto and Osaka gradient border remains restored.
 
 For iOS Home Screen testing after manifest or status bar changes, remove the old icon and add the web app to the Home Screen again.
