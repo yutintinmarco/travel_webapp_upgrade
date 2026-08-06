@@ -1,4 +1,4 @@
-Travel Webapp Phase 1 v7.0.7 demo
+Travel Webapp Phase 1 v7.0.8 demo
 
 This lightweight package uses demo data and placeholder assets.
 
@@ -14,3 +14,6 @@ Current Phase 1 refinements:
 For iOS Home Screen testing after manifest or status bar changes, remove the old icon and add the web app to the Home Screen again.
 
 Restored original itinerary glass for flight and weather cards and original flight text colours.
+
+
+v7.0.8: Restored page indicator dots below inline itinerary galleries. Dots appear only when more than one image exists and follow swipe position.

@@ -608,7 +608,7 @@ body.expenses-view-active .container {
 
   
 
-/* Phase 1 · iOS native shell · refinement 7.0.7 */
+/* Phase 1 · iOS native shell · refinement 7.0.8 */
 :root {
   --tabbar-h: 72px;
   --compact-header-h: 58px;
@@ -1174,8 +1174,9 @@ html.theme-dark .bottom-nav {
   border-top-width: .5px;
   border-top-color: var(--separator);
 }
+.inline-gallery-block { margin: 0 -2px 11px; }
 .inline-gallery {
-  margin: 0 -2px 11px;
+  margin: 0;
   overflow-x: auto;
   scroll-snap-type: x mandatory;
   scrollbar-width: none;
@@ -1195,6 +1196,35 @@ html.theme-dark .bottom-nav {
   scroll-snap-align: center;
   background: var(--surface-secondary);
 }
+.inline-gallery-dots {
+  min-height: 14px;
+  margin: 7px 0 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+}
+.inline-gallery-dot {
+  width: 6px;
+  height: 6px;
+  flex: 0 0 6px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  appearance: none;
+  -webkit-appearance: none;
+  background: rgba(60,60,67,0.28);
+  transform: scale(1);
+  transition: background-color .18s ease, transform .18s ease;
+}
+.inline-gallery-dot.active {
+  background: rgba(17,17,17,0.88);
+  transform: scale(1.28);
+}
+html.theme-dark .inline-gallery-dot,
+html:not(.theme-light):not(.theme-dark) .inline-gallery-dot { background: rgba(235,235,245,0.30); }
+html.theme-dark .inline-gallery-dot.active,
+html:not(.theme-light):not(.theme-dark) .inline-gallery-dot.active { background: rgba(255,255,255,0.92); }
 .inline-detail-body {
   color: var(--label-secondary);
   font-size: calc(12px * var(--font-scale));
@@ -1308,7 +1338,7 @@ html.theme-dark .inline-action-btn.secondary { background: rgba(255,255,255,0.08
 
   
 
-/* Phase 1 · v7.0.7 · full-bleed root canvas, fixed day grid and interactive iOS sheet */
+/* Phase 1 · v7.0.8 · full-bleed root canvas, fixed day grid and interactive iOS sheet */
 
 /* Let the root background paint the WebKit canvas itself. Do not tint the
    status-bar region with theme-color; content alone observes the safe area. */
@@ -1455,7 +1485,7 @@ html:not(.theme-light):not(.theme-dark) .sheet-grabber { background: rgba(235,23
 }
 
 
-/* Phase 1 · v7.0.7 · browser chrome, tighter large title and visual cleanup */
+/* Phase 1 · v7.0.8 · browser chrome, tighter large title and visual cleanup */
 
 /* Safari browser mode derives its top chrome tint from the root canvas on
    recent iOS releases. Keep the installed Web App full bleed, but use a
@@ -1521,7 +1551,7 @@ html:not(.theme-light):not(.theme-dark) .day-tab.city-both.active {
 }
 
 
-/* Phase 1 · v7.0.7 · harmonised disclosure, clear flight details and balanced dark glass */
+/* Phase 1 · v7.0.8 · harmonised disclosure, clear flight details and balanced dark glass */
 
 /* The disclosure returns to intrinsic grid-track expansion so its final
    height always includes the complete action row. Opening and closing use one
@@ -1610,7 +1640,7 @@ html:not(.theme-light):not(.theme-dark) .bottom-nav-item svg {
 
 
 
-/* Phase 1 · v7.0.7 · restore original itinerary glass and original flight palette */
+/* Phase 1 · v7.0.8 · restore original itinerary glass and original flight palette */
 
 /* Flight and weather are part of the itinerary overview. Their outer surface
    deliberately matches the untouched itinerary cards from the original app. */
@@ -1674,9 +1704,9 @@ html:not(.theme-light):not(.theme-dark) #flight-card .trip-col-sub {
 </style>
             <link rel="apple-touch-icon" href="assets/icon/trip_icon.png">
   <link rel="icon" type="image/png" href="assets/icon/trip_icon.png">
-  <link rel="manifest" href="manifest.json?v=7.0.7">
+  <link rel="manifest" href="manifest.json?v=7.0.8">
   <meta name="apple-mobile-web-app-title" content="關嘉露西生日之旅">
-  <link rel="stylesheet" href="assets/css/expenses.css?v=7.0.7">
+  <link rel="stylesheet" href="assets/css/expenses.css?v=7.0.8">
 </head>
 <body>
 <div class="bg-fixed"></div>
@@ -1759,7 +1789,7 @@ html:not(.theme-light):not(.theme-dark) #flight-card .trip-col-sub {
   <div id="expenses-root"></div>
 </div>
 <div class="footer-note" id="footer-note"></div>
-<div class="app-version-note" id="app-version-note">v7.0.7</div>
+<div class="app-version-note" id="app-version-note">v7.0.8</div>
 
 
   </div>
@@ -1987,10 +2017,63 @@ function appendInlineDetails(itemEl,item,gallery){
   const detail=document.createElement("div");detail.className="inline-detail-content";
 
   if(gallery?.length){
+    const galleryBlock=document.createElement("div");galleryBlock.className="inline-gallery-block";
     const galleryEl=document.createElement("div");galleryEl.className="inline-gallery";
+    galleryEl.setAttribute("role","region");
+    galleryEl.setAttribute("aria-label",`${item.title||"行程"} 相冊`);
     const track=document.createElement("div");track.className="inline-gallery-track";
-    gallery.forEach((src,index)=>{const img=document.createElement("img");img.src=src;img.alt=`${item.title||"行程"} ${index+1}`;img.loading="lazy";track.appendChild(img);});
-    galleryEl.appendChild(track);detail.appendChild(galleryEl);
+    const images=[];
+    gallery.forEach((src,index)=>{
+      const img=document.createElement("img");
+      img.src=src;
+      img.alt=`${item.title||"行程"} ${index+1} / ${gallery.length}`;
+      img.loading="lazy";
+      track.appendChild(img);
+      images.push(img);
+    });
+    galleryEl.appendChild(track);
+    galleryBlock.appendChild(galleryEl);
+
+    if(gallery.length>1){
+      const dots=document.createElement("div");dots.className="inline-gallery-dots";
+      dots.setAttribute("aria-label",`相片 1 / ${gallery.length}`);
+      const dotButtons=gallery.map((_,index)=>{
+        const dot=document.createElement("button");
+        dot.type="button";
+        dot.className=`inline-gallery-dot${index===0?" active":""}`;
+        dot.setAttribute("aria-label",`查看第 ${index+1} 張相片`);
+        dot.setAttribute("aria-current",index===0?"true":"false");
+        dot.addEventListener("click",event=>{
+          event.stopPropagation();
+          galleryEl.scrollTo({left:images[index].offsetLeft,behavior:"smooth"});
+        });
+        dots.appendChild(dot);
+        return dot;
+      });
+      let galleryRaf=0;
+      const setActiveDot=index=>{
+        dotButtons.forEach((dot,i)=>{
+          const active=i===index;
+          dot.classList.toggle("active",active);
+          dot.setAttribute("aria-current",active?"true":"false");
+        });
+        dots.setAttribute("aria-label",`相片 ${index+1} / ${gallery.length}`);
+      };
+      galleryEl.addEventListener("scroll",()=>{
+        cancelAnimationFrame(galleryRaf);
+        galleryRaf=requestAnimationFrame(()=>{
+          let closestIndex=0;
+          let closestDistance=Infinity;
+          images.forEach((img,index)=>{
+            const distance=Math.abs(img.offsetLeft-galleryEl.scrollLeft);
+            if(distance<closestDistance){closestDistance=distance;closestIndex=index;}
+          });
+          setActiveDot(closestIndex);
+        });
+      },{passive:true});
+      galleryBlock.appendChild(dots);
+    }
+    detail.appendChild(galleryBlock);
   }
 
   const body=document.createElement("div");body.className="inline-detail-body";
@@ -2754,7 +2837,7 @@ let currentAppView="itinerary";
 let baseTripTitle="旅程";
 let collapseRaf=0;
 
-const APP_VERSION = "7.0.7";
+const APP_VERSION = "7.0.8";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 window.EXPENSES_MODULE_VERSION = EXPENSES_MODULE_VERSION;
