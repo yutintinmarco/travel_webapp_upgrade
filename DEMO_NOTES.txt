@@ -1,27 +1,27 @@
-Travel Webapp Phase 2B v7.3.0 Multi Trip Schema
+Travel Webapp Phase 2B v7.3.1 Refinement
 
 Purpose
-Phase 2B establishes the clean multi trip data model before Firebase import and cloud loading are enabled.
+Refine the Phase 2B multi trip architecture before any production trip data is imported to Firestore.
 
 Implemented
-1. Portable trip schema upgraded to schemaVersion 2 with tripId and revision.
-2. Every day has a stable dayId and sortOrder.
-3. Every itinerary item has a stable itemId, sortOrder and normalized image metadata while the legacy gallery array remains compatible with the current renderer.
-4. Saved places have stable placeId values.
-5. Added trip-schema-service.js to validate portable JSON and build the future Firestore write plan.
-6. Firestore plan separates trip metadata, members, days, items, savedPlaces, general settings and expense settings instead of using one oversized document.
-7. Added trip-catalog-service.js for the future same URL multi trip library using trips.memberUids.
-8. The 旅程 tab is now a multi trip library shell. The current bundled JSON remains the active trip during Phase 2B.
-9. Signed in users without a member document are no longer treated as Viewer. Viewer is now an explicit assigned role.
-10. Expense module no longer shows a permission alert merely because the new Firestore project is empty. Until a trip is imported and a member role exists, expense cloud writes remain read only.
+1. Fixed first refresh rendering for Team, Flight and Weather by moving those cards physically inside #itinerary-view.
+2. Removed the body.view-itinerary visibility workaround that could leave iOS backdrop-filter cards hidden until a tab repaint.
+3. The fourth bottom tab is now 資料. It is dedicated to the currently active trip's Visit Japan Web, visa, traveller, flight and hotel reference data.
+4. Multi Trip management moved to 我的 under 我的旅程.
+5. Added a header quick trip switcher sheet. During Phase 2B the bundled trip is current; cloud trip switching stays disabled until Phase 2E.
+6. Added archive-aware trip architecture. Trip lifecycle status remains draft / upcoming / active / completed and archive is a separate boolean state.
+7. Firestore trip documents now prepare archived, archivedAt and archivedBy fields.
+8. Active trip catalog and archived trip catalog are separate Firestore queries. Archived trips are not subscribed during normal app use and are loaded only when the user opens 已封存旅程.
+9. Added a prepared Archive / Restore patch helper for the Phase 2C writer.
+10. Added an Archived Trips management area in 我的. Actual archive and restore writes remain intentionally disabled until Phase 2C.
 
-Canonical roles
-Owner
-Admin
-Member
-Viewer
+Canonical trip lifecycle fields
+status: draft | upcoming | active | completed
+archived: boolean
+archivedAt: timestamp / null
+archivedBy: uid / empty
 
-Canonical Firestore structure prepared by the schema service
+Canonical Firestore structure
 trips/{tripId}
 trips/{tripId}/members/{uid}
 trips/{tripId}/days/{dayId}
@@ -33,14 +33,18 @@ trips/{tripId}/expenses/{expenseId}
 trips/{tripId}/snapshots/{snapshotId}
 trips/{tripId}/activityLogs/{logId}
 
-Multi trip discovery
-The trip root document contains memberUids. After Security Rules are installed, the app can query trips where memberUids contains the signed in uid and render all accessible trips in one app. The canonical role remains the member document.
+Navigation hierarchy
+行程: current trip itinerary
+收藏: current trip saved places
+支出: current trip expenses
+資料: current trip visa / travel reference information
+我的: account, preferences, multi trip management and permissions
 
 Not activated yet
-Phase 2C will add JSON Import and first trip creation. The creator becomes Owner.
+Phase 2C will add JSON Import, first trip creation, Owner assignment and archive / restore writes.
 Phase 2D will add Export and snapshots.
-Phase 2E will load active trip data from Firestore and make switching between cloud trips live.
-Phase 2F will install and test Security Rules.
+Phase 2E will load an active trip from Firestore and enable live switching from the quick switcher.
+Phase 2F will install and test Security Rules and any required composite indexes.
 
 Important
-The current Firestore database is still in the default Production deny state. That is intentional. The current trip continues to render from trip.json and must not depend on Firebase access.
+The current Firestore database can remain empty and in Production deny mode. The bundled trip still renders from trip.json and Firebase failures must not block itinerary rendering.

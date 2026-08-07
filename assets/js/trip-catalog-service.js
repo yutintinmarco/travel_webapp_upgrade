@@ -22,6 +22,9 @@ function normalizeTripDoc(snapshot) {
     startDate: clean(data.startDate),
     endDate: clean(data.endDate),
     status: clean(data.status || "upcoming"),
+    archived: data.archived === true,
+    archivedAt: data.archivedAt || null,
+    archivedBy: clean(data.archivedBy),
     coverImage: clean(data.coverImage),
     updatedAt: data.updatedAt || null,
     createdBy: clean(data.createdBy),
@@ -43,7 +46,7 @@ async function attachRoles(trips, uid) {
   }));
 }
 
-export function subscribeUserTrips(user, callback) {
+export function subscribeUserTrips(user, callback, { archived = false } = {}) {
   if (typeof callback !== "function") return () => {};
   const uid = clean(user?.uid);
   if (!uid) {
@@ -52,7 +55,13 @@ export function subscribeUserTrips(user, callback) {
   }
 
   callback({ status: "loading", trips: [], error: null });
-  const tripsQuery = query(collection(db, "trips"), where("memberUids", "array-contains", uid));
+  // Active and archived trips are deliberately separate queries. Archived trips
+  // are only subscribed when the archive UI is explicitly opened.
+  const tripsQuery = query(
+    collection(db, "trips"),
+    where("memberUids", "array-contains", uid),
+    where("archived", "==", archived === true)
+  );
   let runId = 0;
 
   return onSnapshot(tripsQuery, snapshot => {

@@ -571,13 +571,7 @@ html.theme-dark .info-mini-copy.copied { background: rgba(42,90,42,0.65); border
 html.theme-dark .info-hint { color: rgba(150,150,175,0.65); }
 
   
-/* Expenses view: replace travel fixed cards with expense snapshot */
-body.expenses-view-active #team-bar,
-body.expenses-view-active #flight-card,
-body.expenses-view-active #weather-card,
-body.expenses-view-active #footer-note {
-  display: none !important;
-}
+/* v7.3.1: view containers alone own visibility; no cross-view card hiding rules. */
 
 
 /* Integration v5.3 global appearance polish */
@@ -732,13 +726,9 @@ body {
 .day-tab:active { transform: scale(0.96); }
 .day-tab.active { box-shadow: 0 4px 12px rgba(15,23,42,0.10), inset 0 1px 0 rgba(255,255,255,0.82); }
 
-/* Main cards belong to the itinerary tab, not every tab */
-body:not(.view-itinerary) #team-bar,
-body:not(.view-itinerary) #flight-card,
-body:not(.view-itinerary) #weather-card,
-body:not(.view-itinerary) #footer-note {
-  display: none !important;
-}
+/* v7.3.1: itinerary-owned cards now live inside #itinerary-view itself.
+   View visibility is structural, so first paint never depends on a body class
+   or an iOS backdrop-filter repaint. */
 
 /* Floating Liquid Glass tab bar, lifted clear of the iPhone home indicator and
    rounded display corners. */
@@ -1903,12 +1893,105 @@ html.theme-dark .trip-library-action, html:not(.theme-light):not(.theme-dark) .t
 html.theme-dark .trip-library-status, html:not(.theme-light):not(.theme-dark) .trip-library-status,
 html.theme-dark .trip-library-stat, html:not(.theme-light):not(.theme-dark) .trip-library-stat { background:rgba(255,255,255,.055); }
 
+
+/* Phase 2B refinement v7.3.1 */
+.header-title-small.trip-switch-trigger {
+  display:inline-flex;
+  align-items:center;
+  gap:4px;
+  cursor:pointer;
+  user-select:none;
+  -webkit-user-select:none;
+  border-radius:8px;
+  padding:1px 4px 1px 0;
+}
+.header-title-small.trip-switch-trigger::after {
+  content:"⌄";
+  font-size:11px;
+  line-height:1;
+  opacity:.58;
+  transform:translateY(-1px);
+}
+.header-title-small.trip-switch-trigger:active { opacity:.62; }
+.trip-info-only-card { padding-top:15px; }
+.trip-info-only-card .trip-info-heading { margin:2px 0 9px; font-size:calc(19px * var(--font-scale)); }
+.trip-info-only-card .trip-info-sub { margin:0 0 13px; }
+.profile-trips-card .trip-library-heading { margin-bottom:11px; }
+.profile-trips-card .trip-library-actions { margin-top:10px; }
+.trip-library-action-wide { grid-column:1 / -1; }
+.trip-archive-toggle {
+  width:100%; margin-top:10px; min-height:54px; border:0; border-radius:14px;
+  padding:9px 11px; background:rgba(118,118,128,.075); color:var(--label-primary);
+  display:flex; align-items:center; justify-content:space-between; gap:12px; text-align:left;
+}
+.trip-archive-toggle > span:first-child { min-width:0; display:grid; gap:2px; }
+.trip-archive-toggle strong { font-size:calc(12px * var(--font-scale)); }
+.trip-archive-toggle small { color:var(--label-secondary); font-size:calc(9.5px * var(--font-scale)); line-height:1.25; }
+.trip-archive-toggle-side { display:flex; align-items:center; gap:8px; color:var(--label-secondary); font-size:10px; font-weight:760; }
+.trip-archive-toggle[aria-expanded="true"] .profile-chevron { transform:rotate(90deg); }
+.trip-archive-panel { margin-top:9px; }
+.trip-archive-panel[hidden] { display:none !important; }
+.trip-library-item.is-archived { opacity:.86; }
+.trip-library-pill.is-archived { background:rgba(142,142,147,.14); color:var(--label-secondary); }
+
+.trip-switch-backdrop {
+  position:fixed; inset:0; z-index:2200; display:flex; align-items:flex-end; justify-content:center;
+  visibility:hidden; pointer-events:none; background:rgba(0,0,0,0);
+  transition:background-color .26s ease, visibility 0s linear .36s;
+  overscroll-behavior:none;
+}
+.trip-switch-backdrop.active {
+  visibility:visible; pointer-events:auto; background:rgba(0,0,0,.42);
+  transition:background-color .26s ease, visibility 0s linear 0s;
+}
+.trip-switch-sheet {
+  width:min(100%,480px); max-height:min(72dvh,620px); margin:0 8px max(8px,env(safe-area-inset-bottom,0px));
+  padding:10px 14px 14px; box-sizing:border-box; overflow:hidden;
+  border:1px solid rgba(255,255,255,.66); border-radius:28px;
+  background:rgba(248,248,250,.90); box-shadow:0 28px 70px rgba(0,0,0,.26),inset 0 1px 0 rgba(255,255,255,.9);
+  backdrop-filter:blur(34px) saturate(180%); -webkit-backdrop-filter:blur(34px) saturate(180%);
+  transform:translate3d(0,108%,0); transition:transform .38s cubic-bezier(.32,.72,0,1); will-change:transform;
+}
+.trip-switch-backdrop.active .trip-switch-sheet { transform:translate3d(0,0,0); }
+.trip-switch-backdrop.is-dragging .trip-switch-sheet,
+.trip-switch-backdrop.is-closing .trip-switch-sheet { transition:none; }
+.trip-switch-grabber-zone { height:22px; display:flex; align-items:flex-start; justify-content:center; touch-action:none; }
+.trip-switch-heading { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin:0 0 10px; }
+.trip-switch-heading h2 { margin:1px 0 0; color:var(--label-primary); font-size:calc(19px * var(--font-scale)); }
+.trip-switch-close { width:30px; height:30px; border:0; border-radius:999px; background:rgba(118,118,128,.12); color:var(--label-secondary); font-size:22px; line-height:1; display:grid; place-items:center; }
+.trip-switch-list { display:grid; gap:8px; overflow:auto; max-height:calc(min(72dvh,620px) - 150px); overscroll-behavior:contain; }
+.trip-switch-row {
+  width:100%; min-height:66px; border:0; border-radius:15px; padding:9px 11px;
+  background:rgba(118,118,128,.075); color:var(--label-primary); display:grid;
+  grid-template-columns:36px minmax(0,1fr) auto; align-items:center; gap:10px; text-align:left;
+}
+.trip-switch-row[disabled] { opacity:.60; }
+.trip-switch-row.is-current { background:rgba(0,122,255,.095); }
+.trip-switch-row-icon { width:36px; height:36px; border-radius:11px; display:grid; place-items:center; background:rgba(0,122,255,.10); }
+.trip-switch-row-copy { min-width:0; display:grid; gap:2px; }
+.trip-switch-row-copy strong { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:calc(12.5px * var(--font-scale)); }
+.trip-switch-row-copy small { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--label-secondary); font-size:calc(9.5px * var(--font-scale)); }
+.trip-switch-check { color:#34c759; font-size:17px; font-weight:800; }
+.trip-switch-manage { width:100%; min-height:44px; margin-top:10px; border:0; border-radius:13px; background:rgba(0,122,255,.10); color:#1478d4; font-size:12px; font-weight:760; }
+html.theme-dark .trip-archive-toggle,
+html:not(.theme-light):not(.theme-dark) .trip-archive-toggle,
+html.theme-dark .trip-switch-row,
+html:not(.theme-light):not(.theme-dark) .trip-switch-row { background:rgba(255,255,255,.055); }
+html.theme-dark .trip-switch-sheet,
+html:not(.theme-light):not(.theme-dark) .trip-switch-sheet {
+  background:rgba(26,26,34,.92); border-color:rgba(255,255,255,.10);
+  box-shadow:0 28px 70px rgba(0,0,0,.58),inset 0 1px 0 rgba(255,255,255,.06);
+}
+@media (prefers-reduced-motion: reduce) {
+  .trip-switch-backdrop,.trip-switch-sheet { transition-duration:.01ms !important; }
+}
+
 </style>
             <link rel="apple-touch-icon" href="assets/icon/trip_icon.png">
   <link rel="icon" type="image/png" href="assets/icon/trip_icon.png">
-  <link rel="manifest" href="manifest.json?v=7.3.0">
+  <link rel="manifest" href="manifest.json?v=7.3.1">
   <meta name="apple-mobile-web-app-title" content="關嘉露西生日之旅">
-  <link rel="stylesheet" href="assets/css/expenses.css?v=7.3.0">
+  <link rel="stylesheet" href="assets/css/expenses.css?v=7.3.1">
 </head>
 <body>
 <div class="bg-fixed"></div>
@@ -1927,7 +2010,7 @@ html.theme-dark .trip-library-stat, html:not(.theme-light):not(.theme-dark) .tri
     <div class="header">
       <div class="header-top">
         <div>
-          <div class="header-title-small" id="header-title-small">My Trip</div>
+          <div class="header-title-small trip-switch-trigger" id="header-title-small" role="button" tabindex="0" aria-label="切換旅程">My Trip</div>
           <div class="header-title-main" id="header-title-main">行程</div>
         </div>
         <div class="header-right">
@@ -1945,24 +2028,25 @@ html.theme-dark .trip-library-stat, html:not(.theme-light):not(.theme-dark) .tri
     </div>
 
 
-<div class="team-bar" id="team-bar" style="display:none;"></div>
-
-<div class="card" id="flight-card" style="display:none;"><div id="flight-content"></div></div>
-
-<div class="card" id="weather-card" style="display:none;">
-  <div class="weather-header">
-    <div class="weather-title" id="weather-title">目的地天氣（自動更新）</div>
-    <div class="weather-updated" id="weather-updated">載入中…</div>
-  </div>
-  <div class="city-tabs" id="city-tabs" style="display:none;"></div>
-  <div class="weather-today" id="weather-today">正在取得今日天氣…</div>
-  <div class="weather-sun" id="weather-sun"></div>
-  <div class="weather-days" id="weather-days"></div>
-</div>
-
 <div id="itinerary-view" class="app-view active-view">
+  <div class="team-bar" id="team-bar" style="display:none;"></div>
+
+  <div class="card" id="flight-card" style="display:none;"><div id="flight-content"></div></div>
+
+  <div class="card" id="weather-card" style="display:none;">
+    <div class="weather-header">
+      <div class="weather-title" id="weather-title">目的地天氣（自動更新）</div>
+      <div class="weather-updated" id="weather-updated">載入中…</div>
+    </div>
+    <div class="city-tabs" id="city-tabs" style="display:none;"></div>
+    <div class="weather-today" id="weather-today">正在取得今日天氣…</div>
+    <div class="weather-sun" id="weather-sun"></div>
+    <div class="weather-days" id="weather-days"></div>
+  </div>
+
   <div class="day-tabs" id="day-tabs"></div>
   <div id="day-contents"></div>
+  <div class="footer-note" id="footer-note"></div>
 </div>
 
 <div id="snacks-view" class="app-view" style="display:none;">
@@ -1978,33 +2062,15 @@ html.theme-dark .trip-library-stat, html:not(.theme-light):not(.theme-dark) .tri
 
 <div id="info-view" class="app-view" style="display:none;">
   <div class="trip-library-shell">
-    <section class="trip-library-card" aria-labelledby="trip-library-title">
-      <div class="trip-library-heading">
-        <div class="trip-library-heading-copy">
-          <div class="trip-library-eyebrow">Multi Trip</div>
-          <h2 id="trip-library-title">我的旅程</h2>
-          <p>同一個 App 管理多個旅程。每個旅程有獨立行程、收藏、支出、成員同權限。</p>
-        </div>
-        <span class="trip-library-count" id="trip-library-count">1</span>
-      </div>
-      <div class="trip-library-list" id="trip-library-list"></div>
-      <div class="trip-library-status" id="trip-library-status">正在準備旅程資料…</div>
-      <div class="trip-library-actions">
-        <button class="trip-library-action" type="button" disabled><span>＋ 新增旅程</span><small>Phase 2C 啟用</small></button>
-        <button class="trip-library-action" type="button" disabled><span>⇅ 匯入 trip.json</span><small>Phase 2C 啟用</small></button>
-      </div>
-      <div class="trip-library-schema" id="trip-library-schema"></div>
-    </section>
-
-    <section class="trip-library-card" id="trip-info-card">
-      <h3 class="trip-info-heading">目前旅程資料</h3>
-      <p class="trip-info-sub">Visit Japan Web、航班及住宿等資料仍然跟住目前旅程。</p>
+    <section class="trip-library-card trip-info-only-card" id="trip-info-card">
+      <div class="trip-library-eyebrow">Travel Details</div>
+      <h2 class="trip-info-heading">旅程資料</h2>
+      <p class="trip-info-sub">集中保存 Visit Japan Web、簽證、航班、住宿及同行旅客資料，方便出發前快速查閱及填表。</p>
       <div id="info-content"></div>
       <div class="info-hint" id="info-hint">以上資料可用於填寫 Visit Japan Web / 電子簽證申請<br>請按實際情況核實所有資料</div>
     </section>
   </div>
 </div>
-
 
 <div id="expenses-view" class="app-view" style="display:none;">
   <div id="expenses-root"></div>
@@ -2033,6 +2099,32 @@ html.theme-dark .trip-library-stat, html:not(.theme-light):not(.theme-dark) .tri
       <span class="profile-row-copy"><strong id="profile-account-action-title">登入 Google 帳戶</strong><small id="profile-account-action-subtitle">登入後顯示你參與嘅旅程及目前身份</small></span>
       <span class="profile-chevron">›</span>
     </button>
+  </section>
+
+  <section class="profile-card profile-trips-card" id="profile-trips-card" aria-labelledby="trip-library-title">
+    <div class="trip-library-heading">
+      <div class="trip-library-heading-copy">
+        <div class="trip-library-eyebrow">Multi Trip</div>
+        <h2 id="trip-library-title">我的旅程</h2>
+        <p>同一個 App 管理多個旅程。切換旅程後，行程、收藏、支出同資料會一齊轉換。</p>
+      </div>
+      <span class="trip-library-count" id="trip-library-count">1</span>
+    </div>
+    <div class="trip-library-list" id="trip-library-list"></div>
+    <div class="trip-library-status" id="trip-library-status">正在準備旅程資料…</div>
+    <div class="trip-library-actions">
+      <button class="trip-library-action" type="button" disabled><span>＋ 新增旅程</span><small>Phase 2C 啟用</small></button>
+      <button class="trip-library-action" type="button" disabled><span>⇅ 匯入 trip.json</span><small>Phase 2C 啟用</small></button>
+      <button class="trip-library-action trip-library-action-wide" type="button" disabled><span>封存目前旅程</span><small>Phase 2C 接入 Firestore 寫入</small></button>
+    </div>
+    <button class="trip-archive-toggle" id="trip-archive-toggle" type="button" aria-expanded="false">
+      <span><strong>已封存旅程</strong><small>平日不載入，按此需要時先讀取</small></span>
+      <span class="trip-archive-toggle-side"><span id="trip-archive-count">—</span><span class="profile-chevron">›</span></span>
+    </button>
+    <div class="trip-archive-panel" id="trip-archive-panel" hidden>
+      <div class="trip-library-list" id="trip-archive-list"></div>
+      <div class="trip-library-status" id="trip-archive-status">尚未載入已封存旅程。</div>
+    </div>
   </section>
 
   <section class="profile-card">
@@ -2082,11 +2174,10 @@ html.theme-dark .trip-library-stat, html:not(.theme-light):not(.theme-dark) .tri
       <span class="profile-row-copy"><strong>關於本 App</strong><small>版本、系統資料及使用說明</small></span>
       <span class="profile-chevron">›</span>
     </button>
-    <div class="profile-meta-row"><span>目前版本</span><strong>v7.3.0</strong></div>
+    <div class="profile-meta-row"><span>目前版本</span><strong>v7.3.1</strong></div>
   </section>
 </div>
-<div class="footer-note" id="footer-note"></div>
-<div class="app-version-note" id="app-version-note">v7.3.0</div>
+<div class="app-version-note" id="app-version-note">v7.3.1</div>
 
 
   </div>
@@ -2105,15 +2196,27 @@ html.theme-dark .trip-library-stat, html:not(.theme-light):not(.theme-dark) .tri
       <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="5" width="18" height="15" rx="3" stroke="currentColor" stroke-width="1.7"/><path d="M3 9h18M16 14h2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
       <span>支出</span>
     </button>
-    <button class="bottom-nav-item" id="bt-info" type="button" data-view="info" aria-label="旅程資料" style="display:none;">
+    <button class="bottom-nav-item" id="bt-info" type="button" data-view="info" aria-label="資料" style="display:none;">
       <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 3h8l4 4v14H7a2 2 0 01-2-2V5a2 2 0 012-2z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M14 3v5h5M9 12h6M9 16h6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
-      <span>旅程</span>
+      <span>資料</span>
     </button>
     <button class="bottom-nav-item" id="bt-profile" type="button" data-view="profile" aria-label="我的">
       <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="8" r="3.2" stroke="currentColor" stroke-width="1.7"/><path d="M5.5 20c.8-4 3-6 6.5-6s5.7 2 6.5 6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
       <span>我的</span>
     </button>
   </nav>
+</div>
+
+<div class="trip-switch-backdrop" id="trip-switch-backdrop" aria-hidden="true">
+  <section class="trip-switch-sheet" id="trip-switch-sheet" role="dialog" aria-modal="true" aria-labelledby="trip-switch-title">
+    <div class="trip-switch-grabber-zone" id="trip-switch-grabber" aria-hidden="true"><span class="sheet-grabber"></span></div>
+    <div class="trip-switch-heading">
+      <div><div class="trip-library-eyebrow">Current Trip</div><h2 id="trip-switch-title">切換旅程</h2></div>
+      <button class="trip-switch-close" id="trip-switch-close" type="button" aria-label="關閉">×</button>
+    </div>
+    <div class="trip-switch-list" id="trip-switch-list"></div>
+    <button class="trip-switch-manage" id="trip-switch-manage" type="button">管理所有旅程</button>
+  </section>
 </div>
 
 <div class="modal-backdrop" id="detail-backdrop" aria-hidden="true">
@@ -2136,7 +2239,7 @@ html.theme-dark .trip-library-stat, html:not(.theme-light):not(.theme-dark) .tri
 </div>
 
 <script>
-const APP_VERSION = "7.3.0";
+const APP_VERSION = "7.3.1";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 window.EXPENSES_MODULE_VERSION = EXPENSES_MODULE_VERSION;
@@ -2904,7 +3007,7 @@ function miniCopyBtn(textFn){
 function renderInfo(data){
   const meta=data.meta||{};
   const infoCard=meta.infoCard||null;
-  // Phase 2B: 旅程 tab is the permanent multi trip library, even when Visit Japan data is absent.
+  // v7.3.1: 資料 tab is dedicated to the current trip's visa / travel reference data.
   document.getElementById("bt-info").style.display="flex";requestAnimationFrame(updateBottomNavIndicator);
 
   const travellers=meta.travellers||{},cities=meta.cities||{},hotels=meta.hotels||{},flights=meta.flights||[];
@@ -3195,7 +3298,7 @@ const headerTitleMainEl=document.getElementById("header-title-main");
 const headerSubEl=document.getElementById("header-sub");
 const viewElements={itinerary:ivw,snacks:svw,info:infvw,expenses:expvw,profile:profilevw};
 const viewButtons={itinerary:bti,snacks:bts,info:btinfo,expenses:btexp,profile:btprofile};
-const viewLabels={itinerary:"行程",snacks:"收藏",expenses:"支出",info:"旅程",profile:"我的"};
+const viewLabels={itinerary:"行程",snacks:"收藏",expenses:"支出",info:"資料",profile:"我的"};
 const viewScrollPositions={itinerary:0,snacks:0,info:0,expenses:0,profile:0};
 let currentAppView="itinerary";
 let baseTripTitle="旅程";
@@ -3478,54 +3581,143 @@ renderProfileAuthState(null);
 
 
 let tripLibraryStopCatalog=null;
+let tripLibraryStopArchivedCatalog=null;
 let tripLibraryAuthUnsubscribe=null;
 let tripLibrarySummary=null;
+let tripLibraryCatalogService=null;
+let tripLibraryCurrentUser=null;
 let tripLibraryCloudState={status:"signed-out",trips:[],error:null};
+let tripLibraryArchiveState={status:"idle",trips:[],error:null};
 
 function tripLibraryEsc(value){return String(value??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#39;");}
 function tripLibraryRoleLabel(role){return({owner:"Owner",admin:"Admin",member:"Member",viewer:"Viewer"})[role]||"";}
-function renderTripLibrary(){
-  const list=document.getElementById("trip-library-list");
-  const status=document.getElementById("trip-library-status");
-  const count=document.getElementById("trip-library-count");
-  const schema=document.getElementById("trip-library-schema");
-  if(!list||!tripLibrarySummary)return;
+function tripLibraryDateText(trip){return trip?.dateRange||[trip?.startDate,trip?.endDate].filter(Boolean).join(" → ")||trip?.tripId||"";}
+function tripLibraryStatusLabel(status){return({draft:"草稿",upcoming:"即將出發",active:"旅程中",completed:"已完成"})[status]||"";}
 
+function currentTripLibraryRow(){
+  if(!tripLibrarySummary)return"";
   const currentId=tripLibrarySummary.tripId;
   const cloudTrips=Array.isArray(tripLibraryCloudState.trips)?tripLibraryCloudState.trips:[];
   const currentCloud=cloudTrips.find(trip=>trip.tripId===currentId)||null;
-  const others=cloudTrips.filter(trip=>trip.tripId!==currentId);
   const currentRole=tripLibraryRoleLabel(currentCloud?.role);
-  const rows=[];
-  rows.push(`<div class="trip-library-item is-current">
+  const statusLabel=tripLibraryStatusLabel(currentCloud?.status);
+  return `<div class="trip-library-item is-current">
     <span class="trip-library-icon">✈️</span>
     <span class="trip-library-copy">
       <strong>${tripLibraryEsc(tripLibrarySummary.title||currentId)}</strong>
       <small>${tripLibraryEsc(tripLibrarySummary.dateRange||[tripLibrarySummary.startDate,tripLibrarySummary.endDate].filter(Boolean).join(" → ")||currentId)}</small>
-      <span class="trip-library-meta"><span class="trip-library-pill is-current">目前</span><span class="trip-library-pill">本機 JSON</span>${currentRole?`<span class="trip-library-pill is-role">${currentRole}</span>`:""}</span>
+      <span class="trip-library-meta"><span class="trip-library-pill is-current">目前</span><span class="trip-library-pill">本機 JSON</span>${statusLabel?`<span class="trip-library-pill">${statusLabel}</span>`:""}${currentRole?`<span class="trip-library-pill is-role">${currentRole}</span>`:""}</span>
     </span>
     <span class="trip-library-side"><strong>${tripLibrarySummary.dayCount} 日</strong><small>${tripLibrarySummary.itemCount} 項</small></span>
-  </div>`);
-  others.forEach(trip=>{
-    const role=tripLibraryRoleLabel(trip.role);
-    rows.push(`<div class="trip-library-item" aria-disabled="true">
-      <span class="trip-library-icon">🗂️</span>
-      <span class="trip-library-copy"><strong>${tripLibraryEsc(trip.title||trip.tripId)}</strong><small>${tripLibraryEsc(trip.dateRange||[trip.startDate,trip.endDate].filter(Boolean).join(" → ")||trip.tripId)}</small><span class="trip-library-meta"><span class="trip-library-pill">Firebase</span>${role?`<span class="trip-library-pill is-role">${role}</span>`:""}</span></span>
-      <span class="trip-library-side"><strong>已加入</strong><small>2E 切換</small></span>
-    </div>`);
-  });
-  list.innerHTML=rows.join("");
-  if(count) count.textContent=String(1+others.length);
-  if(schema) schema.innerHTML=`<div class="trip-library-stat"><strong>v${tripLibrarySummary.schemaVersion}</strong><span>Schema</span></div><div class="trip-library-stat"><strong>${tripLibrarySummary.dayCount}</strong><span>Days</span></div><div class="trip-library-stat"><strong>${tripLibrarySummary.savedPlaceCount}</strong><span>Saved</span></div>`;
+  </div>`;
+}
 
-  if(!status)return;
-  const state=tripLibraryCloudState.status;
-  if(state==="signed-out") status.textContent="目前使用本機 trip.json。登入 Google 後會顯示你有權使用嘅雲端旅程。";
-  else if(state==="loading") status.textContent="已登入 Google，正在讀取 Firebase 旅程清單…";
-  else if(state==="rules-pending") status.textContent="Google 登入正常。Firestore 仍使用 Production 預設封鎖規則，Phase 2F 套用正式 Rules 後會讀取雲端旅程。";
-  else if(state==="ready"&&cloudTrips.length===0) status.textContent="暫時未有已匯入嘅雲端旅程。Phase 2C 匯入第一個 trip.json 時，建立者會自動成為 Owner。";
-  else if(state==="ready") status.textContent=`已讀取 ${cloudTrips.length} 個雲端旅程。Phase 2E 完成 Firebase Loader 後可喺同一個網址直接切換。`;
-  else status.textContent="旅程清單暫時未能同步，但目前本機行程不受影響。";
+function cloudTripLibraryRow(trip,{archived=false}={}){
+  const role=tripLibraryRoleLabel(trip.role);
+  const statusLabel=tripLibraryStatusLabel(trip.status);
+  return `<div class="trip-library-item${archived?" is-archived":""}" aria-disabled="true">
+    <span class="trip-library-icon">${archived?"🗄️":"🗂️"}</span>
+    <span class="trip-library-copy">
+      <strong>${tripLibraryEsc(trip.title||trip.tripId)}</strong>
+      <small>${tripLibraryEsc(tripLibraryDateText(trip))}</small>
+      <span class="trip-library-meta">${archived?'<span class="trip-library-pill is-archived">已封存</span>':'<span class="trip-library-pill">Firebase</span>'}${statusLabel?`<span class="trip-library-pill">${statusLabel}</span>`:""}${role?`<span class="trip-library-pill is-role">${role}</span>`:""}</span>
+    </span>
+    <span class="trip-library-side"><strong>${archived?"保留":"已加入"}</strong><small>${archived?"可還原":"2E 切換"}</small></span>
+  </div>`;
+}
+
+function renderTripSwitcher(){
+  const list=document.getElementById("trip-switch-list");
+  if(!list||!tripLibrarySummary)return;
+  const currentId=tripLibrarySummary.tripId;
+  const cloudTrips=Array.isArray(tripLibraryCloudState.trips)?tripLibraryCloudState.trips:[];
+  const others=cloudTrips.filter(trip=>trip.tripId!==currentId && trip.archived!==true);
+  const rows=[`<button class="trip-switch-row is-current" type="button" data-trip-switch-current="true">
+    <span class="trip-switch-row-icon">✈️</span>
+    <span class="trip-switch-row-copy"><strong>${tripLibraryEsc(tripLibrarySummary.title||currentId)}</strong><small>${tripLibraryEsc(tripLibrarySummary.dateRange||currentId)}</small></span>
+    <span class="trip-switch-check">✓</span>
+  </button>`];
+  others.forEach(trip=>rows.push(`<button class="trip-switch-row" type="button" disabled>
+    <span class="trip-switch-row-icon">🗂️</span>
+    <span class="trip-switch-row-copy"><strong>${tripLibraryEsc(trip.title||trip.tripId)}</strong><small>${tripLibraryEsc(tripLibraryDateText(trip))} · Phase 2E 啟用切換</small></span>
+    <span class="profile-chevron">›</span>
+  </button>`));
+  list.innerHTML=rows.join("");
+}
+
+function renderArchivedTrips(){
+  const panel=document.getElementById("trip-archive-panel");
+  const list=document.getElementById("trip-archive-list");
+  const status=document.getElementById("trip-archive-status");
+  const count=document.getElementById("trip-archive-count");
+  if(!panel||!list||!status||!count)return;
+  const state=tripLibraryArchiveState.status;
+  const trips=Array.isArray(tripLibraryArchiveState.trips)?tripLibraryArchiveState.trips:[];
+  if(state==="idle"){
+    count.textContent="—";
+    list.innerHTML="";
+    status.textContent="尚未載入已封存旅程。";
+  }else if(state==="signed-out"){
+    count.textContent="—";
+    list.innerHTML="";
+    status.textContent="登入 Google 後先可以查看已封存旅程。";
+  }else if(state==="loading"){
+    count.textContent="…";
+    list.innerHTML="";
+    status.textContent="正在載入已封存旅程…";
+  }else if(state==="rules-pending"){
+    count.textContent="—";
+    list.innerHTML="";
+    status.textContent="Firestore Rules 尚未開放旅程查詢；Phase 2F 後先會顯示封存清單。";
+  }else if(state==="ready"){
+    count.textContent=String(trips.length);
+    list.innerHTML=trips.length?trips.map(trip=>cloudTripLibraryRow(trip,{archived:true})).join(""):"";
+    status.textContent=trips.length?"封存只會喺你主動打開呢一區時讀取，平日唔會加入 Active Trip 查詢。":"暫時未有已封存旅程。";
+  }else{
+    count.textContent="—";
+    list.innerHTML="";
+    status.textContent="暫時未能讀取已封存旅程。";
+  }
+}
+
+function renderTripLibrary(){
+  const list=document.getElementById("trip-library-list");
+  const status=document.getElementById("trip-library-status");
+  const count=document.getElementById("trip-library-count");
+  if(!list||!tripLibrarySummary)return;
+
+  const currentId=tripLibrarySummary.tripId;
+  const cloudTrips=(Array.isArray(tripLibraryCloudState.trips)?tripLibraryCloudState.trips:[]).filter(trip=>trip.archived!==true);
+  const currentCloud=cloudTrips.find(trip=>trip.tripId===currentId)||null;
+  const others=cloudTrips.filter(trip=>trip.tripId!==currentId);
+  list.innerHTML=currentTripLibraryRow()+others.map(trip=>cloudTripLibraryRow(trip)).join("");
+  if(count) count.textContent=String(Math.max(1,cloudTrips.length+(currentCloud?0:1)));
+
+  if(status){
+    const state=tripLibraryCloudState.status;
+    if(state==="signed-out") status.textContent="目前使用本機 trip.json。登入 Google 後會顯示你有權使用嘅 Active Trips。";
+    else if(state==="loading") status.textContent="已登入 Google，正在讀取未封存旅程…";
+    else if(state==="rules-pending") status.textContent="Google 登入正常。Firestore 仍使用 Production 預設封鎖規則，Phase 2F 套用正式 Rules 後會讀取雲端旅程。";
+    else if(state==="ready"&&cloudTrips.length===0) status.textContent="暫時未有已匯入嘅雲端旅程。Phase 2C 匯入第一個 trip.json 時，建立者會自動成為 Owner。";
+    else if(state==="ready") status.textContent=`已讀取 ${cloudTrips.length} 個未封存雲端旅程。Phase 2E 完成 Firebase Loader 後可直接切換。`;
+    else status.textContent="旅程清單暫時未能同步，但目前本機行程不受影響。";
+  }
+  renderTripSwitcher();
+  renderArchivedTrips();
+}
+
+function stopArchivedTripSubscription(){
+  if(tripLibraryStopArchivedCatalog){tripLibraryStopArchivedCatalog();tripLibraryStopArchivedCatalog=null;}
+}
+function loadArchivedTrips(){
+  if(!tripLibraryCurrentUser){tripLibraryArchiveState={status:"signed-out",trips:[],error:null};renderArchivedTrips();return;}
+  if(!tripLibraryCatalogService){tripLibraryArchiveState={status:"error",trips:[],error:new Error("catalog unavailable")};renderArchivedTrips();return;}
+  stopArchivedTripSubscription();
+  tripLibraryArchiveState={status:"loading",trips:[],error:null};renderArchivedTrips();
+  tripLibraryStopArchivedCatalog=tripLibraryCatalogService.subscribeUserTrips(tripLibraryCurrentUser,state=>{
+    tripLibraryArchiveState=state;
+    renderArchivedTrips();
+  },{archived:true});
 }
 
 function initTripLibrarySafe(data){
@@ -3535,18 +3727,27 @@ function initTripLibrarySafe(data){
       tripLibrarySummary=schemaService.getTripSummary(result.trip);
       window.__portableTripSchema=result;
       tripLibraryCloudState={status:window.__appAuthUser?"loading":"signed-out",trips:[],error:null};
+      tripLibraryArchiveState={status:"idle",trips:[],error:null};
       renderTripLibrary();
 
       Promise.all([
         import(`./assets/js/trip-catalog-service.js?v=${APP_VERSION}`),
         getGlobalAuthService()
       ]).then(([catalogService,authService])=>{
+        tripLibraryCatalogService=catalogService;
         if(tripLibraryAuthUnsubscribe) tripLibraryAuthUnsubscribe();
         tripLibraryAuthUnsubscribe=authService.subscribeAuthState(user=>{
+          tripLibraryCurrentUser=user||null;
           if(tripLibraryStopCatalog){tripLibraryStopCatalog();tripLibraryStopCatalog=null;}
+          stopArchivedTripSubscription();
+          tripLibraryArchiveState={status:user?"idle":"signed-out",trips:[],error:null};
+          const archivePanel=document.getElementById("trip-archive-panel");
+          const archiveToggle=document.getElementById("trip-archive-toggle");
+          if(archivePanel) archivePanel.hidden=true;
+          if(archiveToggle) archiveToggle.setAttribute("aria-expanded","false");
           if(!user){tripLibraryCloudState={status:"signed-out",trips:[],error:null};renderTripLibrary();return;}
           tripLibraryCloudState={status:"loading",trips:[],error:null};renderTripLibrary();
-          tripLibraryStopCatalog=catalogService.subscribeUserTrips(user,state=>{tripLibraryCloudState=state;renderTripLibrary();});
+          tripLibraryStopCatalog=catalogService.subscribeUserTrips(user,state=>{tripLibraryCloudState=state;renderTripLibrary();},{archived:false});
         });
       }).catch(error=>{
         console.warn("Phase 2B cloud trip catalog unavailable",error);
@@ -3560,6 +3761,108 @@ function initTripLibrarySafe(data){
       if(status) status.textContent="旅程 Schema service 載入失敗；目前行程仍可正常使用。";
     });
 }
+
+const tripArchiveToggle=document.getElementById("trip-archive-toggle");
+tripArchiveToggle?.addEventListener("click",()=>{
+  const panel=document.getElementById("trip-archive-panel");
+  if(!panel)return;
+  const willOpen=panel.hidden;
+  panel.hidden=!willOpen;
+  tripArchiveToggle.setAttribute("aria-expanded",willOpen?"true":"false");
+  if(willOpen && ["idle","signed-out","error"].includes(tripLibraryArchiveState.status)) loadArchivedTrips();
+});
+
+const tripSwitchBackdrop=document.getElementById("trip-switch-backdrop");
+const tripSwitchSheet=document.getElementById("trip-switch-sheet");
+const tripSwitchGrabber=document.getElementById("trip-switch-grabber");
+let tripSwitchTouch=null;
+let tripSwitchCloseTimer=0;
+function openTripSwitcher(){
+  if(!tripSwitchBackdrop||!tripSwitchSheet)return;
+  clearTimeout(tripSwitchCloseTimer);
+  renderTripSwitcher();
+  tripSwitchSheet.style.transition="";
+  tripSwitchSheet.style.transform="";
+  tripSwitchBackdrop.style.backgroundColor="";
+  tripSwitchBackdrop.classList.remove("is-closing","is-dragging");
+  tripSwitchBackdrop.setAttribute("aria-hidden","false");
+  lockScroll();
+  requestAnimationFrame(()=>tripSwitchBackdrop.classList.add("active"));
+}
+function closeTripSwitcher({velocity=0}={}){
+  if(!tripSwitchBackdrop?.classList.contains("active")||!tripSwitchSheet)return;
+  tripSwitchBackdrop.classList.remove("is-dragging");
+  tripSwitchBackdrop.classList.add("is-closing");
+  const distance=Math.max(window.innerHeight,tripSwitchSheet.getBoundingClientRect().height+80);
+  const duration=Math.max(180,Math.min(340,290-Math.max(0,velocity)*80));
+  tripSwitchSheet.style.transition=`transform ${duration}ms cubic-bezier(.32,.72,0,1)`;
+  tripSwitchSheet.style.transform=`translate3d(0,${distance}px,0)`;
+  tripSwitchBackdrop.style.backgroundColor="rgba(0,0,0,0)";
+  clearTimeout(tripSwitchCloseTimer);
+  tripSwitchCloseTimer=setTimeout(()=>{
+    tripSwitchBackdrop.classList.remove("active","is-closing");
+    tripSwitchBackdrop.setAttribute("aria-hidden","true");
+    tripSwitchSheet.style.transition="";
+    tripSwitchSheet.style.transform="";
+    tripSwitchBackdrop.style.backgroundColor="";
+    unlockScroll();
+  },duration+22);
+}
+function beginTripSwitchDrag(e){
+  if(!tripSwitchBackdrop?.classList.contains("active")||e.touches?.length!==1)return;
+  const t=e.touches[0];
+  tripSwitchTouch={startX:t.clientX,startY:t.clientY,lastY:t.clientY,lastTime:performance.now(),offset:0,velocity:0,dragging:false};
+}
+function moveTripSwitchDrag(e){
+  if(!tripSwitchTouch||e.touches?.length!==1)return;
+  const t=e.touches[0],dx=t.clientX-tripSwitchTouch.startX,dy=t.clientY-tripSwitchTouch.startY;
+  if(!tripSwitchTouch.dragging){
+    if(dy<=3||Math.abs(dx)>Math.abs(dy))return;
+    tripSwitchTouch.dragging=true;
+    tripSwitchBackdrop.classList.add("is-dragging");
+  }
+  e.preventDefault();
+  const now=performance.now(),dt=Math.max(1,now-tripSwitchTouch.lastTime);
+  const instant=(t.clientY-tripSwitchTouch.lastY)/dt;
+  tripSwitchTouch.velocity=tripSwitchTouch.velocity*.72+instant*.28;
+  tripSwitchTouch.lastY=t.clientY;tripSwitchTouch.lastTime=now;
+  tripSwitchTouch.offset=Math.max(0,dy);
+  tripSwitchSheet.style.transform=`translate3d(0,${tripSwitchTouch.offset}px,0)`;
+  const h=Math.max(tripSwitchSheet.getBoundingClientRect().height,1);
+  const progress=Math.min(1,tripSwitchTouch.offset/h);
+  tripSwitchBackdrop.style.backgroundColor=`rgba(0,0,0,${(.42*(1-progress)).toFixed(3)})`;
+}
+function endTripSwitchDrag(){
+  if(!tripSwitchTouch)return;
+  const state=tripSwitchTouch;tripSwitchTouch=null;
+  if(!state.dragging)return;
+  const h=Math.max(tripSwitchSheet?.getBoundingClientRect().height||0,1);
+  if(state.offset>Math.min(160,h*.28)||state.velocity>.62){closeTripSwitcher({velocity:state.velocity});return;}
+  tripSwitchBackdrop?.classList.remove("is-dragging");
+  if(tripSwitchSheet){tripSwitchSheet.style.transition="transform .32s cubic-bezier(.22,.86,.26,1)";tripSwitchSheet.style.transform="translate3d(0,0,0)";}
+  if(tripSwitchBackdrop)tripSwitchBackdrop.style.backgroundColor="rgba(0,0,0,.42)";
+  setTimeout(()=>{if(tripSwitchSheet)tripSwitchSheet.style.transition="";},340);
+}
+tripSwitchGrabber?.addEventListener("touchstart",beginTripSwitchDrag,{passive:true});
+tripSwitchGrabber?.addEventListener("touchmove",moveTripSwitchDrag,{passive:false});
+tripSwitchGrabber?.addEventListener("touchend",endTripSwitchDrag,{passive:true});
+document.getElementById("trip-switch-close")?.addEventListener("click",()=>closeTripSwitcher());
+tripSwitchBackdrop?.addEventListener("click",event=>{if(event.target===tripSwitchBackdrop)closeTripSwitcher();});
+document.getElementById("trip-switch-manage")?.addEventListener("click",()=>{
+  closeTripSwitcher();
+  setTimeout(()=>{
+    setView("profile",{restoreScroll:false});
+    requestAnimationFrame(()=>{
+      const card=document.getElementById("profile-trips-card");
+      if(!card||!scrollShell)return;
+      const top=scrollShell.scrollTop+card.getBoundingClientRect().top-18;
+      scrollShell.scrollTo({top:Math.max(0,top),behavior:"smooth"});
+    });
+  },220);
+});
+const largeTripSwitchTrigger=document.getElementById("header-title-small");
+largeTripSwitchTrigger?.addEventListener("click",openTripSwitcher);
+largeTripSwitchTrigger?.addEventListener("keydown",event=>{if(event.key==="Enter"||event.key===" "){event.preventDefault();openTripSwitcher();}});
 
 function initPhase2AccessContext(data){
   Promise.all([

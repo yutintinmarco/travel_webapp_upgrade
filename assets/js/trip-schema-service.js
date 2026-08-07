@@ -3,8 +3,7 @@ export const TRIP_STATUS = Object.freeze({
   DRAFT: "draft",
   UPCOMING: "upcoming",
   ACTIVE: "active",
-  COMPLETED: "completed",
-  ARCHIVED: "archived"
+  COMPLETED: "completed"
 });
 
 function clean(value) { return String(value ?? "").trim(); }
@@ -190,7 +189,10 @@ export function buildFirestoreTripPlan(rawInput = {}, ownerUser = null) {
 
   const meta = trip.meta || {};
   const title = stripHtml(meta.titleMain || meta.titleSmall || trip.tripId);
-  const nowStatus = clean(meta.status) || inferTripStatus(clean(meta.tripStartIso), clean(meta.tripEndIso));
+  const requestedStatus = clean(meta.status);
+  const nowStatus = Object.values(TRIP_STATUS).includes(requestedStatus)
+    ? requestedStatus
+    : inferTripStatus(clean(meta.tripStartIso), clean(meta.tripEndIso));
   const ownerUid = clean(ownerUser?.uid);
   const memberUids = ownerUid ? [ownerUid] : [];
 
@@ -206,6 +208,9 @@ export function buildFirestoreTripPlan(rawInput = {}, ownerUser = null) {
     startDate: clean(meta.tripStartIso),
     endDate: clean(meta.tripEndIso),
     status: nowStatus,
+    archived: false,
+    archivedAt: null,
+    archivedBy: "",
     coverImage: clean(meta.coverImage),
     memberUids,
     memberCount: memberUids.length,
@@ -280,6 +285,18 @@ export function buildFirestoreTripPlan(rawInput = {}, ownerUser = null) {
       savedPlaces,
       settings
     }
+  };
+}
+
+export function buildTripArchivePatch({ archived = true, user = null, timestamp = null } = {}) {
+  const shouldArchive = archived === true;
+  return {
+    archived: shouldArchive,
+    // Phase 2C writer supplies Firestore serverTimestamp() here. Keeping the
+    // schema helper Firebase-agnostic avoids mixing browser SDK concerns into
+    // portable trip validation.
+    archivedAt: shouldArchive ? timestamp : null,
+    archivedBy: shouldArchive ? clean(user?.uid) : ""
   };
 }
 
