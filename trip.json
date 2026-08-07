@@ -205,7 +205,8 @@
         ]
       },
       "fallback": "assets/gallery/demo_city.svg"
-    }
+    },
+    "tripId": "kyoto-osaka-2026"
   },
   "days": [
     {
@@ -227,6 +228,16 @@
           "maps": "https://www.google.com/maps/search/?api=1&query=Kansai+International+Airport",
           "gallery": [
             "assets/gallery/demo_transport.svg"
+          ],
+          "itemId": "itm_8fcb1760",
+          "sortOrder": 0,
+          "images": [
+            {
+              "imageId": "img_d7ed53e4",
+              "source": "static",
+              "src": "assets/gallery/demo_transport.svg",
+              "sortOrder": 0
+            }
           ]
         },
         {
@@ -240,6 +251,16 @@
           "maps": "https://www.google.com/maps/search/?api=1&query=Kyoto+Station",
           "gallery": [
             "assets/gallery/demo_transport.svg"
+          ],
+          "itemId": "itm_1e82818e",
+          "sortOrder": 1,
+          "images": [
+            {
+              "imageId": "img_d7ed53e4",
+              "source": "static",
+              "src": "assets/gallery/demo_transport.svg",
+              "sortOrder": 0
+            }
           ]
         },
         {
@@ -255,6 +276,28 @@
             "assets/gallery/demo_shop.svg",
             "assets/gallery/demo_food.svg",
             "assets/gallery/demo_nature.svg"
+          ],
+          "itemId": "itm_82312e97",
+          "sortOrder": 2,
+          "images": [
+            {
+              "imageId": "img_991161e5",
+              "source": "static",
+              "src": "assets/gallery/demo_shop.svg",
+              "sortOrder": 0
+            },
+            {
+              "imageId": "img_037bf5b0",
+              "source": "static",
+              "src": "assets/gallery/demo_food.svg",
+              "sortOrder": 1
+            },
+            {
+              "imageId": "img_0b81e549",
+              "source": "static",
+              "src": "assets/gallery/demo_nature.svg",
+              "sortOrder": 2
+            }
           ]
         },
         {
@@ -270,6 +313,28 @@
             "assets/gallery/demo_shop.svg",
             "assets/gallery/demo_food.svg",
             "assets/gallery/demo_nature.svg"
+          ],
+          "itemId": "itm_31f6d821",
+          "sortOrder": 3,
+          "images": [
+            {
+              "imageId": "img_991161e5",
+              "source": "static",
+              "src": "assets/gallery/demo_shop.svg",
+              "sortOrder": 0
+            },
+            {
+              "imageId": "img_037bf5b0",
+              "source": "static",
+              "src": "assets/gallery/demo_food.svg",
+              "sortOrder": 1
+            },
+            {
+              "imageId": "img_0b81e549",
+              "source": "static",
+              "src": "assets/gallery/demo_nature.svg",
+              "sortOrder": 2
+            }
           ]
         },
         {
@@ -283,6 +348,16 @@
           "maps": "https://www.google.com/maps/search/?api=1&query=Kansai+International+Airport",
           "gallery": [
             "assets/gallery/demo_transport.svg"
+          ],
+          "itemId": "itm_75a6cf8a",
+          "sortOrder": 4,
+          "images": [
+            {
+              "imageId": "img_d7ed53e4",
+              "source": "static",
+              "src": "assets/gallery/demo_transport.svg",
+              "sortOrder": 0
+            }
           ]
         },
         {
@@ -296,6 +371,16 @@
           "maps": "https://www.google.com/maps/search/?api=1&query=Kyoto+Station",
           "gallery": [
             "assets/gallery/demo_transport.svg"
+          ],
+          "itemId": "itm_8a84d5ee",
+          "sortOrder": 5,
+          "images": [
+            {
+              "imageId": "img_d7ed53e4",
+              "source": "static",
+              "src": "assets/gallery/demo_transport.svg",
+              "sortOrder": 0
+            }
           ]
         },
         {
@@ -309,6 +394,16 @@
           "maps": "https://www.google.com/maps/search/?api=1&query=AEON+Mall+KYOTO",
           "gallery": [
             "assets/gallery/demo_city.svg"
+          ],
+          "itemId": "itm_f8216f7a",
+          "sortOrder": 6,
+          "images": [
+            {
+              "imageId": "img_7ab4c3f6",
+              "source": "static",
+              "src": "assets/gallery/demo_city.svg",
+              "sortOrder": 0
+            }
           ]
         },
         {
@@ -325,6 +420,28 @@
             "assets/gallery/demo_food.svg",
             "assets/gallery/demo_city.svg",
             "assets/gallery/demo_nature.svg"
+          ],
+          "itemId": "itm_df2a4788",
+          "sortOrder": 7,
+          "images": [
+            {
+              "imageId": "img_037bf5b0",
+              "source": "static",
+              "src": "assets/gallery/demo_food.svg",
+              "sortOrder": 0
+            },
+            {
+              "imageId": "img_7ab4c3f6",
+              "source": "static",
+              "src": "assets/gallery/demo_city.svg",
+              "sortOrder": 1
+            },
+            {
+              "imageId": "img_0b81e549",
+              "source": "static",
+              "src": "assets/gallery/demo_nature.svg",
+              "sortOrder": 2
+            }
           ]
         },
         {
@@ -340,9 +457,33 @@
             "assets/gallery/demo_hotel.svg",
             "assets/gallery/demo_food.svg",
             "assets/gallery/demo_nature.svg"
+          ],
+          "itemId": "itm_a53b8d9e",
+          "sortOrder": 8,
+          "images": [
+            {
+              "imageId": "img_09c601f3",
+              "source": "static",
+              "src": "assets/gallery/demo_hotel.svg",
+              "sortOrder": 0
+            },
+            {
+              "imageId": "img_037bf5b0",
+              "source": "static",
+              "src": "assets/gallery/demo_food.svg",
+              "sortOrder": 1
+            },
+            {
+              "imageId": "img_0b81e549",
+              "source": "static",
+              "src": "assets/gallery/demo_nature.svg",
+              "sortOrder": 2
+            }
           ]
         }
-      ]
+      ],
+      "dayId": "day_20260523",
+      "sortOrder": 0
     },
     {
       "label": "Day 2",
@@ -363,6 +504,16 @@
           "maps": "https://www.google.com/maps/search/?api=1&query=Uji+Station+Kyoto",
           "gallery": [
             "assets/gallery/demo_transport.svg"
+          ],
+          "itemId": "itm_5216fd11",
+          "sortOrder": 0,
+          "images": [
+            {
+              "imageId": "img_d7ed53e4",
+              "source": "static",
+              "src": "assets/gallery/demo_transport.svg",
+              "sortOrder": 0
+            }
           ]
         },
         {
@@ -379,6 +530,28 @@
             "assets/gallery/demo_nature.svg",
             "assets/gallery/demo_food.svg",
             "assets/gallery/demo_nature.svg"
+          ],
+          "itemId": "itm_9e11c6d0",
+          "sortOrder": 1,
+          "images": [
+            {
+              "imageId": "img_0b81e549",
+              "source": "static",
+              "src": "assets/gallery/demo_nature.svg",
+              "sortOrder": 0
+            },
+            {
+              "imageId": "img_037bf5b0",
+              "source": "static",
+              "src": "assets/gallery/demo_food.svg",
+              "sortOrder": 1
+            },
+            {
+              "imageId": "img_0b81e549",
+              "source": "static",
+              "src": "assets/gallery/demo_nature.svg",
+              "sortOrder": 2
+            }
           ]
         },
         {
@@ -392,6 +565,16 @@
           "maps": "https://www.google.com/maps/search/?api=1&query=Nakamura+Tokichi+Byodoin+Uji",
           "gallery": [
             "assets/gallery/demo_city.svg"
+          ],
+          "itemId": "itm_ef6d11db",
+          "sortOrder": 2,
+          "images": [
+            {
+              "imageId": "img_7ab4c3f6",
+              "source": "static",
+              "src": "assets/gallery/demo_city.svg",
+              "sortOrder": 0
+            }
           ]
         },
         {
@@ -402,7 +585,9 @@
           "who": "all",
           "popup": true,
           "detail": "由宇治一帶前往 Nintendo Museum，預留交通及等候時間。",
-          "maps": "https://www.google.com/maps/search/?api=1&query=Nintendo+Museum+Uji+Kyoto"
+          "maps": "https://www.google.com/maps/search/?api=1&query=Nintendo+Museum+Uji+Kyoto",
+          "itemId": "itm_b355a7f3",
+          "sortOrder": 3
         },
         {
           "time": "11:00",
@@ -421,6 +606,28 @@
             "assets/gallery/demo_shop.svg",
             "assets/gallery/demo_food.svg",
             "assets/gallery/demo_nature.svg"
+          ],
+          "itemId": "itm_b2329742",
+          "sortOrder": 4,
+          "images": [
+            {
+              "imageId": "img_991161e5",
+              "source": "static",
+              "src": "assets/gallery/demo_shop.svg",
+              "sortOrder": 0
+            },
+            {
+              "imageId": "img_037bf5b0",
+              "source": "static",
+              "src": "assets/gallery/demo_food.svg",
+              "sortOrder": 1
+            },
+            {
+              "imageId": "img_0b81e549",
+              "source": "static",
+              "src": "assets/gallery/demo_nature.svg",
+              "sortOrder": 2
+            }
           ]
         },
         {
@@ -431,7 +638,9 @@
           "who": "all",
           "popup": true,
           "detail": "參觀後安排下午茶或稍作休息。",
-          "maps": "https://www.google.com/maps/search/?api=1&query=Uji+Kyoto+tea"
+          "maps": "https://www.google.com/maps/search/?api=1&query=Uji+Kyoto+tea",
+          "itemId": "itm_2fd939cf",
+          "sortOrder": 5
         },
         {
           "time": "17:00",
@@ -444,6 +653,16 @@
           "maps": "https://www.google.com/maps/search/?api=1&query=Fushimi+Inari+Taisha",
           "gallery": [
             "assets/gallery/demo_nature.svg"
+          ],
+          "itemId": "itm_ea5eca5b",
+          "sortOrder": 6,
+          "images": [
+            {
+              "imageId": "img_0b81e549",
+              "source": "static",
+              "src": "assets/gallery/demo_nature.svg",
+              "sortOrder": 0
+            }
           ]
         },
         {
@@ -460,6 +679,28 @@
             "assets/gallery/demo_food.svg",
             "assets/gallery/demo_city.svg",
             "assets/gallery/demo_nature.svg"
+          ],
+          "itemId": "itm_37e4306e",
+          "sortOrder": 7,
+          "images": [
+            {
+              "imageId": "img_037bf5b0",
+              "source": "static",
+              "src": "assets/gallery/demo_food.svg",
+              "sortOrder": 0
+            },
+            {
+              "imageId": "img_7ab4c3f6",
+              "source": "static",
+              "src": "assets/gallery/demo_city.svg",
+              "sortOrder": 1
+            },
+            {
+              "imageId": "img_0b81e549",
+              "source": "static",
+              "src": "assets/gallery/demo_nature.svg",
+              "sortOrder": 2
+            }
           ]
         },
         {
@@ -473,6 +714,16 @@
           "maps": "https://www.google.com/maps/search/?api=1&query=Kyoto+Station",
           "gallery": [
             "assets/gallery/demo_transport.svg"
+          ],
+          "itemId": "itm_b159a4d6",
+          "sortOrder": 8,
+          "images": [
+            {
+              "imageId": "img_d7ed53e4",
+              "source": "static",
+              "src": "assets/gallery/demo_transport.svg",
+              "sortOrder": 0
+            }
           ]
         },
         {
@@ -488,9 +739,33 @@
             "assets/gallery/demo_hotel.svg",
             "assets/gallery/demo_food.svg",
             "assets/gallery/demo_nature.svg"
+          ],
+          "itemId": "itm_8b158471",
+          "sortOrder": 9,
+          "images": [
+            {
+              "imageId": "img_09c601f3",
+              "source": "static",
+              "src": "assets/gallery/demo_hotel.svg",
+              "sortOrder": 0
+            },
+            {
+              "imageId": "img_037bf5b0",
+              "source": "static",
+              "src": "assets/gallery/demo_food.svg",
+              "sortOrder": 1
+            },
+            {
+              "imageId": "img_0b81e549",
+              "source": "static",
+              "src": "assets/gallery/demo_nature.svg",
+              "sortOrder": 2
+            }
           ]
         }
-      ]
+      ],
+      "dayId": "day_20260524",
+      "sortOrder": 1
     },
     {
       "label": "Day 3",
@@ -511,6 +786,16 @@
           "maps": "https://www.google.com/maps/search/?api=1&query=Daimaru+Kyoto+Hands+JINS",
           "gallery": [
             "assets/gallery/demo_shop.svg"
+          ],
+          "itemId": "itm_a6eed74c",
+          "sortOrder": 0,
+          "images": [
+            {
+              "imageId": "img_991161e5",
+              "source": "static",
+              "src": "assets/gallery/demo_shop.svg",
+              "sortOrder": 0
+            }
           ]
         },
         {
@@ -527,6 +812,28 @@
             "assets/gallery/demo_city.svg",
             "assets/gallery/demo_food.svg",
             "assets/gallery/demo_nature.svg"
+          ],
+          "itemId": "itm_4623db94",
+          "sortOrder": 1,
+          "images": [
+            {
+              "imageId": "img_7ab4c3f6",
+              "source": "static",
+              "src": "assets/gallery/demo_city.svg",
+              "sortOrder": 0
+            },
+            {
+              "imageId": "img_037bf5b0",
+              "source": "static",
+              "src": "assets/gallery/demo_food.svg",
+              "sortOrder": 1
+            },
+            {
+              "imageId": "img_0b81e549",
+              "source": "static",
+              "src": "assets/gallery/demo_nature.svg",
+              "sortOrder": 2
+            }
           ]
         },
         {
@@ -537,7 +844,9 @@
           "who": "all",
           "popup": true,
           "detail": "午餐後前往銀閣寺方向。",
-          "maps": "https://www.google.com/maps/search/?api=1&query=Ginkakuji+Kyoto"
+          "maps": "https://www.google.com/maps/search/?api=1&query=Ginkakuji+Kyoto",
+          "itemId": "itm_f57a34ca",
+          "sortOrder": 2
         },
         {
           "time": "16:00",
@@ -552,6 +861,28 @@
             "assets/gallery/demo_nature.svg",
             "assets/gallery/demo_food.svg",
             "assets/gallery/demo_nature.svg"
+          ],
+          "itemId": "itm_83c8c2d2",
+          "sortOrder": 3,
+          "images": [
+            {
+              "imageId": "img_0b81e549",
+              "source": "static",
+              "src": "assets/gallery/demo_nature.svg",
+              "sortOrder": 0
+            },
+            {
+              "imageId": "img_037bf5b0",
+              "source": "static",
+              "src": "assets/gallery/demo_food.svg",
+              "sortOrder": 1
+            },
+            {
+              "imageId": "img_0b81e549",
+              "source": "static",
+              "src": "assets/gallery/demo_nature.svg",
+              "sortOrder": 2
+            }
           ]
         },
         {
@@ -568,6 +899,28 @@
             "assets/gallery/demo_food.svg",
             "assets/gallery/demo_city.svg",
             "assets/gallery/demo_nature.svg"
+          ],
+          "itemId": "itm_9d34e6d8",
+          "sortOrder": 4,
+          "images": [
+            {
+              "imageId": "img_037bf5b0",
+              "source": "static",
+              "src": "assets/gallery/demo_food.svg",
+              "sortOrder": 0
+            },
+            {
+              "imageId": "img_7ab4c3f6",
+              "source": "static",
+              "src": "assets/gallery/demo_city.svg",
+              "sortOrder": 1
+            },
+            {
+              "imageId": "img_0b81e549",
+              "source": "static",
+              "src": "assets/gallery/demo_nature.svg",
+              "sortOrder": 2
+            }
           ]
         },
         {
@@ -583,9 +936,33 @@
             "assets/gallery/demo_hotel.svg",
             "assets/gallery/demo_food.svg",
             "assets/gallery/demo_nature.svg"
+          ],
+          "itemId": "itm_ee4aca66",
+          "sortOrder": 5,
+          "images": [
+            {
+              "imageId": "img_09c601f3",
+              "source": "static",
+              "src": "assets/gallery/demo_hotel.svg",
+              "sortOrder": 0
+            },
+            {
+              "imageId": "img_037bf5b0",
+              "source": "static",
+              "src": "assets/gallery/demo_food.svg",
+              "sortOrder": 1
+            },
+            {
+              "imageId": "img_0b81e549",
+              "source": "static",
+              "src": "assets/gallery/demo_nature.svg",
+              "sortOrder": 2
+            }
           ]
         }
-      ]
+      ],
+      "dayId": "day_20260525",
+      "sortOrder": 2
     },
     {
       "label": "Day 4",
@@ -603,7 +980,9 @@
           "who": "all",
           "popup": true,
           "detail": "早上早餐後開始行程。",
-          "maps": ""
+          "maps": "",
+          "itemId": "itm_9450dee1",
+          "sortOrder": 0
         },
         {
           "time": "10:00",
@@ -618,6 +997,28 @@
             "assets/gallery/demo_nature.svg",
             "assets/gallery/demo_food.svg",
             "assets/gallery/demo_nature.svg"
+          ],
+          "itemId": "itm_c1b4342e",
+          "sortOrder": 1,
+          "images": [
+            {
+              "imageId": "img_0b81e549",
+              "source": "static",
+              "src": "assets/gallery/demo_nature.svg",
+              "sortOrder": 0
+            },
+            {
+              "imageId": "img_037bf5b0",
+              "source": "static",
+              "src": "assets/gallery/demo_food.svg",
+              "sortOrder": 1
+            },
+            {
+              "imageId": "img_0b81e549",
+              "source": "static",
+              "src": "assets/gallery/demo_nature.svg",
+              "sortOrder": 2
+            }
           ]
         },
         {
@@ -631,6 +1032,16 @@
           "maps": "https://www.google.com/maps/search/?api=1&query=Osaka+Station",
           "gallery": [
             "assets/gallery/demo_transport.svg"
+          ],
+          "itemId": "itm_6e6082ad",
+          "sortOrder": 2,
+          "images": [
+            {
+              "imageId": "img_d7ed53e4",
+              "source": "static",
+              "src": "assets/gallery/demo_transport.svg",
+              "sortOrder": 0
+            }
           ]
         },
         {
@@ -646,6 +1057,28 @@
             "assets/gallery/demo_shop.svg",
             "assets/gallery/demo_food.svg",
             "assets/gallery/demo_nature.svg"
+          ],
+          "itemId": "itm_5b1d9268",
+          "sortOrder": 3,
+          "images": [
+            {
+              "imageId": "img_991161e5",
+              "source": "static",
+              "src": "assets/gallery/demo_shop.svg",
+              "sortOrder": 0
+            },
+            {
+              "imageId": "img_037bf5b0",
+              "source": "static",
+              "src": "assets/gallery/demo_food.svg",
+              "sortOrder": 1
+            },
+            {
+              "imageId": "img_0b81e549",
+              "source": "static",
+              "src": "assets/gallery/demo_nature.svg",
+              "sortOrder": 2
+            }
           ]
         },
         {
@@ -661,6 +1094,28 @@
             "assets/gallery/demo_shop.svg",
             "assets/gallery/demo_food.svg",
             "assets/gallery/demo_nature.svg"
+          ],
+          "itemId": "itm_d1111baf",
+          "sortOrder": 4,
+          "images": [
+            {
+              "imageId": "img_991161e5",
+              "source": "static",
+              "src": "assets/gallery/demo_shop.svg",
+              "sortOrder": 0
+            },
+            {
+              "imageId": "img_037bf5b0",
+              "source": "static",
+              "src": "assets/gallery/demo_food.svg",
+              "sortOrder": 1
+            },
+            {
+              "imageId": "img_0b81e549",
+              "source": "static",
+              "src": "assets/gallery/demo_nature.svg",
+              "sortOrder": 2
+            }
           ]
         },
         {
@@ -677,6 +1132,28 @@
             "assets/gallery/demo_city.svg",
             "assets/gallery/demo_food.svg",
             "assets/gallery/demo_nature.svg"
+          ],
+          "itemId": "itm_1a283459",
+          "sortOrder": 5,
+          "images": [
+            {
+              "imageId": "img_7ab4c3f6",
+              "source": "static",
+              "src": "assets/gallery/demo_city.svg",
+              "sortOrder": 0
+            },
+            {
+              "imageId": "img_037bf5b0",
+              "source": "static",
+              "src": "assets/gallery/demo_food.svg",
+              "sortOrder": 1
+            },
+            {
+              "imageId": "img_0b81e549",
+              "source": "static",
+              "src": "assets/gallery/demo_nature.svg",
+              "sortOrder": 2
+            }
           ]
         },
         {
@@ -692,13 +1169,37 @@
             "assets/gallery/demo_hotel.svg",
             "assets/gallery/demo_food.svg",
             "assets/gallery/demo_nature.svg"
+          ],
+          "itemId": "itm_127e171b",
+          "sortOrder": 6,
+          "images": [
+            {
+              "imageId": "img_09c601f3",
+              "source": "static",
+              "src": "assets/gallery/demo_hotel.svg",
+              "sortOrder": 0
+            },
+            {
+              "imageId": "img_037bf5b0",
+              "source": "static",
+              "src": "assets/gallery/demo_food.svg",
+              "sortOrder": 1
+            },
+            {
+              "imageId": "img_0b81e549",
+              "source": "static",
+              "src": "assets/gallery/demo_nature.svg",
+              "sortOrder": 2
+            }
           ]
         }
       ],
       "cities": [
         "kyoto",
         "osaka"
-      ]
+      ],
+      "dayId": "day_20260526",
+      "sortOrder": 3
     },
     {
       "label": "Day 5",
@@ -719,6 +1220,16 @@
           "maps": "https://www.google.com/maps/search/?api=1&query=Kobe+Animal+Kingdom",
           "gallery": [
             "assets/gallery/demo_transport.svg"
+          ],
+          "itemId": "itm_297e9db2",
+          "sortOrder": 0,
+          "images": [
+            {
+              "imageId": "img_d7ed53e4",
+              "source": "static",
+              "src": "assets/gallery/demo_transport.svg",
+              "sortOrder": 0
+            }
           ]
         },
         {
@@ -735,6 +1246,28 @@
             "assets/gallery/demo_city.svg",
             "assets/gallery/demo_food.svg",
             "assets/gallery/demo_nature.svg"
+          ],
+          "itemId": "itm_3e211e11",
+          "sortOrder": 1,
+          "images": [
+            {
+              "imageId": "img_7ab4c3f6",
+              "source": "static",
+              "src": "assets/gallery/demo_city.svg",
+              "sortOrder": 0
+            },
+            {
+              "imageId": "img_037bf5b0",
+              "source": "static",
+              "src": "assets/gallery/demo_food.svg",
+              "sortOrder": 1
+            },
+            {
+              "imageId": "img_0b81e549",
+              "source": "static",
+              "src": "assets/gallery/demo_nature.svg",
+              "sortOrder": 2
+            }
           ]
         },
         {
@@ -748,6 +1281,16 @@
           "maps": "https://www.google.com/maps/search/?api=1&query=Sannomiya+Motomachi+Kobe",
           "gallery": [
             "assets/gallery/demo_transport.svg"
+          ],
+          "itemId": "itm_9db0571f",
+          "sortOrder": 2,
+          "images": [
+            {
+              "imageId": "img_d7ed53e4",
+              "source": "static",
+              "src": "assets/gallery/demo_transport.svg",
+              "sortOrder": 0
+            }
           ]
         },
         {
@@ -764,6 +1307,28 @@
             "assets/gallery/demo_city.svg",
             "assets/gallery/demo_food.svg",
             "assets/gallery/demo_nature.svg"
+          ],
+          "itemId": "itm_835d8ee7",
+          "sortOrder": 3,
+          "images": [
+            {
+              "imageId": "img_7ab4c3f6",
+              "source": "static",
+              "src": "assets/gallery/demo_city.svg",
+              "sortOrder": 0
+            },
+            {
+              "imageId": "img_037bf5b0",
+              "source": "static",
+              "src": "assets/gallery/demo_food.svg",
+              "sortOrder": 1
+            },
+            {
+              "imageId": "img_0b81e549",
+              "source": "static",
+              "src": "assets/gallery/demo_nature.svg",
+              "sortOrder": 2
+            }
           ]
         },
         {
@@ -777,6 +1342,16 @@
           "maps": "https://www.google.com/maps/search/?api=1&query=Nankinmachi+Kobe",
           "gallery": [
             "assets/gallery/demo_city.svg"
+          ],
+          "itemId": "itm_9229ab1e",
+          "sortOrder": 4,
+          "images": [
+            {
+              "imageId": "img_7ab4c3f6",
+              "source": "static",
+              "src": "assets/gallery/demo_city.svg",
+              "sortOrder": 0
+            }
           ]
         },
         {
@@ -792,6 +1367,28 @@
             "assets/gallery/demo_shop.svg",
             "assets/gallery/demo_food.svg",
             "assets/gallery/demo_nature.svg"
+          ],
+          "itemId": "itm_b2860019",
+          "sortOrder": 5,
+          "images": [
+            {
+              "imageId": "img_991161e5",
+              "source": "static",
+              "src": "assets/gallery/demo_shop.svg",
+              "sortOrder": 0
+            },
+            {
+              "imageId": "img_037bf5b0",
+              "source": "static",
+              "src": "assets/gallery/demo_food.svg",
+              "sortOrder": 1
+            },
+            {
+              "imageId": "img_0b81e549",
+              "source": "static",
+              "src": "assets/gallery/demo_nature.svg",
+              "sortOrder": 2
+            }
           ]
         },
         {
@@ -807,6 +1404,28 @@
             "assets/gallery/demo_food.svg",
             "assets/gallery/demo_city.svg",
             "assets/gallery/demo_nature.svg"
+          ],
+          "itemId": "itm_b4bc4e9c",
+          "sortOrder": 6,
+          "images": [
+            {
+              "imageId": "img_037bf5b0",
+              "source": "static",
+              "src": "assets/gallery/demo_food.svg",
+              "sortOrder": 0
+            },
+            {
+              "imageId": "img_7ab4c3f6",
+              "source": "static",
+              "src": "assets/gallery/demo_city.svg",
+              "sortOrder": 1
+            },
+            {
+              "imageId": "img_0b81e549",
+              "source": "static",
+              "src": "assets/gallery/demo_nature.svg",
+              "sortOrder": 2
+            }
           ]
         },
         {
@@ -822,6 +1441,28 @@
             "assets/gallery/demo_city.svg",
             "assets/gallery/demo_food.svg",
             "assets/gallery/demo_nature.svg"
+          ],
+          "itemId": "itm_3d3fbb23",
+          "sortOrder": 7,
+          "images": [
+            {
+              "imageId": "img_7ab4c3f6",
+              "source": "static",
+              "src": "assets/gallery/demo_city.svg",
+              "sortOrder": 0
+            },
+            {
+              "imageId": "img_037bf5b0",
+              "source": "static",
+              "src": "assets/gallery/demo_food.svg",
+              "sortOrder": 1
+            },
+            {
+              "imageId": "img_0b81e549",
+              "source": "static",
+              "src": "assets/gallery/demo_nature.svg",
+              "sortOrder": 2
+            }
           ]
         },
         {
@@ -835,6 +1476,16 @@
           "maps": "https://www.google.com/maps/search/?api=1&query=Osaka+Station",
           "gallery": [
             "assets/gallery/demo_transport.svg"
+          ],
+          "itemId": "itm_6b8c16d4",
+          "sortOrder": 8,
+          "images": [
+            {
+              "imageId": "img_d7ed53e4",
+              "source": "static",
+              "src": "assets/gallery/demo_transport.svg",
+              "sortOrder": 0
+            }
           ]
         },
         {
@@ -850,9 +1501,33 @@
             "assets/gallery/demo_hotel.svg",
             "assets/gallery/demo_food.svg",
             "assets/gallery/demo_nature.svg"
+          ],
+          "itemId": "itm_ee80ecbb",
+          "sortOrder": 9,
+          "images": [
+            {
+              "imageId": "img_09c601f3",
+              "source": "static",
+              "src": "assets/gallery/demo_hotel.svg",
+              "sortOrder": 0
+            },
+            {
+              "imageId": "img_037bf5b0",
+              "source": "static",
+              "src": "assets/gallery/demo_food.svg",
+              "sortOrder": 1
+            },
+            {
+              "imageId": "img_0b81e549",
+              "source": "static",
+              "src": "assets/gallery/demo_nature.svg",
+              "sortOrder": 2
+            }
           ]
         }
-      ]
+      ],
+      "dayId": "day_20260527",
+      "sortOrder": 4
     },
     {
       "label": "Day 6",
@@ -873,6 +1548,16 @@
           "maps": "https://maps.app.goo.gl/gHhYGkgWEd9Cbh4Y7",
           "gallery": [
             "assets/gallery/demo_shop.svg"
+          ],
+          "itemId": "itm_d8edd4bc",
+          "sortOrder": 0,
+          "images": [
+            {
+              "imageId": "img_991161e5",
+              "source": "static",
+              "src": "assets/gallery/demo_shop.svg",
+              "sortOrder": 0
+            }
           ]
         },
         {
@@ -886,6 +1571,16 @@
           "maps": "https://www.google.com/maps/search/?api=1&query=Abeno+Q's+Mall+Tennoji+Osaka",
           "gallery": [
             "assets/gallery/demo_shop.svg"
+          ],
+          "itemId": "itm_857e6294",
+          "sortOrder": 1,
+          "images": [
+            {
+              "imageId": "img_991161e5",
+              "source": "static",
+              "src": "assets/gallery/demo_shop.svg",
+              "sortOrder": 0
+            }
           ]
         },
         {
@@ -899,6 +1594,16 @@
           "maps": "https://www.google.com/maps/search/?api=1&query=Kansai+International+Airport",
           "gallery": [
             "assets/gallery/demo_transport.svg"
+          ],
+          "itemId": "itm_ed06cbd8",
+          "sortOrder": 2,
+          "images": [
+            {
+              "imageId": "img_d7ed53e4",
+              "source": "static",
+              "src": "assets/gallery/demo_transport.svg",
+              "sortOrder": 0
+            }
           ]
         },
         {
@@ -912,6 +1617,16 @@
           "maps": "https://www.google.com/maps/search/?api=1&query=Kansai+International+Airport",
           "gallery": [
             "assets/gallery/demo_transport.svg"
+          ],
+          "itemId": "itm_75d2eff0",
+          "sortOrder": 3,
+          "images": [
+            {
+              "imageId": "img_d7ed53e4",
+              "source": "static",
+              "src": "assets/gallery/demo_transport.svg",
+              "sortOrder": 0
+            }
           ]
         },
         {
@@ -925,9 +1640,21 @@
           "maps": "https://www.google.com/maps/search/?api=1&query=Kansai+International+Airport",
           "gallery": [
             "assets/gallery/demo_transport.svg"
+          ],
+          "itemId": "itm_c204b21d",
+          "sortOrder": 4,
+          "images": [
+            {
+              "imageId": "img_d7ed53e4",
+              "source": "static",
+              "src": "assets/gallery/demo_transport.svg",
+              "sortOrder": 0
+            }
           ]
         }
-      ]
+      ],
+      "dayId": "day_20260528",
+      "sortOrder": 5
     }
   ],
   "snacks": {
@@ -958,6 +1685,21 @@
         "gallery": [
           "assets/gallery/demo_food.svg",
           "assets/gallery/demo_city.svg"
+        ],
+        "placeId": "place_b6698c7f",
+        "images": [
+          {
+            "imageId": "img_037bf5b0",
+            "source": "static",
+            "src": "assets/gallery/demo_food.svg",
+            "sortOrder": 0
+          },
+          {
+            "imageId": "img_7ab4c3f6",
+            "source": "static",
+            "src": "assets/gallery/demo_city.svg",
+            "sortOrder": 1
+          }
         ]
       },
       {
@@ -984,6 +1726,21 @@
         "gallery": [
           "assets/gallery/demo_food.svg",
           "assets/gallery/demo_city.svg"
+        ],
+        "placeId": "place_ff35baf8",
+        "images": [
+          {
+            "imageId": "img_037bf5b0",
+            "source": "static",
+            "src": "assets/gallery/demo_food.svg",
+            "sortOrder": 0
+          },
+          {
+            "imageId": "img_7ab4c3f6",
+            "source": "static",
+            "src": "assets/gallery/demo_city.svg",
+            "sortOrder": 1
+          }
         ]
       },
       {
@@ -1010,6 +1767,15 @@
         "maps": "https://www.google.com/maps/search/?api=1&query=Gion+Tsujiri+Kyoto",
         "gallery": [
           "assets/gallery/demo_food.svg"
+        ],
+        "placeId": "place_5758d9e0",
+        "images": [
+          {
+            "imageId": "img_037bf5b0",
+            "source": "static",
+            "src": "assets/gallery/demo_food.svg",
+            "sortOrder": 0
+          }
         ]
       },
       {
@@ -1034,6 +1800,15 @@
         "maps": "https://www.google.com/maps/search/?api=1&query=Tenkaippin+Kyoto",
         "gallery": [
           "assets/gallery/demo_food.svg"
+        ],
+        "placeId": "place_06bf8a50",
+        "images": [
+          {
+            "imageId": "img_037bf5b0",
+            "source": "static",
+            "src": "assets/gallery/demo_food.svg",
+            "sortOrder": 0
+          }
         ]
       },
       {
@@ -1059,6 +1834,15 @@
         "maps": "https://www.google.com/maps/search/?api=1&query=Nakamura+Tokichi+Uji",
         "gallery": [
           "assets/gallery/demo_food.svg"
+        ],
+        "placeId": "place_0bb9baa2",
+        "images": [
+          {
+            "imageId": "img_037bf5b0",
+            "source": "static",
+            "src": "assets/gallery/demo_food.svg",
+            "sortOrder": 0
+          }
         ]
       },
       {
@@ -1085,6 +1869,21 @@
         "gallery": [
           "assets/gallery/demo_food.svg",
           "assets/gallery/demo_city.svg"
+        ],
+        "placeId": "place_e2ca5591",
+        "images": [
+          {
+            "imageId": "img_037bf5b0",
+            "source": "static",
+            "src": "assets/gallery/demo_food.svg",
+            "sortOrder": 0
+          },
+          {
+            "imageId": "img_7ab4c3f6",
+            "source": "static",
+            "src": "assets/gallery/demo_city.svg",
+            "sortOrder": 1
+          }
         ]
       },
       {
@@ -1110,6 +1909,15 @@
         "maps": "https://www.google.com/maps/search/?api=1&query=Tsujiri+Uji+Main+Store",
         "gallery": [
           "assets/gallery/demo_food.svg"
+        ],
+        "placeId": "place_ddae7913",
+        "images": [
+          {
+            "imageId": "img_037bf5b0",
+            "source": "static",
+            "src": "assets/gallery/demo_food.svg",
+            "sortOrder": 0
+          }
         ]
       },
       {
@@ -1136,6 +1944,21 @@
         "gallery": [
           "assets/gallery/demo_food.svg",
           "assets/gallery/demo_city.svg"
+        ],
+        "placeId": "place_407cbaab",
+        "images": [
+          {
+            "imageId": "img_037bf5b0",
+            "source": "static",
+            "src": "assets/gallery/demo_food.svg",
+            "sortOrder": 0
+          },
+          {
+            "imageId": "img_7ab4c3f6",
+            "source": "static",
+            "src": "assets/gallery/demo_city.svg",
+            "sortOrder": 1
+          }
         ]
       },
       {
@@ -1161,6 +1984,15 @@
         "maps": "https://www.google.com/maps/search/?api=1&query=Creo+Ru+Dotonbori",
         "gallery": [
           "assets/gallery/demo_food.svg"
+        ],
+        "placeId": "place_0107cf51",
+        "images": [
+          {
+            "imageId": "img_037bf5b0",
+            "source": "static",
+            "src": "assets/gallery/demo_food.svg",
+            "sortOrder": 0
+          }
         ]
       },
       {
@@ -1186,6 +2018,15 @@
         "maps": "https://www.google.com/maps/search/?api=1&query=Mizuno+Okonomiyaki+Osaka",
         "gallery": [
           "assets/gallery/demo_food.svg"
+        ],
+        "placeId": "place_11a91829",
+        "images": [
+          {
+            "imageId": "img_037bf5b0",
+            "source": "static",
+            "src": "assets/gallery/demo_food.svg",
+            "sortOrder": 0
+          }
         ]
       },
       {
@@ -1211,6 +2052,15 @@
         "maps": "https://www.google.com/maps/search/?api=1&query=Kushikatsu+Daruma+Namba+Osaka",
         "gallery": [
           "assets/gallery/demo_food.svg"
+        ],
+        "placeId": "place_eeb34538",
+        "images": [
+          {
+            "imageId": "img_037bf5b0",
+            "source": "static",
+            "src": "assets/gallery/demo_food.svg",
+            "sortOrder": 0
+          }
         ]
       },
       {
@@ -1236,6 +2086,15 @@
         "maps": "https://www.google.com/maps/search/?api=1&query=551+Horai+Osaka",
         "gallery": [
           "assets/gallery/demo_food.svg"
+        ],
+        "placeId": "place_c8146b70",
+        "images": [
+          {
+            "imageId": "img_037bf5b0",
+            "source": "static",
+            "src": "assets/gallery/demo_food.svg",
+            "sortOrder": 0
+          }
         ]
       },
       {
@@ -1261,6 +2120,15 @@
         "maps": "https://maps.app.goo.gl/gHhYGkgWEd9Cbh4Y7",
         "gallery": [
           "assets/gallery/demo_food.svg"
+        ],
+        "placeId": "place_1ba1279e",
+        "images": [
+          {
+            "imageId": "img_037bf5b0",
+            "source": "static",
+            "src": "assets/gallery/demo_food.svg",
+            "sortOrder": 0
+          }
         ]
       },
       {
@@ -1286,6 +2154,15 @@
         "maps": "https://www.google.com/maps/search/?api=1&query=Roushouki+Kobe+Nankinmachi",
         "gallery": [
           "assets/gallery/demo_food.svg"
+        ],
+        "placeId": "place_3b000c8e",
+        "images": [
+          {
+            "imageId": "img_037bf5b0",
+            "source": "static",
+            "src": "assets/gallery/demo_food.svg",
+            "sortOrder": 0
+          }
         ]
       },
       {
@@ -1311,6 +2188,15 @@
         "maps": "https://www.google.com/maps/search/?api=1&query=Ganso+Gyozaen+Kobe",
         "gallery": [
           "assets/gallery/demo_food.svg"
+        ],
+        "placeId": "place_70de1a08",
+        "images": [
+          {
+            "imageId": "img_037bf5b0",
+            "source": "static",
+            "src": "assets/gallery/demo_food.svg",
+            "sortOrder": 0
+          }
         ]
       },
       {
@@ -1336,6 +2222,15 @@
         "maps": "https://www.google.com/maps/search/?api=1&query=Kobe+beef+croquette+Motomachi+Kobe",
         "gallery": [
           "assets/gallery/demo_food.svg"
+        ],
+        "placeId": "place_407995e3",
+        "images": [
+          {
+            "imageId": "img_037bf5b0",
+            "source": "static",
+            "src": "assets/gallery/demo_food.svg",
+            "sortOrder": 0
+          }
         ]
       },
       {
@@ -1361,6 +2256,15 @@
         "maps": "https://www.google.com/maps/search/?api=1&query=Kobe+Milk+Nankinmachi",
         "gallery": [
           "assets/gallery/demo_food.svg"
+        ],
+        "placeId": "place_41610a1e",
+        "images": [
+          {
+            "imageId": "img_037bf5b0",
+            "source": "static",
+            "src": "assets/gallery/demo_food.svg",
+            "sortOrder": 0
+          }
         ]
       },
       {
@@ -1388,8 +2292,26 @@
         "gallery": [
           "assets/gallery/demo_food.svg",
           "assets/gallery/demo_city.svg"
+        ],
+        "placeId": "place_fd3b959a",
+        "images": [
+          {
+            "imageId": "img_037bf5b0",
+            "source": "static",
+            "src": "assets/gallery/demo_food.svg",
+            "sortOrder": 0
+          },
+          {
+            "imageId": "img_7ab4c3f6",
+            "source": "static",
+            "src": "assets/gallery/demo_city.svg",
+            "sortOrder": 1
+          }
         ]
       }
     ]
-  }
+  },
+  "schemaVersion": 2,
+  "tripId": "kyoto-osaka-2026",
+  "revision": 1
 }

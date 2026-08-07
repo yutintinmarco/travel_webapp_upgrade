@@ -25,7 +25,7 @@ function validRole(value) {
 
 function computeAccess() {
   const memberRole = validRole(latestMemberData?.role);
-  const role = latestUser ? (memberRole || TRIP_ROLES.VIEWER) : null;
+  const role = latestUser ? memberRole : null;
   currentAccess = {
     tripId: activeTripId,
     role,

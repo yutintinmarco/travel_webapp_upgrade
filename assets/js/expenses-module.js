@@ -383,7 +383,7 @@ function mountExpensesHtml(root) {
       <div class="modal-heading-row"><h3><span class="modal-title-icon">🔐</span><span>權限管理</span></h3></div>
       <div class="modal-body-scroll">
       <section class="hidden" id="adminPanel">
-        <p class="hint">以下 email 登入後可自動加入此 trip。Admin 可管理成員、匯率、權限及鎖定旅程。</p>
+        <p class="hint">Phase 2B 起旅程權限由 Owner、Admin、Member、Viewer member document 管理。舊 email 白名單只保留作 legacy 顯示。</p>
         <div class="setting-subtitle">可使用此旅程的 Google Email</div>
         <div id="allowedEmailList" class="member-list"></div>
         <div class="member-add-row" style="margin-top:12px">
@@ -398,7 +398,7 @@ function mountExpensesHtml(root) {
           <button type="button" id="addAdminEmailBtn" class="secondary-btn">新增 Admin</button>
         </div>
       </section>
-      <p id="accessNoAdminHint" class="hint">如你不是 Admin，權限管理不會顯示可編輯名單。</p>
+      <p id="accessNoAdminHint" class="hint">目前旅程尚未建立雲端角色，或你沒有 Owner / Admin 權限。</p>
       </div>
       <div class="modal-footer-actions"><button type="button" class="modal-close-btn" data-modal-close="accessSettingsModal">關閉</button></div>
     </div>
@@ -415,7 +415,7 @@ function mountExpensesHtml(root) {
           <button type="button" id="unlockTripBtn" class="secondary-btn hidden">解鎖此旅程</button>
         </div>
       </section>
-      <p id="lockNoAdminHint" class="hint">只有 creator 可以鎖定或解鎖旅程。</p>
+      <p id="lockNoAdminHint" class="hint">只有 Owner / Admin 可以鎖定或解鎖旅程。</p>
       </div>
       <div class="modal-footer-actions"><button type="button" class="modal-close-btn" data-modal-close="lockSettingsModal">關閉</button></div>
     </div>
@@ -641,6 +641,8 @@ function setModuleStatus(message) {
 }
 
 let currentUser = null;
+let phase2TripRole = null;
+let cloudExpenseStarted = false;
 let allExpenses = [];
 let expenses = [];
 let settlements = [];
@@ -961,27 +963,28 @@ function updateTripStatusUi() {
   if (lockTripBtn) lockTripBtn.classList.toggle("hidden", locked || !isAdmin());
   if (unlockTripBtn) unlockTripBtn.classList.toggle("hidden", !locked || !isAdmin());
 
-  setFormDisabled(locked);
+  const readOnly = !canWriteExpenses();
+  setFormDisabled(locked || readOnly);
 
-  if (addMemberBtn) addMemberBtn.disabled = locked;
-  if (memberNameInput) memberNameInput.disabled = locked;
-  if (saveRatesBtn) saveRatesBtn.disabled = locked;
-  if (baseCurrencyInput) baseCurrencyInput.disabled = locked;
+  if (addMemberBtn) addMemberBtn.disabled = locked || readOnly;
+  if (memberNameInput) memberNameInput.disabled = locked || readOnly;
+  if (saveRatesBtn) saveRatesBtn.disabled = locked || !isAdmin();
+  if (baseCurrencyInput) baseCurrencyInput.disabled = locked || !isAdmin();
   if (ratesContainer) {
     ratesContainer.querySelectorAll("input").forEach(input => {
-      input.disabled = locked || input.dataset.rateCode === tripSettings.baseCurrency;
+      input.disabled = locked || !isAdmin() || input.dataset.rateCode === tripSettings.baseCurrency;
     });
   }
-  if (ocrBtn) ocrBtn.disabled = locked;
-  if (ocrFileInput) ocrFileInput.disabled = locked;
+  if (ocrBtn) ocrBtn.disabled = locked || readOnly;
+  if (ocrFileInput) ocrFileInput.disabled = locked || readOnly;
 
   [quickTitleInput, quickAmountInput, quickCurrencyInput, quickPaidByInput, quickCategoryInput, quickAddBtn].forEach(el => {
-    if (el) el.disabled = locked;
+    if (el) el.disabled = locked || readOnly;
   });
   document.querySelectorAll("[data-admin-only]").forEach(btn => {
     btn.classList.toggle("hidden", !isAdmin());
   });
-  if (quickAddFab) quickAddFab.disabled = locked;
+  if (quickAddFab) quickAddFab.disabled = locked || readOnly;
 }
 
 async function logActivity(action, message, targetType = "trip", targetId = tripId, details = {}) {
@@ -1921,6 +1924,35 @@ async function ensureTripMembersAndSettings() {
   }
 
   const data = tripDoc.data();
+
+  // Phase 2B clean schema: role lives in trips/{tripId}/members/{uid}.
+  // Expense-specific settings move to trips/{tripId}/settings/expenses.
+  if (Number(data.schemaVersion) >= 2) {
+    tripCreatorUid = data.createdBy || null;
+    tripAllowedUids = Array.isArray(data.memberUids) ? uniqueStrings(data.memberUids) : [];
+    tripAdminUids = [];
+    adminEmailsCache = [];
+    allowedEmailsCache = [];
+    members = Array.isArray(expensesConfig.defaultMembers) && expensesConfig.defaultMembers.length
+      ? expensesConfig.defaultMembers
+      : [currentUser.displayName || "Me"];
+    try {
+      const settingsSnap = await getDoc(doc(db, "trips", tripId, "settings", "expenses"));
+      if (settingsSnap.exists()) {
+        const cloudSettings = settingsSnap.data() || {};
+        if (Array.isArray(cloudSettings.defaultMembers) && cloudSettings.defaultMembers.length) members = cloudSettings.defaultMembers;
+        tripSettings = {
+          ...tripSettings,
+          ...cloudSettings,
+          exchangeRates: { ...tripSettings.exchangeRates, ...(cloudSettings.exchangeRates || cloudSettings.defaultExchangeRates || {}) }
+        };
+      }
+    } catch (error) {
+      if (error?.code !== "permission-denied") console.warn("Expense settings read failed", error);
+    }
+    return;
+  }
+
   tripAllowedUids = Array.isArray(data.allowedUids) ? uniqueStrings(data.allowedUids) : [];
   tripCreatorUid = data.createdBy || null;
   tripAdminUids = Array.isArray(data.adminUids) ? uniqueStrings(data.adminUids) : [];
@@ -2029,8 +2061,7 @@ function startTripListener() {
     console.error(err);
     if (err?.code === "permission-denied") {
       tripStatus = "unknown";
-      setModuleStatus("No access");
-      alert("你無權限進入此 trip。");
+      setModuleStatus("Waiting for Firestore Rules");
     }
   });
 }
@@ -3589,7 +3620,7 @@ async function handleExportJsonBackup() {
 }
 
 async function lockTrip() {
-  if (!isAdmin()) return alert("只有 creator 可以鎖定旅程。");
+  if (!isAdmin()) return alert("只有 Owner / Admin 可以鎖定旅程。");
   if (isTripLocked()) return;
 
   const confirmed = confirm("鎖定後不可再新增、修改、刪除支出，亦不可修改成員及匯率。仍可記錄找數及匯出 Excel。確定鎖定？");
@@ -3608,7 +3639,7 @@ async function lockTrip() {
 }
 
 async function unlockTrip() {
-  if (!isAdmin()) return alert("只有 creator 可以解鎖旅程。");
+  if (!isAdmin()) return alert("只有 Owner / Admin 可以解鎖旅程。");
   if (!isTripLocked()) return;
 
   const confirmed = confirm("解鎖後大家可以再次修改支出及設定。除非真係要改數，否則不建議解鎖。確定解鎖？");
@@ -3643,12 +3674,21 @@ function renderActivityLogs() {
 }
 
 /* admin panel */
+function getPhase2TripRole() {
+  return phase2TripRole || window.__appTripAccess?.role || null;
+}
+
+function canWriteExpenses() {
+  return ["owner", "admin", "member"].includes(getPhase2TripRole());
+}
+
 function isAdmin() {
-  return !!(currentUser && (currentUser.uid === tripCreatorUid || tripAdminUids.includes(currentUser.uid)));
+  const role = getPhase2TripRole();
+  return role === "owner" || role === "admin";
 }
 
 function isCreator() {
-  return !!(currentUser && tripCreatorUid && currentUser.uid === tripCreatorUid);
+  return getPhase2TripRole() === "owner";
 }
 
 function getCreatorEmail() {
@@ -4069,11 +4109,65 @@ document.addEventListener("click", (event) => {
 if (lockTripBtn) lockTripBtn.addEventListener("click", lockTrip);
 if (unlockTripBtn) unlockTripBtn.addEventListener("click", unlockTrip);
 
+async function startExpenseCloudIfAllowed() {
+  if (!currentUser) return;
+  phase2TripRole = window.__appTripAccess?.role || phase2TripRole || null;
+
+  if (!phase2TripRole) {
+    cloudExpenseStarted = false;
+    members = Array.isArray(expensesConfig.defaultMembers) && expensesConfig.defaultMembers.length
+      ? expensesConfig.defaultMembers
+      : [currentUser.displayName || "Me"];
+    initMembers();
+    renderRateEditor();
+    renderAllowedEmails();
+    renderAdminEmails();
+    tripStatus = "unknown";
+    setModuleStatus("Signed in · Trip not imported");
+    updateTripStatusUi();
+    return;
+  }
+
+  if (cloudExpenseStarted) {
+    updateTripStatusUi();
+    return;
+  }
+  cloudExpenseStarted = true;
+  setModuleStatus(`Connected · ${phase2TripRole}`);
+  try {
+    await ensureTripMembersAndSettings();
+    initMembers();
+    renderRateEditor();
+    renderAllowedEmails();
+    renderAdminEmails();
+    startTripListener();
+    listenToExpenses();
+    listenToSettlements();
+    listenToActivityLogs();
+    updateTripStatusUi();
+  } catch (error) {
+    cloudExpenseStarted = false;
+    console.error(error);
+    tripStatus = "unknown";
+    setModuleStatus(error?.code === "permission-denied" ? "Waiting for Firestore Rules" : "Init error");
+    updateTripStatusUi();
+  }
+}
+
+window.addEventListener("app-trip-access", event => {
+  phase2TripRole = event.detail?.role || null;
+  cloudExpenseStarted = false;
+  updateTripStatusUi();
+  if (currentUser) startExpenseCloudIfAllowed();
+});
+
 subscribeAuthState(async (user) => {
   currentUser = user;
   setAuthUI(user);
 
   if (!user) {
+    phase2TripRole = null;
+    cloudExpenseStarted = false;
     setModuleStatus("Please sign in");
     if (stopTripListener) stopTripListener();
     if (stopExpensesListener) stopExpensesListener();
@@ -4101,28 +4195,8 @@ subscribeAuthState(async (user) => {
     return;
   }
 
-  setModuleStatus("Connected");
-  try {
-    await ensureTripMembersAndSettings();
-    initMembers();
-    renderRateEditor();
-    renderAllowedEmails();
-    renderAdminEmails();
-    startTripListener();
-    listenToExpenses();
-    listenToSettlements();
-    listenToActivityLogs();
-  } catch (error) {
-    console.error(error);
-    if (error?.code === "permission-denied") {
-      tripStatus = "unknown";
-      setModuleStatus("No access");
-      alert("你無權限進入此 trip。請管理員把你 email 加入 allowedEmails。");
-    } else {
-      setModuleStatus("Init error");
-      alert(`初始化失敗：${error?.code || error?.message || "unknown"}`);
-    }
-  }
+  phase2TripRole = window.__appTripAccess?.role || null;
+  await startExpenseCloudIfAllowed();
 });
 
 }

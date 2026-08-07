@@ -1850,12 +1850,65 @@ html.theme-dark .profile-stepper,html:not(.theme-light):not(.theme-dark) .profil
 html.theme-dark .profile-theme-segment button.active,html:not(.theme-light):not(.theme-dark) .profile-theme-segment button.active { background:rgba(99,99,102,.78); color:#fff; box-shadow:0 1px 4px rgba(0,0,0,.34); }
 @media(max-width:370px){.profile-theme-segment{margin-left:0}.profile-row-copy small{font-size:9.5px}.bottom-nav-item span{font-size:calc(9px * var(--font-scale));}}
 
+
+/* Phase 2B · Multi Trip library */
+.trip-library-shell { display:grid; gap:12px; }
+.trip-library-card {
+  border:1px solid rgba(255,255,255,.66);
+  border-radius:20px;
+  background:rgba(255,255,255,.54);
+  box-shadow:0 10px 28px rgba(45,30,38,.10), inset 0 1px 0 rgba(255,255,255,.30);
+  backdrop-filter:blur(24px) saturate(1.12);
+  -webkit-backdrop-filter:blur(24px) saturate(1.12);
+  padding:14px;
+}
+.trip-library-heading { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:12px; }
+.trip-library-heading-copy { min-width:0; display:grid; gap:3px; }
+.trip-library-eyebrow { color:var(--label-secondary); font-size:calc(10px * var(--font-scale)); font-weight:760; letter-spacing:.04em; text-transform:uppercase; }
+.trip-library-heading h2 { margin:0; color:var(--label-primary); font-size:calc(19px * var(--font-scale)); line-height:1.18; }
+.trip-library-heading p { margin:0; color:var(--label-secondary); font-size:calc(10.5px * var(--font-scale)); line-height:1.42; }
+.trip-library-count { flex:0 0 auto; min-width:29px; height:29px; padding:0 9px; border-radius:999px; display:grid; place-items:center; background:rgba(0,122,255,.11); color:#1478d4; font-size:11px; font-weight:800; }
+.trip-library-list { display:grid; gap:9px; }
+.trip-library-item {
+  width:100%; min-height:86px; border:1px solid rgba(255,255,255,.34); border-radius:16px; background:rgba(118,118,128,.065); padding:11px 12px;
+  display:grid; grid-template-columns:43px minmax(0,1fr) auto; align-items:center; gap:11px; text-align:left; color:var(--label-primary);
+}
+.trip-library-item.is-current { background:rgba(0,122,255,.075); border-color:rgba(0,122,255,.15); }
+.trip-library-icon { width:43px; height:43px; border-radius:13px; display:grid; place-items:center; background:linear-gradient(145deg,rgba(0,122,255,.18),rgba(175,82,222,.13)); font-size:20px; box-shadow:inset 0 1px 0 rgba(255,255,255,.35); }
+.trip-library-copy { min-width:0; display:grid; gap:3px; }
+.trip-library-copy strong { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--label-primary); font-size:calc(13.5px * var(--font-scale)); }
+.trip-library-copy small { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--label-secondary); font-size:calc(10px * var(--font-scale)); }
+.trip-library-meta { display:flex; flex-wrap:wrap; gap:5px; margin-top:2px; }
+.trip-library-pill { padding:3px 7px; border-radius:999px; background:rgba(118,118,128,.11); color:var(--label-secondary); font-size:9.5px; font-weight:720; }
+.trip-library-pill.is-current { background:rgba(52,199,89,.12); color:#238844; }
+.trip-library-pill.is-role { background:rgba(0,122,255,.10); color:#1478d4; }
+.trip-library-side { display:grid; justify-items:end; gap:4px; }
+.trip-library-side strong { color:var(--label-primary); font-size:10px; }
+.trip-library-side small { color:var(--label-tertiary); font-size:9px; }
+.trip-library-status { margin-top:10px; padding:9px 10px; border-radius:12px; background:rgba(118,118,128,.075); color:var(--label-secondary); font-size:calc(10px * var(--font-scale)); line-height:1.4; }
+.trip-library-actions { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:10px; }
+.trip-library-action { min-height:47px; padding:7px 9px; border:0; border-radius:13px; background:rgba(118,118,128,.08); color:var(--label-primary); display:grid; gap:2px; place-items:center; font-size:11px; font-weight:750; }
+.trip-library-action small { color:var(--label-secondary); font-size:8.5px; font-weight:650; }
+.trip-library-action:disabled { opacity:.58; }
+.trip-library-schema { margin-top:10px; display:grid; grid-template-columns:repeat(3,1fr); gap:7px; }
+.trip-library-stat { padding:8px 7px; border-radius:11px; background:rgba(118,118,128,.065); text-align:center; }
+.trip-library-stat strong { display:block; color:var(--label-primary); font-size:13px; }
+.trip-library-stat span { display:block; margin-top:1px; color:var(--label-secondary); font-size:9px; }
+.trip-info-heading { margin:0 0 10px; color:var(--label-primary); font-size:calc(16px * var(--font-scale)); }
+.trip-info-sub { margin:-5px 0 11px; color:var(--label-secondary); font-size:calc(10px * var(--font-scale)); line-height:1.4; }
+html.theme-dark .trip-library-card, html:not(.theme-light):not(.theme-dark) .trip-library-card { background:rgba(24,24,31,.60); border-color:rgba(255,255,255,.09); box-shadow:0 10px 26px rgba(0,0,0,.32),inset 0 1px 0 rgba(255,255,255,.05); }
+html.theme-dark .trip-library-item, html:not(.theme-light):not(.theme-dark) .trip-library-item { background:rgba(255,255,255,.055); border-color:rgba(255,255,255,.06); }
+html.theme-dark .trip-library-item.is-current, html:not(.theme-light):not(.theme-dark) .trip-library-item.is-current { background:rgba(10,132,255,.11); border-color:rgba(10,132,255,.18); }
+html.theme-dark .trip-library-action, html:not(.theme-light):not(.theme-dark) .trip-library-action,
+html.theme-dark .trip-library-status, html:not(.theme-light):not(.theme-dark) .trip-library-status,
+html.theme-dark .trip-library-stat, html:not(.theme-light):not(.theme-dark) .trip-library-stat { background:rgba(255,255,255,.055); }
+
 </style>
             <link rel="apple-touch-icon" href="assets/icon/trip_icon.png">
   <link rel="icon" type="image/png" href="assets/icon/trip_icon.png">
-  <link rel="manifest" href="manifest.json?v=7.2.2">
+  <link rel="manifest" href="manifest.json?v=7.3.0">
   <meta name="apple-mobile-web-app-title" content="關嘉露西生日之旅">
-  <link rel="stylesheet" href="assets/css/expenses.css?v=7.2.2">
+  <link rel="stylesheet" href="assets/css/expenses.css?v=7.3.0">
 </head>
 <body>
 <div class="bg-fixed"></div>
@@ -1924,8 +1977,32 @@ html.theme-dark .profile-theme-segment button.active,html:not(.theme-light):not(
 </div>
 
 <div id="info-view" class="app-view" style="display:none;">
-  <div id="info-content"></div>
-  <div class="info-hint">以上資料可用於填寫 Visit Japan Web / 電子簽證申請<br>請按實際情況核實所有資料</div>
+  <div class="trip-library-shell">
+    <section class="trip-library-card" aria-labelledby="trip-library-title">
+      <div class="trip-library-heading">
+        <div class="trip-library-heading-copy">
+          <div class="trip-library-eyebrow">Multi Trip</div>
+          <h2 id="trip-library-title">我的旅程</h2>
+          <p>同一個 App 管理多個旅程。每個旅程有獨立行程、收藏、支出、成員同權限。</p>
+        </div>
+        <span class="trip-library-count" id="trip-library-count">1</span>
+      </div>
+      <div class="trip-library-list" id="trip-library-list"></div>
+      <div class="trip-library-status" id="trip-library-status">正在準備旅程資料…</div>
+      <div class="trip-library-actions">
+        <button class="trip-library-action" type="button" disabled><span>＋ 新增旅程</span><small>Phase 2C 啟用</small></button>
+        <button class="trip-library-action" type="button" disabled><span>⇅ 匯入 trip.json</span><small>Phase 2C 啟用</small></button>
+      </div>
+      <div class="trip-library-schema" id="trip-library-schema"></div>
+    </section>
+
+    <section class="trip-library-card" id="trip-info-card">
+      <h3 class="trip-info-heading">目前旅程資料</h3>
+      <p class="trip-info-sub">Visit Japan Web、航班及住宿等資料仍然跟住目前旅程。</p>
+      <div id="info-content"></div>
+      <div class="info-hint" id="info-hint">以上資料可用於填寫 Visit Japan Web / 電子簽證申請<br>請按實際情況核實所有資料</div>
+    </section>
+  </div>
 </div>
 
 
@@ -1953,7 +2030,7 @@ html.theme-dark .profile-theme-segment button.active,html:not(.theme-light):not(
     </div>
     <button class="profile-row" id="my-account-btn" type="button">
       <span class="profile-row-icon profile-icon-blue">👤</span>
-      <span class="profile-row-copy"><strong id="profile-account-action-title">登入 Google 帳戶</strong><small id="profile-account-action-subtitle">登入後同步支出及顯示目前身份</small></span>
+      <span class="profile-row-copy"><strong id="profile-account-action-title">登入 Google 帳戶</strong><small id="profile-account-action-subtitle">登入後顯示你參與嘅旅程及目前身份</small></span>
       <span class="profile-chevron">›</span>
     </button>
   </section>
@@ -1981,10 +2058,10 @@ html.theme-dark .profile-theme-segment button.active,html:not(.theme-light):not(
 
   <section class="profile-card">
     <div class="profile-section-title">旅程管理</div>
-    <button class="profile-row" type="button" data-global-setting="access">
+    <button class="profile-row profile-row-disabled" type="button" disabled>
       <span class="profile-row-icon profile-icon-green">🔐</span>
-      <span class="profile-row-copy"><strong>旅程權限</strong><small>管理可查看及使用旅程嘅帳戶</small></span>
-      <span class="profile-chevron">›</span>
+      <span class="profile-row-copy"><strong>旅程權限</strong><small>Owner、Admin、Member、Viewer 架構已建立</small></span>
+      <span class="profile-status-pill">2F</span>
     </button>
     <button class="profile-row" type="button" data-global-setting="lock">
       <span class="profile-row-icon profile-icon-red">🔒</span>
@@ -1993,8 +2070,8 @@ html.theme-dark .profile-theme-segment button.active,html:not(.theme-light):not(
     </button>
     <button class="profile-row profile-row-disabled" type="button" disabled>
       <span class="profile-row-icon profile-icon-grey">⇅</span>
-      <span class="profile-row-copy"><strong>行程匯入與匯出</strong><small>Phase 2 啟用 Firebase 行程資料後提供</small></span>
-      <span class="profile-status-pill">稍後</span>
+      <span class="profile-row-copy"><strong>行程匯入與匯出</strong><small>Portable JSON schema 已升級，下一步接 Import / Export</small></span>
+      <span class="profile-status-pill">2C</span>
     </button>
   </section>
 
@@ -2005,11 +2082,11 @@ html.theme-dark .profile-theme-segment button.active,html:not(.theme-light):not(
       <span class="profile-row-copy"><strong>關於本 App</strong><small>版本、系統資料及使用說明</small></span>
       <span class="profile-chevron">›</span>
     </button>
-    <div class="profile-meta-row"><span>目前版本</span><strong>v7.2.2</strong></div>
+    <div class="profile-meta-row"><span>目前版本</span><strong>v7.3.0</strong></div>
   </section>
 </div>
 <div class="footer-note" id="footer-note"></div>
-<div class="app-version-note" id="app-version-note">v7.2.2</div>
+<div class="app-version-note" id="app-version-note">v7.3.0</div>
 
 
   </div>
@@ -2059,12 +2136,12 @@ html.theme-dark .profile-theme-segment button.active,html:not(.theme-light):not(
 </div>
 
 <script>
-const APP_VERSION = "7.2.2";
+const APP_VERSION = "7.3.0";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 window.EXPENSES_MODULE_VERSION = EXPENSES_MODULE_VERSION;
 
-function getTripJsonUrl(){const p=new URLSearchParams(location.search);return p.get("data")||((p.get("trip")||"")&&p.get("trip")+".json")||"trip.json";}
+function getTripJsonUrl(){const p=new URLSearchParams(location.search);return p.get("data")||"trip.json";}
 function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
 function fmtMMDD(iso){return iso.slice(5).replace("-","/");}
 function dateInTZ(tz){try{return new Intl.DateTimeFormat("en-CA",{timeZone:tz||"UTC",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date());}catch(e){return new Date().toISOString().slice(0,10);}}
@@ -2826,14 +2903,21 @@ function miniCopyBtn(textFn){
 }
 function renderInfo(data){
   const meta=data.meta||{};
-  const infoCard=meta.infoCard;
-  // 📋 button only appears if infoCard is defined in JSON — same logic as snacks
-  if(!infoCard)return;
+  const infoCard=meta.infoCard||null;
+  // Phase 2B: 旅程 tab is the permanent multi trip library, even when Visit Japan data is absent.
   document.getElementById("bt-info").style.display="flex";requestAnimationFrame(updateBottomNavIndicator);
 
   const travellers=meta.travellers||{},cities=meta.cities||{},hotels=meta.hotels||{},flights=meta.flights||[];
   const container=document.getElementById("info-content");if(!container)return;
   container.innerHTML="";
+  const hint=document.getElementById("info-hint");
+  if(hint&&infoCard?.hint) hint.innerHTML=esc(infoCard.hint).replace(/\n/g,"<br>");
+  if(!infoCard){
+    container.innerHTML="<div class='info-hint'>此旅程未有額外旅程資料。</div>";
+    if(hint) hint.style.display="none";
+    return;
+  }
+  if(hint) hint.style.display="block";
 
   function fmtDate(iso){if(!iso)return"";const[y,m,d]=iso.split("-");return`${y}年${parseInt(m)}月${parseInt(d)}日`;}
   const cityKeys=Object.keys(cities);
@@ -3111,7 +3195,7 @@ const headerTitleMainEl=document.getElementById("header-title-main");
 const headerSubEl=document.getElementById("header-sub");
 const viewElements={itinerary:ivw,snacks:svw,info:infvw,expenses:expvw,profile:profilevw};
 const viewButtons={itinerary:bti,snacks:bts,info:btinfo,expenses:btexp,profile:btprofile};
-const viewLabels={itinerary:"行程",snacks:"收藏",expenses:"支出",info:"旅程資料",profile:"我的"};
+const viewLabels={itinerary:"行程",snacks:"收藏",expenses:"支出",info:"旅程",profile:"我的"};
 const viewScrollPositions={itinerary:0,snacks:0,info:0,expenses:0,profile:0};
 let currentAppView="itinerary";
 let baseTripTitle="旅程";
@@ -3333,7 +3417,7 @@ function renderProfileAuthState(user){
     email.textContent="使用 Google 帳戶登入後顯示資料";
     status.textContent="未登入";
     if(actionTitle) actionTitle.textContent="登入 Google 帳戶";
-    if(actionSubtitle) actionSubtitle.textContent="登入後同步支出及顯示目前身份";
+    if(actionSubtitle) actionSubtitle.textContent="登入後顯示你參與嘅旅程及目前身份";
     return;
   }
 
@@ -3363,7 +3447,8 @@ function renderProfileAccessState(access){
   const status=document.getElementById("profile-auth-status");
   if(!status) return;
   if(!window.__appAuthUser){ status.textContent="未登入"; return; }
-  status.textContent=access?.roleLabel||"已登入";
+  if(access?.roleLabel){ status.textContent=access.roleLabel; return; }
+  status.textContent=access?.source==="no-membership"?"未有角色":"已登入";
 }
 
 let globalAuthServicePromise=null;
@@ -3390,6 +3475,91 @@ window.addEventListener("app-auth-state",event=>{
 });
 window.addEventListener("app-trip-access",event=>renderProfileAccessState(event.detail||null));
 renderProfileAuthState(null);
+
+
+let tripLibraryStopCatalog=null;
+let tripLibraryAuthUnsubscribe=null;
+let tripLibrarySummary=null;
+let tripLibraryCloudState={status:"signed-out",trips:[],error:null};
+
+function tripLibraryEsc(value){return String(value??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#39;");}
+function tripLibraryRoleLabel(role){return({owner:"Owner",admin:"Admin",member:"Member",viewer:"Viewer"})[role]||"";}
+function renderTripLibrary(){
+  const list=document.getElementById("trip-library-list");
+  const status=document.getElementById("trip-library-status");
+  const count=document.getElementById("trip-library-count");
+  const schema=document.getElementById("trip-library-schema");
+  if(!list||!tripLibrarySummary)return;
+
+  const currentId=tripLibrarySummary.tripId;
+  const cloudTrips=Array.isArray(tripLibraryCloudState.trips)?tripLibraryCloudState.trips:[];
+  const currentCloud=cloudTrips.find(trip=>trip.tripId===currentId)||null;
+  const others=cloudTrips.filter(trip=>trip.tripId!==currentId);
+  const currentRole=tripLibraryRoleLabel(currentCloud?.role);
+  const rows=[];
+  rows.push(`<div class="trip-library-item is-current">
+    <span class="trip-library-icon">✈️</span>
+    <span class="trip-library-copy">
+      <strong>${tripLibraryEsc(tripLibrarySummary.title||currentId)}</strong>
+      <small>${tripLibraryEsc(tripLibrarySummary.dateRange||[tripLibrarySummary.startDate,tripLibrarySummary.endDate].filter(Boolean).join(" → ")||currentId)}</small>
+      <span class="trip-library-meta"><span class="trip-library-pill is-current">目前</span><span class="trip-library-pill">本機 JSON</span>${currentRole?`<span class="trip-library-pill is-role">${currentRole}</span>`:""}</span>
+    </span>
+    <span class="trip-library-side"><strong>${tripLibrarySummary.dayCount} 日</strong><small>${tripLibrarySummary.itemCount} 項</small></span>
+  </div>`);
+  others.forEach(trip=>{
+    const role=tripLibraryRoleLabel(trip.role);
+    rows.push(`<div class="trip-library-item" aria-disabled="true">
+      <span class="trip-library-icon">🗂️</span>
+      <span class="trip-library-copy"><strong>${tripLibraryEsc(trip.title||trip.tripId)}</strong><small>${tripLibraryEsc(trip.dateRange||[trip.startDate,trip.endDate].filter(Boolean).join(" → ")||trip.tripId)}</small><span class="trip-library-meta"><span class="trip-library-pill">Firebase</span>${role?`<span class="trip-library-pill is-role">${role}</span>`:""}</span></span>
+      <span class="trip-library-side"><strong>已加入</strong><small>2E 切換</small></span>
+    </div>`);
+  });
+  list.innerHTML=rows.join("");
+  if(count) count.textContent=String(1+others.length);
+  if(schema) schema.innerHTML=`<div class="trip-library-stat"><strong>v${tripLibrarySummary.schemaVersion}</strong><span>Schema</span></div><div class="trip-library-stat"><strong>${tripLibrarySummary.dayCount}</strong><span>Days</span></div><div class="trip-library-stat"><strong>${tripLibrarySummary.savedPlaceCount}</strong><span>Saved</span></div>`;
+
+  if(!status)return;
+  const state=tripLibraryCloudState.status;
+  if(state==="signed-out") status.textContent="目前使用本機 trip.json。登入 Google 後會顯示你有權使用嘅雲端旅程。";
+  else if(state==="loading") status.textContent="已登入 Google，正在讀取 Firebase 旅程清單…";
+  else if(state==="rules-pending") status.textContent="Google 登入正常。Firestore 仍使用 Production 預設封鎖規則，Phase 2F 套用正式 Rules 後會讀取雲端旅程。";
+  else if(state==="ready"&&cloudTrips.length===0) status.textContent="暫時未有已匯入嘅雲端旅程。Phase 2C 匯入第一個 trip.json 時，建立者會自動成為 Owner。";
+  else if(state==="ready") status.textContent=`已讀取 ${cloudTrips.length} 個雲端旅程。Phase 2E 完成 Firebase Loader 後可喺同一個網址直接切換。`;
+  else status.textContent="旅程清單暫時未能同步，但目前本機行程不受影響。";
+}
+
+function initTripLibrarySafe(data){
+  import(`./assets/js/trip-schema-service.js?v=${APP_VERSION}`)
+    .then(schemaService=>{
+      const result=schemaService.validatePortableTrip(data);
+      tripLibrarySummary=schemaService.getTripSummary(result.trip);
+      window.__portableTripSchema=result;
+      tripLibraryCloudState={status:window.__appAuthUser?"loading":"signed-out",trips:[],error:null};
+      renderTripLibrary();
+
+      Promise.all([
+        import(`./assets/js/trip-catalog-service.js?v=${APP_VERSION}`),
+        getGlobalAuthService()
+      ]).then(([catalogService,authService])=>{
+        if(tripLibraryAuthUnsubscribe) tripLibraryAuthUnsubscribe();
+        tripLibraryAuthUnsubscribe=authService.subscribeAuthState(user=>{
+          if(tripLibraryStopCatalog){tripLibraryStopCatalog();tripLibraryStopCatalog=null;}
+          if(!user){tripLibraryCloudState={status:"signed-out",trips:[],error:null};renderTripLibrary();return;}
+          tripLibraryCloudState={status:"loading",trips:[],error:null};renderTripLibrary();
+          tripLibraryStopCatalog=catalogService.subscribeUserTrips(user,state=>{tripLibraryCloudState=state;renderTripLibrary();});
+        });
+      }).catch(error=>{
+        console.warn("Phase 2B cloud trip catalog unavailable",error);
+        tripLibraryCloudState={status:"error",trips:[],error};
+        renderTripLibrary();
+      });
+    })
+    .catch(error=>{
+      console.error("Phase 2B portable trip schema init error",error);
+      const status=document.getElementById("trip-library-status");
+      if(status) status.textContent="旅程 Schema service 載入失敗；目前行程仍可正常使用。";
+    });
+}
 
 function initPhase2AccessContext(data){
   Promise.all([
@@ -3453,6 +3623,7 @@ fetch(getTripJsonUrl())
     render(data);
     renderWeather(data);
     renderInfo(data);
+    initTripLibrarySafe(data);
     updateCompactHeader();
     requestAnimationFrame(()=>{updateBottomNavIndicator();updateCollapsingChrome();});
     try{

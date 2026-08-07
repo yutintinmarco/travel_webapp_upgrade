@@ -1,26 +1,46 @@
-Travel Webapp Phase 2A v7.2.2 Clean Project Demo
+Travel Webapp Phase 2B v7.3.0 Multi Trip Schema
 
 Purpose
-This build switches the whole app to the new Firebase project travel-app-744ab.
+Phase 2B establishes the clean multi trip data model before Firebase import and cloud loading are enabled.
 
-Phase 2A clean-project changes
-1. Firebase config now points only to travel-app-744ab.
-2. Firebase App, Auth and Firestore remain initialized only once in firebase-service.js.
-3. Google Auth remains app-wide through auth-service.js.
-4. Removed the temporary expense-auth compatibility event.
-5. Trip access now uses only the canonical trips/{tripId}/members/{uid} role document.
-6. Removed legacy role fallback from trip root fields.
-7. Owner, Admin, Member and Viewer remain the canonical roles.
-8. Storage is not used in Phase 2. Analytics is not loaded even though measurementId is present in the public Firebase config.
+Implemented
+1. Portable trip schema upgraded to schemaVersion 2 with tripId and revision.
+2. Every day has a stable dayId and sortOrder.
+3. Every itinerary item has a stable itemId, sortOrder and normalized image metadata while the legacy gallery array remains compatible with the current renderer.
+4. Saved places have stable placeId values.
+5. Added trip-schema-service.js to validate portable JSON and build the future Firestore write plan.
+6. Firestore plan separates trip metadata, members, days, items, savedPlaces, general settings and expense settings instead of using one oversized document.
+7. Added trip-catalog-service.js for the future same URL multi trip library using trips.memberUids.
+8. The 旅程 tab is now a multi trip library shell. The current bundled JSON remains the active trip during Phase 2B.
+9. Signed in users without a member document are no longer treated as Viewer. Viewer is now an explicit assigned role.
+10. Expense module no longer shows a permission alert merely because the new Firestore project is empty. Until a trip is imported and a member role exists, expense cloud writes remain read only.
+
+Canonical roles
+Owner
+Admin
+Member
+Viewer
+
+Canonical Firestore structure prepared by the schema service
+trips/{tripId}
+trips/{tripId}/members/{uid}
+trips/{tripId}/days/{dayId}
+trips/{tripId}/days/{dayId}/items/{itemId}
+trips/{tripId}/savedPlaces/{placeId}
+trips/{tripId}/settings/general
+trips/{tripId}/settings/expenses
+trips/{tripId}/expenses/{expenseId}
+trips/{tripId}/snapshots/{snapshotId}
+trips/{tripId}/activityLogs/{logId}
+
+Multi trip discovery
+The trip root document contains memberUids. After Security Rules are installed, the app can query trips where memberUids contains the signed in uid and render all accessible trips in one app. The canonical role remains the member document.
+
+Not activated yet
+Phase 2C will add JSON Import and first trip creation. The creator becomes Owner.
+Phase 2D will add Export and snapshots.
+Phase 2E will load active trip data from Firestore and make switching between cloud trips live.
+Phase 2F will install and test Security Rules.
 
 Important
-The new Firestore database was created in Production mode and is empty. Until Phase 2B installs the new schema and security rules, Google Auth can be tested but Firestore-backed trip and expense writes are expected to be blocked by the default production rules. Do not manually create collections.
-
-Verification performed
-• No reference to the old Firebase project remains in the app source
-• initializeApp, getAuth and getFirestore remain centralized in firebase-service.js
-• GoogleAuthProvider and onAuthStateChanged remain centralized in auth-service.js
-• trip-access-service has no legacy allowedEmails/adminEmails fallback
-• JavaScript syntax checked
-• trip.json and manifest.json parsed successfully
-• ZIP integrity checked
+The current Firestore database is still in the default Production deny state. That is intentional. The current trip continues to render from trip.json and must not depend on Firebase access.
