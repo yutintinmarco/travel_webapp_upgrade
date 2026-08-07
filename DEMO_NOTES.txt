@@ -1,50 +1,14 @@
-Travel Webapp Phase 2B v7.3.1 Refinement
+Travel Webapp Phase 2B v7.3.2 Refinement
 
-Purpose
-Refine the Phase 2B multi trip architecture before any production trip data is imported to Firestore.
+Key fixes
+1. Fixed false 「無法載入行程資料」 header state. v7.3.1 renderInfo referenced an undefined esc() helper after the itinerary had already rendered.
+2. Optional weather, travel info, Firebase catalog, auth and profile setup are isolated from the critical itinerary render path.
+3. Header trip title now opens a compact anchored Liquid Glass trip chooser directly underneath. No full bottom sheet and no Manage Trips button.
+4. 我的 first page is intentionally minimal: account plus four navigation rows only.
+5. 我的 detail pages use native-style forward push and reverse back transitions.
+6. Left-edge right-swipe back follows the finger and uses the Price Track app thresholds: 32% distance or 0.55 px/ms velocity.
+7. 我的旅程, appearance, trip settings and app/data content now live inside detail pages.
+8. 資料 tab remains dedicated to the current trip visa / Visit Japan / flight / hotel reference information.
+9. Archive model remains separate from trip lifecycle status.
 
-Implemented
-1. Fixed first refresh rendering for Team, Flight and Weather by moving those cards physically inside #itinerary-view.
-2. Removed the body.view-itinerary visibility workaround that could leave iOS backdrop-filter cards hidden until a tab repaint.
-3. The fourth bottom tab is now 資料. It is dedicated to the currently active trip's Visit Japan Web, visa, traveller, flight and hotel reference data.
-4. Multi Trip management moved to 我的 under 我的旅程.
-5. Added a header quick trip switcher sheet. During Phase 2B the bundled trip is current; cloud trip switching stays disabled until Phase 2E.
-6. Added archive-aware trip architecture. Trip lifecycle status remains draft / upcoming / active / completed and archive is a separate boolean state.
-7. Firestore trip documents now prepare archived, archivedAt and archivedBy fields.
-8. Active trip catalog and archived trip catalog are separate Firestore queries. Archived trips are not subscribed during normal app use and are loaded only when the user opens 已封存旅程.
-9. Added a prepared Archive / Restore patch helper for the Phase 2C writer.
-10. Added an Archived Trips management area in 我的. Actual archive and restore writes remain intentionally disabled until Phase 2C.
-
-Canonical trip lifecycle fields
-status: draft | upcoming | active | completed
-archived: boolean
-archivedAt: timestamp / null
-archivedBy: uid / empty
-
-Canonical Firestore structure
-trips/{tripId}
-trips/{tripId}/members/{uid}
-trips/{tripId}/days/{dayId}
-trips/{tripId}/days/{dayId}/items/{itemId}
-trips/{tripId}/savedPlaces/{placeId}
-trips/{tripId}/settings/general
-trips/{tripId}/settings/expenses
-trips/{tripId}/expenses/{expenseId}
-trips/{tripId}/snapshots/{snapshotId}
-trips/{tripId}/activityLogs/{logId}
-
-Navigation hierarchy
-行程: current trip itinerary
-收藏: current trip saved places
-支出: current trip expenses
-資料: current trip visa / travel reference information
-我的: account, preferences, multi trip management and permissions
-
-Not activated yet
-Phase 2C will add JSON Import, first trip creation, Owner assignment and archive / restore writes.
-Phase 2D will add Export and snapshots.
-Phase 2E will load an active trip from Firestore and enable live switching from the quick switcher.
-Phase 2F will install and test Security Rules and any required composite indexes.
-
-Important
-The current Firestore database can remain empty and in Production deny mode. The bundled trip still renders from trip.json and Firebase failures must not block itinerary rendering.
+Phase 2C is still intentionally disabled for actual Firestore create/import/archive writes.

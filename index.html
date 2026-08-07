@@ -571,7 +571,7 @@ html.theme-dark .info-mini-copy.copied { background: rgba(42,90,42,0.65); border
 html.theme-dark .info-hint { color: rgba(150,150,175,0.65); }
 
   
-/* v7.3.1: view containers alone own visibility; no cross-view card hiding rules. */
+/* v7.3.2: view containers alone own visibility; no cross-view card hiding rules. */
 
 
 /* Integration v5.3 global appearance polish */
@@ -726,7 +726,7 @@ body {
 .day-tab:active { transform: scale(0.96); }
 .day-tab.active { box-shadow: 0 4px 12px rgba(15,23,42,0.10), inset 0 1px 0 rgba(255,255,255,0.82); }
 
-/* v7.3.1: itinerary-owned cards now live inside #itinerary-view itself.
+/* v7.3.2: itinerary-owned cards now live inside #itinerary-view itself.
    View visibility is structural, so first paint never depends on a body class
    or an iOS backdrop-filter repaint. */
 
@@ -1894,7 +1894,7 @@ html.theme-dark .trip-library-status, html:not(.theme-light):not(.theme-dark) .t
 html.theme-dark .trip-library-stat, html:not(.theme-light):not(.theme-dark) .trip-library-stat { background:rgba(255,255,255,.055); }
 
 
-/* Phase 2B refinement v7.3.1 */
+/* Phase 2B refinement v7.3.2 */
 .header-title-small.trip-switch-trigger {
   display:inline-flex;
   align-items:center;
@@ -1986,12 +1986,53 @@ html:not(.theme-light):not(.theme-dark) .trip-switch-sheet {
   .trip-switch-backdrop,.trip-switch-sheet { transition-duration:.01ms !important; }
 }
 
+
+/* v7.3.2 compact trip chooser + native 我的 push navigation */
+.header-title-small.trip-switch-trigger{display:inline-flex;align-items:center;gap:4px;max-width:min(72vw,320px);cursor:pointer;user-select:none;-webkit-user-select:none;touch-action:manipulation;}
+.header-title-small.trip-switch-trigger::after{content:"⌄";position:static;display:inline-block;margin-left:2px;font-size:10px;line-height:1;color:var(--label-tertiary);transform:translateY(-1px);}
+.header-title-small.trip-switch-trigger[aria-expanded="true"]::after{transform:translateY(-1px) rotate(180deg);}
+.trip-quick-popover{position:fixed;z-index:460;display:none;padding:7px;border:1px solid rgba(255,255,255,.42);border-radius:18px;background:rgba(244,244,248,.82);box-shadow:0 18px 48px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.62);backdrop-filter:blur(28px) saturate(170%);-webkit-backdrop-filter:blur(28px) saturate(170%);transform:translate3d(0,-7px,0) scale(.975);transform-origin:top left;opacity:0;pointer-events:none;transition:opacity .17s ease,transform .22s cubic-bezier(.22,.86,.26,1);}
+.trip-quick-popover.active{display:block;opacity:1;pointer-events:auto;transform:translate3d(0,0,0) scale(1);}
+.trip-quick-popover .trip-switch-list{display:grid;gap:2px;}
+.trip-quick-popover .trip-switch-row{width:100%;min-height:48px;border:0;border-radius:13px;background:transparent;color:var(--label-primary);display:grid;grid-template-columns:31px minmax(0,1fr) 18px;align-items:center;gap:9px;padding:6px 9px;text-align:left;}
+.trip-quick-popover .trip-switch-row:active{background:rgba(118,118,128,.12);}
+.trip-quick-popover .trip-switch-row:disabled{opacity:.46;}
+.trip-quick-popover .trip-switch-row-icon{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;background:rgba(0,122,255,.08);overflow:hidden;}
+.trip-quick-popover .trip-switch-row-icon img{width:22px;height:22px;object-fit:contain;}
+.trip-quick-popover .trip-switch-row-copy{min-width:0;display:block;}
+.trip-quick-popover .trip-switch-row-copy strong{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:calc(12.5px * var(--font-scale));font-weight:760;letter-spacing:-.1px;}
+.trip-quick-popover .trip-switch-check{justify-self:end;color:#178b43;font-size:14px;font-weight:800;}
+html.theme-dark .trip-quick-popover,html:not(.theme-light):not(.theme-dark) .trip-quick-popover{background:rgba(30,30,35,.84);border-color:rgba(255,255,255,.11);box-shadow:0 20px 52px rgba(0,0,0,.42),inset 0 1px 0 rgba(255,255,255,.07);}
+html.theme-dark .trip-quick-popover .trip-switch-row:active,html:not(.theme-light):not(.theme-dark) .trip-quick-popover .trip-switch-row:active{background:rgba(255,255,255,.08);}
+
+#profile-view{overflow:visible;}
+.profile-nav-host{position:relative;width:100%;min-height:260px;overflow:visible;}
+.profile-nav-page{width:100%;transform:translate3d(0,0,0);backface-visibility:hidden;-webkit-backface-visibility:hidden;}
+.profile-nav-page[hidden]{display:none!important;}
+.profile-nav-page.is-transition-layer{position:absolute;top:0;left:0;width:100%;z-index:2;will-change:transform,opacity;}
+.profile-nav-page.is-transition-layer.is-active{z-index:3;}
+body.profile-navigation-active{overflow-x:hidden;}
+body.profile-edge-swipe-active{touch-action:pan-y;}
+.profile-menu-card{padding:0;overflow:hidden;}
+.profile-menu-card .profile-row{border-radius:0;margin:0;border-bottom:1px solid rgba(60,60,67,.09);}
+.profile-menu-card .profile-row:last-child{border-bottom:0;}
+.profile-detail-bar{min-height:46px;margin:0 0 10px;display:grid;grid-template-columns:42px minmax(0,1fr) 42px;align-items:center;}
+.profile-detail-bar h2{margin:0;text-align:center;font-size:calc(16px * var(--font-scale));font-weight:780;letter-spacing:-.25px;color:var(--label-primary);}
+.profile-detail-back{width:40px;height:40px;border:0;background:transparent;color:#087ec4;display:grid;place-items:center;border-radius:999px;padding:0;}
+.profile-detail-back span{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",sans-serif;font-size:34px;font-weight:300;line-height:1;transform:translateY(-1px);}
+.profile-detail-back:active{background:rgba(0,122,255,.09);}
+.profile-detail-spacer{width:40px;height:40px;}
+.profile-nav-page:not([data-profile-page="root"])>.profile-card{margin-top:0;}
+.profile-identity-card .profile-user-card{margin-top:0;}
+.profile-trips-card .trip-library-heading-copy p{max-width:34em;}
+html.theme-dark .profile-menu-card .profile-row,html:not(.theme-light):not(.theme-dark) .profile-menu-card .profile-row{border-bottom-color:rgba(255,255,255,.075);}
+@media (prefers-reduced-motion:reduce){.trip-quick-popover{transition:none!important}.profile-nav-page{transition:none!important}}
 </style>
             <link rel="apple-touch-icon" href="assets/icon/trip_icon.png">
   <link rel="icon" type="image/png" href="assets/icon/trip_icon.png">
-  <link rel="manifest" href="manifest.json?v=7.3.1">
+  <link rel="manifest" href="manifest.json?v=7.3.2">
   <meta name="apple-mobile-web-app-title" content="關嘉露西生日之旅">
-  <link rel="stylesheet" href="assets/css/expenses.css?v=7.3.1">
+  <link rel="stylesheet" href="assets/css/expenses.css?v=7.3.2">
 </head>
 <body>
 <div class="bg-fixed"></div>
@@ -2077,107 +2118,153 @@ html:not(.theme-light):not(.theme-dark) .trip-switch-sheet {
 </div>
 
 <div id="profile-view" class="app-view" style="display:none;">
-  <section class="profile-card profile-identity-card">
-    <div class="profile-card-heading">
-      <div>
-        <div class="profile-eyebrow">帳戶與身份</div>
-        <h2>我的</h2>
-      </div>
-    </div>
-    <div class="profile-user-card" id="profile-user-card">
-      <span class="profile-avatar" id="profile-avatar" aria-hidden="true">
-        <svg viewBox="0 0 24 24" fill="none"><path d="M12 12.2a4.1 4.1 0 1 0 0-8.2 4.1 4.1 0 0 0 0 8.2Z" stroke="currentColor" stroke-width="1.8"/><path d="M4.8 20c.65-3.55 3.28-5.55 7.2-5.55s6.55 2 7.2 5.55" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-      </span>
-      <span class="profile-user-main">
-        <span class="profile-user-name" id="profile-user-name">尚未登入</span>
-        <span class="profile-user-email" id="profile-user-email">使用 Google 帳戶登入後顯示資料</span>
-      </span>
-      <span class="profile-status-pill profile-auth-status" id="profile-auth-status">未登入</span>
-    </div>
-    <button class="profile-row" id="my-account-btn" type="button">
-      <span class="profile-row-icon profile-icon-blue">👤</span>
-      <span class="profile-row-copy"><strong id="profile-account-action-title">登入 Google 帳戶</strong><small id="profile-account-action-subtitle">登入後顯示你參與嘅旅程及目前身份</small></span>
-      <span class="profile-chevron">›</span>
-    </button>
-  </section>
+  <div class="profile-nav-host" id="profile-nav-host">
+    <div class="profile-nav-page is-active" id="profile-page-root" data-profile-page="root">
+      <section class="profile-card profile-identity-card">
+        <div class="profile-user-card" id="profile-user-card">
+          <span class="profile-avatar" id="profile-avatar" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M12 12.2a4.1 4.1 0 1 0 0-8.2 4.1 4.1 0 0 0 0 8.2Z" stroke="currentColor" stroke-width="1.8"/><path d="M4.8 20c.65-3.55 3.28-5.55 7.2-5.55s6.55 2 7.2 5.55" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          </span>
+          <span class="profile-user-main">
+            <span class="profile-user-name" id="profile-user-name">尚未登入</span>
+            <span class="profile-user-email" id="profile-user-email">使用 Google 帳戶登入後顯示資料</span>
+          </span>
+          <span class="profile-status-pill profile-auth-status" id="profile-auth-status">未登入</span>
+        </div>
+        <button class="profile-row" id="my-account-btn" type="button">
+          <span class="profile-row-icon profile-icon-blue">👤</span>
+          <span class="profile-row-copy"><strong id="profile-account-action-title">登入 Google 帳戶</strong><small id="profile-account-action-subtitle">登入後顯示你參與嘅旅程及目前身份</small></span>
+          <span class="profile-chevron">›</span>
+        </button>
+      </section>
 
-  <section class="profile-card profile-trips-card" id="profile-trips-card" aria-labelledby="trip-library-title">
-    <div class="trip-library-heading">
-      <div class="trip-library-heading-copy">
-        <div class="trip-library-eyebrow">Multi Trip</div>
-        <h2 id="trip-library-title">我的旅程</h2>
-        <p>同一個 App 管理多個旅程。切換旅程後，行程、收藏、支出同資料會一齊轉換。</p>
-      </div>
-      <span class="trip-library-count" id="trip-library-count">1</span>
+      <section class="profile-card profile-menu-card" aria-label="我的設定">
+        <button class="profile-row" type="button" data-profile-open="trips">
+          <span class="profile-row-icon profile-icon-blue">🧳</span>
+          <span class="profile-row-copy"><strong>我的旅程</strong><small>切換、建立、匯入及封存旅程</small></span>
+          <span class="profile-chevron">›</span>
+        </button>
+        <button class="profile-row" type="button" data-profile-open="appearance">
+          <span class="profile-row-icon profile-icon-purple">◐</span>
+          <span class="profile-row-copy"><strong>外觀與顯示</strong><small>主題、文字大小及顯示偏好</small></span>
+          <span class="profile-chevron">›</span>
+        </button>
+        <button class="profile-row" type="button" data-profile-open="trip-management">
+          <span class="profile-row-icon profile-icon-green">⚙︎</span>
+          <span class="profile-row-copy"><strong>旅程設定</strong><small>權限、鎖定、匯入與匯出</small></span>
+          <span class="profile-chevron">›</span>
+        </button>
+        <button class="profile-row" type="button" data-profile-open="app-data">
+          <span class="profile-row-icon profile-icon-grey">ⓘ</span>
+          <span class="profile-row-copy"><strong>App 與資料</strong><small>版本、系統資料及使用說明</small></span>
+          <span class="profile-chevron">›</span>
+        </button>
+      </section>
     </div>
-    <div class="trip-library-list" id="trip-library-list"></div>
-    <div class="trip-library-status" id="trip-library-status">正在準備旅程資料…</div>
-    <div class="trip-library-actions">
-      <button class="trip-library-action" type="button" disabled><span>＋ 新增旅程</span><small>Phase 2C 啟用</small></button>
-      <button class="trip-library-action" type="button" disabled><span>⇅ 匯入 trip.json</span><small>Phase 2C 啟用</small></button>
-      <button class="trip-library-action trip-library-action-wide" type="button" disabled><span>封存目前旅程</span><small>Phase 2C 接入 Firestore 寫入</small></button>
-    </div>
-    <button class="trip-archive-toggle" id="trip-archive-toggle" type="button" aria-expanded="false">
-      <span><strong>已封存旅程</strong><small>平日不載入，按此需要時先讀取</small></span>
-      <span class="trip-archive-toggle-side"><span id="trip-archive-count">—</span><span class="profile-chevron">›</span></span>
-    </button>
-    <div class="trip-archive-panel" id="trip-archive-panel" hidden>
-      <div class="trip-library-list" id="trip-archive-list"></div>
-      <div class="trip-library-status" id="trip-archive-status">尚未載入已封存旅程。</div>
-    </div>
-  </section>
 
-  <section class="profile-card">
-    <div class="profile-section-title">外觀與顯示</div>
-    <div class="profile-setting-row profile-font-row">
-      <span class="profile-row-icon profile-icon-orange">Aa</span>
-      <span class="profile-row-copy"><strong>文字大小</strong><small id="font-scale-label">標準</small></span>
-      <div class="profile-stepper" aria-label="文字大小">
-        <button class="profile-stepper-btn" id="font-smaller" type="button" aria-label="縮小文字">A−</button>
-        <button class="profile-stepper-btn" id="font-larger" type="button" aria-label="放大文字">A＋</button>
+    <div class="profile-nav-page" id="profile-page-trips" data-profile-page="trips" hidden>
+      <div class="profile-detail-bar">
+        <button class="profile-detail-back" type="button" data-profile-back aria-label="返回我的"><span>‹</span></button>
+        <h2>我的旅程</h2>
+        <span class="profile-detail-spacer"></span>
       </div>
+      <section class="profile-card profile-trips-card" id="profile-trips-card" aria-labelledby="trip-library-title">
+        <div class="trip-library-heading">
+          <div class="trip-library-heading-copy">
+            <div class="trip-library-eyebrow">Multi Trip</div>
+            <h2 id="trip-library-title">我的旅程</h2>
+            <p>每個旅程獨立保存行程、收藏、支出、資料、成員同權限。</p>
+          </div>
+          <span class="trip-library-count" id="trip-library-count">1</span>
+        </div>
+        <div class="trip-library-list" id="trip-library-list"></div>
+        <div class="trip-library-status" id="trip-library-status">正在準備旅程資料…</div>
+        <div class="trip-library-actions">
+          <button class="trip-library-action" type="button" disabled><span>＋ 新增旅程</span><small>Phase 2C 啟用</small></button>
+          <button class="trip-library-action" type="button" disabled><span>⇅ 匯入 trip.json</span><small>Phase 2C 啟用</small></button>
+          <button class="trip-library-action trip-library-action-wide" type="button" disabled><span>封存目前旅程</span><small>Phase 2C 接入 Firestore 寫入</small></button>
+        </div>
+        <button class="trip-archive-toggle" id="trip-archive-toggle" type="button" aria-expanded="false">
+          <span><strong>已封存旅程</strong><small>平日不載入，需要時先讀取</small></span>
+          <span class="trip-archive-toggle-side"><span id="trip-archive-count">—</span><span class="profile-chevron">›</span></span>
+        </button>
+        <div class="trip-archive-panel" id="trip-archive-panel" hidden>
+          <div class="trip-library-list" id="trip-archive-list"></div>
+          <div class="trip-library-status" id="trip-archive-status">尚未載入已封存旅程。</div>
+        </div>
+      </section>
     </div>
-    <div class="profile-setting-block">
-      <div class="profile-setting-label"><span class="profile-row-icon profile-icon-purple">◐</span><span><strong>顯示模式</strong><small>套用至整個 App</small></span></div>
-      <div class="profile-theme-segment" id="profile-theme-segment" role="group" aria-label="顯示模式">
-        <button type="button" data-theme-choice="auto">自動</button>
-        <button type="button" data-theme-choice="light">淺色</button>
-        <button type="button" data-theme-choice="dark">深色</button>
+
+    <div class="profile-nav-page" id="profile-page-appearance" data-profile-page="appearance" hidden>
+      <div class="profile-detail-bar">
+        <button class="profile-detail-back" type="button" data-profile-back aria-label="返回我的"><span>‹</span></button>
+        <h2>外觀與顯示</h2>
+        <span class="profile-detail-spacer"></span>
       </div>
-      <button class="theme-btn profile-theme-compat" id="theme-btn" type="button" title="切換主題" data-theme="auto" aria-hidden="true" tabindex="-1"></button>
+      <section class="profile-card">
+        <div class="profile-setting-row profile-font-row">
+          <span class="profile-row-icon profile-icon-orange">Aa</span>
+          <span class="profile-row-copy"><strong>文字大小</strong><small id="font-scale-label">標準</small></span>
+          <div class="profile-stepper" aria-label="文字大小">
+            <button class="profile-stepper-btn" id="font-smaller" type="button" aria-label="縮小文字">A−</button>
+            <button class="profile-stepper-btn" id="font-larger" type="button" aria-label="放大文字">A＋</button>
+          </div>
+        </div>
+        <div class="profile-setting-block">
+          <div class="profile-setting-label"><span class="profile-row-icon profile-icon-purple">◐</span><span><strong>顯示模式</strong><small>套用至整個 App</small></span></div>
+          <div class="profile-theme-segment" id="profile-theme-segment" role="group" aria-label="顯示模式">
+            <button type="button" data-theme-choice="auto">自動</button>
+            <button type="button" data-theme-choice="light">淺色</button>
+            <button type="button" data-theme-choice="dark">深色</button>
+          </div>
+          <button class="theme-btn profile-theme-compat" id="theme-btn" type="button" title="切換主題" data-theme="auto" aria-hidden="true" tabindex="-1"></button>
+        </div>
+      </section>
     </div>
-  </section>
 
-  <section class="profile-card">
-    <div class="profile-section-title">旅程管理</div>
-    <button class="profile-row profile-row-disabled" type="button" disabled>
-      <span class="profile-row-icon profile-icon-green">🔐</span>
-      <span class="profile-row-copy"><strong>旅程權限</strong><small>Owner、Admin、Member、Viewer 架構已建立</small></span>
-      <span class="profile-status-pill">2F</span>
-    </button>
-    <button class="profile-row" type="button" data-global-setting="lock">
-      <span class="profile-row-icon profile-icon-red">🔒</span>
-      <span class="profile-row-copy"><strong>旅程鎖定</strong><small>目前先沿用支出模組鎖定功能</small></span>
-      <span class="profile-chevron">›</span>
-    </button>
-    <button class="profile-row profile-row-disabled" type="button" disabled>
-      <span class="profile-row-icon profile-icon-grey">⇅</span>
-      <span class="profile-row-copy"><strong>行程匯入與匯出</strong><small>Portable JSON schema 已升級，下一步接 Import / Export</small></span>
-      <span class="profile-status-pill">2C</span>
-    </button>
-  </section>
+    <div class="profile-nav-page" id="profile-page-trip-management" data-profile-page="trip-management" hidden>
+      <div class="profile-detail-bar">
+        <button class="profile-detail-back" type="button" data-profile-back aria-label="返回我的"><span>‹</span></button>
+        <h2>旅程設定</h2>
+        <span class="profile-detail-spacer"></span>
+      </div>
+      <section class="profile-card">
+        <button class="profile-row profile-row-disabled" type="button" disabled>
+          <span class="profile-row-icon profile-icon-green">🔐</span>
+          <span class="profile-row-copy"><strong>旅程權限</strong><small>Owner、Admin、Member、Viewer</small></span>
+          <span class="profile-status-pill">2F</span>
+        </button>
+        <button class="profile-row" type="button" data-global-setting="lock">
+          <span class="profile-row-icon profile-icon-red">🔒</span>
+          <span class="profile-row-copy"><strong>旅程鎖定</strong><small>目前先沿用支出模組鎖定功能</small></span>
+          <span class="profile-chevron">›</span>
+        </button>
+        <button class="profile-row profile-row-disabled" type="button" disabled>
+          <span class="profile-row-icon profile-icon-grey">⇅</span>
+          <span class="profile-row-copy"><strong>行程匯入與匯出</strong><small>Portable JSON schema 已準備</small></span>
+          <span class="profile-status-pill">2C</span>
+        </button>
+      </section>
+    </div>
 
-  <section class="profile-card">
-    <div class="profile-section-title">App 與資料</div>
-    <button class="profile-row" type="button" data-global-setting="about">
-      <span class="profile-row-icon profile-icon-grey">ⓘ</span>
-      <span class="profile-row-copy"><strong>關於本 App</strong><small>版本、系統資料及使用說明</small></span>
-      <span class="profile-chevron">›</span>
-    </button>
-    <div class="profile-meta-row"><span>目前版本</span><strong>v7.3.1</strong></div>
-  </section>
+    <div class="profile-nav-page" id="profile-page-app-data" data-profile-page="app-data" hidden>
+      <div class="profile-detail-bar">
+        <button class="profile-detail-back" type="button" data-profile-back aria-label="返回我的"><span>‹</span></button>
+        <h2>App 與資料</h2>
+        <span class="profile-detail-spacer"></span>
+      </div>
+      <section class="profile-card">
+        <button class="profile-row" type="button" data-global-setting="about">
+          <span class="profile-row-icon profile-icon-grey">ⓘ</span>
+          <span class="profile-row-copy"><strong>關於本 App</strong><small>系統資料及使用說明</small></span>
+          <span class="profile-chevron">›</span>
+        </button>
+        <div class="profile-meta-row"><span>目前版本</span><strong>v7.3.2</strong></div>
+      </section>
+    </div>
+  </div>
 </div>
-<div class="app-version-note" id="app-version-note">v7.3.1</div>
+<div class="app-version-note" id="app-version-note">v7.3.2</div>
 
 
   </div>
@@ -2207,16 +2294,8 @@ html:not(.theme-light):not(.theme-dark) .trip-switch-sheet {
   </nav>
 </div>
 
-<div class="trip-switch-backdrop" id="trip-switch-backdrop" aria-hidden="true">
-  <section class="trip-switch-sheet" id="trip-switch-sheet" role="dialog" aria-modal="true" aria-labelledby="trip-switch-title">
-    <div class="trip-switch-grabber-zone" id="trip-switch-grabber" aria-hidden="true"><span class="sheet-grabber"></span></div>
-    <div class="trip-switch-heading">
-      <div><div class="trip-library-eyebrow">Current Trip</div><h2 id="trip-switch-title">切換旅程</h2></div>
-      <button class="trip-switch-close" id="trip-switch-close" type="button" aria-label="關閉">×</button>
-    </div>
-    <div class="trip-switch-list" id="trip-switch-list"></div>
-    <button class="trip-switch-manage" id="trip-switch-manage" type="button">管理所有旅程</button>
-  </section>
+<div class="trip-quick-popover" id="trip-quick-popover" aria-hidden="true">
+  <div class="trip-switch-list" id="trip-switch-list" role="menu" aria-label="切換旅程"></div>
 </div>
 
 <div class="modal-backdrop" id="detail-backdrop" aria-hidden="true">
@@ -2239,13 +2318,14 @@ html:not(.theme-light):not(.theme-dark) .trip-switch-sheet {
 </div>
 
 <script>
-const APP_VERSION = "7.3.1";
+const APP_VERSION = "7.3.2";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 window.EXPENSES_MODULE_VERSION = EXPENSES_MODULE_VERSION;
 
 function getTripJsonUrl(){const p=new URLSearchParams(location.search);return p.get("data")||"trip.json";}
 function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
+function escapeHtmlText(value){return String(value??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#39;");}
 function fmtMMDD(iso){return iso.slice(5).replace("-","/");}
 function dateInTZ(tz){try{return new Intl.DateTimeFormat("en-CA",{timeZone:tz||"UTC",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date());}catch(e){return new Date().toISOString().slice(0,10);}}
 function normGallery(v){if(!v)return[];if(Array.isArray(v))return v;return[v];}
@@ -3007,14 +3087,14 @@ function miniCopyBtn(textFn){
 function renderInfo(data){
   const meta=data.meta||{};
   const infoCard=meta.infoCard||null;
-  // v7.3.1: 資料 tab is dedicated to the current trip's visa / travel reference data.
+  // v7.3.2: 資料 tab is dedicated to the current trip's visa / travel reference data.
   document.getElementById("bt-info").style.display="flex";requestAnimationFrame(updateBottomNavIndicator);
 
   const travellers=meta.travellers||{},cities=meta.cities||{},hotels=meta.hotels||{},flights=meta.flights||[];
   const container=document.getElementById("info-content");if(!container)return;
   container.innerHTML="";
   const hint=document.getElementById("info-hint");
-  if(hint&&infoCard?.hint) hint.innerHTML=esc(infoCard.hint).replace(/\n/g,"<br>");
+  if(hint&&infoCard?.hint) hint.innerHTML=escapeHtmlText(infoCard.hint).replace(/\n/g,"<br>");
   if(!infoCard){
     container.innerHTML="<div class='info-hint'>此旅程未有額外旅程資料。</div>";
     if(hint) hint.style.display="none";
@@ -3589,7 +3669,7 @@ let tripLibraryCurrentUser=null;
 let tripLibraryCloudState={status:"signed-out",trips:[],error:null};
 let tripLibraryArchiveState={status:"idle",trips:[],error:null};
 
-function tripLibraryEsc(value){return String(value??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#39;");}
+function tripLibraryEsc(value){return escapeHtmlText(value);}
 function tripLibraryRoleLabel(role){return({owner:"Owner",admin:"Admin",member:"Member",viewer:"Viewer"})[role]||"";}
 function tripLibraryDateText(trip){return trip?.dateRange||[trip?.startDate,trip?.endDate].filter(Boolean).join(" → ")||trip?.tripId||"";}
 function tripLibraryStatusLabel(status){return({draft:"草稿",upcoming:"即將出發",active:"旅程中",completed:"已完成"})[status]||"";}
@@ -3632,15 +3712,14 @@ function renderTripSwitcher(){
   const currentId=tripLibrarySummary.tripId;
   const cloudTrips=Array.isArray(tripLibraryCloudState.trips)?tripLibraryCloudState.trips:[];
   const others=cloudTrips.filter(trip=>trip.tripId!==currentId && trip.archived!==true);
-  const rows=[`<button class="trip-switch-row is-current" type="button" data-trip-switch-current="true">
-    <span class="trip-switch-row-icon">✈️</span>
-    <span class="trip-switch-row-copy"><strong>${tripLibraryEsc(tripLibrarySummary.title||currentId)}</strong><small>${tripLibraryEsc(tripLibrarySummary.dateRange||currentId)}</small></span>
+  const rows=[`<button class="trip-switch-row is-current" type="button" data-trip-switch-current="true" role="menuitem">
+    <span class="trip-switch-row-icon"><img src="assets/icon/trip_icon.png" alt=""></span>
+    <span class="trip-switch-row-copy"><strong>${tripLibraryEsc(tripLibrarySummary.title||currentId)}</strong></span>
     <span class="trip-switch-check">✓</span>
   </button>`];
-  others.forEach(trip=>rows.push(`<button class="trip-switch-row" type="button" disabled>
-    <span class="trip-switch-row-icon">🗂️</span>
-    <span class="trip-switch-row-copy"><strong>${tripLibraryEsc(trip.title||trip.tripId)}</strong><small>${tripLibraryEsc(tripLibraryDateText(trip))} · Phase 2E 啟用切換</small></span>
-    <span class="profile-chevron">›</span>
+  others.forEach(trip=>rows.push(`<button class="trip-switch-row" type="button" disabled role="menuitem">
+    <span class="trip-switch-row-icon"><img src="assets/icon/trip_icon.png" alt=""></span>
+    <span class="trip-switch-row-copy"><strong>${tripLibraryEsc(trip.title||trip.tripId)}</strong></span>
   </button>`));
   list.innerHTML=rows.join("");
 }
@@ -3772,97 +3851,185 @@ tripArchiveToggle?.addEventListener("click",()=>{
   if(willOpen && ["idle","signed-out","error"].includes(tripLibraryArchiveState.status)) loadArchivedTrips();
 });
 
-const tripSwitchBackdrop=document.getElementById("trip-switch-backdrop");
-const tripSwitchSheet=document.getElementById("trip-switch-sheet");
-const tripSwitchGrabber=document.getElementById("trip-switch-grabber");
-let tripSwitchTouch=null;
-let tripSwitchCloseTimer=0;
-function openTripSwitcher(){
-  if(!tripSwitchBackdrop||!tripSwitchSheet)return;
-  clearTimeout(tripSwitchCloseTimer);
-  renderTripSwitcher();
-  tripSwitchSheet.style.transition="";
-  tripSwitchSheet.style.transform="";
-  tripSwitchBackdrop.style.backgroundColor="";
-  tripSwitchBackdrop.classList.remove("is-closing","is-dragging");
-  tripSwitchBackdrop.setAttribute("aria-hidden","false");
-  lockScroll();
-  requestAnimationFrame(()=>tripSwitchBackdrop.classList.add("active"));
-}
-function closeTripSwitcher({velocity=0}={}){
-  if(!tripSwitchBackdrop?.classList.contains("active")||!tripSwitchSheet)return;
-  tripSwitchBackdrop.classList.remove("is-dragging");
-  tripSwitchBackdrop.classList.add("is-closing");
-  const distance=Math.max(window.innerHeight,tripSwitchSheet.getBoundingClientRect().height+80);
-  const duration=Math.max(180,Math.min(340,290-Math.max(0,velocity)*80));
-  tripSwitchSheet.style.transition=`transform ${duration}ms cubic-bezier(.32,.72,0,1)`;
-  tripSwitchSheet.style.transform=`translate3d(0,${distance}px,0)`;
-  tripSwitchBackdrop.style.backgroundColor="rgba(0,0,0,0)";
-  clearTimeout(tripSwitchCloseTimer);
-  tripSwitchCloseTimer=setTimeout(()=>{
-    tripSwitchBackdrop.classList.remove("active","is-closing");
-    tripSwitchBackdrop.setAttribute("aria-hidden","true");
-    tripSwitchSheet.style.transition="";
-    tripSwitchSheet.style.transform="";
-    tripSwitchBackdrop.style.backgroundColor="";
-    unlockScroll();
-  },duration+22);
-}
-function beginTripSwitchDrag(e){
-  if(!tripSwitchBackdrop?.classList.contains("active")||e.touches?.length!==1)return;
-  const t=e.touches[0];
-  tripSwitchTouch={startX:t.clientX,startY:t.clientY,lastY:t.clientY,lastTime:performance.now(),offset:0,velocity:0,dragging:false};
-}
-function moveTripSwitchDrag(e){
-  if(!tripSwitchTouch||e.touches?.length!==1)return;
-  const t=e.touches[0],dx=t.clientX-tripSwitchTouch.startX,dy=t.clientY-tripSwitchTouch.startY;
-  if(!tripSwitchTouch.dragging){
-    if(dy<=3||Math.abs(dx)>Math.abs(dy))return;
-    tripSwitchTouch.dragging=true;
-    tripSwitchBackdrop.classList.add("is-dragging");
-  }
-  e.preventDefault();
-  const now=performance.now(),dt=Math.max(1,now-tripSwitchTouch.lastTime);
-  const instant=(t.clientY-tripSwitchTouch.lastY)/dt;
-  tripSwitchTouch.velocity=tripSwitchTouch.velocity*.72+instant*.28;
-  tripSwitchTouch.lastY=t.clientY;tripSwitchTouch.lastTime=now;
-  tripSwitchTouch.offset=Math.max(0,dy);
-  tripSwitchSheet.style.transform=`translate3d(0,${tripSwitchTouch.offset}px,0)`;
-  const h=Math.max(tripSwitchSheet.getBoundingClientRect().height,1);
-  const progress=Math.min(1,tripSwitchTouch.offset/h);
-  tripSwitchBackdrop.style.backgroundColor=`rgba(0,0,0,${(.42*(1-progress)).toFixed(3)})`;
-}
-function endTripSwitchDrag(){
-  if(!tripSwitchTouch)return;
-  const state=tripSwitchTouch;tripSwitchTouch=null;
-  if(!state.dragging)return;
-  const h=Math.max(tripSwitchSheet?.getBoundingClientRect().height||0,1);
-  if(state.offset>Math.min(160,h*.28)||state.velocity>.62){closeTripSwitcher({velocity:state.velocity});return;}
-  tripSwitchBackdrop?.classList.remove("is-dragging");
-  if(tripSwitchSheet){tripSwitchSheet.style.transition="transform .32s cubic-bezier(.22,.86,.26,1)";tripSwitchSheet.style.transform="translate3d(0,0,0)";}
-  if(tripSwitchBackdrop)tripSwitchBackdrop.style.backgroundColor="rgba(0,0,0,.42)";
-  setTimeout(()=>{if(tripSwitchSheet)tripSwitchSheet.style.transition="";},340);
-}
-tripSwitchGrabber?.addEventListener("touchstart",beginTripSwitchDrag,{passive:true});
-tripSwitchGrabber?.addEventListener("touchmove",moveTripSwitchDrag,{passive:false});
-tripSwitchGrabber?.addEventListener("touchend",endTripSwitchDrag,{passive:true});
-document.getElementById("trip-switch-close")?.addEventListener("click",()=>closeTripSwitcher());
-tripSwitchBackdrop?.addEventListener("click",event=>{if(event.target===tripSwitchBackdrop)closeTripSwitcher();});
-document.getElementById("trip-switch-manage")?.addEventListener("click",()=>{
-  closeTripSwitcher();
-  setTimeout(()=>{
-    setView("profile",{restoreScroll:false});
-    requestAnimationFrame(()=>{
-      const card=document.getElementById("profile-trips-card");
-      if(!card||!scrollShell)return;
-      const top=scrollShell.scrollTop+card.getBoundingClientRect().top-18;
-      scrollShell.scrollTo({top:Math.max(0,top),behavior:"smooth"});
-    });
-  },220);
-});
+const tripQuickPopover=document.getElementById("trip-quick-popover");
 const largeTripSwitchTrigger=document.getElementById("header-title-small");
-largeTripSwitchTrigger?.addEventListener("click",openTripSwitcher);
-largeTripSwitchTrigger?.addEventListener("keydown",event=>{if(event.key==="Enter"||event.key===" "){event.preventDefault();openTripSwitcher();}});
+let tripQuickOpen=false;
+function positionTripQuickPopover(){
+  if(!tripQuickPopover||!largeTripSwitchTrigger)return;
+  const rect=largeTripSwitchTrigger.getBoundingClientRect();
+  const width=Math.min(304,window.innerWidth-28);
+  const left=clamp(rect.left,14,Math.max(14,window.innerWidth-width-14));
+  const top=Math.min(window.innerHeight-90,rect.bottom+8);
+  tripQuickPopover.style.width=`${width}px`;
+  tripQuickPopover.style.left=`${Math.round(left)}px`;
+  tripQuickPopover.style.top=`${Math.round(top)}px`;
+}
+function openTripSwitcher(){
+  if(!tripQuickPopover)return;
+  renderTripSwitcher();
+  positionTripQuickPopover();
+  tripQuickOpen=true;
+  tripQuickPopover.classList.add("active");
+  tripQuickPopover.setAttribute("aria-hidden","false");
+  largeTripSwitchTrigger?.setAttribute("aria-expanded","true");
+}
+function closeTripSwitcher(){
+  if(!tripQuickPopover)return;
+  tripQuickOpen=false;
+  tripQuickPopover.classList.remove("active");
+  tripQuickPopover.setAttribute("aria-hidden","true");
+  largeTripSwitchTrigger?.setAttribute("aria-expanded","false");
+}
+function toggleTripSwitcher(){tripQuickOpen?closeTripSwitcher():openTripSwitcher();}
+largeTripSwitchTrigger?.setAttribute("aria-haspopup","menu");
+largeTripSwitchTrigger?.setAttribute("aria-expanded","false");
+largeTripSwitchTrigger?.addEventListener("click",event=>{event.stopPropagation();toggleTripSwitcher();});
+largeTripSwitchTrigger?.addEventListener("keydown",event=>{if(event.key==="Enter"||event.key===" "){event.preventDefault();toggleTripSwitcher();}else if(event.key==="Escape")closeTripSwitcher();});
+document.addEventListener("pointerdown",event=>{if(tripQuickOpen&&!tripQuickPopover?.contains(event.target)&&event.target!==largeTripSwitchTrigger)closeTripSwitcher();},{passive:true});
+document.addEventListener("keydown",event=>{if(event.key==="Escape"&&tripQuickOpen)closeTripSwitcher();});
+scrollShell?.addEventListener("scroll",()=>{if(tripQuickOpen)closeTripSwitcher();},{passive:true});
+window.addEventListener("resize",()=>{if(tripQuickOpen)positionTripQuickPopover();},{passive:true});
+
+// v7.3.2: iOS native-style internal navigation for 我的.
+// This follows the stable Price Track pattern: forward push, reverse back,
+// and an interactive left-edge right-swipe where both pages track the finger.
+const profileNavHost=document.getElementById("profile-nav-host");
+const profilePages=Object.fromEntries([...document.querySelectorAll("#profile-view [data-profile-page]")].map(page=>[page.dataset.profilePage,page]));
+let profileCurrentPage="root";
+let profileNavigationTransitioning=false;
+let profilePreviousState=null;
+let profileSwipe=null;
+function profileSetLayer(page,active){
+  page?.classList.toggle("is-transition-layer",!!active);
+}
+function profilePrepareLayers(fromPage,toPage){
+  if(!profileNavHost||!fromPage||!toPage)return 0;
+  fromPage.hidden=false;toPage.hidden=false;
+  profileSetLayer(fromPage,true);profileSetLayer(toPage,true);
+  const h=Math.max(fromPage.scrollHeight||0,toPage.scrollHeight||0,360);
+  profileNavHost.style.height=`${h}px`;
+  return Math.max(1,profileNavHost.getBoundingClientRect().width||window.innerWidth);
+}
+function profileFinishTransition(activeKey,hiddenKey,scrollTop){
+  const active=profilePages[activeKey],hidden=profilePages[hiddenKey];
+  if(active){
+    active.hidden=false;active.classList.add("is-active");profileSetLayer(active,false);active.style.transform="";active.style.opacity="";active.style.transition="";
+  }
+  if(hidden){
+    hidden.hidden=true;hidden.classList.remove("is-active");profileSetLayer(hidden,false);hidden.style.transform="";hidden.style.opacity="";hidden.style.transition="";
+  }
+  if(profileNavHost)profileNavHost.style.height="";
+  document.body.classList.remove("profile-navigation-active","profile-edge-swipe-active");
+  profileCurrentPage=activeKey;
+  profileNavigationTransitioning=false;
+  if(scrollShell)scrollShell.scrollTo({top:Math.max(0,Number(scrollTop||0)),behavior:"auto"});
+}
+function openProfilePage(key){
+  if(profileNavigationTransitioning||key==="root"||!profilePages[key]||profileCurrentPage===key)return;
+  const from=profilePages[profileCurrentPage],to=profilePages[key];
+  if(!from||!to)return;
+  closeTripSwitcher();
+  const oldScroll=Math.max(0,scrollShell?.scrollTop||0);
+  profilePreviousState={key:profileCurrentPage,scrollTop:oldScroll};
+  const width=profilePrepareLayers(from,to);
+  const duration=460,easing="cubic-bezier(.32,.72,0,1)";
+  profileNavigationTransitioning=true;
+  document.body.classList.add("profile-navigation-active");
+  from.style.transform="translate3d(0,0,0)";from.style.opacity="1";
+  to.style.transform=`translate3d(${width}px,${oldScroll}px,0)`;to.style.opacity="1";
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    from.style.transition=`transform ${duration}ms ${easing}, opacity ${duration}ms ${easing}`;
+    to.style.transition=`transform ${duration}ms ${easing}`;
+    from.style.transform=`translate3d(${-Math.round(width*.12)}px,0,0)`;from.style.opacity=".97";
+    to.style.transform=`translate3d(0,${oldScroll}px,0)`;
+  }));
+  setTimeout(()=>profileFinishTransition(key,profilePreviousState?.key||"root",0),duration+34);
+}
+function backProfilePage(){
+  if(profileNavigationTransitioning||profileCurrentPage==="root")return;
+  const current=profilePages[profileCurrentPage];
+  const previousKey=profilePreviousState?.key||"root";
+  const previous=profilePages[previousKey];
+  if(!current||!previous)return;
+  const currentScroll=Math.max(0,scrollShell?.scrollTop||0);
+  const previousScroll=Math.max(0,profilePreviousState?.scrollTop||0);
+  const width=profilePrepareLayers(current,previous);
+  const yOffset=currentScroll-previousScroll;
+  const duration=430,easing="cubic-bezier(.32,.72,0,1)";
+  profileNavigationTransitioning=true;
+  document.body.classList.add("profile-navigation-active");
+  current.style.transform="translate3d(0,0,0)";
+  previous.style.transform=`translate3d(${-Math.round(width*.12)}px,${yOffset}px,0)`;previous.style.opacity=".97";
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    current.style.transition=`transform ${duration}ms ${easing}, opacity ${duration}ms ${easing}`;
+    previous.style.transition=`transform ${duration}ms ${easing}, opacity ${duration}ms ${easing}`;
+    current.style.transform=`translate3d(${width}px,0,0)`;current.style.opacity=".98";
+    previous.style.transform=`translate3d(0,${yOffset}px,0)`;previous.style.opacity="1";
+  }));
+  setTimeout(()=>{const old=profileCurrentPage;profilePreviousState=null;profileFinishTransition(previousKey,old,previousScroll);},duration+30);
+}
+document.querySelectorAll("[data-profile-open]").forEach(button=>button.addEventListener("click",()=>openProfilePage(button.dataset.profileOpen)));
+document.querySelectorAll("[data-profile-back]").forEach(button=>button.addEventListener("click",backProfilePage));
+
+function beginProfileEdgeSwipe(event){
+  if(profileNavigationTransitioning||profileCurrentPage==="root"||currentAppView!=="profile"||event.touches?.length!==1)return;
+  if(document.body.classList.contains("expenses-modal-open"))return;
+  const t=event.touches[0];
+  if(t.clientX>32)return;
+  if(event.target.closest?.("input,textarea,select,[contenteditable='true']"))return;
+  profileSwipe={tracking:true,active:false,startX:t.clientX,startY:t.clientY,currentX:t.clientX,startedAt:performance.now(),width:0,currentScroll:Math.max(0,scrollShell?.scrollTop||0),previousScroll:Math.max(0,profilePreviousState?.scrollTop||0),previousKey:profilePreviousState?.key||"root"};
+}
+function moveProfileEdgeSwipe(event){
+  if(!profileSwipe?.tracking||event.touches?.length!==1)return;
+  const t=event.touches[0],dx=t.clientX-profileSwipe.startX,dy=t.clientY-profileSwipe.startY;
+  if(!profileSwipe.active){
+    if(dx<8)return;
+    if(Math.abs(dy)>Math.abs(dx)*.72){profileSwipe=null;return;}
+    const current=profilePages[profileCurrentPage],previous=profilePages[profileSwipe.previousKey];
+    if(!current||!previous){profileSwipe=null;return;}
+    profileSwipe.width=profilePrepareLayers(current,previous);
+    profileSwipe.active=true;profileNavigationTransitioning=true;
+    document.body.classList.add("profile-navigation-active","profile-edge-swipe-active");
+    current.style.transition="none";previous.style.transition="none";
+    previous.style.opacity=".97";
+  }
+  event.preventDefault();
+  profileSwipe.currentX=t.clientX;
+  const width=Math.max(1,profileSwipe.width),distance=clamp(t.clientX-profileSwipe.startX,0,width),progress=distance/width;
+  const current=profilePages[profileCurrentPage],previous=profilePages[profileSwipe.previousKey];
+  const yOffset=profileSwipe.currentScroll-profileSwipe.previousScroll;
+  current.style.transform=`translate3d(${distance}px,0,0)`;
+  current.style.boxShadow=`${-18*(1-progress)}px 0 34px rgba(11,35,32,${(.12*(1-progress)).toFixed(3)})`;
+  previous.style.transform=`translate3d(${-width*.12*(1-progress)}px,${yOffset}px,0)`;
+  previous.style.opacity=String(.97+progress*.03);
+}
+function endProfileEdgeSwipe(){
+  if(!profileSwipe?.tracking)return;
+  if(!profileSwipe.active){profileSwipe=null;return;}
+  const swipe=profileSwipe;profileSwipe=null;
+  const width=Math.max(1,swipe.width),distance=clamp(swipe.currentX-swipe.startX,0,width),elapsed=Math.max(1,performance.now()-swipe.startedAt),velocity=distance/elapsed;
+  const goBack=distance>width*.32||velocity>.55;
+  const progress=distance/width,duration=goBack?Math.max(150,Math.min(300,(1-progress)*360)):Math.max(180,Math.min(300,progress*320+160));
+  const easing="cubic-bezier(.32,.72,0,1)";
+  const currentKey=profileCurrentPage,current=profilePages[currentKey],previous=profilePages[swipe.previousKey],yOffset=swipe.currentScroll-swipe.previousScroll;
+  if(!current||!previous){profileNavigationTransitioning=false;return;}
+  current.style.transition=`transform ${duration}ms ${easing}, opacity ${duration}ms ${easing}`;
+  previous.style.transition=`transform ${duration}ms ${easing}, opacity ${duration}ms ${easing}`;
+  requestAnimationFrame(()=>{
+    if(goBack){current.style.transform=`translate3d(${width}px,0,0)`;current.style.opacity=".98";previous.style.transform=`translate3d(0,${yOffset}px,0)`;previous.style.opacity="1";}
+    else{current.style.transform="translate3d(0,0,0)";current.style.opacity="1";previous.style.transform=`translate3d(${-Math.round(width*.12)}px,${yOffset}px,0)`;previous.style.opacity=".97";}
+  });
+  setTimeout(()=>{
+    current.style.boxShadow="";
+    if(goBack){profilePreviousState=null;profileFinishTransition(swipe.previousKey,currentKey,swipe.previousScroll);}
+    else{previous.hidden=true;profileSetLayer(previous,false);previous.style.transform="";previous.style.opacity="";previous.style.transition="";profileSetLayer(current,false);current.style.transform="";current.style.opacity="";current.style.transition="";profileNavHost.style.height="";document.body.classList.remove("profile-navigation-active","profile-edge-swipe-active");profileNavigationTransitioning=false;}
+  },duration+24);
+}
+function cancelProfileEdgeSwipe(){if(profileSwipe?.active){endProfileEdgeSwipe();}else profileSwipe=null;}
+document.addEventListener("touchstart",beginProfileEdgeSwipe,{passive:true});
+document.addEventListener("touchmove",moveProfileEdgeSwipe,{passive:false});
+document.addEventListener("touchend",endProfileEdgeSwipe,{passive:true});
+document.addEventListener("touchcancel",cancelProfileEdgeSwipe,{passive:true});
 
 function initPhase2AccessContext(data){
   Promise.all([
@@ -3918,31 +4085,33 @@ if ("serviceWorker" in navigator) {
 }
 
 // Load
+function runOptionalAppStep(label,fn){try{return fn();}catch(error){console.error(`${label} error`,error);return null;}}
 fetch(getTripJsonUrl())
   .then(r=>{if(!r.ok)throw new Error("HTTP "+r.status);return r.json();})
   .then(data=>{
     window.tripData=data;
-    // Critical path first: render the JSON trip before any optional Firebase service starts.
+    // Only the itinerary renderer is critical. Weather, visa data, Firebase and profile
+    // enhancements are isolated so none of them can overwrite an already rendered trip.
     render(data);
-    renderWeather(data);
-    renderInfo(data);
-    initTripLibrarySafe(data);
-    updateCompactHeader();
-    requestAnimationFrame(()=>{updateBottomNavIndicator();updateCollapsingChrome();});
-    try{
-      const saved=sessionStorage.getItem("trip_current_view");
-      if(["itinerary","snacks","info","expenses","profile"].includes(saved)) setView(saved,{restoreScroll:false});
-      else setView("itinerary",{restoreScroll:false});
-    }catch(e){setView("itinerary",{restoreScroll:false});}
-    // Optional Phase 2 services are deliberately non-blocking.
-    initPreferencesCloudSyncSafe();
-    initGlobalAuthSafe();
-    initPhase2AccessContext(data);
+    runOptionalAppStep("Weather render",()=>renderWeather(data));
+    runOptionalAppStep("Travel info render",()=>renderInfo(data));
+    runOptionalAppStep("Trip library init",()=>initTripLibrarySafe(data));
+    runOptionalAppStep("Compact header init",()=>updateCompactHeader());
+    requestAnimationFrame(()=>{runOptionalAppStep("Bottom nav update",updateBottomNavIndicator);runOptionalAppStep("Chrome update",updateCollapsingChrome);});
+    runOptionalAppStep("View restore",()=>{
+      let saved="";
+      try{saved=sessionStorage.getItem("trip_current_view")||"";}catch(e){}
+      setView(["itinerary","snacks","info","expenses","profile"].includes(saved)?saved:"itinerary",{restoreScroll:false});
+    });
+    runOptionalAppStep("Preference sync init",initPreferencesCloudSyncSafe);
+    runOptionalAppStep("Global auth init",initGlobalAuthSafe);
+    runOptionalAppStep("Trip access init",()=>initPhase2AccessContext(data));
   })
   .catch(error=>{
-    console.error("Trip data/render load error",error);
-    document.getElementById("today-chip").textContent="無法載入行程資料";
-    document.getElementById("header-title-main").textContent="無法載入行程資料";
+    console.error("Trip JSON / critical itinerary render error",error);
+    const chip=document.getElementById("today-chip"),title=document.getElementById("header-title-main");
+    if(chip)chip.textContent="無法載入行程資料";
+    if(title)title.textContent="無法載入行程資料";
   });
 </script>
 
