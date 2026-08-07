@@ -1,17 +1,11 @@
-import { firebaseConfig } from "./firebase-config.js";
-
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-app.js";
+import { db } from "./firebase-service.js";
+import { resolveTripId } from "./trip-session-service.js";
 import {
-  getAuth,
-  onAuthStateChanged,
-  GoogleAuthProvider,
-  signInWithPopup,
-  signInWithRedirect,
-  getRedirectResult,
-  signOut
-} from "https://www.gstatic.com/firebasejs/11.8.0/firebase-auth.js";
+  subscribeAuthState,
+  signInWithGoogle,
+  signOutCurrentUser
+} from "./auth-service.js";
 import {
-  getFirestore,
   collection,
   addDoc,
   updateDoc,
@@ -515,13 +509,8 @@ export function initExpensesModule(tripData) {
   expensesModuleStarted = true;
 
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-
 const expensesConfig = tripData?.meta?.expenses || {};
-const tripId = expensesConfig.tripId || new URLSearchParams(window.location.search).get("expensesTrip") || new URLSearchParams(window.location.search).get("trip") || "demo-trip-001";
-const provider = new GoogleAuthProvider();
+const tripId = resolveTripId(tripData);
 let members = [];
 let tripSettings = {
   baseCurrency: expensesConfig.baseCurrency || "HKD",
@@ -1777,19 +1766,7 @@ function setupExpenseInnerTabs() {
   });
 }
 
-function publishAuthState(user) {
-  const safeUser = user ? {
-    uid: user.uid || "",
-    displayName: user.displayName || "",
-    email: user.email || "",
-    photoURL: user.photoURL || ""
-  } : null;
-  window.__expenseAuthUser = safeUser;
-  window.dispatchEvent(new CustomEvent("expense-auth-state", { detail: { user: safeUser } }));
-}
-
 function setAuthUI(user) {
-  publishAuthState(user);
   if (user) {
     googleSignInBtn.classList.add("hidden");
     signOutBtn.classList.remove("hidden");
@@ -1804,32 +1781,18 @@ function setAuthUI(user) {
 
 async function handleGoogleSignIn() {
   try {
-    await signInWithPopup(auth, provider);
+    await signInWithGoogle();
   } catch (error) {
-    console.error("Google popup login error:", error?.code, error?.message, error);
-    const popupRelated = [
-      "auth/popup-blocked",
-      "auth/popup-closed-by-user",
-      "auth/cancelled-popup-request",
-      "auth/operation-not-supported-in-this-environment"
-    ];
-    if (popupRelated.includes(error?.code)) {
-      try {
-        await signInWithRedirect(auth, provider);
-        return;
-      } catch (redirectError) {
-        console.error("Google redirect login error:", redirectError?.code, redirectError?.message, redirectError);
-        alert(`Google 登入失敗：${redirectError?.code || "unknown"}`);
-        return;
-      }
+    console.error("Google login error:", error?.code, error?.message, error);
+    if (error?.code !== "auth/popup-closed-by-user") {
+      alert(`Google 登入失敗：${error?.code || "unknown"}`);
     }
-    alert(`Google 登入失敗：${error?.code || "unknown"}`);
   }
 }
 
 async function handleSignOut() {
   try {
-    await signOut(auth);
+    await signOutCurrentUser();
   } catch (error) {
     console.error(error);
     alert("登出失敗。");
@@ -4106,12 +4069,7 @@ document.addEventListener("click", (event) => {
 if (lockTripBtn) lockTripBtn.addEventListener("click", lockTrip);
 if (unlockTripBtn) unlockTripBtn.addEventListener("click", unlockTrip);
 
-getRedirectResult(auth).catch((error) => {
-  console.error("Google redirect login error:", error?.code, error?.message, error);
-  alert(`Google redirect 失敗：${error?.code || "unknown"}`);
-});
-
-onAuthStateChanged(auth, async (user) => {
+subscribeAuthState(async (user) => {
   currentUser = user;
   setAuthUI(user);
 

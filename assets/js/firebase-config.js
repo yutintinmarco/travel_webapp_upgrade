@@ -1,8 +1,9 @@
 export const firebaseConfig = {
-  apiKey: "AIzaSyACiaa4c-uRkGNQHc8z_zDqaLWyMzmtDSo",
-  authDomain: "travel-expenses-e4304.firebaseapp.com",
-  projectId: "travel-expenses-e4304",
-  storageBucket: "travel-expenses-e4304.firebasestorage.app",
-  messagingSenderId: "249856212318",
-  appId: "1:249856212318:web:b5f39c74b6babc23e723cf"
+  apiKey: "AIzaSyC2tXO5h2n5e9OUkUEeqpdPoMEZ0M592jY",
+  authDomain: "travel-app-744ab.firebaseapp.com",
+  projectId: "travel-app-744ab",
+  storageBucket: "travel-app-744ab.firebasestorage.app",
+  messagingSenderId: "960269531459",
+  appId: "1:960269531459:web:af50a8e54a0c283eba17f6",
+  measurementId: "G-9VVCH527GE"
 };

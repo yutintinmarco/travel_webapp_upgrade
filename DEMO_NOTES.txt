@@ -1,12 +1,26 @@
-Travel Webapp Expense UI Phase 1 v7.1.3 Demo
+Travel Webapp Phase 2A v7.2.1 Clean Project Demo
 
-This lightweight build uses demo data and placeholder assets.
+Purpose
+This build switches the whole app to the new Firebase project travel-app-744ab.
 
-Changes:
-1. Added fifth bottom tab: 我的.
-2. Moved font size and theme controls from the top bar into 我的.
-3. Removed expense-specific top bar actions.
-4. Added global account and trip-management entries in 我的.
-5. Added 支出管理 inside the expense overview.
-6. Standard sheets use 72% height; large form sheets use 92%.
-7. Existing expense calculation, Firebase, OCR, export and settlement logic is retained.
+Phase 2A clean-project changes
+1. Firebase config now points only to travel-app-744ab.
+2. Firebase App, Auth and Firestore remain initialized only once in firebase-service.js.
+3. Google Auth remains app-wide through auth-service.js.
+4. Removed the temporary expense-auth compatibility event.
+5. Trip access now uses only the canonical trips/{tripId}/members/{uid} role document.
+6. Removed legacy role fallback from trip root fields.
+7. Owner, Admin, Member and Viewer remain the canonical roles.
+8. Storage is not used in Phase 2. Analytics is not loaded even though measurementId is present in the public Firebase config.
+
+Important
+The new Firestore database was created in Production mode and is empty. Until Phase 2B installs the new schema and security rules, Google Auth can be tested but Firestore-backed trip and expense writes are expected to be blocked by the default production rules. Do not manually create collections.
+
+Verification performed
+• No reference to the old Firebase project remains in the app source
+• initializeApp, getAuth and getFirestore remain centralized in firebase-service.js
+• GoogleAuthProvider and onAuthStateChanged remain centralized in auth-service.js
+• trip-access-service has no legacy allowedEmails/adminEmails fallback
+• JavaScript syntax checked
+• trip.json and manifest.json parsed successfully
+• ZIP integrity checked
