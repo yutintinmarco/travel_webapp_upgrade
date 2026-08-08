@@ -1,4 +1,12 @@
-v7.3.3 Phase 2B profile navigation refinement
+v7.3.4 Phase 2B transition compositing refinement
+
+• Profile navigation snapshots no longer carry a cloned full screen background. The single fixed trip background remains stationary.
+• Moving page leading edge uses a soft feather mask during push and interactive swipe back.
+• Removed the apparent background zoom / shrink caused by moving and re-cropping snapshot backgrounds.
+• Bottom navigation moved outside the scroll shell to body level and raised above profile transition surfaces, preventing it from being clipped or hidden during navigation.
+• Bottom nav remains below true modal sheets so sheet interaction stays correct.
+
+v7.3.4 Phase 2B profile navigation refinement
 
 • Snapshot based My page push and swipe back navigation to prevent translucent page overlap
 • Consistent Apple style row insets and box sizing
@@ -6,7 +14,7 @@ v7.3.3 Phase 2B profile navigation refinement
 • Signed in state hides Login and shows a red Sign Out button at the bottom
 • Simplified My Trips detail hierarchy
 
-Travel Webapp Phase 2B v7.3.3 Refinement
+Travel Webapp Phase 2B v7.3.4 Refinement
 
 Key fixes
 1. Fixed false 「無法載入行程資料」 header state. v7.3.1 renderInfo referenced an undefined esc() helper after the itinerary had already rendered.
