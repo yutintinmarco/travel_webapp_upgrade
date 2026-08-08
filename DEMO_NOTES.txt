@@ -1,30 +1,12 @@
-v7.3.4 Phase 2B transition compositing refinement
+v7.3.5 Phase 2B fade-through navigation experiment
 
-• Profile navigation snapshots no longer carry a cloned full screen background. The single fixed trip background remains stationary.
-• Moving page leading edge uses a soft feather mask during push and interactive swipe back.
-• Removed the apparent background zoom / shrink caused by moving and re-cropping snapshot backgrounds.
-• Bottom navigation moved outside the scroll shell to body level and raised above profile transition surfaces, preventing it from being clipped or hidden during navigation.
-• Bottom nav remains below true modal sheets so sheet interaction stays correct.
+• Replaced the overlapping push/snapshot look with a two-stage fade-through transition.
+• First 48%: outgoing page fades fully away with only a very small horizontal drift.
+• 48% to 52%: deliberate low-visibility handoff zone, leaving the fixed trip background visible instead of showing two translucent pages at once.
+• Final 48%: incoming page fades in and settles into place.
+• Interactive left-edge swipe uses the exact same progress mapping, including cancel and complete animations.
+• No page scale, background scale, background re-crop or snapshot background movement.
+• Bottom navigation remains body-level and above all profile transition surfaces.
 
-v7.3.4 Phase 2B profile navigation refinement
-
-• Snapshot based My page push and swipe back navigation to prevent translucent page overlap
-• Consistent Apple style row insets and box sizing
-• Fixed current Trip card overflow
-• Signed in state hides Login and shows a red Sign Out button at the bottom
-• Simplified My Trips detail hierarchy
-
-Travel Webapp Phase 2B v7.3.4 Refinement
-
-Key fixes
-1. Fixed false 「無法載入行程資料」 header state. v7.3.1 renderInfo referenced an undefined esc() helper after the itinerary had already rendered.
-2. Optional weather, travel info, Firebase catalog, auth and profile setup are isolated from the critical itinerary render path.
-3. Header trip title now opens a compact anchored Liquid Glass trip chooser directly underneath. No full bottom sheet and no Manage Trips button.
-4. 我的 first page is intentionally minimal: account plus four navigation rows only.
-5. 我的 detail pages use native-style forward push and reverse back transitions.
-6. Left-edge right-swipe back follows the finger and uses the Price Track app thresholds: 32% distance or 0.55 px/ms velocity.
-7. 我的旅程, appearance, trip settings and app/data content now live inside detail pages.
-8. 資料 tab remains dedicated to the current trip visa / Visit Japan / flight / hotel reference information.
-9. Archive model remains separate from trip lifecycle status.
-
-Phase 2C is still intentionally disabled for actual Firestore create/import/archive writes.
+Other v7.3.x Phase 2B refinements remain unchanged.
+Phase 2C Firestore create/import/archive writes remain intentionally disabled.

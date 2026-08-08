@@ -571,7 +571,7 @@ html.theme-dark .info-mini-copy.copied { background: rgba(42,90,42,0.65); border
 html.theme-dark .info-hint { color: rgba(150,150,175,0.65); }
 
   
-/* v7.3.4: view containers alone own visibility; no cross-view card hiding rules. */
+/* v7.3.5: view containers alone own visibility; no cross-view card hiding rules. */
 
 
 /* Integration v5.3 global appearance polish */
@@ -726,12 +726,12 @@ body {
 .day-tab:active { transform: scale(0.96); }
 .day-tab.active { box-shadow: 0 4px 12px rgba(15,23,42,0.10), inset 0 1px 0 rgba(255,255,255,0.82); }
 
-/* v7.3.4: itinerary-owned cards now live inside #itinerary-view itself.
+/* v7.3.5: itinerary-owned cards now live inside #itinerary-view itself.
    View visibility is structural, so first paint never depends on a body class
    or an iOS backdrop-filter repaint. */
 
 /* Floating Liquid Glass tab bar, lifted clear of the iPhone home indicator and
-   rounded display corners. v7.3.4 keeps it at body level, outside scroll/snapshot
+   rounded display corners. v7.3.5 keeps it at body level, outside scroll/snapshot
    navigation, so page transitions can never hide or clip it. */
 .bottom-nav {
   position: fixed;
@@ -1898,7 +1898,7 @@ html.theme-dark .trip-library-status, html:not(.theme-light):not(.theme-dark) .t
 html.theme-dark .trip-library-stat, html:not(.theme-light):not(.theme-dark) .trip-library-stat { background:rgba(255,255,255,.055); }
 
 
-/* Phase 2B refinement v7.3.4 */
+/* Phase 2B refinement v7.3.5 */
 .header-title-small.trip-switch-trigger {
   display:inline-flex;
   align-items:center;
@@ -1991,7 +1991,7 @@ html:not(.theme-light):not(.theme-dark) .trip-switch-sheet {
 }
 
 
-/* v7.3.4 compact trip chooser + native 我的 push navigation */
+/* v7.3.5 compact trip chooser + native 我的 push navigation */
 .header-title-small.trip-switch-trigger{display:inline-flex;align-items:center;gap:4px;max-width:min(72vw,320px);cursor:pointer;user-select:none;-webkit-user-select:none;touch-action:manipulation;}
 .header-title-small.trip-switch-trigger::after{content:"⌄";position:static;display:inline-block;margin-left:2px;font-size:10px;line-height:1;color:var(--label-tertiary);transform:translateY(-1px);}
 .header-title-small.trip-switch-trigger[aria-expanded="true"]::after{transform:translateY(-1px) rotate(180deg);}
@@ -2032,7 +2032,7 @@ body.profile-edge-swipe-active{touch-action:pan-y;}
 html.theme-dark .profile-menu-card .profile-row,html:not(.theme-light):not(.theme-dark) .profile-menu-card .profile-row{border-bottom-color:rgba(255,255,255,.075);}
 @media (prefers-reduced-motion:reduce){.trip-quick-popover{transition:none!important}.profile-nav-page{transition:none!important}}
 
-/* v7.3.4 · profile geometry, account state and snapshot navigation */
+/* v7.3.5 · profile geometry, account state and snapshot navigation */
 .profile-card,.profile-user-card,.profile-row,.profile-setting-row,.trip-library-card,.trip-library-item,.trip-library-action,.trip-library-status,.profile-stepper{box-sizing:border-box;max-width:100%;min-width:0;}
 .profile-nav-host,.profile-nav-page{min-width:0;max-width:100%;}
 .profile-identity-card{padding:0;overflow:hidden;}
@@ -2059,12 +2059,13 @@ html.theme-dark .profile-menu-card .profile-row,html:not(.theme-light):not(.them
 body.profile-navigation-active .scroll-shell,body.profile-edge-swipe-active .scroll-shell{overflow:hidden!important;}
 .profile-nav-host.is-snapshotting{visibility:hidden;}
 .profile-nav-surface{position:fixed;left:0;width:100vw;overflow:hidden;z-index:1420;pointer-events:none;contain:layout paint style;will-change:transform,opacity;backface-visibility:hidden;-webkit-backface-visibility:hidden;background:transparent;transform-origin:0 0;}
-/* v7.3.4: the app background is never cloned into a moving navigation surface.
+/* v7.3.5: the app background is never cloned into a moving navigation surface.
    Only page content moves; the single fixed .bg-fixed layer stays perfectly still. */
 .profile-nav-surface::before{display:none!important;content:none!important;}
 .profile-nav-surface.is-front{box-shadow:-14px 0 30px rgba(20,39,55,.12);}
-/* Feather the moving leading edge instead of exposing a hard rectangular snapshot edge. */
-.profile-nav-surface.edge-fade-left{-webkit-mask-image:linear-gradient(to right,transparent 0,rgba(0,0,0,.22) 10px,rgba(0,0,0,.72) 24px,#000 46px,#000 100%);mask-image:linear-gradient(to right,transparent 0,rgba(0,0,0,.22) 10px,rgba(0,0,0,.72) 24px,#000 46px,#000 100%);-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;}
+/* v7.3.5 uses whole-page fade-through instead of a moving edge mask.
+   Outgoing content fades away before incoming content becomes visible. */
+.profile-nav-surface.edge-fade-left{-webkit-mask-image:none!important;mask-image:none!important;}
 .profile-nav-surface-frame{position:relative;z-index:1;width:min(480px,100%);height:100%;margin:0 auto;padding:0 16px calc(var(--tabbar-h) + env(safe-area-inset-bottom,0px) + 30px);box-sizing:border-box;overflow:hidden;}
 .profile-nav-surface-content{width:100%;min-height:100%;will-change:transform;}
 .profile-nav-surface .profile-nav-page{display:block!important;width:100%;max-width:100%;}
@@ -2076,9 +2077,9 @@ html.theme-dark .profile-identity-card .profile-row,html:not(.theme-light):not(.
 </style>
             <link rel="apple-touch-icon" href="assets/icon/trip_icon.png">
   <link rel="icon" type="image/png" href="assets/icon/trip_icon.png">
-  <link rel="manifest" href="manifest.json?v=7.3.4">
+  <link rel="manifest" href="manifest.json?v=7.3.5">
   <meta name="apple-mobile-web-app-title" content="關嘉露西生日之旅">
-  <link rel="stylesheet" href="assets/css/expenses.css?v=7.3.4">
+  <link rel="stylesheet" href="assets/css/expenses.css?v=7.3.5">
 </head>
 <body>
 <div class="bg-fixed"></div>
@@ -2307,14 +2308,14 @@ html.theme-dark .profile-identity-card .profile-row,html:not(.theme-light):not(.
         <span class="profile-detail-spacer"></span>
       </div>
       <section class="profile-card">
-        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.3.4</strong></div>
+        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.3.5</strong></div>
         <div class="profile-meta-row"><span>資料架構</span><strong>Phase 2B</strong></div>
         <div class="profile-meta-row"><span>主要資料來源</span><strong>本機 JSON</strong></div>
       </section>
     </div>
   </div>
 </div>
-<div class="app-version-note" id="app-version-note">v7.3.4</div>
+<div class="app-version-note" id="app-version-note">v7.3.5</div>
 
 
   </div>
@@ -2368,7 +2369,7 @@ html.theme-dark .profile-identity-card .profile-row,html:not(.theme-light):not(.
 </div>
 
 <script>
-const APP_VERSION = "7.3.4";
+const APP_VERSION = "7.3.5";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 window.EXPENSES_MODULE_VERSION = EXPENSES_MODULE_VERSION;
@@ -3137,7 +3138,7 @@ function miniCopyBtn(textFn){
 function renderInfo(data){
   const meta=data.meta||{};
   const infoCard=meta.infoCard||null;
-  // v7.3.4: 資料 tab is dedicated to the current trip's visa / travel reference data.
+  // v7.3.5: 資料 tab is dedicated to the current trip's visa / travel reference data.
   document.getElementById("bt-info").style.display="flex";requestAnimationFrame(updateBottomNavIndicator);
 
   const travellers=meta.travellers||{},cities=meta.cities||{},hotels=meta.hotels||{},flights=meta.flights||[];
@@ -3943,9 +3944,10 @@ document.addEventListener("keydown",event=>{if(event.key==="Escape"&&tripQuickOp
 scrollShell?.addEventListener("scroll",()=>{if(tripQuickOpen)closeTripSwitcher();},{passive:true});
 window.addEventListener("resize",()=>{if(tripQuickOpen)positionTripQuickPopover();},{passive:true});
 
-// v7.3.4: snapshot-based iOS navigation for 我的.
-// Live pages never overlap. Transitions use isolated visual snapshots with
-// the same fixed trip background, following the stable Price Track approach.
+// v7.3.5: two-stage fade-through navigation for 我的.
+// The outgoing page owns the first half of the gesture and fades away before
+// the incoming page owns the second half. This deliberately avoids the long
+// translucent overlap that looks artificial over glass cards.
 const profileNavHost=document.getElementById("profile-nav-host");
 const profilePages=Object.fromEntries([...document.querySelectorAll("#profile-view [data-profile-page]")].map(page=>[page.dataset.profilePage,page]));
 let profileCurrentPage="root";
@@ -3953,6 +3955,10 @@ let profileNavigationTransitioning=false;
 let profilePreviousState=null;
 let profileSwipe=null;
 let profileNavSurfaces=[];
+let profileNavAnimationFrame=0;
+const PROFILE_FADE_OUT_END=.48;
+const PROFILE_FADE_IN_START=.52;
+const PROFILE_TRANSITION_TRAVEL_RATIO=.045;
 function profileHostDocumentTop(){
   if(!profileNavHost)return 0;
   const rect=profileNavHost.getBoundingClientRect();
@@ -3972,6 +3978,7 @@ function profileCaptureSnapshot(key,scrollTop=Math.max(0,scrollShell?.scrollTop|
   return {key,scrollTop:Number(scrollTop||0),hostTop:profileHostDocumentTop(),pageClone:profileClonePage(page)};
 }
 function profileClearSurfaces(){
+  if(profileNavAnimationFrame){cancelAnimationFrame(profileNavAnimationFrame);profileNavAnimationFrame=0;}
   profileNavSurfaces.forEach(surface=>surface.remove());
   profileNavSurfaces=[];
   profileNavHost?.classList.remove("is-snapshotting");
@@ -4023,6 +4030,51 @@ function profilePrepareSnapshotTransition(fromSnapshot,toSnapshot){
   const width=Math.max(1,window.innerWidth);
   return {fromSurface,toSurface,width};
 }
+function profileSmooth01(value){
+  const t=clamp(Number(value)||0,0,1);
+  return t*t*(3-2*t);
+}
+function profileFadeThroughState(progress){
+  const p=clamp(Number(progress)||0,0,1);
+  const outT=profileSmooth01(p/PROFILE_FADE_OUT_END);
+  const inT=profileSmooth01((p-PROFILE_FADE_IN_START)/(1-PROFILE_FADE_IN_START));
+  return {p,outT,inT,outOpacity:1-outT,inOpacity:inT};
+}
+function profileApplyFadeThrough(outSurface,inSurface,progress,direction,width){
+  if(!outSurface||!inSurface)return;
+  const state=profileFadeThroughState(progress);
+  const travel=Math.min(22,Math.max(12,width*PROFILE_TRANSITION_TRAVEL_RATIO));
+  const outX=direction*travel*state.outT;
+  const inX=-direction*travel*(1-state.inT);
+  outSurface.style.zIndex="1422";
+  inSurface.style.zIndex="1421";
+  outSurface.style.opacity=String(state.outOpacity);
+  inSurface.style.opacity=String(state.inOpacity);
+  outSurface.style.transform=`translate3d(${outX.toFixed(2)}px,0,0)`;
+  inSurface.style.transform=`translate3d(${inX.toFixed(2)}px,0,0)`;
+  outSurface.style.boxShadow="none";
+  inSurface.style.boxShadow="none";
+}
+function profileAnimateFadeThrough(outSurface,inSurface,{from=0,to=1,direction=1,width=Math.max(1,window.innerWidth),duration=420,onDone}={}){
+  if(profileNavAnimationFrame){cancelAnimationFrame(profileNavAnimationFrame);profileNavAnimationFrame=0;}
+  const reduced=window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+  if(reduced||duration<=0){
+    profileApplyFadeThrough(outSurface,inSurface,to,direction,width);
+    onDone?.();
+    return;
+  }
+  const started=performance.now();
+  const tick=now=>{
+    const t=clamp((now-started)/duration,0,1);
+    const p=from+(to-from)*t;
+    profileApplyFadeThrough(outSurface,inSurface,p,direction,width);
+    if(t<1){profileNavAnimationFrame=requestAnimationFrame(tick);return;}
+    profileNavAnimationFrame=0;
+    onDone?.();
+  };
+  profileApplyFadeThrough(outSurface,inSurface,from,direction,width);
+  profileNavAnimationFrame=requestAnimationFrame(tick);
+}
 function openProfilePage(key){
   if(profileNavigationTransitioning||key==="root"||!profilePages[key]||profileCurrentPage===key)return;
   closeTripSwitcher();
@@ -4034,21 +4086,8 @@ function openProfilePage(key){
   const layers=profilePrepareSnapshotTransition(fromSnapshot,toSnapshot);
   if(!layers)return;
   const {fromSurface,toSurface,width}=layers;
-  toSurface.classList.add("edge-fade-left");
-  const duration=430,easing="cubic-bezier(.32,.72,0,1)";
   profileNavigationTransitioning=true;
-  fromSurface.style.transform="translate3d(0,0,0)";
-  fromSurface.style.opacity="1";
-  toSurface.style.transform=`translate3d(${width}px,0,0)`;
-  toSurface.style.opacity="1";
-  requestAnimationFrame(()=>requestAnimationFrame(()=>{
-    fromSurface.style.transition=`transform ${duration}ms ${easing}, opacity ${duration}ms ${easing}`;
-    toSurface.style.transition=`transform ${duration}ms ${easing}`;
-    fromSurface.style.transform=`translate3d(${-Math.round(width*.12)}px,0,0)`;
-    fromSurface.style.opacity=".985";
-    toSurface.style.transform="translate3d(0,0,0)";
-  }));
-  setTimeout(()=>profileActivateLivePage(key,0),duration+28);
+  profileAnimateFadeThrough(fromSurface,toSurface,{from:0,to:1,direction:-1,width,duration:410,onDone:()=>profileActivateLivePage(key,0)});
 }
 function backProfilePage(){
   if(profileNavigationTransitioning||profileCurrentPage==="root")return;
@@ -4063,20 +4102,12 @@ function backProfilePage(){
   if(!previousSurface||!currentSurface){profileClearSurfaces();return;}
   profileNavHost?.classList.add("is-snapshotting");
   document.body.classList.add("profile-navigation-active");
-  currentSurface.classList.add("edge-fade-left");
-  const width=Math.max(1,window.innerWidth),duration=410,easing="cubic-bezier(.32,.72,0,1)";
+  const width=Math.max(1,window.innerWidth);
   profileNavigationTransitioning=true;
-  previousSurface.style.transform=`translate3d(${-Math.round(width*.12)}px,0,0)`;
-  previousSurface.style.opacity=".985";
-  currentSurface.style.transform="translate3d(0,0,0)";
-  requestAnimationFrame(()=>requestAnimationFrame(()=>{
-    previousSurface.style.transition=`transform ${duration}ms ${easing}, opacity ${duration}ms ${easing}`;
-    currentSurface.style.transition=`transform ${duration}ms ${easing}, opacity ${duration}ms ${easing}`;
-    previousSurface.style.transform="translate3d(0,0,0)";
-    previousSurface.style.opacity="1";
-    currentSurface.style.transform=`translate3d(${width}px,0,0)`;
-  }));
-  setTimeout(()=>{profilePreviousState=null;profileActivateLivePage(previousKey,previousScroll);},duration+26);
+  profileAnimateFadeThrough(currentSurface,previousSurface,{from:0,to:1,direction:1,width,duration:390,onDone:()=>{
+    profilePreviousState=null;
+    profileActivateLivePage(previousKey,previousScroll);
+  }});
 }
 document.querySelectorAll("[data-profile-open]").forEach(button=>button.addEventListener("click",()=>openProfilePage(button.dataset.profileOpen)));
 document.querySelectorAll("[data-profile-back]").forEach(button=>button.addEventListener("click",backProfilePage));
@@ -4087,7 +4118,7 @@ function beginProfileEdgeSwipe(event){
   const t=event.touches[0];
   if(t.clientX>30)return;
   if(event.target.closest?.("input,textarea,select,[contenteditable='true']"))return;
-  profileSwipe={tracking:true,active:false,startX:t.clientX,startY:t.clientY,currentX:t.clientX,startedAt:performance.now(),width:0,currentScroll:Math.max(0,scrollShell?.scrollTop||0),previousScroll:Math.max(0,profilePreviousState?.scrollTop||0),previousKey:profilePreviousState?.key||"root",previousSnapshot:profilePreviousState?.snapshot||null,currentSurface:null,previousSurface:null};
+  profileSwipe={tracking:true,active:false,startX:t.clientX,startY:t.clientY,currentX:t.clientX,startedAt:performance.now(),width:0,currentScroll:Math.max(0,scrollShell?.scrollTop||0),previousScroll:Math.max(0,profilePreviousState?.scrollTop||0),previousKey:profilePreviousState?.key||"root",previousSnapshot:profilePreviousState?.snapshot||null,currentSurface:null,previousSurface:null,progress:0};
 }
 function moveProfileEdgeSwipe(event){
   if(!profileSwipe?.tracking||event.touches?.length!==1)return;
@@ -4103,23 +4134,17 @@ function moveProfileEdgeSwipe(event){
     profileSwipe.currentSurface=profileCreateSurface(currentSnapshot,"is-front");
     if(!profileSwipe.previousSurface||!profileSwipe.currentSurface){profileClearSurfaces();profileSwipe=null;return;}
     profileSwipe.width=Math.max(1,window.innerWidth);
-    profileSwipe.previousSurface.style.transform=`translate3d(${-Math.round(profileSwipe.width*.10)}px,0,0)`;
-    profileSwipe.previousSurface.style.opacity=".99";
-    profileSwipe.currentSurface.classList.add("edge-fade-left");
-    profileSwipe.currentSurface.style.transform="translate3d(0,0,0)";
     profileNavHost?.classList.add("is-snapshotting");
     profileSwipe.active=true;
     profileNavigationTransitioning=true;
     document.body.classList.add("profile-navigation-active","profile-edge-swipe-active");
+    profileApplyFadeThrough(profileSwipe.currentSurface,profileSwipe.previousSurface,0,1,profileSwipe.width);
   }
   event.preventDefault();
   profileSwipe.currentX=t.clientX;
   const width=Math.max(1,profileSwipe.width),distance=clamp(t.clientX-profileSwipe.startX,0,width),progress=distance/width;
-  profileSwipe.currentSurface.style.transform=`translate3d(${distance}px,0,0)`;
-  profileSwipe.currentSurface.style.opacity=String(1-progress*.055);
-  profileSwipe.currentSurface.style.boxShadow=`${-14*(1-progress)}px 0 30px rgba(20,39,55,${(.12*(1-progress)).toFixed(3)})`;
-  profileSwipe.previousSurface.style.transform=`translate3d(${-width*.10*(1-progress)}px,0,0)`;
-  profileSwipe.previousSurface.style.opacity=String(.99+progress*.01);
+  profileSwipe.progress=progress;
+  profileApplyFadeThrough(profileSwipe.currentSurface,profileSwipe.previousSurface,progress,1,width);
 }
 function endProfileEdgeSwipe(){
   if(!profileSwipe?.tracking)return;
@@ -4128,27 +4153,13 @@ function endProfileEdgeSwipe(){
   profileSwipe=null;
   const width=Math.max(1,swipe.width),distance=clamp(swipe.currentX-swipe.startX,0,width),elapsed=Math.max(1,performance.now()-swipe.startedAt),velocity=distance/elapsed;
   const goBack=distance>width*.32||velocity>.55;
-  const progress=distance/width,duration=goBack?Math.max(150,Math.min(300,(1-progress)*360)):Math.max(180,Math.min(300,progress*320+160));
-  const easing="cubic-bezier(.32,.72,0,1)";
+  const progress=clamp(Number(swipe.progress)||distance/width,0,1);
+  const target=goBack?1:0;
+  const remaining=Math.abs(target-progress);
+  const duration=Math.max(150,Math.min(320,150+remaining*210));
   const currentSurface=swipe.currentSurface,previousSurface=swipe.previousSurface;
   if(!currentSurface||!previousSurface){profileNavigationTransitioning=false;profileClearSurfaces();return;}
-  currentSurface.style.transition=`transform ${duration}ms ${easing}, opacity ${duration}ms ${easing}`;
-  previousSurface.style.transition=`transform ${duration}ms ${easing}, opacity ${duration}ms ${easing}`;
-  requestAnimationFrame(()=>{
-    if(goBack){
-      currentSurface.style.transform=`translate3d(${width}px,0,0)`;
-      currentSurface.style.opacity=".945";
-      previousSurface.style.transform="translate3d(0,0,0)";
-      previousSurface.style.opacity="1";
-    }else{
-      currentSurface.style.transform="translate3d(0,0,0)";
-      currentSurface.style.opacity="1";
-      previousSurface.style.transform=`translate3d(${-Math.round(width*.10)}px,0,0)`;
-      previousSurface.style.opacity=".99";
-    }
-  });
-  setTimeout(()=>{
-    currentSurface.style.boxShadow="";
+  profileAnimateFadeThrough(currentSurface,previousSurface,{from:progress,to:target,direction:1,width,duration,onDone:()=>{
     if(goBack){
       profilePreviousState=null;
       profileActivateLivePage(swipe.previousKey,swipe.previousScroll);
@@ -4156,7 +4167,7 @@ function endProfileEdgeSwipe(){
       profileNavigationTransitioning=false;
       profileClearSurfaces();
     }
-  },duration+22);
+  }});
 }
 function cancelProfileEdgeSwipe(){if(profileSwipe?.active){endProfileEdgeSwipe();}else profileSwipe=null;}
 document.addEventListener("touchstart",beginProfileEdgeSwipe,{passive:true});
