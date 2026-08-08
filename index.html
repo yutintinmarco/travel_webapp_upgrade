@@ -571,7 +571,7 @@ html.theme-dark .info-mini-copy.copied { background: rgba(42,90,42,0.65); border
 html.theme-dark .info-hint { color: rgba(150,150,175,0.65); }
 
   
-/* v7.3.2: view containers alone own visibility; no cross-view card hiding rules. */
+/* v7.3.3: view containers alone own visibility; no cross-view card hiding rules. */
 
 
 /* Integration v5.3 global appearance polish */
@@ -726,7 +726,7 @@ body {
 .day-tab:active { transform: scale(0.96); }
 .day-tab.active { box-shadow: 0 4px 12px rgba(15,23,42,0.10), inset 0 1px 0 rgba(255,255,255,0.82); }
 
-/* v7.3.2: itinerary-owned cards now live inside #itinerary-view itself.
+/* v7.3.3: itinerary-owned cards now live inside #itinerary-view itself.
    View visibility is structural, so first paint never depends on a body class
    or an iOS backdrop-filter repaint. */
 
@@ -1894,7 +1894,7 @@ html.theme-dark .trip-library-status, html:not(.theme-light):not(.theme-dark) .t
 html.theme-dark .trip-library-stat, html:not(.theme-light):not(.theme-dark) .trip-library-stat { background:rgba(255,255,255,.055); }
 
 
-/* Phase 2B refinement v7.3.2 */
+/* Phase 2B refinement v7.3.3 */
 .header-title-small.trip-switch-trigger {
   display:inline-flex;
   align-items:center;
@@ -1987,7 +1987,7 @@ html:not(.theme-light):not(.theme-dark) .trip-switch-sheet {
 }
 
 
-/* v7.3.2 compact trip chooser + native 我的 push navigation */
+/* v7.3.3 compact trip chooser + native 我的 push navigation */
 .header-title-small.trip-switch-trigger{display:inline-flex;align-items:center;gap:4px;max-width:min(72vw,320px);cursor:pointer;user-select:none;-webkit-user-select:none;touch-action:manipulation;}
 .header-title-small.trip-switch-trigger::after{content:"⌄";position:static;display:inline-block;margin-left:2px;font-size:10px;line-height:1;color:var(--label-tertiary);transform:translateY(-1px);}
 .header-title-small.trip-switch-trigger[aria-expanded="true"]::after{transform:translateY(-1px) rotate(180deg);}
@@ -2027,12 +2027,50 @@ body.profile-edge-swipe-active{touch-action:pan-y;}
 .profile-trips-card .trip-library-heading-copy p{max-width:34em;}
 html.theme-dark .profile-menu-card .profile-row,html:not(.theme-light):not(.theme-dark) .profile-menu-card .profile-row{border-bottom-color:rgba(255,255,255,.075);}
 @media (prefers-reduced-motion:reduce){.trip-quick-popover{transition:none!important}.profile-nav-page{transition:none!important}}
+
+/* v7.3.3 · profile geometry, account state and snapshot navigation */
+.profile-card,.profile-user-card,.profile-row,.profile-setting-row,.trip-library-card,.trip-library-item,.trip-library-action,.trip-library-status,.profile-stepper{box-sizing:border-box;max-width:100%;min-width:0;}
+.profile-nav-host,.profile-nav-page{min-width:0;max-width:100%;}
+.profile-identity-card{padding:0;overflow:hidden;}
+.profile-identity-card .profile-user-card{margin:0;padding:14px 15px;border:0;border-radius:0;background:transparent;}
+.profile-identity-card .profile-row{padding:10px 15px;border-top:1px solid rgba(60,60,67,.09);}
+.profile-menu-card .profile-row{padding:10px 15px;box-sizing:border-box;}
+.profile-menu-card .profile-row-icon,.profile-identity-card .profile-row-icon{justify-self:start;}
+.profile-signout-card{padding:0;overflow:hidden;}
+.profile-signout-card[hidden]{display:none!important;}
+.profile-signout-btn{width:100%;min-height:52px;padding:12px 15px;border:0;background:transparent;color:#ff3b30;font:inherit;font-size:calc(13px * var(--font-scale));font-weight:760;text-align:center;-webkit-appearance:none;appearance:none;}
+.profile-signout-btn:active{background:rgba(255,59,48,.08);}
+.profile-inline-section-heading{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 2px 10px;}
+.profile-inline-section-heading strong{font-size:calc(12px * var(--font-scale));color:var(--label-secondary);font-weight:760;}
+.profile-trips-card .trip-library-status{margin:8px 2px 0;padding:0;background:transparent;border-radius:0;}
+.profile-trip-actions-card .profile-row[disabled]{opacity:.52;}
+#trip-archive-toggle[aria-expanded="true"] .profile-chevron{transform:rotate(90deg);}
+.trip-archive-panel{margin-top:12px;}
+.trip-archive-panel>.profile-card{margin-bottom:0;}
+.trip-library-item{width:100%;overflow:hidden;}
+.trip-library-copy,.trip-library-side{min-width:0;}
+.trip-library-side{max-width:74px;}
+.trip-library-side strong,.trip-library-side small{white-space:nowrap;}
+#app-version-note{display:none!important;}
+body.profile-navigation-active .scroll-shell,body.profile-edge-swipe-active .scroll-shell{overflow:hidden!important;}
+.profile-nav-host.is-snapshotting{visibility:hidden;}
+.profile-nav-surface{position:fixed;left:0;width:100vw;overflow:hidden;z-index:1420;pointer-events:none;contain:layout paint style;will-change:transform,opacity;backface-visibility:hidden;-webkit-backface-visibility:hidden;background:transparent;}
+.profile-nav-surface::before{content:"";position:absolute;left:0;top:calc(-1 * var(--profile-surface-top,0px));width:100vw;height:100vh;height:100dvh;background-color:var(--app-canvas);background:var(--app-background);background-position:center top;background-size:cover;background-repeat:no-repeat;pointer-events:none;}
+.profile-nav-surface.is-front{box-shadow:-18px 0 38px rgba(20,39,55,.16);}
+.profile-nav-surface-frame{position:relative;z-index:1;width:min(480px,100%);height:100%;margin:0 auto;padding:0 16px calc(var(--tabbar-h) + env(safe-area-inset-bottom,0px) + 30px);box-sizing:border-box;overflow:hidden;}
+.profile-nav-surface-content{width:100%;min-height:100%;will-change:transform;}
+.profile-nav-surface .profile-nav-page{display:block!important;width:100%;max-width:100%;}
+.profile-nav-surface .profile-nav-page[hidden]{display:block!important;}
+.profile-nav-surface .profile-detail-back,.profile-nav-surface button{pointer-events:none!important;}
+html.theme-dark .profile-identity-card .profile-row,html:not(.theme-light):not(.theme-dark) .profile-identity-card .profile-row{border-top-color:rgba(255,255,255,.075);}
+@media(max-width:370px){.profile-identity-card .profile-row,.profile-menu-card .profile-row{padding-left:12px;padding-right:12px}.profile-nav-surface-frame{padding-left:16px;padding-right:16px}}
+@media(prefers-reduced-motion:reduce){.profile-nav-surface{transition:none!important}}
 </style>
             <link rel="apple-touch-icon" href="assets/icon/trip_icon.png">
   <link rel="icon" type="image/png" href="assets/icon/trip_icon.png">
-  <link rel="manifest" href="manifest.json?v=7.3.2">
+  <link rel="manifest" href="manifest.json?v=7.3.3">
   <meta name="apple-mobile-web-app-title" content="關嘉露西生日之旅">
-  <link rel="stylesheet" href="assets/css/expenses.css?v=7.3.2">
+  <link rel="stylesheet" href="assets/css/expenses.css?v=7.3.3">
 </head>
 <body>
 <div class="bg-fixed"></div>
@@ -2151,7 +2189,7 @@ html.theme-dark .profile-menu-card .profile-row,html:not(.theme-light):not(.them
         </button>
         <button class="profile-row" type="button" data-profile-open="trip-management">
           <span class="profile-row-icon profile-icon-green">⚙︎</span>
-          <span class="profile-row-copy"><strong>旅程設定</strong><small>權限、鎖定、匯入與匯出</small></span>
+          <span class="profile-row-copy"><strong>旅程設定</strong><small>權限、鎖定及目前旅程設定</small></span>
           <span class="profile-chevron">›</span>
         </button>
         <button class="profile-row" type="button" data-profile-open="app-data">
@@ -2159,6 +2197,10 @@ html.theme-dark .profile-menu-card .profile-row,html:not(.theme-light):not(.them
           <span class="profile-row-copy"><strong>App 與資料</strong><small>版本、系統資料及使用說明</small></span>
           <span class="profile-chevron">›</span>
         </button>
+      </section>
+
+      <section class="profile-card profile-signout-card" id="profile-signout-card" hidden>
+        <button class="profile-signout-btn" id="profile-signout-btn" type="button">登出 Google 帳戶</button>
       </section>
     </div>
 
@@ -2168,31 +2210,34 @@ html.theme-dark .profile-menu-card .profile-row,html:not(.theme-light):not(.them
         <h2>我的旅程</h2>
         <span class="profile-detail-spacer"></span>
       </div>
-      <section class="profile-card profile-trips-card" id="profile-trips-card" aria-labelledby="trip-library-title">
-        <div class="trip-library-heading">
-          <div class="trip-library-heading-copy">
-            <div class="trip-library-eyebrow">Multi Trip</div>
-            <h2 id="trip-library-title">我的旅程</h2>
-            <p>每個旅程獨立保存行程、收藏、支出、資料、成員同權限。</p>
-          </div>
-          <span class="trip-library-count" id="trip-library-count">1</span>
-        </div>
+      <section class="profile-card profile-trips-card" aria-label="旅程清單">
+        <div class="profile-inline-section-heading"><strong>旅程</strong><span class="trip-library-count" id="trip-library-count">1</span></div>
         <div class="trip-library-list" id="trip-library-list"></div>
         <div class="trip-library-status" id="trip-library-status">正在準備旅程資料…</div>
-        <div class="trip-library-actions">
-          <button class="trip-library-action" type="button" disabled><span>＋ 新增旅程</span><small>Phase 2C 啟用</small></button>
-          <button class="trip-library-action" type="button" disabled><span>⇅ 匯入 trip.json</span><small>Phase 2C 啟用</small></button>
-          <button class="trip-library-action trip-library-action-wide" type="button" disabled><span>封存目前旅程</span><small>Phase 2C 接入 Firestore 寫入</small></button>
-        </div>
-        <button class="trip-archive-toggle" id="trip-archive-toggle" type="button" aria-expanded="false">
-          <span><strong>已封存旅程</strong><small>平日不載入，需要時先讀取</small></span>
+      </section>
+      <section class="profile-card profile-menu-card profile-trip-actions-card" aria-label="旅程管理">
+        <button class="profile-row" type="button" disabled>
+          <span class="profile-row-icon profile-icon-blue">＋</span>
+          <span class="profile-row-copy"><strong>新增旅程</strong><small>建立一個全新旅程</small></span>
+          <span class="profile-status-pill">2C</span>
+        </button>
+        <button class="profile-row" type="button" disabled>
+          <span class="profile-row-icon profile-icon-grey">⇅</span>
+          <span class="profile-row-copy"><strong>匯入 trip.json</strong><small>從 Portable JSON 建立旅程</small></span>
+          <span class="profile-status-pill">2C</span>
+        </button>
+        <button class="profile-row" id="trip-archive-toggle" type="button" aria-expanded="false">
+          <span class="profile-row-icon profile-icon-grey">🗄️</span>
+          <span class="profile-row-copy"><strong>已封存旅程</strong><small>平日不載入，需要時先讀取</small></span>
           <span class="trip-archive-toggle-side"><span id="trip-archive-count">—</span><span class="profile-chevron">›</span></span>
         </button>
-        <div class="trip-archive-panel" id="trip-archive-panel" hidden>
+      </section>
+      <div class="trip-archive-panel" id="trip-archive-panel" hidden>
+        <section class="profile-card">
           <div class="trip-library-list" id="trip-archive-list"></div>
           <div class="trip-library-status" id="trip-archive-status">尚未載入已封存旅程。</div>
-        </div>
-      </section>
+        </section>
+      </div>
     </div>
 
     <div class="profile-nav-page" id="profile-page-appearance" data-profile-page="appearance" hidden>
@@ -2234,14 +2279,14 @@ html.theme-dark .profile-menu-card .profile-row,html:not(.theme-light):not(.them
           <span class="profile-row-copy"><strong>旅程權限</strong><small>Owner、Admin、Member、Viewer</small></span>
           <span class="profile-status-pill">2F</span>
         </button>
-        <button class="profile-row" type="button" data-global-setting="lock">
+        <button class="profile-row profile-row-disabled" type="button" disabled>
           <span class="profile-row-icon profile-icon-red">🔒</span>
-          <span class="profile-row-copy"><strong>旅程鎖定</strong><small>目前先沿用支出模組鎖定功能</small></span>
-          <span class="profile-chevron">›</span>
+          <span class="profile-row-copy"><strong>旅程鎖定</strong><small>獨立於支出鎖定，於正式權限階段啟用</small></span>
+          <span class="profile-status-pill">2F</span>
         </button>
         <button class="profile-row profile-row-disabled" type="button" disabled>
           <span class="profile-row-icon profile-icon-grey">⇅</span>
-          <span class="profile-row-copy"><strong>行程匯入與匯出</strong><small>Portable JSON schema 已準備</small></span>
+          <span class="profile-row-copy"><strong>行程匯出與備份</strong><small>Portable JSON schema 已準備</small></span>
           <span class="profile-status-pill">2C</span>
         </button>
       </section>
@@ -2254,17 +2299,14 @@ html.theme-dark .profile-menu-card .profile-row,html:not(.theme-light):not(.them
         <span class="profile-detail-spacer"></span>
       </div>
       <section class="profile-card">
-        <button class="profile-row" type="button" data-global-setting="about">
-          <span class="profile-row-icon profile-icon-grey">ⓘ</span>
-          <span class="profile-row-copy"><strong>關於本 App</strong><small>系統資料及使用說明</small></span>
-          <span class="profile-chevron">›</span>
-        </button>
-        <div class="profile-meta-row"><span>目前版本</span><strong>v7.3.2</strong></div>
+        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.3.3</strong></div>
+        <div class="profile-meta-row"><span>資料架構</span><strong>Phase 2B</strong></div>
+        <div class="profile-meta-row"><span>主要資料來源</span><strong>本機 JSON</strong></div>
       </section>
     </div>
   </div>
 </div>
-<div class="app-version-note" id="app-version-note">v7.3.2</div>
+<div class="app-version-note" id="app-version-note">v7.3.3</div>
 
 
   </div>
@@ -2318,7 +2360,7 @@ html.theme-dark .profile-menu-card .profile-row,html:not(.theme-light):not(.them
 </div>
 
 <script>
-const APP_VERSION = "7.3.2";
+const APP_VERSION = "7.3.3";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 window.EXPENSES_MODULE_VERSION = EXPENSES_MODULE_VERSION;
@@ -3087,7 +3129,7 @@ function miniCopyBtn(textFn){
 function renderInfo(data){
   const meta=data.meta||{};
   const infoCard=meta.infoCard||null;
-  // v7.3.2: 資料 tab is dedicated to the current trip's visa / travel reference data.
+  // v7.3.3: 資料 tab is dedicated to the current trip's visa / travel reference data.
   document.getElementById("bt-info").style.display="flex";requestAnimationFrame(updateBottomNavIndicator);
 
   const travellers=meta.travellers||{},cities=meta.cities||{},hotels=meta.hotels||{},flights=meta.flights||[];
@@ -3588,12 +3630,16 @@ function renderProfileAuthState(user){
   const name=document.getElementById("profile-user-name");
   const email=document.getElementById("profile-user-email");
   const status=document.getElementById("profile-auth-status");
+  const accountButton=document.getElementById("my-account-btn");
+  const signoutCard=document.getElementById("profile-signout-card");
   const actionTitle=document.getElementById("profile-account-action-title");
   const actionSubtitle=document.getElementById("profile-account-action-subtitle");
   if(!avatar||!name||!email||!status) return;
 
   avatar.replaceChildren();
   avatar.classList.toggle("is-signed-in",!!user);
+  if(accountButton) accountButton.hidden=!!user;
+  if(signoutCard) signoutCard.hidden=!user;
   if(!user){
     avatar.innerHTML=signedOutProfileIcon;
     name.textContent="尚未登入";
@@ -3621,9 +3667,8 @@ function renderProfileAuthState(user){
   name.textContent=user.displayName||"Google 使用者";
   email.textContent=user.email||"已連接 Google 帳戶";
   status.textContent="已登入";
-  if(actionTitle) actionTitle.textContent="帳戶與登入";
-  if(actionSubtitle) actionSubtitle.textContent="查看 Google 帳戶、同步狀態及目前身份";
 }
+
 let currentProfileAccess=null;
 function renderProfileAccessState(access){
   currentProfileAccess=access||null;
@@ -3890,83 +3935,139 @@ document.addEventListener("keydown",event=>{if(event.key==="Escape"&&tripQuickOp
 scrollShell?.addEventListener("scroll",()=>{if(tripQuickOpen)closeTripSwitcher();},{passive:true});
 window.addEventListener("resize",()=>{if(tripQuickOpen)positionTripQuickPopover();},{passive:true});
 
-// v7.3.2: iOS native-style internal navigation for 我的.
-// This follows the stable Price Track pattern: forward push, reverse back,
-// and an interactive left-edge right-swipe where both pages track the finger.
+// v7.3.3: snapshot-based iOS navigation for 我的.
+// Live pages never overlap. Transitions use isolated visual snapshots with
+// the same fixed trip background, following the stable Price Track approach.
 const profileNavHost=document.getElementById("profile-nav-host");
 const profilePages=Object.fromEntries([...document.querySelectorAll("#profile-view [data-profile-page]")].map(page=>[page.dataset.profilePage,page]));
 let profileCurrentPage="root";
 let profileNavigationTransitioning=false;
 let profilePreviousState=null;
 let profileSwipe=null;
-function profileSetLayer(page,active){
-  page?.classList.toggle("is-transition-layer",!!active);
+let profileNavSurfaces=[];
+function profileHostDocumentTop(){
+  if(!profileNavHost)return 0;
+  const rect=profileNavHost.getBoundingClientRect();
+  return rect.top+Math.max(0,scrollShell?.scrollTop||0);
 }
-function profilePrepareLayers(fromPage,toPage){
-  if(!profileNavHost||!fromPage||!toPage)return 0;
-  fromPage.hidden=false;toPage.hidden=false;
-  profileSetLayer(fromPage,true);profileSetLayer(toPage,true);
-  const h=Math.max(fromPage.scrollHeight||0,toPage.scrollHeight||0,360);
-  profileNavHost.style.height=`${h}px`;
-  return Math.max(1,profileNavHost.getBoundingClientRect().width||window.innerWidth);
+function profileClonePage(page){
+  const clone=page.cloneNode(true);
+  clone.hidden=false;
+  clone.classList.remove("is-active","is-transition-layer");
+  clone.classList.add("profile-nav-clone");
+  [clone,...clone.querySelectorAll("[id]")].forEach(node=>node.removeAttribute?.("id"));
+  return clone;
 }
-function profileFinishTransition(activeKey,hiddenKey,scrollTop){
-  const active=profilePages[activeKey],hidden=profilePages[hiddenKey];
-  if(active){
-    active.hidden=false;active.classList.add("is-active");profileSetLayer(active,false);active.style.transform="";active.style.opacity="";active.style.transition="";
-  }
-  if(hidden){
-    hidden.hidden=true;hidden.classList.remove("is-active");profileSetLayer(hidden,false);hidden.style.transform="";hidden.style.opacity="";hidden.style.transition="";
-  }
-  if(profileNavHost)profileNavHost.style.height="";
+function profileCaptureSnapshot(key,scrollTop=Math.max(0,scrollShell?.scrollTop||0)){
+  const page=profilePages[key];
+  if(!page)return null;
+  return {key,scrollTop:Number(scrollTop||0),hostTop:profileHostDocumentTop(),pageClone:profileClonePage(page)};
+}
+function profileClearSurfaces(){
+  profileNavSurfaces.forEach(surface=>surface.remove());
+  profileNavSurfaces=[];
+  profileNavHost?.classList.remove("is-snapshotting");
   document.body.classList.remove("profile-navigation-active","profile-edge-swipe-active");
+}
+function profileCreateSurface(snapshot,className=""){
+  if(!snapshot)return null;
+  const surface=document.createElement("div");
+  surface.className=`profile-nav-surface ${className}`.trim();
+  const liveTop=snapshot.hostTop-snapshot.scrollTop;
+  const top=Math.max(0,Math.round(liveTop));
+  const clipped=Math.min(0,liveTop);
+  surface.style.top=`${top}px`;
+  surface.style.setProperty("--profile-surface-top",`${top}px`);
+  surface.style.height=`${Math.max(1,window.innerHeight-top)}px`;
+  const frame=document.createElement("div");
+  frame.className="profile-nav-surface-frame";
+  const content=document.createElement("div");
+  content.className="profile-nav-surface-content";
+  if(clipped<0)content.style.transform=`translate3d(0,${Math.round(clipped)}px,0)`;
+  content.appendChild(snapshot.pageClone.cloneNode(true));
+  frame.appendChild(content);
+  surface.appendChild(frame);
+  document.body.appendChild(surface);
+  profileNavSurfaces.push(surface);
+  return surface;
+}
+function profileActivateLivePage(activeKey,scrollTop=0){
+  Object.entries(profilePages).forEach(([key,page])=>{
+    const active=key===activeKey;
+    page.hidden=!active;
+    page.classList.toggle("is-active",active);
+    page.style.transform="";
+    page.style.opacity="";
+    page.style.transition="";
+    page.style.boxShadow="";
+  });
   profileCurrentPage=activeKey;
   profileNavigationTransitioning=false;
+  profileClearSurfaces();
   if(scrollShell)scrollShell.scrollTo({top:Math.max(0,Number(scrollTop||0)),behavior:"auto"});
+}
+function profilePrepareSnapshotTransition(fromSnapshot,toSnapshot){
+  profileClearSurfaces();
+  const fromSurface=profileCreateSurface(fromSnapshot,"is-front");
+  const toSurface=profileCreateSurface(toSnapshot,"is-previous");
+  if(!fromSurface||!toSurface){profileClearSurfaces();return null;}
+  profileNavHost?.classList.add("is-snapshotting");
+  document.body.classList.add("profile-navigation-active");
+  const width=Math.max(1,window.innerWidth);
+  return {fromSurface,toSurface,width};
 }
 function openProfilePage(key){
   if(profileNavigationTransitioning||key==="root"||!profilePages[key]||profileCurrentPage===key)return;
-  const from=profilePages[profileCurrentPage],to=profilePages[key];
-  if(!from||!to)return;
   closeTripSwitcher();
   const oldScroll=Math.max(0,scrollShell?.scrollTop||0);
-  profilePreviousState={key:profileCurrentPage,scrollTop:oldScroll};
-  const width=profilePrepareLayers(from,to);
-  const duration=460,easing="cubic-bezier(.32,.72,0,1)";
+  const fromSnapshot=profileCaptureSnapshot(profileCurrentPage,oldScroll);
+  const toSnapshot=profileCaptureSnapshot(key,0);
+  if(!fromSnapshot||!toSnapshot)return;
+  profilePreviousState={key:profileCurrentPage,scrollTop:oldScroll,snapshot:fromSnapshot};
+  const layers=profilePrepareSnapshotTransition(fromSnapshot,toSnapshot);
+  if(!layers)return;
+  const {fromSurface,toSurface,width}=layers;
+  const duration=430,easing="cubic-bezier(.32,.72,0,1)";
   profileNavigationTransitioning=true;
-  document.body.classList.add("profile-navigation-active");
-  from.style.transform="translate3d(0,0,0)";from.style.opacity="1";
-  to.style.transform=`translate3d(${width}px,${oldScroll}px,0)`;to.style.opacity="1";
+  fromSurface.style.transform="translate3d(0,0,0)";
+  fromSurface.style.opacity="1";
+  toSurface.style.transform=`translate3d(${width}px,0,0)`;
+  toSurface.style.opacity="1";
   requestAnimationFrame(()=>requestAnimationFrame(()=>{
-    from.style.transition=`transform ${duration}ms ${easing}, opacity ${duration}ms ${easing}`;
-    to.style.transition=`transform ${duration}ms ${easing}`;
-    from.style.transform=`translate3d(${-Math.round(width*.12)}px,0,0)`;from.style.opacity=".97";
-    to.style.transform=`translate3d(0,${oldScroll}px,0)`;
+    fromSurface.style.transition=`transform ${duration}ms ${easing}, opacity ${duration}ms ${easing}`;
+    toSurface.style.transition=`transform ${duration}ms ${easing}`;
+    fromSurface.style.transform=`translate3d(${-Math.round(width*.12)}px,0,0)`;
+    fromSurface.style.opacity=".985";
+    toSurface.style.transform="translate3d(0,0,0)";
   }));
-  setTimeout(()=>profileFinishTransition(key,profilePreviousState?.key||"root",0),duration+34);
+  setTimeout(()=>profileActivateLivePage(key,0),duration+28);
 }
 function backProfilePage(){
   if(profileNavigationTransitioning||profileCurrentPage==="root")return;
-  const current=profilePages[profileCurrentPage];
   const previousKey=profilePreviousState?.key||"root";
-  const previous=profilePages[previousKey];
-  if(!current||!previous)return;
-  const currentScroll=Math.max(0,scrollShell?.scrollTop||0);
   const previousScroll=Math.max(0,profilePreviousState?.scrollTop||0);
-  const width=profilePrepareLayers(current,previous);
-  const yOffset=currentScroll-previousScroll;
-  const duration=430,easing="cubic-bezier(.32,.72,0,1)";
-  profileNavigationTransitioning=true;
+  const currentSnapshot=profileCaptureSnapshot(profileCurrentPage,Math.max(0,scrollShell?.scrollTop||0));
+  const previousSnapshot=profilePreviousState?.snapshot||profileCaptureSnapshot(previousKey,previousScroll);
+  if(!currentSnapshot||!previousSnapshot)return;
+  profileClearSurfaces();
+  const previousSurface=profileCreateSurface(previousSnapshot,"is-previous");
+  const currentSurface=profileCreateSurface(currentSnapshot,"is-front");
+  if(!previousSurface||!currentSurface){profileClearSurfaces();return;}
+  profileNavHost?.classList.add("is-snapshotting");
   document.body.classList.add("profile-navigation-active");
-  current.style.transform="translate3d(0,0,0)";
-  previous.style.transform=`translate3d(${-Math.round(width*.12)}px,${yOffset}px,0)`;previous.style.opacity=".97";
+  const width=Math.max(1,window.innerWidth),duration=410,easing="cubic-bezier(.32,.72,0,1)";
+  profileNavigationTransitioning=true;
+  previousSurface.style.transform=`translate3d(${-Math.round(width*.12)}px,0,0)`;
+  previousSurface.style.opacity=".985";
+  currentSurface.style.transform="translate3d(0,0,0)";
   requestAnimationFrame(()=>requestAnimationFrame(()=>{
-    current.style.transition=`transform ${duration}ms ${easing}, opacity ${duration}ms ${easing}`;
-    previous.style.transition=`transform ${duration}ms ${easing}, opacity ${duration}ms ${easing}`;
-    current.style.transform=`translate3d(${width}px,0,0)`;current.style.opacity=".98";
-    previous.style.transform=`translate3d(0,${yOffset}px,0)`;previous.style.opacity="1";
+    previousSurface.style.transition=`transform ${duration}ms ${easing}, opacity ${duration}ms ${easing}`;
+    currentSurface.style.transition=`transform ${duration}ms ${easing}`;
+    previousSurface.style.transform="translate3d(0,0,0)";
+    previousSurface.style.opacity="1";
+    currentSurface.style.transform=`translate3d(${width}px,0,0)`;
   }));
-  setTimeout(()=>{const old=profileCurrentPage;profilePreviousState=null;profileFinishTransition(previousKey,old,previousScroll);},duration+30);
+  setTimeout(()=>{profilePreviousState=null;profileActivateLivePage(previousKey,previousScroll);},duration+26);
 }
 document.querySelectorAll("[data-profile-open]").forEach(button=>button.addEventListener("click",()=>openProfilePage(button.dataset.profileOpen)));
 document.querySelectorAll("[data-profile-back]").forEach(button=>button.addEventListener("click",backProfilePage));
@@ -3975,9 +4076,9 @@ function beginProfileEdgeSwipe(event){
   if(profileNavigationTransitioning||profileCurrentPage==="root"||currentAppView!=="profile"||event.touches?.length!==1)return;
   if(document.body.classList.contains("expenses-modal-open"))return;
   const t=event.touches[0];
-  if(t.clientX>32)return;
+  if(t.clientX>30)return;
   if(event.target.closest?.("input,textarea,select,[contenteditable='true']"))return;
-  profileSwipe={tracking:true,active:false,startX:t.clientX,startY:t.clientY,currentX:t.clientX,startedAt:performance.now(),width:0,currentScroll:Math.max(0,scrollShell?.scrollTop||0),previousScroll:Math.max(0,profilePreviousState?.scrollTop||0),previousKey:profilePreviousState?.key||"root"};
+  profileSwipe={tracking:true,active:false,startX:t.clientX,startY:t.clientY,currentX:t.clientX,startedAt:performance.now(),width:0,currentScroll:Math.max(0,scrollShell?.scrollTop||0),previousScroll:Math.max(0,profilePreviousState?.scrollTop||0),previousKey:profilePreviousState?.key||"root",previousSnapshot:profilePreviousState?.snapshot||null,currentSurface:null,previousSurface:null};
 }
 function moveProfileEdgeSwipe(event){
   if(!profileSwipe?.tracking||event.touches?.length!==1)return;
@@ -3985,45 +4086,64 @@ function moveProfileEdgeSwipe(event){
   if(!profileSwipe.active){
     if(dx<8)return;
     if(Math.abs(dy)>Math.abs(dx)*.72){profileSwipe=null;return;}
-    const current=profilePages[profileCurrentPage],previous=profilePages[profileSwipe.previousKey];
-    if(!current||!previous){profileSwipe=null;return;}
-    profileSwipe.width=profilePrepareLayers(current,previous);
-    profileSwipe.active=true;profileNavigationTransitioning=true;
+    const currentSnapshot=profileCaptureSnapshot(profileCurrentPage,profileSwipe.currentScroll);
+    const previousSnapshot=profileSwipe.previousSnapshot||profileCaptureSnapshot(profileSwipe.previousKey,profileSwipe.previousScroll);
+    if(!currentSnapshot||!previousSnapshot){profileSwipe=null;return;}
+    profileClearSurfaces();
+    profileSwipe.previousSurface=profileCreateSurface(previousSnapshot,"is-previous");
+    profileSwipe.currentSurface=profileCreateSurface(currentSnapshot,"is-front");
+    if(!profileSwipe.previousSurface||!profileSwipe.currentSurface){profileClearSurfaces();profileSwipe=null;return;}
+    profileSwipe.width=Math.max(1,window.innerWidth);
+    profileSwipe.previousSurface.style.transform=`translate3d(${-Math.round(profileSwipe.width*.12)}px,0,0)`;
+    profileSwipe.previousSurface.style.opacity=".985";
+    profileSwipe.currentSurface.style.transform="translate3d(0,0,0)";
+    profileNavHost?.classList.add("is-snapshotting");
+    profileSwipe.active=true;
+    profileNavigationTransitioning=true;
     document.body.classList.add("profile-navigation-active","profile-edge-swipe-active");
-    current.style.transition="none";previous.style.transition="none";
-    previous.style.opacity=".97";
   }
   event.preventDefault();
   profileSwipe.currentX=t.clientX;
   const width=Math.max(1,profileSwipe.width),distance=clamp(t.clientX-profileSwipe.startX,0,width),progress=distance/width;
-  const current=profilePages[profileCurrentPage],previous=profilePages[profileSwipe.previousKey];
-  const yOffset=profileSwipe.currentScroll-profileSwipe.previousScroll;
-  current.style.transform=`translate3d(${distance}px,0,0)`;
-  current.style.boxShadow=`${-18*(1-progress)}px 0 34px rgba(11,35,32,${(.12*(1-progress)).toFixed(3)})`;
-  previous.style.transform=`translate3d(${-width*.12*(1-progress)}px,${yOffset}px,0)`;
-  previous.style.opacity=String(.97+progress*.03);
+  profileSwipe.currentSurface.style.transform=`translate3d(${distance}px,0,0)`;
+  profileSwipe.currentSurface.style.boxShadow=`${-18*(1-progress)}px 0 38px rgba(20,39,55,${(.16*(1-progress)).toFixed(3)})`;
+  profileSwipe.previousSurface.style.transform=`translate3d(${-width*.12*(1-progress)}px,0,0)`;
+  profileSwipe.previousSurface.style.opacity=String(.985+progress*.015);
 }
 function endProfileEdgeSwipe(){
   if(!profileSwipe?.tracking)return;
   if(!profileSwipe.active){profileSwipe=null;return;}
-  const swipe=profileSwipe;profileSwipe=null;
+  const swipe=profileSwipe;
+  profileSwipe=null;
   const width=Math.max(1,swipe.width),distance=clamp(swipe.currentX-swipe.startX,0,width),elapsed=Math.max(1,performance.now()-swipe.startedAt),velocity=distance/elapsed;
   const goBack=distance>width*.32||velocity>.55;
   const progress=distance/width,duration=goBack?Math.max(150,Math.min(300,(1-progress)*360)):Math.max(180,Math.min(300,progress*320+160));
   const easing="cubic-bezier(.32,.72,0,1)";
-  const currentKey=profileCurrentPage,current=profilePages[currentKey],previous=profilePages[swipe.previousKey],yOffset=swipe.currentScroll-swipe.previousScroll;
-  if(!current||!previous){profileNavigationTransitioning=false;return;}
-  current.style.transition=`transform ${duration}ms ${easing}, opacity ${duration}ms ${easing}`;
-  previous.style.transition=`transform ${duration}ms ${easing}, opacity ${duration}ms ${easing}`;
+  const currentSurface=swipe.currentSurface,previousSurface=swipe.previousSurface;
+  if(!currentSurface||!previousSurface){profileNavigationTransitioning=false;profileClearSurfaces();return;}
+  currentSurface.style.transition=`transform ${duration}ms ${easing}`;
+  previousSurface.style.transition=`transform ${duration}ms ${easing}, opacity ${duration}ms ${easing}`;
   requestAnimationFrame(()=>{
-    if(goBack){current.style.transform=`translate3d(${width}px,0,0)`;current.style.opacity=".98";previous.style.transform=`translate3d(0,${yOffset}px,0)`;previous.style.opacity="1";}
-    else{current.style.transform="translate3d(0,0,0)";current.style.opacity="1";previous.style.transform=`translate3d(${-Math.round(width*.12)}px,${yOffset}px,0)`;previous.style.opacity=".97";}
+    if(goBack){
+      currentSurface.style.transform=`translate3d(${width}px,0,0)`;
+      previousSurface.style.transform="translate3d(0,0,0)";
+      previousSurface.style.opacity="1";
+    }else{
+      currentSurface.style.transform="translate3d(0,0,0)";
+      previousSurface.style.transform=`translate3d(${-Math.round(width*.12)}px,0,0)`;
+      previousSurface.style.opacity=".985";
+    }
   });
   setTimeout(()=>{
-    current.style.boxShadow="";
-    if(goBack){profilePreviousState=null;profileFinishTransition(swipe.previousKey,currentKey,swipe.previousScroll);}
-    else{previous.hidden=true;profileSetLayer(previous,false);previous.style.transform="";previous.style.opacity="";previous.style.transition="";profileSetLayer(current,false);current.style.transform="";current.style.opacity="";current.style.transition="";profileNavHost.style.height="";document.body.classList.remove("profile-navigation-active","profile-edge-swipe-active");profileNavigationTransitioning=false;}
-  },duration+24);
+    currentSurface.style.boxShadow="";
+    if(goBack){
+      profilePreviousState=null;
+      profileActivateLivePage(swipe.previousKey,swipe.previousScroll);
+    }else{
+      profileNavigationTransitioning=false;
+      profileClearSurfaces();
+    }
+  },duration+22);
 }
 function cancelProfileEdgeSwipe(){if(profileSwipe?.active){endProfileEdgeSwipe();}else profileSwipe=null;}
 document.addEventListener("touchstart",beginProfileEdgeSwipe,{passive:true});
@@ -4050,17 +4170,23 @@ function dispatchExpenseUiAction(action){
 }
 
 document.getElementById("my-account-btn")?.addEventListener("click",()=>{
-  if(!window.__appAuthUser){
-    getGlobalAuthService()
-      .then(({signInWithGoogle})=>signInWithGoogle())
-      .catch(error=>{
-        console.error(error);
-        if(error?.code!=="auth/popup-closed-by-user") alert(`Google 登入失敗：${error?.code||"unknown"}`);
-      });
-    return;
-  }
-  dispatchExpenseUiAction("setting:account");
+  if(window.__appAuthUser)return;
+  getGlobalAuthService()
+    .then(({signInWithGoogle})=>signInWithGoogle())
+    .catch(error=>{
+      console.error(error);
+      if(error?.code!=="auth/popup-closed-by-user") alert(`Google 登入失敗：${error?.code||"unknown"}`);
+    });
 });
+document.getElementById("profile-signout-btn")?.addEventListener("click",()=>{
+  getGlobalAuthService()
+    .then(({signOutCurrentUser})=>signOutCurrentUser())
+    .catch(error=>{
+      console.error("Google sign out error",error);
+      alert("暫時未能登出 Google 帳戶。");
+    });
+});
+
 document.querySelectorAll("[data-global-setting]").forEach(button=>{
   button.addEventListener("click",()=>dispatchExpenseUiAction(`setting:${button.dataset.globalSetting}`));
 });

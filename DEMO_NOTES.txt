@@ -1,4 +1,12 @@
-Travel Webapp Phase 2B v7.3.2 Refinement
+v7.3.3 Phase 2B profile navigation refinement
+
+• Snapshot based My page push and swipe back navigation to prevent translucent page overlap
+• Consistent Apple style row insets and box sizing
+• Fixed current Trip card overflow
+• Signed in state hides Login and shows a red Sign Out button at the bottom
+• Simplified My Trips detail hierarchy
+
+Travel Webapp Phase 2B v7.3.3 Refinement
 
 Key fixes
 1. Fixed false 「無法載入行程資料」 header state. v7.3.1 renderInfo referenced an undefined esc() helper after the itinerary had already rendered.
