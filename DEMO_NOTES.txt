@@ -1,4 +1,4 @@
-v7.3.6 Phase 2B navigation polish
+v7.3.7 Phase 2B navigation polish
 
 • Fade-through endpoints now use quintic smootherstep to remove the quick opacity kick.
 • Transition surfaces are born at the correct opacity, avoiding a one-frame double-page flash.

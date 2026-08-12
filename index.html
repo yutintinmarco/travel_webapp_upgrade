@@ -571,7 +571,7 @@ html.theme-dark .info-mini-copy.copied { background: rgba(42,90,42,0.65); border
 html.theme-dark .info-hint { color: rgba(150,150,175,0.65); }
 
   
-/* v7.3.6: view containers alone own visibility; no cross-view card hiding rules. */
+/* v7.3.7: view containers alone own visibility; no cross-view card hiding rules. */
 
 
 /* Integration v5.3 global appearance polish */
@@ -730,12 +730,12 @@ body {
 .day-tab:active { transform: scale(0.96); }
 .day-tab.active { box-shadow: 0 4px 12px rgba(15,23,42,0.10), inset 0 1px 0 rgba(255,255,255,0.82); }
 
-/* v7.3.6: itinerary-owned cards now live inside #itinerary-view itself.
+/* v7.3.7: itinerary-owned cards now live inside #itinerary-view itself.
    View visibility is structural, so first paint never depends on a body class
    or an iOS backdrop-filter repaint. */
 
 /* Floating Liquid Glass tab bar, lifted clear of the iPhone home indicator and
-   rounded display corners. v7.3.6 keeps it at body level, outside scroll/snapshot
+   rounded display corners. v7.3.7 keeps it at body level, outside scroll/snapshot
    navigation, so page transitions can never hide or clip it. */
 .bottom-nav {
   position: fixed;
@@ -1902,7 +1902,7 @@ html.theme-dark .trip-library-status, html:not(.theme-light):not(.theme-dark) .t
 html.theme-dark .trip-library-stat, html:not(.theme-light):not(.theme-dark) .trip-library-stat { background:rgba(255,255,255,.055); }
 
 
-/* Phase 2B refinement v7.3.6 */
+/* Phase 2B refinement v7.3.7 */
 .header-title-small.trip-switch-trigger {
   display:inline-flex;
   align-items:center;
@@ -1995,7 +1995,7 @@ html:not(.theme-light):not(.theme-dark) .trip-switch-sheet {
 }
 
 
-/* v7.3.6 compact trip chooser + native 我的 push navigation */
+/* v7.3.7 compact trip chooser + native 我的 push navigation */
 .header-title-small.trip-switch-trigger{display:inline-flex;align-items:center;gap:4px;max-width:min(72vw,320px);cursor:pointer;user-select:none;-webkit-user-select:none;touch-action:manipulation;}
 .header-title-small.trip-switch-trigger::after{content:"⌄";position:static;display:inline-block;margin-left:2px;font-size:10px;line-height:1;color:var(--label-tertiary);transform:translateY(-1px);}
 .header-title-small.trip-switch-trigger[aria-expanded="true"]::after{transform:translateY(-1px) rotate(180deg);}
@@ -2036,7 +2036,7 @@ body.profile-edge-swipe-active{touch-action:pan-y;}
 html.theme-dark .profile-menu-card .profile-row,html:not(.theme-light):not(.theme-dark) .profile-menu-card .profile-row{border-bottom-color:rgba(255,255,255,.075);}
 @media (prefers-reduced-motion:reduce){.trip-quick-popover{transition:none!important}.profile-nav-page{transition:none!important}}
 
-/* v7.3.6 · profile geometry, account state and snapshot navigation */
+/* v7.3.7 · profile geometry, account state and snapshot navigation */
 .profile-card,.profile-user-card,.profile-row,.profile-setting-row,.trip-library-card,.trip-library-item,.trip-library-action,.trip-library-status,.profile-stepper{box-sizing:border-box;max-width:100%;min-width:0;}
 .profile-nav-host,.profile-nav-page{min-width:0;max-width:100%;}
 .profile-identity-card{padding:0;overflow:hidden;}
@@ -2068,12 +2068,18 @@ html.theme-dark .profile-menu-card .profile-row,html:not(.theme-light):not(.them
 }
 body.profile-navigation-active .scroll-shell,body.profile-edge-swipe-active .scroll-shell{overflow:hidden!important;}
 .profile-nav-host.is-snapshotting{visibility:hidden;}
+/* v7.3.7 live navigation: every profile page stays in the same DOM/compositing
+   context for its entire lifetime. The host owns layout height; pages are
+   absolute only after JS has measured the initially visible page. */
+.profile-nav-host.is-live-navigation{position:relative;overflow:visible;}
+.profile-nav-host.is-live-navigation .profile-nav-page{position:absolute;top:0;left:0;width:100%;margin:0;}
+.profile-nav-page.profile-live-outgoing,.profile-nav-page.profile-live-incoming{pointer-events:none!important;}
 .profile-nav-surface{position:fixed;left:0;width:100vw;overflow:hidden;z-index:1420;pointer-events:none;contain:layout paint style;will-change:transform,opacity;backface-visibility:hidden;-webkit-backface-visibility:hidden;background:transparent;transform-origin:0 0;}
-/* v7.3.6: the app background is never cloned into a moving navigation surface.
+/* v7.3.7: the app background is never cloned into a moving navigation surface.
    Only page content moves; the single fixed .bg-fixed layer stays perfectly still. */
 .profile-nav-surface::before{display:none!important;content:none!important;}
 .profile-nav-surface.is-front{box-shadow:-14px 0 30px rgba(20,39,55,.12);}
-/* v7.3.6 uses whole-page fade-through instead of a moving edge mask.
+/* v7.3.7 uses whole-page fade-through instead of a moving edge mask.
    Outgoing content fades away before incoming content becomes visible. */
 .profile-nav-surface.edge-fade-left{-webkit-mask-image:none!important;mask-image:none!important;}
 .profile-nav-surface-frame{position:relative;z-index:1;width:min(480px,100%);height:100%;margin:0 auto;padding:0 16px calc(var(--tabbar-h) + env(safe-area-inset-bottom,0px) + 30px);box-sizing:border-box;overflow:hidden;}
@@ -2087,9 +2093,9 @@ html.theme-dark .profile-identity-card .profile-row,html:not(.theme-light):not(.
 </style>
             <link rel="apple-touch-icon" href="assets/icon/trip_icon.png">
   <link rel="icon" type="image/png" href="assets/icon/trip_icon.png">
-  <link rel="manifest" href="manifest.json?v=7.3.6">
+  <link rel="manifest" href="manifest.json?v=7.3.7">
   <meta name="apple-mobile-web-app-title" content="關嘉露西生日之旅">
-  <link rel="stylesheet" href="assets/css/expenses.css?v=7.3.6">
+  <link rel="stylesheet" href="assets/css/expenses.css?v=7.3.7">
 </head>
 <body>
 <div class="bg-fixed"></div>
@@ -2363,14 +2369,14 @@ html.theme-dark .profile-identity-card .profile-row,html:not(.theme-light):not(.
         <span class="profile-detail-spacer"></span>
       </div>
       <section class="profile-card">
-        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.3.6</strong></div>
+        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.3.7</strong></div>
         <div class="profile-meta-row"><span>資料架構</span><strong>Phase 2B</strong></div>
         <div class="profile-meta-row"><span>主要資料來源</span><strong>本機 JSON</strong></div>
       </section>
     </div>
   </div>
 </div>
-<div class="app-version-note" id="app-version-note">v7.3.6</div>
+<div class="app-version-note" id="app-version-note">v7.3.7</div>
 
 
   </div>
@@ -2424,7 +2430,7 @@ html.theme-dark .profile-identity-card .profile-row,html:not(.theme-light):not(.
 </div>
 
 <script>
-const APP_VERSION = "7.3.6";
+const APP_VERSION = "7.3.7";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 window.EXPENSES_MODULE_VERSION = EXPENSES_MODULE_VERSION;
@@ -3193,7 +3199,7 @@ function miniCopyBtn(textFn){
 function renderInfo(data){
   const meta=data.meta||{};
   const infoCard=meta.infoCard||null;
-  // v7.3.6: 資料 tab is dedicated to the current trip's visa / travel reference data.
+  // v7.3.7: 資料 tab is dedicated to the current trip's visa / travel reference data.
   document.getElementById("bt-info").style.display="flex";requestAnimationFrame(updateBottomNavIndicator);
 
   const travellers=meta.travellers||{},cities=meta.cities||{},hotels=meta.hotels||{},flights=meta.flights||[];
@@ -3999,270 +4005,257 @@ document.addEventListener("keydown",event=>{if(event.key==="Escape"&&tripQuickOp
 scrollShell?.addEventListener("scroll",()=>{if(tripQuickOpen)closeTripSwitcher();},{passive:true});
 window.addEventListener("resize",()=>{if(tripQuickOpen)positionTripQuickPopover();},{passive:true});
 
-// v7.3.6: two-stage fade-through navigation for 我的.
-// The outgoing page owns the first half of the gesture and fades away before
-// the incoming page owns the second half. This deliberately avoids the long
-// translucent overlap that looks artificial over glass cards.
+// v7.3.7: live-DOM fade-through navigation for 我的.
+// IMPORTANT: do not clone glass pages for transitions. On iOS, moving a cloned
+// backdrop-filter tree into a fixed layer changes its compositing and makes the
+// page appear to jump in transparency before the gesture has really started.
+// Both outgoing and incoming pages below are the original live DOM nodes.
 const profileNavHost=document.getElementById("profile-nav-host");
 const profilePages=Object.fromEntries([...document.querySelectorAll("#profile-view [data-profile-page]")].map(page=>[page.dataset.profilePage,page]));
 let profileCurrentPage="root";
 let profileNavigationTransitioning=false;
-let profilePreviousState=null;
 let profileSwipe=null;
-let profileNavSurfaces=[];
 let profileNavAnimationFrame=0;
+let profileNavStack=[{key:"root",scrollTop:0}];
 const PROFILE_FADE_OUT_END=.48;
 const PROFILE_FADE_IN_START=.52;
-const PROFILE_TRANSITION_TRAVEL_RATIO=.045;
-function profileHostDocumentTop(){
-  if(!profileNavHost)return 0;
-  const rect=profileNavHost.getBoundingClientRect();
-  return rect.top+Math.max(0,scrollShell?.scrollTop||0);
-}
-function profileClonePage(page){
-  const clone=page.cloneNode(true);
-  clone.hidden=false;
-  clone.classList.remove("is-active","is-transition-layer");
-  clone.classList.add("profile-nav-clone");
-  [clone,...clone.querySelectorAll("[id]")].forEach(node=>node.removeAttribute?.("id"));
-  return clone;
-}
-function profileCaptureSnapshot(key,scrollTop=Math.max(0,scrollShell?.scrollTop||0)){
-  const page=profilePages[key];
-  if(!page)return null;
-  return {key,scrollTop:Number(scrollTop||0),hostTop:profileHostDocumentTop(),pageClone:profileClonePage(page)};
-}
-function profileClearSurfaces(){
-  if(profileNavAnimationFrame){cancelAnimationFrame(profileNavAnimationFrame);profileNavAnimationFrame=0;}
-  profileNavSurfaces.forEach(surface=>surface.remove());
-  profileNavSurfaces=[];
-  profileNavHost?.classList.remove("is-snapshotting");
-  document.body.classList.remove("profile-navigation-active","profile-edge-swipe-active");
-}
-function profileCreateSurface(snapshot,className=""){
-  if(!snapshot)return null;
-  const surface=document.createElement("div");
-  surface.className=`profile-nav-surface ${className}`.trim();
-  const liveTop=snapshot.hostTop-snapshot.scrollTop;
-  const top=Math.max(0,Math.round(liveTop));
-  const clipped=Math.min(0,liveTop);
-  surface.style.top=`${top}px`;
-  surface.style.height=`${Math.max(1,window.innerHeight-top)}px`;
-  // Prime opacity before insertion/compositing. Incoming surfaces must never
-  // exist for a frame at opacity 1, otherwise iOS briefly flashes both pages.
-  surface.style.opacity=className.includes("is-front")?"1":"0";
-  const frame=document.createElement("div");
-  frame.className="profile-nav-surface-frame";
-  const content=document.createElement("div");
-  content.className="profile-nav-surface-content";
-  if(clipped<0)content.style.transform=`translate3d(0,${Math.round(clipped)}px,0)`;
-  content.appendChild(snapshot.pageClone.cloneNode(true));
-  frame.appendChild(content);
-  surface.appendChild(frame);
-  document.body.appendChild(surface);
-  profileNavSurfaces.push(surface);
-  return surface;
-}
-function profileActivateLivePage(activeKey,scrollTop=0){
-  Object.entries(profilePages).forEach(([key,page])=>{
-    const active=key===activeKey;
-    page.hidden=!active;
-    page.classList.toggle("is-active",active);
-    page.style.transform="";
-    page.style.opacity="";
-    page.style.transition="";
-    page.style.boxShadow="";
-  });
-  profileCurrentPage=activeKey;
-  profileNavigationTransitioning=false;
-  profileClearSurfaces();
-  if(scrollShell)scrollShell.scrollTo({top:Math.max(0,Number(scrollTop||0)),behavior:"auto"});
-}
-function profileCommitLivePage(activeKey,scrollTop=0,overlaySurface=null,duration=120){
-  Object.entries(profilePages).forEach(([key,page])=>{
-    const active=key===activeKey;
-    page.hidden=!active;
-    page.classList.toggle("is-active",active);
-    page.style.transform="";
-    page.style.opacity="";
-    page.style.transition="";
-    page.style.boxShadow="";
-  });
-  profileCurrentPage=activeKey;
-  if(scrollShell)scrollShell.scrollTo({top:Math.max(0,Number(scrollTop||0)),behavior:"auto"});
-  profileNavHost?.classList.remove("is-snapshotting");
-  if(!overlaySurface){
-    profileNavigationTransitioning=false;
-    profileClearSurfaces();
-    return;
-  }
-  // Keep the final snapshot briefly above the now-live page and dissolve it.
-  // The user never sees the snapshot/live DOM handoff as a hard frame change.
-  overlaySurface.style.transition=`opacity ${duration}ms cubic-bezier(.22,.61,.36,1)`;
-  overlaySurface.style.opacity="1";
-  requestAnimationFrame(()=>{
-    overlaySurface.style.opacity="0";
-    setTimeout(()=>{
-      profileNavigationTransitioning=false;
-      profileClearSurfaces();
-    },duration+24);
-  });
-}
-function profilePrepareSnapshotTransition(fromSnapshot,toSnapshot){
-  profileClearSurfaces();
-  const fromSurface=profileCreateSurface(fromSnapshot,"is-front");
-  const toSurface=profileCreateSurface(toSnapshot,"is-previous");
-  if(!fromSurface||!toSurface){profileClearSurfaces();return null;}
-  profileNavHost?.classList.add("is-snapshotting");
-  document.body.classList.add("profile-navigation-active");
-  const width=Math.max(1,window.innerWidth);
-  return {fromSurface,toSurface,width};
-}
+function profileScrollTop(){return Math.max(0,Number(scrollShell?.scrollTop||0));}
 function profileSmooth01(value){
   const t=clamp(Number(value)||0,0,1);
-  // Quintic smootherstep keeps both velocity and acceleration at zero at
-  // the beginning/end, removing the quick opacity kick seen on iOS.
   return t*t*t*(t*(t*6-15)+10);
 }
 function profileFadeThroughState(progress){
   const p=clamp(Number(progress)||0,0,1);
   const outT=profileSmooth01(p/PROFILE_FADE_OUT_END);
   const inT=profileSmooth01((p-PROFILE_FADE_IN_START)/(1-PROFILE_FADE_IN_START));
-  return {p,outT,inT,outOpacity:1-outT,inOpacity:inT};
+  return {p,outOpacity:1-outT,inOpacity:inT};
 }
-function profileApplyFadeThrough(outSurface,inSurface,progress,direction,width){
-  if(!outSurface||!inSurface)return;
-  const state=profileFadeThroughState(progress);
-  const travel=Math.min(22,Math.max(12,width*PROFILE_TRANSITION_TRAVEL_RATIO));
-  const outX=direction*travel*state.outT;
-  const inX=-direction*travel*(1-state.inT);
-  outSurface.style.zIndex="1422";
-  inSurface.style.zIndex="1421";
-  outSurface.style.opacity=String(state.outOpacity);
-  inSurface.style.opacity=String(state.inOpacity);
-  outSurface.style.transform=`translate3d(${outX.toFixed(2)}px,0,0)`;
-  inSurface.style.transform=`translate3d(${inX.toFixed(2)}px,0,0)`;
-  outSurface.style.boxShadow="none";
-  inSurface.style.boxShadow="none";
+function profileMeasurePage(page){
+  if(!page)return 260;
+  return Math.max(260,Math.ceil(page.scrollHeight||page.getBoundingClientRect().height||260));
 }
-function profileAnimateFadeThrough(outSurface,inSurface,{from=0,to=1,direction=1,width=Math.max(1,window.innerWidth),duration=420,onDone}={}){
+function profileSetHostHeight(page){
+  if(!profileNavHost||!page)return;
+  profileNavHost.style.height=`${profileMeasurePage(page)}px`;
+}
+function profileClearPageTransitionStyle(page){
+  if(!page)return;
+  page.classList.remove("profile-live-outgoing","profile-live-incoming");
+  page.style.opacity="";
+  page.style.top="";
+  page.style.zIndex="";
+  page.style.pointerEvents="";
+}
+function profileClearAnimation(){
   if(profileNavAnimationFrame){cancelAnimationFrame(profileNavAnimationFrame);profileNavAnimationFrame=0;}
+}
+function profileClearTransitionState(){
+  profileClearAnimation();
+  Object.values(profilePages).forEach(profileClearPageTransitionStyle);
+  document.body.classList.remove("profile-navigation-active","profile-edge-swipe-active");
+}
+function profilePrimeLiveNavigation(){
+  const active=profilePages[profileCurrentPage]||profilePages.root;
+  if(!profileNavHost||!active)return;
+  Object.entries(profilePages).forEach(([key,page])=>{
+    const on=key===profileCurrentPage;
+    page.hidden=!on;
+    page.classList.toggle("is-active",on);
+  });
+  // Measure while the page still participates normally, then switch the host
+  // to its permanent absolute-page layout. No transition ever changes this
+  // positioning mode afterwards, so there is no end-of-animation handoff.
+  profileSetHostHeight(active);
+  profileNavHost.classList.add("is-live-navigation");
+  requestAnimationFrame(()=>profileSetHostHeight(active));
+}
+function profilePrepareLiveTransition(targetKey,targetScroll){
+  const outgoing=profilePages[profileCurrentPage];
+  const incoming=profilePages[targetKey];
+  if(!outgoing||!incoming)return null;
+  profileClearTransitionState();
+  const currentScroll=profileScrollTop();
+  incoming.hidden=false;
+  incoming.classList.remove("is-active");
+  incoming.classList.add("profile-live-incoming");
+  outgoing.classList.add("profile-live-outgoing");
+  // Keep the incoming page visually aligned to the scroll position it will
+  // have after commit, without changing the real scroll position mid-gesture.
+  incoming.style.top=`${Math.round(currentScroll-Math.max(0,targetScroll))}px`;
+  incoming.style.opacity="0";
+  incoming.style.zIndex="1421";
+  incoming.style.pointerEvents="none";
+  outgoing.style.top="0px";
+  outgoing.style.opacity="1";
+  outgoing.style.zIndex="1422";
+  outgoing.style.pointerEvents="none";
+  document.body.classList.add("profile-navigation-active");
+  return {outgoing,incoming,currentScroll,targetScroll:Math.max(0,targetScroll)};
+}
+function profileApplyFadeThrough(outgoing,incoming,progress){
+  if(!outgoing||!incoming)return;
+  const state=profileFadeThroughState(progress);
+  // Opacity only. No translate, scale, clone or moving background layer.
+  outgoing.style.opacity=String(state.outOpacity);
+  incoming.style.opacity=String(state.inOpacity);
+}
+function profileAnimateFadeThrough(outgoing,incoming,{from=0,to=1,duration=440,onDone}={}){
+  profileClearAnimation();
   const reduced=window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
-  if(reduced||duration<=0){
-    profileApplyFadeThrough(outSurface,inSurface,to,direction,width);
-    onDone?.();
-    return;
-  }
+  if(reduced||duration<=0){profileApplyFadeThrough(outgoing,incoming,to);onDone?.();return;}
   const started=performance.now();
   const tick=now=>{
     const t=clamp((now-started)/duration,0,1);
-    const p=from+(to-from)*t;
-    profileApplyFadeThrough(outSurface,inSurface,p,direction,width);
+    // Smooth the time progress too, so release/settle never starts with a
+    // visible velocity kick even when the finger stops between frames.
+    const eased=profileSmooth01(t);
+    const p=from+(to-from)*eased;
+    profileApplyFadeThrough(outgoing,incoming,p);
     if(t<1){profileNavAnimationFrame=requestAnimationFrame(tick);return;}
     profileNavAnimationFrame=0;
     onDone?.();
   };
-  profileApplyFadeThrough(outSurface,inSurface,from,direction,width);
+  profileApplyFadeThrough(outgoing,incoming,from);
   profileNavAnimationFrame=requestAnimationFrame(tick);
+}
+function profileCommitLiveTransition(targetKey,targetScroll,outgoing,incoming,{pop=false,push=false}={}){
+  // All DOM/scroll changes are made synchronously before the next paint. The
+  // incoming element is already the real page at opacity 1, so there is no
+  // snapshot-to-live dissolve and therefore no final transparency jump.
+  if(scrollShell)scrollShell.scrollTop=Math.max(0,targetScroll);
+  Object.entries(profilePages).forEach(([key,page])=>{
+    const active=key===targetKey;
+    page.hidden=!active;
+    page.classList.toggle("is-active",active);
+    profileClearPageTransitionStyle(page);
+  });
+  profileCurrentPage=targetKey;
+  if(pop&&profileNavStack.length>1)profileNavStack.pop();
+  if(push)profileNavStack.push({key:targetKey,scrollTop:Math.max(0,targetScroll)});
+  const topEntry=profileNavStack[profileNavStack.length-1];
+  if(topEntry&&topEntry.key===targetKey)topEntry.scrollTop=Math.max(0,targetScroll);
+  profileSetHostHeight(profilePages[targetKey]);
+  document.body.classList.remove("profile-navigation-active","profile-edge-swipe-active");
+  profileNavigationTransitioning=false;
+}
+function profileRestoreCurrentAfterCancelledSwipe(outgoing,incoming,currentScroll){
+  if(scrollShell)scrollShell.scrollTop=Math.max(0,currentScroll);
+  incoming.hidden=true;
+  incoming.classList.remove("is-active");
+  outgoing.hidden=false;
+  outgoing.classList.add("is-active");
+  profileClearPageTransitionStyle(incoming);
+  profileClearPageTransitionStyle(outgoing);
+  profileSetHostHeight(outgoing);
+  document.body.classList.remove("profile-navigation-active","profile-edge-swipe-active");
+  profileNavigationTransitioning=false;
 }
 function openProfilePage(key){
   if(profileNavigationTransitioning||key==="root"||!profilePages[key]||profileCurrentPage===key)return;
   closeTripSwitcher();
-  const oldScroll=Math.max(0,scrollShell?.scrollTop||0);
-  const fromSnapshot=profileCaptureSnapshot(profileCurrentPage,oldScroll);
-  const toSnapshot=profileCaptureSnapshot(key,0);
-  if(!fromSnapshot||!toSnapshot)return;
-  profilePreviousState={key:profileCurrentPage,scrollTop:oldScroll,snapshot:fromSnapshot};
-  const layers=profilePrepareSnapshotTransition(fromSnapshot,toSnapshot);
+  const currentScroll=profileScrollTop();
+  const currentEntry=profileNavStack[profileNavStack.length-1];
+  if(currentEntry&&currentEntry.key===profileCurrentPage)currentEntry.scrollTop=currentScroll;
+  const targetScroll=0;
+  const layers=profilePrepareLiveTransition(key,targetScroll);
   if(!layers)return;
-  const {fromSurface,toSurface,width}=layers;
   profileNavigationTransitioning=true;
-  profileAnimateFadeThrough(fromSurface,toSurface,{from:0,to:1,direction:-1,width,duration:455,onDone:()=>profileCommitLivePage(key,0,toSurface,125)});
+  profileApplyFadeThrough(layers.outgoing,layers.incoming,0);
+  profileAnimateFadeThrough(layers.outgoing,layers.incoming,{from:0,to:1,duration:500,onDone:()=>profileCommitLiveTransition(key,targetScroll,layers.outgoing,layers.incoming,{push:true})});
 }
 function backProfilePage(){
-  if(profileNavigationTransitioning||profileCurrentPage==="root")return;
-  const previousKey=profilePreviousState?.key||"root";
-  const previousScroll=Math.max(0,profilePreviousState?.scrollTop||0);
-  const currentSnapshot=profileCaptureSnapshot(profileCurrentPage,Math.max(0,scrollShell?.scrollTop||0));
-  const previousSnapshot=profilePreviousState?.snapshot||profileCaptureSnapshot(previousKey,previousScroll);
-  if(!currentSnapshot||!previousSnapshot)return;
-  profileClearSurfaces();
-  const previousSurface=profileCreateSurface(previousSnapshot,"is-previous");
-  const currentSurface=profileCreateSurface(currentSnapshot,"is-front");
-  if(!previousSurface||!currentSurface){profileClearSurfaces();return;}
-  profileNavHost?.classList.add("is-snapshotting");
-  document.body.classList.add("profile-navigation-active");
-  const width=Math.max(1,window.innerWidth);
+  if(profileNavigationTransitioning||profileNavStack.length<=1||profileCurrentPage==="root")return;
+  const currentScroll=profileScrollTop();
+  const currentEntry=profileNavStack[profileNavStack.length-1];
+  if(currentEntry&&currentEntry.key===profileCurrentPage)currentEntry.scrollTop=currentScroll;
+  const previous=profileNavStack[profileNavStack.length-2]||{key:"root",scrollTop:0};
+  const layers=profilePrepareLiveTransition(previous.key,previous.scrollTop||0);
+  if(!layers)return;
   profileNavigationTransitioning=true;
-  profileAnimateFadeThrough(currentSurface,previousSurface,{from:0,to:1,direction:1,width,duration:440,onDone:()=>{
-    profilePreviousState=null;
-    profileCommitLivePage(previousKey,previousScroll,previousSurface,125);
-  }});
+  profileApplyFadeThrough(layers.outgoing,layers.incoming,0);
+  profileAnimateFadeThrough(layers.outgoing,layers.incoming,{from:0,to:1,duration:485,onDone:()=>profileCommitLiveTransition(previous.key,previous.scrollTop||0,layers.outgoing,layers.incoming,{pop:true})});
 }
 document.querySelectorAll("[data-profile-open]").forEach(button=>button.addEventListener("click",()=>openProfilePage(button.dataset.profileOpen)));
 document.querySelectorAll("[data-profile-back]").forEach(button=>button.addEventListener("click",backProfilePage));
 
 function beginProfileEdgeSwipe(event){
-  if(profileNavigationTransitioning||profileCurrentPage==="root"||currentAppView!=="profile"||event.touches?.length!==1)return;
+  if(profileNavigationTransitioning||profileNavStack.length<=1||profileCurrentPage==="root"||currentAppView!=="profile"||event.touches?.length!==1)return;
   if(document.body.classList.contains("expenses-modal-open"))return;
   const t=event.touches[0];
-  if(t.clientX>30)return;
+  if(t.clientX>32)return;
   if(event.target.closest?.("input,textarea,select,[contenteditable='true']"))return;
-  profileSwipe={tracking:true,active:false,startX:t.clientX,startY:t.clientY,currentX:t.clientX,startedAt:performance.now(),width:0,currentScroll:Math.max(0,scrollShell?.scrollTop||0),previousScroll:Math.max(0,profilePreviousState?.scrollTop||0),previousKey:profilePreviousState?.key||"root",previousSnapshot:profilePreviousState?.snapshot||null,currentSurface:null,previousSurface:null,progress:0};
+  const currentEntry=profileNavStack[profileNavStack.length-1];
+  if(currentEntry&&currentEntry.key===profileCurrentPage)currentEntry.scrollTop=profileScrollTop();
+  const previous=profileNavStack[profileNavStack.length-2]||{key:"root",scrollTop:0};
+  profileSwipe={tracking:true,active:false,startX:t.clientX,startY:t.clientY,currentX:t.clientX,startedAt:performance.now(),width:Math.max(1,window.innerWidth),currentScroll:profileScrollTop(),previousKey:previous.key,previousScroll:Math.max(0,previous.scrollTop||0),outgoing:null,incoming:null,progress:0};
 }
 function moveProfileEdgeSwipe(event){
   if(!profileSwipe?.tracking||event.touches?.length!==1)return;
   const t=event.touches[0],dx=t.clientX-profileSwipe.startX,dy=t.clientY-profileSwipe.startY;
   if(!profileSwipe.active){
-    if(dx<8)return;
-    if(Math.abs(dy)>Math.abs(dx)*.72){profileSwipe=null;return;}
-    const currentSnapshot=profileCaptureSnapshot(profileCurrentPage,profileSwipe.currentScroll);
-    const previousSnapshot=profileSwipe.previousSnapshot||profileCaptureSnapshot(profileSwipe.previousKey,profileSwipe.previousScroll);
-    if(!currentSnapshot||!previousSnapshot){profileSwipe=null;return;}
-    profileClearSurfaces();
-    profileSwipe.previousSurface=profileCreateSurface(previousSnapshot,"is-previous");
-    profileSwipe.currentSurface=profileCreateSurface(currentSnapshot,"is-front");
-    if(!profileSwipe.previousSurface||!profileSwipe.currentSurface){profileClearSurfaces();profileSwipe=null;return;}
-    profileSwipe.width=Math.max(1,window.innerWidth);
-    profileNavHost?.classList.add("is-snapshotting");
+    if(dx<3)return;
+    if(Math.abs(dy)>Math.abs(dx)*.78&&Math.abs(dy)>5){profileSwipe=null;return;}
+    const layers=profilePrepareLiveTransition(profileSwipe.previousKey,profileSwipe.previousScroll);
+    if(!layers){profileSwipe=null;return;}
+    profileSwipe.outgoing=layers.outgoing;
+    profileSwipe.incoming=layers.incoming;
+    profileSwipe.currentScroll=layers.currentScroll;
     profileSwipe.active=true;
     profileNavigationTransitioning=true;
-    document.body.classList.add("profile-navigation-active","profile-edge-swipe-active");
-    profileApplyFadeThrough(profileSwipe.currentSurface,profileSwipe.previousSurface,0,1,profileSwipe.width);
+    document.body.classList.add("profile-edge-swipe-active");
+    // This frame is visually identical to the untouched live page.
+    profileApplyFadeThrough(profileSwipe.outgoing,profileSwipe.incoming,0);
   }
   event.preventDefault();
   profileSwipe.currentX=t.clientX;
-  const width=Math.max(1,profileSwipe.width),distance=clamp(t.clientX-profileSwipe.startX,0,width),progress=distance/width;
+  const distance=clamp(t.clientX-profileSwipe.startX,0,profileSwipe.width);
+  const progress=distance/profileSwipe.width;
   profileSwipe.progress=progress;
-  profileApplyFadeThrough(profileSwipe.currentSurface,profileSwipe.previousSurface,progress,1,width);
+  profileApplyFadeThrough(profileSwipe.outgoing,profileSwipe.incoming,progress);
 }
 function endProfileEdgeSwipe(){
   if(!profileSwipe?.tracking)return;
   if(!profileSwipe.active){profileSwipe=null;return;}
   const swipe=profileSwipe;
   profileSwipe=null;
-  const width=Math.max(1,swipe.width),distance=clamp(swipe.currentX-swipe.startX,0,width),elapsed=Math.max(1,performance.now()-swipe.startedAt),velocity=distance/elapsed;
-  const goBack=distance>width*.32||velocity>.55;
-  const progress=clamp(Number(swipe.progress)||distance/width,0,1);
+  const distance=clamp(swipe.currentX-swipe.startX,0,swipe.width);
+  const elapsed=Math.max(1,performance.now()-swipe.startedAt);
+  const velocity=distance/elapsed;
+  const goBack=distance>swipe.width*.32||velocity>.55;
+  const progress=clamp(Number(swipe.progress)||distance/swipe.width,0,1);
   const target=goBack?1:0;
   const remaining=Math.abs(target-progress);
-  const duration=Math.max(150,Math.min(320,150+remaining*210));
-  const currentSurface=swipe.currentSurface,previousSurface=swipe.previousSurface;
-  if(!currentSurface||!previousSurface){profileNavigationTransitioning=false;profileClearSurfaces();return;}
-  profileAnimateFadeThrough(currentSurface,previousSurface,{from:progress,to:target,direction:1,width,duration,onDone:()=>{
+  const duration=Math.max(170,Math.min(360,170+remaining*240));
+  profileAnimateFadeThrough(swipe.outgoing,swipe.incoming,{from:progress,to:target,duration,onDone:()=>{
     if(goBack){
-      profilePreviousState=null;
-      profileCommitLivePage(swipe.previousKey,swipe.previousScroll,previousSurface,125);
+      profileCommitLiveTransition(swipe.previousKey,swipe.previousScroll,swipe.outgoing,swipe.incoming,{pop:true});
     }else{
-      profileCommitLivePage(profileCurrentPage,swipe.currentScroll,currentSurface,105);
+      profileRestoreCurrentAfterCancelledSwipe(swipe.outgoing,swipe.incoming,swipe.currentScroll);
     }
   }});
 }
-function cancelProfileEdgeSwipe(){if(profileSwipe?.active){endProfileEdgeSwipe();}else profileSwipe=null;}
+function cancelProfileEdgeSwipe(){
+  if(!profileSwipe?.tracking)return;
+  if(!profileSwipe.active){profileSwipe=null;return;}
+  const swipe=profileSwipe;
+  profileSwipe=null;
+  profileAnimateFadeThrough(swipe.outgoing,swipe.incoming,{from:swipe.progress||0,to:0,duration:220,onDone:()=>profileRestoreCurrentAfterCancelledSwipe(swipe.outgoing,swipe.incoming,swipe.currentScroll)});
+}
 document.addEventListener("touchstart",beginProfileEdgeSwipe,{passive:true});
 document.addEventListener("touchmove",moveProfileEdgeSwipe,{passive:false});
 document.addEventListener("touchend",endProfileEdgeSwipe,{passive:true});
 document.addEventListener("touchcancel",cancelProfileEdgeSwipe,{passive:true});
+
+// Keep the absolute-page host matched to the live page as login state, font
+// size, trip cards or orientation change its content height.
+if(window.ResizeObserver){
+  const profilePageResizeObserver=new ResizeObserver(()=>{
+    if(!profileNavigationTransitioning)profileSetHostHeight(profilePages[profileCurrentPage]);
+  });
+  Object.values(profilePages).forEach(page=>profilePageResizeObserver.observe(page));
+}
+window.addEventListener("resize",()=>{if(!profileNavigationTransitioning)profileSetHostHeight(profilePages[profileCurrentPage]);},{passive:true});
+profilePrimeLiveNavigation();
 
 function initPhase2AccessContext(data){
   Promise.all([
