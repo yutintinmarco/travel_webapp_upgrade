@@ -571,7 +571,7 @@ html.theme-dark .info-mini-copy.copied { background: rgba(42,90,42,0.65); border
 html.theme-dark .info-hint { color: rgba(150,150,175,0.65); }
 
   
-/* v7.3.9: view containers alone own visibility; no cross-view card hiding rules. */
+/* v7.3.10: view containers alone own visibility; no cross-view card hiding rules. */
 
 
 /* Integration v5.3 global appearance polish */
@@ -730,12 +730,12 @@ body {
 .day-tab:active { transform: scale(0.96); }
 .day-tab.active { box-shadow: 0 4px 12px rgba(15,23,42,0.10), inset 0 1px 0 rgba(255,255,255,0.82); }
 
-/* v7.3.9: itinerary-owned cards now live inside #itinerary-view itself.
+/* v7.3.10: itinerary-owned cards now live inside #itinerary-view itself.
    View visibility is structural, so first paint never depends on a body class
    or an iOS backdrop-filter repaint. */
 
 /* Floating Liquid Glass tab bar, lifted clear of the iPhone home indicator and
-   rounded display corners. v7.3.9 keeps it at body level, outside scroll/snapshot
+   rounded display corners. v7.3.10 keeps it at body level, outside scroll/snapshot
    navigation, so page transitions can never hide or clip it. */
 .bottom-nav {
   position: fixed;
@@ -1902,7 +1902,7 @@ html.theme-dark .trip-library-status, html:not(.theme-light):not(.theme-dark) .t
 html.theme-dark .trip-library-stat, html:not(.theme-light):not(.theme-dark) .trip-library-stat { background:rgba(255,255,255,.055); }
 
 
-/* Phase 2B refinement v7.3.9 */
+/* Phase 2B refinement v7.3.10 */
 .header-title-small.trip-switch-trigger {
   display:inline-flex;
   align-items:center;
@@ -1995,7 +1995,7 @@ html:not(.theme-light):not(.theme-dark) .trip-switch-sheet {
 }
 
 
-/* v7.3.9 compact trip chooser + native 我的 push navigation */
+/* v7.3.10 compact trip chooser + native 我的 push navigation */
 .header-title-small.trip-switch-trigger{display:inline-flex;align-items:center;gap:4px;max-width:min(72vw,320px);cursor:pointer;user-select:none;-webkit-user-select:none;touch-action:manipulation;}
 .header-title-small.trip-switch-trigger::after{content:"⌄";position:static;display:inline-block;margin-left:2px;font-size:10px;line-height:1;color:var(--label-tertiary);transform:translateY(-1px);}
 .header-title-small.trip-switch-trigger[aria-expanded="true"]::after{transform:translateY(-1px) rotate(180deg);}
@@ -2036,7 +2036,7 @@ body.profile-edge-swipe-active{touch-action:pan-y;}
 html.theme-dark .profile-menu-card .profile-row,html:not(.theme-light):not(.theme-dark) .profile-menu-card .profile-row{border-bottom-color:rgba(255,255,255,.075);}
 @media (prefers-reduced-motion:reduce){.trip-quick-popover{transition:none!important}.profile-nav-page{transition:none!important}}
 
-/* v7.3.9 · profile geometry, account state and snapshot navigation */
+/* v7.3.10 · profile geometry, account state and snapshot navigation */
 .profile-card,.profile-user-card,.profile-row,.profile-setting-row,.trip-library-card,.trip-library-item,.trip-library-action,.trip-library-status,.profile-stepper{box-sizing:border-box;max-width:100%;min-width:0;}
 .profile-nav-host,.profile-nav-page{min-width:0;max-width:100%;}
 .profile-identity-card{padding:0;overflow:hidden;}
@@ -2066,23 +2066,23 @@ html.theme-dark .profile-menu-card .profile-row,html:not(.theme-light):not(.them
   user-select:none;
   -webkit-user-select:none;
 }
-/* v7.3.9: never mutate the scroll shell when an edge gesture begins.
+/* v7.3.10: never mutate the scroll shell when an edge gesture begins.
    Changing overflow forces WebKit to rebuild backdrop-filter layers and was
    one source of the visible first-frame glass transparency jump. */
 body.profile-navigation-active .scroll-shell,body.profile-edge-swipe-active .scroll-shell{overflow-y:auto!important;overflow-x:hidden!important;}
 .profile-nav-host.is-snapshotting{visibility:hidden;}
-/* v7.3.9 live navigation: every profile page stays in the same DOM/compositing
+/* v7.3.10 live navigation: every profile page stays in the same DOM/compositing
    context for its entire lifetime. The host owns layout height; pages are
    absolute only after JS has measured the initially visible page. */
 .profile-nav-host.is-live-navigation{position:relative;overflow:visible;}
 .profile-nav-host.is-live-navigation .profile-nav-page{position:absolute;top:0;left:0;width:100%;margin:0;}
 .profile-nav-page.profile-live-outgoing,.profile-nav-page.profile-live-incoming{pointer-events:none!important;}
 .profile-nav-surface{position:fixed;left:0;width:100vw;overflow:hidden;z-index:1420;pointer-events:none;contain:layout paint style;will-change:transform,opacity;backface-visibility:hidden;-webkit-backface-visibility:hidden;background:transparent;transform-origin:0 0;}
-/* v7.3.9: the app background is never cloned into a moving navigation surface.
+/* v7.3.10: the app background is never cloned into a moving navigation surface.
    Only page content moves; the single fixed .bg-fixed layer stays perfectly still. */
 .profile-nav-surface::before{display:none!important;content:none!important;}
 .profile-nav-surface.is-front{box-shadow:-14px 0 30px rgba(20,39,55,.12);}
-/* v7.3.9 uses whole-page fade-through instead of a moving edge mask.
+/* v7.3.10 uses whole-page fade-through instead of a moving edge mask.
    Outgoing content fades away before incoming content becomes visible. */
 .profile-nav-surface.edge-fade-left{-webkit-mask-image:none!important;mask-image:none!important;}
 .profile-nav-surface-frame{position:relative;z-index:1;width:min(480px,100%);height:100%;margin:0 auto;padding:0 16px calc(var(--tabbar-h) + env(safe-area-inset-bottom,0px) + 30px);box-sizing:border-box;overflow:hidden;}
@@ -2094,29 +2094,23 @@ html.theme-dark .profile-identity-card .profile-row,html:not(.theme-light):not(.
 @media(max-width:370px){.profile-identity-card .profile-row,.profile-menu-card .profile-row{padding-left:12px;padding-right:12px}.profile-nav-surface-frame{padding-left:16px;padding-right:16px}}
 @media(prefers-reduced-motion:reduce){.profile-nav-surface{transition:none!important}}
 
-/* v7.3.9 · Content-only feather-mask navigation
-   Transition only the profile detail content. The fixed trip background, global
-   trip header/title, version note and Bottom Bar never receive a transition
-   layer and are never repainted by navigation. Glass pages remain at opacity 1;
-   a spatial alpha mask softly dissolves the outgoing content, then reveals the
-   destination after the invisible midpoint. */
+/* v7.3.10 · Stable content-only feather-mask navigation
+   Every active profile page keeps a fully opaque mask even while resting. This
+   avoids adding/removing a mask compositing layer on the first and final gesture
+   frames. The feather width starts near zero, grows smoothly through mid-swipe,
+   then contracts again. Background, trip header, version and Bottom Bar remain
+   completely outside the transition. */
 .profile-transition-veil{display:none!important;}
 .profile-nav-page.profile-mask-transition{
-  will-change:-webkit-mask-image,mask-image;
   transform:none!important;
   opacity:1!important;
-  backface-visibility:hidden;
-  -webkit-backface-visibility:hidden;
-}
-@media(prefers-reduced-motion:reduce){
-  .profile-nav-page.profile-mask-transition{will-change:auto;}
 }
 </style>
             <link rel="apple-touch-icon" href="assets/icon/trip_icon.png">
   <link rel="icon" type="image/png" href="assets/icon/trip_icon.png">
-  <link rel="manifest" href="manifest.json?v=7.3.9">
+  <link rel="manifest" href="manifest.json?v=7.3.10">
   <meta name="apple-mobile-web-app-title" content="關嘉露西生日之旅">
-  <link rel="stylesheet" href="assets/css/expenses.css?v=7.3.9">
+  <link rel="stylesheet" href="assets/css/expenses.css?v=7.3.10">
 </head>
 <body>
 <div class="bg-fixed"></div>
@@ -2390,14 +2384,14 @@ html.theme-dark .profile-identity-card .profile-row,html:not(.theme-light):not(.
         <span class="profile-detail-spacer"></span>
       </div>
       <section class="profile-card">
-        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.3.9</strong></div>
+        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.3.10</strong></div>
         <div class="profile-meta-row"><span>資料架構</span><strong>Phase 2B</strong></div>
         <div class="profile-meta-row"><span>主要資料來源</span><strong>本機 JSON</strong></div>
       </section>
     </div>
   </div>
 </div>
-<div class="app-version-note" id="app-version-note">v7.3.9</div>
+<div class="app-version-note" id="app-version-note">v7.3.10</div>
 
 
   </div>
@@ -2451,7 +2445,7 @@ html.theme-dark .profile-identity-card .profile-row,html:not(.theme-light):not(.
 </div>
 
 <script>
-const APP_VERSION = "7.3.9";
+const APP_VERSION = "7.3.10";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 window.EXPENSES_MODULE_VERSION = EXPENSES_MODULE_VERSION;
@@ -3220,7 +3214,7 @@ function miniCopyBtn(textFn){
 function renderInfo(data){
   const meta=data.meta||{};
   const infoCard=meta.infoCard||null;
-  // v7.3.9: 資料 tab is dedicated to the current trip's visa / travel reference data.
+  // v7.3.10: 資料 tab is dedicated to the current trip's visa / travel reference data.
   document.getElementById("bt-info").style.display="flex";requestAnimationFrame(updateBottomNavIndicator);
 
   const travellers=meta.travellers||{},cities=meta.cities||{},hotels=meta.hotels||{},flights=meta.flights||[];
@@ -4026,7 +4020,7 @@ document.addEventListener("keydown",event=>{if(event.key==="Escape"&&tripQuickOp
 scrollShell?.addEventListener("scroll",()=>{if(tripQuickOpen)closeTripSwitcher();},{passive:true});
 window.addEventListener("resize",()=>{if(tripQuickOpen)positionTripQuickPopover();},{passive:true});
 
-// v7.3.9: Content-only feather-mask navigation for 我的.
+// v7.3.10: Content-only feather-mask navigation for 我的.
 // The app background, global trip header/title, version note and Bottom Bar are
 // never covered, cloned, faded, translated or refreshed. Only the current
 // profile detail page gets a spatial mask. The outgoing page softly dissolves
@@ -4040,7 +4034,8 @@ let profileSwipe=null;
 let profileNavAnimationFrame=0;
 let profileNavStack=[{key:"root",scrollTop:0}];
 const PROFILE_MASK_MIDPOINT=.5;
-const PROFILE_MASK_FEATHER_PCT=30;
+const PROFILE_MASK_FEATHER_MAX_PCT=26;
+const PROFILE_GESTURE_VISUAL_POWER=1.18;
 function profileScrollTop(){return Math.max(0,Number(scrollShell?.scrollTop||0));}
 function profileSmooth01(value){
   const t=clamp(Number(value)||0,0,1);
@@ -4067,6 +4062,17 @@ function profileClearMask(page){
   page.style.webkitMaskSize="";
   page.style.maskSize="";
 }
+function profileSetRestMask(page){
+  if(!page)return;
+  const full="linear-gradient(90deg, #000 0%, #000 100%)";
+  page.classList.add("profile-mask-transition");
+  page.style.webkitMaskRepeat="no-repeat";
+  page.style.maskRepeat="no-repeat";
+  page.style.webkitMaskSize="100% 100%";
+  page.style.maskSize="100% 100%";
+  page.style.webkitMaskImage=full;
+  page.style.maskImage=full;
+}
 function profileSetMask(page,visibleFraction,direction="ltr"){
   if(!page)return;
   const visible=clamp(Number(visibleFraction)||0,0,1);
@@ -4075,23 +4081,24 @@ function profileSetMask(page,visibleFraction,direction="ltr"){
   page.style.maskRepeat="no-repeat";
   page.style.webkitMaskSize="100% 100%";
   page.style.maskSize="100% 100%";
-  if(visible>=.9998){profileClearMask(page);return;}
+  if(visible>=.9998){profileSetRestMask(page);return;}
   if(visible<=.0002){
     const none="linear-gradient(90deg, transparent 0%, transparent 100%)";
     page.style.webkitMaskImage=none;
     page.style.maskImage=none;
     return;
   }
-  const feather=PROFILE_MASK_FEATHER_PCT;
+  // Crucial: do not expose a full-width feather on the first gesture frame.
+  // The feather is almost zero near either endpoint and reaches its maximum
+  // only around the middle of the dissolve.
+  const feather=PROFILE_MASK_FEATHER_MAX_PCT*(4*visible*(1-visible));
   let gradient;
   if(direction==="rtl"){
-    // Visible area shrinks from the right edge toward the left.
     const edge=visible*100;
     const a=Math.max(0,Math.min(100,edge-feather*.5));
     const b=Math.max(0,Math.min(100,edge+feather*.5));
     gradient=`linear-gradient(90deg, #000 0%, #000 ${a.toFixed(3)}%, transparent ${b.toFixed(3)}%, transparent 100%)`;
   }else{
-    // Visible area shrinks from the left edge toward the right.
     const edge=(1-visible)*100;
     const a=Math.max(0,Math.min(100,edge-feather*.5));
     const b=Math.max(0,Math.min(100,edge+feather*.5));
@@ -4105,7 +4112,7 @@ function profileShowOnlyPage(key){
     const active=pageKey===key;
     page.hidden=!active;
     page.classList.toggle("is-active",active);
-    if(!active)profileClearMask(page);
+    if(active)profileSetRestMask(page);else profileClearMask(page);
     page.style.opacity="";
     page.style.transform="";
     page.style.top="";
@@ -4117,7 +4124,7 @@ function profilePrimeLiveNavigation(){
   const active=profilePages[profileCurrentPage]||profilePages.root;
   if(!profileNavHost||!active)return;
   profileShowOnlyPage(profileCurrentPage);
-  profileClearMask(active);
+  profileSetRestMask(active);
   profileSetHostHeight(active);
   profileNavHost.classList.add("is-live-navigation");
   requestAnimationFrame(()=>profileSetHostHeight(active));
@@ -4129,7 +4136,7 @@ function profilePrepareMaskTransition(targetKey,targetScroll,direction="ltr"){
   profileClearAnimation();
   const currentScroll=profileScrollTop();
   profileShowOnlyPage(profileCurrentPage);
-  profileClearMask(outgoing);
+  profileSetRestMask(outgoing);
   profileSetHostHeight(outgoing);
   document.body.classList.add("profile-navigation-active");
   return {
@@ -4190,7 +4197,7 @@ function profileAnimateMask(ctx,{from=0,to=1,duration=440,onDone}={}){
 function profileFinishTransition(ctx,{pop=false,push=false}={}){
   if(!ctx)return;
   profileShowOnlyPage(ctx.targetKey);
-  profileClearMask(profilePages[ctx.targetKey]);
+  profileSetRestMask(profilePages[ctx.targetKey]);
   if(scrollShell)scrollShell.scrollTop=Math.max(0,ctx.targetScroll);
   profileCurrentPage=ctx.targetKey;
   if(pop&&profileNavStack.length>1)profileNavStack.pop();
@@ -4204,7 +4211,7 @@ function profileFinishTransition(ctx,{pop=false,push=false}={}){
 function profileRestoreSource(ctx){
   if(!ctx)return;
   profileShowOnlyPage(ctx.sourceKey);
-  profileClearMask(profilePages[ctx.sourceKey]);
+  profileSetRestMask(profilePages[ctx.sourceKey]);
   if(scrollShell)scrollShell.scrollTop=Math.max(0,ctx.currentScroll);
   profileSetHostHeight(profilePages[ctx.sourceKey]);
   document.body.classList.remove("profile-navigation-active","profile-edge-swipe-active");
@@ -4219,7 +4226,7 @@ function openProfilePage(key){
   const ctx=profilePrepareMaskTransition(key,0,"rtl");
   if(!ctx)return;
   profileNavigationTransitioning=true;
-  profileAnimateMask(ctx,{from:0,to:1,duration:500,onDone:()=>profileFinishTransition(ctx,{push:true})});
+  profileAnimateMask(ctx,{from:0,to:1,duration:680,onDone:()=>profileFinishTransition(ctx,{push:true})});
 }
 function backProfilePage(){
   if(profileNavigationTransitioning||profileNavStack.length<=1||profileCurrentPage==="root")return;
@@ -4230,7 +4237,7 @@ function backProfilePage(){
   const ctx=profilePrepareMaskTransition(previous.key,previous.scrollTop||0,"ltr");
   if(!ctx)return;
   profileNavigationTransitioning=true;
-  profileAnimateMask(ctx,{from:0,to:1,duration:490,onDone:()=>profileFinishTransition(ctx,{pop:true})});
+  profileAnimateMask(ctx,{from:0,to:1,duration:660,onDone:()=>profileFinishTransition(ctx,{pop:true})});
 }
 document.querySelectorAll("[data-profile-open]").forEach(button=>button.addEventListener("click",()=>openProfilePage(button.dataset.profileOpen)));
 document.querySelectorAll("[data-profile-back]").forEach(button=>button.addEventListener("click",backProfilePage));
@@ -4268,7 +4275,8 @@ function moveProfileEdgeSwipe(event){
   event.preventDefault();
   profileSwipe.currentX=t.clientX;
   const distance=clamp(t.clientX-profileSwipe.startX,0,profileSwipe.width);
-  const progress=distance/profileSwipe.width;
+  const rawProgress=distance/profileSwipe.width;
+  const progress=Math.pow(rawProgress,PROFILE_GESTURE_VISUAL_POWER);
   profileSwipe.progress=progress;
   profileApplyMaskProgress(profileSwipe.ctx,progress);
 }
@@ -4284,7 +4292,7 @@ function endProfileEdgeSwipe(){
   const progress=clamp(Number(swipe.progress)||distance/swipe.width,0,1);
   const target=goBack?1:0;
   const remaining=Math.abs(target-progress);
-  const duration=Math.max(175,Math.min(370,175+remaining*230));
+  const duration=Math.max(260,Math.min(520,260+remaining*320));
   profileAnimateMask(swipe.ctx,{from:progress,to:target,duration,onDone:()=>{
     if(goBack)profileFinishTransition(swipe.ctx,{pop:true});
     else profileRestoreSource(swipe.ctx);
@@ -4295,7 +4303,7 @@ function cancelProfileEdgeSwipe(){
   if(!profileSwipe.active){profileSwipe=null;return;}
   const swipe=profileSwipe;
   profileSwipe=null;
-  profileAnimateMask(swipe.ctx,{from:swipe.progress||0,to:0,duration:220,onDone:()=>profileRestoreSource(swipe.ctx)});
+  profileAnimateMask(swipe.ctx,{from:swipe.progress||0,to:0,duration:320,onDone:()=>profileRestoreSource(swipe.ctx)});
 }
 document.addEventListener("touchstart",beginProfileEdgeSwipe,{passive:true});
 document.addEventListener("touchmove",moveProfileEdgeSwipe,{passive:false});

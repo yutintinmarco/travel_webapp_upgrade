@@ -1,4 +1,4 @@
-v7.3.9 Phase 2B · Content-only Feather Mask transition
+v7.3.10 Phase 2B · Content-only Feather Mask transition
 
 • Removed the full-viewport Background Veil experiment.
 • Global fixed background, trip header/title, version note and Bottom Bar never participate in profile navigation.
@@ -8,3 +8,7 @@ v7.3.9 Phase 2B · Content-only Feather Mask transition
 • Only one profile page is visible at a time; the DOM page swaps while the outgoing mask is fully invisible.
 • Forward navigation fades from the right edge; edge-swipe/back fades from the left edge in the gesture direction.
 • 7 px gesture dead zone retained. Bottom Bar remains an independent body-level overlay.
+
+
+v7.3.10 transition refinement:
+Active profile pages retain a fully opaque WebKit mask at rest, so edge gestures no longer attach/detach a mask compositing layer on the first/final frame. Feather width grows dynamically from near zero and contracts again at the endpoints. Interactive visual progress is slightly damped and completion animations are slower.
