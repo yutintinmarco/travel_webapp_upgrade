@@ -1,11 +1,10 @@
-v7.3.8 Phase 2B · Background Veil transition experiment
+v7.3.9 Phase 2B · Content-only Feather Mask transition
 
-• Replaced whole-page opacity fading with a permanent Background Veil layer.
-• Glass pages never change opacity, transform or scale during profile navigation.
-• Only one profile page is visible at any moment; destination DOM stays hidden until the opaque midpoint.
-• At 50% progress the page swap and scroll/height changes happen behind the fully opaque background veil.
-• The second half clears the veil to reveal the destination page.
-• Added a 7 px edge-swipe dead zone so tiny finger movement produces no visual change.
-• Removed the transition-time scroll-shell overflow mutation that could force iOS to rebuild backdrop-filter layers.
-• Bottom Bar remains body-level at z-index 2000, above the veil at z-index 1500.
-• No clone, snapshot, parent opacity, translate or scale is used.
+• Removed the full-viewport Background Veil experiment.
+• Global fixed background, trip header/title, version note and Bottom Bar never participate in profile navigation.
+• No duplicate background layer is created, so navigation cannot look like the wallpaper reloads.
+• Profile glass pages remain at opacity 1 and are never cloned, scaled or translated.
+• A spatial CSS mask dissolves only the profile content area with a broad feathered edge.
+• Only one profile page is visible at a time; the DOM page swaps while the outgoing mask is fully invisible.
+• Forward navigation fades from the right edge; edge-swipe/back fades from the left edge in the gesture direction.
+• 7 px gesture dead zone retained. Bottom Bar remains an independent body-level overlay.
