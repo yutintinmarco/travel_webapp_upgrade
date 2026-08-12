@@ -1,10 +1,11 @@
-v7.3.7 Phase 2B navigation polish
+v7.3.8 Phase 2B · Background Veil transition experiment
 
-• Fade-through endpoints now use quintic smootherstep to remove the quick opacity kick.
-• Transition surfaces are born at the correct opacity, avoiding a one-frame double-page flash.
-• Final snapshot dissolves gently into the live destination page instead of switching in one hard frame.
-• No scale animation is used. Background and Bottom Bar remain fixed.
-• Restored the small version number at the bottom of the app views.
-• Removed 支出管理 from the 支出 content page.
-• Added 我的 → 旅程設定 → 支出管理 with members, rates, expense lock, backup, deleted items and logs.
-• Expense setting sheets continue to use the global modal portal, so they can open while 我的 remains the active tab.
+• Replaced whole-page opacity fading with a permanent Background Veil layer.
+• Glass pages never change opacity, transform or scale during profile navigation.
+• Only one profile page is visible at any moment; destination DOM stays hidden until the opaque midpoint.
+• At 50% progress the page swap and scroll/height changes happen behind the fully opaque background veil.
+• The second half clears the veil to reveal the destination page.
+• Added a 7 px edge-swipe dead zone so tiny finger movement produces no visual change.
+• Removed the transition-time scroll-shell overflow mutation that could force iOS to rebuild backdrop-filter layers.
+• Bottom Bar remains body-level at z-index 2000, above the veil at z-index 1500.
+• No clone, snapshot, parent opacity, translate or scale is used.
