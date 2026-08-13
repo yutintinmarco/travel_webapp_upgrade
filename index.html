@@ -2641,12 +2641,137 @@ html.theme-light #info-view .info-flight-block{
   }
 }
 
+
+/* ==========================================================================
+   v7.6.5.1 · Grouping Glass + Member Control Polish
+   ========================================================================== */
+
+/* Saved Places: restore one soft grouping substrate around title, filters
+   and the saved-place list. It is intentionally lighter than an item card,
+   so nested glass does not become milky or look like a different app. */
+#snacks-view > .card{
+  padding:12px 14px !important;
+  border-radius:16px !important;
+  background:rgba(255,255,255,0.11) !important;
+  border:1px solid rgba(255,255,255,0.40) !important;
+  box-shadow:0 6px 18px rgba(15,23,42,0.055) !important;
+  backdrop-filter:blur(24px) saturate(1.05) !important;
+  -webkit-backdrop-filter:blur(24px) saturate(1.05) !important;
+}
+
+/* Travel Details: same grouping substrate as Saved Places.
+   Individual team cards remain the actual itinerary-strength glass cards. */
+#info-view .trip-info-only-card{
+  padding:15px 14px 14px !important;
+  border-radius:20px !important;
+  background:rgba(255,255,255,0.11) !important;
+  border:1px solid rgba(255,255,255,0.40) !important;
+  box-shadow:0 6px 18px rgba(15,23,42,0.055) !important;
+  backdrop-filter:blur(24px) saturate(1.05) !important;
+  -webkit-backdrop-filter:blur(24px) saturate(1.05) !important;
+}
+
+/* The team colour is semantic information and must survive the common
+   glass border rule. */
+#info-view .info-team-card{
+  border-left-width:4px !important;
+  border-left-style:solid !important;
+  border-left-color:var(--info-team-color,#888) !important;
+}
+
+/* System light follows the same material values. */
+@media (prefers-color-scheme: light){
+  html:not(.theme-light):not(.theme-dark) #snacks-view > .card,
+  html:not(.theme-light):not(.theme-dark) #info-view .trip-info-only-card{
+    background:rgba(255,255,255,0.11) !important;
+    border-color:rgba(255,255,255,0.40) !important;
+    box-shadow:0 6px 18px rgba(15,23,42,0.055) !important;
+  }
+}
+
+/* Dark Mode grouping substrate: enough structure to read the sections,
+   without pale slabs or a second opaque theme. */
+html.theme-dark #snacks-view > .card,
+html.theme-dark #info-view .trip-info-only-card{
+  background:rgba(20,20,28,0.16) !important;
+  border-color:rgba(255,255,255,0.10) !important;
+  box-shadow:0 8px 22px rgba(0,0,0,0.16) !important;
+  backdrop-filter:blur(24px) saturate(1.05) !important;
+  -webkit-backdrop-filter:blur(24px) saturate(1.05) !important;
+}
+@media (prefers-color-scheme: dark){
+  html:not(.theme-light):not(.theme-dark) #snacks-view > .card,
+  html:not(.theme-light):not(.theme-dark) #info-view .trip-info-only-card{
+    background:rgba(20,20,28,0.16) !important;
+    border-color:rgba(255,255,255,0.10) !important;
+    box-shadow:0 8px 22px rgba(0,0,0,0.16) !important;
+  }
+}
+
+/* Editable members: keep avatar + identity as the main row, then place
+   Role and Remove together in a compact horizontal action row underneath.
+   Non-editable Owner rows keep the existing right-side role pill. */
+.trip-member-row.is-manageable{
+  grid-template-columns:42px minmax(0,1fr) !important;
+  grid-template-rows:auto auto;
+  align-items:center !important;
+  column-gap:10px !important;
+  row-gap:4px !important;
+}
+.trip-member-row.is-manageable .trip-member-avatar{
+  grid-column:1;
+  grid-row:1 / span 2;
+  align-self:center;
+}
+.trip-member-row.is-manageable .trip-member-copy{
+  grid-column:2;
+  grid-row:1;
+}
+.trip-member-row.is-manageable .trip-member-side{
+  grid-column:2;
+  grid-row:2;
+  width:100%;
+  min-width:0;
+  display:flex !important;
+  align-items:center;
+  justify-content:flex-start;
+  gap:7px;
+  margin-top:2px;
+}
+.trip-member-row.is-manageable .trip-member-role-select{
+  width:auto;
+  min-width:104px;
+  max-width:128px;
+  height:29px;
+  padding:0 24px 0 11px;
+  border-radius:999px;
+  background:rgba(118,118,128,.10);
+  box-shadow:inset 0 0 0 1px rgba(118,118,128,.06);
+  font-size:9.5px;
+}
+.trip-member-row.is-manageable .trip-member-remove{
+  min-height:29px;
+  padding:5px 11px;
+  border-radius:999px;
+  background:rgba(255,59,48,.085);
+  color:#c8352d;
+}
+.trip-member-row.is-manageable .trip-member-remove:active,
+.trip-member-row.is-manageable .trip-member-role-select:active{
+  transform:scale(.97);
+}
+html.theme-dark .trip-member-row.is-manageable .trip-member-role-select,
+html:not(.theme-light):not(.theme-dark) .trip-member-row.is-manageable .trip-member-role-select{
+  background:rgba(255,255,255,.075);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.055);
+}
+
 </style>
             <link rel="apple-touch-icon" href="assets/icon/trip_icon.png">
   <link rel="icon" type="image/png" href="assets/icon/trip_icon.png">
-  <link rel="manifest" href="manifest.json?v=7.6.5">
+  <link rel="manifest" href="manifest.json?v=7.6.5.1">
   <meta name="apple-mobile-web-app-title" content="關嘉露西生日之旅">
-  <link rel="stylesheet" href="assets/css/expenses.css?v=7.6.5">
+  <link rel="stylesheet" href="assets/css/expenses.css?v=7.6.5.1">
 </head>
 <body>
 <div class="bg-fixed"></div>
@@ -3048,7 +3173,7 @@ html.theme-light #info-view .info-flight-block{
         <span class="profile-detail-spacer"></span>
       </div>
       <section class="profile-card" aria-label="App 資料">
-        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.6.5</strong></div>
+        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.6.5.1</strong></div>
         <div class="profile-meta-row"><span>資料架構</span><strong>Phase 2E</strong></div>
         <div class="profile-meta-row"><span>主要資料來源</span><strong id="app-data-source-label">Firebase / 本機快取</strong></div>
       </section>
@@ -3066,7 +3191,7 @@ html.theme-light #info-view .info-flight-block{
     </div>
   </div>
 </div>
-<div class="app-version-note" id="app-version-note">v7.6.5</div>
+<div class="app-version-note" id="app-version-note">v7.6.5.1</div>
 
 
   </div>
@@ -3167,7 +3292,7 @@ html.theme-light #info-view .info-flight-block{
 </div>
 
 <script>
-const APP_VERSION = "7.6.5";
+const APP_VERSION = "7.6.5.1";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 window.EXPENSES_MODULE_VERSION = EXPENSES_MODULE_VERSION;
@@ -3967,6 +4092,7 @@ function renderInfo(data){
     const card=document.createElement("div");
     card.className="info-team-card";
     card.setAttribute("data-team",tk);
+    card.style.setProperty("--info-team-color",teamColor);
     card.style.borderLeftColor=teamColor;
 
     // Header
@@ -5610,7 +5736,7 @@ function renderTripMemberPage(){
         ? `<select class="trip-member-role-select" data-member-role-uid="${tripMemberEsc(member.uid)}" aria-label="更改角色">${tripMemberRoleOptions(actorRole,role)}</select>`
         : `<span class="trip-member-role-pill">${tripMemberEsc(tripLibraryRoleLabel(role)||role)}</span>`;
       const remove=canManage?`<button class="trip-member-remove" type="button" data-member-remove-uid="${tripMemberEsc(member.uid)}">移除</button>`:"";
-      return `<div class="trip-member-row">
+      return `<div class="trip-member-row${canManage?" is-manageable":""}">
         <span class="trip-member-avatar">${tripMemberAvatarMarkup(member)}</span>
         <span class="trip-member-copy">
           <strong>${tripMemberEsc(member.displayName||member.email||member.uid)}</strong>
