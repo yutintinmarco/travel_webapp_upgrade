@@ -445,7 +445,9 @@ export async function importTrip(rawInput, { mode = "create", user: userInput = 
       };
     }
     if (!existing) existing = await readExistingStructure(plan.tripId);
+    if (typeof onProgress === "function") onProgress({ completed: 0.15, total: 1, stage: "snapshot" });
     snapshotId = await createSnapshot(existing, user);
+    if (typeof onProgress === "function") onProgress({ completed: 0.22, total: 1, stage: "prepare" });
   }
 
   const baseExisting = exists ? tripSnap.data() || {} : {};
@@ -497,9 +499,13 @@ export async function importTrip(rawInput, { mode = "create", user: userInput = 
   const writes = contentWriteOps(plan, user);
   const deletes = staleDeleteOps(existing, plan);
   const totalOps = writes.length + deletes.length + 2;
-  if (typeof onProgress === "function") onProgress({ completed: 1, total: totalOps });
-  await commitOps(writes, onProgress, 1, totalOps);
-  await commitOps(deletes, onProgress, 1 + writes.length, totalOps);
+  if (typeof onProgress === "function") onProgress({ completed: 1, total: totalOps, stage: "prepare" });
+  const contentProgress = ({ completed, total }) => {
+    if (typeof onProgress === "function") onProgress({ completed, total, stage: "content", detail: `${Math.max(0, Math.round(completed - 1))}/${Math.max(1, totalOps - 2)}` });
+  };
+  await commitOps(writes, contentProgress, 1, totalOps);
+  await commitOps(deletes, contentProgress, 1 + writes.length, totalOps);
+  if (typeof onProgress === "function") onProgress({ completed: totalOps - 1, total: totalOps, stage: "finalize" });
 
   const finalBatch = writeBatch(db);
   finalBatch.set(tripRef, {
@@ -515,8 +521,13 @@ export async function importTrip(rawInput, { mode = "create", user: userInput = 
     updatedAt: serverTimestamp()
   }, { merge: true });
   const logRef = doc(collection(db, "trips", plan.tripId, "activityLogs"));
+  const importType = mode === "replace" ? "trip.import.replace" : "trip.import.create";
   finalBatch.set(logRef, {
-    type: mode === "replace" ? "trip.import.replace" : "trip.import.create",
+    type: importType,
+    actionType: importType,
+    category: "itinerary",
+    title: mode === "replace" ? "匯入 trip.json" : "建立旅程",
+    summary: mode === "replace" ? `更新 Firebase 旅程 · Revision ${finalRevision}` : `首次匯入 trip.json · Revision ${finalRevision}`,
     actorUid: user.uid,
     actorName: clean(user.displayName),
     revision: finalRevision,
@@ -526,7 +537,7 @@ export async function importTrip(rawInput, { mode = "create", user: userInput = 
     createdAt: serverTimestamp()
   });
   await finalBatch.commit();
-  if (typeof onProgress === "function") onProgress({ completed: totalOps, total: totalOps });
+  if (typeof onProgress === "function") onProgress({ completed: totalOps, total: totalOps, stage: "done" });
 
   return {
     tripId: plan.tripId,
@@ -561,8 +572,13 @@ export async function setTripArchived(tripIdInput, archived, { user: userInput =
     updatedAt: serverTimestamp(),
     updatedBy: user.uid
   }, { merge: true });
+  const archiveType = shouldArchive ? "trip.archive" : "trip.restore";
   batch.set(doc(collection(db, "trips", tripId, "activityLogs")), {
-    type: shouldArchive ? "trip.archive" : "trip.restore",
+    type: archiveType,
+    actionType: archiveType,
+    category: "itinerary",
+    title: shouldArchive ? "封存旅程" : "還原已封存旅程",
+    summary: shouldArchive ? "旅程保留於 Firebase 並從 Active Trips 收起。" : "旅程重新加入 Active Trips。",
     actorUid: user.uid,
     actorName: clean(user.displayName),
     createdAt: serverTimestamp()

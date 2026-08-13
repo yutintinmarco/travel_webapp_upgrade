@@ -406,6 +406,10 @@ export async function createManualSnapshot(tripIdInput, { user: userInput = null
   const batch = writeBatch(db);
   batch.set(doc(collection(db, "trips", tripId, "activityLogs")), {
     type: "trip.snapshot.manual",
+    actionType: "trip.snapshot.manual",
+    category: "backup",
+    title: "建立手動備份",
+    summary: `Snapshot · Revision ${result.sourceRevision}`,
     actorUid: user.uid,
     actorName: clean(user.displayName),
     snapshotId: result.snapshotId,
@@ -488,6 +492,10 @@ export async function restoreTripSnapshot(tripIdInput, snapshotIdInput, { user: 
   const finalBatch = writeBatch(db);
   finalBatch.set(doc(collection(db, "trips", tripId, "activityLogs")), {
     type: "trip.snapshot.restore",
+    actionType: "trip.snapshot.restore",
+    category: "backup",
+    title: "還原旅程版本",
+    summary: `由 Revision ${snapshot.sourceRevision || 0} 還原 · 新 Revision ${nextRevision}`,
     actorUid: user.uid,
     actorName: clean(user.displayName),
     snapshotId,

@@ -1,6 +1,6 @@
 # Phase 2E · Firebase Loader & Multi Trip Sync
 
-Version: 7.6.0
+Version: 7.6.1
 
 ## Purpose
 

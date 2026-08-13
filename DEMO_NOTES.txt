@@ -21,8 +21,14 @@ Firebase
 • Existing Phase 2C Firestore Rules are sufficient.
 • No new composite index is required for Phase 2D.
 
-Phase 2E v7.6.0
+Phase 2E v7.6.1
 Firebase Loader is now the live data source after authenticated Trip catalog resolution.
 Bundled trip.json remains the immediate bootstrap and signed-out fallback.
 Quick Trip Switcher and My Trips now switch live Firebase Trips.
 Persistent Firestore local cache is enabled when supported.
+
+v7.6.1 Phase 2E UX refinement
+- Restore and JSON import now use a blocking Liquid Glass progress overlay with percentage and stage detail.
+- Operation Records moved from Expense Management to My > Trip Settings and now represents trip-wide audit history.
+- Existing legacy activity documents are rendered with meaningful action titles; new writers store structured action metadata.
+- v7.3.13 navigation transition block remains byte-for-byte unchanged from v7.6.0.

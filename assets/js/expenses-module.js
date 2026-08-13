@@ -163,7 +163,6 @@ function mountExpensesHtml(root) {
         <button type="button" class="settings-menu-btn" data-settings-open="lock" data-admin-only="true"><span>🔒</span><strong>鎖定旅程</strong><small>停止新增及修改支出</small></button>
         <button type="button" class="settings-menu-btn" data-settings-open="backup"><span>📦</span><strong>資料備份</strong><small>匯出 Excel 或 JSON</small></button>
         <button type="button" class="settings-menu-btn" data-settings-open="deleted"><span>🗑️</span><strong>已刪除項目</strong><small>查看及還原支出</small></button>
-        <button type="button" class="settings-menu-btn" data-settings-open="logs"><span>🧾</span><strong>操作記錄</strong><small>主要修改及找數紀錄</small></button>
       </div>
     </section>
   </section>
@@ -981,12 +980,35 @@ function updateTripStatusUi() {
   if (quickAddFab) quickAddFab.disabled = locked || readOnly;
 }
 
+function expenseActivityDescriptor(action, message = "") {
+  const map = {
+    expense_created: ["新增支出", "expense"],
+    expense_updated: ["修改支出", "expense"],
+    expense_deleted: ["刪除支出", "expense"],
+    expense_restored: ["還原已刪除支出", "expense"],
+    settings_updated: ["更新支出設定", "expense"],
+    settlement_recorded: ["記錄找數", "expense"],
+    settlement_cancelled: ["取消找數紀錄", "expense"],
+    member_added: ["新增分帳成員", "expense"],
+    member_removed: ["移除分帳成員", "expense"],
+    trip_locked: ["鎖定支出", "expense"],
+    trip_unlocked: ["解鎖支出", "expense"]
+  };
+  const [title, category] = map[action] || [String(action || "支出操作"), "expense"];
+  return { title, category, summary: String(message || title) };
+}
+
 async function logActivity(action, message, targetType = "trip", targetId = tripId, details = {}) {
   if (!currentUser) return;
+  const descriptor = expenseActivityDescriptor(action, message);
 
   try {
     await addDoc(getActivityLogsCollection(), {
       action,
+      actionType: action,
+      category: descriptor.category,
+      title: descriptor.title,
+      summary: descriptor.summary,
       message,
       actorUid: currentUser.uid,
       actorName: getCurrentUserDisplayName(),
