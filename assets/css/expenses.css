@@ -4855,3 +4855,30 @@ html.theme-dark .expenses-module .expense-footer-note.is-warning,
 html:not(.theme-light):not(.theme-dark) .expenses-module .expense-footer-note.is-warning{
   color:#ffd166 !important;
 }
+
+
+/* ==========================================================================
+   v7.6.5 · Expense light-mode glass = itinerary glass.
+   Fields/buttons remain intentionally more opaque for legibility.
+   ========================================================================== */
+html.theme-light .expenses-module{
+  --expense-card-bg:rgba(255,255,255,0.20) !important;
+  --expense-border:rgba(255,255,255,0.52) !important;
+  --expense-shadow:0 6px 16px rgba(15,23,42,0.08) !important;
+}
+html.theme-light .expenses-module .card{
+  backdrop-filter:blur(24px) saturate(1.08) !important;
+  -webkit-backdrop-filter:blur(24px) saturate(1.08) !important;
+}
+
+@media (prefers-color-scheme: light){
+  html:not(.theme-light):not(.theme-dark) .expenses-module{
+    --expense-card-bg:rgba(255,255,255,0.20) !important;
+    --expense-border:rgba(255,255,255,0.52) !important;
+    --expense-shadow:0 6px 16px rgba(15,23,42,0.08) !important;
+  }
+  html:not(.theme-light):not(.theme-dark) .expenses-module .card{
+    backdrop-filter:blur(24px) saturate(1.08) !important;
+    -webkit-backdrop-filter:blur(24px) saturate(1.08) !important;
+  }
+}

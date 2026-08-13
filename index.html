@@ -2547,12 +2547,106 @@ html.theme-dark .trip-member-role-tabs button,html:not(.theme-light):not(.theme-
   background:rgba(38,38,46,.88);border-color:rgba(255,255,255,.10);
 }
 
+
+/* ==========================================================================
+   v7.6.5 · Visual Consistency Pass
+   Reference: itinerary Liquid Glass.
+   Profile / 我的 intentionally keeps its denser Apple Settings glass.
+   ========================================================================== */
+
+/* 1) Membership secondary pills: same vertical centering as the primary pill.
+      The old .trip-library-pill was inline text with padding only, which made
+      the second pill appear optically too high beside .trip-member-you-pill. */
+.trip-library-pill,
+.trip-member-role-pill,
+.trip-member-you-pill{
+  box-sizing:border-box;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:20px;
+  line-height:1 !important;
+  vertical-align:middle;
+}
+.trip-member-meta{
+  align-items:center !important;
+}
+
+/* 2) Profile status/help lines are text, not another translucent card.
+      This removes the pale full-width slab visible in Dark Mode. */
+#profile-view .trip-library-status{
+  background:transparent !important;
+  box-shadow:none !important;
+  border:0 !important;
+  border-radius:0 !important;
+  padding-left:2px !important;
+  padding-right:2px !important;
+}
+html.theme-dark #profile-view .trip-library-status,
+html:not(.theme-light):not(.theme-dark) #profile-view .trip-library-status{
+  background:transparent !important;
+}
+
+/* 3) Non-Profile pages share the itinerary visual language.
+      Avoid nested glass-on-glass shells, which visually increases opacity. */
+#snacks-view > .card{
+  background:transparent;
+  border:0;
+  box-shadow:none;
+  backdrop-filter:none;
+  -webkit-backdrop-filter:none;
+  padding-left:0;
+  padding-right:0;
+}
+#info-view .trip-info-only-card{
+  background:transparent;
+  border:0;
+  box-shadow:none;
+  backdrop-filter:none;
+  -webkit-backdrop-filter:none;
+  padding-left:0;
+  padding-right:0;
+}
+
+/* Explicit LIGHT theme: activity / saved / info / expense cards use the
+   itinerary timeline-item glass values. */
+html.theme-light #snacks-view .snack-item,
+html.theme-light #info-view .info-team-card{
+  background:rgba(255,255,255,0.20) !important;
+  border-color:rgba(255,255,255,0.52) !important;
+  box-shadow:0 6px 16px rgba(15,23,42,0.08) !important;
+  backdrop-filter:blur(24px) saturate(1.08) !important;
+  -webkit-backdrop-filter:blur(24px) saturate(1.08) !important;
+}
+
+/* System LIGHT when no explicit theme class is selected. */
+@media (prefers-color-scheme: light){
+  html:not(.theme-light):not(.theme-dark) #snacks-view .snack-item,
+  html:not(.theme-light):not(.theme-dark) #info-view .info-team-card{
+    background:rgba(255,255,255,0.20) !important;
+    border-color:rgba(255,255,255,0.52) !important;
+    box-shadow:0 6px 16px rgba(15,23,42,0.08) !important;
+    backdrop-filter:blur(24px) saturate(1.08) !important;
+    -webkit-backdrop-filter:blur(24px) saturate(1.08) !important;
+  }
+}
+
+/* Keep inner Info blocks as hierarchy, but do not add another pale card. */
+html.theme-light #info-view .info-flight-block{
+  background:rgba(255,255,255,0.10) !important;
+}
+@media (prefers-color-scheme: light){
+  html:not(.theme-light):not(.theme-dark) #info-view .info-flight-block{
+    background:rgba(255,255,255,0.10) !important;
+  }
+}
+
 </style>
             <link rel="apple-touch-icon" href="assets/icon/trip_icon.png">
   <link rel="icon" type="image/png" href="assets/icon/trip_icon.png">
-  <link rel="manifest" href="manifest.json?v=7.6.4.2">
+  <link rel="manifest" href="manifest.json?v=7.6.5">
   <meta name="apple-mobile-web-app-title" content="關嘉露西生日之旅">
-  <link rel="stylesheet" href="assets/css/expenses.css?v=7.6.4.2">
+  <link rel="stylesheet" href="assets/css/expenses.css?v=7.6.5">
 </head>
 <body>
 <div class="bg-fixed"></div>
@@ -2954,7 +3048,7 @@ html.theme-dark .trip-member-role-tabs button,html:not(.theme-light):not(.theme-
         <span class="profile-detail-spacer"></span>
       </div>
       <section class="profile-card" aria-label="App 資料">
-        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.6.4.2</strong></div>
+        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.6.5</strong></div>
         <div class="profile-meta-row"><span>資料架構</span><strong>Phase 2E</strong></div>
         <div class="profile-meta-row"><span>主要資料來源</span><strong id="app-data-source-label">Firebase / 本機快取</strong></div>
       </section>
@@ -2972,7 +3066,7 @@ html.theme-dark .trip-member-role-tabs button,html:not(.theme-light):not(.theme-
     </div>
   </div>
 </div>
-<div class="app-version-note" id="app-version-note">v7.6.4.2</div>
+<div class="app-version-note" id="app-version-note">v7.6.5</div>
 
 
   </div>
@@ -3073,7 +3167,7 @@ html.theme-dark .trip-member-role-tabs button,html:not(.theme-light):not(.theme-
 </div>
 
 <script>
-const APP_VERSION = "7.6.4.2";
+const APP_VERSION = "7.6.5";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 window.EXPENSES_MODULE_VERSION = EXPENSES_MODULE_VERSION;
