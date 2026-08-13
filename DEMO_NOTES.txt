@@ -1,4 +1,4 @@
-v7.3.12 Phase 2B fade-through navigation experiment
+v7.3.5 Phase 2B fade-through navigation experiment
 
 • Replaced the overlapping push/snapshot look with a two-stage fade-through transition.
 • First 48%: outgoing page fades fully away with only a very small horizontal drift.
@@ -10,6 +10,3 @@ v7.3.12 Phase 2B fade-through navigation experiment
 
 Other v7.3.x Phase 2B refinements remain unchanged.
 Phase 2C Firestore create/import/archive writes remain intentionally disabled.
-
-
-v7.3.12: Restored v7.3.5 fade-through feel with primed snapshot handoff and smooth snapshot-to-live dissolve. Preserves fixed background/header/bottom bar, restored version note, nested profile navigation stack, and moves expense management under My > Trip Settings.

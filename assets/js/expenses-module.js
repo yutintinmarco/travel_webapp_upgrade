@@ -113,6 +113,13 @@ function mountExpensesHtml(root) {
         <div id="recentExpenseList"></div>
       </section>
 
+      <section class="card expense-management-card">
+        <button type="button" id="expenseManagementEntry" class="expense-management-entry">
+          <span class="expense-management-icon">⚙︎</span>
+          <span><strong>支出管理</strong><small>匯率、分帳成員、備份、已刪除項目及操作記錄</small></span>
+          <span class="expense-management-chevron">›</span>
+        </button>
+      </section>
     </section>
 
     <section class="expenses-panel" data-expenses-panel="details">
