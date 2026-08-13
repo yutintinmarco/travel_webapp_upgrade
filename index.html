@@ -2443,12 +2443,35 @@ body.expenses-view-active #expenses-root{
   padding-bottom:0 !important;
 }
 
+
+/* v7.6.3.5 · App & Data diagnostics */
+#profile-page-app-data .profile-meta-row{
+  gap:18px;
+  align-items:flex-start;
+}
+#profile-page-app-data .profile-meta-row > span{
+  flex:0 0 auto;
+}
+#profile-page-app-data .profile-meta-row > strong{
+  min-width:0;
+  max-width:68%;
+  text-align:right;
+  overflow-wrap:anywhere;
+  word-break:break-word;
+}
+#profile-page-app-data .profile-section-label{
+  margin:14px 14px 7px;
+  font-size:12px;
+  font-weight:650;
+  color:var(--muted);
+}
+
 </style>
             <link rel="apple-touch-icon" href="assets/icon/trip_icon.png">
   <link rel="icon" type="image/png" href="assets/icon/trip_icon.png">
-  <link rel="manifest" href="manifest.json?v=7.6.3.4">
+  <link rel="manifest" href="manifest.json?v=7.6.3.5">
   <meta name="apple-mobile-web-app-title" content="關嘉露西生日之旅">
-  <link rel="stylesheet" href="assets/css/expenses.css?v=7.6.3.4">
+  <link rel="stylesheet" href="assets/css/expenses.css?v=7.6.3.5">
 </head>
 <body>
 <div class="bg-fixed"></div>
@@ -2796,15 +2819,26 @@ body.expenses-view-active #expenses-root{
         <h2>App 與資料</h2>
         <span class="profile-detail-spacer"></span>
       </div>
-      <section class="profile-card">
-        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.6.3.4</strong></div>
+      <section class="profile-card" aria-label="App 資料">
+        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.6.3.5</strong></div>
         <div class="profile-meta-row"><span>資料架構</span><strong>Phase 2E</strong></div>
         <div class="profile-meta-row"><span>主要資料來源</span><strong id="app-data-source-label">Firebase / 本機快取</strong></div>
+      </section>
+
+      <div class="profile-section-label">Firebase 與同步狀態</div>
+      <section class="profile-card" aria-label="Firebase 與同步狀態">
+        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>同步狀態</span><strong id="app-data-sync-status">—</strong></div>
+        <div class="profile-meta-row"><span>目前 Trip ID</span><strong id="app-data-trip-id">—</strong></div>
+        <div class="profile-meta-row"><span>Revision</span><strong id="app-data-revision">—</strong></div>
+        <div class="profile-meta-row"><span>旅程狀態</span><strong id="app-data-trip-status">—</strong></div>
+        <div class="profile-meta-row"><span>寫入狀態</span><strong id="app-data-write-status">—</strong></div>
+        <div class="profile-meta-row"><span>Google 帳戶</span><strong id="app-data-google-account">—</strong></div>
+        <div class="profile-meta-row"><span>旅程角色</span><strong id="app-data-role">—</strong></div>
       </section>
     </div>
   </div>
 </div>
-<div class="app-version-note" id="app-version-note">v7.6.3.4</div>
+<div class="app-version-note" id="app-version-note">v7.6.3.5</div>
 
 
   </div>
@@ -2905,7 +2939,7 @@ body.expenses-view-active #expenses-root{
 </div>
 
 <script>
-const APP_VERSION = "7.6.3.4";
+const APP_VERSION = "7.6.3.5";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 window.EXPENSES_MODULE_VERSION = EXPENSES_MODULE_VERSION;
@@ -4342,8 +4376,9 @@ window.addEventListener("app-auth-state",event=>{
   window.__appAuthUser=event.detail?.user||null;
   renderProfileAuthState(window.__appAuthUser);
   renderProfileAccessState(window.__appTripAccess||currentProfileAccess);
+  refreshAppDataDiagnostics();
 });
-window.addEventListener("app-trip-access",event=>renderProfileAccessState(event.detail||null));
+window.addEventListener("app-trip-access",event=>{renderProfileAccessState(event.detail||null);refreshAppDataDiagnostics();});
 renderProfileAuthState(null);
 
 
@@ -4588,7 +4623,51 @@ function weatherRenderSignature(data){
   const meta=data?.meta||{};
   try{return JSON.stringify({start:meta.tripStartIso,end:meta.tripEndIso,cities:meta.cities||{}});}catch(error){return"";}
 }
-function setDataSourceLabel(label){const el=document.getElementById("app-data-source-label");if(el)el.textContent=label;}
+function setDataSourceLabel(label){
+  const el=document.getElementById("app-data-source-label");
+  if(el)el.textContent=label;
+  refreshAppDataDiagnostics();
+}
+function appDataSet(id,value){
+  const el=document.getElementById(id);
+  if(el)el.textContent=value==null||value===""?"—":String(value);
+}
+function appDataTripStatusLabel(status){
+  return ({draft:"草稿",upcoming:"即將出發",active:"旅程中",completed:"已完成",locked:"已鎖定"})[String(status||"").toLowerCase()]||status||"—";
+}
+function refreshAppDataDiagnostics(){
+  const data=window.tripData||{};
+  const meta=data.meta||{};
+  const loader=tripLoaderState||{};
+  const user=window.__appAuthUser||null;
+  const access=window.__appTripAccess||currentProfileAccess||null;
+  const activeId=String(loader.tripId||tripLoaderActiveId||dataTripId(data)||"").trim();
+  const revision=Number(data.revision||0);
+
+  let syncLabel="未連接";
+  if(loader.status==="ready") syncLabel=loader.source==="cache"?"Firebase 快取已載入":"已同步";
+  else if(loader.status==="loading") syncLabel="正在連接 Firebase…";
+  else if(loader.status==="syncing") syncLabel="正在同步…";
+  else if(loader.status==="local") syncLabel="使用本機資料";
+  else if(loader.status==="permission-denied") syncLabel="權限不足";
+  else if(loader.status==="not-found") syncLabel="Firebase 找不到旅程";
+  else if(loader.status==="error") syncLabel="同步錯誤";
+
+  const lifecycleStatus=meta.status||data.status||"";
+  const writeStatus=String(lifecycleStatus).toLowerCase()==="locked"?"Locked":"Open";
+  const account=user
+    ? (user.displayName ? `${user.displayName}${user.email?` · ${user.email}`:""}` : (user.email||"Google 已登入"))
+    : "未登入";
+  const role=access?.roleLabel||tripLibraryRoleLabel(access?.role)||access?.role||"—";
+
+  appDataSet("app-data-sync-status",syncLabel);
+  appDataSet("app-data-trip-id",activeId);
+  appDataSet("app-data-revision",revision||"—");
+  appDataSet("app-data-trip-status",appDataTripStatusLabel(lifecycleStatus));
+  appDataSet("app-data-write-status",writeStatus);
+  appDataSet("app-data-google-account",account);
+  appDataSet("app-data-role",role);
+}
 function updateTripUrl(tripId){
   try{const url=new URL(location.href);if(tripId)url.searchParams.set("trip",tripId);else url.searchParams.delete("trip");history.replaceState(history.state,"",url);}catch(error){}
 }
@@ -5693,6 +5772,9 @@ document.addEventListener("touchstart",beginProfileEdgeSwipe,{passive:true});
 document.addEventListener("touchmove",moveProfileEdgeSwipe,{passive:false});
 document.addEventListener("touchend",endProfileEdgeSwipe,{passive:true});
 document.addEventListener("touchcancel",cancelProfileEdgeSwipe,{passive:true});
+document.querySelector('[data-profile-open="app-data"]')?.addEventListener("click",()=>{
+  refreshAppDataDiagnostics();
+});
 
 function initPhase2AccessContext(data){
   Promise.all([
