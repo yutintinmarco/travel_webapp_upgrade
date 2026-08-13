@@ -12,6 +12,26 @@ import {
 const WRITE_CHUNK_SIZE = 8;
 const SNAPSHOT_SOFT_LIMIT_BYTES = 760_000;
 const VALID_REPLACE_ROLES = new Set(["owner", "admin"]);
+const CONTENT_HASH_VERSION = 1;
+const IGNORED_CONTENT_KEYS = new Set([
+  "createdAt",
+  "createdBy",
+  "updatedAt",
+  "updatedBy",
+  "importedAt",
+  "importedBy",
+  "importState",
+  "lastImportMode",
+  "lastSnapshotId",
+  "revision",
+  "memberUids",
+  "memberCount",
+  "archived",
+  "archivedAt",
+  "archivedBy",
+  "contentHash",
+  "contentHashVersion"
+]);
 
 function clean(value) { return String(value ?? "").trim(); }
 function clone(value) { return value == null ? value : JSON.parse(JSON.stringify(value)); }
@@ -77,24 +97,153 @@ function contentWriteOps(plan, user) {
   return ops;
 }
 
+function stripOperationalFields(value) {
+  if (Array.isArray(value)) return value.map(stripOperationalFields);
+  if (!value || typeof value !== "object") return value;
+  const output = {};
+  Object.keys(value).sort().forEach(key => {
+    if (IGNORED_CONTENT_KEYS.has(key)) return;
+    const next = value[key];
+    if (typeof next === "undefined") return;
+    output[key] = stripOperationalFields(next);
+  });
+  return output;
+}
+
+function stableStringify(value) {
+  return JSON.stringify(stripOperationalFields(value));
+}
+
+function fallbackHash(text) {
+  let h1 = 0x811c9dc5;
+  let h2 = 0x9e3779b9;
+  for (let i = 0; i < text.length; i += 1) {
+    const code = text.charCodeAt(i);
+    h1 ^= code;
+    h1 = Math.imul(h1, 0x01000193);
+    h2 ^= code + i;
+    h2 = Math.imul(h2, 0x85ebca6b);
+  }
+  return `f${(h1 >>> 0).toString(16).padStart(8, "0")}${(h2 >>> 0).toString(16).padStart(8, "0")}`;
+}
+
+async function digestText(text) {
+  try {
+    if (globalThis.crypto?.subtle && globalThis.TextEncoder) {
+      const bytes = new TextEncoder().encode(text);
+      const digest = await crypto.subtle.digest("SHA-256", bytes);
+      return Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, "0")).join("");
+    }
+  } catch (error) {
+    console.warn("SHA-256 content fingerprint unavailable; using local fallback", error);
+  }
+  return fallbackHash(text);
+}
+
+function canonicalPlanContent(plan) {
+  return {
+    tripDoc: stripOperationalFields(plan.tripDoc || {}),
+    days: [...(plan.days || [])]
+      .map(day => ({
+        id: day.id,
+        data: stripOperationalFields(day.data || {}),
+        items: [...(day.items || [])]
+          .map(item => ({ id: item.id, data: stripOperationalFields(item.data || {}) }))
+          .sort((a, b) => a.id.localeCompare(b.id))
+      }))
+      .sort((a, b) => a.id.localeCompare(b.id)),
+    savedPlaces: [...(plan.savedPlaces || [])]
+      .map(place => ({ id: place.id, data: stripOperationalFields(place.data || {}) }))
+      .sort((a, b) => a.id.localeCompare(b.id)),
+    settings: stripOperationalFields(plan.settings || {})
+  };
+}
+
+function canonicalExistingContent(existing) {
+  return {
+    tripDoc: stripOperationalFields(existing?.tripDoc || {}),
+    days: [...(existing?.days || [])]
+      .map(day => ({
+        id: day.id,
+        data: stripOperationalFields(day.data || {}),
+        items: [...(day.items || [])]
+          .map(item => ({ id: item.id, data: stripOperationalFields(item.data || {}) }))
+          .sort((a, b) => a.id.localeCompare(b.id))
+      }))
+      .sort((a, b) => a.id.localeCompare(b.id)),
+    savedPlaces: [...(existing?.savedPlaces || [])]
+      .map(place => ({ id: place.id, data: stripOperationalFields(place.data || {}) }))
+      .sort((a, b) => a.id.localeCompare(b.id)),
+    settings: stripOperationalFields(existing?.settings || {})
+  };
+}
+
+async function planContentHash(plan) {
+  return digestText(stableStringify(canonicalPlanContent(plan)));
+}
+
+function equalContent(a, b) {
+  return stableStringify(a) === stableStringify(b);
+}
+
+function compareById(existingEntries = [], plannedEntries = [], getExistingData = entry => entry?.data, getPlannedData = entry => entry?.data) {
+  const existingMap = new Map(existingEntries.map(entry => [entry.id, entry]));
+  const plannedMap = new Map(plannedEntries.map(entry => [entry.id, entry]));
+  let added = 0;
+  let modified = 0;
+  let deleted = 0;
+  plannedMap.forEach((entry, id) => {
+    const before = existingMap.get(id);
+    if (!before) added += 1;
+    else if (!equalContent(getExistingData(before), getPlannedData(entry))) modified += 1;
+  });
+  existingMap.forEach((entry, id) => {
+    if (!plannedMap.has(id)) deleted += 1;
+  });
+  return { added, modified, deleted, changed: added + modified + deleted };
+}
+
+function buildChangeSummary(existing, plan) {
+  const daySummary = compareById(existing?.days || [], plan.days || []);
+  const existingItems = [];
+  const plannedItems = [];
+  (existing?.days || []).forEach(day => (day.items || []).forEach(item => existingItems.push({ id: `${day.id}/${item.id}`, data: item.data })));
+  (plan.days || []).forEach(day => (day.items || []).forEach(item => plannedItems.push({ id: `${day.id}/${item.id}`, data: item.data })));
+  const itemSummary = compareById(existingItems, plannedItems);
+  const savedSummary = compareById(existing?.savedPlaces || [], plan.savedPlaces || []);
+  const tripChanged = equalContent(existing?.tripDoc || {}, plan.tripDoc || {}) ? 0 : 1;
+  const settingsChanged = ["general", "expenses"].reduce((sum, key) => sum + (equalContent(existing?.settings?.[key] || {}, plan.settings?.[key] || {}) ? 0 : 1), 0);
+  const totalChanged = daySummary.changed + itemSummary.changed + savedSummary.changed + tripChanged + settingsChanged;
+  return {
+    days: daySummary,
+    items: itemSummary,
+    savedPlaces: savedSummary,
+    tripChanged,
+    settingsChanged,
+    totalChanged,
+    unchanged: totalChanged === 0
+  };
+}
+
 async function readExistingStructure(tripId) {
   const tripRef = doc(db, "trips", tripId);
   const tripSnap = await getDoc(tripRef);
   if (!tripSnap.exists()) return null;
 
-  const daySnaps = await getDocs(collection(db, "trips", tripId, "days"));
-  const days = [];
-  for (const daySnap of daySnaps.docs) {
+  const [daySnaps, savedSnaps, settingsGeneral, settingsExpenses] = await Promise.all([
+    getDocs(collection(db, "trips", tripId, "days")),
+    getDocs(collection(db, "trips", tripId, "savedPlaces")),
+    getDoc(doc(db, "trips", tripId, "settings", "general")),
+    getDoc(doc(db, "trips", tripId, "settings", "expenses"))
+  ]);
+  const days = await Promise.all(daySnaps.docs.map(async daySnap => {
     const itemSnaps = await getDocs(collection(db, "trips", tripId, "days", daySnap.id, "items"));
-    days.push({
+    return {
       id: daySnap.id,
       data: daySnap.data(),
       items: itemSnaps.docs.map(itemSnap => ({ id: itemSnap.id, data: itemSnap.data() }))
-    });
-  }
-  const savedSnaps = await getDocs(collection(db, "trips", tripId, "savedPlaces"));
-  const settingsGeneral = await getDoc(doc(db, "trips", tripId, "settings", "general"));
-  const settingsExpenses = await getDoc(doc(db, "trips", tripId, "settings", "expenses"));
+    };
+  }));
   return {
     tripId,
     tripDoc: tripSnap.data(),
@@ -148,35 +297,93 @@ async function createSnapshot(existing, user) {
   return snapshotId;
 }
 
+async function inspectExistingAgainstPlan(existingTripDoc, plan, tripId) {
+  const nextHash = await planContentHash(plan);
+  const storedHash = clean(existingTripDoc?.contentHash);
+  if (storedHash && storedHash === nextHash && Number(existingTripDoc?.contentHashVersion || CONTENT_HASH_VERSION) === CONTENT_HASH_VERSION) {
+    return {
+      unchanged: true,
+      contentHash: nextHash,
+      existing: null,
+      changeSummary: {
+        days: { added: 0, modified: 0, deleted: 0, changed: 0 },
+        items: { added: 0, modified: 0, deleted: 0, changed: 0 },
+        savedPlaces: { added: 0, modified: 0, deleted: 0, changed: 0 },
+        tripChanged: 0,
+        settingsChanged: 0,
+        totalChanged: 0,
+        unchanged: true
+      }
+    };
+  }
+  const existing = await readExistingStructure(tripId);
+  const changeSummary = buildChangeSummary(existing, plan);
+  return { unchanged: changeSummary.unchanged, contentHash: nextHash, existing, changeSummary };
+}
+
 export async function inspectTripImport(rawInput, userInput = null) {
   const user = await requireUser(userInput);
-  const validation = validatePortableTrip(rawInput);
+  const built = buildFirestoreTripPlan(rawInput, user);
+  const validation = built.valid
+    ? { valid: true, errors: built.errors || [], warnings: built.warnings || [], trip: built.trip }
+    : validatePortableTrip(rawInput);
   const summary = getTripSummary(validation.trip);
-  if (!validation.valid) return { ...validation, summary, exists: false, role: null, canImport: false, mode: "invalid" };
+  if (!validation.valid || !built.plan) return { ...validation, summary, exists: false, role: null, canImport: false, mode: "invalid" };
 
   const tripRef = doc(db, "trips", validation.trip.tripId);
   const tripSnap = await getDoc(tripRef);
   if (!tripSnap.exists()) {
-    return { ...validation, summary, exists: false, role: null, canImport: true, mode: "create", existingTrip: null };
+    return { ...validation, summary, exists: false, role: null, canImport: true, mode: "create", existingTrip: null, changeSummary: null };
   }
   const existingTrip = tripSnap.data() || {};
   const listedMember = Array.isArray(existingTrip.memberUids) && existingTrip.memberUids.includes(user.uid);
   if (!listedMember) {
     return {
-      ...validation, summary, exists: true, role: null, roleLabel: "", canImport: false, mode: "replace", existingTrip
+      ...validation, summary, exists: true, role: null, roleLabel: "", canImport: false, mode: "replace", existingTrip, changeSummary: null
     };
   }
   const memberSnap = await getDoc(doc(db, "trips", validation.trip.tripId, "members", user.uid));
   const role = memberSnap.exists() ? clean(memberSnap.data()?.role) : null;
+  if (!VALID_REPLACE_ROLES.has(role)) {
+    return {
+      ...validation,
+      summary,
+      exists: true,
+      role,
+      roleLabel: roleLabel(role),
+      canImport: false,
+      mode: "replace",
+      existingTrip,
+      changeSummary: null
+    };
+  }
+
+  const comparison = await inspectExistingAgainstPlan(existingTrip, built.plan, validation.trip.tripId);
+  if (comparison.unchanged) {
+    return {
+      ...validation,
+      summary,
+      exists: true,
+      role,
+      roleLabel: roleLabel(role),
+      canImport: false,
+      mode: "unchanged",
+      existingTrip,
+      contentHash: comparison.contentHash,
+      changeSummary: comparison.changeSummary
+    };
+  }
   return {
     ...validation,
     summary,
     exists: true,
     role,
     roleLabel: roleLabel(role),
-    canImport: VALID_REPLACE_ROLES.has(role),
+    canImport: true,
     mode: "replace",
-    existingTrip
+    existingTrip,
+    contentHash: comparison.contentHash,
+    changeSummary: comparison.changeSummary
   };
 }
 
@@ -190,6 +397,7 @@ export async function importTrip(rawInput, { mode = "create", user: userInput = 
     throw error;
   }
   const plan = built.plan;
+  const contentHash = await planContentHash(plan);
   const tripRef = doc(db, "trips", plan.tripId);
   const tripSnap = await getDoc(tripRef);
   const exists = tripSnap.exists();
@@ -204,6 +412,7 @@ export async function importTrip(rawInput, { mode = "create", user: userInput = 
   let existing = null;
   let snapshotId = null;
   let existingRole = null;
+  let changeSummary = null;
   if (mode === "replace") {
     const parentData = tripSnap.data() || {};
     if (!Array.isArray(parentData.memberUids) || !parentData.memberUids.includes(user.uid)) {
@@ -218,7 +427,24 @@ export async function importTrip(rawInput, { mode = "create", user: userInput = 
       error.code = "insufficient-role";
       throw error;
     }
-    existing = await readExistingStructure(plan.tripId);
+
+    const comparison = await inspectExistingAgainstPlan(parentData, plan, plan.tripId);
+    changeSummary = comparison.changeSummary;
+    existing = comparison.existing;
+    if (comparison.unchanged) {
+      return {
+        tripId: plan.tripId,
+        mode: "unchanged",
+        role: existingRole,
+        revision: Number(parentData.revision) || 1,
+        snapshotId: null,
+        contentHash,
+        changeSummary,
+        normalizedTrip: normalizePortableTrip(rawInput),
+        summary: getTripSummary(rawInput)
+      };
+    }
+    if (!existing) existing = await readExistingStructure(plan.tripId);
     snapshotId = await createSnapshot(existing, user);
   }
 
@@ -232,6 +458,8 @@ export async function importTrip(rawInput, { mode = "create", user: userInput = 
     batch.set(tripRef, {
       ...plan.tripDoc,
       revision: finalRevision,
+      contentHash,
+      contentHashVersion: CONTENT_HASH_VERSION,
       importState: "importing",
       importedBy: user.uid,
       importedAt: serverTimestamp(),
@@ -250,6 +478,8 @@ export async function importTrip(rawInput, { mode = "create", user: userInput = 
       ...baseExisting,
       ...plan.tripDoc,
       revision: finalRevision,
+      contentHash,
+      contentHashVersion: CONTENT_HASH_VERSION,
       memberUids: Array.isArray(baseExisting.memberUids) ? baseExisting.memberUids : plan.tripDoc.memberUids,
       memberCount: Number(baseExisting.memberCount) || (Array.isArray(baseExisting.memberUids) ? baseExisting.memberUids.length : 1),
       createdBy: clean(baseExisting.createdBy) || plan.tripDoc.createdBy,
@@ -275,6 +505,8 @@ export async function importTrip(rawInput, { mode = "create", user: userInput = 
   finalBatch.set(tripRef, {
     revision: finalRevision,
     schemaVersion: Number(plan.tripDoc.schemaVersion) || 2,
+    contentHash,
+    contentHashVersion: CONTENT_HASH_VERSION,
     importState: "ready",
     lastImportMode: mode,
     lastSnapshotId: snapshotId || "",
@@ -290,6 +522,7 @@ export async function importTrip(rawInput, { mode = "create", user: userInput = 
     revision: finalRevision,
     schemaVersion: Number(plan.tripDoc.schemaVersion) || 2,
     snapshotId: snapshotId || "",
+    changeSummary: changeSummary || null,
     createdAt: serverTimestamp()
   });
   await finalBatch.commit();
@@ -301,6 +534,8 @@ export async function importTrip(rawInput, { mode = "create", user: userInput = 
     role: mode === "create" ? "owner" : existingRole,
     revision: finalRevision,
     snapshotId,
+    contentHash,
+    changeSummary,
     normalizedTrip: normalizePortableTrip(rawInput),
     summary: getTripSummary(rawInput)
   };

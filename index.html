@@ -2280,6 +2280,12 @@ html:not(.theme-light):not(.theme-dark) .profile-signout-btn:active{background:r
 .trip-import-stat span{display:block;margin-top:2px;color:var(--label-secondary);font-size:8.5px;white-space:nowrap;}
 .trip-import-mode{padding:10px 11px;border-radius:13px;background:rgba(0,122,255,.075);color:var(--label-secondary);font-size:calc(10.5px * var(--font-scale));line-height:1.45;}
 .trip-import-mode strong{color:var(--label-primary);}
+.trip-import-changes{display:grid;gap:7px;padding:10px 11px;border-radius:13px;background:rgba(52,199,89,.075);border:1px solid rgba(52,199,89,.10);}
+.trip-import-changes[hidden]{display:none!important;}
+.trip-import-change-title{color:var(--label-primary);font-size:calc(10.5px * var(--font-scale));font-weight:720;}
+.trip-import-change-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;}
+.trip-import-change-row{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:7px 8px;border-radius:10px;background:rgba(118,118,128,.055);color:var(--label-secondary);font-size:calc(9.5px * var(--font-scale));}
+.trip-import-change-row strong{color:var(--label-primary);font-size:calc(9.5px * var(--font-scale));white-space:nowrap;}
 .trip-import-warnings{display:grid;gap:5px;color:var(--label-secondary);font-size:calc(10px * var(--font-scale));line-height:1.42;}
 .trip-import-warnings:empty{display:none;}
 .trip-import-warning{padding:8px 10px;border-radius:11px;background:rgba(255,159,10,.09);}
@@ -2299,9 +2305,9 @@ html.theme-dark .trip-import-preview,html.theme-dark .trip-import-stat,html.them
 </style>
             <link rel="apple-touch-icon" href="assets/icon/trip_icon.png">
   <link rel="icon" type="image/png" href="assets/icon/trip_icon.png">
-  <link rel="manifest" href="manifest.json?v=7.4.0">
+  <link rel="manifest" href="manifest.json?v=7.4.2">
   <meta name="apple-mobile-web-app-title" content="關嘉露西生日之旅">
-  <link rel="stylesheet" href="assets/css/expenses.css?v=7.4.0">
+  <link rel="stylesheet" href="assets/css/expenses.css?v=7.4.2">
 </head>
 <body>
 <div class="bg-fixed"></div>
@@ -2575,14 +2581,14 @@ html.theme-dark .trip-import-preview,html.theme-dark .trip-import-stat,html.them
         <span class="profile-detail-spacer"></span>
       </div>
       <section class="profile-card">
-        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.4.1</strong></div>
+        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.4.2</strong></div>
         <div class="profile-meta-row"><span>資料架構</span><strong>Phase 2B</strong></div>
         <div class="profile-meta-row"><span>主要資料來源</span><strong>本機 JSON</strong></div>
       </section>
     </div>
   </div>
 </div>
-<div class="app-version-note" id="app-version-note">v7.4.1</div>
+<div class="app-version-note" id="app-version-note">v7.4.2</div>
 
 
   </div>
@@ -2633,6 +2639,7 @@ html.theme-dark .trip-import-preview,html.theme-dark .trip-import-stat,html.them
           <div class="trip-import-stat"><strong id="trip-import-maps">—</strong><span>Map refs</span></div>
         </div>
         <div class="trip-import-mode" id="trip-import-mode">等待選擇檔案。</div>
+        <div class="trip-import-changes" id="trip-import-changes" hidden></div>
       </div>
       <div class="trip-import-warnings" id="trip-import-warnings"></div>
       <div class="trip-import-error" id="trip-import-error" hidden></div>
@@ -2665,7 +2672,7 @@ html.theme-dark .trip-import-preview,html.theme-dark .trip-import-stat,html.them
 </div>
 
 <script>
-const APP_VERSION = "7.4.1";
+const APP_VERSION = "7.4.2";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 window.EXPENSES_MODULE_VERSION = EXPENSES_MODULE_VERSION;
@@ -4261,6 +4268,17 @@ function tripImportPermissionMessage(error){
   if(error?.code==="insufficient-role") return "呢個 tripId 已存在，但目前帳戶唔係 Owner / Admin，所以唔可以覆蓋。";
   return error?.message||"暫時未能檢查或匯入呢份 trip.json。";
 }
+function renderTripImportChanges(changeSummary){
+  const box=document.getElementById("trip-import-changes");
+  if(!box)return;
+  if(!changeSummary||changeSummary.unchanged){box.hidden=true;box.innerHTML="";return;}
+  const fmt=part=>`+${part?.added||0} · ~${part?.modified||0} · −${part?.deleted||0}`;
+  const extras=[];
+  if(changeSummary.tripChanged)extras.push("旅程資料 1");
+  if(changeSummary.settingsChanged)extras.push(`設定 ${changeSummary.settingsChanged}`);
+  box.innerHTML=`<div class="trip-import-change-title">偵測到變更</div><div class="trip-import-change-grid"><div class="trip-import-change-row"><span>行程項目</span><strong>${fmt(changeSummary.items)}</strong></div><div class="trip-import-change-row"><span>日子</span><strong>${fmt(changeSummary.days)}</strong></div><div class="trip-import-change-row"><span>收藏</span><strong>${fmt(changeSummary.savedPlaces)}</strong></div><div class="trip-import-change-row"><span>其他</span><strong>${escapeHtmlText(extras.join(" · ")||"0")}</strong></div></div>`;
+  box.hidden=false;
+}
 function renderTripImportPreview(inspection,{checking=false}={}){
   const summary=inspection?.summary||{};
   document.getElementById("trip-import-name").textContent=summary.title||"未命名旅程";
@@ -4273,7 +4291,8 @@ function renderTripImportPreview(inspection,{checking=false}={}){
   const confirm=document.getElementById("trip-import-confirm");
   const warnings=document.getElementById("trip-import-warnings");
   warnings.innerHTML=(inspection?.warnings||[]).map(w=>`<div class="trip-import-warning">${escapeHtmlText(w)}</div>`).join("");
-  if(checking){mode.innerHTML="正在檢查 Firebase 有冇同一個 <strong>tripId</strong>…";confirm.disabled=true;return;}
+  renderTripImportChanges(inspection?.changeSummary||null);
+  if(checking){mode.innerHTML="正在比較 Firebase 現有版本同呢份 JSON…";confirm.disabled=true;return;}
   if(!inspection?.valid){mode.innerHTML="JSON 驗證未通過。";confirm.disabled=true;return;}
   if(inspection.mode==="auth-required"){
     mode.innerHTML="<strong>JSON 驗證完成</strong><br>登入 Google 後先檢查 Firebase 有冇相同 tripId，再決定建立或取代。";
@@ -4282,11 +4301,14 @@ function renderTripImportPreview(inspection,{checking=false}={}){
   if(inspection.mode==="create"){
     mode.innerHTML="<strong>建立新旅程</strong><br>寫入 Firebase 後，目前 Google 帳戶會自動成為 Owner。";
     confirm.textContent="匯入 Firebase";confirm.disabled=!inspection.canImport;
+  }else if(inspection.mode==="unchanged"){
+    mode.innerHTML="<strong>沒有變更</strong><br>呢份 JSON 同 Firebase 現有旅程內容相同，所以唔會建立 Snapshot、唔會增加 revision，亦唔會重新寫入資料。";
+    confirm.textContent="完成";confirm.disabled=false;
   }else if(inspection.mode==="replace"){
     mode.innerHTML=inspection.canImport
-      ? `<strong>取代現有旅程</strong><br>你目前係 ${escapeHtmlText(inspection.roleLabel||inspection.role||"Owner / Admin")}。系統會先建立 pre-import snapshot，再更新行程；成員、支出記錄及舊 snapshots 唔會刪除。`
+      ? `<strong>更新現有旅程</strong><br>你目前係 ${escapeHtmlText(inspection.roleLabel||inspection.role||"Owner / Admin")}。只因為偵測到實際變更，系統先會建立 pre-import snapshot，再更新 Firebase。`
       : "<strong>同一 tripId 已存在</strong><br>只有 Owner / Admin 可以用 JSON 取代現有旅程。";
-    confirm.textContent="Snapshot 後取代";confirm.disabled=!inspection.canImport;
+    confirm.textContent="Snapshot 後更新";confirm.disabled=!inspection.canImport;
   }else{
     mode.innerHTML="未能確認匯入模式。";confirm.disabled=true;
   }
@@ -4352,6 +4374,7 @@ tripImportConfirm?.addEventListener("click",async()=>{
   if(tripImportState.done){closeTripImportModal();return;}
   let inspection=tripImportState.inspection;
   if(!tripImportState.raw||tripImportState.busy)return;
+  if(inspection?.mode==="unchanged"){closeTripImportModal();return;}
   if(inspection?.mode==="auth-required"){
     tripImportSetError("");
     tripImportConfirm.disabled=true;
@@ -4383,11 +4406,13 @@ tripImportConfirm?.addEventListener("click",async()=>{
     const result=await service.importTrip(tripImportState.raw,{mode:inspection.mode,user,onProgress:({completed,total})=>{if(bar)bar.style.width=`${Math.max(3,Math.min(100,(completed/Math.max(1,total))*100))}%`;}});
     tripImportState.done=true;
     if(bar)bar.style.width="100%";
-    restartActiveTripCatalog();
-    if(result.tripId===tripLibrarySummary?.tripId){
+    if(result.mode!=="unchanged")restartActiveTripCatalog();
+    if(result.mode!=="unchanged"&&result.tripId===tripLibrarySummary?.tripId){
       import(`./assets/js/trip-access-service.js?v=${APP_VERSION}`).then(service=>service.refreshTripAccess?.()).catch(()=>{});
     }
-    mode.innerHTML=`<strong>匯入完成</strong><br>${escapeHtmlText(result.tripId)} · revision ${result.revision} · ${result.mode==="create"?"你已成為 Owner":"已建立 snapshot 後更新"}。`;
+    mode.innerHTML=result.mode==="unchanged"
+      ? `<strong>沒有變更</strong><br>${escapeHtmlText(result.tripId)} 同 Firebase 現有內容相同，冇建立 Snapshot，亦冇寫入任何旅程資料。`
+      : `<strong>匯入完成</strong><br>${escapeHtmlText(result.tripId)} · revision ${result.revision} · ${result.mode==="create"?"你已成為 Owner":"已建立 snapshot 後更新"}。`;
     tripImportConfirm.textContent="完成";tripImportConfirm.disabled=false;
     tripImportCancel.disabled=true;
   }catch(error){
