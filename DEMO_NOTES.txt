@@ -1,14 +1,16 @@
-v7.3.10 Phase 2B · Content-only Feather Mask transition
+v7.3.11 Phase 2B · Opaque Clip Wipe transition
 
-• Removed the full-viewport Background Veil experiment.
-• Global fixed background, trip header/title, version note and Bottom Bar never participate in profile navigation.
-• No duplicate background layer is created, so navigation cannot look like the wallpaper reloads.
-• Profile glass pages remain at opacity 1 and are never cloned, scaled or translated.
-• A spatial CSS mask dissolves only the profile content area with a broad feathered edge.
-• Only one profile page is visible at a time; the DOM page swaps while the outgoing mask is fully invisible.
-• Forward navigation fades from the right edge; edge-swipe/back fades from the left edge in the gesture direction.
-• 7 px gesture dead zone retained. Bottom Bar remains an independent body-level overlay.
+Transition experiment based on the new direction:
 
+1. No page opacity animation.
+2. No CSS mask / feather-mask on the glass page.
+3. No clone, snapshot, background veil or scaling.
+4. Profile pages keep a stable clip-path compositing state even while resting.
+5. Back gesture erases the current page from left to right using clip-path.
+6. At the fully hidden midpoint, the real DOM page is swapped.
+7. The previous page is then revealed from left to right. Forward navigation mirrors this direction.
+8. Remaining visible pixels stay 100% opaque, so glass cards should not become semi-transparent.
+9. Global background, trip header/title, page version and Bottom Bar remain untouched.
+10. Gesture retains an 8 px dead zone and is close to 1:1 with the finger.
 
-v7.3.10 transition refinement:
-Active profile pages retain a fully opaque WebKit mask at rest, so edge gestures no longer attach/detach a mask compositing layer on the first/final frame. Feather width grows dynamically from near zero and contracts again at the endpoints. Interactive visual progress is slightly damped and completion animations are slower.
+This build is intentionally focused on validating the opaque wipe behaviour before adding any decorative edge feather.
