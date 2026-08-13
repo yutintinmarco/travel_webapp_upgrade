@@ -1,35 +1,22 @@
-v7.4.3 — Phase 2C Portable JSON Import
+v7.5.0 — Phase 2D Backup & Recovery
 
-BASELINE
-• Built directly from user-approved v7.3.13.
-• The v7.3.13 Claude navigation compositor fix is preserved. No transition architecture from v7.3.12 or experimental 7.3.8–7.3.11 was reintroduced.
+Baseline
+• Built directly from the stable v7.4.3 Phase 2C build.
+• The v7.3.13 profile navigation compositor is unchanged.
 
-PHASE 2C IMPORT
-• 我的 → 我的旅程 → 匯入 trip.json is now live.
-• JSON is parsed locally first, normalized to schema v2, validated, and previewed before any Firestore write.
-• Preview shows trip title/id, day count, item count, saved places and Google Maps reference coverage.
-• New trip: current signed-in Google user becomes Owner automatically.
-• Existing trip: only Owner/Admin can replace it.
-• Replace import creates a pre-import snapshot first, preserves members, expense records and previous snapshots, then updates itinerary/settings.
-• Import writes are chunked so Security Rules document-access limits remain manageable.
-• Import failures are isolated from the local trip.json renderer and cannot blank the itinerary.
+Phase 2D
+• Firebase → portable trip.json export.
+• Snapshot history in 我的 → 旅程設定 → 行程匯出與備份.
+• Manual Snapshot creation for Owner / Admin.
+• Snapshot detail page with export and restore.
+• Restore automatically creates a pre-restore safety Snapshot.
+• Restore preserves memberUids, memberCount, creator, archive state, members subcollection and expenses subcollection.
+• Restore increments revision and writes an activity log.
+• Snapshot history is capped to the latest 10 entries in the UI.
 
-MAPS-READY SCHEMA
-• Every itinerary item and saved place now has a normalized `location` object:
-  name, placeId, latitude, longitude, address, mapsUrl.
-• No coordinates or Place IDs are guessed. Existing Google Maps search URLs are preserved as mapsUrl.
-• This is the Phase 2C schema foundation for Phase 3 Google Maps / Routes / Transit.
+Phase boundary
+• The itinerary UI still renders from local trip.json until Phase 2E. Firebase restore is therefore visible in Firestore/export immediately, but not yet used to redraw the main itinerary.
 
-ARCHIVE WRITER
-• Owner/Admin can archive non-current cloud trips and restore archived trips.
-• Archive keeps the trip in Firebase; only archived metadata changes.
-• Current local trip is intentionally not archiveable until Phase 2E cloud trip switching is active.
-
-FIRESTORE SETUP
-• `firestore.rules` contains the Phase 2C bootstrap rules.
-• `firestore.indexes.json` contains the Active/Archived trip catalog composite index.
-• Keep Firestore out of Test mode. Publish the included rules instead.
-• Phase 2F remains the final security hardening, emulator tests and rule regression phase.
-
-
-v7.4.3 hotfix: rebased from known-good v7.4.1, retained v7.3.13 navigation compositor, added same-JSON skip/change detection, and restored the standard enclosing project-folder ZIP structure.
+Firebase
+• Existing Phase 2C Firestore Rules are sufficient.
+• No new composite index is required for Phase 2D.

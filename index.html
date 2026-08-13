@@ -2302,12 +2302,25 @@ html:not(.theme-light):not(.theme-dark) .profile-signout-btn:active{background:r
 .trip-library-mini-action.is-restore{color:#1478d4;background:rgba(0,122,255,.10);}
 html.theme-dark .trip-import-preview,html.theme-dark .trip-import-stat,html.theme-dark .trip-import-cancel{background:rgba(255,255,255,.055);border-color:rgba(255,255,255,.06);}
 @media(max-width:380px){.trip-import-stats{grid-template-columns:repeat(2,minmax(0,1fr));}}
+
+/* Phase 2D · Firebase export and Snapshot recovery */
+.profile-backup-history-card{overflow:hidden;}
+.profile-backup-history-card #trip-backup-list:empty{display:none;}
+.profile-backup-history-card .profile-row{--row-sep-inset:48px;--row-sep-bleed:-15px;}
+.profile-backup-note{margin:9px 4px 0;color:var(--label-secondary);font-size:calc(9.5px * var(--font-scale));line-height:1.45;}
+.snapshot-detail-id{max-width:58%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:right;}
+.snapshot-restore-row .profile-row-copy strong{color:#ff3b30;}
+.trip-backup-row-meta{display:flex;align-items:center;gap:6px;flex-wrap:wrap;color:var(--label-secondary);font-size:calc(9.5px * var(--font-scale));line-height:1.35;}
+.trip-backup-row-meta span+span::before{content:"·";margin-right:6px;color:var(--label-tertiary);}
+.trip-backup-row-time{font-variant-numeric:tabular-nums;}
+#trip-backup-status[hidden]{display:none!important;}
+html.theme-dark .snapshot-restore-row .profile-row-copy strong,html:not(.theme-light):not(.theme-dark) .snapshot-restore-row .profile-row-copy strong{color:#ff6961;}
 </style>
             <link rel="apple-touch-icon" href="assets/icon/trip_icon.png">
   <link rel="icon" type="image/png" href="assets/icon/trip_icon.png">
-  <link rel="manifest" href="manifest.json?v=7.4.3">
+  <link rel="manifest" href="manifest.json?v=7.5.0">
   <meta name="apple-mobile-web-app-title" content="關嘉露西生日之旅">
-  <link rel="stylesheet" href="assets/css/expenses.css?v=7.4.3">
+  <link rel="stylesheet" href="assets/css/expenses.css?v=7.5.0">
 </head>
 <body>
 <div class="bg-fixed"></div>
@@ -2526,10 +2539,10 @@ html.theme-dark .trip-import-preview,html.theme-dark .trip-import-stat,html.them
           <span class="profile-row-copy"><strong>支出管理</strong><small>匯率、分帳成員、備份、已刪除項目及操作記錄</small></span>
           <span class="profile-chevron">›</span>
         </button>
-        <button class="profile-row profile-row-disabled" type="button" disabled>
+        <button class="profile-row" id="trip-backup-open-btn" type="button" data-profile-open="trip-backup">
           <span class="profile-row-icon profile-icon-grey">⇅</span>
-          <span class="profile-row-copy"><strong>行程匯出與備份</strong><small>Portable JSON schema 已準備</small></span>
-          <span class="profile-status-pill">2C</span>
+          <span class="profile-row-copy"><strong>行程匯出與備份</strong><small>匯出 Firebase JSON、查看 Snapshot 及安全還原</small></span>
+          <span class="profile-chevron">›</span>
         </button>
       </section>
     </div>
@@ -2574,6 +2587,60 @@ html.theme-dark .trip-import-preview,html.theme-dark .trip-import-stat,html.them
       </section>
     </div>
 
+    <div class="profile-nav-page" id="profile-page-trip-backup" data-profile-page="trip-backup" hidden>
+      <div class="profile-detail-bar">
+        <button class="profile-detail-back" type="button" data-profile-back aria-label="返回旅程設定"><span class="profile-back-glyph">‹</span><span class="profile-detail-back-label">旅程設定</span></button>
+        <h2>行程備份</h2>
+        <span class="profile-detail-spacer"></span>
+      </div>
+      <section class="profile-card profile-menu-card" aria-label="行程備份操作">
+        <button class="profile-row" id="trip-backup-export-current" type="button">
+          <span class="profile-row-icon profile-icon-blue">⇩</span>
+          <span class="profile-row-copy"><strong>匯出目前 trip.json</strong><small>由 Firebase 現有版本產生 Portable JSON</small></span>
+          <span class="profile-chevron">›</span>
+        </button>
+        <button class="profile-row" id="trip-backup-create-manual" type="button">
+          <span class="profile-row-icon profile-icon-green">＋</span>
+          <span class="profile-row-copy"><strong>建立手動 Snapshot</strong><small>保存目前 Firebase 行程，方便日後還原</small></span>
+          <span class="profile-chevron">›</span>
+        </button>
+      </section>
+      <section class="profile-card profile-backup-history-card" aria-label="Snapshot 版本紀錄">
+        <div class="profile-inline-section-heading"><strong>版本紀錄</strong><span class="trip-library-count" id="trip-backup-count">—</span></div>
+        <div id="trip-backup-list"></div>
+        <div class="trip-library-status" id="trip-backup-status">開啟此頁後會讀取最近 Snapshot。</div>
+      </section>
+      <div class="profile-backup-note" id="trip-backup-note">Snapshot 只備份行程內容與設定。旅程成員及支出交易不會因還原而回滾。</div>
+    </div>
+
+    <div class="profile-nav-page" id="profile-page-snapshot-detail" data-profile-page="snapshot-detail" hidden>
+      <div class="profile-detail-bar">
+        <button class="profile-detail-back" type="button" data-profile-back aria-label="返回行程備份"><span class="profile-back-glyph">‹</span><span class="profile-detail-back-label">行程備份</span></button>
+        <h2>版本詳情</h2>
+        <span class="profile-detail-spacer"></span>
+      </div>
+      <section class="profile-card">
+        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>建立時間</span><strong id="snapshot-detail-time">—</strong></div>
+        <div class="profile-meta-row"><span>類型</span><strong id="snapshot-detail-type">—</strong></div>
+        <div class="profile-meta-row"><span>來源 Revision</span><strong id="snapshot-detail-revision">—</strong></div>
+        <div class="profile-meta-row"><span>行程內容</span><strong id="snapshot-detail-counts">—</strong></div>
+        <div class="profile-meta-row"><span>Snapshot ID</span><strong class="snapshot-detail-id" id="snapshot-detail-id">—</strong></div>
+      </section>
+      <section class="profile-card profile-menu-card" aria-label="Snapshot 操作">
+        <button class="profile-row" id="snapshot-detail-export" type="button">
+          <span class="profile-row-icon profile-icon-blue">⇩</span>
+          <span class="profile-row-copy"><strong>匯出此版本</strong><small>下載此 Snapshot 對應嘅 trip.json</small></span>
+          <span class="profile-chevron">›</span>
+        </button>
+        <button class="profile-row snapshot-restore-row" id="snapshot-detail-restore" type="button">
+          <span class="profile-row-icon profile-icon-red">↶</span>
+          <span class="profile-row-copy"><strong>還原此版本</strong><small>還原前會先自動保存目前 Firebase 版本</small></span>
+          <span class="profile-chevron">›</span>
+        </button>
+      </section>
+      <div class="trip-library-status" id="snapshot-detail-status">還原只影響 Firebase 行程內容及設定，不會刪除成員或支出交易。</div>
+    </div>
+
     <div class="profile-nav-page" id="profile-page-app-data" data-profile-page="app-data" hidden>
       <div class="profile-detail-bar">
         <button class="profile-detail-back" type="button" data-profile-back aria-label="返回我的"><span class="profile-back-glyph">‹</span><span class="profile-detail-back-label">我的</span></button>
@@ -2581,14 +2648,14 @@ html.theme-dark .trip-import-preview,html.theme-dark .trip-import-stat,html.them
         <span class="profile-detail-spacer"></span>
       </div>
       <section class="profile-card">
-        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.4.3</strong></div>
-        <div class="profile-meta-row"><span>資料架構</span><strong>Phase 2B</strong></div>
+        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.5.0</strong></div>
+        <div class="profile-meta-row"><span>資料架構</span><strong>Phase 2D</strong></div>
         <div class="profile-meta-row"><span>主要資料來源</span><strong>本機 JSON</strong></div>
       </section>
     </div>
   </div>
 </div>
-<div class="app-version-note" id="app-version-note">v7.4.3</div>
+<div class="app-version-note" id="app-version-note">v7.5.0</div>
 
 
   </div>
@@ -2672,7 +2739,7 @@ html.theme-dark .trip-import-preview,html.theme-dark .trip-import-stat,html.them
 </div>
 
 <script>
-const APP_VERSION = "7.4.3";
+const APP_VERSION = "7.5.0";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 window.EXPENSES_MODULE_VERSION = EXPENSES_MODULE_VERSION;
@@ -4437,6 +4504,139 @@ document.getElementById("trip-library-list")?.addEventListener("click",event=>{
 });
 document.getElementById("trip-archive-list")?.addEventListener("click",event=>{
   const button=event.target.closest?.("[data-trip-restore-id]");if(button)handleTripArchiveAction(button,false);
+});
+
+let tripBackupServicePromise=null;
+let tripBackupSnapshots=[];
+let tripBackupSelectedSnapshot=null;
+let tripBackupBusy=false;
+function getTripBackupService(){
+  if(!tripBackupServicePromise)tripBackupServicePromise=import(`./assets/js/trip-backup-service.js?v=${APP_VERSION}`);
+  return tripBackupServicePromise;
+}
+function currentBackupTripId(){return String(tripLibrarySummary?.tripId||window.__activeTripId||"").trim();}
+function backupFriendlyError(error){
+  if(error?.code==="auth-required")return "請先登入 Google 帳戶。";
+  if(error?.code==="insufficient-role")return "只有 Owner 或 Admin 可以查看及還原 Snapshot。";
+  if(error?.code==="trip-not-found")return "Firebase 暫時未有呢個旅程。請先匯入 trip.json。";
+  if(error?.code==="snapshot-not-found")return "搵唔到呢個 Snapshot，可能已經被刪除。";
+  if(error?.code==="snapshot-too-large")return "目前旅程太大，未能建立單一 Snapshot。";
+  if(error?.code==="permission-denied"||error?.code==="firestore/permission-denied")return "Firebase 權限不足，請確認 Firestore Rules 同旅程角色。";
+  return error?.message||"操作未完成。";
+}
+function backupFormatDate(value){
+  if(!value)return "—";
+  const d=new Date(value);
+  if(!Number.isFinite(d.getTime()))return "—";
+  try{return new Intl.DateTimeFormat("zh-HK",{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit",hour12:false}).format(d);}catch(error){return d.toLocaleString();}
+}
+function backupDownloadJson(json,filename){
+  const blob=new Blob([JSON.stringify(json,null,2)],{type:"application/json;charset=utf-8"});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=url;a.download=filename||"trip.json";a.style.display="none";
+  document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1200);
+}
+function backupSetStatus(message,{error=false,hidden=false}={}){
+  const el=document.getElementById("trip-backup-status");if(!el)return;
+  el.hidden=hidden;el.textContent=message||"";el.style.color=error?"#c8352d":"";
+}
+function renderTripBackupList(){
+  const list=document.getElementById("trip-backup-list");
+  const count=document.getElementById("trip-backup-count");
+  if(count)count.textContent=String(tripBackupSnapshots.length);
+  if(!list)return;
+  list.innerHTML=tripBackupSnapshots.map(snapshot=>{
+    const meta=[`Revision ${snapshot.sourceRevision||0}`,`${snapshot.dayCount||0} Days`,`${snapshot.itemCount||0} Items`];
+    return `<button class="profile-row" type="button" data-snapshot-open="${escapeHtmlText(snapshot.snapshotId)}"><span class="profile-row-icon profile-icon-grey">↶</span><span class="profile-row-copy"><strong class="trip-backup-row-time">${escapeHtmlText(backupFormatDate(snapshot.createdAtIso||snapshot.createdAtMillis))}</strong><small>${escapeHtmlText(snapshot.typeLabel||"旅程備份")}</small><span class="trip-backup-row-meta">${meta.map(v=>`<span>${escapeHtmlText(v)}</span>`).join("")}</span></span><span class="profile-chevron">›</span></button>`;
+  }).join("");
+}
+async function loadTripBackupPage(){
+  if(tripBackupBusy)return;
+  const tripId=currentBackupTripId();
+  const manual=document.getElementById("trip-backup-create-manual");
+  if(!tripId){backupSetStatus("暫時未有目前旅程。",{error:true});return;}
+  tripBackupBusy=true;backupSetStatus("正在讀取 Firebase Snapshot…");
+  if(manual)manual.disabled=true;
+  try{
+    const service=await getTripBackupService();
+    const user=await getImportFirebaseUser();
+    const roleInfo=await service.getTripBackupRole(tripId,{user});
+    if(!roleInfo.canManage){
+      tripBackupSnapshots=[];renderTripBackupList();
+      backupSetStatus(`目前身份：${roleInfo.roleLabel||"未有角色"}。只有 Owner / Admin 可以查看 Snapshot。`);
+      return;
+    }
+    const result=await service.listTripSnapshots(tripId,{user,maxItems:10});
+    tripBackupSnapshots=result.snapshots||[];renderTripBackupList();
+    backupSetStatus(tripBackupSnapshots.length?`顯示最近 ${tripBackupSnapshots.length} 個 Snapshot。`:`目前未有 Snapshot。`);
+    if(manual)manual.disabled=false;
+  }catch(error){
+    console.error("Load trip backups",error);tripBackupSnapshots=[];renderTripBackupList();backupSetStatus(backupFriendlyError(error),{error:true});
+  }finally{tripBackupBusy=false;}
+}
+async function openSnapshotDetail(snapshotId){
+  const summary=tripBackupSnapshots.find(item=>item.snapshotId===snapshotId)||null;
+  tripBackupSelectedSnapshot=summary;
+  document.getElementById("snapshot-detail-time").textContent=summary?backupFormatDate(summary.createdAtIso||summary.createdAtMillis):"正在讀取…";
+  document.getElementById("snapshot-detail-type").textContent=summary?.typeLabel||"正在讀取…";
+  document.getElementById("snapshot-detail-revision").textContent=summary?String(summary.sourceRevision||0):"—";
+  document.getElementById("snapshot-detail-counts").textContent=summary?`${summary.dayCount||0} Days · ${summary.itemCount||0} Items · ${summary.savedPlaceCount||0} Saved`:"—";
+  document.getElementById("snapshot-detail-id").textContent=snapshotId;
+  document.getElementById("snapshot-detail-status").textContent="還原只影響 Firebase 行程內容及設定，不會刪除成員或支出交易。";
+  openProfilePage("snapshot-detail");
+}
+document.getElementById("trip-backup-open-btn")?.addEventListener("click",()=>setTimeout(loadTripBackupPage,40));
+document.getElementById("trip-backup-list")?.addEventListener("click",event=>{
+  const button=event.target.closest?.("[data-snapshot-open]");if(button)openSnapshotDetail(button.dataset.snapshotOpen);
+});
+document.getElementById("trip-backup-export-current")?.addEventListener("click",async()=>{
+  const button=document.getElementById("trip-backup-export-current");if(button?.disabled)return;
+  button.disabled=true;backupSetStatus("正在由 Firebase 產生 trip.json…");
+  try{
+    const service=await getTripBackupService();const user=await getImportFirebaseUser();
+    const result=await service.exportCurrentTrip(currentBackupTripId(),{user});backupDownloadJson(result.json,result.filename);
+    backupSetStatus(`已匯出 Revision ${result.revision} · ${result.counts.dayCount} Days · ${result.counts.itemCount} Items。`);
+  }catch(error){console.error("Export current trip",error);backupSetStatus(backupFriendlyError(error),{error:true});}
+  finally{button.disabled=false;}
+});
+document.getElementById("trip-backup-create-manual")?.addEventListener("click",async()=>{
+  const button=document.getElementById("trip-backup-create-manual");if(button?.disabled)return;
+  if(!window.confirm("建立一個目前 Firebase 行程嘅手動 Snapshot？"))return;
+  button.disabled=true;backupSetStatus("正在建立手動 Snapshot…");
+  try{
+    const service=await getTripBackupService();const user=await getImportFirebaseUser();
+    const result=await service.createManualSnapshot(currentBackupTripId(),{user});
+    backupSetStatus(`已建立 Snapshot · Revision ${result.sourceRevision}。`);tripBackupBusy=false;await loadTripBackupPage();
+  }catch(error){console.error("Create manual snapshot",error);backupSetStatus(backupFriendlyError(error),{error:true});}
+  finally{button.disabled=false;}
+});
+document.getElementById("snapshot-detail-export")?.addEventListener("click",async()=>{
+  const button=document.getElementById("snapshot-detail-export");if(button?.disabled||!tripBackupSelectedSnapshot?.snapshotId)return;
+  button.disabled=true;const status=document.getElementById("snapshot-detail-status");status.textContent="正在準備此版本嘅 trip.json…";
+  try{
+    const service=await getTripBackupService();const user=await getImportFirebaseUser();
+    const result=await service.exportSnapshotTrip(currentBackupTripId(),tripBackupSelectedSnapshot.snapshotId,{user});backupDownloadJson(result.json,result.filename);
+    status.textContent=`已匯出 Snapshot · Revision ${result.sourceRevision}。`;
+  }catch(error){console.error("Export snapshot",error);status.textContent=backupFriendlyError(error);}
+  finally{button.disabled=false;}
+});
+document.getElementById("snapshot-detail-restore")?.addEventListener("click",async()=>{
+  const button=document.getElementById("snapshot-detail-restore");if(button?.disabled||!tripBackupSelectedSnapshot?.snapshotId)return;
+  const snapshot=tripBackupSelectedSnapshot;
+  if(!window.confirm(`還原 Revision ${snapshot.sourceRevision||0}？\n\n系統會先自動 Snapshot 目前 Firebase 版本，再還原所選版本。成員及支出交易不會被刪除。`))return;
+  button.disabled=true;const status=document.getElementById("snapshot-detail-status");status.textContent="正在建立還原前安全備份…";
+  try{
+    const service=await getTripBackupService();const user=await getImportFirebaseUser();
+    const result=await service.restoreTripSnapshot(currentBackupTripId(),snapshot.snapshotId,{user,onProgress:progress=>{
+      const stage=progress?.stage;
+      status.textContent=stage==="safety-snapshot"?"已保存目前版本，正在準備還原…":stage==="content"?`正在還原旅程內容${progress.detail?` · ${progress.detail}`:""}…`:stage==="done"?"正在完成還原…":"正在還原 Firebase 版本…";
+    }});
+    status.textContent=`還原完成 · 新 Revision ${result.revision}。目前畫面喺 Phase 2E 前仍由本機 JSON 顯示；Firebase 已經係所選版本。`;
+    await loadTripBackupPage();
+  }catch(error){console.error("Restore snapshot",error);status.textContent=backupFriendlyError(error);}
+  finally{button.disabled=false;}
 });
 
 const tripQuickPopover=document.getElementById("trip-quick-popover");
