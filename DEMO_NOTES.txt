@@ -1,33 +1,35 @@
-v7.4.2 — Phase 2C Final Refinement
+v7.4.3 — Phase 2C Portable JSON Import
 
 BASELINE
-• Built from v7.4.1, which itself is based directly on user-approved v7.3.13.
-• The v7.3.13 Claude navigation compositor fix is untouched.
-
-SAME-JSON / CHANGE DETECTION
-• Existing trip imports are compared against current Firestore content before any snapshot or write.
-• If the uploaded JSON is unchanged, the app shows 「沒有變更」 and performs no snapshot, no revision increment and no itinerary write.
-• Real changes show a preview summary for itinerary items, days, saved places, trip metadata and settings.
-• Only real changes proceed to pre-import Snapshot + Replace.
-• importTrip has a second server-state guard, so a stale UI cannot accidentally create a no-op snapshot.
-• A deterministic content fingerprint is stored after the next real Create/Replace so later same-content checks can be fast. Legacy v7.4.1 trips without a fingerprint fall back to a full structural comparison.
+• Built directly from user-approved v7.3.13.
+• The v7.3.13 Claude navigation compositor fix is preserved. No transition architecture from v7.3.12 or experimental 7.3.8–7.3.11 was reintroduced.
 
 PHASE 2C IMPORT
-• 我的 → 我的旅程 → 匯入 trip.json remains live.
+• 我的 → 我的旅程 → 匯入 trip.json is now live.
 • JSON is parsed locally first, normalized to schema v2, validated, and previewed before any Firestore write.
+• Preview shows trip title/id, day count, item count, saved places and Google Maps reference coverage.
 • New trip: current signed-in Google user becomes Owner automatically.
 • Existing trip: only Owner/Admin can replace it.
 • Replace import creates a pre-import snapshot first, preserves members, expense records and previous snapshots, then updates itinerary/settings.
-• Import failures remain isolated from the local trip.json renderer.
+• Import writes are chunked so Security Rules document-access limits remain manageable.
+• Import failures are isolated from the local trip.json renderer and cannot blank the itinerary.
 
 MAPS-READY SCHEMA
-• Every itinerary item and saved place keeps the normalized location object prepared for Phase 3 Google Maps / Routes / Transit.
-• No coordinates or Place IDs are guessed.
+• Every itinerary item and saved place now has a normalized `location` object:
+  name, placeId, latitude, longitude, address, mapsUrl.
+• No coordinates or Place IDs are guessed. Existing Google Maps search URLs are preserved as mapsUrl.
+• This is the Phase 2C schema foundation for Phase 3 Google Maps / Routes / Transit.
 
 ARCHIVE WRITER
 • Owner/Admin can archive non-current cloud trips and restore archived trips.
 • Archive keeps the trip in Firebase; only archived metadata changes.
+• Current local trip is intentionally not archiveable until Phase 2E cloud trip switching is active.
 
 FIRESTORE SETUP
-• Existing Phase 2C firestore.rules and firestore.indexes.json remain valid; no Rules republish is required solely for v7.4.2 if v7.4.1 rules are already published.
-• Phase 2F remains the final security hardening and rule regression phase.
+• `firestore.rules` contains the Phase 2C bootstrap rules.
+• `firestore.indexes.json` contains the Active/Archived trip catalog composite index.
+• Keep Firestore out of Test mode. Publish the included rules instead.
+• Phase 2F remains the final security hardening, emulator tests and rule regression phase.
+
+
+v7.4.3 hotfix: rebased from known-good v7.4.1, retained v7.3.13 navigation compositor, added same-JSON skip/change detection, and restored the standard enclosing project-folder ZIP structure.

@@ -17,7 +17,3 @@ The importer writes in small batches. Replacing an existing trip first saves a p
 ## Composite index
 
 The Active / Archived trip catalog uses `memberUids array-contains uid` together with `archived == true/false`. If Firestore reports that an index is required, create the index shown in `firestore.indexes.json` (or use the Firebase Console link included in Firestore's error).
-
-## v7.4.2 note
-
-If the Phase 2C rules from v7.4.1 are already published, v7.4.2 does not require another Rules publish. Same JSON / change detection is handled by the client import service and uses the existing permitted trip reads.
