@@ -70,16 +70,80 @@ export async function acceptTripInvite(inviteIdInput,{user:userInput=null}={}){
   if(invite.status!=="pending"){const e=new Error("Invite no longer pending");e.code="invite-not-found";throw e;}
   if(normalizeEmail(user.email)!==invite.emailLower){const e=new Error("Email mismatch");e.code="invite-email-mismatch";throw e;}
   if(!ASSIGNABLE_ROLES.has(invite.role)){const e=new Error("Invalid invite role");e.code="insufficient-role";throw e;}
+
   const tripRef=doc(db,"trips",invite.tripId),memberRef=doc(db,"trips",invite.tripId,"members",user.uid);
   const [tripSnap,memberSnap]=await Promise.all([getDoc(tripRef),getDoc(memberRef)]);
   if(!tripSnap.exists()){const e=new Error("Trip not found");e.code="trip-not-found";throw e;}
-  if(memberSnap.exists()){await updateDoc(inviteRef,{status:"accepted",acceptedBy:user.uid,acceptedAt:serverTimestamp(),updatedAt:serverTimestamp()});return{tripId:invite.tripId,tripTitle:invite.tripTitle,role:clean(memberSnap.data()?.role)};}
+
+  if(memberSnap.exists()){
+    try{
+      await updateDoc(inviteRef,{status:"accepted",acceptedBy:user.uid,acceptedAt:serverTimestamp(),updatedAt:serverTimestamp()});
+    }catch(error){
+      console.warn("Invite already joined; unable to mark invite accepted",error);
+    }
+    return{tripId:invite.tripId,tripTitle:invite.tripTitle,role:clean(memberSnap.data()?.role),alreadyMember:true};
+  }
+
+  const tripData=tripSnap.data()||{};
+  const currentUids=Array.isArray(tripData.memberUids)?tripData.memberUids.filter(Boolean):[];
+  const nextUids=[...new Set([...currentUids,user.uid])];
+
   const batch=writeBatch(db);
-  batch.set(memberRef,{uid:user.uid,role:invite.role,status:"active",displayName:clean(user.displayName),email:normalizeEmail(user.email),photoURL:clean(user.photoURL),inviteId,invitedBy:invite.invitedBy,joinedAt:serverTimestamp(),createdAt:serverTimestamp(),updatedAt:serverTimestamp()});
-  batch.update(tripRef,{memberUids:arrayUnion(user.uid),memberCount:increment(1),updatedBy:user.uid,updatedAt:serverTimestamp()});
-  batch.update(inviteRef,{status:"accepted",acceptedBy:user.uid,acceptedAt:serverTimestamp(),updatedAt:serverTimestamp()});
-  await batch.commit();
-  await setDoc(doc(collection(db,"trips",invite.tripId,"activityLogs")),{type:"trip.member.accept",actionType:"trip.member.accept",category:"member",title:"加入旅程",summary:`${clean(user.displayName||user.email)} 以 ${roleLabel(invite.role)} 身份加入旅程`,actorUid:user.uid,actorName:clean(user.displayName),actorEmail:normalizeEmail(user.email),role:invite.role,createdAt:serverTimestamp()});
+  batch.set(memberRef,{
+    uid:user.uid,
+    role:invite.role,
+    status:"active",
+    displayName:clean(user.displayName),
+    email:normalizeEmail(user.email),
+    photoURL:clean(user.photoURL),
+    inviteId,
+    invitedBy:invite.invitedBy,
+    joinedAt:serverTimestamp(),
+    createdAt:serverTimestamp(),
+    updatedAt:serverTimestamp()
+  });
+  batch.update(tripRef,{
+    memberUids:nextUids,
+    memberCount:nextUids.length,
+    updatedBy:user.uid,
+    updatedAt:serverTimestamp()
+  });
+  batch.update(inviteRef,{
+    status:"accepted",
+    acceptedBy:user.uid,
+    acceptedAt:serverTimestamp(),
+    updatedAt:serverTimestamp()
+  });
+
+  try{
+    await batch.commit();
+  }catch(error){
+    const wrapped=new Error(error?.message||"Membership write failed");
+    wrapped.code=error?.code||"membership-write-failed";
+    wrapped.stage="membership";
+    wrapped.cause=error;
+    throw wrapped;
+  }
+
+  // Membership is already committed at this point. Audit logging is useful,
+  // but must never make the UI report that joining the Trip failed.
+  try{
+    await setDoc(doc(collection(db,"trips",invite.tripId,"activityLogs")),{
+      type:"trip.member.accept",
+      actionType:"trip.member.accept",
+      category:"member",
+      title:"加入旅程",
+      summary:`${clean(user.displayName||user.email)} 以 ${roleLabel(invite.role)} 身份加入旅程`,
+      actorUid:user.uid,
+      actorName:clean(user.displayName),
+      actorEmail:normalizeEmail(user.email),
+      role:invite.role,
+      createdAt:serverTimestamp()
+    });
+  }catch(error){
+    console.warn("Trip joined successfully; activity log write skipped",error);
+  }
+
   return{tripId:invite.tripId,tripTitle:invite.tripTitle,role:invite.role};
 }
 export async function declineTripInvite(inviteIdInput,{user:userInput=null}={}){

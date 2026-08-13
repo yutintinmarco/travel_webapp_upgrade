@@ -39,14 +39,6 @@ service cloud.firestore {
         && get(invitePath(inviteId)).data.role == role
         && get(invitePath(inviteId)).data.emailLower == authEmail();
     }
-    function acceptedInviteMatchesAuthAfter(inviteId, tripId, role) {
-      return existsAfter(invitePath(inviteId))
-        && getAfter(invitePath(inviteId)).data.status == 'accepted'
-        && getAfter(invitePath(inviteId)).data.acceptedBy == request.auth.uid
-        && getAfter(invitePath(inviteId)).data.tripId == tripId
-        && getAfter(invitePath(inviteId)).data.role == role
-        && getAfter(invitePath(inviteId)).data.emailLower == authEmail();
-    }
     function isSelfJoinTripUpdate(tripId) {
       let added = request.resource.data.memberUids.removeAll(resource.data.memberUids);
       let removed = resource.data.memberUids.removeAll(request.resource.data.memberUids);
@@ -62,11 +54,6 @@ service cloud.firestore {
         && validInviteRole(getAfter(memberPath(tripId, request.auth.uid)).data.role)
         && getAfter(memberPath(tripId, request.auth.uid)).data.inviteId is string
         && pendingInviteMatchesAuth(
-          getAfter(memberPath(tripId, request.auth.uid)).data.inviteId,
-          tripId,
-          getAfter(memberPath(tripId, request.auth.uid)).data.role
-        )
-        && acceptedInviteMatchesAuthAfter(
           getAfter(memberPath(tripId, request.auth.uid)).data.inviteId,
           tripId,
           getAfter(memberPath(tripId, request.auth.uid)).data.role
@@ -177,7 +164,6 @@ service cloud.firestore {
             && validInviteRole(request.resource.data.role)
             && request.resource.data.inviteId is string
             && pendingInviteMatchesAuth(request.resource.data.inviteId, tripId, request.resource.data.role)
-            && acceptedInviteMatchesAuthAfter(request.resource.data.inviteId, tripId, request.resource.data.role)
             && request.auth.uid in getAfter(tripPath(tripId)).data.memberUids)
         );
 
