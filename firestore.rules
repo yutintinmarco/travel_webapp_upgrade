@@ -102,6 +102,14 @@ service cloud.firestore {
         allow create, update, delete: if canManageTrip(tripId)
           || roleFor(tripId) == 'member';
       }
+
+      // Expense settlement/payment records use a separate collection.
+      // It must follow the same per-trip access model as expense records.
+      match /settlements/{settlementId} {
+        allow read: if canReadTrip(tripId);
+        allow create, update, delete: if canManageTrip(tripId)
+          || roleFor(tripId) == 'member';
+      }
     }
   }
 }

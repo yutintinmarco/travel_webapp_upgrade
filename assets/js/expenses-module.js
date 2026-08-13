@@ -616,17 +616,34 @@ let lastModuleStatus = "Connecting";
 
 function renderCompactModuleStatus(message = lastModuleStatus) {
   lastModuleStatus = message || lastModuleStatus || "Ready";
-
   if (!syncStatus) return;
 
-  const statusText = getCleanModuleStatus(lastModuleStatus);
-  const tripLabel = tripId || "No trip";
-  const openLabel = tripStatus === "unknown" ? "狀態未能讀取" : (isTripLocked() ? "Locked" : "Open");
-  const loginLabel = currentUser
-    ? `Google 已登入 ${currentUser.displayName || currentUser.email || "Google"}`
-    : "Google 未登入";
+  const footer = syncStatus.closest(".expense-footer-note");
+  const raw = String(lastModuleStatus || "");
+  const healthy = /^(Synced|Connected|OCR ready)/i.test(raw);
+  if (healthy) {
+    syncStatus.textContent = "";
+    if (footer) {
+      footer.hidden = true;
+      footer.classList.remove("is-warning","is-loading");
+    }
+    return;
+  }
 
-  syncStatus.textContent = `${statusText} · ${tripLabel} · ${openLabel} · ${loginLabel}`;
+  const friendly =
+    raw === "No access to settlements" ? "找數資料暫時未能同步" :
+    raw === "No access to expenses" ? "支出資料暫時未能同步" :
+    raw === "No access to activity logs" ? "操作記錄暫時未能同步" :
+    raw === "Waiting for Firestore Rules" ? "Firebase 權限設定尚未完成" :
+    raw === "Connecting" ? "正在同步支出資料…" :
+    getCleanModuleStatus(raw);
+
+  syncStatus.textContent = friendly;
+  if (footer) {
+    footer.hidden = false;
+    footer.classList.toggle("is-loading", /Connecting|Preparing|OCR/i.test(raw));
+    footer.classList.toggle("is-warning", /No access|error|Rules|failed/i.test(raw));
+  }
 }
 
 function setModuleStatus(message) {
@@ -2101,7 +2118,6 @@ function listenToExpenses() {
 
 function listenToSettlements() {
   if (stopSettlementsListener) stopSettlementsListener();
-    if (stopActivityLogsListener) stopActivityLogsListener();
   const q = query(getSettlementsCollection(), orderBy("paidAt", "desc"));
   stopSettlementsListener = onSnapshot(q, snap => {
     settlements = snap.docs.map(d => ({ id: d.id, ...d.data() }));

@@ -2435,15 +2435,20 @@ html.theme-dark .trip-activity-meta,html:not(.theme-light):not(.theme-dark) .tri
   text-overflow:clip !important;
 }
 body.expenses-view-active #app-version-note{
-  margin:2px 0 calc(var(--tabbar-h) + env(safe-area-inset-bottom, 0px) + 24px) !important;
+  margin:4px 0 0 !important;
+  padding:0 8px !important;
+}
+body.expenses-view-active #expenses-root{
+  margin-bottom:0 !important;
+  padding-bottom:0 !important;
 }
 
 </style>
             <link rel="apple-touch-icon" href="assets/icon/trip_icon.png">
   <link rel="icon" type="image/png" href="assets/icon/trip_icon.png">
-  <link rel="manifest" href="manifest.json?v=7.6.3.3">
+  <link rel="manifest" href="manifest.json?v=7.6.3.4">
   <meta name="apple-mobile-web-app-title" content="關嘉露西生日之旅">
-  <link rel="stylesheet" href="assets/css/expenses.css?v=7.6.3.3">
+  <link rel="stylesheet" href="assets/css/expenses.css?v=7.6.3.4">
 </head>
 <body>
 <div class="bg-fixed"></div>
@@ -2792,14 +2797,14 @@ body.expenses-view-active #app-version-note{
         <span class="profile-detail-spacer"></span>
       </div>
       <section class="profile-card">
-        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.6.3.3</strong></div>
+        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.6.3.4</strong></div>
         <div class="profile-meta-row"><span>資料架構</span><strong>Phase 2E</strong></div>
         <div class="profile-meta-row"><span>主要資料來源</span><strong id="app-data-source-label">Firebase / 本機快取</strong></div>
       </section>
     </div>
   </div>
 </div>
-<div class="app-version-note" id="app-version-note">v7.6.3.3</div>
+<div class="app-version-note" id="app-version-note">v7.6.3.4</div>
 
 
   </div>
@@ -2900,7 +2905,7 @@ body.expenses-view-active #app-version-note{
 </div>
 
 <script>
-const APP_VERSION = "7.6.3.3";
+const APP_VERSION = "7.6.3.4";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 window.EXPENSES_MODULE_VERSION = EXPENSES_MODULE_VERSION;
@@ -4035,8 +4040,11 @@ let collapseRaf=0;
 const appVersionNote = document.getElementById("app-version-note");
 if (appVersionNote) appVersionNote.textContent = `v${APP_VERSION}`;
 function placeAppVersionNote(viewKey){
-  const target=viewElements[viewKey];
-  if(!appVersionNote||!target)return;
+  if(!appVersionNote)return;
+  const target=viewKey==="expenses"
+    ? (document.querySelector("#expenses-root .expenses-app") || viewElements.expenses)
+    : viewElements[viewKey];
+  if(!target)return;
   if(appVersionNote.parentElement!==target)target.appendChild(appVersionNote);
 }
 let expensesModuleImportPromise = null;
@@ -4059,6 +4067,7 @@ function mountExpensesModuleNow(mod){
     const root=document.getElementById("expenses-root");
     if(root) root.dataset.loading = "false";
     initFn(window.tripData);
+    requestAnimationFrame(()=>placeAppVersionNote("expenses"));
     return true;
   }
   return false;

@@ -4812,3 +4812,46 @@ html:not(.theme-light):not(.theme-dark) .expenses-module .expenses-inner-tab.act
   color:#fff !important;
   box-shadow:0 4px 12px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.10) !important;
 }
+
+
+/* ==========================================================================
+   v7.6.3.4 · Structural footer/version fix
+   Version is the actual last child of .expenses-app. Bottom-nav clearance is
+   padding after it, not a margin between expense content and the version.
+   ========================================================================== */
+body.expenses-view-active .expenses-module .expenses-app{
+  padding-bottom:calc(var(--tabbar-h) + env(safe-area-inset-bottom, 0px) + 24px) !important;
+}
+.expenses-module .expenses-app > #app-version-note{
+  margin:4px 0 0 !important;
+  padding:0 8px !important;
+}
+.expenses-module .expense-footer-note[hidden]{
+  display:none !important;
+}
+.expenses-module .expense-footer-note{
+  margin:6px 0 0 !important;
+  padding:5px 6px 0 !important;
+}
+.expenses-module .expense-footer-note.is-warning{
+  color:#9a6700 !important;
+}
+.expenses-module .expense-footer-note.is-loading::after{
+  content:"";
+  display:block;
+  width:42%;
+  height:2px;
+  margin:6px auto 0;
+  border-radius:999px;
+  background:currentColor;
+  opacity:.38;
+  animation:expenseStatusPulse 1.15s ease-in-out infinite alternate;
+}
+@keyframes expenseStatusPulse{
+  from{transform:scaleX(.45);opacity:.22}
+  to{transform:scaleX(1);opacity:.52}
+}
+html.theme-dark .expenses-module .expense-footer-note.is-warning,
+html:not(.theme-light):not(.theme-dark) .expenses-module .expense-footer-note.is-warning{
+  color:#ffd166 !important;
+}
