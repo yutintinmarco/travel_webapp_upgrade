@@ -1,12 +1,31 @@
-v7.3.5 Phase 2B fade-through navigation experiment
+v7.3.13 — 我的 navigation smoothness + iOS-native UI pass
 
-• Replaced the overlapping push/snapshot look with a two-stage fade-through transition.
-• First 48%: outgoing page fades fully away with only a very small horizontal drift.
-• 48% to 52%: deliberate low-visibility handoff zone, leaving the fixed trip background visible instead of showing two translucent pages at once.
-• Final 48%: incoming page fades in and settles into place.
-• Interactive left-edge swipe uses the exact same progress mapping, including cancel and complete animations.
-• No page scale, background scale, background re-crop or snapshot background movement.
-• Bottom navigation remains body-level and above all profile transition surfaces.
+TRANSITION FIX (the visible "jump" at the start and the end)
+• Root cause: v7.3.12 cross-faded the snapshot clone in above the still-visible
+  live page ("handoff prime", 96ms) and cross-faded the incoming clone out above
+  the newly committed live page ("commit", 132ms). .profile-card is translucent
+  glass (rgba background + backdrop-filter), so painting a clone above its own
+  original stacks two glass layers — the card brightens and thickens, then snaps
+  back the instant the live page is hidden.
+• v7.3.13 never paints a clone and its original at the same time. The clone is
+  created transparent, rasterised over two idle frames, then swapped with the
+  live page inside a single frame. The two are pixel-identical, so the swap is
+  invisible. Same swap in reverse on commit and on gesture cancel.
+• Total transition 728ms -> 430ms. Directional travel 12–22px -> 18–34px.
+• Edge swipe uses the same one-frame handoff; the 7.5% "blend zone" is gone, so
+  the page now follows the finger 1:1 from the first tracked pixel.
 
-Other v7.3.x Phase 2B refinements remain unchanged.
+iOS-NATIVE UI PASS (我的 only)
+• Press feedback: cell background highlight (instant in, eased out) instead of
+  dimming the whole row's opacity.
+• Separators: half-pixel hairlines, inset to the label column, running to the
+  card edge — as in a Settings inset grouped table. Stray card-top borders gone.
+• Disclosure chevron drawn in CSS instead of the "›" glyph, so it keeps one
+  weight and baseline across font fallbacks.
+• Back control now names its destination ("‹ 我的", "‹ 旅程設定") and dims on
+  press like a bar button rather than highlighting like a cell.
+• Row typography: label 14.5px/510 (was ~13px bold), subtitle 11.5px.
+• Icon squircles 30px / 7.5px radius with a top inner highlight.
+• Segmented control and text-size stepper aligned to the label column.
+
 Phase 2C Firestore create/import/archive writes remain intentionally disabled.
