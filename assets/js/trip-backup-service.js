@@ -438,6 +438,14 @@ export async function restoreTripSnapshot(tripIdInput, snapshotIdInput, { user: 
   const nextRevision = Math.max(1, Number(currentTrip.revision) || 0) + 1;
   const restoredTripContent = stripTripOperational(targetTrip);
 
+  // Phase 2E loader suppresses partial renders while a restore is writing many
+  // documents. Mark the trip as restoring before replacing parent/content docs.
+  await writeBatch(db).set(tripRef, {
+    restoreState: "restoring",
+    updatedAt: serverTimestamp(),
+    updatedBy: user.uid
+  }, { merge: true }).commit();
+
   await writeBatch(db).set(tripRef, {
     ...restoredTripContent,
     revision: nextRevision,
@@ -451,6 +459,7 @@ export async function restoreTripSnapshot(tripIdInput, snapshotIdInput, { user: 
     contentHash: "",
     contentHashVersion: 1,
     importState: "ready",
+    restoreState: "restoring",
     lastImportMode: "snapshot-restore",
     lastSnapshotId: safety.snapshotId,
     restoredFromSnapshotId: snapshotId,

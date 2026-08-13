@@ -20,3 +20,9 @@ Phase boundary
 Firebase
 • Existing Phase 2C Firestore Rules are sufficient.
 • No new composite index is required for Phase 2D.
+
+Phase 2E v7.6.0
+Firebase Loader is now the live data source after authenticated Trip catalog resolution.
+Bundled trip.json remains the immediate bootstrap and signed-out fallback.
+Quick Trip Switcher and My Trips now switch live Firebase Trips.
+Persistent Firestore local cache is enabled when supported.

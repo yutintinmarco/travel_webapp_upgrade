@@ -27,7 +27,10 @@ function publish() {
 
 export function resolveTripId(tripData) {
   if (activeTripId) return activeTripId;
-  activeTripId = fromQuery() || fromTripData(tripData) || fromLocalStorage() || "demo-trip-001";
+  // Explicit deep links win, then remember the user's last selected Trip.
+  // The bundled trip.json is only a bootstrap fallback and must not override a
+  // previously selected Firebase Trip on the next launch.
+  activeTripId = fromQuery() || fromLocalStorage() || fromTripData(tripData) || "demo-trip-001";
   try { localStorage.setItem(STORAGE_KEY, activeTripId); } catch (error) {}
   publish();
   return activeTripId;

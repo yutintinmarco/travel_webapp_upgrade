@@ -504,6 +504,7 @@ export function initExpensesModule(tripData) {
 
 const expensesConfig = tripData?.meta?.expenses || {};
 const tripId = resolveTripId(tripData);
+window.__expensesModuleTripId = tripId;
 let members = [];
 let tripSettings = {
   baseCurrency: expensesConfig.baseCurrency || "HKD",
