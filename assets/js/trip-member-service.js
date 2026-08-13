@@ -72,20 +72,33 @@ export async function acceptTripInvite(inviteIdInput,{user:userInput=null}={}){
   if(!ASSIGNABLE_ROLES.has(invite.role)){const e=new Error("Invalid invite role");e.code="insufficient-role";throw e;}
 
   const tripRef=doc(db,"trips",invite.tripId),memberRef=doc(db,"trips",invite.tripId,"members",user.uid);
-  const [tripSnap,memberSnap]=await Promise.all([getDoc(tripRef),getDoc(memberRef)]);
+  // IMPORTANT: before the invitation is accepted the invitee is not yet a
+  // Trip member, so Security Rules intentionally do not allow reading
+  // trips/{tripId}/members/{uid}. Use the parent Trip membership index first.
+  const tripSnap=await getDoc(tripRef);
   if(!tripSnap.exists()){const e=new Error("Trip not found");e.code="trip-not-found";throw e;}
 
-  if(memberSnap.exists()){
+  const tripData=tripSnap.data()||{};
+  const currentUids=Array.isArray(tripData.memberUids)?tripData.memberUids.filter(Boolean):[];
+
+  // Idempotent retry path. Only after the UID is already present in the
+  // parent memberUids are we allowed to read the member document.
+  if(currentUids.includes(user.uid)){
+    let existingRole=invite.role;
+    try{
+      const memberSnap=await getDoc(memberRef);
+      if(memberSnap.exists()) existingRole=clean(memberSnap.data()?.role)||existingRole;
+    }catch(error){
+      console.warn("Already in memberUids; member profile read skipped",error);
+    }
     try{
       await updateDoc(inviteRef,{status:"accepted",acceptedBy:user.uid,acceptedAt:serverTimestamp(),updatedAt:serverTimestamp()});
     }catch(error){
       console.warn("Invite already joined; unable to mark invite accepted",error);
     }
-    return{tripId:invite.tripId,tripTitle:invite.tripTitle,role:clean(memberSnap.data()?.role),alreadyMember:true};
+    return{tripId:invite.tripId,tripTitle:invite.tripTitle,role:existingRole,alreadyMember:true};
   }
 
-  const tripData=tripSnap.data()||{};
-  const currentUids=Array.isArray(tripData.memberUids)?tripData.memberUids.filter(Boolean):[];
   const nextUids=[...new Set([...currentUids,user.uid])];
 
   const batch=writeBatch(db);
