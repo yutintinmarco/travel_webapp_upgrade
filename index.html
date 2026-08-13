@@ -2766,12 +2766,133 @@ html:not(.theme-light):not(.theme-dark) .trip-member-row.is-manageable .trip-mem
   box-shadow:inset 0 0 0 1px rgba(255,255,255,.055);
 }
 
+
+/* ==========================================================================
+   v7.6.5.2 · Member row compact right-side controls
+   Keep editable Member cards the same visual height as Owner cards.
+   Role selector + Remove sit together on the right, vertically centred.
+   ========================================================================== */
+.trip-member-row.is-manageable{
+  grid-template-columns:42px minmax(0,1fr) auto !important;
+  grid-template-rows:auto !important;
+  align-items:center !important;
+  column-gap:10px !important;
+  row-gap:0 !important;
+}
+.trip-member-row.is-manageable .trip-member-avatar{
+  grid-column:1 !important;
+  grid-row:1 !important;
+  align-self:center !important;
+}
+.trip-member-row.is-manageable .trip-member-copy{
+  grid-column:2 !important;
+  grid-row:1 !important;
+  align-self:center !important;
+}
+.trip-member-row.is-manageable .trip-member-side{
+  grid-column:3 !important;
+  grid-row:1 !important;
+  width:auto !important;
+  min-width:0 !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:flex-end !important;
+  align-self:center !important;
+  gap:6px !important;
+  margin-top:0 !important;
+}
+.trip-member-row.is-manageable .trip-member-role-select{
+  width:96px !important;
+  min-width:96px !important;
+  max-width:96px !important;
+  height:31px !important;
+  padding:0 22px 0 9px !important;
+  border-radius:999px !important;
+  font-size:9.5px !important;
+}
+.trip-member-row.is-manageable .trip-member-remove{
+  min-width:46px !important;
+  min-height:31px !important;
+  height:31px !important;
+  padding:0 10px !important;
+  display:inline-flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  border-radius:999px !important;
+  white-space:nowrap !important;
+}
+
+/* Slightly tighten identity text so small iPhones still keep both controls
+   on the right without increasing card height. */
+@media (max-width:390px){
+  .trip-member-row.is-manageable{
+    grid-template-columns:40px minmax(0,1fr) auto !important;
+    column-gap:8px !important;
+    padding-left:9px !important;
+    padding-right:9px !important;
+  }
+  .trip-member-row.is-manageable .trip-member-avatar{
+    width:40px !important;
+    height:40px !important;
+  }
+  .trip-member-row.is-manageable .trip-member-role-select{
+    width:86px !important;
+    min-width:86px !important;
+    max-width:86px !important;
+    padding-left:7px !important;
+    padding-right:20px !important;
+  }
+  .trip-member-row.is-manageable .trip-member-remove{
+    min-width:42px !important;
+    padding-left:8px !important;
+    padding-right:8px !important;
+  }
+}
+
+
+/* ==========================================================================
+   v7.6.5.3 · Travel Details Team selector + protected Team accent stripe
+   ========================================================================== */
+
+/* Same spacing as itinerary Team Bar, immediately before the Travel Details card. */
+#info-view > #info-team-bar{
+  margin-bottom:12px;
+}
+
+/* v7.6.5 common glass rules use border-color !important.
+   Protect the semantic left stripe with matching theme specificity so the
+   team's own colour remains visible in both Light and Dark Mode. */
+html.theme-light #info-view .info-team-card{
+  border-left-width:4px !important;
+  border-left-style:solid !important;
+  border-left-color:var(--info-team-color,#888) !important;
+}
+html.theme-dark #info-view .info-team-card{
+  border-left-width:4px !important;
+  border-left-style:solid !important;
+  border-left-color:var(--info-team-color,#888) !important;
+}
+@media (prefers-color-scheme: light){
+  html:not(.theme-light):not(.theme-dark) #info-view .info-team-card{
+    border-left-width:4px !important;
+    border-left-style:solid !important;
+    border-left-color:var(--info-team-color,#888) !important;
+  }
+}
+@media (prefers-color-scheme: dark){
+  html:not(.theme-light):not(.theme-dark) #info-view .info-team-card{
+    border-left-width:4px !important;
+    border-left-style:solid !important;
+    border-left-color:var(--info-team-color,#888) !important;
+  }
+}
+
 </style>
             <link rel="apple-touch-icon" href="assets/icon/trip_icon.png">
   <link rel="icon" type="image/png" href="assets/icon/trip_icon.png">
-  <link rel="manifest" href="manifest.json?v=7.6.5.1">
+  <link rel="manifest" href="manifest.json?v=7.6.5.3">
   <meta name="apple-mobile-web-app-title" content="關嘉露西生日之旅">
-  <link rel="stylesheet" href="assets/css/expenses.css?v=7.6.5.1">
+  <link rel="stylesheet" href="assets/css/expenses.css?v=7.6.5.3">
 </head>
 <body>
 <div class="bg-fixed"></div>
@@ -2841,6 +2962,7 @@ html:not(.theme-light):not(.theme-dark) .trip-member-row.is-manageable .trip-mem
 </div>
 
 <div id="info-view" class="app-view" style="display:none;">
+  <div class="team-bar" id="info-team-bar" style="display:none;"></div>
   <div class="trip-library-shell">
     <section class="trip-library-card trip-info-only-card" id="trip-info-card">
       <div class="trip-library-eyebrow">Travel Details</div>
@@ -3173,7 +3295,7 @@ html:not(.theme-light):not(.theme-dark) .trip-member-row.is-manageable .trip-mem
         <span class="profile-detail-spacer"></span>
       </div>
       <section class="profile-card" aria-label="App 資料">
-        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.6.5.1</strong></div>
+        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.6.5.3</strong></div>
         <div class="profile-meta-row"><span>資料架構</span><strong>Phase 2E</strong></div>
         <div class="profile-meta-row"><span>主要資料來源</span><strong id="app-data-source-label">Firebase / 本機快取</strong></div>
       </section>
@@ -3191,7 +3313,7 @@ html:not(.theme-light):not(.theme-dark) .trip-member-row.is-manageable .trip-mem
     </div>
   </div>
 </div>
-<div class="app-version-note" id="app-version-note">v7.6.5.1</div>
+<div class="app-version-note" id="app-version-note">v7.6.5.3</div>
 
 
   </div>
@@ -3292,7 +3414,7 @@ html:not(.theme-light):not(.theme-dark) .trip-member-row.is-manageable .trip-mem
 </div>
 
 <script>
-const APP_VERSION = "7.6.5.1";
+const APP_VERSION = "7.6.5.3";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 window.EXPENSES_MODULE_VERSION = EXPENSES_MODULE_VERSION;
@@ -4241,7 +4363,10 @@ function tripIconMarkup(trip){
 }
 function resetTripScopedUi(data){
   activeTeam="all";
-  const teamBar=document.getElementById("team-bar");if(teamBar){teamBar.innerHTML="";teamBar.style.display="none";}
+  ["team-bar","info-team-bar"].forEach(id=>{
+    const teamBar=document.getElementById(id);
+    if(teamBar){teamBar.innerHTML="";teamBar.style.display="none";}
+  });
   const fcard=document.getElementById("flight-card"),fc=document.getElementById("flight-content");if(fcard)fcard.style.display="none";if(fc)fc.innerHTML="";
   const footer=document.getElementById("footer-note");if(footer)footer.textContent="";
   const hs=document.getElementById("header-title-small"),hm=document.getElementById("header-title-main"),sub=document.getElementById("header-sub");
@@ -4260,25 +4385,37 @@ function render(data){
   // Set CSS colour variables for every traveller key dynamically (e.g. --team1-color, --solo-color)
   Object.entries(travellers).forEach(([tk,ti])=>{if(ti.color)document.documentElement.style.setProperty(`--${tk}-color`,ti.color);});
 
-  // Team bar — fully dynamic from JSON travellers, only shown if 2+ travellers
-  const teamBar=document.getElementById("team-bar");
-  teamBar.innerHTML="";
+  // Team bars — itinerary and Travel Details use the same selector, style and state.
   const tKeys=Object.keys(travellers);
-  if(tKeys.length>=2){
+  ["team-bar","info-team-bar"].forEach(id=>{
+    const teamBar=document.getElementById(id);
+    if(!teamBar)return;
+    teamBar.innerHTML="";
+    teamBar.style.display="none";
+    if(tKeys.length<2)return;
+
     teamBar.style.display="flex";
     const allBtn=document.createElement("button");
-    allBtn.className="team-btn active-all";allBtn.dataset.team="all";allBtn.textContent="全部";
+    allBtn.className="team-btn";
+    allBtn.dataset.team="all";
+    allBtn.textContent="全部";
     teamBar.appendChild(allBtn);
+
     tKeys.forEach(tk=>{
       const ti=travellers[tk];
       const btn=document.createElement("button");
-      btn.className="team-btn";btn.dataset.team=tk;btn.dataset.color=ti.color||"#888";
+      btn.className="team-btn";
+      btn.dataset.team=tk;
+      btn.dataset.color=ti.color||"#888";
       btn.style.setProperty("--team-accent",ti.color||"#888");
       btn.textContent=ti.label||tk;
       teamBar.appendChild(btn);
     });
+
     teamBar.querySelectorAll(".team-btn").forEach(b=>b.addEventListener("click",()=>applyTeam(b.dataset.team)));
-  }
+  });
+  // Synchronise both bars and all team-scoped content with the current selection.
+  applyTeam(activeTeam||"all");
 
   document.getElementById("page-title").textContent=meta.titleMain?.replace(/<[^>]*>/g,"")||"行程";
   baseTripTitle=(meta.titleMain?.replace(/<[^>]*>/g,"")||meta.titleSmall||"旅程").trim();
