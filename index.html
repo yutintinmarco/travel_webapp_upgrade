@@ -2069,10 +2069,27 @@ html.theme-dark .profile-menu-card .profile-row,html:not(.theme-light):not(.them
 body.profile-navigation-active .scroll-shell,body.profile-edge-swipe-active .scroll-shell{overflow:hidden!important;}
 .profile-nav-host.is-snapshotting{visibility:hidden;}
 .profile-nav-surface{position:fixed;left:0;width:100vw;overflow:hidden;z-index:1420;pointer-events:none;contain:layout paint style;will-change:transform,opacity;backface-visibility:hidden;-webkit-backface-visibility:hidden;background:transparent;transform-origin:0 0;}
-/* v7.3.13: the app background is never cloned into a moving navigation surface.
-   Only page content moves; the single fixed .bg-fixed layer stays perfectly still. */
+/* v7.3.13: each surface carries its own copy of the app background.
+   REASON: .profile-card is backdrop-filter glass. A surface is a backdrop root
+   (contain:paint + will-change:transform/opacity), so a card cloned into it has
+   NOTHING to blur and renders as flat 56% white - the card visibly loses its
+   frosted body the instant the transition starts. Giving the surface an exact,
+   viewport-aligned copy of .bg-fixed restores the blur source, so the clone is
+   pixel-identical to the live card.
+   The copy is counter-translated against the surface transform, so the
+   background still never appears to move. */
 .profile-nav-surface::before{display:none!important;content:none!important;}
-.profile-nav-surface.is-front{box-shadow:-14px 0 30px rgba(20,39,55,.12);}
+.profile-nav-surface.is-front{box-shadow:none;}
+.profile-nav-surface-bg{
+  position:absolute;z-index:0;pointer-events:none;
+  background-repeat:no-repeat;background-attachment:scroll;
+  will-change:transform;backface-visibility:hidden;-webkit-backface-visibility:hidden;
+}
+/* .bg-fixed is already a fixed, viewport-sized box, so attachment:fixed adds
+   nothing - but it resolves against the nearest transformed ancestor and iOS
+   Safari treats it as scroll regardless. Pinning it makes the live layer and
+   the cloned layer identical by construction on every engine. */
+.bg-fixed{background-attachment:scroll!important;}
 /* v7.3.13 uses whole-page fade-through instead of a moving edge mask.
    Outgoing content fades away before incoming content becomes visible. */
 .profile-nav-surface.edge-fade-left{-webkit-mask-image:none!important;mask-image:none!important;}
@@ -4232,6 +4249,26 @@ function profileCreateSurface(snapshot,className=""){
   // Surfaces are inserted transparent. This prevents an iOS compositor frame
   // from ever flashing a newly-created glass clone at full opacity.
   surface.style.opacity="0";
+  // Exact copy of the live .bg-fixed box, in viewport coordinates, so the glass
+  // cards inside this surface blur the same pixels the live cards blur.
+  const bgSource=document.querySelector(".bg-fixed");
+  if(bgSource){
+    const bgRect=bgSource.getBoundingClientRect();
+    const bgStyle=getComputedStyle(bgSource);
+    const bgLayer=document.createElement("div");
+    bgLayer.className="profile-nav-surface-bg";
+    bgLayer.style.left=`${bgRect.left}px`;
+    bgLayer.style.top=`${bgRect.top-top}px`;
+    bgLayer.style.width=`${bgRect.width}px`;
+    bgLayer.style.height=`${bgRect.height}px`;
+    bgLayer.style.backgroundColor=bgStyle.backgroundColor;
+    bgLayer.style.backgroundImage=bgStyle.backgroundImage;
+    bgLayer.style.backgroundSize=bgStyle.backgroundSize;
+    bgLayer.style.backgroundPosition=bgStyle.backgroundPosition;
+    bgLayer.style.backgroundRepeat=bgStyle.backgroundRepeat;
+    surface.appendChild(bgLayer);
+    surface.__profileBgLayer=bgLayer;
+  }
   const frame=document.createElement("div");
   frame.className="profile-nav-surface-frame";
   const content=document.createElement("div");
@@ -4298,6 +4335,10 @@ function profileApplyFadeThrough(outSurface,inSurface,progress,direction,width){
   inSurface.style.opacity=String(state.inOpacity);
   outSurface.style.transform=`translate3d(${outX.toFixed(2)}px,0,0)`;
   inSurface.style.transform=`translate3d(${inX.toFixed(2)}px,0,0)`;
+  // Cancel the surface transform on the background copy: content drifts, the
+  // background stays welded to the viewport exactly like .bg-fixed.
+  if(outSurface.__profileBgLayer)outSurface.__profileBgLayer.style.transform=`translate3d(${(-outX).toFixed(2)}px,0,0)`;
+  if(inSurface.__profileBgLayer)inSurface.__profileBgLayer.style.transform=`translate3d(${(-inX).toFixed(2)}px,0,0)`;
   outSurface.style.boxShadow="none";
   inSurface.style.boxShadow="none";
 }
@@ -4362,6 +4403,7 @@ function profileCommitSnapshotToLive(activeKey,scrollTop,inSurface,{pop=false,pu
   inSurface.style.zIndex="1423";
   inSurface.style.opacity="1";
   inSurface.style.transform="translate3d(0,0,0)";
+  if(inSurface.__profileBgLayer)inSurface.__profileBgLayer.style.transform="translate3d(0,0,0)";
   profileNextFrames(2,()=>{
     profileNavHost?.classList.remove("is-snapshotting");
     inSurface.style.opacity="0";
@@ -4384,6 +4426,7 @@ function profileRestoreLiveAfterCancel(outSurface,currentScroll){
   outSurface.style.zIndex="1423";
   outSurface.style.opacity="1";
   outSurface.style.transform="translate3d(0,0,0)";
+  if(outSurface.__profileBgLayer)outSurface.__profileBgLayer.style.transform="translate3d(0,0,0)";
   profileNextFrames(2,()=>{
     profileNavHost?.classList.remove("is-snapshotting");
     outSurface.style.opacity="0";

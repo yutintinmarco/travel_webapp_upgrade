@@ -1,6 +1,23 @@
 v7.3.13 — 我的 navigation smoothness + iOS-native UI pass
 
-TRANSITION FIX (the visible "jump" at the start and the end)
+TRANSITION FIX A — the card losing its frosted body on the first frame
+• Root cause: .profile-card is backdrop-filter glass. A .profile-nav-surface is
+  a backdrop root (contain:paint + will-change:transform/opacity), so a card
+  cloned into it has NOTHING behind it to blur and renders as flat 56% white —
+  the card drops to a see-through state the instant the transition starts, even
+  before the finger has moved 1%.
+• Fix: each surface now carries an exact, viewport-aligned copy of .bg-fixed
+  behind its content, restoring the blur source. The copy is counter-translated
+  against the surface transform, so the background still never appears to move.
+• Verified in Chromium against a high-frequency striped background: live page vs
+  cloned surface differ by at most 5/255 on any channel, 0 pixels above 8; the
+  background band drifts by at most 1/255 across the whole fade.
+• .bg-fixed is pinned to background-attachment:scroll so the live layer and the
+  cloned layer are geometrically identical on every engine (attachment:fixed
+  resolves against the nearest transformed ancestor, and iOS treats it as
+  scroll anyway).
+
+TRANSITION FIX B (the visible "jump" at the start and the end)
 • Root cause: v7.3.12 cross-faded the snapshot clone in above the still-visible
   live page ("handoff prime", 96ms) and cross-faded the incoming clone out above
   the newly committed live page ("commit", 132ms). .profile-card is translucent
