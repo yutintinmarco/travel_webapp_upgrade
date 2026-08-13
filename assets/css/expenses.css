@@ -4744,3 +4744,71 @@ html:not(.theme-light):not(.theme-dark) .expenses-module .expense-form-body .spl
   .expenses-module .expense-presentation-sheet > .modal-card { height:min(72dvh,720px) !important; max-height:min(72dvh,720px) !important; }
   .expenses-module .expense-presentation-sheet[data-sheet-size="large"] > .modal-card { height:min(88dvh,820px) !important; max-height:min(88dvh,820px) !important; }
 }
+
+
+/* ==========================================================================
+   v7.6.3.2 · Expense navigation uses itinerary Day Bar language
+   ========================================================================== */
+.expenses-module .expenses-inner-tabs{
+  display:grid !important;
+  grid-template-columns:repeat(4,minmax(0,1fr)) !important;
+  gap:8px !important;
+  width:100% !important;
+  margin:14px 0 12px !important;
+  padding:7px 0 8px !important;
+  overflow:visible !important;
+  background:transparent !important;
+  border:0 !important;
+  border-radius:0 !important;
+  box-shadow:none !important;
+  backdrop-filter:none !important;
+  -webkit-backdrop-filter:none !important;
+}
+.expenses-module .expenses-inner-tab{
+  width:100% !important;
+  min-width:0 !important;
+  height:34px !important;
+  min-height:34px !important;
+  padding:0 8px !important;
+  border-radius:999px !important;
+  border:1px solid rgba(255,255,255,0.72) !important;
+  background:rgba(248,248,250,0.88) !important;
+  color:var(--expense-text) !important;
+  font-size:calc(11px * var(--font-scale)) !important;
+  font-weight:600 !important;
+  white-space:nowrap !important;
+  box-shadow:0 2px 8px rgba(15,23,42,0.07), inset 0 1px 0 rgba(255,255,255,0.86) !important;
+  backdrop-filter:blur(18px) saturate(145%) !important;
+  -webkit-backdrop-filter:blur(18px) saturate(145%) !important;
+  transition:transform .16s ease, background .22s ease, border-color .22s ease, box-shadow .22s ease !important;
+}
+.expenses-module .expenses-inner-tab:active{
+  transform:scale(.96) !important;
+}
+.expenses-module .expenses-inner-tab.active{
+  background:color-mix(in srgb, var(--accent-color,#d85c8a) 18%, rgba(248,248,250,.94)) !important;
+  border-color:color-mix(in srgb, var(--accent-color,#d85c8a) 70%, rgba(255,255,255,.72)) !important;
+  color:var(--expense-text) !important;
+  font-weight:700 !important;
+  box-shadow:0 4px 12px rgba(15,23,42,0.10), inset 0 1px 0 rgba(255,255,255,0.82) !important;
+}
+
+/* Version note now provides the last safe-area clearance. */
+body.expenses-view-active .expenses-module .expenses-app{
+  padding-bottom:8px !important;
+}
+
+html.theme-dark .expenses-module .expenses-inner-tab,
+html:not(.theme-light):not(.theme-dark) .expenses-module .expenses-inner-tab{
+  background:rgba(38,38,46,0.88) !important;
+  border-color:rgba(255,255,255,0.12) !important;
+  color:rgba(225,225,235,0.84) !important;
+  box-shadow:0 3px 10px rgba(0,0,0,0.20), inset 0 1px 0 rgba(255,255,255,0.08) !important;
+}
+html.theme-dark .expenses-module .expenses-inner-tab.active,
+html:not(.theme-light):not(.theme-dark) .expenses-module .expenses-inner-tab.active{
+  background:color-mix(in srgb, var(--accent-color,#d85c8a) 32%, rgba(38,38,46,.92)) !important;
+  border-color:color-mix(in srgb, var(--accent-color,#d85c8a) 75%, rgba(255,255,255,.18)) !important;
+  color:#fff !important;
+  box-shadow:0 4px 12px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.10) !important;
+}
