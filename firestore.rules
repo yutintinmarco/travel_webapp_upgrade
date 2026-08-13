@@ -1,34 +1,97 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    function signedIn() {
-      return request.auth != null;
+    function signedIn() { return request.auth != null; }
+    function authEmail() {
+      return signedIn() && request.auth.token.email is string
+        ? request.auth.token.email.lower()
+        : "";
     }
-
-    function tripPath(tripId) {
-      return /databases/$(database)/documents/trips/$(tripId);
-    }
-
-    function memberPath(tripId, uid) {
-      return /databases/$(database)/documents/trips/$(tripId)/members/$(uid);
-    }
+    function tripPath(tripId) { return /databases/$(database)/documents/trips/$(tripId); }
+    function memberPath(tripId, uid) { return /databases/$(database)/documents/trips/$(tripId)/members/$(uid); }
+    function invitePath(inviteId) { return /databases/$(database)/documents/tripInvites/$(inviteId); }
+    function validInviteRole(role) { return role in ['admin', 'member', 'viewer']; }
 
     function canReadTrip(tripId) {
       return signedIn() && request.auth.uid in get(tripPath(tripId)).data.memberUids;
     }
-
     function roleFor(tripId) {
       return signedIn() && exists(memberPath(tripId, request.auth.uid))
         ? get(memberPath(tripId, request.auth.uid)).data.role
         : null;
     }
-
-    function canManageTrip(tripId) {
-      return roleFor(tripId) in ['owner', 'admin'];
+    function canManageTrip(tripId) { return canReadTrip(tripId) && roleFor(tripId) in ['owner', 'admin']; }
+    function isOwner(tripId) { return canReadTrip(tripId) && roleFor(tripId) == 'owner'; }
+    function canAssignInviteRole(tripId, role) {
+      return (isOwner(tripId) && validInviteRole(role))
+        || (canReadTrip(tripId) && roleFor(tripId) == 'admin' && role in ['member', 'viewer']);
     }
-
-    function isOwner(tripId) {
-      return roleFor(tripId) == 'owner';
+    function memberListValid(data) {
+      return data.memberUids is list
+        && data.memberCount is int
+        && data.memberUids.size() == data.memberUids.toSet().size()
+        && data.memberCount == data.memberUids.size();
+    }
+    function pendingInviteMatchesAuth(inviteId, tripId, role) {
+      return exists(invitePath(inviteId))
+        && get(invitePath(inviteId)).data.status == 'pending'
+        && get(invitePath(inviteId)).data.tripId == tripId
+        && get(invitePath(inviteId)).data.role == role
+        && get(invitePath(inviteId)).data.emailLower == authEmail();
+    }
+    function acceptedInviteMatchesAuthAfter(inviteId, tripId, role) {
+      return existsAfter(invitePath(inviteId))
+        && getAfter(invitePath(inviteId)).data.status == 'accepted'
+        && getAfter(invitePath(inviteId)).data.acceptedBy == request.auth.uid
+        && getAfter(invitePath(inviteId)).data.tripId == tripId
+        && getAfter(invitePath(inviteId)).data.role == role
+        && getAfter(invitePath(inviteId)).data.emailLower == authEmail();
+    }
+    function isSelfJoinTripUpdate(tripId) {
+      let added = request.resource.data.memberUids.removeAll(resource.data.memberUids);
+      let removed = resource.data.memberUids.removeAll(request.resource.data.memberUids);
+      return signedIn()
+        && request.resource.data.createdBy == resource.data.createdBy
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['memberUids', 'memberCount', 'updatedBy', 'updatedAt'])
+        && added.size() == 1
+        && added[0] == request.auth.uid
+        && removed.size() == 0
+        && memberListValid(request.resource.data)
+        && existsAfter(memberPath(tripId, request.auth.uid))
+        && getAfter(memberPath(tripId, request.auth.uid)).data.uid == request.auth.uid
+        && validInviteRole(getAfter(memberPath(tripId, request.auth.uid)).data.role)
+        && getAfter(memberPath(tripId, request.auth.uid)).data.inviteId is string
+        && pendingInviteMatchesAuth(
+          getAfter(memberPath(tripId, request.auth.uid)).data.inviteId,
+          tripId,
+          getAfter(memberPath(tripId, request.auth.uid)).data.role
+        )
+        && acceptedInviteMatchesAuthAfter(
+          getAfter(memberPath(tripId, request.auth.uid)).data.inviteId,
+          tripId,
+          getAfter(memberPath(tripId, request.auth.uid)).data.role
+        );
+    }
+    function isManagerMemberRemoval(tripId) {
+      let added = request.resource.data.memberUids.removeAll(resource.data.memberUids);
+      let removed = resource.data.memberUids.removeAll(request.resource.data.memberUids);
+      return canManageTrip(tripId)
+        && request.resource.data.createdBy == resource.data.createdBy
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['memberUids', 'memberCount', 'updatedBy', 'updatedAt'])
+        && added.size() == 0
+        && removed.size() == 1
+        && get(memberPath(tripId, removed[0])).data.role != 'owner'
+        && !existsAfter(memberPath(tripId, removed[0]))
+        && memberListValid(request.resource.data);
+    }
+    function managerCanModifyMember(tripId, currentRole, nextRole) {
+      return (isOwner(tripId) && currentRole != 'owner' && nextRole in ['admin', 'member', 'viewer'])
+        || (canReadTrip(tripId) && roleFor(tripId) == 'admin'
+          && currentRole in ['member', 'viewer'] && nextRole in ['member', 'viewer']);
+    }
+    function managerCanDeleteMember(tripId, targetRole) {
+      return (isOwner(tripId) && targetRole != 'owner')
+        || (canReadTrip(tripId) && roleFor(tripId) == 'admin' && targetRole in ['member', 'viewer']);
     }
 
     match /users/{uid} {
@@ -36,79 +99,138 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    match /tripInvites/{inviteId} {
+      allow read: if signedIn() && (
+        canManageTrip(resource.data.tripId)
+        || resource.data.emailLower == authEmail()
+      );
+
+      allow create: if signedIn()
+        && request.resource.data.keys().hasAll([
+          'inviteId', 'tripId', 'tripTitle', 'email', 'emailLower',
+          'role', 'status', 'invitedBy', 'invitedByName', 'createdAt', 'updatedAt'
+        ])
+        && request.resource.data.keys().hasOnly([
+          'inviteId', 'tripId', 'tripTitle', 'tripDateRange', 'tripIcon',
+          'email', 'emailLower', 'role', 'status',
+          'invitedBy', 'invitedByName', 'createdAt', 'updatedAt'
+        ])
+        && request.resource.data.inviteId == inviteId
+        && request.resource.data.status == 'pending'
+        && request.resource.data.invitedBy == request.auth.uid
+        && request.resource.data.emailLower == request.resource.data.email.lower().trim()
+        && validInviteRole(request.resource.data.role)
+        && canAssignInviteRole(request.resource.data.tripId, request.resource.data.role);
+
+      allow update: if signedIn()
+        && resource.data.status == 'pending'
+        && resource.data.emailLower == authEmail()
+        && request.resource.data.tripId == resource.data.tripId
+        && request.resource.data.emailLower == resource.data.emailLower
+        && request.resource.data.role == resource.data.role
+        && request.resource.data.invitedBy == resource.data.invitedBy
+        && request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['status', 'acceptedBy', 'acceptedAt', 'declinedBy', 'declinedAt', 'updatedAt'])
+        && (
+          (request.resource.data.status == 'accepted' && request.resource.data.acceptedBy == request.auth.uid)
+          || (request.resource.data.status == 'declined' && request.resource.data.declinedBy == request.auth.uid)
+        );
+
+      allow delete: if signedIn() && canManageTrip(resource.data.tripId);
+    }
+
     match /trips/{tripId} {
       allow create: if signedIn()
         && request.resource.data.createdBy == request.auth.uid
-        && request.auth.uid in request.resource.data.memberUids;
+        && request.auth.uid in request.resource.data.memberUids
+        && memberListValid(request.resource.data);
 
-      // Phase 2C bootstrap: signed-in users may probe one trip document by ID so the
-      // client can distinguish create vs replace before importing. Trip content remains
-      // member-only. Phase 2F will replace this with a stricter access-index pattern.
+      // Phase 2C import probe retained until Phase 2F hardening.
       allow get: if signedIn();
       allow list: if signedIn() && request.auth.uid in resource.data.memberUids;
-      allow update: if canManageTrip(tripId)
-        && request.resource.data.createdBy == resource.data.createdBy
-        && request.resource.data.memberUids == resource.data.memberUids;
+
+      allow update: if request.resource.data.createdBy == resource.data.createdBy
+        && (
+          (canManageTrip(tripId)
+            && request.resource.data.memberUids == resource.data.memberUids
+            && request.resource.data.memberCount == resource.data.memberCount)
+          || isManagerMemberRemoval(tripId)
+          || isSelfJoinTripUpdate(tripId)
+        );
+
       allow delete: if isOwner(tripId);
 
       match /members/{uid} {
         allow read: if canReadTrip(tripId);
+
         allow create: if signedIn() && (
           (uid == request.auth.uid
             && request.resource.data.role == 'owner'
+            && request.resource.data.uid == request.auth.uid
+            && request.auth.uid in getAfter(tripPath(tripId)).data.memberUids
             && getAfter(tripPath(tripId)).data.createdBy == request.auth.uid)
-          || canManageTrip(tripId)
+          ||
+          (uid == request.auth.uid
+            && request.resource.data.uid == request.auth.uid
+            && request.resource.data.status == 'active'
+            && request.resource.data.email == authEmail()
+            && validInviteRole(request.resource.data.role)
+            && request.resource.data.inviteId is string
+            && pendingInviteMatchesAuth(request.resource.data.inviteId, tripId, request.resource.data.role)
+            && acceptedInviteMatchesAuthAfter(request.resource.data.inviteId, tripId, request.resource.data.role)
+            && request.auth.uid in getAfter(tripPath(tripId)).data.memberUids)
         );
-        allow update, delete: if canManageTrip(tripId);
+
+        allow update: if signedIn()
+          && request.resource.data.uid == resource.data.uid
+          && request.resource.data.email == resource.data.email
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['role', 'updatedBy', 'updatedAt'])
+          && managerCanModifyMember(tripId, resource.data.role, request.resource.data.role);
+
+        allow delete: if signedIn()
+          && uid != request.auth.uid
+          && managerCanDeleteMember(tripId, resource.data.role);
       }
 
       match /days/{dayId} {
         allow read: if canReadTrip(tripId);
         allow create, update, delete: if canManageTrip(tripId);
-
         match /items/{itemId} {
           allow read: if canReadTrip(tripId);
           allow create, update, delete: if canManageTrip(tripId);
         }
       }
-
       match /savedPlaces/{placeId} {
         allow read: if canReadTrip(tripId);
         allow create, update, delete: if canManageTrip(tripId);
       }
-
       match /settings/{settingId} {
         allow read: if canReadTrip(tripId);
         allow create, update, delete: if canManageTrip(tripId);
       }
-
       match /snapshots/{snapshotId} {
         allow read: if canManageTrip(tripId);
-        allow create: if canManageTrip(tripId)
-          && request.resource.data.createdBy == request.auth.uid;
+        allow create: if canManageTrip(tripId) && request.resource.data.createdBy == request.auth.uid;
         allow update: if false;
         allow delete: if isOwner(tripId);
       }
-
       match /activityLogs/{logId} {
         allow read: if canReadTrip(tripId);
-        allow create: if canManageTrip(tripId)
-          && request.resource.data.actorUid == request.auth.uid;
+        allow create: if signedIn()
+          && request.resource.data.actorUid == request.auth.uid
+          && (
+            canManageTrip(tripId)
+            || (canReadTrip(tripId) && request.resource.data.actionType == 'trip.member.accept')
+          );
         allow update, delete: if false;
       }
-
       match /expenses/{expenseId} {
         allow read: if canReadTrip(tripId);
-        allow create, update, delete: if canManageTrip(tripId)
-          || roleFor(tripId) == 'member';
+        allow create, update, delete: if canManageTrip(tripId) || roleFor(tripId) == 'member';
       }
-
-      // Expense settlement/payment records use a separate collection.
-      // It must follow the same per-trip access model as expense records.
       match /settlements/{settlementId} {
         allow read: if canReadTrip(tripId);
-        allow create, update, delete: if canManageTrip(tripId)
-          || roleFor(tripId) == 'member';
+        allow create, update, delete: if canManageTrip(tripId) || roleFor(tripId) == 'member';
       }
     }
   }

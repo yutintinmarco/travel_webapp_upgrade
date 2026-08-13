@@ -2466,12 +2466,93 @@ body.expenses-view-active #expenses-root{
   color:var(--muted);
 }
 
+
+/* ==========================================================================
+   Phase 2E · v7.6.4 Member Sharing
+   ========================================================================== */
+.trip-invite-inbox-list,.trip-member-list,.trip-member-pending-list{display:grid;gap:8px;margin-top:10px;}
+.trip-invite-row,.trip-member-row,.trip-member-pending-row{
+  display:grid;grid-template-columns:42px minmax(0,1fr) auto;align-items:center;gap:10px;min-width:0;
+  padding:10px;border-radius:14px;background:rgba(118,118,128,.07);
+  border:1px solid rgba(255,255,255,.34);box-shadow:inset 0 1px 0 rgba(255,255,255,.26);
+}
+.trip-member-avatar{
+  width:42px;height:42px;border-radius:13px;overflow:hidden;display:grid;place-items:center;
+  background:linear-gradient(145deg,rgba(0,122,255,.18),rgba(52,199,89,.12));
+  color:var(--label-primary);font-size:13px;font-weight:800;
+}
+.trip-member-avatar img{width:100%;height:100%;display:block;object-fit:cover;}
+.trip-member-copy{min-width:0;display:grid;gap:3px;}
+.trip-member-copy strong{color:var(--label-primary);font-size:calc(12.5px * var(--font-scale));overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.trip-member-copy small{color:var(--label-secondary);font-size:calc(9.5px * var(--font-scale));overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.trip-member-copy .trip-member-meta{display:flex;flex-wrap:wrap;gap:5px;margin-top:2px;}
+.trip-member-role-pill,.trip-member-you-pill{
+  display:inline-flex;align-items:center;min-height:20px;padding:2px 7px;border-radius:999px;
+  background:rgba(0,122,255,.10);color:#1478d4;font-size:9px;font-weight:780;
+}
+.trip-member-you-pill{background:rgba(52,199,89,.12);color:#238844;}
+.trip-member-side{display:grid;justify-items:end;gap:6px;min-width:76px;}
+.trip-member-role-select{
+  max-width:104px;height:31px;padding:0 24px 0 9px;border:0;border-radius:999px;
+  background:rgba(118,118,128,.10);color:var(--label-primary);font:inherit;
+  font-size:10px;font-weight:760;text-align-last:center;
+}
+.trip-member-role-select:disabled{opacity:.62;}
+.trip-member-remove,.trip-member-cancel,.trip-invite-action{
+  border:0;border-radius:10px;min-height:29px;padding:5px 9px;font-size:9.5px;font-weight:780;
+}
+.trip-member-remove,.trip-member-cancel{background:rgba(255,59,48,.10);color:#c8352d;}
+.trip-member-card-title{display:grid;gap:3px;margin-bottom:12px;}
+.trip-member-card-title strong{font-size:calc(14px * var(--font-scale));color:var(--label-primary);}
+.trip-member-card-title small,.trip-member-role-help,.trip-member-inline-status{
+  color:var(--label-secondary);font-size:calc(9.5px * var(--font-scale));line-height:1.45;
+}
+.trip-member-role-help{margin-top:8px;padding-top:8px;border-top:1px solid var(--separator);}
+.trip-member-field{display:grid;gap:6px;margin-top:10px;color:var(--label-secondary);font-size:10px;font-weight:720;}
+.trip-member-field input{
+  width:100%;height:44px;box-sizing:border-box;border:0;border-radius:13px;padding:0 13px;
+  background:rgba(118,118,128,.08);color:var(--label-primary);font:inherit;font-size:14px;
+  outline:none;box-shadow:inset 0 0 0 1px rgba(118,118,128,.07);
+}
+.trip-member-field input:focus{box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--accent-color,#0a84ff) 72%,transparent);}
+.trip-member-role-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;}
+.trip-member-role-tabs button{
+  min-width:0;height:34px;border:1px solid rgba(255,255,255,.58);border-radius:999px;
+  background:rgba(248,248,250,.82);color:var(--label-secondary);font-size:10px;font-weight:760;
+  box-shadow:0 2px 8px rgba(15,23,42,.06),inset 0 1px 0 rgba(255,255,255,.72);
+}
+.trip-member-role-tabs button.active{
+  color:var(--label-primary);
+  background:color-mix(in srgb,var(--accent-color,#0a84ff) 16%,rgba(248,248,250,.92));
+  border-color:color-mix(in srgb,var(--accent-color,#0a84ff) 62%,rgba(255,255,255,.62));
+}
+.trip-member-role-tabs button:disabled{display:none;}
+.trip-member-primary-action{
+  width:100%;height:44px;margin-top:12px;border:0;border-radius:13px;
+  background:var(--accent-color,#0a84ff);color:#fff;font-size:12px;font-weight:800;
+  box-shadow:0 7px 18px color-mix(in srgb,var(--accent-color,#0a84ff) 28%,transparent);
+}
+.trip-member-primary-action:disabled{opacity:.54;}
+.trip-member-inline-status{margin-top:8px;text-align:center;}
+.trip-member-inline-status.is-error{color:#c8352d;}
+.trip-invite-actions{display:flex;gap:6px;align-items:center;}
+.trip-invite-action.is-accept{background:rgba(52,199,89,.13);color:#238844;}
+.trip-invite-action.is-decline{background:rgba(118,118,128,.10);color:var(--label-secondary);}
+html.theme-dark .trip-invite-row,html.theme-dark .trip-member-row,html.theme-dark .trip-member-pending-row,
+html:not(.theme-light):not(.theme-dark) .trip-invite-row,html:not(.theme-light):not(.theme-dark) .trip-member-row,html:not(.theme-light):not(.theme-dark) .trip-member-pending-row{
+  background:rgba(255,255,255,.055);border-color:rgba(255,255,255,.07);
+}
+html.theme-dark .trip-member-field input,html:not(.theme-light):not(.theme-dark) .trip-member-field input{background:rgba(255,255,255,.07);}
+html.theme-dark .trip-member-role-tabs button,html:not(.theme-light):not(.theme-dark) .trip-member-role-tabs button{
+  background:rgba(38,38,46,.88);border-color:rgba(255,255,255,.10);
+}
+
 </style>
             <link rel="apple-touch-icon" href="assets/icon/trip_icon.png">
   <link rel="icon" type="image/png" href="assets/icon/trip_icon.png">
-  <link rel="manifest" href="manifest.json?v=7.6.3.5">
+  <link rel="manifest" href="manifest.json?v=7.6.4">
   <meta name="apple-mobile-web-app-title" content="關嘉露西生日之旅">
-  <link rel="stylesheet" href="assets/css/expenses.css?v=7.6.3.5">
+  <link rel="stylesheet" href="assets/css/expenses.css?v=7.6.4">
 </head>
 <body>
 <div class="bg-fixed"></div>
@@ -2611,6 +2692,12 @@ body.expenses-view-active #expenses-root{
         <h2>我的旅程</h2>
         <span class="profile-detail-spacer"></span>
       </div>
+      <section class="profile-card trip-invite-inbox-card" id="trip-invite-inbox-card" aria-label="旅程邀請" hidden>
+        <div class="profile-inline-section-heading"><strong>旅程邀請</strong><span class="trip-library-count" id="trip-invite-inbox-count">0</span></div>
+        <div class="trip-invite-inbox-list" id="trip-invite-inbox-list"></div>
+        <div class="trip-library-status" id="trip-invite-inbox-status">用同一個 Google email 登入後，收到嘅旅程邀請會顯示喺呢度。</div>
+      </section>
+
       <section class="profile-card profile-trips-card" aria-label="旅程清單">
         <div class="profile-inline-section-heading"><strong>旅程</strong><span class="trip-library-count" id="trip-library-count">1</span></div>
         <div class="trip-library-list" id="trip-library-list"></div>
@@ -2675,10 +2762,10 @@ body.expenses-view-active #expenses-root{
         <span class="profile-detail-spacer"></span>
       </div>
       <section class="profile-card">
-        <button class="profile-row profile-row-disabled" type="button" disabled>
+        <button class="profile-row" id="trip-members-open-btn" type="button" data-profile-open="trip-members">
           <span class="profile-row-icon profile-icon-green">🔐</span>
-          <span class="profile-row-copy"><strong>旅程權限</strong><small>Owner、Admin、Member、Viewer</small></span>
-          <span class="profile-status-pill">2F</span>
+          <span class="profile-row-copy"><strong>旅程權限</strong><small>邀請成員、角色及存取權限</small></span>
+          <span class="profile-chevron">›</span>
         </button>
         <button class="profile-row profile-row-disabled" type="button" disabled>
           <span class="profile-row-icon profile-icon-red">🔒</span>
@@ -2700,6 +2787,53 @@ body.expenses-view-active #expenses-root{
           <span class="profile-row-copy"><strong>操作記錄</strong><small>行程、支出、備份及權限變更</small></span>
           <span class="profile-chevron">›</span>
         </button>
+      </section>
+    </div>
+
+
+    <div class="profile-nav-page" id="profile-page-trip-members" data-profile-page="trip-members" hidden>
+      <div class="profile-detail-bar">
+        <button class="profile-detail-back" type="button" data-profile-back aria-label="返回旅程設定"><span class="profile-back-glyph">‹</span><span class="profile-detail-back-label">旅程設定</span></button>
+        <h2>旅程權限</h2>
+        <span class="profile-detail-spacer"></span>
+      </div>
+
+      <section class="profile-card trip-member-summary-card">
+        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前旅程</span><strong id="trip-member-current-trip">—</strong></div>
+        <div class="profile-meta-row"><span>你的角色</span><strong id="trip-member-current-role">—</strong></div>
+        <div class="trip-member-role-help">Owner 擁有最高權限；Admin 可以管理旅程及一般成員；Member 可以使用旅程及支出；Viewer 為唯讀。</div>
+      </section>
+
+      <section class="profile-card trip-members-card" aria-label="旅程成員">
+        <div class="profile-inline-section-heading"><strong>成員</strong><span class="trip-library-count" id="trip-member-count">—</span></div>
+        <div class="trip-member-list" id="trip-member-list"></div>
+        <div class="trip-library-status" id="trip-member-status">開啟此頁後會讀取目前 Trip 嘅成員。</div>
+      </section>
+
+      <section class="profile-card trip-member-invite-card" id="trip-member-invite-card" aria-label="邀請成員" hidden>
+        <div class="trip-member-card-title">
+          <strong>邀請成員</strong>
+          <small>對方使用同一個 Google email 登入後，就會喺「我的旅程」見到邀請。</small>
+        </div>
+        <label class="trip-member-field">
+          <span>Google email</span>
+          <input id="trip-member-invite-email" type="email" inputmode="email" autocomplete="email" placeholder="name@gmail.com">
+        </label>
+        <div class="trip-member-field">
+          <span>角色</span>
+          <div class="trip-member-role-tabs" id="trip-member-invite-role-tabs" role="group" aria-label="邀請角色">
+            <button type="button" data-invite-role="admin">Admin</button>
+            <button type="button" data-invite-role="member" class="active">Member</button>
+            <button type="button" data-invite-role="viewer">Viewer</button>
+          </div>
+        </div>
+        <button class="trip-member-primary-action" id="trip-member-send-invite" type="button">發出邀請</button>
+        <div class="trip-member-inline-status" id="trip-member-invite-status">暫時只建立 App 內邀請，唔會自動寄出電郵。</div>
+      </section>
+
+      <section class="profile-card trip-member-pending-card" id="trip-member-pending-card" aria-label="待接受邀請" hidden>
+        <div class="profile-inline-section-heading"><strong>待接受邀請</strong><span class="trip-library-count" id="trip-member-pending-count">0</span></div>
+        <div class="trip-member-pending-list" id="trip-member-pending-list"></div>
       </section>
     </div>
 
@@ -2820,7 +2954,7 @@ body.expenses-view-active #expenses-root{
         <span class="profile-detail-spacer"></span>
       </div>
       <section class="profile-card" aria-label="App 資料">
-        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.6.3.5</strong></div>
+        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.6.4</strong></div>
         <div class="profile-meta-row"><span>資料架構</span><strong>Phase 2E</strong></div>
         <div class="profile-meta-row"><span>主要資料來源</span><strong id="app-data-source-label">Firebase / 本機快取</strong></div>
       </section>
@@ -2838,7 +2972,7 @@ body.expenses-view-active #expenses-root{
     </div>
   </div>
 </div>
-<div class="app-version-note" id="app-version-note">v7.6.3.5</div>
+<div class="app-version-note" id="app-version-note">v7.6.4</div>
 
 
   </div>
@@ -2939,7 +3073,7 @@ body.expenses-view-active #expenses-root{
 </div>
 
 <script>
-const APP_VERSION = "7.6.3.5";
+const APP_VERSION = "7.6.4";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 window.EXPENSES_MODULE_VERSION = EXPENSES_MODULE_VERSION;
@@ -4584,6 +4718,7 @@ function initTripLibrarySafe(data){
           const archiveToggle=document.getElementById("trip-archive-toggle");
           if(archivePanel) archivePanel.hidden=true;
           if(archiveToggle) archiveToggle.setAttribute("aria-expanded","false");
+          restartMyTripInviteSubscription(user||null);
           if(!user){tripLibraryCloudState={status:"signed-out",trips:[],error:null};renderTripLibrary();stopFirebaseTripLoader({fallback:true});return;}
           restartActiveTripCatalog();
         });
@@ -5276,6 +5411,224 @@ document.addEventListener("pointerdown",event=>{if(tripQuickOpen&&!tripQuickPopo
 document.addEventListener("keydown",event=>{if(event.key==="Escape"&&tripQuickOpen)closeTripSwitcher();});
 scrollShell?.addEventListener("scroll",()=>{if(tripQuickOpen)closeTripSwitcher();},{passive:true});
 window.addEventListener("resize",()=>{if(tripQuickOpen)positionTripQuickPopover();},{passive:true});
+
+
+// =========================================================================
+// Phase 2E · v7.6.4 · Trip Member Sharing
+// =========================================================================
+let tripMemberServicePromise=null;
+let tripMemberStopMembers=null;
+let tripMemberStopInvites=null;
+let tripMemberStopMyInvites=null;
+let tripMemberRows=[];
+let tripMemberPendingRows=[];
+let tripMyPendingInvites=[];
+let tripMemberInviteRole="member";
+let tripMemberPageTripId="";
+
+function getTripMemberService(){
+  if(!tripMemberServicePromise)tripMemberServicePromise=import(`./assets/js/trip-member-service.js?v=${APP_VERSION}`);
+  return tripMemberServicePromise;
+}
+function tripMemberEsc(value){return escapeHtmlText(value);}
+function tripMemberInitials(member={}){
+  const label=String(member.displayName||member.email||"?").trim();
+  const words=label.split(/\s+/).filter(Boolean);
+  return (words.length>1?(words[0][0]+words[words.length-1][0]):label.slice(0,2)).toUpperCase();
+}
+function tripMemberAvatarMarkup(member={}){
+  const url=String(member.photoURL||"").trim();
+  return url?`<img src="${tripMemberEsc(url)}" alt="">`:`<span>${tripMemberEsc(tripMemberInitials(member))}</span>`;
+}
+function tripMemberCanManageRole(actorRole,targetRole){
+  if(actorRole==="owner")return targetRole!=="owner";
+  if(actorRole==="admin")return targetRole==="member"||targetRole==="viewer";
+  return false;
+}
+function tripMemberRoleOptions(actorRole,currentRole){
+  const allowed=actorRole==="owner"?["admin","member","viewer"]:["member","viewer"];
+  return allowed.map(role=>`<option value="${role}"${role===currentRole?" selected":""}>${tripLibraryRoleLabel(role)}</option>`).join("");
+}
+function currentTripMemberAccess(){return window.__appTripAccess||currentProfileAccess||{};}
+function currentTripMemberId(){return String(tripLibrarySummary?.tripId||window.__activeTripId||"").trim();}
+
+function renderTripMemberInbox(){
+  const card=document.getElementById("trip-invite-inbox-card"),list=document.getElementById("trip-invite-inbox-list"),
+        count=document.getElementById("trip-invite-inbox-count"),status=document.getElementById("trip-invite-inbox-status");
+  if(!card||!list||!count||!status)return;
+  const rows=Array.isArray(tripMyPendingInvites)?tripMyPendingInvites:[];
+  card.hidden=!tripLibraryCurrentUser||rows.length===0;
+  count.textContent=String(rows.length);
+  if(!rows.length){list.innerHTML="";return;}
+  list.innerHTML=rows.map(invite=>`<div class="trip-invite-row">
+    <span class="trip-member-avatar"><span>✉️</span></span>
+    <span class="trip-member-copy">
+      <strong>${tripMemberEsc(invite.tripTitle||invite.tripId)}</strong>
+      <small>${tripMemberEsc(invite.tripDateRange||invite.tripId)}</small>
+      <span class="trip-member-meta"><span class="trip-member-role-pill">${tripMemberEsc(tripLibraryRoleLabel(invite.role)||invite.role)}</span>${invite.invitedByName?`<span class="trip-library-pill">由 ${tripMemberEsc(invite.invitedByName)} 邀請</span>`:""}</span>
+    </span>
+    <span class="trip-invite-actions">
+      <button class="trip-invite-action is-decline" type="button" data-trip-invite-decline="${tripMemberEsc(invite.inviteId)}">拒絕</button>
+      <button class="trip-invite-action is-accept" type="button" data-trip-invite-accept="${tripMemberEsc(invite.inviteId)}">加入</button>
+    </span>
+  </div>`).join("");
+  status.textContent="邀請綁定 Google email；加入後呢個 Trip 會自動出現喺 Firebase 旅程清單。";
+}
+function stopMyTripInviteSubscription(){
+  if(tripMemberStopMyInvites){tripMemberStopMyInvites();tripMemberStopMyInvites=null;}
+}
+async function restartMyTripInviteSubscription(user){
+  stopMyTripInviteSubscription();tripMyPendingInvites=[];renderTripMemberInbox();
+  if(!user?.uid||!user?.email)return;
+  try{
+    const service=await getTripMemberService();
+    tripMemberStopMyInvites=service.subscribeMyPendingInvites(user,state=>{
+      tripMyPendingInvites=state?.invites||[];renderTripMemberInbox();
+    });
+  }catch(error){console.warn("Trip invite inbox",error);}
+}
+
+function stopTripMemberPageSubscriptions(){
+  if(tripMemberStopMembers){tripMemberStopMembers();tripMemberStopMembers=null;}
+  if(tripMemberStopInvites){tripMemberStopInvites();tripMemberStopInvites=null;}
+}
+function renderTripMemberPage(){
+  const access=currentTripMemberAccess(),actorRole=String(access.role||""),user=window.__appAuthUser||null;
+  const tripId=tripMemberPageTripId||currentTripMemberId();
+  const currentTrip=document.getElementById("trip-member-current-trip"),currentRole=document.getElementById("trip-member-current-role");
+  const list=document.getElementById("trip-member-list"),count=document.getElementById("trip-member-count"),status=document.getElementById("trip-member-status");
+  const inviteCard=document.getElementById("trip-member-invite-card"),pendingCard=document.getElementById("trip-member-pending-card");
+  const pendingList=document.getElementById("trip-member-pending-list"),pendingCount=document.getElementById("trip-member-pending-count");
+
+  if(actorRole!=="owner"&&tripMemberInviteRole==="admin")tripMemberInviteRole="member";
+  document.querySelectorAll("[data-invite-role]").forEach(btn=>btn.classList.toggle("active",btn.dataset.inviteRole===tripMemberInviteRole));
+  document.querySelector('[data-invite-role="admin"]')?.toggleAttribute("disabled",actorRole!=="owner");
+
+  if(currentTrip)currentTrip.textContent=tripLibrarySummary?.title||tripId||"—";
+  if(currentRole)currentRole.textContent=tripLibraryRoleLabel(actorRole)||"未有角色";
+  if(count)count.textContent=String(tripMemberRows.length);
+
+  if(list){
+    if(!tripMemberRows.length)list.innerHTML='<div class="trip-activity-empty">暫時未有成員資料。</div>';
+    else list.innerHTML=tripMemberRows.map(member=>{
+      const role=String(member.role||"viewer"),isSelf=member.uid===user?.uid,canManage=tripMemberCanManageRole(actorRole,role);
+      const roleControl=canManage
+        ? `<select class="trip-member-role-select" data-member-role-uid="${tripMemberEsc(member.uid)}" aria-label="更改角色">${tripMemberRoleOptions(actorRole,role)}</select>`
+        : `<span class="trip-member-role-pill">${tripMemberEsc(tripLibraryRoleLabel(role)||role)}</span>`;
+      const remove=canManage?`<button class="trip-member-remove" type="button" data-member-remove-uid="${tripMemberEsc(member.uid)}">移除</button>`:"";
+      return `<div class="trip-member-row">
+        <span class="trip-member-avatar">${tripMemberAvatarMarkup(member)}</span>
+        <span class="trip-member-copy">
+          <strong>${tripMemberEsc(member.displayName||member.email||member.uid)}</strong>
+          <small>${tripMemberEsc(member.email||member.uid)}</small>
+          <span class="trip-member-meta">${isSelf?'<span class="trip-member-you-pill">你</span>':""}<span class="trip-library-pill">${tripMemberEsc(role==="owner"?"最高權限":role==="admin"?"管理旅程":role==="member"?"可使用支出":"唯讀")}</span></span>
+        </span>
+        <span class="trip-member-side">${roleControl}${remove}</span>
+      </div>`;
+    }).join("");
+  }
+  if(status)status.textContent=actorRole==="owner"?"你係 Owner，可以管理所有非 Owner 成員。":actorRole==="admin"?"你係 Admin，可以邀請及管理 Member / Viewer。":"目前角色只可以查看旅程成員。";
+
+  const canInvite=actorRole==="owner"||actorRole==="admin";
+  if(inviteCard)inviteCard.hidden=!canInvite;
+  if(pendingCard)pendingCard.hidden=!canInvite||tripMemberPendingRows.length===0;
+  if(pendingCount)pendingCount.textContent=String(tripMemberPendingRows.length);
+  if(pendingList){
+    pendingList.innerHTML=tripMemberPendingRows.map(invite=>`<div class="trip-member-pending-row">
+      <span class="trip-member-avatar"><span>✉️</span></span>
+      <span class="trip-member-copy">
+        <strong>${tripMemberEsc(invite.email||invite.emailLower)}</strong>
+        <small>等待對方用同一 Google email 加入</small>
+        <span class="trip-member-meta"><span class="trip-member-role-pill">${tripMemberEsc(tripLibraryRoleLabel(invite.role)||invite.role)}</span></span>
+      </span>
+      <span class="trip-member-side"><button class="trip-member-cancel" type="button" data-member-cancel-invite="${tripMemberEsc(invite.inviteId)}">取消</button></span>
+    </div>`).join("");
+  }
+}
+async function loadTripMemberPage(){
+  stopTripMemberPageSubscriptions();tripMemberRows=[];tripMemberPendingRows=[];tripMemberPageTripId=currentTripMemberId();renderTripMemberPage();
+  const status=document.getElementById("trip-member-status");
+  if(!tripMemberPageTripId){if(status)status.textContent="未有目前 Firebase Trip。";return;}
+  try{
+    const service=await getTripMemberService();
+    tripMemberStopMembers=service.subscribeTripMembers(tripMemberPageTripId,state=>{tripMemberRows=state?.members||[];renderTripMemberPage();});
+    const role=String(currentTripMemberAccess().role||"");
+    if(role==="owner"||role==="admin"){
+      tripMemberStopInvites=service.subscribeTripPendingInvites(tripMemberPageTripId,state=>{tripMemberPendingRows=state?.invites||[];renderTripMemberPage();});
+    }
+  }catch(error){console.error("Trip member page",error);if(status)status.textContent="暫時未能讀取旅程權限資料。";}
+}
+function tripMemberFriendlyError(error){
+  const code=String(error?.code||"");
+  if(code==="invalid-email")return"請輸入有效 Google email。";
+  if(code==="already-member")return"呢個 Google email 已經係旅程成員。";
+  if(code==="invite-exists")return"呢個 Google email 已經有一個待接受邀請。";
+  if(code==="insufficient-role")return"目前角色冇權限進行呢個操作。";
+  if(code==="invite-not-found")return"搵唔到呢個邀請，可能已被取消。";
+  if(code==="invite-email-mismatch")return"呢個邀請唔屬於目前登入嘅 Google email。";
+  if(code==="permission-denied"||code==="firestore/permission-denied")return"Firestore 權限不足，請先 Publish v7.6.4 嘅 firestore.rules。";
+  return error?.message||"操作未完成。";
+}
+
+document.getElementById("trip-members-open-btn")?.addEventListener("click",()=>setTimeout(loadTripMemberPage,0));
+window.addEventListener("app-trip-access",()=>{
+  if(document.getElementById("profile-page-trip-members")?.hidden===false)loadTripMemberPage();
+});
+document.getElementById("trip-member-invite-role-tabs")?.addEventListener("click",event=>{
+  const button=event.target.closest?.("[data-invite-role]");if(!button||button.disabled)return;
+  tripMemberInviteRole=button.dataset.inviteRole||"member";
+  document.querySelectorAll("[data-invite-role]").forEach(btn=>btn.classList.toggle("active",btn===button));
+});
+document.getElementById("trip-member-send-invite")?.addEventListener("click",async()=>{
+  const button=document.getElementById("trip-member-send-invite"),input=document.getElementById("trip-member-invite-email"),status=document.getElementById("trip-member-invite-status");
+  if(!button||!input)return;
+  button.disabled=true;if(status){status.classList.remove("is-error");status.textContent="正在建立邀請…";}
+  try{
+    const service=await getTripMemberService();
+    const result=await service.createTripInvite(currentTripMemberId(),input.value,tripMemberInviteRole,{user:tripLibraryCurrentUser});
+    input.value="";if(status)status.textContent=`已邀請 ${result.email} 成為 ${tripLibraryRoleLabel(result.role)}。`;
+  }catch(error){if(status){status.classList.add("is-error");status.textContent=tripMemberFriendlyError(error);}}
+  finally{button.disabled=false;}
+});
+document.getElementById("trip-member-list")?.addEventListener("change",async event=>{
+  const select=event.target.closest?.("[data-member-role-uid]");if(!select)return;
+  select.disabled=true;
+  try{const service=await getTripMemberService();await service.updateTripMemberRole(currentTripMemberId(),select.dataset.memberRoleUid,select.value,{user:tripLibraryCurrentUser});}
+  catch(error){alert(tripMemberFriendlyError(error));loadTripMemberPage();}
+  finally{select.disabled=false;}
+});
+document.getElementById("trip-member-list")?.addEventListener("click",async event=>{
+  const button=event.target.closest?.("[data-member-remove-uid]");if(!button)return;
+  const uid=button.dataset.memberRemoveUid,member=tripMemberRows.find(item=>item.uid===uid);
+  if(!window.confirm(`移除「${member?.displayName||member?.email||uid}」嘅旅程權限？`))return;
+  button.disabled=true;
+  try{const service=await getTripMemberService();await service.removeTripMember(currentTripMemberId(),uid,{user:tripLibraryCurrentUser});}
+  catch(error){alert(tripMemberFriendlyError(error));button.disabled=false;}
+});
+document.getElementById("trip-member-pending-list")?.addEventListener("click",async event=>{
+  const button=event.target.closest?.("[data-member-cancel-invite]");if(!button)return;
+  button.disabled=true;
+  try{const service=await getTripMemberService();await service.cancelTripInvite(button.dataset.memberCancelInvite,{user:tripLibraryCurrentUser});}
+  catch(error){alert(tripMemberFriendlyError(error));button.disabled=false;}
+});
+document.getElementById("trip-invite-inbox-list")?.addEventListener("click",async event=>{
+  const accept=event.target.closest?.("[data-trip-invite-accept]"),decline=event.target.closest?.("[data-trip-invite-decline]");
+  const button=accept||decline;if(!button)return;
+  const inviteId=accept?.dataset.tripInviteAccept||decline?.dataset.tripInviteDecline;button.disabled=true;
+  try{
+    const service=await getTripMemberService();
+    if(accept){
+      appProgressOpen({kicker:"旅程邀請",title:"加入旅程",subtitle:"正在建立你嘅旅程權限…",percent:18,stageTitle:"驗證 Google email",stageDetail:"確認邀請同目前登入帳戶相符",icon:"👤"});
+      const result=await service.acceptTripInvite(inviteId,{user:tripLibraryCurrentUser});
+      appProgressUpdate({percent:88,stageTitle:"同步旅程清單",stageDetail:`${result.tripTitle||result.tripId} 已加入你嘅 Firebase Trips`,icon:"☁️"});
+      appProgressFinish({title:"已加入旅程",detail:"旅程會自動出現喺「我的旅程」及左上角 Trip Switcher。"});
+    }else await service.declineTripInvite(inviteId,{user:tripLibraryCurrentUser});
+  }catch(error){
+    if(accept)appProgressFail(tripMemberFriendlyError(error));else alert(tripMemberFriendlyError(error));
+    button.disabled=false;
+  }
+});
+
 
 // v7.3.13: fade-through navigation for 我的, with the end-of-transition
 // "pop" removed.
