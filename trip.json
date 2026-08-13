@@ -127,11 +127,11 @@
       ],
       "defaultExchangeRates": {
         "JPY": 1,
-        "HKD": 19.0,
-        "CNY": 21.0,
+        "HKD": 19,
+        "CNY": 21,
         "TWD": 4.8,
         "KRW": 0.11,
-        "USD": 155.0
+        "USD": 155
       },
       "features": {
         "quickAdd": true,
@@ -236,9 +236,19 @@
               "imageId": "img_d7ed53e4",
               "source": "static",
               "src": "assets/gallery/demo_transport.svg",
+              "storagePath": "",
+              "caption": "",
               "sortOrder": 0
             }
-          ]
+          ],
+          "location": {
+            "name": "Team Ian 抵達關西機場",
+            "placeId": "",
+            "latitude": null,
+            "longitude": null,
+            "address": "",
+            "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Kansai+International+Airport"
+          }
         },
         {
           "time": "08:00",
@@ -259,9 +269,19 @@
               "imageId": "img_d7ed53e4",
               "source": "static",
               "src": "assets/gallery/demo_transport.svg",
+              "storagePath": "",
+              "caption": "",
               "sortOrder": 0
             }
-          ]
+          ],
+          "location": {
+            "name": "前往京都",
+            "placeId": "",
+            "latitude": null,
+            "longitude": null,
+            "address": "",
+            "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Kyoto+Station"
+          }
         },
         {
           "time": "09:00",
@@ -284,21 +304,35 @@
               "imageId": "img_991161e5",
               "source": "static",
               "src": "assets/gallery/demo_shop.svg",
+              "storagePath": "",
+              "caption": "",
               "sortOrder": 0
             },
             {
               "imageId": "img_037bf5b0",
               "source": "static",
               "src": "assets/gallery/demo_food.svg",
+              "storagePath": "",
+              "caption": "",
               "sortOrder": 1
             },
             {
               "imageId": "img_0b81e549",
               "source": "static",
               "src": "assets/gallery/demo_nature.svg",
+              "storagePath": "",
+              "caption": "",
               "sortOrder": 2
             }
-          ]
+          ],
+          "location": {
+            "name": "錦市場",
+            "placeId": "",
+            "latitude": null,
+            "longitude": null,
+            "address": "",
+            "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Nishiki+Market+Kyoto"
+          }
         },
         {
           "time": "12:00",
@@ -321,21 +355,35 @@
               "imageId": "img_991161e5",
               "source": "static",
               "src": "assets/gallery/demo_shop.svg",
+              "storagePath": "",
+              "caption": "",
               "sortOrder": 0
             },
             {
               "imageId": "img_037bf5b0",
               "source": "static",
               "src": "assets/gallery/demo_food.svg",
+              "storagePath": "",
+              "caption": "",
               "sortOrder": 1
             },
             {
               "imageId": "img_0b81e549",
               "source": "static",
               "src": "assets/gallery/demo_nature.svg",
+              "storagePath": "",
+              "caption": "",
               "sortOrder": 2
             }
-          ]
+          ],
+          "location": {
+            "name": "Pokémon Center Kyoto",
+            "placeId": "",
+            "latitude": null,
+            "longitude": null,
+            "address": "",
+            "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Pokemon+Center+Kyoto"
+          }
         },
         {
           "time": "15:10",
@@ -356,9 +404,19 @@
               "imageId": "img_d7ed53e4",
               "source": "static",
               "src": "assets/gallery/demo_transport.svg",
+              "storagePath": "",
+              "caption": "",
               "sortOrder": 0
             }
-          ]
+          ],
+          "location": {
+            "name": "Team Edan 抵達關西機場",
+            "placeId": "",
+            "latitude": null,
+            "longitude": null,
+            "address": "",
+            "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Kansai+International+Airport"
+          }
         },
         {
           "time": "16:30",
@@ -379,9 +437,19 @@
               "imageId": "img_d7ed53e4",
               "source": "static",
               "src": "assets/gallery/demo_transport.svg",
+              "storagePath": "",
+              "caption": "",
               "sortOrder": 0
             }
-          ]
+          ],
+          "location": {
+            "name": "前往京都",
+            "placeId": "",
+            "latitude": null,
+            "longitude": null,
+            "address": "",
+            "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Kyoto+Station"
+          }
         },
         {
           "time": "17:00",
@@ -402,9 +470,19 @@
               "imageId": "img_7ab4c3f6",
               "source": "static",
               "src": "assets/gallery/demo_city.svg",
+              "storagePath": "",
+              "caption": "",
               "sortOrder": 0
             }
-          ]
+          ],
+          "location": {
+            "name": "AEON Mall KYOTO",
+            "placeId": "",
+            "latitude": null,
+            "longitude": null,
+            "address": "",
+            "mapsUrl": "https://www.google.com/maps/search/?api=1&query=AEON+Mall+KYOTO"
+          }
         },
         {
           "time": "19:30",
@@ -428,21 +506,35 @@
               "imageId": "img_037bf5b0",
               "source": "static",
               "src": "assets/gallery/demo_food.svg",
+              "storagePath": "",
+              "caption": "",
               "sortOrder": 0
             },
             {
               "imageId": "img_7ab4c3f6",
               "source": "static",
               "src": "assets/gallery/demo_city.svg",
+              "storagePath": "",
+              "caption": "",
               "sortOrder": 1
             },
             {
               "imageId": "img_0b81e549",
               "source": "static",
               "src": "assets/gallery/demo_nature.svg",
+              "storagePath": "",
+              "caption": "",
               "sortOrder": 2
             }
-          ]
+          ],
+          "location": {
+            "name": "炭火串焼とりと 四条烏丸店",
+            "placeId": "",
+            "latitude": null,
+            "longitude": null,
+            "address": "",
+            "mapsUrl": "https://maps.app.goo.gl/favccBogyy6thvew5"
+          }
         },
         {
           "time": "21:30",
@@ -465,21 +557,35 @@
               "imageId": "img_09c601f3",
               "source": "static",
               "src": "assets/gallery/demo_hotel.svg",
+              "storagePath": "",
+              "caption": "",
               "sortOrder": 0
             },
             {
               "imageId": "img_037bf5b0",
               "source": "static",
               "src": "assets/gallery/demo_food.svg",
+              "storagePath": "",
+              "caption": "",
               "sortOrder": 1
             },
             {
               "imageId": "img_0b81e549",
               "source": "static",
               "src": "assets/gallery/demo_nature.svg",
+              "storagePath": "",
+              "caption": "",
               "sortOrder": 2
             }
-          ]
+          ],
+          "location": {
+            "name": "返回京都酒店休息",
+            "placeId": "",
+            "latitude": null,
+            "longitude": null,
+            "address": "",
+            "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Daiwa+Roynet+Hotel+Kyoto+Shijo+Karasuma"
+          }
         }
       ],
       "dayId": "day_20260523",
@@ -512,9 +618,19 @@
               "imageId": "img_d7ed53e4",
               "source": "static",
               "src": "assets/gallery/demo_transport.svg",
+              "storagePath": "",
+              "caption": "",
               "sortOrder": 0
             }
-          ]
+          ],
+          "location": {
+            "name": "前往宇治",
+            "placeId": "",
+            "latitude": null,
+            "longitude": null,
+            "address": "",
+            "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Uji+Station+Kyoto"
+          }
         },
         {
           "time": "09:00",
@@ -538,21 +654,35 @@
               "imageId": "img_0b81e549",
               "source": "static",
               "src": "assets/gallery/demo_nature.svg",
+              "storagePath": "",
+              "caption": "",
               "sortOrder": 0
             },
             {
               "imageId": "img_037bf5b0",
               "source": "static",
               "src": "assets/gallery/demo_food.svg",
+              "storagePath": "",
+              "caption": "",
               "sortOrder": 1
             },
             {
               "imageId": "img_0b81e549",
               "source": "static",
               "src": "assets/gallery/demo_nature.svg",
+              "storagePath": "",
+              "caption": "",
               "sortOrder": 2
             }
-          ]
+          ],
+          "location": {
+            "name": "平等院",
+            "placeId": "",
+            "latitude": null,
+            "longitude": null,
+            "address": "",
+            "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Byodoin+Temple+Uji"
+          }
         },
         {
           "time": "10:00",
@@ -573,9 +703,19 @@
               "imageId": "img_7ab4c3f6",
               "source": "static",
               "src": "assets/gallery/demo_city.svg",
+              "storagePath": "",
+              "caption": "",
               "sortOrder": 0
             }
-          ]
+          ],
+          "location": {
+            "name": "中村藤吉平等院店",
+            "placeId": "",
+            "latitude": null,
+            "longitude": null,
+            "address": "",
+            "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Nakamura+Tokichi+Byodoin+Uji"
+          }
         },
         {
           "time": "10:30",
@@ -587,7 +727,16 @@
           "detail": "由宇治一帶前往 Nintendo Museum，預留交通及等候時間。",
           "maps": "https://www.google.com/maps/search/?api=1&query=Nintendo+Museum+Uji+Kyoto",
           "itemId": "itm_b355a7f3",
-          "sortOrder": 3
+          "sortOrder": 3,
+          "location": {
+            "name": "Travel",
+            "placeId": "",
+            "latitude": null,
+            "longitude": null,
+            "address": "",
+            "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Nintendo+Museum+Uji+Kyoto"
+          },
+          "images": []
         },
         {
           "time": "11:00",
@@ -614,21 +763,35 @@
               "imageId": "img_991161e5",
               "source": "static",
               "src": "assets/gallery/demo_shop.svg",
+              "storagePath": "",
+              "caption": "",
               "sortOrder": 0
             },
             {
               "imageId": "img_037bf5b0",
               "source": "static",
               "src": "assets/gallery/demo_food.svg",
+              "storagePath": "",
+              "caption": "",
               "sortOrder": 1
             },
             {
               "imageId": "img_0b81e549",
               "source": "static",
               "src": "assets/gallery/demo_nature.svg",
+              "storagePath": "",
+              "caption": "",
               "sortOrder": 2
             }
-          ]
+          ],
+          "location": {
+            "name": "Nintendo Museum",
+            "placeId": "",
+            "latitude": null,
+            "longitude": null,
+            "address": "",
+            "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Nintendo+Museum+Uji+Kyoto"
+          }
         },
         {
           "time": "16:00",
@@ -640,7 +803,16 @@
           "detail": "參觀後安排下午茶或稍作休息。",
           "maps": "https://www.google.com/maps/search/?api=1&query=Uji+Kyoto+tea",
           "itemId": "itm_2fd939cf",
-          "sortOrder": 5
+          "sortOrder": 5,
+          "location": {
+            "name": "Tea",
+            "placeId": "",
+            "latitude": null,
+            "longitude": null,
+            "address": "",
+            "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Uji+Kyoto+tea"
+          },
+          "images": []
         },
         {
           "time": "17:00",
@@ -661,9 +833,19 @@
               "imageId": "img_0b81e549",
               "source": "static",
               "src": "assets/gallery/demo_nature.svg",
+              "storagePath": "",
+              "caption": "",
               "sortOrder": 0
             }
-          ]
+          ],
+          "location": {
+            "name": "伏見稻荷大社",
+            "placeId": "",
+            "latitude": null,
+            "longitude": null,
+            "address": "",
+            "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Fushimi+Inari+Taisha"
+          }
         },
         {
           "time": "19:00",
@@ -687,21 +869,35 @@
               "imageId": "img_037bf5b0",
               "source": "static",
               "src": "assets/gallery/demo_food.svg",
+              "storagePath": "",
+              "caption": "",
               "sortOrder": 0
             },
             {
               "imageId": "img_7ab4c3f6",
               "source": "static",
               "src": "assets/gallery/demo_city.svg",
+              "storagePath": "",
+              "caption": "",
               "sortOrder": 1
             },
             {
               "imageId": "img_0b81e549",
               "source": "static",
               "src": "assets/gallery/demo_nature.svg",
+              "storagePath": "",
+              "caption": "",
               "sortOrder": 2
             }
-          ]
+          ],
+          "location": {
+            "name": "炭焼鰻 土井活鰻",
+            "placeId": "",
+            "latitude": null,
+            "longitude": null,
+            "address": "",
+            "mapsUrl": "https://maps.app.goo.gl/6WRg1gPa91CGdBqa7"
+          }
         },
         {
           "time": "20:00",
@@ -722,9 +918,19 @@
               "imageId": "img_d7ed53e4",
               "source": "static",
               "src": "assets/gallery/demo_transport.svg",
+              "storagePath": "",
+              "caption": "",
               "sortOrder": 0
             }
-          ]
+          ],
+          "location": {
+            "name": "返回京都",
+            "placeId": "",
+            "latitude": null,
+            "longitude": null,
+            "address": "",
+            "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Kyoto+Station"
+          }
         },
         {
           "time": "21:30",
@@ -747,21 +953,35 @@
               "imageId": "img_09c601f3",
               "source": "static",
               "src": "assets/gallery/demo_hotel.svg",
+              "storagePath": "",
+              "caption": "",
               "sortOrder": 0
             },
             {
               "imageId": "img_037bf5b0",
               "source": "static",
               "src": "assets/gallery/demo_food.svg",
+              "storagePath": "",
+              "caption": "",
               "sortOrder": 1
             },
             {
               "imageId": "img_0b81e549",
               "source": "static",
               "src": "assets/gallery/demo_nature.svg",
+              "storagePath": "",
+              "caption": "",
               "sortOrder": 2
             }
-          ]
+          ],
+          "location": {
+            "name": "返回京都酒店休息",
+            "placeId": "",
+            "latitude": null,
+            "longitude": null,
+            "address": "",
+            "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Daiwa+Roynet+Hotel+Kyoto+Shijo+Karasuma"
+          }
         }
       ],
       "dayId": "day_20260524",
@@ -794,9 +1014,19 @@
               "imageId": "img_991161e5",
               "source": "static",
               "src": "assets/gallery/demo_shop.svg",
+              "storagePath": "",
+              "caption": "",
               "sortOrder": 0
             }
-          ]
+          ],
+          "location": {
+            "name": "大丸 / Hands / 商店街 / JINS",
+            "placeId": "",
+            "latitude": null,
+            "longitude": null,
+            "address": "",
+            "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Daimaru+Kyoto+Hands+JINS"
+          }
         },
         {
           "time": "11:30",
@@ -820,21 +1050,35 @@
               "imageId": "img_7ab4c3f6",
               "source": "static",
               "src": "assets/gallery/demo_city.svg",
+              "storagePath": "",
+              "caption": "",
               "sortOrder": 0
             },
             {
               "imageId": "img_037bf5b0",
               "source": "static",
               "src": "assets/gallery/demo_food.svg",
+              "storagePath": "",
+              "caption": "",
               "sortOrder": 1
             },
             {
               "imageId": "img_0b81e549",
               "source": "static",
               "src": "assets/gallery/demo_nature.svg",
+              "storagePath": "",
+              "caption": "",
               "sortOrder": 2
             }
-          ]
+          ],
+          "location": {
+            "name": "Kobe Beef Mouriya Gion",
+            "placeId": "",
+            "latitude": null,
+            "longitude": null,
+            "address": "",
+            "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Kobe+Beef+Mouriya+Gion"
+          }
         },
         {
           "time": "14:00",
@@ -846,7 +1090,16 @@
           "detail": "午餐後前往銀閣寺方向。",
           "maps": "https://www.google.com/maps/search/?api=1&query=Ginkakuji+Kyoto",
           "itemId": "itm_f57a34ca",
-          "sortOrder": 2
+          "sortOrder": 2,
+          "location": {
+            "name": "Travel",
+            "placeId": "",
+            "latitude": null,
+            "longitude": null,
+            "address": "",
+            "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Ginkakuji+Kyoto"
+          },
+          "images": []
         },
         {
           "time": "16:00",
@@ -869,21 +1122,35 @@
               "imageId": "img_0b81e549",
               "source": "static",
               "src": "assets/gallery/demo_nature.svg",
+              "storagePath": "",
+              "caption": "",
               "sortOrder": 0
             },
             {
               "imageId": "img_037bf5b0",
               "source": "static",
               "src": "assets/gallery/demo_food.svg",
+              "storagePath": "",
+              "caption": "",
               "sortOrder": 1
             },
             {
               "imageId": "img_0b81e549",
               "source": "static",
               "src": "assets/gallery/demo_nature.svg",
+              "storagePath": "",
+              "caption": "",
               "sortOrder": 2
             }
-          ]
+          ],
+          "location": {
+            "name": "銀閣寺",
+            "placeId": "",
+            "latitude": null,
+            "longitude": null,
+            "address": "",
+            "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Ginkakuji+Kyoto"
+          }
         },
         {
           "time": "18:00",
@@ -907,21 +1174,35 @@
               "imageId": "img_037bf5b0",
               "source": "static",
               "src": "assets/gallery/demo_food.svg",
+              "storagePath": "",
+              "caption": "",
               "sortOrder": 0
             },
             {
               "imageId": "img_7ab4c3f6",
               "source": "static",
               "src": "assets/gallery/demo_city.svg",
+              "storagePath": "",
+              "caption": "",
               "sortOrder": 1
             },
             {
               "imageId": "img_0b81e549",
               "source": "static",
               "src": "assets/gallery/demo_nature.svg",
+              "storagePath": "",
+              "caption": "",
               "sortOrder": 2
             }
-          ]
+          ],
+          "location": {
+            "name": "天下一品 総本店",
+            "placeId": "",
+            "latitude": null,
+            "longitude": null,
+            "address": "",
+            "mapsUrl": "https://maps.app.goo.gl/dT4zWjnRvvZLHP7t7"
+          }
         },
         {
           "time": "20:30",
@@ -944,21 +1225,35 @@
               "imageId": "img_09c601f3",
               "source": "static",
               "src": "assets/gallery/demo_hotel.svg",
+              "storagePath": "",
+              "caption": "",
               "sortOrder": 0
             },
             {
               "imageId": "img_037bf5b0",
               "source": "static",
               "src": "assets/gallery/demo_food.svg",
+              "storagePath": "",
+              "caption": "",
               "sortOrder": 1
             },
             {
               "imageId": "img_0b81e549",
               "source": "static",
               "src": "assets/gallery/demo_nature.svg",
+              "storagePath": "",
+              "caption": "",
               "sortOrder": 2
             }
-          ]
+          ],
+          "location": {
+            "name": "返回京都酒店休息",
+            "placeId": "",
+            "latitude": null,
+            "longitude": null,
+            "address": "",
+            "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Daiwa+Roynet+Hotel+Kyoto+Shijo+Karasuma"
+          }
         }
       ],
       "dayId": "day_20260525",
@@ -982,7 +1277,16 @@
           "detail": "早上早餐後開始行程。",
           "maps": "",
           "itemId": "itm_9450dee1",
-          "sortOrder": 0
+          "sortOrder": 0,
+          "location": {
+            "name": "Breakfast",
+            "placeId": "",
+            "latitude": null,
+            "longitude": null,
+            "address": "",
+            "mapsUrl": ""
+          },
+          "images": []
         },
         {
           "time": "10:00",
@@ -1005,21 +1309,35 @@
               "imageId": "img_0b81e549",
               "source": "static",
               "src": "assets/gallery/demo_nature.svg",
+              "storagePath": "",
+              "caption": "",
               "sortOrder": 0
             },
             {
               "imageId": "img_037bf5b0",
               "source": "static",
               "src": "assets/gallery/demo_food.svg",
+              "storagePath": "",
+              "caption": "",
               "sortOrder": 1
             },
             {
               "imageId": "img_0b81e549",
               "source": "static",
               "src": "assets/gallery/demo_nature.svg",
+              "storagePath": "",
+              "caption": "",
               "sortOrder": 2
             }
-          ]
+          ],
+          "location": {
+            "name": "金閣寺",
+            "placeId": "",
+            "latitude": null,
+            "longitude": null,
+            "address": "",
+            "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Kinkakuji+Kyoto"
+          }
         },
         {
           "time": "13:00",
@@ -1040,9 +1358,19 @@
               "imageId": "img_d7ed53e4",
               "source": "static",
               "src": "assets/gallery/demo_transport.svg",
+              "storagePath": "",
+              "caption": "",
               "sortOrder": 0
             }
-          ]
+          ],
+          "location": {
+            "name": "前往大阪",
+            "placeId": "",
+            "latitude": null,
+            "longitude": null,
+            "address": "",
+            "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Osaka+Station"
+          }
         },
         {
           "time": "15:00",
@@ -1065,21 +1393,35 @@
               "imageId": "img_991161e5",
               "source": "static",
               "src": "assets/gallery/demo_shop.svg",
+              "storagePath": "",
+              "caption": "",
               "sortOrder": 0
             },
             {
               "imageId": "img_037bf5b0",
               "source": "static",
               "src": "assets/gallery/demo_food.svg",
+              "storagePath": "",
+              "caption": "",
               "sortOrder": 1
             },
             {
               "imageId": "img_0b81e549",
               "source": "static",
               "src": "assets/gallery/demo_nature.svg",
+              "storagePath": "",
+              "caption": "",
               "sortOrder": 2
             }
-          ]
+          ],
+          "location": {
+            "name": "自由行：心齋橋 / 難波",
+            "placeId": "",
+            "latitude": null,
+            "longitude": null,
+            "address": "",
+            "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Shinsaibashi+Namba+Osaka"
+          }
         },
         {
           "time": "15:00",
@@ -1102,21 +1444,35 @@
               "imageId": "img_991161e5",
               "source": "static",
               "src": "assets/gallery/demo_shop.svg",
+              "storagePath": "",
+              "caption": "",
               "sortOrder": 0
             },
             {
               "imageId": "img_037bf5b0",
               "source": "static",
               "src": "assets/gallery/demo_food.svg",
+              "storagePath": "",
+              "caption": "",
               "sortOrder": 1
             },
             {
               "imageId": "img_0b81e549",
               "source": "static",
               "src": "assets/gallery/demo_nature.svg",
+              "storagePath": "",
+              "caption": "",
               "sortOrder": 2
             }
-          ]
+          ],
+          "location": {
+            "name": "自由行：心齋橋 / 難波",
+            "placeId": "",
+            "latitude": null,
+            "longitude": null,
+            "address": "",
+            "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Shinsaibashi+Namba+Osaka"
+          }
         },
         {
           "time": "19:00",
@@ -1140,21 +1496,35 @@
               "imageId": "img_7ab4c3f6",
               "source": "static",
               "src": "assets/gallery/demo_city.svg",
+              "storagePath": "",
+              "caption": "",
               "sortOrder": 0
             },
             {
               "imageId": "img_037bf5b0",
               "source": "static",
               "src": "assets/gallery/demo_food.svg",
+              "storagePath": "",
+              "caption": "",
               "sortOrder": 1
             },
             {
               "imageId": "img_0b81e549",
               "source": "static",
               "src": "assets/gallery/demo_nature.svg",
+              "storagePath": "",
+              "caption": "",
               "sortOrder": 2
             }
-          ]
+          ],
+          "location": {
+            "name": "国産牛焼肉食べ放題 あぶりや千日前店",
+            "placeId": "",
+            "latitude": null,
+            "longitude": null,
+            "address": "",
+            "mapsUrl": "https://maps.app.goo.gl/fsFQfW9Vvd63mvYa6"
+          }
         },
         {
           "time": "21:30",
@@ -1177,21 +1547,35 @@
               "imageId": "img_09c601f3",
               "source": "static",
               "src": "assets/gallery/demo_hotel.svg",
+              "storagePath": "",
+              "caption": "",
               "sortOrder": 0
             },
             {
               "imageId": "img_037bf5b0",
               "source": "static",
               "src": "assets/gallery/demo_food.svg",
+              "storagePath": "",
+              "caption": "",
               "sortOrder": 1
             },
             {
               "imageId": "img_0b81e549",
               "source": "static",
               "src": "assets/gallery/demo_nature.svg",
+              "storagePath": "",
+              "caption": "",
               "sortOrder": 2
             }
-          ]
+          ],
+          "location": {
+            "name": "返回大阪住宿休息",
+            "placeId": "",
+            "latitude": null,
+            "longitude": null,
+            "address": "",
+            "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Apartment+Hotel+11+Shinimamiya+1+Osaka"
+          }
         }
       ],
       "cities": [
@@ -1228,9 +1612,19 @@
               "imageId": "img_d7ed53e4",
               "source": "static",
               "src": "assets/gallery/demo_transport.svg",
+              "storagePath": "",
+              "caption": "",
               "sortOrder": 0
             }
-          ]
+          ],
+          "location": {
+            "name": "出發前往神戶",
+            "placeId": "",
+            "latitude": null,
+            "longitude": null,
+            "address": "",
+            "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Kobe+Animal+Kingdom"
+          }
         },
         {
           "time": "10:00",
@@ -1254,21 +1648,35 @@
               "imageId": "img_7ab4c3f6",
               "source": "static",
               "src": "assets/gallery/demo_city.svg",
+              "storagePath": "",
+              "caption": "",
               "sortOrder": 0
             },
             {
               "imageId": "img_037bf5b0",
               "source": "static",
               "src": "assets/gallery/demo_food.svg",
+              "storagePath": "",
+              "caption": "",
               "sortOrder": 1
             },
             {
               "imageId": "img_0b81e549",
               "source": "static",
               "src": "assets/gallery/demo_nature.svg",
+              "storagePath": "",
+              "caption": "",
               "sortOrder": 2
             }
-          ]
+          ],
+          "location": {
+            "name": "神戶動物王國",
+            "placeId": "",
+            "latitude": null,
+            "longitude": null,
+            "address": "",
+            "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Kobe+Animal+Kingdom"
+          }
         },
         {
           "time": "13:00",
@@ -1289,9 +1697,19 @@
               "imageId": "img_d7ed53e4",
               "source": "static",
               "src": "assets/gallery/demo_transport.svg",
+              "storagePath": "",
+              "caption": "",
               "sortOrder": 0
             }
-          ]
+          ],
+          "location": {
+            "name": "前往三宮 / 元町",
+            "placeId": "",
+            "latitude": null,
+            "longitude": null,
+            "address": "",
+            "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Sannomiya+Motomachi+Kobe"
+          }
         },
         {
           "time": "13:30",
@@ -1315,21 +1733,35 @@
               "imageId": "img_7ab4c3f6",
               "source": "static",
               "src": "assets/gallery/demo_city.svg",
+              "storagePath": "",
+              "caption": "",
               "sortOrder": 0
             },
             {
               "imageId": "img_037bf5b0",
               "source": "static",
               "src": "assets/gallery/demo_food.svg",
+              "storagePath": "",
+              "caption": "",
               "sortOrder": 1
             },
             {
               "imageId": "img_0b81e549",
               "source": "static",
               "src": "assets/gallery/demo_nature.svg",
+              "storagePath": "",
+              "caption": "",
               "sortOrder": 2
             }
-          ]
+          ],
+          "location": {
+            "name": "かに道楽神戸三宮店",
+            "placeId": "",
+            "latitude": null,
+            "longitude": null,
+            "address": "",
+            "mapsUrl": "https://maps.app.goo.gl/HDB9xaeu5mUnbtow8"
+          }
         },
         {
           "time": "15:00",
@@ -1350,9 +1782,19 @@
               "imageId": "img_7ab4c3f6",
               "source": "static",
               "src": "assets/gallery/demo_city.svg",
+              "storagePath": "",
+              "caption": "",
               "sortOrder": 0
             }
-          ]
+          ],
+          "location": {
+            "name": "南京町 / 元町散策",
+            "placeId": "",
+            "latitude": null,
+            "longitude": null,
+            "address": "",
+            "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Nankinmachi+Kobe"
+          }
         },
         {
           "time": "16:30",
@@ -1375,21 +1817,35 @@
               "imageId": "img_991161e5",
               "source": "static",
               "src": "assets/gallery/demo_shop.svg",
+              "storagePath": "",
+              "caption": "",
               "sortOrder": 0
             },
             {
               "imageId": "img_037bf5b0",
               "source": "static",
               "src": "assets/gallery/demo_food.svg",
+              "storagePath": "",
+              "caption": "",
               "sortOrder": 1
             },
             {
               "imageId": "img_0b81e549",
               "source": "static",
               "src": "assets/gallery/demo_nature.svg",
+              "storagePath": "",
+              "caption": "",
               "sortOrder": 2
             }
-          ]
+          ],
+          "location": {
+            "name": "神戶臨海樂園 umie / MOSAIC",
+            "placeId": "",
+            "latitude": null,
+            "longitude": null,
+            "address": "",
+            "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Kobe+Harborland+umie+MOSAIC"
+          }
         },
         {
           "time": "18:30",
@@ -1412,21 +1868,35 @@
               "imageId": "img_037bf5b0",
               "source": "static",
               "src": "assets/gallery/demo_food.svg",
+              "storagePath": "",
+              "caption": "",
               "sortOrder": 0
             },
             {
               "imageId": "img_7ab4c3f6",
               "source": "static",
               "src": "assets/gallery/demo_city.svg",
+              "storagePath": "",
+              "caption": "",
               "sortOrder": 1
             },
             {
               "imageId": "img_0b81e549",
               "source": "static",
               "src": "assets/gallery/demo_nature.svg",
+              "storagePath": "",
+              "caption": "",
               "sortOrder": 2
             }
-          ]
+          ],
+          "location": {
+            "name": "Dinner at Harborland",
+            "placeId": "",
+            "latitude": null,
+            "longitude": null,
+            "address": "",
+            "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Kobe+Harborland+MOSAIC+restaurants"
+          }
         },
         {
           "time": "20:00",
@@ -1449,21 +1919,35 @@
               "imageId": "img_7ab4c3f6",
               "source": "static",
               "src": "assets/gallery/demo_city.svg",
+              "storagePath": "",
+              "caption": "",
               "sortOrder": 0
             },
             {
               "imageId": "img_037bf5b0",
               "source": "static",
               "src": "assets/gallery/demo_food.svg",
+              "storagePath": "",
+              "caption": "",
               "sortOrder": 1
             },
             {
               "imageId": "img_0b81e549",
               "source": "static",
               "src": "assets/gallery/demo_nature.svg",
+              "storagePath": "",
+              "caption": "",
               "sortOrder": 2
             }
-          ]
+          ],
+          "location": {
+            "name": "Meriken Park / Kobe Port Tower 夜景",
+            "placeId": "",
+            "latitude": null,
+            "longitude": null,
+            "address": "",
+            "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Meriken+Park+Kobe+Port+Tower"
+          }
         },
         {
           "time": "21:00",
@@ -1484,9 +1968,19 @@
               "imageId": "img_d7ed53e4",
               "source": "static",
               "src": "assets/gallery/demo_transport.svg",
+              "storagePath": "",
+              "caption": "",
               "sortOrder": 0
             }
-          ]
+          ],
+          "location": {
+            "name": "返回大阪",
+            "placeId": "",
+            "latitude": null,
+            "longitude": null,
+            "address": "",
+            "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Osaka+Station"
+          }
         },
         {
           "time": "22:00",
@@ -1509,21 +2003,35 @@
               "imageId": "img_09c601f3",
               "source": "static",
               "src": "assets/gallery/demo_hotel.svg",
+              "storagePath": "",
+              "caption": "",
               "sortOrder": 0
             },
             {
               "imageId": "img_037bf5b0",
               "source": "static",
               "src": "assets/gallery/demo_food.svg",
+              "storagePath": "",
+              "caption": "",
               "sortOrder": 1
             },
             {
               "imageId": "img_0b81e549",
               "source": "static",
               "src": "assets/gallery/demo_nature.svg",
+              "storagePath": "",
+              "caption": "",
               "sortOrder": 2
             }
-          ]
+          ],
+          "location": {
+            "name": "返回大阪住宿休息",
+            "placeId": "",
+            "latitude": null,
+            "longitude": null,
+            "address": "",
+            "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Apartment+Hotel+11+Shinimamiya+1+Osaka"
+          }
         }
       ],
       "dayId": "day_20260527",
@@ -1556,9 +2064,19 @@
               "imageId": "img_991161e5",
               "source": "static",
               "src": "assets/gallery/demo_shop.svg",
+              "storagePath": "",
+              "caption": "",
               "sortOrder": 0
             }
-          ]
+          ],
+          "location": {
+            "name": "木津市場",
+            "placeId": "",
+            "latitude": null,
+            "longitude": null,
+            "address": "",
+            "mapsUrl": "https://maps.app.goo.gl/gHhYGkgWEd9Cbh4Y7"
+          }
         },
         {
           "time": "10:30",
@@ -1579,9 +2097,19 @@
               "imageId": "img_991161e5",
               "source": "static",
               "src": "assets/gallery/demo_shop.svg",
+              "storagePath": "",
+              "caption": "",
               "sortOrder": 0
             }
-          ]
+          ],
+          "location": {
+            "name": "天王寺 Q’s Mall",
+            "placeId": "",
+            "latitude": null,
+            "longitude": null,
+            "address": "",
+            "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Abeno+Q's+Mall+Tennoji+Osaka"
+          }
         },
         {
           "time": "15:00",
@@ -1602,9 +2130,19 @@
               "imageId": "img_d7ed53e4",
               "source": "static",
               "src": "assets/gallery/demo_transport.svg",
+              "storagePath": "",
+              "caption": "",
               "sortOrder": 0
             }
-          ]
+          ],
+          "location": {
+            "name": "Travel",
+            "placeId": "",
+            "latitude": null,
+            "longitude": null,
+            "address": "",
+            "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Kansai+International+Airport"
+          }
         },
         {
           "time": "18:30",
@@ -1625,9 +2163,19 @@
               "imageId": "img_d7ed53e4",
               "source": "static",
               "src": "assets/gallery/demo_transport.svg",
+              "storagePath": "",
+              "caption": "",
               "sortOrder": 0
             }
-          ]
+          ],
+          "location": {
+            "name": "Team Ian 回程 CX595",
+            "placeId": "",
+            "latitude": null,
+            "longitude": null,
+            "address": "",
+            "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Kansai+International+Airport"
+          }
         },
         {
           "time": "19:25",
@@ -1648,9 +2196,19 @@
               "imageId": "img_d7ed53e4",
               "source": "static",
               "src": "assets/gallery/demo_transport.svg",
+              "storagePath": "",
+              "caption": "",
               "sortOrder": 0
             }
-          ]
+          ],
+          "location": {
+            "name": "Team Edan 回程 CX569",
+            "placeId": "",
+            "latitude": null,
+            "longitude": null,
+            "address": "",
+            "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Kansai+International+Airport"
+          }
         }
       ],
       "dayId": "day_20260528",
@@ -1692,15 +2250,27 @@
             "imageId": "img_037bf5b0",
             "source": "static",
             "src": "assets/gallery/demo_food.svg",
+            "storagePath": "",
+            "caption": "",
             "sortOrder": 0
           },
           {
             "imageId": "img_7ab4c3f6",
             "source": "static",
             "src": "assets/gallery/demo_city.svg",
+            "storagePath": "",
+            "caption": "",
             "sortOrder": 1
           }
-        ]
+        ],
+        "location": {
+          "name": "Konnamonja こんなもんじゃ",
+          "placeId": "",
+          "latitude": null,
+          "longitude": null,
+          "address": "",
+          "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Konnamonja+Kyoto+Nishiki+Market"
+        }
       },
       {
         "title": "錦市場總覽",
@@ -1733,15 +2303,27 @@
             "imageId": "img_037bf5b0",
             "source": "static",
             "src": "assets/gallery/demo_food.svg",
+            "storagePath": "",
+            "caption": "",
             "sortOrder": 0
           },
           {
             "imageId": "img_7ab4c3f6",
             "source": "static",
             "src": "assets/gallery/demo_city.svg",
+            "storagePath": "",
+            "caption": "",
             "sortOrder": 1
           }
-        ]
+        ],
+        "location": {
+          "name": "錦市場總覽",
+          "placeId": "",
+          "latitude": null,
+          "longitude": null,
+          "address": "",
+          "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Nishiki+Market+Kyoto"
+        }
       },
       {
         "title": "Gion Tsujiri / 茶寮都路里",
@@ -1774,9 +2356,19 @@
             "imageId": "img_037bf5b0",
             "source": "static",
             "src": "assets/gallery/demo_food.svg",
+            "storagePath": "",
+            "caption": "",
             "sortOrder": 0
           }
-        ]
+        ],
+        "location": {
+          "name": "Gion Tsujiri / 茶寮都路里",
+          "placeId": "",
+          "latitude": null,
+          "longitude": null,
+          "address": "",
+          "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Gion+Tsujiri+Kyoto"
+        }
       },
       {
         "title": "Tenkaippin 天下一品",
@@ -1807,9 +2399,19 @@
             "imageId": "img_037bf5b0",
             "source": "static",
             "src": "assets/gallery/demo_food.svg",
+            "storagePath": "",
+            "caption": "",
             "sortOrder": 0
           }
-        ]
+        ],
+        "location": {
+          "name": "Tenkaippin 天下一品",
+          "placeId": "",
+          "latitude": null,
+          "longitude": null,
+          "address": "",
+          "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Tenkaippin+Kyoto"
+        }
       },
       {
         "title": "中村藤吉 宇治",
@@ -1841,9 +2443,19 @@
             "imageId": "img_037bf5b0",
             "source": "static",
             "src": "assets/gallery/demo_food.svg",
+            "storagePath": "",
+            "caption": "",
             "sortOrder": 0
           }
-        ]
+        ],
+        "location": {
+          "name": "中村藤吉 宇治",
+          "placeId": "",
+          "latitude": null,
+          "longitude": null,
+          "address": "",
+          "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Nakamura+Tokichi+Uji"
+        }
       },
       {
         "title": "伊藤久右衛門 宇治",
@@ -1876,15 +2488,27 @@
             "imageId": "img_037bf5b0",
             "source": "static",
             "src": "assets/gallery/demo_food.svg",
+            "storagePath": "",
+            "caption": "",
             "sortOrder": 0
           },
           {
             "imageId": "img_7ab4c3f6",
             "source": "static",
             "src": "assets/gallery/demo_city.svg",
+            "storagePath": "",
+            "caption": "",
             "sortOrder": 1
           }
-        ]
+        ],
+        "location": {
+          "name": "伊藤久右衛門 宇治",
+          "placeId": "",
+          "latitude": null,
+          "longitude": null,
+          "address": "",
+          "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Itoh+Kyuemon+Uji"
+        }
       },
       {
         "title": "辻利 宇治本店",
@@ -1916,9 +2540,19 @@
             "imageId": "img_037bf5b0",
             "source": "static",
             "src": "assets/gallery/demo_food.svg",
+            "storagePath": "",
+            "caption": "",
             "sortOrder": 0
           }
-        ]
+        ],
+        "location": {
+          "name": "辻利 宇治本店",
+          "placeId": "",
+          "latitude": null,
+          "longitude": null,
+          "address": "",
+          "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Tsujiri+Uji+Main+Store"
+        }
       },
       {
         "title": "Takoyaki Doraku Wanaka 道頓堀店",
@@ -1951,15 +2585,27 @@
             "imageId": "img_037bf5b0",
             "source": "static",
             "src": "assets/gallery/demo_food.svg",
+            "storagePath": "",
+            "caption": "",
             "sortOrder": 0
           },
           {
             "imageId": "img_7ab4c3f6",
             "source": "static",
             "src": "assets/gallery/demo_city.svg",
+            "storagePath": "",
+            "caption": "",
             "sortOrder": 1
           }
-        ]
+        ],
+        "location": {
+          "name": "Takoyaki Doraku Wanaka 道頓堀店",
+          "placeId": "",
+          "latitude": null,
+          "longitude": null,
+          "address": "",
+          "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Takoyaki+Doraku+Wanaka+Dotonbori"
+        }
       },
       {
         "title": "Creo Ru 道頓堀",
@@ -1991,9 +2637,19 @@
             "imageId": "img_037bf5b0",
             "source": "static",
             "src": "assets/gallery/demo_food.svg",
+            "storagePath": "",
+            "caption": "",
             "sortOrder": 0
           }
-        ]
+        ],
+        "location": {
+          "name": "Creo Ru 道頓堀",
+          "placeId": "",
+          "latitude": null,
+          "longitude": null,
+          "address": "",
+          "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Creo+Ru+Dotonbori"
+        }
       },
       {
         "title": "Mizuno 美津の",
@@ -2025,9 +2681,19 @@
             "imageId": "img_037bf5b0",
             "source": "static",
             "src": "assets/gallery/demo_food.svg",
+            "storagePath": "",
+            "caption": "",
             "sortOrder": 0
           }
-        ]
+        ],
+        "location": {
+          "name": "Mizuno 美津の",
+          "placeId": "",
+          "latitude": null,
+          "longitude": null,
+          "address": "",
+          "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Mizuno+Okonomiyaki+Osaka"
+        }
       },
       {
         "title": "Kushikatsu Daruma 串炸だるま",
@@ -2059,9 +2725,19 @@
             "imageId": "img_037bf5b0",
             "source": "static",
             "src": "assets/gallery/demo_food.svg",
+            "storagePath": "",
+            "caption": "",
             "sortOrder": 0
           }
-        ]
+        ],
+        "location": {
+          "name": "Kushikatsu Daruma 串炸だるま",
+          "placeId": "",
+          "latitude": null,
+          "longitude": null,
+          "address": "",
+          "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Kushikatsu+Daruma+Namba+Osaka"
+        }
       },
       {
         "title": "551 蓬萊",
@@ -2093,9 +2769,19 @@
             "imageId": "img_037bf5b0",
             "source": "static",
             "src": "assets/gallery/demo_food.svg",
+            "storagePath": "",
+            "caption": "",
             "sortOrder": 0
           }
-        ]
+        ],
+        "location": {
+          "name": "551 蓬萊",
+          "placeId": "",
+          "latitude": null,
+          "longitude": null,
+          "address": "",
+          "mapsUrl": "https://www.google.com/maps/search/?api=1&query=551+Horai+Osaka"
+        }
       },
       {
         "title": "木津市場早餐",
@@ -2127,9 +2813,19 @@
             "imageId": "img_037bf5b0",
             "source": "static",
             "src": "assets/gallery/demo_food.svg",
+            "storagePath": "",
+            "caption": "",
             "sortOrder": 0
           }
-        ]
+        ],
+        "location": {
+          "name": "木津市場早餐",
+          "placeId": "",
+          "latitude": null,
+          "longitude": null,
+          "address": "",
+          "mapsUrl": "https://maps.app.goo.gl/gHhYGkgWEd9Cbh4Y7"
+        }
       },
       {
         "title": "老祥記 Roushouki",
@@ -2161,9 +2857,19 @@
             "imageId": "img_037bf5b0",
             "source": "static",
             "src": "assets/gallery/demo_food.svg",
+            "storagePath": "",
+            "caption": "",
             "sortOrder": 0
           }
-        ]
+        ],
+        "location": {
+          "name": "老祥記 Roushouki",
+          "placeId": "",
+          "latitude": null,
+          "longitude": null,
+          "address": "",
+          "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Roushouki+Kobe+Nankinmachi"
+        }
       },
       {
         "title": "元祖ぎょうざ苑",
@@ -2195,9 +2901,19 @@
             "imageId": "img_037bf5b0",
             "source": "static",
             "src": "assets/gallery/demo_food.svg",
+            "storagePath": "",
+            "caption": "",
             "sortOrder": 0
           }
-        ]
+        ],
+        "location": {
+          "name": "元祖ぎょうざ苑",
+          "placeId": "",
+          "latitude": null,
+          "longitude": null,
+          "address": "",
+          "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Ganso+Gyozaen+Kobe"
+        }
       },
       {
         "title": "神戶牛可樂餅 / 牛肉小食",
@@ -2229,9 +2945,19 @@
             "imageId": "img_037bf5b0",
             "source": "static",
             "src": "assets/gallery/demo_food.svg",
+            "storagePath": "",
+            "caption": "",
             "sortOrder": 0
           }
-        ]
+        ],
+        "location": {
+          "name": "神戶牛可樂餅 / 牛肉小食",
+          "placeId": "",
+          "latitude": null,
+          "longitude": null,
+          "address": "",
+          "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Kobe+beef+croquette+Motomachi+Kobe"
+        }
       },
       {
         "title": "Kobe Milk",
@@ -2263,9 +2989,19 @@
             "imageId": "img_037bf5b0",
             "source": "static",
             "src": "assets/gallery/demo_food.svg",
+            "storagePath": "",
+            "caption": "",
             "sortOrder": 0
           }
-        ]
+        ],
+        "location": {
+          "name": "Kobe Milk",
+          "placeId": "",
+          "latitude": null,
+          "longitude": null,
+          "address": "",
+          "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Kobe+Milk+Nankinmachi"
+        }
       },
       {
         "title": "Harborland / MOSAIC 甜品 Cafe",
@@ -2299,15 +3035,27 @@
             "imageId": "img_037bf5b0",
             "source": "static",
             "src": "assets/gallery/demo_food.svg",
+            "storagePath": "",
+            "caption": "",
             "sortOrder": 0
           },
           {
             "imageId": "img_7ab4c3f6",
             "source": "static",
             "src": "assets/gallery/demo_city.svg",
+            "storagePath": "",
+            "caption": "",
             "sortOrder": 1
           }
-        ]
+        ],
+        "location": {
+          "name": "Harborland / MOSAIC 甜品 Cafe",
+          "placeId": "",
+          "latitude": null,
+          "longitude": null,
+          "address": "",
+          "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Kobe+Harborland+MOSAIC+cafe"
+        }
       }
     ]
   },

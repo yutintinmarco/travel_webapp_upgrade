@@ -2262,12 +2262,46 @@ html:not(.theme-light):not(.theme-dark) .profile-signout-btn:active{background:r
   .profile-row,.profile-chevron,.profile-detail-back,
   .profile-signout-btn,.profile-theme-segment button{transition:none!important;}
 }
+
+
+/* Phase 2C · portable JSON import */
+.trip-import-backdrop{z-index:3200;}
+.trip-import-modal{max-height:min(86vh,760px);overflow:hidden;padding-bottom:max(16px,env(safe-area-inset-bottom,0px));}
+.trip-import-scroll{overflow:auto;-webkit-overflow-scrolling:touch;padding:0 2px 4px;display:grid;gap:12px;}
+.trip-import-title-row{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;}
+.trip-import-title-row h3{margin:0;color:var(--label-primary);font-size:calc(20px * var(--font-scale));}
+.trip-import-title-row p{margin:4px 0 0;color:var(--label-secondary);font-size:calc(11px * var(--font-scale));line-height:1.45;}
+.trip-import-preview{display:grid;gap:10px;padding:12px;border-radius:16px;background:rgba(118,118,128,.07);border:1px solid rgba(118,118,128,.09);}
+.trip-import-tripname{color:var(--label-primary);font-size:calc(15px * var(--font-scale));font-weight:720;overflow-wrap:anywhere;}
+.trip-import-id{color:var(--label-secondary);font-size:calc(10px * var(--font-scale));overflow-wrap:anywhere;}
+.trip-import-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;}
+.trip-import-stat{min-width:0;padding:8px 5px;border-radius:11px;text-align:center;background:rgba(118,118,128,.065);}
+.trip-import-stat strong{display:block;color:var(--label-primary);font-size:13px;}
+.trip-import-stat span{display:block;margin-top:2px;color:var(--label-secondary);font-size:8.5px;white-space:nowrap;}
+.trip-import-mode{padding:10px 11px;border-radius:13px;background:rgba(0,122,255,.075);color:var(--label-secondary);font-size:calc(10.5px * var(--font-scale));line-height:1.45;}
+.trip-import-mode strong{color:var(--label-primary);}
+.trip-import-warnings{display:grid;gap:5px;color:var(--label-secondary);font-size:calc(10px * var(--font-scale));line-height:1.42;}
+.trip-import-warnings:empty{display:none;}
+.trip-import-warning{padding:8px 10px;border-radius:11px;background:rgba(255,159,10,.09);}
+.trip-import-error{padding:9px 10px;border-radius:11px;background:rgba(255,59,48,.09);color:#c8352d;font-size:calc(10px * var(--font-scale));line-height:1.42;}
+.trip-import-error[hidden]{display:none!important;}
+.trip-import-progress{height:4px;border-radius:999px;background:rgba(118,118,128,.13);overflow:hidden;}
+.trip-import-progress span{display:block;height:100%;width:0;background:#0a84ff;border-radius:inherit;transition:width .22s ease;}
+.trip-import-actions{display:grid;grid-template-columns:1fr 1.35fr;gap:8px;margin-top:2px;}
+.trip-import-actions button{min-height:46px;border:0;border-radius:14px;font:inherit;font-weight:720;}
+.trip-import-cancel{background:rgba(118,118,128,.10);color:var(--label-primary);}
+.trip-import-confirm{background:#0a84ff;color:white;}
+.trip-import-confirm:disabled{opacity:.42;}
+.trip-library-mini-action{border:0;border-radius:9px;padding:5px 7px;background:rgba(118,118,128,.10);color:var(--label-secondary);font-size:9px;font-weight:750;}
+.trip-library-mini-action.is-restore{color:#1478d4;background:rgba(0,122,255,.10);}
+html.theme-dark .trip-import-preview,html.theme-dark .trip-import-stat,html.theme-dark .trip-import-cancel{background:rgba(255,255,255,.055);border-color:rgba(255,255,255,.06);}
+@media(max-width:380px){.trip-import-stats{grid-template-columns:repeat(2,minmax(0,1fr));}}
 </style>
             <link rel="apple-touch-icon" href="assets/icon/trip_icon.png">
   <link rel="icon" type="image/png" href="assets/icon/trip_icon.png">
-  <link rel="manifest" href="manifest.json?v=7.3.13">
+  <link rel="manifest" href="manifest.json?v=7.4.0">
   <meta name="apple-mobile-web-app-title" content="關嘉露西生日之旅">
-  <link rel="stylesheet" href="assets/css/expenses.css?v=7.3.13">
+  <link rel="stylesheet" href="assets/css/expenses.css?v=7.4.0">
 </head>
 <body>
 <div class="bg-fixed"></div>
@@ -2415,13 +2449,13 @@ html:not(.theme-light):not(.theme-dark) .profile-signout-btn:active{background:r
       <section class="profile-card profile-menu-card profile-trip-actions-card" aria-label="旅程管理">
         <button class="profile-row" type="button" disabled>
           <span class="profile-row-icon profile-icon-blue">＋</span>
-          <span class="profile-row-copy"><strong>新增旅程</strong><small>建立一個全新旅程</small></span>
-          <span class="profile-status-pill">2C</span>
+          <span class="profile-row-copy"><strong>新增空白旅程</strong><small>Phase 3 編輯器完成後開放</small></span>
+          <span class="profile-status-pill">3</span>
         </button>
-        <button class="profile-row" type="button" disabled>
+        <button class="profile-row" id="trip-import-btn" type="button">
           <span class="profile-row-icon profile-icon-grey">⇅</span>
-          <span class="profile-row-copy"><strong>匯入 trip.json</strong><small>從 Portable JSON 建立旅程</small></span>
-          <span class="profile-status-pill">2C</span>
+          <span class="profile-row-copy"><strong>匯入 trip.json</strong><small>驗證後寫入 Firebase，建立者自動成為 Owner</small></span>
+          <span class="profile-chevron">›</span>
         </button>
         <button class="profile-row" id="trip-archive-toggle" type="button" aria-expanded="false">
           <span class="profile-row-icon profile-icon-grey">🗄️</span>
@@ -2541,14 +2575,14 @@ html:not(.theme-light):not(.theme-dark) .profile-signout-btn:active{background:r
         <span class="profile-detail-spacer"></span>
       </div>
       <section class="profile-card">
-        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.3.13</strong></div>
+        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.4.0</strong></div>
         <div class="profile-meta-row"><span>資料架構</span><strong>Phase 2B</strong></div>
         <div class="profile-meta-row"><span>主要資料來源</span><strong>本機 JSON</strong></div>
       </section>
     </div>
   </div>
 </div>
-<div class="app-version-note" id="app-version-note">v7.3.13</div>
+<div class="app-version-note" id="app-version-note">v7.4.0</div>
 
 
   </div>
@@ -2582,6 +2616,35 @@ html:not(.theme-light):not(.theme-dark) .profile-signout-btn:active{background:r
   <div class="trip-switch-list" id="trip-switch-list" role="menu" aria-label="切換旅程"></div>
 </div>
 
+<input id="trip-import-file" type="file" accept="application/json,.json" hidden>
+<div class="modal-backdrop trip-import-backdrop" id="trip-import-backdrop" aria-hidden="true">
+  <div class="modal trip-import-modal" role="dialog" aria-modal="true" aria-labelledby="trip-import-title">
+    <div class="sheet-grabber-zone" aria-hidden="true"><span class="sheet-grabber"></span></div>
+    <div class="trip-import-scroll">
+      <div class="trip-import-title-row">
+        <div><h3 id="trip-import-title">匯入旅程</h3><p id="trip-import-subtitle">先驗證 Portable JSON，再寫入 Firebase。</p></div>
+      </div>
+      <div class="trip-import-preview">
+        <div><div class="trip-import-tripname" id="trip-import-name">—</div><div class="trip-import-id" id="trip-import-id">—</div></div>
+        <div class="trip-import-stats">
+          <div class="trip-import-stat"><strong id="trip-import-days">—</strong><span>Days</span></div>
+          <div class="trip-import-stat"><strong id="trip-import-items">—</strong><span>Items</span></div>
+          <div class="trip-import-stat"><strong id="trip-import-saved">—</strong><span>Saved</span></div>
+          <div class="trip-import-stat"><strong id="trip-import-maps">—</strong><span>Map refs</span></div>
+        </div>
+        <div class="trip-import-mode" id="trip-import-mode">等待選擇檔案。</div>
+      </div>
+      <div class="trip-import-warnings" id="trip-import-warnings"></div>
+      <div class="trip-import-error" id="trip-import-error" hidden></div>
+      <div class="trip-import-progress" id="trip-import-progress" hidden><span></span></div>
+      <div class="trip-import-actions">
+        <button class="trip-import-cancel" id="trip-import-cancel" type="button">取消</button>
+        <button class="trip-import-confirm" id="trip-import-confirm" type="button" disabled>匯入 Firebase</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="modal-backdrop" id="detail-backdrop" aria-hidden="true">
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="detail-title">
     <div class="sheet-grabber-zone" id="detail-sheet-grabber" aria-hidden="true"><span class="sheet-grabber"></span></div>
@@ -2602,7 +2665,7 @@ html:not(.theme-light):not(.theme-dark) .profile-signout-btn:active{background:r
 </div>
 
 <script>
-const APP_VERSION = "7.3.13";
+const APP_VERSION = "7.4.0";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 window.EXPENSES_MODULE_VERSION = EXPENSES_MODULE_VERSION;
@@ -3968,12 +4031,13 @@ function currentTripLibraryRow(){
   const currentCloud=cloudTrips.find(trip=>trip.tripId===currentId)||null;
   const currentRole=tripLibraryRoleLabel(currentCloud?.role);
   const statusLabel=tripLibraryStatusLabel(currentCloud?.status);
+  const importPill=currentCloud?.importState==="importing"?'<span class="trip-library-pill">匯入中</span>':"";
   return `<div class="trip-library-item is-current">
     <span class="trip-library-icon">✈️</span>
     <span class="trip-library-copy">
       <strong>${tripLibraryEsc(tripLibrarySummary.title||currentId)}</strong>
       <small>${tripLibraryEsc(tripLibrarySummary.dateRange||[tripLibrarySummary.startDate,tripLibrarySummary.endDate].filter(Boolean).join(" → ")||currentId)}</small>
-      <span class="trip-library-meta"><span class="trip-library-pill is-current">目前</span><span class="trip-library-pill">本機 JSON</span>${statusLabel?`<span class="trip-library-pill">${statusLabel}</span>`:""}${currentRole?`<span class="trip-library-pill is-role">${currentRole}</span>`:""}</span>
+      <span class="trip-library-meta"><span class="trip-library-pill is-current">目前</span><span class="trip-library-pill">本機 JSON</span>${statusLabel?`<span class="trip-library-pill">${statusLabel}</span>`:""}${importPill}${currentRole?`<span class="trip-library-pill is-role">${currentRole}</span>`:""}</span>
     </span>
     <span class="trip-library-side"><strong>${tripLibrarySummary.dayCount} 日</strong><small>${tripLibrarySummary.itemCount} 項</small></span>
   </div>`;
@@ -3982,14 +4046,22 @@ function currentTripLibraryRow(){
 function cloudTripLibraryRow(trip,{archived=false}={}){
   const role=tripLibraryRoleLabel(trip.role);
   const statusLabel=tripLibraryStatusLabel(trip.status);
+  const importPill=trip.importState==="importing"?'<span class="trip-library-pill">匯入中</span>':"";
+  const canManage=trip.role==="owner"||trip.role==="admin";
+  const isCurrent=tripLibrarySummary?.tripId===trip.tripId;
+  const action=canManage
+    ? (archived
+      ? `<button class="trip-library-mini-action is-restore" type="button" data-trip-restore-id="${tripLibraryEsc(trip.tripId)}">還原</button>`
+      : (!isCurrent?`<button class="trip-library-mini-action" type="button" data-trip-archive-id="${tripLibraryEsc(trip.tripId)}">封存</button>`:""))
+    : "";
   return `<div class="trip-library-item${archived?" is-archived":""}" aria-disabled="true">
     <span class="trip-library-icon">${archived?"🗄️":"🗂️"}</span>
     <span class="trip-library-copy">
       <strong>${tripLibraryEsc(trip.title||trip.tripId)}</strong>
       <small>${tripLibraryEsc(tripLibraryDateText(trip))}</small>
-      <span class="trip-library-meta">${archived?'<span class="trip-library-pill is-archived">已封存</span>':'<span class="trip-library-pill">Firebase</span>'}${statusLabel?`<span class="trip-library-pill">${statusLabel}</span>`:""}${role?`<span class="trip-library-pill is-role">${role}</span>`:""}</span>
+      <span class="trip-library-meta">${archived?'<span class="trip-library-pill is-archived">已封存</span>':'<span class="trip-library-pill">Firebase</span>'}${statusLabel?`<span class="trip-library-pill">${statusLabel}</span>`:""}${importPill}${role?`<span class="trip-library-pill is-role">${role}</span>`:""}</span>
     </span>
-    <span class="trip-library-side"><strong>${archived?"保留":"已加入"}</strong><small>${archived?"可還原":"2E 切換"}</small></span>
+    <span class="trip-library-side"><strong>${archived?"保留":"已加入"}</strong><small>${archived?"Firebase":"2E 切換"}</small>${action}</span>
   </div>`;
 }
 
@@ -4034,7 +4106,11 @@ function renderArchivedTrips(){
   }else if(state==="rules-pending"){
     count.textContent="—";
     list.innerHTML="";
-    status.textContent="Firestore Rules 尚未開放旅程查詢；Phase 2F 後先會顯示封存清單。";
+    status.textContent="Firestore Rules 尚未套用 Phase 2C 權限；請先 publish zip 內 firestore.rules。";
+  }else if(state==="index-required"){
+    count.textContent="—";
+    list.innerHTML="";
+    status.textContent="Firestore 仲欠 Active / Archived Trip index；請按 Console error 提供嘅連結建立 index。";
   }else if(state==="ready"){
     count.textContent=String(trips.length);
     list.innerHTML=trips.length?trips.map(trip=>cloudTripLibraryRow(trip,{archived:true})).join(""):"";
@@ -4063,8 +4139,9 @@ function renderTripLibrary(){
     const state=tripLibraryCloudState.status;
     if(state==="signed-out") status.textContent="目前使用本機 trip.json。登入 Google 後會顯示你有權使用嘅 Active Trips。";
     else if(state==="loading") status.textContent="已登入 Google，正在讀取未封存旅程…";
-    else if(state==="rules-pending") status.textContent="Google 登入正常。Firestore 仍使用 Production 預設封鎖規則，Phase 2F 套用正式 Rules 後會讀取雲端旅程。";
-    else if(state==="ready"&&cloudTrips.length===0) status.textContent="暫時未有已匯入嘅雲端旅程。Phase 2C 匯入第一個 trip.json 時，建立者會自動成為 Owner。";
+    else if(state==="rules-pending") status.textContent="Google 登入正常。請先 publish zip 內 firestore.rules，Phase 2C Import 先可以安全寫入 Firebase。";
+    else if(state==="index-required") status.textContent="Firestore 欠 Trip catalog composite index；按 Console error 提供嘅連結建立一次就得。";
+    else if(state==="ready"&&cloudTrips.length===0) status.textContent="暫時未有雲端旅程。你可以用「匯入 trip.json」建立第一個 Trip，建立者會自動成為 Owner。";
     else if(state==="ready") status.textContent=`已讀取 ${cloudTrips.length} 個未封存雲端旅程。Phase 2E 完成 Firebase Loader 後可直接切換。`;
     else status.textContent="旅程清單暫時未能同步，但目前本機行程不受影響。";
   }
@@ -4074,6 +4151,12 @@ function renderTripLibrary(){
 
 function stopArchivedTripSubscription(){
   if(tripLibraryStopArchivedCatalog){tripLibraryStopArchivedCatalog();tripLibraryStopArchivedCatalog=null;}
+}
+function restartActiveTripCatalog(){
+  if(tripLibraryStopCatalog){tripLibraryStopCatalog();tripLibraryStopCatalog=null;}
+  if(!tripLibraryCurrentUser||!tripLibraryCatalogService)return;
+  tripLibraryCloudState={status:"loading",trips:[],error:null};renderTripLibrary();
+  tripLibraryStopCatalog=tripLibraryCatalogService.subscribeUserTrips(tripLibraryCurrentUser,state=>{tripLibraryCloudState=state;renderTripLibrary();},{archived:false});
 }
 function loadArchivedTrips(){
   if(!tripLibraryCurrentUser){tripLibraryArchiveState={status:"signed-out",trips:[],error:null};renderArchivedTrips();return;}
@@ -4112,8 +4195,7 @@ function initTripLibrarySafe(data){
           if(archivePanel) archivePanel.hidden=true;
           if(archiveToggle) archiveToggle.setAttribute("aria-expanded","false");
           if(!user){tripLibraryCloudState={status:"signed-out",trips:[],error:null};renderTripLibrary();return;}
-          tripLibraryCloudState={status:"loading",trips:[],error:null};renderTripLibrary();
-          tripLibraryStopCatalog=catalogService.subscribeUserTrips(user,state=>{tripLibraryCloudState=state;renderTripLibrary();},{archived:false});
+          restartActiveTripCatalog();
         });
       }).catch(error=>{
         console.warn("Phase 2B cloud trip catalog unavailable",error);
@@ -4135,7 +4217,154 @@ tripArchiveToggle?.addEventListener("click",()=>{
   const willOpen=panel.hidden;
   panel.hidden=!willOpen;
   tripArchiveToggle.setAttribute("aria-expanded",willOpen?"true":"false");
-  if(willOpen && ["idle","signed-out","error"].includes(tripLibraryArchiveState.status)) loadArchivedTrips();
+  if(willOpen && ["idle","signed-out","error","index-required"].includes(tripLibraryArchiveState.status)) loadArchivedTrips();
+});
+
+// Phase 2C · Portable JSON -> Firestore import. This is deliberately isolated
+// from the critical trip.json renderer, so an import or rules failure can never
+// blank the itinerary.
+const tripImportButton=document.getElementById("trip-import-btn");
+const tripImportFile=document.getElementById("trip-import-file");
+const tripImportBackdrop=document.getElementById("trip-import-backdrop");
+const tripImportConfirm=document.getElementById("trip-import-confirm");
+const tripImportCancel=document.getElementById("trip-import-cancel");
+let tripImportState={raw:null,inspection:null,done:false,busy:false};
+let tripImportServicePromise=null;
+function getTripImportService(){
+  if(!tripImportServicePromise) tripImportServicePromise=import(`./assets/js/trip-import-service.js?v=${APP_VERSION}`);
+  return tripImportServicePromise;
+}
+function openTripImportModal(){
+  if(!tripImportBackdrop)return;
+  tripImportBackdrop.setAttribute("aria-hidden","false");
+  lockScroll();
+  requestAnimationFrame(()=>tripImportBackdrop.classList.add("active"));
+}
+function closeTripImportModal(){
+  if(!tripImportBackdrop||tripImportState.busy)return;
+  tripImportBackdrop.classList.remove("active");
+  tripImportBackdrop.setAttribute("aria-hidden","true");
+  unlockScroll();
+  tripImportState={raw:null,inspection:null,done:false,busy:false};
+  if(tripImportFile)tripImportFile.value="";
+}
+function tripImportSetError(message=""){
+  const box=document.getElementById("trip-import-error");
+  if(!box)return;
+  box.hidden=!message;
+  box.textContent=message;
+}
+function tripImportPermissionMessage(error){
+  if(error?.code==="permission-denied") return "Firestore 仍然係 Locked rules。請先喺 Firebase Console publish 呢個 ZIP 入面嘅 firestore.rules，再重新選擇 trip.json。";
+  if(error?.code==="snapshot-too-large") return "現有 Trip 太大，未能安全建立單一 pre-import snapshot。今次唔會覆蓋任何資料。";
+  if(error?.code==="insufficient-role") return "呢個 tripId 已存在，但目前帳戶唔係 Owner / Admin，所以唔可以覆蓋。";
+  return error?.message||"暫時未能檢查或匯入呢份 trip.json。";
+}
+function renderTripImportPreview(inspection,{checking=false}={}){
+  const summary=inspection?.summary||{};
+  document.getElementById("trip-import-name").textContent=summary.title||"未命名旅程";
+  document.getElementById("trip-import-id").textContent=`tripId · ${summary.tripId||"—"}`;
+  document.getElementById("trip-import-days").textContent=String(summary.dayCount??"—");
+  document.getElementById("trip-import-items").textContent=String(summary.itemCount??"—");
+  document.getElementById("trip-import-saved").textContent=String(summary.savedPlaceCount??"—");
+  document.getElementById("trip-import-maps").textContent=summary.itemCount!=null?`${summary.mapReferenceCount||0}/${summary.itemCount}`:"—";
+  const mode=document.getElementById("trip-import-mode");
+  const confirm=document.getElementById("trip-import-confirm");
+  const warnings=document.getElementById("trip-import-warnings");
+  warnings.innerHTML=(inspection?.warnings||[]).map(w=>`<div class="trip-import-warning">${escapeHtmlText(w)}</div>`).join("");
+  if(checking){mode.innerHTML="正在檢查 Firebase 有冇同一個 <strong>tripId</strong>…";confirm.disabled=true;return;}
+  if(!inspection?.valid){mode.innerHTML="JSON 驗證未通過。";confirm.disabled=true;return;}
+  if(inspection.mode==="create"){
+    mode.innerHTML="<strong>建立新旅程</strong><br>寫入 Firebase 後，目前 Google 帳戶會自動成為 Owner。";
+    confirm.textContent="匯入 Firebase";confirm.disabled=!inspection.canImport;
+  }else if(inspection.mode==="replace"){
+    mode.innerHTML=inspection.canImport
+      ? `<strong>取代現有旅程</strong><br>你目前係 ${escapeHtmlText(inspection.roleLabel||inspection.role||"Owner / Admin")}。系統會先建立 pre-import snapshot，再更新行程；成員、支出記錄及舊 snapshots 唔會刪除。`
+      : "<strong>同一 tripId 已存在</strong><br>只有 Owner / Admin 可以用 JSON 取代現有旅程。";
+    confirm.textContent="Snapshot 後取代";confirm.disabled=!inspection.canImport;
+  }else{
+    mode.innerHTML="未能確認匯入模式。";confirm.disabled=true;
+  }
+}
+async function prepareTripImportFile(file){
+  if(!file)return;
+  openTripImportModal();
+  tripImportSetError("");
+  const progress=document.getElementById("trip-import-progress");
+  if(progress)progress.hidden=true;
+  try{
+    if(file.size>5_000_000)throw new Error("trip.json 大過 5 MB；請先移除 base64 圖片或其他大型內嵌資料。");
+    const raw=JSON.parse(await file.text());
+    const schema=await import(`./assets/js/trip-schema-service.js?v=${APP_VERSION}`);
+    const validation=schema.validatePortableTrip(raw);
+    const localInspection={...validation,summary:schema.getTripSummary(validation.trip),mode:validation.valid?"checking":"invalid",canImport:false};
+    tripImportState={raw,inspection:localInspection,done:false,busy:false};
+    renderTripImportPreview(localInspection,{checking:validation.valid});
+    if(!validation.valid){tripImportSetError(validation.errors.join("；"));return;}
+    const service=await getTripImportService();
+    const inspection=await service.inspectTripImport(raw);
+    tripImportState.inspection=inspection;
+    renderTripImportPreview(inspection);
+  }catch(error){
+    console.error("Trip JSON inspection error",error);
+    tripImportSetError(tripImportPermissionMessage(error));
+    if(tripImportConfirm)tripImportConfirm.disabled=true;
+  }
+}
+tripImportButton?.addEventListener("click",async()=>{
+  if(!window.__appAuthUser){
+    try{const {signInWithGoogle}=await getGlobalAuthService();await signInWithGoogle();}
+    catch(error){if(error?.code!=="auth/popup-closed-by-user")console.error("Import sign in",error);}
+    return;
+  }
+  tripImportFile?.click();
+});
+tripImportFile?.addEventListener("change",()=>prepareTripImportFile(tripImportFile.files?.[0]||null));
+tripImportCancel?.addEventListener("click",closeTripImportModal);
+tripImportBackdrop?.addEventListener("click",event=>{if(event.target===tripImportBackdrop)closeTripImportModal();});
+tripImportConfirm?.addEventListener("click",async()=>{
+  if(tripImportState.done){closeTripImportModal();return;}
+  const inspection=tripImportState.inspection;
+  if(!tripImportState.raw||!inspection?.canImport||tripImportState.busy)return;
+  tripImportState.busy=true;tripImportConfirm.disabled=true;tripImportCancel.disabled=true;
+  tripImportSetError("");
+  const progress=document.getElementById("trip-import-progress"),bar=progress?.querySelector("span"),mode=document.getElementById("trip-import-mode");
+  if(progress)progress.hidden=false;if(bar)bar.style.width="3%";
+  mode.innerHTML=inspection.mode==="replace"?"正在建立 snapshot 並更新 Firebase…":"正在建立 Firebase Trip 同 Owner 權限…";
+  try{
+    const service=await getTripImportService();
+    const result=await service.importTrip(tripImportState.raw,{mode:inspection.mode,onProgress:({completed,total})=>{if(bar)bar.style.width=`${Math.max(3,Math.min(100,(completed/Math.max(1,total))*100))}%`;}});
+    tripImportState.done=true;
+    if(bar)bar.style.width="100%";
+    restartActiveTripCatalog();
+    if(result.tripId===tripLibrarySummary?.tripId){
+      import(`./assets/js/trip-access-service.js?v=${APP_VERSION}`).then(service=>service.refreshTripAccess?.()).catch(()=>{});
+    }
+    mode.innerHTML=`<strong>匯入完成</strong><br>${escapeHtmlText(result.tripId)} · revision ${result.revision} · ${result.mode==="create"?"你已成為 Owner":"已建立 snapshot 後更新"}。`;
+    tripImportConfirm.textContent="完成";tripImportConfirm.disabled=false;
+    tripImportCancel.disabled=true;
+  }catch(error){
+    console.error("Trip JSON import error",error);
+    tripImportSetError(tripImportPermissionMessage(error));
+    tripImportConfirm.disabled=false;tripImportCancel.disabled=false;
+    mode.textContent="匯入未完成，現有本機行程不受影響。";
+  }finally{tripImportState.busy=false;}
+});
+
+async function handleTripArchiveAction(button,archived){
+  const tripId=button?.dataset?.tripArchiveId||button?.dataset?.tripRestoreId;
+  if(!tripId||button.disabled)return;
+  const verb=archived?"封存":"還原";
+  if(!window.confirm(`${verb}「${tripId}」？${archived?"資料會繼續留喺 Firebase。":"旅程會重新出現喺 Active Trips。"}`))return;
+  button.disabled=true;
+  try{const service=await getTripImportService();await service.setTripArchived(tripId,archived);}
+  catch(error){console.error("Trip archive action",error);alert(tripImportPermissionMessage(error));button.disabled=false;}
+}
+document.getElementById("trip-library-list")?.addEventListener("click",event=>{
+  const button=event.target.closest?.("[data-trip-archive-id]");if(button)handleTripArchiveAction(button,true);
+});
+document.getElementById("trip-archive-list")?.addEventListener("click",event=>{
+  const button=event.target.closest?.("[data-trip-restore-id]");if(button)handleTripArchiveAction(button,false);
 });
 
 const tripQuickPopover=document.getElementById("trip-quick-popover");

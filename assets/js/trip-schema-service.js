@@ -45,6 +45,29 @@ function stripHtml(value) {
   return clean(value).replace(/<[^>]*>/g, "").replace(/\s+/g, " ").trim();
 }
 
+function finiteNumber(value) {
+  const n = Number(value);
+  return Number.isFinite(n) ? n : null;
+}
+
+function normalizeLocation(record = {}) {
+  const source = record?.location && typeof record.location === "object" ? record.location : {};
+  const latitude = finiteNumber(source.latitude ?? source.lat ?? record.latitude ?? record.lat);
+  const longitude = finiteNumber(source.longitude ?? source.lng ?? source.lon ?? record.longitude ?? record.lng ?? record.lon);
+  const mapsUrl = clean(source.mapsUrl || source.googleMapsUrl || record.maps || record.mapsUrl || record.googleMapsUrl);
+  const placeId = clean(source.placeId || source.googlePlaceId || record.googlePlaceId || record.googleMapsPlaceId);
+  const address = clean(source.address || record.address);
+  const name = clean(source.name || record.placeName || stripHtml(record.title || record.name || ""));
+  return {
+    name,
+    placeId,
+    latitude,
+    longitude,
+    address,
+    mapsUrl
+  };
+}
+
 function deriveTripId(raw) {
   const meta = raw?.meta || {};
   const explicit = clean(raw?.tripId || meta.tripId || meta?.expenses?.tripId);
@@ -105,6 +128,7 @@ function normalizeSavedPlace(place, index) {
   return {
     ...clone(place),
     placeId,
+    location: normalizeLocation(place),
     sortOrder: Number.isFinite(Number(place?.sortOrder)) ? Number(place.sortOrder) : index,
     images: normalizeImages(place)
   };
@@ -119,6 +143,7 @@ export function normalizePortableTrip(rawInput = {}) {
     const items = safeArray(day?.items).map((item, itemIndex) => ({
       ...clone(item),
       itemId: deriveItemId(item, dayId, itemIndex),
+      location: normalizeLocation(item),
       sortOrder: Number.isFinite(Number(item?.sortOrder)) ? Number(item.sortOrder) : itemIndex,
       images: normalizeImages(item)
     }));
@@ -173,6 +198,9 @@ export function validatePortableTrip(rawInput = {}) {
       seenItems.add(item.itemId);
     });
   });
+  const inlineImageCount = trip.days.reduce((sum, day) => sum + day.items.reduce((itemSum, item) => itemSum + safeArray(item.images).filter(image => clean(image?.src).startsWith("data:")).length, 0), 0);
+  if (inlineImageCount) warnings.push(`${inlineImageCount} inline/base64 images detected; Phase 3 Storage should be used instead`);
+
   const seenPlaces = new Set();
   const savedPlaces = Array.isArray(trip.snacks) ? trip.snacks : safeArray(trip.snacks?.items);
   savedPlaces.forEach(place => {
@@ -314,6 +342,9 @@ export function getTripSummary(rawInput = {}) {
     dateRange: clean(meta.dateRange),
     dayCount: trip.days.length,
     itemCount: trip.days.reduce((sum, day) => sum + safeArray(day.items).length, 0),
-    savedPlaceCount: Array.isArray(trip.snacks) ? trip.snacks.length : safeArray(trip.snacks?.items).length
+    savedPlaceCount: Array.isArray(trip.snacks) ? trip.snacks.length : safeArray(trip.snacks?.items).length,
+    mapReferenceCount: trip.days.reduce((sum, day) => sum + day.items.filter(item => clean(item?.location?.mapsUrl) || clean(item?.location?.placeId) || (item?.location?.latitude != null && item?.location?.longitude != null)).length, 0),
+    placeIdCount: trip.days.reduce((sum, day) => sum + day.items.filter(item => clean(item?.location?.placeId)).length, 0),
+    coordinateCount: trip.days.reduce((sum, day) => sum + day.items.filter(item => item?.location?.latitude != null && item?.location?.longitude != null).length, 0)
   };
 }

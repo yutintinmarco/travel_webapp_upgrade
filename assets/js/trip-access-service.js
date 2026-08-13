@@ -88,3 +88,8 @@ export function isOwner() { return currentAccess.role === TRIP_ROLES.OWNER; }
 export function isAdminOrOwner() { return hasTripRole(TRIP_ROLES.ADMIN); }
 export function isMemberOrAbove() { return hasTripRole(TRIP_ROLES.MEMBER); }
 export function getRoleLabel(role = currentAccess.role) { return ROLE_LABELS[role] || ""; }
+
+export function refreshTripAccess() {
+  attachMemberListener();
+  computeAccess();
+}

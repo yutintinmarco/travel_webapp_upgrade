@@ -25,6 +25,7 @@ function normalizeTripDoc(snapshot) {
     archived: data.archived === true,
     archivedAt: data.archivedAt || null,
     archivedBy: clean(data.archivedBy),
+    importState: clean(data.importState || "ready"),
     coverImage: clean(data.coverImage),
     updatedAt: data.updatedAt || null,
     createdBy: clean(data.createdBy),
@@ -77,6 +78,6 @@ export function subscribeUserTrips(user, callback, { archived = false } = {}) {
       callback({ status: "ready", trips, error: null });
     });
   }, error => {
-    callback({ status: error?.code === "permission-denied" ? "rules-pending" : "error", trips: [], error });
+    callback({ status: error?.code === "permission-denied" ? "rules-pending" : (error?.code === "failed-precondition" ? "index-required" : "error"), trips: [], error });
   });
 }

@@ -1,48 +1,32 @@
-v7.3.13 — 我的 navigation smoothness + iOS-native UI pass
+v7.4.0 — Phase 2C Portable JSON Import
 
-TRANSITION FIX A — the card losing its frosted body on the first frame
-• Root cause: .profile-card is backdrop-filter glass. A .profile-nav-surface is
-  a backdrop root (contain:paint + will-change:transform/opacity), so a card
-  cloned into it has NOTHING behind it to blur and renders as flat 56% white —
-  the card drops to a see-through state the instant the transition starts, even
-  before the finger has moved 1%.
-• Fix: each surface now carries an exact, viewport-aligned copy of .bg-fixed
-  behind its content, restoring the blur source. The copy is counter-translated
-  against the surface transform, so the background still never appears to move.
-• Verified in Chromium against a high-frequency striped background: live page vs
-  cloned surface differ by at most 5/255 on any channel, 0 pixels above 8; the
-  background band drifts by at most 1/255 across the whole fade.
-• .bg-fixed is pinned to background-attachment:scroll so the live layer and the
-  cloned layer are geometrically identical on every engine (attachment:fixed
-  resolves against the nearest transformed ancestor, and iOS treats it as
-  scroll anyway).
+BASELINE
+• Built directly from user-approved v7.3.13.
+• The v7.3.13 Claude navigation compositor fix is preserved. No transition architecture from v7.3.12 or experimental 7.3.8–7.3.11 was reintroduced.
 
-TRANSITION FIX B (the visible "jump" at the start and the end)
-• Root cause: v7.3.12 cross-faded the snapshot clone in above the still-visible
-  live page ("handoff prime", 96ms) and cross-faded the incoming clone out above
-  the newly committed live page ("commit", 132ms). .profile-card is translucent
-  glass (rgba background + backdrop-filter), so painting a clone above its own
-  original stacks two glass layers — the card brightens and thickens, then snaps
-  back the instant the live page is hidden.
-• v7.3.13 never paints a clone and its original at the same time. The clone is
-  created transparent, rasterised over two idle frames, then swapped with the
-  live page inside a single frame. The two are pixel-identical, so the swap is
-  invisible. Same swap in reverse on commit and on gesture cancel.
-• Total transition 728ms -> 430ms. Directional travel 12–22px -> 18–34px.
-• Edge swipe uses the same one-frame handoff; the 7.5% "blend zone" is gone, so
-  the page now follows the finger 1:1 from the first tracked pixel.
+PHASE 2C IMPORT
+• 我的 → 我的旅程 → 匯入 trip.json is now live.
+• JSON is parsed locally first, normalized to schema v2, validated, and previewed before any Firestore write.
+• Preview shows trip title/id, day count, item count, saved places and Google Maps reference coverage.
+• New trip: current signed-in Google user becomes Owner automatically.
+• Existing trip: only Owner/Admin can replace it.
+• Replace import creates a pre-import snapshot first, preserves members, expense records and previous snapshots, then updates itinerary/settings.
+• Import writes are chunked so Security Rules document-access limits remain manageable.
+• Import failures are isolated from the local trip.json renderer and cannot blank the itinerary.
 
-iOS-NATIVE UI PASS (我的 only)
-• Press feedback: cell background highlight (instant in, eased out) instead of
-  dimming the whole row's opacity.
-• Separators: half-pixel hairlines, inset to the label column, running to the
-  card edge — as in a Settings inset grouped table. Stray card-top borders gone.
-• Disclosure chevron drawn in CSS instead of the "›" glyph, so it keeps one
-  weight and baseline across font fallbacks.
-• Back control now names its destination ("‹ 我的", "‹ 旅程設定") and dims on
-  press like a bar button rather than highlighting like a cell.
-• Row typography: label 14.5px/510 (was ~13px bold), subtitle 11.5px.
-• Icon squircles 30px / 7.5px radius with a top inner highlight.
-• Segmented control and text-size stepper aligned to the label column.
+MAPS-READY SCHEMA
+• Every itinerary item and saved place now has a normalized `location` object:
+  name, placeId, latitude, longitude, address, mapsUrl.
+• No coordinates or Place IDs are guessed. Existing Google Maps search URLs are preserved as mapsUrl.
+• This is the Phase 2C schema foundation for Phase 3 Google Maps / Routes / Transit.
 
-Phase 2C Firestore create/import/archive writes remain intentionally disabled.
+ARCHIVE WRITER
+• Owner/Admin can archive non-current cloud trips and restore archived trips.
+• Archive keeps the trip in Firebase; only archived metadata changes.
+• Current local trip is intentionally not archiveable until Phase 2E cloud trip switching is active.
+
+FIRESTORE SETUP
+• `firestore.rules` contains the Phase 2C bootstrap rules.
+• `firestore.indexes.json` contains the Active/Archived trip catalog composite index.
+• Keep Firestore out of Test mode. Publish the included rules instead.
+• Phase 2F remains the final security hardening, emulator tests and rule regression phase.
