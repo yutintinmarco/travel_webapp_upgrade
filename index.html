@@ -2387,12 +2387,44 @@ html.theme-dark .trip-activity-meta,html:not(.theme-light):not(.theme-dark) .tri
 .expenses-empty-state{padding:22px 4px;color:var(--label-secondary);font-size:calc(12px * var(--font-scale));line-height:1.55;}
 @media(prefers-reduced-motion:reduce){.expenses-inline-progress span{animation:none;width:64%;}}
 
+
+/* v7.6.3.1 · My Trips visual hotfix */
+.trip-library-icon{
+  overflow:hidden;
+}
+.trip-library-icon img{
+  width:100%;
+  height:100%;
+  display:block;
+  object-fit:cover;
+  border-radius:inherit;
+}
+.trip-library-icon .trip-icon-emoji,
+.trip-library-icon .trip-icon-monogram{
+  width:100%;
+  height:100%;
+  display:grid;
+  place-items:center;
+}
+.trip-library-icon .trip-icon-emoji{font-size:20px;line-height:1;}
+.trip-library-icon .trip-icon-monogram{
+  font-size:12px;
+  font-weight:800;
+  letter-spacing:-.2px;
+  background:rgba(0,122,255,.10);
+}
+/* .container already owns bottom-bar clearance. Avoid a second 118px gap
+   between the active Profile page and the global version label. */
+#profile-view{
+  padding-bottom:0 !important;
+}
+
 </style>
             <link rel="apple-touch-icon" href="assets/icon/trip_icon.png">
   <link rel="icon" type="image/png" href="assets/icon/trip_icon.png">
-  <link rel="manifest" href="manifest.json?v=7.5.0">
+  <link rel="manifest" href="manifest.json?v=7.6.3.1">
   <meta name="apple-mobile-web-app-title" content="關嘉露西生日之旅">
-  <link rel="stylesheet" href="assets/css/expenses.css?v=7.5.0">
+  <link rel="stylesheet" href="assets/css/expenses.css?v=7.6.3.1">
 </head>
 <body>
 <div class="bg-fixed"></div>
@@ -2741,14 +2773,14 @@ html.theme-dark .trip-activity-meta,html:not(.theme-light):not(.theme-dark) .tri
         <span class="profile-detail-spacer"></span>
       </div>
       <section class="profile-card">
-        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.6.1</strong></div>
+        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.6.3.1</strong></div>
         <div class="profile-meta-row"><span>資料架構</span><strong>Phase 2E</strong></div>
         <div class="profile-meta-row"><span>主要資料來源</span><strong id="app-data-source-label">Firebase / 本機快取</strong></div>
       </section>
     </div>
   </div>
 </div>
-<div class="app-version-note" id="app-version-note">v7.6.1</div>
+<div class="app-version-note" id="app-version-note">v7.6.3.1</div>
 
 
   </div>
@@ -2849,7 +2881,7 @@ html.theme-dark .trip-activity-meta,html:not(.theme-light):not(.theme-dark) .tri
 </div>
 
 <script>
-const APP_VERSION = "7.6.3";
+const APP_VERSION = "7.6.3.1";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 window.EXPENSES_MODULE_VERSION = EXPENSES_MODULE_VERSION;
@@ -4339,7 +4371,7 @@ function cloudTripLibraryRow(trip,{archived=false}={}){
       : (!isCurrent?`<button class="trip-library-mini-action" type="button" data-trip-archive-id="${tripLibraryEsc(trip.tripId)}">封存</button>`:""))
     : "";
   return `<div class="trip-library-item${archived?" is-archived":""}" aria-disabled="true">
-    <span class="trip-library-icon">${archived?"🗄️":"🗂️"}</span>
+    <span class="trip-library-icon">${archived?"🗄️":tripIconMarkup(trip)}</span>
     <span class="trip-library-copy">
       <strong>${tripLibraryEsc(trip.title||trip.tripId)}</strong>
       <small>${tripLibraryEsc(tripLibraryDateText(trip))}</small>
