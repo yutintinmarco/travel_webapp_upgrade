@@ -1,5 +1,4 @@
-import { db } from "./firebase-service.js";
-import { getCurrentUser } from "./auth-service.js";
+import { auth, db } from "./firebase-service.js";
 import { buildFirestoreTripPlan, getTripSummary, normalizePortableTrip, validatePortableTrip } from "./trip-schema-service.js";
 import {
   collection,
@@ -21,13 +20,18 @@ function nowId() {
   const stamp = [d.getFullYear(), String(d.getMonth() + 1).padStart(2, "0"), String(d.getDate()).padStart(2, "0"), "_", String(d.getHours()).padStart(2, "0"), String(d.getMinutes()).padStart(2, "0"), String(d.getSeconds()).padStart(2, "0")].join("");
   return `import_${stamp}_${Math.random().toString(36).slice(2, 7)}`;
 }
-function requireUser(user = getCurrentUser()) {
-  if (!user?.uid) {
-    const error = new Error("Google sign-in required");
-    error.code = "auth-required";
-    throw error;
+async function requireUser(userInput = null) {
+  if (userInput?.uid) return userInput;
+  if (auth?.currentUser?.uid) return auth.currentUser;
+  try {
+    if (typeof auth?.authStateReady === "function") await auth.authStateReady();
+  } catch (error) {
+    console.warn("Unable to wait for Firebase Auth state", error);
   }
-  return user;
+  if (auth?.currentUser?.uid) return auth.currentUser;
+  const error = new Error("Google sign-in required");
+  error.code = "auth-required";
+  throw error;
 }
 function roleLabel(role) { return ({ owner: "Owner", admin: "Admin", member: "Member", viewer: "Viewer" })[role] || ""; }
 function approxJsonBytes(value) {
@@ -145,7 +149,7 @@ async function createSnapshot(existing, user) {
 }
 
 export async function inspectTripImport(rawInput, userInput = null) {
-  const user = requireUser(userInput);
+  const user = await requireUser(userInput);
   const validation = validatePortableTrip(rawInput);
   const summary = getTripSummary(validation.trip);
   if (!validation.valid) return { ...validation, summary, exists: false, role: null, canImport: false, mode: "invalid" };
@@ -177,7 +181,7 @@ export async function inspectTripImport(rawInput, userInput = null) {
 }
 
 export async function importTrip(rawInput, { mode = "create", user: userInput = null, onProgress = null } = {}) {
-  const user = requireUser(userInput);
+  const user = await requireUser(userInput);
   const built = buildFirestoreTripPlan(rawInput, user);
   if (!built.valid || !built.plan) {
     const error = new Error(built.errors?.join("; ") || "Invalid portable trip JSON");
@@ -303,7 +307,7 @@ export async function importTrip(rawInput, { mode = "create", user: userInput = 
 }
 
 export async function setTripArchived(tripIdInput, archived, { user: userInput = null } = {}) {
-  const user = requireUser(userInput);
+  const user = await requireUser(userInput);
   const tripId = clean(tripIdInput);
   if (!tripId) throw new Error("Missing tripId");
   const memberSnap = await getDoc(doc(db, "trips", tripId, "members", user.uid));

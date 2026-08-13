@@ -2575,14 +2575,14 @@ html.theme-dark .trip-import-preview,html.theme-dark .trip-import-stat,html.them
         <span class="profile-detail-spacer"></span>
       </div>
       <section class="profile-card">
-        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.4.0</strong></div>
+        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.4.1</strong></div>
         <div class="profile-meta-row"><span>資料架構</span><strong>Phase 2B</strong></div>
         <div class="profile-meta-row"><span>主要資料來源</span><strong>本機 JSON</strong></div>
       </section>
     </div>
   </div>
 </div>
-<div class="app-version-note" id="app-version-note">v7.4.0</div>
+<div class="app-version-note" id="app-version-note">v7.4.1</div>
 
 
   </div>
@@ -2665,7 +2665,7 @@ html.theme-dark .trip-import-preview,html.theme-dark .trip-import-stat,html.them
 </div>
 
 <script>
-const APP_VERSION = "7.4.0";
+const APP_VERSION = "7.4.1";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 window.EXPENSES_MODULE_VERSION = EXPENSES_MODULE_VERSION;
@@ -4255,6 +4255,7 @@ function tripImportSetError(message=""){
   box.textContent=message;
 }
 function tripImportPermissionMessage(error){
+  if(error?.code==="auth-required") return "請先登入 Google 帳戶，再繼續匯入。";
   if(error?.code==="permission-denied") return "Firestore 仍然係 Locked rules。請先喺 Firebase Console publish 呢個 ZIP 入面嘅 firestore.rules，再重新選擇 trip.json。";
   if(error?.code==="snapshot-too-large") return "現有 Trip 太大，未能安全建立單一 pre-import snapshot。今次唔會覆蓋任何資料。";
   if(error?.code==="insufficient-role") return "呢個 tripId 已存在，但目前帳戶唔係 Owner / Admin，所以唔可以覆蓋。";
@@ -4274,6 +4275,10 @@ function renderTripImportPreview(inspection,{checking=false}={}){
   warnings.innerHTML=(inspection?.warnings||[]).map(w=>`<div class="trip-import-warning">${escapeHtmlText(w)}</div>`).join("");
   if(checking){mode.innerHTML="正在檢查 Firebase 有冇同一個 <strong>tripId</strong>…";confirm.disabled=true;return;}
   if(!inspection?.valid){mode.innerHTML="JSON 驗證未通過。";confirm.disabled=true;return;}
+  if(inspection.mode==="auth-required"){
+    mode.innerHTML="<strong>JSON 驗證完成</strong><br>登入 Google 後先檢查 Firebase 有冇相同 tripId，再決定建立或取代。";
+    confirm.textContent="登入 Google 繼續";confirm.disabled=false;return;
+  }
   if(inspection.mode==="create"){
     mode.innerHTML="<strong>建立新旅程</strong><br>寫入 Firebase 後，目前 Google 帳戶會自動成為 Owner。";
     confirm.textContent="匯入 Firebase";confirm.disabled=!inspection.canImport;
@@ -4285,6 +4290,27 @@ function renderTripImportPreview(inspection,{checking=false}={}){
   }else{
     mode.innerHTML="未能確認匯入模式。";confirm.disabled=true;
   }
+}
+async function getImportFirebaseUser(){
+  const authService=await getGlobalAuthService();
+  let user=authService.getCurrentUser?.()||null;
+  if(!user && authService.waitForInitialAuth) user=await authService.waitForInitialAuth();
+  return user||authService.getCurrentUser?.()||null;
+}
+async function inspectPreparedTripImport(){
+  if(!tripImportState.raw)return null;
+  const user=await getImportFirebaseUser();
+  if(!user?.uid){
+    const inspection={...(tripImportState.inspection||{}),mode:"auth-required",canImport:false};
+    tripImportState.inspection=inspection;
+    renderTripImportPreview(inspection);
+    return inspection;
+  }
+  const service=await getTripImportService();
+  const inspection=await service.inspectTripImport(tripImportState.raw,user);
+  tripImportState.inspection=inspection;
+  renderTripImportPreview(inspection);
+  return inspection;
 }
 async function prepareTripImportFile(file){
   if(!file)return;
@@ -4301,8 +4327,15 @@ async function prepareTripImportFile(file){
     tripImportState={raw,inspection:localInspection,done:false,busy:false};
     renderTripImportPreview(localInspection,{checking:validation.valid});
     if(!validation.valid){tripImportSetError(validation.errors.join("；"));return;}
+    const user=await getImportFirebaseUser();
+    if(!user?.uid){
+      const authInspection={...localInspection,mode:"auth-required",canImport:false};
+      tripImportState.inspection=authInspection;
+      renderTripImportPreview(authInspection);
+      return;
+    }
     const service=await getTripImportService();
-    const inspection=await service.inspectTripImport(raw);
+    const inspection=await service.inspectTripImport(raw,user);
     tripImportState.inspection=inspection;
     renderTripImportPreview(inspection);
   }catch(error){
@@ -4311,21 +4344,33 @@ async function prepareTripImportFile(file){
     if(tripImportConfirm)tripImportConfirm.disabled=true;
   }
 }
-tripImportButton?.addEventListener("click",async()=>{
-  if(!window.__appAuthUser){
-    try{const {signInWithGoogle}=await getGlobalAuthService();await signInWithGoogle();}
-    catch(error){if(error?.code!=="auth/popup-closed-by-user")console.error("Import sign in",error);}
-    return;
-  }
-  tripImportFile?.click();
-});
+tripImportButton?.addEventListener("click",()=>tripImportFile?.click());
 tripImportFile?.addEventListener("change",()=>prepareTripImportFile(tripImportFile.files?.[0]||null));
 tripImportCancel?.addEventListener("click",closeTripImportModal);
 tripImportBackdrop?.addEventListener("click",event=>{if(event.target===tripImportBackdrop)closeTripImportModal();});
 tripImportConfirm?.addEventListener("click",async()=>{
   if(tripImportState.done){closeTripImportModal();return;}
-  const inspection=tripImportState.inspection;
-  if(!tripImportState.raw||!inspection?.canImport||tripImportState.busy)return;
+  let inspection=tripImportState.inspection;
+  if(!tripImportState.raw||tripImportState.busy)return;
+  if(inspection?.mode==="auth-required"){
+    tripImportSetError("");
+    tripImportConfirm.disabled=true;
+    try{
+      const authService=await getGlobalAuthService();
+      const credential=await authService.signInWithGoogle();
+      const user=credential?.user||authService.getCurrentUser?.()||await authService.waitForInitialAuth?.();
+      if(!user?.uid){const e=new Error("Google sign-in required");e.code="auth-required";throw e;}
+      const service=await getTripImportService();
+      inspection=await service.inspectTripImport(tripImportState.raw,user);
+      tripImportState.inspection=inspection;
+      renderTripImportPreview(inspection);
+    }catch(error){
+      if(error?.code!=="auth/popup-closed-by-user")tripImportSetError(tripImportPermissionMessage(error));
+      tripImportConfirm.disabled=false;
+    }
+    return;
+  }
+  if(!inspection?.canImport)return;
   tripImportState.busy=true;tripImportConfirm.disabled=true;tripImportCancel.disabled=true;
   tripImportSetError("");
   const progress=document.getElementById("trip-import-progress"),bar=progress?.querySelector("span"),mode=document.getElementById("trip-import-mode");
@@ -4333,7 +4378,9 @@ tripImportConfirm?.addEventListener("click",async()=>{
   mode.innerHTML=inspection.mode==="replace"?"正在建立 snapshot 並更新 Firebase…":"正在建立 Firebase Trip 同 Owner 權限…";
   try{
     const service=await getTripImportService();
-    const result=await service.importTrip(tripImportState.raw,{mode:inspection.mode,onProgress:({completed,total})=>{if(bar)bar.style.width=`${Math.max(3,Math.min(100,(completed/Math.max(1,total))*100))}%`;}});
+    const user=await getImportFirebaseUser();
+    if(!user?.uid){const e=new Error("Google sign-in required");e.code="auth-required";throw e;}
+    const result=await service.importTrip(tripImportState.raw,{mode:inspection.mode,user,onProgress:({completed,total})=>{if(bar)bar.style.width=`${Math.max(3,Math.min(100,(completed/Math.max(1,total))*100))}%`;}});
     tripImportState.done=true;
     if(bar)bar.style.width="100%";
     restartActiveTripCatalog();
@@ -4357,7 +4404,7 @@ async function handleTripArchiveAction(button,archived){
   const verb=archived?"封存":"還原";
   if(!window.confirm(`${verb}「${tripId}」？${archived?"資料會繼續留喺 Firebase。":"旅程會重新出現喺 Active Trips。"}`))return;
   button.disabled=true;
-  try{const service=await getTripImportService();await service.setTripArchived(tripId,archived);}
+  try{const service=await getTripImportService();const user=await getImportFirebaseUser();await service.setTripArchived(tripId,archived,{user});}
   catch(error){console.error("Trip archive action",error);alert(tripImportPermissionMessage(error));button.disabled=false;}
 }
 document.getElementById("trip-library-list")?.addEventListener("click",event=>{
