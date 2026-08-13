@@ -2316,7 +2316,7 @@ html.theme-dark .trip-import-preview,html.theme-dark .trip-import-stat,html.them
 #trip-backup-status[hidden]{display:none!important;}
 html.theme-dark .snapshot-restore-row .profile-row-copy strong,html:not(.theme-light):not(.theme-dark) .snapshot-restore-row .profile-row-copy strong{color:#ff6961;}
 
-/* Phase 2E · v7.6.1 · Blocking progress + trip-wide audit trail */
+/* Phase 2E · v7.6.2 · Loader hotfix, acknowledged progress + day-bar audit filters */
 .app-progress-backdrop{position:fixed;inset:0;z-index:3900;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(13,18,28,.28);-webkit-backdrop-filter:blur(8px) saturate(1.05);backdrop-filter:blur(8px) saturate(1.05);opacity:0;visibility:hidden;pointer-events:none;transition:opacity .22s ease,visibility .22s step-end;}
 .app-progress-backdrop.active{opacity:1;visibility:visible;pointer-events:auto;transition:opacity .22s ease,visibility 0s;}
 .app-progress-card{width:min(360px,calc(100vw - 40px));border-radius:26px;padding:22px 22px 20px;background:rgba(248,249,252,.88);border:1px solid rgba(255,255,255,.76);box-shadow:0 18px 55px rgba(24,31,42,.22);-webkit-backdrop-filter:blur(28px) saturate(1.18);backdrop-filter:blur(28px) saturate(1.18);}
@@ -2332,6 +2332,11 @@ html.theme-dark .snapshot-restore-row .profile-row-copy strong,html:not(.theme-l
 .app-progress-stage-copy{min-width:0;}
 .app-progress-stage-copy strong{display:block;font-size:15px;color:#1c1c1e;line-height:1.25;}
 .app-progress-stage-copy small{display:block;margin-top:3px;font-size:13px;line-height:1.35;color:rgba(60,60,67,.66);font-variant-numeric:tabular-nums;}
+.app-progress-done{width:100%;min-height:46px;margin-top:18px;border:0;border-radius:14px;background:#0a84ff;color:#fff;font:inherit;font-size:15px;font-weight:720;box-shadow:inset 0 1px 0 rgba(255,255,255,.22);}
+.app-progress-done:active{opacity:.72;}
+.app-progress-done[hidden]{display:none!important;}
+.app-progress-backdrop.is-success .app-progress-done{background:#30b35a;}
+.app-progress-backdrop.is-error .app-progress-done{background:#ff3b30;}
 .app-progress-backdrop.is-success .app-progress-meter span{background:#30b35a;}
 .app-progress-backdrop.is-success .app-progress-stage-icon{background:rgba(48,179,90,.13);color:#248a3d;}
 .app-progress-backdrop.is-error .app-progress-meter span{background:#ff3b30;}
@@ -2342,11 +2347,11 @@ html.theme-dark .app-progress-card,html:not(.theme-light):not(.theme-dark) .app-
 html.theme-dark .app-progress-title,html:not(.theme-light):not(.theme-dark) .app-progress-title,html.theme-dark .app-progress-percent,html:not(.theme-light):not(.theme-dark) .app-progress-percent,html.theme-dark .app-progress-stage-copy strong,html:not(.theme-light):not(.theme-dark) .app-progress-stage-copy strong{color:#f5f5f7;}
 html.theme-dark .app-progress-kicker,html:not(.theme-light):not(.theme-dark) .app-progress-kicker,html.theme-dark .app-progress-subtitle,html:not(.theme-light):not(.theme-dark) .app-progress-subtitle,html.theme-dark .app-progress-stage-copy small,html:not(.theme-light):not(.theme-dark) .app-progress-stage-copy small{color:rgba(235,235,245,.64);}
 
-.trip-activity-toolbar{padding:10px 12px 12px;}
-.trip-activity-filters{display:flex;gap:7px;overflow-x:auto;scrollbar-width:none;padding:2px 0;}
-.trip-activity-filters::-webkit-scrollbar{display:none;}
-.trip-activity-filter{border:0;border-radius:999px;padding:8px 13px;font:inherit;font-size:13px;font-weight:650;color:rgba(60,60,67,.72);background:rgba(118,118,128,.10);white-space:nowrap;}
-.trip-activity-filter.active{background:#111;color:white;}
+.trip-activity-toolbar{padding:0;background:transparent!important;border:0!important;box-shadow:none!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;overflow:visible;}
+.trip-activity-filters{width:100vw;box-sizing:border-box;margin-left:calc(50% - 50vw);margin-right:calc(50% - 50vw);padding-left:max(18px,calc((100vw - 480px)/2 + 18px));padding-right:max(18px,calc((100vw - 480px)/2 + 18px));display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:5px;overflow:visible;}
+.trip-activity-filter{min-width:0;width:100%;padding:7px 2px;border-radius:999px;border:1px solid #dadada;background:#f8f8fa;color:#555;font:inherit;font-size:calc(10.5px * var(--font-scale));font-weight:500;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:transform .12s ease,background-color .18s ease,border-color .18s ease,color .18s ease;}
+.trip-activity-filter:active{transform:scale(.96);}
+.trip-activity-filter.active{background:#111;border-color:#111;color:#fff;font-weight:650;box-shadow:0 4px 12px rgba(15,23,42,.10),inset 0 1px 0 rgba(255,255,255,.18);}
 .trip-activity-list{overflow:hidden;}
 .trip-activity-item{display:flex;gap:12px;padding:15px 16px;border-top:1px solid rgba(60,60,67,.11);}
 .trip-activity-item:first-child{border-top:0;}
@@ -2358,8 +2363,8 @@ html.theme-dark .app-progress-kicker,html:not(.theme-light):not(.theme-dark) .ap
 .trip-activity-category{font-weight:700;}
 .trip-activity-empty{padding:30px 18px;text-align:center;color:rgba(60,60,67,.6);font-size:14px;}
 .trip-activity-status{padding:12px 16px 15px;border-top:1px solid rgba(60,60,67,.10);font-size:12px;color:rgba(60,60,67,.54);}
-html.theme-dark .trip-activity-filter,html:not(.theme-light):not(.theme-dark) .trip-activity-filter{color:rgba(235,235,245,.72);background:rgba(118,118,128,.17);}
-html.theme-dark .trip-activity-filter.active,html:not(.theme-light):not(.theme-dark) .trip-activity-filter.active{background:#f5f5f7;color:#151517;}
+html.theme-dark .trip-activity-filter,html:not(.theme-light):not(.theme-dark) .trip-activity-filter{background:rgba(36,36,44,.70);border-color:rgba(255,255,255,.12);color:rgba(200,200,215,.78);}
+html.theme-dark .trip-activity-filter.active,html:not(.theme-light):not(.theme-dark) .trip-activity-filter.active{background:#f5f5f7;border-color:#f5f5f7;color:#151517;box-shadow:0 4px 12px rgba(0,0,0,.24);}
 html.theme-dark .trip-activity-copy strong,html:not(.theme-light):not(.theme-dark) .trip-activity-copy strong{color:#f5f5f7;}
 html.theme-dark .trip-activity-summary,html:not(.theme-light):not(.theme-dark) .trip-activity-summary{color:rgba(235,235,245,.7);}
 html.theme-dark .trip-activity-meta,html:not(.theme-light):not(.theme-dark) .trip-activity-meta,html.theme-dark .trip-activity-status,html:not(.theme-light):not(.theme-dark) .trip-activity-status,html.theme-dark .trip-activity-empty,html:not(.theme-light):not(.theme-dark) .trip-activity-empty{color:rgba(235,235,245,.5);}
@@ -2367,9 +2372,9 @@ html.theme-dark .trip-activity-meta,html:not(.theme-light):not(.theme-dark) .tri
 </style>
             <link rel="apple-touch-icon" href="assets/icon/trip_icon.png">
   <link rel="icon" type="image/png" href="assets/icon/trip_icon.png">
-  <link rel="manifest" href="manifest.json?v=7.6.1">
+  <link rel="manifest" href="manifest.json?v=7.5.0">
   <meta name="apple-mobile-web-app-title" content="關嘉露西生日之旅">
-  <link rel="stylesheet" href="assets/css/expenses.css?v=7.6.1">
+  <link rel="stylesheet" href="assets/css/expenses.css?v=7.5.0">
 </head>
 <body>
 <div class="bg-fixed"></div>
@@ -2773,6 +2778,7 @@ html.theme-dark .trip-activity-meta,html:not(.theme-light):not(.theme-dark) .tri
         <div class="app-progress-stage-icon" id="app-progress-stage-icon">•</div>
         <div class="app-progress-stage-copy"><strong id="app-progress-stage-title">正在準備</strong><small id="app-progress-stage-detail">連接 Firebase…</small></div>
       </div>
+      <button class="app-progress-done" id="app-progress-done" type="button" hidden>完成</button>
     </div>
   </div>
 
@@ -2825,7 +2831,7 @@ html.theme-dark .trip-activity-meta,html:not(.theme-light):not(.theme-dark) .tri
 </div>
 
 <script>
-const APP_VERSION = "7.6.1";
+const APP_VERSION = "7.6.2";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 window.EXPENSES_MODULE_VERSION = EXPENSES_MODULE_VERSION;
@@ -4212,7 +4218,7 @@ function currentTripLibraryRow(){
     <span class="trip-library-copy">
       <strong>${tripLibraryEsc(tripLibrarySummary.title||currentId)}</strong>
       <small>${tripLibraryEsc(tripLibrarySummary.dateRange||[tripLibrarySummary.startDate,tripLibrarySummary.endDate].filter(Boolean).join(" → ")||currentId)}</small>
-      <span class="trip-library-meta"><span class="trip-library-pill is-current">目前</span><span class="trip-library-pill">本機 JSON</span>${statusLabel?`<span class="trip-library-pill">${statusLabel}</span>`:""}${importPill}${currentRole?`<span class="trip-library-pill is-role">${currentRole}</span>`:""}</span>
+      <span class="trip-library-meta"><span class="trip-library-pill is-current">目前</span><span class="trip-library-pill">${tripLoaderState.status==="ready"&&tripLoaderState.tripId===currentId?(tripLoaderState.source==="cache"?"Firebase 快取":"Firebase"):"本機 JSON"}</span>${statusLabel?`<span class="trip-library-pill">${statusLabel}</span>`:""}${importPill}${currentRole?`<span class="trip-library-pill is-role">${currentRole}</span>`:""}</span>
     </span>
     <span class="trip-library-side"><strong>${tripLibrarySummary.dayCount} 日</strong><small>${tripLibrarySummary.itemCount} 項</small></span>
   </div>`;
@@ -4251,7 +4257,7 @@ function renderTripSwitcher(){
     <span class="trip-switch-row-copy"><strong>${tripLibraryEsc(tripLibrarySummary.title||currentId)}</strong></span>
     <span class="trip-switch-check">✓</span>
   </button>`];
-  others.forEach(trip=>rows.push(`<button class="trip-switch-row" type="button" disabled role="menuitem">
+  others.forEach(trip=>rows.push(`<button class="trip-switch-row" type="button" data-trip-switch-id="${tripLibraryEsc(trip.tripId)}" role="menuitem">
     <span class="trip-switch-row-icon"><img src="assets/icon/trip_icon.png" alt=""></span>
     <span class="trip-switch-row-copy"><strong>${tripLibraryEsc(trip.title||trip.tripId)}</strong></span>
   </button>`));
@@ -4317,7 +4323,7 @@ function renderTripLibrary(){
     else if(state==="rules-pending") status.textContent="Google 登入正常。請先 publish zip 內 firestore.rules，Phase 2C Import 先可以安全寫入 Firebase。";
     else if(state==="index-required") status.textContent="Firestore 欠 Trip catalog composite index；按 Console error 提供嘅連結建立一次就得。";
     else if(state==="ready"&&cloudTrips.length===0) status.textContent="暫時未有雲端旅程。你可以用「匯入 trip.json」建立第一個 Trip，建立者會自動成為 Owner。";
-    else if(state==="ready") status.textContent=`已讀取 ${cloudTrips.length} 個未封存雲端旅程。Phase 2E 完成 Firebase Loader 後可直接切換。`;
+    else if(state==="ready") status.textContent=`已讀取 ${cloudTrips.length} 個未封存雲端旅程。Firebase Loader 已連接，可直接切換。`;
     else status.textContent="旅程清單暫時未能同步，但目前本機行程不受影響。";
   }
   renderTripSwitcher();
@@ -4331,7 +4337,7 @@ function restartActiveTripCatalog(){
   if(tripLibraryStopCatalog){tripLibraryStopCatalog();tripLibraryStopCatalog=null;}
   if(!tripLibraryCurrentUser||!tripLibraryCatalogService)return;
   tripLibraryCloudState={status:"loading",trips:[],error:null};renderTripLibrary();
-  tripLibraryStopCatalog=tripLibraryCatalogService.subscribeUserTrips(tripLibraryCurrentUser,state=>{tripLibraryCloudState=state;renderTripLibrary();},{archived:false});
+  tripLibraryStopCatalog=tripLibraryCatalogService.subscribeUserTrips(tripLibraryCurrentUser,state=>{tripLibraryCloudState=state;renderTripLibrary();reconcileFirebaseTripLoader().catch(error=>console.error("Firebase loader reconcile",error));},{archived:false});
 }
 function loadArchivedTrips(){
   if(!tripLibraryCurrentUser){tripLibraryArchiveState={status:"signed-out",trips:[],error:null};renderArchivedTrips();return;}
@@ -4345,6 +4351,9 @@ function loadArchivedTrips(){
 }
 
 function initTripLibrarySafe(data){
+  bundledTripData=data;
+  if(!tripRenderSignature)tripRenderSignature=tripContentRenderSignature(data);
+  if(!tripWeatherSignature)tripWeatherSignature=weatherRenderSignature(data);
   import(`./assets/js/trip-schema-service.js?v=${APP_VERSION}`)
     .then(schemaService=>{
       tripLibrarySchemaService=schemaService;
@@ -4370,7 +4379,7 @@ function initTripLibrarySafe(data){
           const archiveToggle=document.getElementById("trip-archive-toggle");
           if(archivePanel) archivePanel.hidden=true;
           if(archiveToggle) archiveToggle.setAttribute("aria-expanded","false");
-          if(!user){tripLibraryCloudState={status:"signed-out",trips:[],error:null};renderTripLibrary();return;}
+          if(!user){tripLibraryCloudState={status:"signed-out",trips:[],error:null};renderTripLibrary();stopFirebaseTripLoader({fallback:true});return;}
           restartActiveTripCatalog();
         });
       }).catch(error=>{
@@ -4384,6 +4393,149 @@ function initTripLibrarySafe(data){
       const status=document.getElementById("trip-library-status");
       if(status) status.textContent="旅程 Schema service 載入失敗；目前行程仍可正常使用。";
     });
+}
+
+
+// Phase 2E · v7.6.2 · actual Firebase live-loader wiring.
+// v7.6.0/v7.6.1 shipped the loader service but never subscribed the app renderer
+// to it. Firestore therefore changed while the visible itinerary kept rendering
+// bundled trip.json. This block makes Firebase the authenticated source of truth.
+let tripLoaderInitPromise=null;
+let tripLoaderReconcileToken=0;
+const tripLoaderRevisionWaiters=new Set();
+
+function dataTripId(data){return String(data?.tripId||data?.meta?.tripId||data?.meta?.expenses?.tripId||"").trim();}
+function currentActiveDayId(){
+  const idx=Number(document.querySelector(".day-tab.active")?.dataset?.dayIndex||0);
+  return String(window.tripData?.days?.[idx]?.dayId||"");
+}
+function tripContentRenderSignature(data){
+  if(!data)return"";
+  const copy={...data};delete copy.cloudMeta;
+  try{return JSON.stringify(copy);}catch(error){return `${dataTripId(data)}:${Number(data?.revision)||0}`;}
+}
+function weatherRenderSignature(data){
+  const meta=data?.meta||{};
+  try{return JSON.stringify({start:meta.tripStartIso,end:meta.tripEndIso,cities:meta.cities||{}});}catch(error){return"";}
+}
+function setDataSourceLabel(label){const el=document.getElementById("app-data-source-label");if(el)el.textContent=label;}
+function updateTripUrl(tripId){
+  try{const url=new URL(location.href);if(tripId)url.searchParams.set("trip",tripId);else url.searchParams.delete("trip");history.replaceState(history.state,"",url);}catch(error){}
+}
+async function getTripLoaderServices(){
+  if(!tripLoaderInitPromise)tripLoaderInitPromise=Promise.all([
+    import(`./assets/js/trip-loader-service.js?v=${APP_VERSION}`),
+    import(`./assets/js/trip-session-service.js?v=${APP_VERSION}`),
+    import(`./assets/js/trip-access-service.js?v=${APP_VERSION}`)
+  ]).then(([loader,session,access])=>{tripLoaderService=loader;tripSessionService=session;tripAccessService=access;return{loader,session,access};});
+  return tripLoaderInitPromise;
+}
+function resolveTripLoaderWaiters(data){
+  const id=dataTripId(data),revision=Number(data?.revision)||0;
+  [...tripLoaderRevisionWaiters].forEach(waiter=>{if(waiter.tripId===id&&revision>=waiter.revision){tripLoaderRevisionWaiters.delete(waiter);clearTimeout(waiter.timer);waiter.resolve(true);}});
+}
+function waitForTripLoaderRevision(tripId,revision,timeoutMs=6500){
+  const id=String(tripId||"").trim(),target=Math.max(0,Number(revision)||0);
+  if(dataTripId(window.tripData)===id&&(Number(window.tripData?.revision)||0)>=target&&tripLoaderState.status==="ready")return Promise.resolve(true);
+  return new Promise(resolve=>{const waiter={tripId:id,revision:target,resolve,timer:0};waiter.timer=setTimeout(()=>{tripLoaderRevisionWaiters.delete(waiter);resolve(false);},timeoutMs);tripLoaderRevisionWaiters.add(waiter);});
+}
+function restoreRenderedDay(dayId){
+  if(!dayId)return;
+  const idx=window.tripData?.days?.findIndex?.(day=>String(day?.dayId||"")===dayId);
+  if(!(idx>=0))return;
+  document.querySelectorAll(".day-tab").forEach(t=>t.classList.toggle("active",Number(t.dataset.dayIndex)===idx));
+  document.querySelectorAll(".day-content").forEach(c=>c.classList.toggle("active",Number(c.dataset.dayIndex)===idx));
+}
+function updateTripLibrarySummaryFromData(data){
+  try{
+    if(tripLibrarySchemaService){const validated=tripLibrarySchemaService.validatePortableTrip(data);tripLibrarySummary=tripLibrarySchemaService.getTripSummary(validated.trip);}
+  }catch(error){console.warn("Trip summary refresh",error);}
+  renderTripLibrary();
+}
+function applyFirebaseTripData(data,{source="server",tripId=""}={}){
+  if(!data)return;
+  const nextSignature=tripContentRenderSignature(data);
+  const currentId=dataTripId(window.tripData),nextId=dataTripId(data)||tripId;
+  const sameTrip=currentId&&nextId&&currentId===nextId;
+  const oldDayId=sameTrip?currentActiveDayId():"";
+  const oldTeam=sameTrip?activeTeam:"all";
+  const oldScroll=sameTrip?Math.max(0,Number(scrollShell?.scrollTop||0)):0;
+  tripLoaderState={status:"ready",source,tripId:nextId,updatedAt:data?.cloudMeta?.updatedAt||"",error:null};
+  setDataSourceLabel(source==="cache"?"Firebase 快取":"Firebase");
+  if(nextSignature!==tripRenderSignature){
+    window.tripData=data;
+    render(data);
+    runOptionalAppStep("Firebase travel info render",()=>renderInfo(data));
+    const nextWeather=weatherRenderSignature(data);
+    if(nextWeather!==tripWeatherSignature){tripWeatherSignature=nextWeather;runOptionalAppStep("Firebase weather render",()=>renderWeather(data));}
+    restoreRenderedDay(oldDayId);
+    if(oldTeam!=="all"&&data?.meta?.travellers?.[oldTeam])applyTeam(oldTeam);else applyTeam("all");
+    updateLargeHeaderForView();updateCompactHeader();updateTripLibrarySummaryFromData(data);
+    requestAnimationFrame(()=>{if(sameTrip&&scrollShell)scrollShell.scrollTo({top:oldScroll,behavior:"auto"});updateBottomNavIndicator();updateCollapsingChrome();updateNowIndicator();});
+    tripRenderSignature=nextSignature;
+  }else{
+    window.tripData=data;
+    updateTripLibrarySummaryFromData(data);
+  }
+  resolveTripLoaderWaiters(data);
+}
+function applyBundledTripFallback(){
+  if(!bundledTripData)return;
+  if(dataTripId(window.tripData)===dataTripId(bundledTripData)&&tripLoaderState.status==="local")return;
+  const sig=tripContentRenderSignature(bundledTripData);
+  window.tripData=bundledTripData;
+  if(sig!==tripRenderSignature){render(bundledTripData);runOptionalAppStep("Local travel info render",()=>renderInfo(bundledTripData));runOptionalAppStep("Local weather render",()=>renderWeather(bundledTripData));tripRenderSignature=sig;tripWeatherSignature=weatherRenderSignature(bundledTripData);updateLargeHeaderForView();updateCompactHeader();}
+  tripLoaderState={status:"local",source:"local",tripId:dataTripId(bundledTripData),updatedAt:"",error:null};
+  setDataSourceLabel("本機 trip.json");updateTripLibrarySummaryFromData(bundledTripData);
+}
+function stopFirebaseTripLoader({fallback=false}={}){
+  if(tripLoaderStop){try{tripLoaderStop();}catch(error){}tripLoaderStop=null;}
+  tripLoaderActiveId="";
+  if(fallback)applyBundledTripFallback();
+}
+async function startFirebaseTripLoader(tripIdInput){
+  const tripId=String(tripIdInput||"").trim();if(!tripId)return;
+  const {loader,access}=await getTripLoaderServices();
+  if(tripLoaderActiveId===tripId&&tripLoaderStop)return;
+  stopFirebaseTripLoader();
+  tripLoaderActiveId=tripId;tripLoaderState={status:"loading",source:"unknown",tripId,updatedAt:"",error:null};setDataSourceLabel("Firebase 同步中…");
+  access.initTripAccess?.(tripId);
+  tripLoaderStop=loader.subscribeTripData(tripId,event=>{
+    if(tripLoaderActiveId!==tripId)return;
+    if(event.status==="ready"){applyFirebaseTripData(event.data,{source:event.fromCache?"cache":"server",tripId});return;}
+    if(event.status==="syncing"){tripLoaderState={...tripLoaderState,status:"syncing",source:event.source||tripLoaderState.source};setDataSourceLabel(event.reason==="restore"?"Firebase 還原中…":"Firebase 更新中…");return;}
+    if(event.status==="permission-denied"||event.status==="error"||event.status==="not-found"){
+      tripLoaderState={status:event.status,source:"firebase",tripId,error:event.error||null};
+      console.warn("Firebase Trip Loader",event.status,event.error||tripId);
+    }
+  });
+}
+async function reconcileFirebaseTripLoader(){
+  const token=++tripLoaderReconcileToken;
+  if(!bundledTripData)return;
+  if(!tripLibraryCurrentUser){stopFirebaseTripLoader({fallback:true});return;}
+  if(tripLibraryCloudState.status!=="ready")return;
+  const trips=(tripLibraryCloudState.trips||[]).filter(t=>t.archived!==true);
+  if(!trips.length){stopFirebaseTripLoader({fallback:true});return;}
+  const {session}=await getTripLoaderServices();if(token!==tripLoaderReconcileToken)return;
+  const desired=session.resolveTripId(bundledTripData);
+  const bundledId=dataTripId(bundledTripData);
+  const target=trips.find(t=>t.tripId===desired)||trips.find(t=>t.tripId===bundledId)||trips[0];
+  if(!target){stopFirebaseTripLoader({fallback:true});return;}
+  session.setActiveTripId(target.tripId);updateTripUrl(target.tripId);await startFirebaseTripLoader(target.tripId);
+}
+async function switchActiveCloudTrip(tripId){
+  const id=String(tripId||"").trim();if(!id||id===tripLoaderActiveId)return;
+  if(document.body.classList.contains("app-progress-active"))return;
+  const allowed=(tripLibraryCloudState.trips||[]).some(t=>t.tripId===id&&t.archived!==true);if(!allowed)return;
+  const {session}=await getTripLoaderServices();
+  // Expense module currently owns long-lived listeners. If it has already been
+  // mounted for another Trip, reload once after changing the session id so it
+  // cannot keep writing to the old Trip.
+  const mountedExpenseTrip=String(window.__expensesModuleTripId||"");
+  session.setActiveTripId(id);updateTripUrl(id);closeTripSwitcher();
+  if(mountedExpenseTrip&&mountedExpenseTrip!==id){location.reload();return;}
+  await startFirebaseTripLoader(id);
 }
 
 const tripArchiveToggle=document.getElementById("trip-archive-toggle");
@@ -4407,9 +4559,11 @@ const appProgressUi={
   percent:document.getElementById("app-progress-percent"),
   stageIcon:document.getElementById("app-progress-stage-icon"),
   stageTitle:document.getElementById("app-progress-stage-title"),
-  stageDetail:document.getElementById("app-progress-stage-detail")
+  stageDetail:document.getElementById("app-progress-stage-detail"),
+  doneButton:document.getElementById("app-progress-done")
 };
 let appProgressHideTimer=0;
+let appProgressDoneCallback=null;
 function appProgressSet({kicker,title,subtitle,percent,stageTitle,stageDetail,icon,state}={}){
   const ui=appProgressUi;if(!ui.backdrop)return;
   if(kicker!=null)ui.kicker.textContent=String(kicker);
@@ -4428,28 +4582,37 @@ function appProgressSet({kicker,title,subtitle,percent,stageTitle,stageDetail,ic
 }
 function appProgressOpen(options={}){
   clearTimeout(appProgressHideTimer);
+  appProgressDoneCallback=null;
+  if(appProgressUi.doneButton){appProgressUi.doneButton.hidden=true;appProgressUi.doneButton.textContent="完成";}
   appProgressSet({...options,state:"busy"});
   appProgressUi.backdrop?.setAttribute("aria-hidden","false");
   document.body.classList.add("app-progress-active");
   requestAnimationFrame(()=>appProgressUi.backdrop?.classList.add("active"));
 }
 function appProgressUpdate(options={}){appProgressSet(options);}
-function appProgressFinish({title="完成",detail="Firebase 已同步最新版本。",delay=720}={}){
+function appProgressFinish({title="完成",detail="Firebase 已同步最新版本。",buttonText="完成",onAcknowledge=null}={}){
   appProgressSet({percent:100,stageTitle:title,stageDetail:detail,icon:"✓",state:"success"});
   clearTimeout(appProgressHideTimer);
-  appProgressHideTimer=setTimeout(appProgressClose,Math.max(350,Number(delay)||720));
+  appProgressDoneCallback=typeof onAcknowledge==="function"?onAcknowledge:null;
+  if(appProgressUi.doneButton){appProgressUi.doneButton.hidden=false;appProgressUi.doneButton.textContent=buttonText||"完成";}
 }
-function appProgressFail(message="操作未完成"){
+function appProgressFail(message="操作未完成",{onAcknowledge=null}={}){
   appProgressSet({stageTitle:"未能完成",stageDetail:message,icon:"!",state:"error"});
   clearTimeout(appProgressHideTimer);
-  appProgressHideTimer=setTimeout(appProgressClose,1500);
+  appProgressDoneCallback=typeof onAcknowledge==="function"?onAcknowledge:null;
+  if(appProgressUi.doneButton){appProgressUi.doneButton.hidden=false;appProgressUi.doneButton.textContent="關閉";}
 }
 function appProgressClose(){
   clearTimeout(appProgressHideTimer);
+  if(appProgressUi.doneButton)appProgressUi.doneButton.hidden=true;
   appProgressUi.backdrop?.classList.remove("active","is-success","is-error");
   appProgressUi.backdrop?.setAttribute("aria-hidden","true");
   document.body.classList.remove("app-progress-active");
 }
+appProgressUi.doneButton?.addEventListener("click",()=>{
+  const callback=appProgressDoneCallback;appProgressDoneCallback=null;appProgressClose();
+  try{callback?.();}catch(error){console.error("Progress acknowledge callback",error);}
+});
 function importProgressPresentation(progress,mode){
   const total=Math.max(1,Number(progress?.total)||1),completed=Math.max(0,Number(progress?.completed)||0);
   const pct=Math.max(4,Math.min(99,(completed/total)*100));
@@ -4659,7 +4822,9 @@ tripImportConfirm?.addEventListener("click",async()=>{
       : `<strong>匯入完成</strong><br>${escapeHtmlText(result.tripId)} · revision ${result.revision} · ${result.mode==="create"?"你已成為 Owner":"已建立 snapshot 後更新"}。`;
     tripImportConfirm.textContent="完成";tripImportConfirm.disabled=false;
     tripImportCancel.disabled=true;
-    appProgressFinish({title:result.mode==="unchanged"?"沒有變更":"匯入完成",detail:result.mode==="unchanged"?"Firebase 現有內容同 JSON 相同。":`Revision ${result.revision} 已寫入 Firebase，畫面會自動同步。`});
+    let liveSynced=true;
+    if(result.mode!=="unchanged"&&result.tripId===tripLoaderActiveId)liveSynced=await waitForTripLoaderRevision(result.tripId,result.revision,7000);
+    appProgressFinish({title:result.mode==="unchanged"?"沒有變更":"匯入完成",detail:result.mode==="unchanged"?"Firebase 現有內容同 JSON 相同。":(liveSynced?`Revision ${result.revision} 已寫入 Firebase，行程畫面亦已同步。`:`Revision ${result.revision} 已寫入 Firebase；畫面仍在背景同步，可按完成返回。`),onAcknowledge:()=>{if(tripImportState.done)closeTripImportModal();}});
   }catch(error){
     console.error("Trip JSON import error",error);
     tripImportSetError(tripImportPermissionMessage(error));
@@ -4814,8 +4979,9 @@ document.getElementById("snapshot-detail-restore")?.addEventListener("click",asy
       status.textContent=stage==="safety-snapshot"?"已保存目前版本，正在準備還原…":stage==="content"?`正在還原旅程內容${progress.detail?` · ${progress.detail}`:""}…`:stage==="done"?"正在完成還原…":"正在還原 Firebase 版本…";
       appProgressUpdate(restoreProgressPresentation(progress));
     }});
-    status.textContent=`還原完成 · 新 Revision ${result.revision}。Firebase Loader 會自動同步已還原版本到目前畫面。`;
-    appProgressFinish({title:"還原完成",detail:`Revision ${result.revision} 已建立，Firebase Loader 正在同步畫面。`,delay:850});
+    const liveSynced=result.tripId===tripLoaderActiveId?await waitForTripLoaderRevision(result.tripId,result.revision,7000):true;
+    status.textContent=`還原完成 · 新 Revision ${result.revision}${liveSynced?"，目前畫面已同步。":"，Firebase 已完成寫入。"}`;
+    appProgressFinish({title:"還原完成",detail:liveSynced?`Revision ${result.revision} 已建立，行程畫面已同步。`:`Revision ${result.revision} 已建立；畫面仍在背景同步。`});
     await loadTripBackupPage();
   }catch(error){console.error("Restore snapshot",error);status.textContent=backupFriendlyError(error);appProgressFail(backupFriendlyError(error));}
   finally{button.disabled=false;}
@@ -4855,6 +5021,7 @@ largeTripSwitchTrigger?.setAttribute("aria-haspopup","menu");
 largeTripSwitchTrigger?.setAttribute("aria-expanded","false");
 largeTripSwitchTrigger?.addEventListener("click",event=>{event.stopPropagation();toggleTripSwitcher();});
 largeTripSwitchTrigger?.addEventListener("keydown",event=>{if(event.key==="Enter"||event.key===" "){event.preventDefault();toggleTripSwitcher();}else if(event.key==="Escape")closeTripSwitcher();});
+tripQuickPopover?.addEventListener("click",event=>{const row=event.target.closest?.("[data-trip-switch-id]");if(row)switchActiveCloudTrip(row.dataset.tripSwitchId).catch(error=>console.error("Trip switch",error));});
 document.addEventListener("pointerdown",event=>{if(tripQuickOpen&&!tripQuickPopover?.contains(event.target)&&event.target!==largeTripSwitchTrigger)closeTripSwitcher();},{passive:true});
 document.addEventListener("keydown",event=>{if(event.key==="Escape"&&tripQuickOpen)closeTripSwitcher();});
 scrollShell?.addEventListener("scroll",()=>{if(tripQuickOpen)closeTripSwitcher();},{passive:true});
@@ -5411,7 +5578,7 @@ if(window.visualViewport&&bottomNav){
 // Android / Chrome PWA support. Network-only service worker, no aggressive cache.
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("./sw.js?v=1.6.2").catch(() => {});
+    navigator.serviceWorker.register("./sw.js?v=1.6.3").catch(() => {});
   });
 }
 
@@ -5420,6 +5587,7 @@ function runOptionalAppStep(label,fn){try{return fn();}catch(error){console.erro
 fetch(getTripJsonUrl())
   .then(r=>{if(!r.ok)throw new Error("HTTP "+r.status);return r.json();})
   .then(data=>{
+    bundledTripData=data;
     window.tripData=data;
     // Only the itinerary renderer is critical. Weather, visa data, Firebase and profile
     // enhancements are isolated so none of them can overwrite an already rendered trip.
