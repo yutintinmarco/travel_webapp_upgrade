@@ -171,7 +171,9 @@ export function normalizePortableTrip(rawInput = {}) {
     revision: Math.max(1, Number(raw.revision) || 1),
     meta: {
       ...clone(meta),
-      tripId
+      tripId,
+      tripIcon: clean(meta.tripIcon || meta.icon || raw.tripIcon || raw.icon),
+      backgroundImage: clean(meta.backgroundImage || meta.bgImage || meta.background || meta.coverImage || raw.backgroundImage || raw.bgImage || raw.background)
     },
     days,
     snacks
@@ -240,6 +242,8 @@ export function buildFirestoreTripPlan(rawInput = {}, ownerUser = null) {
     archivedAt: null,
     archivedBy: "",
     coverImage: clean(meta.coverImage),
+    tripIcon: clean(meta.tripIcon),
+    backgroundImage: clean(meta.backgroundImage),
     memberUids,
     memberCount: memberUids.length,
     createdBy: ownerUid,
@@ -288,6 +292,12 @@ export function buildFirestoreTripPlan(rawInput = {}, ownerUser = null) {
       travellers: clone(meta.travellers || {}),
       cities: clone(meta.cities || {}),
       flights: clone(meta.flights || []),
+      outbound: clone(meta.outbound || null),
+      inbound: clone(meta.inbound || null),
+      airlineLogo: clean(meta.airlineLogo),
+      weather: clone(meta.weather || {}),
+      tripIcon: clean(meta.tripIcon),
+      backgroundImage: clean(meta.backgroundImage),
       hotels: clone(meta.hotels || {}),
       infoCard: clone(meta.infoCard || {}),
       galleryDefaults: clone(meta.galleryDefaults || {}),
@@ -340,6 +350,9 @@ export function getTripSummary(rawInput = {}) {
     startDate: clean(meta.tripStartIso),
     endDate: clean(meta.tripEndIso),
     dateRange: clean(meta.dateRange),
+    tripIcon: clean(meta.tripIcon),
+    backgroundImage: clean(meta.backgroundImage),
+    coverImage: clean(meta.coverImage),
     dayCount: trip.days.length,
     itemCount: trip.days.reduce((sum, day) => sum + safeArray(day.items).length, 0),
     savedPlaceCount: Array.isArray(trip.snacks) ? trip.snacks.length : safeArray(trip.snacks?.items).length,

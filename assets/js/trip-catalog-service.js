@@ -27,6 +27,8 @@ function normalizeTripDoc(snapshot) {
     archivedBy: clean(data.archivedBy),
     importState: clean(data.importState || "ready"),
     coverImage: clean(data.coverImage),
+    tripIcon: clean(data.tripIcon),
+    backgroundImage: clean(data.backgroundImage),
     updatedAt: data.updatedAt || null,
     createdBy: clean(data.createdBy),
     memberCount: Number(data.memberCount) || 0,

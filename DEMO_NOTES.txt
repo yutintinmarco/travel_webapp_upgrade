@@ -32,3 +32,11 @@ v7.6.2 Phase 2E UX refinement
 - Operation Records moved from Expense Management to My > Trip Settings and now represents trip-wide audit history.
 - Existing legacy activity documents are rendered with meaningful action titles; new writers store structured action metadata.
 - v7.3.13 navigation transition block remains byte-for-byte unchanged from v7.6.0.
+
+Phase 2E v7.6.3
+Legacy Trip Compatibility
+• Per Trip icon fallback uses explicit tripIcon, title emoji, or a generated monogram. It never reuses another Trip icon.
+• Background is reset on every Trip switch. Missing legacy artwork gets a deterministic gradient instead of the previous Trip photo.
+• Flight, Team, Header, Footer and other Trip scoped UI are reset before rendering sparse legacy JSON.
+• Legacy Trips without expense settings bootstrap a fresh expense config for Owner or Admin on first use.
+• Expense loading uses a slim inline progress bar rather than a debug card or blocking modal.
