@@ -1,3 +1,31 @@
+# Travel WebApp — v7.7.0.11
+
+## Phase 2F current build
+
+### Destination Colour Palette iOS Scroll / Ring Fix
+
+• Fixed the selected colour swatch outer ring being clipped at the left / right or bottom edge of the palette.
+• Added dedicated safe padding around the swatch strip so the `inset: -4px` selected ring always has room to render inside the palette viewport.
+• Fixed an iOS Safari overflow interaction where a palette intended to scroll horizontally could also acquire a tiny vertical scroll range. This could leave a row visually shifted so the upper half of its colour circles appeared cut off.
+• The palette now explicitly uses horizontal scrolling only (`overflow-x: auto`, `overflow-y: hidden`) and blocks internal vertical overscroll while the Profile page itself remains normally vertically scrollable.
+• No destination colour data, Firebase schema, Day gradient logic, or Profile Navigation animation logic changed.
+
+### Package and Firebase
+
+• Service Worker shell cache updated to v7.7.0.11.
+• Firestore Rules are unchanged.
+• Firestore indexes are unchanged.
+• No Firebase Rules redeploy is required for this build.
+• Package continues to keep only one development document: CHANGELOG.md.
+
+## Build QA
+
+• JavaScript syntax, JSON validity, duplicate static IDs, Firestore Rules structural sanity, and ZIP integrity checked.
+• `firestore.rules` and `firestore.indexes.json` are byte for byte unchanged from v7.7.0.10.
+• The protected v7.3.13 Profile Navigation compositor source is byte for byte unchanged from the v7.7.0.10 baseline.
+
+---
+
 # Travel WebApp — v7.7.0.10
 
 ## Phase 2F current build
