@@ -7,6 +7,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js";
 
 const AUDIT_KEYS = new Set(["createdAt", "createdBy", "updatedAt", "updatedBy"]);
+const EMIT_DEBOUNCE_MS = 120;
 
 function clean(value) { return String(value ?? "").trim(); }
 function clonePlain(value) {
@@ -21,7 +22,6 @@ function clonePlain(value) {
   });
   return output;
 }
-function safeArray(value) { return Array.isArray(value) ? value : []; }
 function numberOr(value, fallback = 0) {
   const n = Number(value);
   return Number.isFinite(n) ? n : fallback;
@@ -35,6 +35,16 @@ function normalizeTimestamp(value) {
   } catch (error) {
     return "";
   }
+}
+function contentSignature(value) {
+  try { return JSON.stringify(clonePlain(value) || {}); }
+  catch (error) { return ""; }
+}
+function changedTopLevelKeys(previous, next) {
+  const a = clonePlain(previous || {}) || {};
+  const b = clonePlain(next || {}) || {};
+  const keys = new Set([...Object.keys(a), ...Object.keys(b)]);
+  return [...keys].filter(key => contentSignature(a[key]) !== contentSignature(b[key]));
 }
 
 function assemblePortableTrip(tripId, state) {
@@ -116,6 +126,7 @@ export function subscribeTripData(tripIdInput, callback) {
   const unsubs = [];
   const itemUnsubs = new Map();
   const sourceMeta = new Map();
+  const documentSignatures = new Map();
   const initial = { trip: false, days: false, saved: false, general: false, expenses: false };
   const itemReady = new Set();
   const state = {
@@ -134,14 +145,23 @@ export function subscribeTripData(tripIdInput, callback) {
   };
 
   let stopped = false;
-  let lastSignature = "";
   let emitTimer = 0;
+  let firstReadyEmitted = false;
+  let lastMetadataState = "";
+  const dirtySections = new Set();
 
   function snapshotMeta(key, snapshot) {
-    sourceMeta.set(key, {
+    const next = {
       fromCache: snapshot?.metadata?.fromCache === true,
       hasPendingWrites: snapshot?.metadata?.hasPendingWrites === true
-    });
+    };
+    const prev = sourceMeta.get(key);
+    sourceMeta.set(key, next);
+    return !prev || prev.fromCache !== next.fromCache || prev.hasPendingWrites !== next.hasPendingWrites;
+  }
+
+  function markDirty(...sections) {
+    sections.flat().filter(Boolean).forEach(section => dirtySections.add(String(section)));
   }
 
   function readyForEmit() {
@@ -157,8 +177,14 @@ export function subscribeTripData(tripIdInput, callback) {
     callback({ status, tripId, ...extra });
   }
 
-  function scheduleEmit(reason = "change") {
+  function currentMetadataState() {
+    return `${state.allFromCache() ? "cache" : "server"}|${state.hasPendingWrites() ? "pending" : "clean"}`;
+  }
+
+  function scheduleEmit(reason = "change", sections = []) {
+    markDirty(sections);
     if (stopped || !readyForEmit() || !state.tripDoc) return;
+
     const importState = clean(state.tripDoc.importState || "ready");
     const restoreState = clean(state.tripDoc.restoreState || "ready");
     if (importState === "importing" || restoreState === "restoring") {
@@ -175,21 +201,44 @@ export function subscribeTripData(tripIdInput, callback) {
       });
       return;
     }
+
     clearTimeout(emitTimer);
     emitTimer = setTimeout(() => {
       if (stopped || !readyForEmit() || !state.tripDoc) return;
+
+      const metadataState = currentMetadataState();
+      const sectionsNow = [...dirtySections];
+      dirtySections.clear();
+
+      // Metadata-only cache → server transitions are common with
+      // includeMetadataChanges. They should update diagnostics, not rebuild and
+      // stringify the whole portable Trip or trigger an app render/cache write.
+      if (firstReadyEmitted && sectionsNow.length === 0) {
+        if (metadataState !== lastMetadataState) {
+          lastMetadataState = metadataState;
+          emitStatus("metadata", {
+            source: state.allFromCache() ? "cache" : "server",
+            fromCache: state.allFromCache(),
+            hasPendingWrites: state.hasPendingWrites(),
+            reason
+          });
+        }
+        return;
+      }
+
       const data = assemblePortableTrip(tripId, state);
-      const signature = JSON.stringify(data);
-      if (signature === lastSignature && reason !== "metadata") return;
-      lastSignature = signature;
+      firstReadyEmitted = true;
+      lastMetadataState = metadataState;
       emitStatus("ready", {
         data,
+        dirtySections: sectionsNow.length ? sectionsNow : ["initial"],
+        reason,
         source: data.cloudMeta?.source || "server",
         fromCache: data.cloudMeta?.source === "cache",
         hasPendingWrites: data.cloudMeta?.hasPendingWrites === true,
         updatedAt: data.cloudMeta?.updatedAt || ""
       });
-    }, 90);
+    }, EMIT_DEBOUNCE_MS);
   }
 
   function stopItemListener(dayId) {
@@ -203,6 +252,25 @@ export function subscribeTripData(tripIdInput, callback) {
     sourceMeta.delete(`items:${dayId}`);
   }
 
+  function applyCollectionChanges(snapshot, targetMap, { idField = "", section = "" } = {}) {
+    let contentChanged = false;
+    const changes = snapshot.docChanges();
+    changes.forEach(change => {
+      const id = change.doc.id;
+      if (change.type === "removed") {
+        if (targetMap.delete(id)) contentChanged = true;
+        return;
+      }
+      const data = change.doc.data() || {};
+      const sig = contentSignature(data);
+      const prev = targetMap.get(id);
+      if (!prev || prev.signature !== sig) contentChanged = true;
+      targetMap.set(id, { id, data, signature: sig, idField });
+    });
+    if (contentChanged && section) markDirty(section);
+    return contentChanged;
+  }
+
   function attachItemListener(dayId) {
     if (itemUnsubs.has(dayId)) return;
     state.itemsByDay.set(dayId, new Map());
@@ -211,11 +279,11 @@ export function subscribeTripData(tripIdInput, callback) {
       { includeMetadataChanges: true },
       snapshot => {
         snapshotMeta(`items:${dayId}`, snapshot);
-        const map = new Map();
-        snapshot.docs.forEach(itemSnap => map.set(itemSnap.id, { id: itemSnap.id, data: itemSnap.data() || {} }));
+        const map = state.itemsByDay.get(dayId) || new Map();
+        const changed = applyCollectionChanges(snapshot, map, { section: `items:${dayId}` });
         state.itemsByDay.set(dayId, map);
         itemReady.add(dayId);
-        scheduleEmit(snapshot.metadata?.fromCache ? "cache" : "items");
+        scheduleEmit(snapshot.metadata?.fromCache ? "cache" : "items", changed ? [`items:${dayId}`] : []);
       },
       error => emitStatus(error?.code === "permission-denied" ? "permission-denied" : "error", { error })
     );
@@ -235,8 +303,15 @@ export function subscribeTripData(tripIdInput, callback) {
         emitStatus("not-found");
         return;
       }
-      state.tripDoc = snapshot.data() || {};
-      scheduleEmit(snapshot.metadata?.fromCache ? "cache" : "trip");
+      const next = snapshot.data() || {};
+      const sig = contentSignature(next);
+      const hadPrevious = documentSignatures.has("trip");
+      const changed = documentSignatures.get("trip") !== sig;
+      const previous = state.tripDoc;
+      documentSignatures.set("trip", sig);
+      state.tripDoc = next;
+      const sections = changed ? (hadPrevious ? changedTopLevelKeys(previous, next).map(key => `trip:${key}`) : ["trip"]) : [];
+      scheduleEmit(snapshot.metadata?.fromCache ? "cache" : "trip", sections.length ? sections : (changed ? ["trip"] : []));
     },
     error => emitStatus(error?.code === "permission-denied" ? "permission-denied" : "error", { error })
   ));
@@ -247,14 +322,23 @@ export function subscribeTripData(tripIdInput, callback) {
     snapshot => {
       snapshotMeta("days", snapshot);
       initial.days = true;
-      const nextDays = new Map();
-      snapshot.docs.forEach(daySnap => nextDays.set(daySnap.id, { id: daySnap.id, data: daySnap.data() || {} }));
-      [...state.days.keys()].forEach(dayId => {
-        if (!nextDays.has(dayId)) stopItemListener(dayId);
+      const changes = snapshot.docChanges();
+      let changed = false;
+      changes.forEach(change => {
+        const dayId = change.doc.id;
+        if (change.type === "removed") {
+          if (state.days.delete(dayId)) changed = true;
+          stopItemListener(dayId);
+          return;
+        }
+        const data = change.doc.data() || {};
+        const sig = contentSignature(data);
+        const prev = state.days.get(dayId);
+        if (!prev || prev.signature !== sig) changed = true;
+        state.days.set(dayId, { id: dayId, data, signature: sig });
       });
-      state.days = nextDays;
-      nextDays.forEach((_, dayId) => attachItemListener(dayId));
-      scheduleEmit(snapshot.metadata?.fromCache ? "cache" : "days");
+      state.days.forEach((_, dayId) => attachItemListener(dayId));
+      scheduleEmit(snapshot.metadata?.fromCache ? "cache" : "days", changed ? ["days"] : []);
     },
     error => emitStatus(error?.code === "permission-denied" ? "permission-denied" : "error", { error })
   ));
@@ -265,10 +349,8 @@ export function subscribeTripData(tripIdInput, callback) {
     snapshot => {
       snapshotMeta("saved", snapshot);
       initial.saved = true;
-      const map = new Map();
-      snapshot.docs.forEach(placeSnap => map.set(placeSnap.id, { id: placeSnap.id, data: placeSnap.data() || {} }));
-      state.savedPlaces = map;
-      scheduleEmit(snapshot.metadata?.fromCache ? "cache" : "saved");
+      const changed = applyCollectionChanges(snapshot, state.savedPlaces, { section: "snacks" });
+      scheduleEmit(snapshot.metadata?.fromCache ? "cache" : "saved", changed ? ["snacks"] : []);
     },
     error => emitStatus(error?.code === "permission-denied" ? "permission-denied" : "error", { error })
   ));
@@ -280,8 +362,23 @@ export function subscribeTripData(tripIdInput, callback) {
       snapshot => {
         snapshotMeta(`settings:${settingId}`, snapshot);
         initial[settingId] = true;
-        state.settings[settingId] = snapshot.exists() ? snapshot.data() || {} : {};
-        scheduleEmit(snapshot.metadata?.fromCache ? "cache" : `settings:${settingId}`);
+        const next = snapshot.exists() ? snapshot.data() || {} : {};
+        const sig = contentSignature(next);
+        const key = `settings:${settingId}`;
+        const hadPrevious = documentSignatures.has(key);
+        const changed = documentSignatures.get(key) !== sig;
+        const previous = state.settings[settingId] || {};
+        documentSignatures.set(key, sig);
+        state.settings[settingId] = next;
+        let sections = [];
+        if (changed) {
+          if (settingId === "general" && hadPrevious) {
+            sections = changedTopLevelKeys(previous, next).map(field => `general:${field}`);
+          } else {
+            sections = [settingId];
+          }
+        }
+        scheduleEmit(snapshot.metadata?.fromCache ? "cache" : key, sections.length ? sections : (changed ? [settingId] : []));
       },
       error => emitStatus(error?.code === "permission-denied" ? "permission-denied" : "error", { error })
     ));
@@ -293,5 +390,6 @@ export function subscribeTripData(tripIdInput, callback) {
     unsubs.forEach(stop => { try { stop(); } catch (error) {} });
     itemUnsubs.forEach(stop => { try { stop(); } catch (error) {} });
     itemUnsubs.clear();
+    dirtySections.clear();
   };
 }

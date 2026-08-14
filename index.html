@@ -3212,7 +3212,7 @@ body.expenses-view-active #app-version-note{
 #snacks-view::after,
 #info-view::after,
 #profile-view::after{
-  content:"v7.7.1.3" !important;
+  content:"v7.7.2.0" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3233,7 +3233,7 @@ body.expenses-view-active #app-version-note{
   display:none !important;
 }
 body.expenses-view-active .expenses-module .expenses-app::after{
-  content:"v7.7.1.3" !important;
+  content:"v7.7.2.0" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3298,7 +3298,7 @@ html:not(.theme-light):not(.theme-dark) .trip-boot-placeholder{
 </style>
             <link rel="apple-touch-icon" href="assets/icon/trip_icon.png">
   <link rel="icon" type="image/png" href="assets/icon/trip_icon.png">
-  <link rel="manifest" href="manifest.json?v=7.7.1.3">
+  <link rel="manifest" href="manifest.json?v=7.7.2.0">
   <meta name="apple-mobile-web-app-title" content="關嘉露西生日之旅">
   <!-- v7.7.1.2: expenses.css is 144KB and every rule is scoped under
        .expenses-module, yet it used to block the very first paint of the
@@ -3306,8 +3306,8 @@ html:not(.theme-light):not(.theme-dark) .trip-boot-placeholder{
        priority without blocking paint; ensureExpensesStylesheet() flips it to
        media="all" before the 支出 view is ever mounted, so the styling is
        byte-for-byte identical by the time anything expenses-related renders. -->
-  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?v=7.7.1.3" media="print">
-  <noscript><link rel="stylesheet" href="assets/css/expenses.css?v=7.7.1.3"></noscript>
+  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?v=7.7.2.0" media="print">
+  <noscript><link rel="stylesheet" href="assets/css/expenses.css?v=7.7.2.0"></noscript>
 </head>
 <body>
 <div class="bg-fixed"></div>
@@ -3757,7 +3757,7 @@ html:not(.theme-light):not(.theme-dark) .trip-boot-placeholder{
         <span class="profile-detail-spacer"></span>
       </div>
       <section class="profile-card" aria-label="App 資料">
-        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.7.1.3</strong></div>
+        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.7.2.0</strong></div>
         <div class="profile-meta-row"><span>資料架構</span><strong>Phase 2F</strong></div>
         <div class="profile-meta-row"><span>主要資料來源</span><strong id="app-data-source-label">Firebase / 本機快取</strong></div>
       </section>
@@ -3876,7 +3876,7 @@ html:not(.theme-light):not(.theme-dark) .trip-boot-placeholder{
 </div>
 
 <script>
-const APP_VERSION = "7.7.1.3";
+const APP_VERSION = "7.7.2.0";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 window.EXPENSES_MODULE_VERSION = EXPENSES_MODULE_VERSION;
@@ -4717,12 +4717,21 @@ function normalizeSnackItem(item){
 }
 function renderSnacks(data){
   const listEl=document.getElementById("snacks-list");if(!listEl)return;
-  const snacks=data.snacks;if(!snacks?.items?.length)return;
-  document.getElementById("bt-snacks").style.display="flex";requestAnimationFrame(updateBottomNavIndicator);
+  const snacks=data.snacks||{};const snackItems=Array.isArray(snacks.items)?snacks.items:[];
+  const snackTab=document.getElementById("bt-snacks");
+  if(!snackItems.length){
+    listEl.innerHTML="";
+    const count=document.getElementById("snacks-count");if(count)count.textContent="";
+    const subtitle=document.getElementById("snacks-subtitle");if(subtitle)subtitle.textContent="";
+    if(snackTab)snackTab.style.display="none";
+    requestAnimationFrame(updateBottomNavIndicator);
+    return;
+  }
+  if(snackTab)snackTab.style.display="flex";requestAnimationFrame(updateBottomNavIndicator);
   if(snacks.title)document.getElementById("snacks-title").textContent=snacks.title;
   if(snacks.subtitle)document.getElementById("snacks-subtitle").textContent=snacks.subtitle;
 
-  const allItems=(snacks.items||[]).map(normalizeSnackItem);
+  const allItems=snackItems.map(normalizeSnackItem);
   const priorityOrder={must:0,route:1,backup:2,souvenir:3};
   const areaFilters=["全部","京都","宇治","大阪","神戶"];
   const priorityFilters=[
@@ -5088,7 +5097,7 @@ function resetTripScopedUi(data){
 }
 
 // Main render
-function render(data){
+function render(data,{includeSnacks=true}={}){
   resetTripScopedUi(data);
   const meta=data.meta||{},travellers=meta.travellers||{},cities=meta.cities||{};
   requestAnimationFrame(updateBottomNavIndicator);
@@ -5240,7 +5249,7 @@ function render(data){
     });
   });
 
-  setupClicks();renderSnacks(data);updateChip(data);applyTeam("all");
+  setupClicks();if(includeSnacks)renderSnacks(data);updateChip(data);applyTeam("all");
   // Refresh now indicator every minute. Cloud re-renders must not stack timers.
   if(nowIndicatorTimer) clearInterval(nowIndicatorTimer);
   nowIndicatorTimer=setInterval(updateNowIndicator, 60000);
@@ -5633,9 +5642,14 @@ let tripRenderCacheServicePromise=null;
 let tripRenderCacheService=null;
 let tripInstantBootToken=0;
 let tripRenderSignature="";
+let tripSnacksSignature="";
+let tripInfoSignature="";
 let tripWeatherSignature="";
+let tripVisualSignature="";
+let tripExpensesSignature="";
 let tripDestinationThemeSignature="";
 let tripTeamThemeSignature="";
+let tripLibrarySummaryDataSignature="";
 let nowIndicatorTimer=0;
 
 function tripLibraryEsc(value){return escapeHtmlText(value);}
@@ -5791,7 +5805,11 @@ function loadArchivedTrips(){
 function initTripLibrarySafe(data){
   bundledTripData=data;
   if(!tripBootDeferred&&!tripRenderSignature)tripRenderSignature=tripContentRenderSignature(data);
+  if(!tripBootDeferred&&!tripSnacksSignature)tripSnacksSignature=snacksRenderSignature(data);
+  if(!tripBootDeferred&&!tripInfoSignature)tripInfoSignature=infoRenderSignature(data);
   if(!tripBootDeferred&&!tripWeatherSignature)tripWeatherSignature=weatherRenderSignature(data);
+  if(!tripBootDeferred&&!tripVisualSignature)tripVisualSignature=tripVisualRenderSignature(data);
+  if(!tripBootDeferred&&!tripExpensesSignature)tripExpensesSignature=expensesRenderSignature(data);
   if(!tripBootDeferred&&!tripDestinationThemeSignature)tripDestinationThemeSignature=destinationThemeRenderSignature(data);
   if(!tripBootDeferred&&!tripTeamThemeSignature)tripTeamThemeSignature=teamThemeRenderSignature(data);
   import(`./assets/js/trip-schema-service.js?v=${APP_VERSION}`)
@@ -5800,6 +5818,7 @@ function initTripLibrarySafe(data){
       const summarySource=window.tripData&&dataTripId(window.tripData)?window.tripData:data;
       const result=schemaService.validatePortableTrip(summarySource);
       tripLibrarySummary=schemaService.getTripSummary(result.trip);
+      tripLibrarySummaryDataSignature=tripLibraryDataSignature(summarySource);
       window.__portableTripSchema=result;
       tripLibraryCloudState={status:window.__appAuthUser?"loading":"signed-out",trips:[],error:null};
       tripLibraryArchiveState={status:"idle",trips:[],error:null};
@@ -5906,34 +5925,72 @@ function currentActiveDayId(){
   const idx=Number(document.querySelector(".day-tab.active")?.dataset?.dayIndex||0);
   return String(window.tripData?.days?.[idx]?.dayId||"");
 }
-function tripDataWithoutIdentityColours(data){
-  if(!data)return null;
-  try{
-    const copy=JSON.parse(JSON.stringify(data));delete copy.cloudMeta;
-    const cities=copy?.meta?.cities||{};
-    Object.values(cities).forEach(cfg=>{if(cfg&&typeof cfg==="object"){delete cfg.color;delete cfg.accentColor;delete cfg.themeColor;}});
-    const travellers=copy?.meta?.travellers||{};
-    Object.values(travellers).forEach(cfg=>{if(cfg&&typeof cfg==="object")delete cfg.color;});
-    return copy;
-  }catch(error){return data;}
+function renderSignature(value,fallback=""){
+  try{return JSON.stringify(value);}catch(error){return fallback;}
+}
+function travellerStructureForRender(travellers={}){
+  return Object.fromEntries(Object.entries(travellers).sort(([a],[b])=>a.localeCompare(b)).map(([key,cfg])=>{
+    const copy={...(cfg||{})};delete copy.color;delete copy.sortOrder;return[key,copy];
+  }));
+}
+function cityStructureForItinerary(cities={}){
+  return Object.fromEntries(Object.entries(cities).sort(([a],[b])=>a.localeCompare(b)).map(([key,cfg])=>[key,{
+    label:cfg?.label||key,startIso:cfg?.startIso||"",endIso:cfg?.endIso||""
+  }]));
 }
 function tripContentRenderSignature(data){
   if(!data)return"";
-  const copy=tripDataWithoutIdentityColours(data);
-  try{return JSON.stringify(copy);}catch(error){return `${dataTripId(data)}:${Number(data?.revision)||0}`;}
+  const meta=data.meta||{};
+  return renderSignature({
+    tripId:dataTripId(data),
+    meta:{
+      titleSmall:meta.titleSmall||"",titleMain:meta.titleMain||"",dateRange:meta.dateRange||"",route:meta.route||"",
+      tripStartIso:meta.tripStartIso||"",tripEndIso:meta.tripEndIso||"",status:meta.status||"",footerNote:meta.footerNote||"",
+      travellers:travellerStructureForRender(meta.travellers||{}),
+      cities:cityStructureForItinerary(meta.cities||{}),
+      flights:meta.flights||[],outbound:meta.outbound||null,inbound:meta.inbound||null,airlineLogo:meta.airlineLogo||"",
+      galleryDefaults:meta.galleryDefaults||{}
+    },
+    days:data.days||[]
+  },`${dataTripId(data)}:${Number(data?.revision)||0}`);
+}
+function snacksRenderSignature(data){
+  return renderSignature({snacks:data?.snacks||{},galleryDefaults:data?.meta?.galleryDefaults||{}},"");
+}
+function infoRenderSignature(data){
+  const meta=data?.meta||{};
+  return renderSignature({
+    tripId:dataTripId(data),start:meta.tripStartIso||"",end:meta.tripEndIso||"",
+    travellers:travellerStructureForRender(meta.travellers||{}),
+    cities:Object.fromEntries(Object.entries(meta.cities||{}).sort(([a],[b])=>a.localeCompare(b)).map(([key,cfg])=>[key,{label:cfg?.label||key,startIso:cfg?.startIso||"",endIso:cfg?.endIso||""}])),
+    hotels:meta.hotels||{},flights:meta.flights||[],outbound:meta.outbound||null,inbound:meta.inbound||null,infoCard:meta.infoCard||{}
+  },"");
 }
 function destinationThemeRenderSignature(data){
   const cities=data?.meta?.cities||{};
-  try{return JSON.stringify(Object.fromEntries(Object.entries(cities).map(([key,cfg])=>[key,{color:cfg?.color||"",accentColor:cfg?.accentColor||"",themeColor:cfg?.themeColor||""}])));}catch(error){return"";}
+  return renderSignature(Object.fromEntries(Object.entries(cities).sort(([a],[b])=>a.localeCompare(b)).map(([key,cfg])=>[key,{color:cfg?.color||"",accentColor:cfg?.accentColor||"",themeColor:cfg?.themeColor||""}])) ,"");
 }
 function teamThemeRenderSignature(data){
   const travellers=data?.meta?.travellers||{};
-  try{return JSON.stringify(Object.fromEntries(Object.entries(travellers).map(([key,cfg])=>[key,{label:cfg?.label||key,color:cfg?.color||""}])));}catch(error){return"";}
+  return renderSignature(Object.fromEntries(Object.entries(travellers).sort(([a],[b])=>a.localeCompare(b)).map(([key,cfg])=>[key,{color:cfg?.color||""}])) ,"");
 }
 function weatherRenderSignature(data){
   const meta=data?.meta||{};const cities={};
-  Object.entries(meta.cities||{}).forEach(([key,cfg])=>{cities[key]={label:cfg?.label||"",latitude:cfg?.latitude??null,longitude:cfg?.longitude??null,timezone:cfg?.timezone||"",startIso:cfg?.startIso||"",endIso:cfg?.endIso||""};});
-  try{return JSON.stringify({start:meta.tripStartIso,end:meta.tripEndIso,cities,weather:meta.weather||{}});}catch(error){return"";}
+  Object.entries(meta.cities||{}).sort(([a],[b])=>a.localeCompare(b)).forEach(([key,cfg])=>{cities[key]={label:cfg?.label||"",latitude:cfg?.latitude??null,longitude:cfg?.longitude??null,timezone:cfg?.timezone||"",startIso:cfg?.startIso||"",endIso:cfg?.endIso||""};});
+  return renderSignature({start:meta.tripStartIso,end:meta.tripEndIso,cities,weather:meta.weather||{}},"");
+}
+function tripVisualRenderSignature(data){
+  const meta=data?.meta||{};
+  return renderSignature({tripId:dataTripId(data),accentColor:meta.accentColor||"",backgroundImage:meta.backgroundImage||"",coverImage:meta.coverImage||""},"");
+}
+function expensesRenderSignature(data){return renderSignature(data?.meta?.expenses||{},"");}
+function tripLibraryDataSignature(data){
+  const meta=data?.meta||{};const days=Array.isArray(data?.days)?data.days:[];const snacks=Array.isArray(data?.snacks?.items)?data.snacks.items:[];
+  return renderSignature({
+    tripId:dataTripId(data),titleMain:meta.titleMain||"",titleSmall:meta.titleSmall||"",dateRange:meta.dateRange||"",
+    start:meta.tripStartIso||"",end:meta.tripEndIso||"",tripIcon:meta.tripIcon||"",backgroundImage:meta.backgroundImage||"",coverImage:meta.coverImage||"",
+    dayCount:days.length,itemCount:days.reduce((sum,day)=>sum+(Array.isArray(day?.items)?day.items.length:0),0),savedPlaceCount:snacks.length
+  },"");
 }
 function setDataSourceLabel(label){
   const el=document.getElementById("app-data-source-label");
@@ -6000,12 +6057,22 @@ async function getTripRenderCacheService(){
   return tripRenderCacheServicePromise;
 }
 function currentCacheUid(user=tripLibraryCurrentUser||window.__appAuthUser){return String(user?.uid||"").trim();}
-async function persistInstantTripCache(data){
+async function persistInstantTripCache(data,{immediate=false}={}){
   const tripId=dataTripId(data),uid=currentCacheUid();
   if(!tripId||!uid)return false;
   rememberCacheUid(uid);
-  try{const service=await getTripRenderCacheService();return await service.writeTripRenderCache(uid,tripId,data);}catch(error){console.warn("Trip render cache persist",error);return false;}
+  try{
+    const service=await getTripRenderCacheService();
+    if(immediate||typeof service.queueTripRenderCacheWrite!=="function")return await service.writeTripRenderCache(uid,tripId,data);
+    return await service.queueTripRenderCacheWrite(uid,tripId,data);
+  }catch(error){console.warn("Trip render cache persist",error);return false;}
 }
+function flushInstantTripCacheWrites(){
+  if(!tripRenderCacheServicePromise)return;
+  tripRenderCacheServicePromise.then(service=>service.flushTripRenderCacheWrites?.()).catch(()=>{});
+}
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="hidden")flushInstantTripCacheWrites();},{passive:true});
+window.addEventListener("pagehide",flushInstantTripCacheWrites,{passive:true});
 async function invalidateInstantTripCache(tripIdInput,user=tripLibraryCurrentUser||window.__appAuthUser){
   const tripId=String(tripIdInput||"").trim(),uid=currentCacheUid(user);
   if(!tripId||!uid)return false;
@@ -6065,57 +6132,114 @@ function restoreRenderedDay(dayId){
   document.querySelectorAll(".day-tab").forEach(t=>t.classList.toggle("active",Number(t.dataset.dayIndex)===idx));
   document.querySelectorAll(".day-content").forEach(c=>c.classList.toggle("active",Number(c.dataset.dayIndex)===idx));
 }
-function updateTripLibrarySummaryFromData(data){
+function updateTripLibrarySummaryFromData(data,{force=false}={}){
+  const signature=tripLibraryDataSignature(data);
+  if(!force&&signature&&signature===tripLibrarySummaryDataSignature)return false;
   try{
     if(tripLibrarySchemaService){const validated=tripLibrarySchemaService.validatePortableTrip(data);tripLibrarySummary=tripLibrarySchemaService.getTripSummary(validated.trip);}
   }catch(error){console.warn("Trip summary refresh",error);}
+  tripLibrarySummaryDataSignature=signature;
   renderTripLibrary();
+  return true;
 }
-function applyFirebaseTripData(data,{source="server",tripId=""}={}){
+function applyFirebaseTripData(data,{source="server",tripId="",dirtySections=[]}={}){
   if(!data)return;
-  const nextSignature=tripContentRenderSignature(data);
-  const nextDestinationThemeSignature=destinationThemeRenderSignature(data);
-  const nextTeamThemeSignature=teamThemeRenderSignature(data);
   const currentId=dataTripId(window.tripData),nextId=dataTripId(data)||tripId;
-  const sameTrip=currentId&&nextId&&currentId===nextId;
-  const oldDayId=sameTrip?currentActiveDayId():"";
-  const oldTeam=sameTrip?activeTeam:"all";
-  const oldScroll=sameTrip?Math.max(0,Number(scrollShell?.scrollTop||0)):0;
+  const sameTrip=Boolean(currentId&&nextId&&currentId===nextId);
+  const dirty=new Set(Array.isArray(dirtySections)?dirtySections:[]);
+  let dirtyUnknown=dirty.size===0||dirty.has("initial");
+  const dirtyPrefix=prefix=>[...dirty].some(section=>section===prefix||section.startsWith(`${prefix}:`));
+  const knownDirty=[...dirty].every(section=>section==="initial"||section==="days"||section==="snacks"||section==="expenses"||section.startsWith("items:")||section==="trip"||section.startsWith("trip:")||section==="general"||section.startsWith("general:"));
+  if(!knownDirty)dirtyUnknown=true;
+  const tripField=field=>dirtyUnknown||dirty.has("trip")||dirty.has(`trip:${field}`);
+  const generalField=field=>dirtyUnknown||dirty.has("general")||dirty.has(`general:${field}`);
+  const dayDirty=dirtyUnknown||dirty.has("days")||dirtyPrefix("items");
+
+  const itineraryTouched=!sameTrip||dayDirty||["titleSmall","title","titleHtml","dateRange","route","startDate","endDate","status"].some(tripField)||["travellers","cities","flights","outbound","inbound","airlineLogo","galleryDefaults","footerNote"].some(generalField);
+  const snacksTouched=!sameTrip||dirtyUnknown||dirty.has("snacks")||["savedPlacesMeta","galleryDefaults"].some(generalField);
+  const infoTouched=!sameTrip||["startDate","endDate"].some(tripField)||["travellers","cities","hotels","flights","outbound","inbound","infoCard"].some(generalField);
+  const weatherTouched=!sameTrip||["startDate","endDate"].some(tripField)||["cities","weather"].some(generalField);
+  const visualTouched=!sameTrip||["accentColor","backgroundImage","coverImage"].some(tripField)||generalField("backgroundImage");
+  const expensesTouched=!sameTrip||dirtyUnknown||dirty.has("expenses");
+  const destinationThemeTouched=!sameTrip||generalField("cities");
+  const teamThemeTouched=!sameTrip||generalField("travellers");
+
+  // Layer 3: only serialize a render section when Firestore says that section
+  // can actually have changed. Item-only edits no longer stringify Saved, Info,
+  // Weather or settings payloads, and vice versa.
+  const nextItinerarySignature=itineraryTouched?tripContentRenderSignature(data):tripRenderSignature;
+  const nextSnacksSignature=snacksTouched?snacksRenderSignature(data):tripSnacksSignature;
+  const nextInfoSignature=infoTouched?infoRenderSignature(data):tripInfoSignature;
+  const nextWeatherSignature=weatherTouched?weatherRenderSignature(data):tripWeatherSignature;
+  const nextVisualSignature=visualTouched?tripVisualRenderSignature(data):tripVisualSignature;
+  const nextExpensesSignature=expensesTouched?expensesRenderSignature(data):tripExpensesSignature;
+  const nextDestinationThemeSignature=destinationThemeTouched?destinationThemeRenderSignature(data):tripDestinationThemeSignature;
+  const nextTeamThemeSignature=teamThemeTouched?teamThemeRenderSignature(data):tripTeamThemeSignature;
+
+  const needsItinerary=!sameTrip||nextItinerarySignature!==tripRenderSignature;
+  const needsSnacks=!sameTrip||nextSnacksSignature!==tripSnacksSignature;
+  const needsInfo=!sameTrip||nextInfoSignature!==tripInfoSignature;
+  const needsWeather=!sameTrip||nextWeatherSignature!==tripWeatherSignature;
+  const needsVisual=!sameTrip||nextVisualSignature!==tripVisualSignature;
+  const needsExpenses=!sameTrip||nextExpensesSignature!==tripExpensesSignature;
+  const needsDestinationTheme=!sameTrip||nextDestinationThemeSignature!==tripDestinationThemeSignature;
+  const needsTeamTheme=!sameTrip||nextTeamThemeSignature!==tripTeamThemeSignature;
+
+  const oldDayId=sameTrip&&needsItinerary?currentActiveDayId():"";
+  const oldTeam=sameTrip&&needsItinerary?activeTeam:"all";
+  const oldScroll=sameTrip&&needsItinerary?Math.max(0,Number(scrollShell?.scrollTop||0)):0;
+
+  const previousLoaderSource=tripLoaderState?.source||"";
   tripLoaderState={status:"ready",source,tripId:nextId,updatedAt:data?.cloudMeta?.updatedAt||"",error:null};
+  window.tripData=data;
   setDataSourceLabel(source==="instant-cache"?"即時旅程快取":(source==="cache"?"Firebase 快取":"Firebase"));
-  if(nextSignature!==tripRenderSignature){
-    window.tripData=data;
-    render(data);
-    runOptionalAppStep("Firebase travel info render",()=>renderInfo(data));
-    const nextWeather=weatherRenderSignature(data);
-    if(nextWeather!==tripWeatherSignature){tripWeatherSignature=nextWeather;runOptionalAppStep("Firebase weather render",()=>renderWeather(data));}
+  refreshAppDataDiagnostics();
+
+  if(needsItinerary){
+    render(data,{includeSnacks:needsSnacks});
     restoreRenderedDay(oldDayId);
-    if(oldTeam!=="all"&&data?.meta?.travellers?.[oldTeam])applyTeam(oldTeam);else applyTeam("all");
-    updateLargeHeaderForView();updateCompactHeader();updateTripLibrarySummaryFromData(data);
-    if(document.body.classList.contains("expenses-view-active"))requestAnimationFrame(()=>initExpensesViewSafe());
-    requestAnimationFrame(()=>{if(sameTrip&&scrollShell)scrollShell.scrollTo({top:oldScroll,behavior:"auto"});updateBottomNavIndicator();updateCollapsingChrome();updateNowIndicator();});
-    tripRenderSignature=nextSignature;
-    tripDestinationThemeSignature=nextDestinationThemeSignature;
-    tripTeamThemeSignature=nextTeamThemeSignature;
+    updateLargeHeaderForView();updateCompactHeader();
+    requestAnimationFrame(()=>{
+      if(sameTrip&&scrollShell)scrollShell.scrollTo({top:oldScroll,behavior:"auto"});
+      updateBottomNavIndicator();updateCollapsingChrome();updateNowIndicator();
+    });
   }else{
-    window.tripData=data;
-    if(nextDestinationThemeSignature!==tripDestinationThemeSignature){
-      refreshDestinationThemeInPlace(data);
-      tripDestinationThemeSignature=nextDestinationThemeSignature;
-    }
-    if(nextTeamThemeSignature!==tripTeamThemeSignature){
-      refreshTeamThemeInPlace(data);
-      tripTeamThemeSignature=nextTeamThemeSignature;
-    }
-    updateTripLibrarySummaryFromData(data);
+    if(needsVisual)applyTripVisualTheme(data);
+    if(needsSnacks)runOptionalAppStep("Firebase saved places render",()=>renderSnacks(data));
   }
-  try{window.__destinationSettingsRefresh?.(data);}catch(error){}
-  try{window.__teamSettingsRefresh?.(data);}catch(error){}
-  try{refreshAppearanceColourMenuState(data);}catch(error){}
+
+  if(needsInfo)runOptionalAppStep("Firebase travel info render",()=>renderInfo(data));
+  if(needsInfo||needsItinerary){
+    const desiredTeam=needsItinerary?oldTeam:(activeTeam||"all");
+    if(desiredTeam!=="all"&&data?.meta?.travellers?.[desiredTeam])applyTeam(desiredTeam);else applyTeam("all");
+  }
+  if(needsWeather)runOptionalAppStep("Firebase weather render",()=>renderWeather(data));
+
+  if(needsDestinationTheme)refreshDestinationThemeInPlace(data);
+  if(needsTeamTheme)refreshTeamThemeInPlace(data);
+
+  if(needsExpenses&&document.body.classList.contains("expenses-view-active"))requestAnimationFrame(()=>initExpensesViewSafe());
+  const librarySummaryChanged=updateTripLibrarySummaryFromData(data);
+  if(!librarySummaryChanged&&previousLoaderSource!==source)renderTripLibrary();
+
+  tripRenderSignature=nextItinerarySignature;
+  tripSnacksSignature=nextSnacksSignature;
+  tripInfoSignature=nextInfoSignature;
+  tripWeatherSignature=nextWeatherSignature;
+  tripVisualSignature=nextVisualSignature;
+  tripExpensesSignature=nextExpensesSignature;
+  tripDestinationThemeSignature=nextDestinationThemeSignature;
+  tripTeamThemeSignature=nextTeamThemeSignature;
+
+  const generalDirty=dirtyUnknown||!sameTrip||dirtyPrefix("general");
+  if(generalDirty||needsDestinationTheme){try{window.__destinationSettingsRefresh?.(data);}catch(error){}}
+  if(generalDirty||needsTeamTheme){try{window.__teamSettingsRefresh?.(data);}catch(error){}}
+  if(generalDirty||needsDestinationTheme||needsTeamTheme){try{refreshAppearanceColourMenuState(data);}catch(error){}}
+
   resolveTripLoaderWaiters(data);
   releaseDeferredTripBoot();
-  // Only Firestore-ready data refreshes the app-owned render cache. Reading the
-  // render cache itself must never rewrite the same stale entry.
+  // Firestore content updates are queued and coalesced before IndexedDB write.
+  // Metadata-only cache/server transitions never reach this path.
   if(source!=="instant-cache")persistInstantTripCache(data).catch(()=>{});
 }
 function applyBundledTripFallback(){
@@ -6123,7 +6247,20 @@ function applyBundledTripFallback(){
   if(dataTripId(window.tripData)===dataTripId(bundledTripData)&&tripLoaderState.status==="local")return;
   const sig=tripContentRenderSignature(bundledTripData);
   window.tripData=bundledTripData;
-  if(sig!==tripRenderSignature){render(bundledTripData);runOptionalAppStep("Local travel info render",()=>renderInfo(bundledTripData));runOptionalAppStep("Local weather render",()=>renderWeather(bundledTripData));tripRenderSignature=sig;tripWeatherSignature=weatherRenderSignature(bundledTripData);tripDestinationThemeSignature=destinationThemeRenderSignature(bundledTripData);tripTeamThemeSignature=teamThemeRenderSignature(bundledTripData);updateLargeHeaderForView();updateCompactHeader();}
+  if(sig!==tripRenderSignature){
+    render(bundledTripData);
+    runOptionalAppStep("Local travel info render",()=>renderInfo(bundledTripData));
+    runOptionalAppStep("Local weather render",()=>renderWeather(bundledTripData));
+    updateLargeHeaderForView();updateCompactHeader();
+  }
+  tripRenderSignature=sig;
+  tripSnacksSignature=snacksRenderSignature(bundledTripData);
+  tripInfoSignature=infoRenderSignature(bundledTripData);
+  tripWeatherSignature=weatherRenderSignature(bundledTripData);
+  tripVisualSignature=tripVisualRenderSignature(bundledTripData);
+  tripExpensesSignature=expensesRenderSignature(bundledTripData);
+  tripDestinationThemeSignature=destinationThemeRenderSignature(bundledTripData);
+  tripTeamThemeSignature=teamThemeRenderSignature(bundledTripData);
   tripLoaderState={status:"local",source:"local",tripId:dataTripId(bundledTripData),updatedAt:"",error:null};
   setDataSourceLabel("本機 trip.json");updateTripLibrarySummaryFromData(bundledTripData);
   try{refreshAppearanceColourMenuState(bundledTripData);}catch(error){}
@@ -6144,7 +6281,14 @@ async function startFirebaseTripLoader(tripIdInput){
   access.initTripAccess?.(tripId);
   tripLoaderStop=loader.subscribeTripData(tripId,event=>{
     if(tripLoaderActiveId!==tripId)return;
-    if(event.status==="ready"){applyFirebaseTripData(event.data,{source:event.fromCache?"cache":"server",tripId});return;}
+    if(event.status==="ready"){applyFirebaseTripData(event.data,{source:event.fromCache?"cache":"server",tripId,dirtySections:event.dirtySections||[]});return;}
+    if(event.status==="metadata"){
+      const metaSource=event.fromCache?"cache":"server";
+      tripLoaderState={...tripLoaderState,status:"ready",source:metaSource};
+      setDataSourceLabel(metaSource==="cache"?"Firebase 快取":"Firebase");
+      renderTripLibrary();
+      return;
+    }
     if(event.status==="syncing"){tripLoaderState={...tripLoaderState,status:"syncing",source:event.source||tripLoaderState.source};setDataSourceLabel(event.reason==="restore"?"Firebase 還原中…":"Firebase 更新中…");return;}
     if(event.status==="recovery-needed"){tripLoaderState={...tripLoaderState,status:"recovery-needed",source:event.source||tripLoaderState.source};setDataSourceLabel("Firebase 更新未完成");renderCloudSafetyStrip();return;}
     if(event.status==="permission-denied"||event.status==="error"||event.status==="not-found"){
@@ -7832,7 +7976,7 @@ refreshCollapseMetrics();
 // Android / Chrome PWA support. Versioned app-shell Service Worker; normal launches are cache-first while explicit reloads stay network-first.
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("./sw.js?v=7.7.1.3").catch(() => {});
+    navigator.serviceWorker.register("./sw.js?v=7.7.2.0").catch(() => {});
   });
 }
 

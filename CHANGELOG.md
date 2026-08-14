@@ -1,3 +1,49 @@
+# Travel WebApp — v7.7.2.0
+
+## Phase 2F Harmony · Layer 3 Runtime Slimming
+
+### Firestore live-loader coalescing
+
+• Replaced whole-Trip `JSON.stringify()` duplicate detection with source-level dirty tracking.
+• Collection listeners now apply Firestore `docChanges()` incrementally instead of rebuilding every Day / Item / Saved Place map on metadata-only callbacks.
+• Audit-only and metadata-only snapshots no longer rebuild Portable JSON or trigger an application render.
+• Cache → server metadata transitions emit a lightweight diagnostics event instead of a second full Trip payload.
+• Real content changes from Trip, Days, Day Items, Saved Places, General Settings and Expense Settings are coalesced into one 120 ms UI commit with scoped `dirtySections`.
+
+### Section-level render invalidation
+
+• Split runtime render signatures into itinerary, Saved Places, Travel Info, Weather, visual theme, expense settings, destination colour and Team colour sections.
+• Saved Place-only changes redraw Saved Places only.
+• Travel Info / hotel-only changes redraw the 資料 view only.
+• Weather coordinate / weather-setting changes refresh Weather only.
+• Expense-setting changes no longer rebuild itinerary DOM.
+• Destination / Team colour changes keep the existing in-place colour refresh path.
+• Team label/member changes still rebuild the relevant itinerary / Travel Info UI; Team colour alone does not.
+• Background / accent changes use the visual-theme path without forcing itinerary reconstruction when content is unchanged.
+
+### Trip Library redraw slimming
+
+• Added a compact Trip Library summary signature based only on fields that actually affect the My Trips / quick-switch summary.
+• Item note/detail edits no longer revalidate the whole Portable Trip and redraw My Trips when title, dates, icon and item/day counts are unchanged.
+• Loader source changes such as Firebase cache → server still update the source pill correctly.
+
+### Render-cache write batching
+
+• IndexedDB render-cache writes are debounced and coalesced; repeated Firestore callbacks for the same Trip keep only the latest complete state.
+• Multiple pending Trip writes share one IndexedDB write transaction where possible.
+• The IndexedDB connection is reused during the page session instead of open → write → prune → close on every callback.
+• Pending cache writes flush when the app becomes hidden / pagehide, reducing the chance of losing the newest warm-boot state on quit.
+• Render cache remains acceleration only; Firestore is unchanged as the authoritative source of truth.
+
+### Behaviour retained
+
+• No UI redesign, navigation timing, Day/Team ordering, permission model, Firestore schema or expense transaction model changed.
+• Layer 0 + 1 Service Worker / first-paint optimisation, Layer 2 scroll-frame optimisation and v7.7.1.3 Appearance Menu Harmony are retained.
+• Service Worker shell cache updated to `travel-shell-v7.7.2.0`.
+• Firestore Rules and indexes are unchanged. No Rules deployment is required.
+
+---
+
 # Travel WebApp — v7.7.1.3
 
 ## Phase 2F Harmony · Appearance Menu Harmony
