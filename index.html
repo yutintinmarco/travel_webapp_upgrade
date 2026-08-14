@@ -1618,7 +1618,7 @@ html:not(.theme-light):not(.theme-dark) .day-tab[data-city-multi="true"].active 
 
 
 /* Phase 2F · v7.7.0.10 · destination colour settings */
-/* v7.7.0.11 · iOS palette ring clearance + horizontal-only internal scrolling */
+/* v7.7.0.12 · iOS palette ring clearance + horizontal-only internal scrolling */
 .destination-settings-card{overflow:hidden;}
 .destination-color-list{display:block;}
 .destination-color-empty{padding:18px 16px;color:var(--label-secondary);font-size:calc(12px * var(--font-scale));line-height:1.5;}
@@ -3182,7 +3182,7 @@ body.expenses-view-active #app-version-note{
 #snacks-view::after,
 #info-view::after,
 #profile-view::after{
-  content:"v7.7.0.11" !important;
+  content:"v7.7.0.12" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3203,7 +3203,7 @@ body.expenses-view-active #app-version-note{
   display:none !important;
 }
 body.expenses-view-active .expenses-module .expenses-app::after{
-  content:"v7.7.0.11" !important;
+  content:"v7.7.0.12" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3700,7 +3700,7 @@ html:not(.theme-light):not(.theme-dark) .trip-boot-placeholder{
         <span class="profile-detail-spacer"></span>
       </div>
       <section class="profile-card" aria-label="App 資料">
-        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.7.0.11</strong></div>
+        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.7.0.12</strong></div>
         <div class="profile-meta-row"><span>資料架構</span><strong>Phase 2F</strong></div>
         <div class="profile-meta-row"><span>主要資料來源</span><strong id="app-data-source-label">Firebase / 本機快取</strong></div>
       </section>
@@ -3819,7 +3819,7 @@ html:not(.theme-light):not(.theme-dark) .trip-boot-placeholder{
 </div>
 
 <script>
-const APP_VERSION = "7.7.0.11";
+const APP_VERSION = "7.7.0.12";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 window.EXPENSES_MODULE_VERSION = EXPENSES_MODULE_VERSION;
@@ -6720,6 +6720,13 @@ document.getElementById("trip-invite-inbox-list")?.addEventListener("click",asyn
 const DESTINATION_COLOUR_PRESETS=["#4A90D9","#3F9F91","#5A9E5A","#D39F27","#E06040","#7B61D1","#C45B8C","#4D9DB0"];
 let tripDestinationServicePromise=null;
 let destinationColorSavingKey="";
+// iOS Safari's native colour picker may emit change/input while the system
+// picker is still on screen. Never rebuild the settings DOM during that
+// interaction or WebKit dismisses the picker immediately.
+let destinationCustomColourPickerKey="";
+let destinationCustomColourSaveSeq=0;
+let destinationCustomColourSaveTimer=0;
+let destinationCustomColourSaveChain=Promise.resolve();
 function getTripDestinationService(){
   if(!tripDestinationServicePromise)tripDestinationServicePromise=import(`./assets/js/trip-destination-service.js?v=${APP_VERSION}`);
   return tripDestinationServicePromise;
@@ -6757,11 +6764,40 @@ function renderDestinationSettingsPage(data=window.tripData){
   }).join("");
   if(status){status.classList.remove("is-error");status.textContent=canEdit?"改色後會直接儲存到 Firebase，並同步更新 Day、跨城市漸變、天氣同城市標籤。":"目前為唯讀。只有 Owner 或 Admin 可以修改目的地顏色。";}
 }
-async function saveDestinationColour(cityKey,color,{reset=false}={}){
-  if(destinationColorSavingKey)return;
+function applyDestinationCustomColourLocalUI(cityKey,color){
+  if(!parseHexColour(color))return;
+  const hex=String(color||"").trim().toUpperCase();
+  const item=document.querySelector(`[data-destination-item="${CSS.escape(String(cityKey))}"]`);if(!item)return;
+  const preview=item.querySelector(".destination-color-preview");if(preview)preview.style.setProperty("--destination-preview",hex);
+  const copy=item.querySelector(".destination-color-copy small");if(copy)copy.textContent=`自訂 ${hex}`;
+  const pill=item.querySelector(".destination-color-default-pill");if(pill)pill.textContent="已自訂";
+  item.querySelectorAll("[data-destination-color-value]").forEach(button=>button.classList.toggle("is-selected",String(button.dataset.destinationColorValue||"").toUpperCase()===hex));
+  const reset=item.querySelector("[data-destination-reset-key]");if(reset)reset.disabled=false;
+}
+function cancelDestinationCustomColourSave(){
+  if(destinationCustomColourSaveTimer){clearTimeout(destinationCustomColourSaveTimer);destinationCustomColourSaveTimer=0;}
+}
+function queueDestinationCustomColourSave(cityKey,color){
+  cancelDestinationCustomColourSave();
+  destinationCustomColourSaveTimer=setTimeout(()=>{
+    destinationCustomColourSaveTimer=0;
+    destinationCustomColourSaveChain=destinationCustomColourSaveChain.catch(()=>{}).then(()=>saveDestinationColour(cityKey,color,{preserveNativePicker:true}));
+  },500);
+}
+async function saveDestinationColour(cityKey,color,{reset=false,preserveNativePicker=false}={}){
+  if(destinationColorSavingKey&&!preserveNativePicker)return;
   const tripId=destinationSettingsTripId();if(!tripId)return;
   let finalMessage="",isError=false;
-  destinationColorSavingKey=cityKey;renderDestinationSettingsPage();
+  const saveSeq=++destinationCustomColourSaveSeq;
+  if(!preserveNativePicker){
+    destinationCustomColourPickerKey="";
+    destinationColorSavingKey=cityKey;
+    renderDestinationSettingsPage();
+  }else{
+    applyDestinationCustomColourLocalUI(cityKey,color);
+    const status=document.getElementById("destination-color-status");
+    if(status){status.classList.remove("is-error");status.textContent="正在儲存自訂顏色…";}
+  }
   try{
     const service=await getTripDestinationService();
     if(reset)await service.resetDestinationColor(tripId,cityKey,{user:window.__appAuthUser||null});
@@ -6769,20 +6805,50 @@ async function saveDestinationColour(cityKey,color,{reset=false}={}){
     finalMessage="已儲存到 Firebase，其他裝置會跟住同步。";
   }catch(error){isError=true;finalMessage=destinationSettingsFriendlyError(error);}
   finally{
-    destinationColorSavingKey="";renderDestinationSettingsPage();
+    if(!preserveNativePicker){
+      destinationColorSavingKey="";renderDestinationSettingsPage();
+    }else if(isError){
+      // A failed save should restore the authoritative value, but only after
+      // the native picker is no longer the active interaction. Keeping the
+      // current DOM intact is more important than repainting mid-picker.
+      destinationCustomColourPickerKey="";
+      renderDestinationSettingsPage();
+    }
     const status=document.getElementById("destination-color-status");
-    if(status&&finalMessage){status.classList.toggle("is-error",isError);status.textContent=finalMessage;}
+    if(status&&finalMessage&&saveSeq===destinationCustomColourSaveSeq){status.classList.toggle("is-error",isError);status.textContent=finalMessage;}
   }
 }
-document.getElementById("destination-settings-open-btn")?.addEventListener("click",()=>setTimeout(()=>renderDestinationSettingsPage(),40));
+document.getElementById("destination-settings-open-btn")?.addEventListener("click",()=>{cancelDestinationCustomColourSave();destinationCustomColourPickerKey="";setTimeout(()=>renderDestinationSettingsPage(),40);});
 document.getElementById("destination-color-list")?.addEventListener("click",event=>{
-  const swatch=event.target.closest?.("[data-destination-color-key]");if(swatch&&!swatch.disabled){saveDestinationColour(swatch.dataset.destinationColorKey,swatch.dataset.destinationColorValue);return;}
-  const reset=event.target.closest?.("[data-destination-reset-key]");if(reset&&!reset.disabled)saveDestinationColour(reset.dataset.destinationResetKey,"",{reset:true});
+  const custom=event.target.closest?.("[data-destination-custom-key]");
+  if(custom&&!custom.disabled){destinationCustomColourPickerKey=String(custom.dataset.destinationCustomKey||"");return;}
+  const swatch=event.target.closest?.("[data-destination-color-key]");if(swatch&&!swatch.disabled){cancelDestinationCustomColourSave();destinationCustomColourPickerKey="";saveDestinationColour(swatch.dataset.destinationColorKey,swatch.dataset.destinationColorValue);return;}
+  const reset=event.target.closest?.("[data-destination-reset-key]");if(reset&&!reset.disabled){cancelDestinationCustomColourSave();destinationCustomColourPickerKey="";saveDestinationColour(reset.dataset.destinationResetKey,"",{reset:true});}
+});
+document.getElementById("destination-color-list")?.addEventListener("input",event=>{
+  const input=event.target.closest?.("[data-destination-custom-key]");
+  if(input&&!input.disabled){
+    const key=String(input.dataset.destinationCustomKey||"");destinationCustomColourPickerKey=key;
+    applyDestinationCustomColourLocalUI(key,input.value);
+    queueDestinationCustomColourSave(key,input.value);
+  }
 });
 document.getElementById("destination-color-list")?.addEventListener("change",event=>{
-  const input=event.target.closest?.("[data-destination-custom-key]");if(input&&!input.disabled)saveDestinationColour(input.dataset.destinationCustomKey,input.value);
+  const input=event.target.closest?.("[data-destination-custom-key]");
+  if(input&&!input.disabled){
+    const key=String(input.dataset.destinationCustomKey||"");destinationCustomColourPickerKey=key;
+    // Critical iOS fix: persist without replacing the <input type=color> DOM.
+    // Replacing that node while the native picker is open makes Safari close
+    // the system colour sheet on the first adjustment. The short debounce also
+    // prevents several WebKit change events from racing Firestore writes.
+    queueDestinationCustomColourSave(key,input.value);
+  }
 });
-window.__destinationSettingsRefresh=data=>{if(profileCurrentPage==="destination-settings")renderDestinationSettingsPage(data);};
+window.__destinationSettingsRefresh=data=>{
+  if(profileCurrentPage!=="destination-settings")return;
+  if(destinationCustomColourPickerKey)return;
+  renderDestinationSettingsPage(data);
+};
 
 // =========================================================================
 // Phase 2F · v7.7.0 · network / cache / operation safety

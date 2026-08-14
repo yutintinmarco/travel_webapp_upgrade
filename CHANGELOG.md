@@ -1,3 +1,32 @@
+# Travel WebApp — v7.7.0.12
+
+## Phase 2F current build
+
+### iOS Native Custom Colour Picker Stability Fix
+
+• Fixed the Destination Colour “自訂顏色” native iOS colour picker closing as soon as the user touched or adjusted a colour value.
+• Root cause: the colour `change` event saved to Firebase and immediately rebuilt the Destination Settings DOM. Replacing the active `<input type="color">` node causes iOS Safari / standalone PWA to dismiss the system colour picker.
+• Custom colour changes now update the preview locally and persist to Firebase without replacing the active colour input while the native picker interaction is in progress.
+• Firestore live refreshes are prevented from rebuilding the Destination Settings list while the native colour picker is the active editor.
+• Preset swatches and “還原預設” continue to use the normal immediate re-render path.
+• Destination colour data model, Day gradients, multi-city order, Firebase schema, and Profile Navigation compositor are unchanged.
+
+### Package and Firebase
+
+• Service Worker shell cache updated to v7.7.0.12.
+• Firestore Rules are unchanged.
+• Firestore indexes are unchanged.
+• No Firebase Rules redeploy is required for this build.
+• Package continues to keep only one development document: CHANGELOG.md.
+
+## Build QA
+
+• JavaScript syntax, JSON validity, duplicate static IDs, Firestore Rules structural sanity, and ZIP integrity checked.
+• `firestore.rules` and `firestore.indexes.json` are byte for byte unchanged from v7.7.0.11.
+• The protected v7.3.13 Profile Navigation compositor source is unchanged from the v7.7.0.11 baseline.
+
+---
+
 # Travel WebApp — v7.7.0.11
 
 ## Phase 2F current build
