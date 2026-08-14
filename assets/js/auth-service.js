@@ -107,6 +107,7 @@ export async function signInWithGoogle() {
 }
 
 export function signOutCurrentUser() {
+  try { localStorage.removeItem("travel_last_auth_uid"); } catch (error) {}
   return signOut(auth);
 }
 

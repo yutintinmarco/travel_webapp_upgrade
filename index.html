@@ -3081,7 +3081,7 @@ body.expenses-view-active #app-version-note{
 #snacks-view::after,
 #info-view::after,
 #profile-view::after{
-  content:"v7.7.0.5" !important;
+  content:"v7.7.0.6" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3102,7 +3102,7 @@ body.expenses-view-active #app-version-note{
   display:none !important;
 }
 body.expenses-view-active .expenses-module .expenses-app::after{
-  content:"v7.7.0.5" !important;
+  content:"v7.7.0.6" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3137,7 +3137,7 @@ body.profile-edge-swipe-active #profile-view::after{
 
 
 /* ==========================================================================
-   v7.7.0.5 · Multi-Trip boot gate
+   v7.7.0.6 · Multi-Trip boot gate
    ========================================================================== */
 .trip-boot-placeholder{
   display:flex;align-items:center;justify-content:center;gap:9px;
@@ -3167,9 +3167,9 @@ html:not(.theme-light):not(.theme-dark) .trip-boot-placeholder{
 </style>
             <link rel="apple-touch-icon" href="assets/icon/trip_icon.png">
   <link rel="icon" type="image/png" href="assets/icon/trip_icon.png">
-  <link rel="manifest" href="manifest.json?v=7.7.0.5">
+  <link rel="manifest" href="manifest.json?v=7.7.0.6">
   <meta name="apple-mobile-web-app-title" content="關嘉露西生日之旅">
-  <link rel="stylesheet" href="assets/css/expenses.css?v=7.7.0.5">
+  <link rel="stylesheet" href="assets/css/expenses.css?v=7.7.0.6">
 </head>
 <body>
 <div class="bg-fixed"></div>
@@ -3581,7 +3581,7 @@ html:not(.theme-light):not(.theme-dark) .trip-boot-placeholder{
         <span class="profile-detail-spacer"></span>
       </div>
       <section class="profile-card" aria-label="App 資料">
-        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.7.0.5</strong></div>
+        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.7.0.6</strong></div>
         <div class="profile-meta-row"><span>資料架構</span><strong>Phase 2F</strong></div>
         <div class="profile-meta-row"><span>主要資料來源</span><strong id="app-data-source-label">Firebase / 本機快取</strong></div>
       </section>
@@ -3700,7 +3700,7 @@ html:not(.theme-light):not(.theme-dark) .trip-boot-placeholder{
 </div>
 
 <script>
-const APP_VERSION = "7.7.0.5";
+const APP_VERSION = "7.7.0.6";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 window.EXPENSES_MODULE_VERSION = EXPENSES_MODULE_VERSION;
@@ -3860,12 +3860,59 @@ function wIcon(c){
   if([95,96,99].includes(c))return{icon:"⛈️",label:"雷暴"};
   return{icon:"☁️",label:"多雲"};
 }
+const WEATHER_CACHE_PREFIX="travel_weather_cache_v1:";
+const WEATHER_CACHE_TTL_MS=30*60*1000;
 let wCache={};
+function validWeatherCfg(cfg){
+  return !!cfg&&Number.isFinite(Number(cfg.latitude))&&Number.isFinite(Number(cfg.longitude));
+}
+function weatherRequestKey(cfg){
+  return [Number(cfg.latitude).toFixed(4),Number(cfg.longitude).toFixed(4),String(cfg.timezone||"UTC")].join("|");
+}
+function readPersistedWeather(cfg){
+  try{
+    const key=WEATHER_CACHE_PREFIX+weatherRequestKey(cfg);
+    const row=JSON.parse(localStorage.getItem(key)||"null");
+    if(!row?.data?.daily||Date.now()-Number(row.savedAt||0)>WEATHER_CACHE_TTL_MS)return null;
+    return row.data;
+  }catch(error){return null;}
+}
+function persistWeather(cfg,data){
+  try{localStorage.setItem(WEATHER_CACHE_PREFIX+weatherRequestKey(cfg),JSON.stringify({savedAt:Date.now(),data}));}catch(error){}
+}
+function resetWeatherLoading(){
+  const updated=document.getElementById("weather-updated"),today=document.getElementById("weather-today"),sun=document.getElementById("weather-sun"),days=document.getElementById("weather-days");
+  if(updated)updated.textContent="載入中…";
+  if(today)today.textContent="正在取得今日天氣…";
+  if(sun)sun.textContent="";
+  if(days)days.innerHTML="";
+}
 function fetchCity(key,cfg,tripDates){
-  if(wCache[key]){renderW(wCache[key],tripDates);return;}
-  fetch(`https://api.open-meteo.com/v1/forecast?latitude=${cfg.latitude}&longitude=${cfg.longitude}&timezone=${encodeURIComponent(cfg.timezone||"UTC")}&daily=weathercode,temperature_2m_max,temperature_2m_min,sunrise,sunset`)
-    .then(r=>r.json()).then(wd=>{if(!wd.daily){document.getElementById("weather-today").textContent="暫時無法取得天氣資料";return;}wCache[key]=wd;renderW(wd,tripDates);})
-    .catch(()=>{document.getElementById("weather-today").textContent="暫時無法連線到天氣服務";});
+  if(!validWeatherCfg(cfg)){
+    const today=document.getElementById("weather-today"),updated=document.getElementById("weather-updated");
+    if(today)today.textContent="此旅程未設定目的地天氣位置";
+    if(updated)updated.textContent="未設定";
+    return;
+  }
+  const requestKey=weatherRequestKey(cfg);
+  if(wCache[requestKey]){renderW(wCache[requestKey],tripDates);return;}
+  const persisted=readPersistedWeather(cfg);
+  if(persisted){wCache[requestKey]=persisted;renderW(persisted,tripDates);return;}
+  resetWeatherLoading();
+  const controller=typeof AbortController!=="undefined"?new AbortController():null;
+  const timer=setTimeout(()=>{try{controller?.abort();}catch(error){}},8000);
+  fetch(`https://api.open-meteo.com/v1/forecast?latitude=${encodeURIComponent(cfg.latitude)}&longitude=${encodeURIComponent(cfg.longitude)}&timezone=${encodeURIComponent(cfg.timezone||"UTC")}&forecast_days=16&daily=weathercode,temperature_2m_max,temperature_2m_min,sunrise,sunset`,controller?{signal:controller.signal}:undefined)
+    .then(r=>{if(!r.ok)throw new Error(`Weather HTTP ${r.status}`);return r.json();})
+    .then(wd=>{
+      if(!wd?.daily)throw new Error("Weather daily data unavailable");
+      wCache[requestKey]=wd;persistWeather(cfg,wd);renderW(wd,tripDates);
+    })
+    .catch(()=>{
+      const today=document.getElementById("weather-today"),updated=document.getElementById("weather-updated");
+      if(today)today.textContent="暫時無法連線到天氣服務";
+      if(updated)updated.textContent="稍後再試";
+    })
+    .finally(()=>clearTimeout(timer));
 }
 function renderW(wd,tripDates){
   const{time:dates,temperature_2m_max:maxT,temperature_2m_min:minT,sunrise,sunset,weathercode:codes}=wd.daily;
@@ -3888,14 +3935,33 @@ function renderW(wd,tripDates){
   if(!el.hasChildNodes()){const x=document.createElement("div");x.style.cssText="font-size:11px;color:#777;";x.textContent="預報暫未覆蓋行程日期，出發前幾日再查看。";el.appendChild(x);}
 }
 function renderWeather(data){
-  const cities=data.meta?.cities,legacy=data.meta?.weather;
-  if(!cities&&!legacy)return;
-  document.getElementById("weather-card").style.display="block";
+  const citiesRaw=data.meta?.cities||{},legacy=data.meta?.weather||{};
+  const declaredCities=Object.keys(citiesRaw);
+  const legacyDeclared=Object.keys(legacy).length>0;
+  const validCities=Object.fromEntries(Object.entries(citiesRaw).filter(([,cfg])=>validWeatherCfg(cfg)));
+  const legacyValid=validWeatherCfg(legacy);
+  const card=document.getElementById("weather-card"),ctEl=document.getElementById("city-tabs");
+  if(!Object.keys(validCities).length&&!legacyValid){
+    if(ctEl){ctEl.style.display="none";ctEl.innerHTML="";}
+    if(!declaredCities.length&&!legacyDeclared){if(card)card.style.display="none";return;}
+    if(card)card.style.display="block";
+    const today=document.getElementById("weather-today"),updated=document.getElementById("weather-updated"),sun=document.getElementById("weather-sun"),days=document.getElementById("weather-days");
+    if(today)today.textContent="此旅程未設定有效嘅目的地天氣位置";
+    if(updated)updated.textContent="未設定";
+    if(sun)sun.textContent="";
+    if(days)days.innerHTML="";
+    return;
+  }
+  if(card)card.style.display="block";
   if(legacy?.title)document.getElementById("weather-title").textContent=legacy.title;
   const tripDates=(data.days||[]).filter(d=>d.isoDate).map(d=>fmtMMDD(d.isoDate));
-  if(!cities&&legacy?.latitude){fetchCity("default",legacy,tripDates);return;}
-  const keys=Object.keys(cities);if(!keys.length)return;
-  const ctEl=document.getElementById("city-tabs");ctEl.style.display="flex";ctEl.innerHTML="";
+  if(!Object.keys(validCities).length&&legacyValid){
+    if(ctEl){ctEl.style.display="none";ctEl.innerHTML="";}
+    fetchCity("default",legacy,tripDates);return;
+  }
+  const cities=validCities;
+  const keys=Object.keys(cities);
+  ctEl.style.display=keys.length>1?"flex":"none";ctEl.innerHTML="";
   let activeKey=keys[0];
   function setCityTabActive(activeK){
     document.querySelectorAll(".city-tab").forEach(b=>{b.className="city-tab";if(b.dataset.cityKey===activeK)b.classList.add(`active-${activeK}`);});
@@ -5337,7 +5403,8 @@ function initTripLibrarySafe(data){
   import(`./assets/js/trip-schema-service.js?v=${APP_VERSION}`)
     .then(schemaService=>{
       tripLibrarySchemaService=schemaService;
-      const result=schemaService.validatePortableTrip(data);
+      const summarySource=window.tripData&&dataTripId(window.tripData)?window.tripData:data;
+      const result=schemaService.validatePortableTrip(summarySource);
       tripLibrarySummary=schemaService.getTripSummary(result.trip);
       window.__portableTripSchema=result;
       tripLibraryCloudState={status:window.__appAuthUser?"loading":"signed-out",trips:[],error:null};
@@ -5352,6 +5419,7 @@ function initTripLibrarySafe(data){
         if(tripLibraryAuthUnsubscribe) tripLibraryAuthUnsubscribe();
         tripLibraryAuthUnsubscribe=authService.subscribeAuthState(user=>{
           tripLibraryCurrentUser=user||null;
+          rememberCacheUid(user?.uid||"");
           if(tripLibraryStopCatalog){tripLibraryStopCatalog();tripLibraryStopCatalog=null;}
           stopArchivedTripSubscription();
           tripLibraryArchiveState={status:user?"idle":"signed-out",trips:[],error:null};
@@ -5361,7 +5429,7 @@ function initTripLibrarySafe(data){
           if(archiveToggle) archiveToggle.setAttribute("aria-expanded","false");
           restartMyTripInviteSubscription(user||null);
           if(!user){tripLibraryCloudState={status:"signed-out",trips:[],error:null};renderTripLibrary();stopFirebaseTripLoader({fallback:true});return;}
-          // v7.7.0.5: do not wait for the full Trip catalog + role fan-out before
+          // v7.7.0.6: do not wait for the full Trip catalog + role fan-out before
           // restoring the last active Trip. Auth identity is enough to safely read
           // the user-bound render cache and start the Firestore listener directly.
           bootstrapRememberedFirebaseTrip(user).catch(error=>console.warn("Instant Trip bootstrap",error));
@@ -5393,6 +5461,12 @@ const tripLoaderRevisionWaiters=new Set();
 function dataTripId(data){return String(data?.tripId||data?.meta?.tripId||data?.meta?.expenses?.tripId||"").trim();}
 
 const TRIP_SESSION_STORAGE_KEY="travel_active_trip_id";
+const TRIP_LAST_AUTH_UID_KEY="travel_last_auth_uid";
+function rememberedCacheUid(){try{return String(localStorage.getItem(TRIP_LAST_AUTH_UID_KEY)||"").trim();}catch(error){return"";}}
+function rememberCacheUid(uidInput){
+  const uid=String(uidInput||"").trim();
+  try{if(uid)localStorage.setItem(TRIP_LAST_AUTH_UID_KEY,uid);else localStorage.removeItem(TRIP_LAST_AUTH_UID_KEY);}catch(error){}
+}
 let tripBootDeferred=false;
 let tripBootPreferredId="";
 function resolveBootPreferredTripId(){
@@ -5445,7 +5519,7 @@ function tripContentRenderSignature(data){
 }
 function weatherRenderSignature(data){
   const meta=data?.meta||{};
-  try{return JSON.stringify({start:meta.tripStartIso,end:meta.tripEndIso,cities:meta.cities||{}});}catch(error){return"";}
+  try{return JSON.stringify({start:meta.tripStartIso,end:meta.tripEndIso,cities:meta.cities||{},weather:meta.weather||{}});}catch(error){return"";}
 }
 function setDataSourceLabel(label){
   const el=document.getElementById("app-data-source-label");
@@ -5515,6 +5589,7 @@ function currentCacheUid(user=tripLibraryCurrentUser||window.__appAuthUser){retu
 async function persistInstantTripCache(data){
   const tripId=dataTripId(data),uid=currentCacheUid();
   if(!tripId||!uid)return false;
+  rememberCacheUid(uid);
   try{const service=await getTripRenderCacheService();return await service.writeTripRenderCache(uid,tripId,data);}catch(error){console.warn("Trip render cache persist",error);return false;}
 }
 async function invalidateInstantTripCache(tripIdInput,user=tripLibraryCurrentUser||window.__appAuthUser){
@@ -5539,6 +5614,13 @@ async function applyInstantTripCache(tripIdInput,user){
     console.warn("Trip render cache read skipped",error);
     return false;
   }
+}
+async function bootstrapRememberedTripBeforeAuth(){
+  if(!tripBootDeferred)return false;
+  const tripId=tripBootPreferredId||resolveBootPreferredTripId();
+  const uid=rememberedCacheUid();
+  if(!tripId||!uid)return false;
+  return applyInstantTripCache(tripId,{uid});
 }
 async function bootstrapRememberedFirebaseTrip(user){
   const uid=currentCacheUid(user);
@@ -7042,7 +7124,7 @@ if(window.visualViewport&&bottomNav){
 // Android / Chrome PWA support. Network-only service worker, no aggressive cache.
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("./sw.js?v=7.7.0.5").catch(() => {});
+    navigator.serviceWorker.register("./sw.js?v=7.7.0.6").catch(() => {});
   });
 }
 
@@ -7060,6 +7142,11 @@ fetch(getTripJsonUrl())
       render(data);
       runOptionalAppStep("Weather render",()=>renderWeather(data));
       runOptionalAppStep("Travel info render",()=>renderInfo(data));
+    }else{
+      // v7.7.0.6 trusted-device warm boot: use the last authenticated UID only
+      // as a local cache namespace hint. Firebase Auth still verifies the real
+      // session immediately afterwards and Firestore remains authoritative.
+      bootstrapRememberedTripBeforeAuth().catch(error=>console.warn("Pre-auth Trip cache bootstrap",error));
     }
     runOptionalAppStep("Trip library init",()=>initTripLibrarySafe(data));
     runOptionalAppStep("Compact header init",()=>updateCompactHeader());
