@@ -1,3 +1,51 @@
+# Travel WebApp — v7.7.0.10
+
+## Phase 2F current build
+
+### Multi City Order Preservation
+
+• Ordered `day.cities` is now preserved by the Portable JSON → Firestore import plan instead of being dropped from Day documents.
+• A multi city Day such as `cities: ["kyoto", "osaka"]` therefore remains Kyoto → Osaka after Import, Replace, Loader, Snapshot and later JSON export.
+• Runtime rendering treats ordered `day.cities` as authoritative for Day colour gradients and city badges.
+• Older Firebase Trips created before this fix may not have `day.cities`. For those rows, the UI uses destination date windows as a deterministic compatibility fallback, sorted by destination start date, so the bundled Birthday Trip transition day returns to Kyoto → Osaka rather than depending on Firestore map order.
+• General destination lists now follow itinerary first appearance rather than raw object / Firestore map ordering. This order is used by Weather, Day rendering and Travel Details.
+• Destination manual reorder is intentionally not added to Settings. Overall order is derived from itinerary; per Day direction stays itinerary data.
+
+### Destination Colour Settings
+
+• Added `我的 → 旅程設定 → 目的地顏色`.
+• Owner and Admin can choose a preset colour, use the native custom colour picker, or restore the default colour for each destination.
+• Destination colour changes are written directly to Firebase `trips/{tripId}/settings/general` inside `cities.{cityKey}.color` and are therefore shared across devices.
+• Viewer and Member can open the page in read only mode but cannot modify colours.
+• Explicit Firebase / JSON destination colours now override the legacy Kyoto / Osaka / Kobe defaults, allowing those original destinations to be customised too.
+• One destination colour identity is reused across the active Day pill, Day heading city badge, Weather active pill, and future compatible city UI.
+• Multi city Day gradients are generated at render time from the ordered Day destination list and each destination colour. The gradient itself is not stored as separate data.
+• Custom colours are automatically converted into matching Light Mode and Dark Mode variants.
+• Destination colour changes are recorded in Trip Activity Log.
+
+### Firebase and Portable JSON Contract
+
+• Firebase remains the runtime source of truth. Destination colour Settings do not edit the bundled JSON file directly.
+• Current Trip and Snapshot JSON exports carry the complete `cities` map, including any saved `color` values.
+• Backup export parity was tightened to also retain `tripIcon`, `backgroundImage`, legacy `outbound` / `inbound`, `airlineLogo`, and `weather` metadata already supported by the Loader and Import schema.
+
+### Package and Firebase
+
+• Added `trip-destination-service.js` to the App Shell cache.
+• Service Worker shell cache updated to v7.7.0.10.
+• Firestore Rules are unchanged because existing `settings/{settingId}` manager write permissions already cover Owner / Admin destination settings.
+• Firestore indexes are unchanged.
+• No Firebase Rules redeploy is required for this build.
+• Package continues to keep only one development document: CHANGELOG.md.
+
+## Build QA
+
+• JavaScript syntax, JSON validity, duplicate static IDs, Firestore Rules structural sanity, ordered Day schema preservation, and ZIP integrity checked.
+• `firestore.rules` and `firestore.indexes.json` are byte for byte unchanged from v7.7.0.9.
+• The protected v7.3.13 Profile Navigation compositor source is byte for byte unchanged from the validated v7.7.0.9 baseline.
+
+---
+
 # Travel WebApp — v7.7.0.9
 
 ## Phase 2F current build

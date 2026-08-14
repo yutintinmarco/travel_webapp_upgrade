@@ -1547,7 +1547,7 @@ html:not(.theme-light):not(.theme-dark) .day-tab.city-both.active {
 
 
 
-/* Phase 2F · v7.7.0.9 · destination selector state parity
+/* Phase 2F · v7.7.0.10 · destination selector state parity
    Weather destination pills now follow exactly the same state logic as Day tabs:
    unselected destinations stay neutral; only the selected destination reveals
    its city identity colour. City badges beside day headings remain coloured. */
@@ -1615,6 +1615,40 @@ html:not(.theme-light):not(.theme-dark) .day-tab[data-city-multi="true"].active 
   background: var(--city-multi-bg-dark) padding-box, var(--city-multi-border-dark) border-box !important;
   color: #f0f0f2 !important;
 }
+
+
+/* Phase 2F · v7.7.0.10 · destination colour settings */
+.destination-settings-card{overflow:hidden;}
+.destination-color-list{display:block;}
+.destination-color-empty{padding:18px 16px;color:var(--label-secondary);font-size:calc(12px * var(--font-scale));line-height:1.5;}
+.destination-color-item{padding:14px 16px 15px;border-top:1px solid var(--separator);}
+.destination-color-item:first-child{border-top:0;}
+.destination-color-head{display:flex;align-items:center;gap:11px;min-width:0;}
+.destination-color-preview{width:38px;height:38px;border-radius:12px;flex:0 0 auto;background:var(--destination-preview,#999);border:1px solid color-mix(in srgb,var(--destination-preview,#999) 72%,#000 8%);box-shadow:inset 0 1px 0 rgba(255,255,255,.55),0 2px 7px rgba(15,23,42,.08);}
+.destination-color-copy{min-width:0;flex:1;display:flex;flex-direction:column;gap:2px;}
+.destination-color-copy strong{font-size:calc(13px * var(--font-scale));font-weight:700;color:var(--label-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.destination-color-copy small{font-size:calc(10px * var(--font-scale));color:var(--label-secondary);font-variant-numeric:tabular-nums;}
+.destination-color-default-pill{flex:0 0 auto;padding:4px 8px;border-radius:999px;background:rgba(118,118,128,.10);color:var(--label-secondary);font-size:calc(9px * var(--font-scale));font-weight:650;}
+.destination-color-palette{display:flex;align-items:center;gap:9px;overflow-x:auto;scrollbar-width:none;padding:11px 1px 2px;overscroll-behavior-inline:contain;}
+.destination-color-palette::-webkit-scrollbar{display:none;}
+.destination-color-swatch{width:32px;height:32px;min-width:32px;border-radius:999px;border:1px solid rgba(60,60,67,.16);background:var(--swatch,#999);box-shadow:inset 0 1px 0 rgba(255,255,255,.48);padding:0;position:relative;}
+.destination-color-swatch.is-selected::after{content:"";position:absolute;inset:-4px;border:2px solid var(--swatch,#999);border-radius:999px;}
+.destination-color-swatch:active{transform:scale(.92);}
+.destination-color-actions{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:11px;}
+.destination-color-custom,.destination-color-reset{height:34px;border:0;border-radius:10px;background:rgba(118,118,128,.10);color:#087ec4;font:inherit;font-size:calc(10.5px * var(--font-scale));font-weight:650;padding:0 12px;display:inline-flex;align-items:center;justify-content:center;gap:6px;}
+.destination-color-custom{position:relative;overflow:hidden;}
+.destination-color-custom input[type="color"]{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;}
+.destination-color-reset[disabled],.destination-color-custom.is-disabled,.destination-color-swatch[disabled]{opacity:.38;pointer-events:none;}
+.destination-color-status{padding:10px 16px 0;color:var(--label-secondary);font-size:calc(10px * var(--font-scale));line-height:1.45;}
+.destination-color-status.is-error{color:#c9342f;}
+html.theme-dark .destination-color-default-pill,
+html.theme-dark .destination-color-custom,
+html.theme-dark .destination-color-reset,
+html:not(.theme-light):not(.theme-dark) .destination-color-default-pill,
+html:not(.theme-light):not(.theme-dark) .destination-color-custom,
+html:not(.theme-light):not(.theme-dark) .destination-color-reset{background:rgba(255,255,255,.08);}
+html.theme-dark .destination-color-preview,
+html:not(.theme-light):not(.theme-dark) .destination-color-preview{border-color:rgba(255,255,255,.16);box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 2px 8px rgba(0,0,0,.18);}
 
 /* Phase 1 · v7.2.2 · harmonised disclosure, clear flight details and balanced dark glass */
 
@@ -3147,7 +3181,7 @@ body.expenses-view-active #app-version-note{
 #snacks-view::after,
 #info-view::after,
 #profile-view::after{
-  content:"v7.7.0.9" !important;
+  content:"v7.7.0.10" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3168,7 +3202,7 @@ body.expenses-view-active #app-version-note{
   display:none !important;
 }
 body.expenses-view-active .expenses-module .expenses-app::after{
-  content:"v7.7.0.9" !important;
+  content:"v7.7.0.10" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3203,7 +3237,7 @@ body.profile-edge-swipe-active #profile-view::after{
 
 
 /* ==========================================================================
-   v7.7.0.9 · Weather city selector UX
+   v7.7.0.10 · Weather city selector UX
    ========================================================================== */
 .trip-boot-placeholder{
   display:flex;align-items:center;justify-content:center;gap:9px;
@@ -3233,9 +3267,9 @@ html:not(.theme-light):not(.theme-dark) .trip-boot-placeholder{
 </style>
             <link rel="apple-touch-icon" href="assets/icon/trip_icon.png">
   <link rel="icon" type="image/png" href="assets/icon/trip_icon.png">
-  <link rel="manifest" href="manifest.json?v=7.7.0.9">
+  <link rel="manifest" href="manifest.json?v=7.7.0.10">
   <meta name="apple-mobile-web-app-title" content="關嘉露西生日之旅">
-  <link rel="stylesheet" href="assets/css/expenses.css?v=7.7.0.9">
+  <link rel="stylesheet" href="assets/css/expenses.css?v=7.7.0.10">
 </head>
 <body>
 <div class="bg-fixed"></div>
@@ -3465,6 +3499,11 @@ html:not(.theme-light):not(.theme-dark) .trip-boot-placeholder{
           <span class="profile-row-copy"><strong>旅程鎖定</strong><small>獨立於支出鎖定，於正式權限階段啟用</small></span>
           <span class="profile-status-pill">2F</span>
         </button>
+        <button class="profile-row" id="destination-settings-open-btn" type="button" data-profile-open="destination-settings">
+          <span class="profile-row-icon profile-icon-purple">🎨</span>
+          <span class="profile-row-copy"><strong>目的地顏色</strong><small>統一 Day、天氣及城市標籤嘅目的地識別色</small></span>
+          <span class="profile-chevron">›</span>
+        </button>
         <button class="profile-row" type="button" data-profile-open="expense-settings">
           <span class="profile-row-icon profile-icon-orange">💳</span>
           <span class="profile-row-copy"><strong>支出管理</strong><small>匯率、分帳成員、備份及已刪除項目</small></span>
@@ -3483,6 +3522,19 @@ html:not(.theme-light):not(.theme-dark) .trip-boot-placeholder{
       </section>
     </div>
 
+
+    <div class="profile-nav-page" id="profile-page-destination-settings" data-profile-page="destination-settings" hidden>
+      <div class="profile-detail-bar">
+        <button class="profile-detail-back" type="button" data-profile-back aria-label="返回旅程設定"><span class="profile-back-glyph">‹</span><span class="profile-detail-back-label">旅程設定</span></button>
+        <h2>目的地顏色</h2>
+        <span class="profile-detail-spacer"></span>
+      </div>
+      <section class="profile-card destination-settings-card" aria-label="目的地顏色設定">
+        <div class="destination-color-list" id="destination-color-list"></div>
+        <div class="destination-color-status" id="destination-color-status">顏色會同步套用至 Day、跨城市漸變、天氣及城市標籤。</div>
+      </section>
+      <div class="profile-backup-note">目的地次序由實際 itinerary 自動推導；同一日跨城市嘅方向會保存喺該 Day，唔需要另外設定排序。</div>
+    </div>
 
     <div class="profile-nav-page" id="profile-page-trip-members" data-profile-page="trip-members" hidden>
       <div class="profile-detail-bar">
@@ -3647,7 +3699,7 @@ html:not(.theme-light):not(.theme-dark) .trip-boot-placeholder{
         <span class="profile-detail-spacer"></span>
       </div>
       <section class="profile-card" aria-label="App 資料">
-        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.7.0.9</strong></div>
+        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.7.0.10</strong></div>
         <div class="profile-meta-row"><span>資料架構</span><strong>Phase 2F</strong></div>
         <div class="profile-meta-row"><span>主要資料來源</span><strong id="app-data-source-label">Firebase / 本機快取</strong></div>
       </section>
@@ -3766,7 +3818,7 @@ html:not(.theme-light):not(.theme-dark) .trip-boot-placeholder{
 </div>
 
 <script>
-const APP_VERSION = "7.7.0.9";
+const APP_VERSION = "7.7.0.10";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 window.EXPENSES_MODULE_VERSION = EXPENSES_MODULE_VERSION;
@@ -3796,7 +3848,7 @@ function getGalleryForItem(item, day, cityKey, matchedCities, meta){
 }
 
 
-// Phase 2F v7.7.0.9: one destination colour identity across all city UI.
+// Phase 2F v7.7.0.10: one destination colour identity across all city UI.
 const LEGACY_CITY_THEMES={
   kyoto:{bg:"#d4ecd4",softBg:"rgba(212,236,212,.66)",softBorder:"rgba(90,158,90,.58)",border:"#5a9e5a",text:"#2a5a2a",ring:"rgba(90,158,90,.10)",shadow:"rgba(90,158,90,.16)",darkBg:"rgba(38,80,38,.75)",darkSoftBg:"rgba(38,80,38,.32)",darkSoftBorder:"rgba(90,158,90,.58)",darkBorder:"#5a9e5a",darkText:"#a8dba8",darkRing:"rgba(90,158,90,.10)"},
   osaka:{bg:"#ffddd4",softBg:"rgba(255,221,212,.66)",softBorder:"rgba(224,96,64,.56)",border:"#e06040",text:"#6a2010",ring:"rgba(224,96,64,.10)",shadow:"rgba(224,96,64,.15)",darkBg:"rgba(100,40,20,.75)",darkSoftBg:"rgba(100,40,20,.32)",darkSoftBorder:"rgba(224,96,64,.58)",darkBorder:"#e06040",darkText:"#ffb09a",darkRing:"rgba(224,96,64,.10)"},
@@ -3819,13 +3871,16 @@ function rgbHex(c){return`#${[c.r,c.g,c.b].map(v=>Math.max(0,Math.min(255,v)).to
 function rgba(c,a){return`rgba(${c.r},${c.g},${c.b},${a})`;}
 function cityThemeFromAccent(value){const c=parseHexColour(value);if(!c)return null;const white={r:255,g:255,b:255},black={r:0,g:0,b:0};return{bg:rgbHex(mixRgb(c,white,.78)),softBg:rgba(mixRgb(c,white,.82),.70),softBorder:rgba(c,.55),border:rgbHex(c),text:rgbHex(mixRgb(c,black,.48)),ring:rgba(c,.10),shadow:rgba(c,.15),darkBg:rgba(mixRgb(c,black,.40),.78),darkSoftBg:rgba(mixRgb(c,black,.40),.30),darkSoftBorder:rgba(mixRgb(c,white,.18),.58),darkBorder:rgbHex(mixRgb(c,white,.18)),darkText:rgbHex(mixRgb(c,white,.60)),darkRing:rgba(mixRgb(c,white,.18),.10)};}
 function buildCityThemeMap(cities={}){
-  const result={},used=new Set();
+  const result={},used=new Set(),keys=Object.keys(cities).sort();
   const reserveTheme=theme=>{const idx=GENERIC_CITY_THEMES.findIndex(t=>t.border===theme?.border);if(idx>=0)used.add(idx);};
-  Object.keys(cities).forEach(key=>{
+  keys.forEach(key=>{
     const cfg=cities[key]||{};
-    if(LEGACY_CITY_THEMES[key]){result[key]=LEGACY_CITY_THEMES[key];reserveTheme(result[key]);return;}
     const explicit=cityThemeFromAccent(cfg.color||cfg.accentColor||cfg.themeColor);
     if(explicit){result[key]=explicit;reserveTheme(explicit);return;}
+    if(LEGACY_CITY_THEMES[key]){result[key]=LEGACY_CITY_THEMES[key];reserveTheme(result[key]);}
+  });
+  keys.forEach(key=>{
+    if(result[key])return;
     let idx=cityThemeHash(key)%GENERIC_CITY_THEMES.length;
     const start=idx;
     while(used.has(idx)){idx=(idx+1)%GENERIC_CITY_THEMES.length;if(idx===start)break;}
@@ -3846,6 +3901,30 @@ function applyMultiCityTheme(el,keys,themeMap){
   el.style.setProperty("--city-multi-border-light",`linear-gradient(to right, ${themes.map(t=>t.border).join(", ")})`);
   el.style.setProperty("--city-multi-bg-dark",`linear-gradient(to right, ${themes.map(t=>t.darkBg).join(", ")})`);
   el.style.setProperty("--city-multi-border-dark",`linear-gradient(to right, ${themes.map(t=>t.darkBorder).join(", ")})`);
+}
+
+function cityDateSortValue(cfg={},key=""){
+  return `${String(cfg.startIso||"9999-99-99")}|${String(cfg.endIso||"9999-99-99")}|${String(cfg.label||key)}|${key}`;
+}
+function cityKeysForDay(day,cities={}){
+  const known=new Set(Object.keys(cities));
+  if(Array.isArray(day?.cities)&&day.cities.length){
+    const out=[];day.cities.forEach(key=>{key=String(key||"").trim();if(known.has(key)&&!out.includes(key))out.push(key);});
+    if(out.length)return out;
+  }
+  const single=String(day?.city||"").trim();
+  if(single&&single!=="both"&&known.has(single))return[single];
+  const iso=String(day?.isoDate||"").trim();
+  if(!iso)return[];
+  return Object.keys(cities)
+    .filter(key=>{const cfg=cities[key]||{};return cfg.startIso&&cfg.endIso&&iso>=cfg.startIso&&iso<=cfg.endIso;})
+    .sort((a,b)=>cityDateSortValue(cities[a],a).localeCompare(cityDateSortValue(cities[b],b)));
+}
+function orderedCityKeys(data,cities=data?.meta?.cities||{}){
+  const result=[];const push=key=>{if(cities[key]&&!result.includes(key))result.push(key);};
+  (data?.days||[]).slice().sort((a,b)=>(Number(a?.sortOrder)||0)-(Number(b?.sortOrder)||0)).forEach(day=>cityKeysForDay(day,cities).forEach(push));
+  Object.keys(cities).sort((a,b)=>cityDateSortValue(cities[a],a).localeCompare(cityDateSortValue(cities[b],b))).forEach(push);
+  return result;
 }
 
 // Font / Refresh
@@ -4087,7 +4166,7 @@ function renderWeather(data){
     fetchCity("default",legacy,tripDates);return;
   }
   const cities=validCities;
-  const keys=Object.keys(cities);
+  const keys=orderedCityKeys(data,cities);
   const cityThemes=buildCityThemeMap(cities);
   ctEl.style.display=keys.length>1?"flex":"none";ctEl.innerHTML="";
   let activeKey=keys[0];
@@ -4109,7 +4188,7 @@ function renderWeather(data){
       }
       return out;
     }
-    const fromDays=(data.days||[]).filter(d=>d.city===k||d.city==="both").map(d=>d.isoDate).filter(Boolean).map(fmtMMDD);
+    const fromDays=(data.days||[]).filter(d=>cityKeysForDay(d,cities).includes(k)).map(d=>d.isoDate).filter(Boolean).map(fmtMMDD);
     return fromDays.length?fromDays:tripDates;
   }
   keys.forEach(k=>{
@@ -4691,7 +4770,7 @@ function renderInfo(data){
   if(hint) hint.style.display="block";
 
   function fmtDate(iso){if(!iso)return"";const[y,m,d]=iso.split("-");return`${y}年${parseInt(m)}月${parseInt(d)}日`;}
-  const cityKeys=Object.keys(cities);
+  const cityKeys=orderedCityKeys(data,cities);
   function hotelDates(cKey){const c=cities[cKey];if(!c)return{in:"",out:""};return{in:fmtDate(c.startIso),out:fmtDate(c.endIso)};}
   function hotelObj(val){if(!val)return{name:"",address:""};if(typeof val==="string")return{name:val,address:""};return{name:val.name||"",address:val.address||""};}
   function addRow(sec,label,val){if(!val)return;const r=document.createElement("div");r.className="info-row";r.innerHTML=`<span class="info-row-label">${label}</span><span class="info-row-value">${val}</span>`;sec.appendChild(r);}
@@ -4946,25 +5025,14 @@ function render(data){
   if(!data.days?.length)return;
   tabsEl.style.setProperty("--day-count",String(data.days.length));
   tabsEl.classList.toggle("is-scrollable-days",data.days.length>7);
-  const cityKeys=Object.keys(cities);
+  const cityKeys=orderedCityKeys(data,cities);
   const cityThemes=buildCityThemeMap(cities);
 
   data.days.forEach((day,idx)=>{
-    // Find which city/cities this day belongs to
-    // Support explicit "both", single city key, or auto-detect from date ranges
-    let matchedCities, ck;
-    if(Array.isArray(day.cities) && day.cities.length){
-      matchedCities=day.cities.filter(k=>cities[k]);
-      ck=matchedCities.length===1?matchedCities[0]:"both";
-    } else if(day.city==="both"){
-      matchedCities=cityKeys.filter(k=>{const cd=cities[k];return cd.startIso&&cd.endIso&&day.isoDate&&day.isoDate>=cd.startIso&&day.isoDate<=cd.endIso;});
-      ck=matchedCities.length===1?matchedCities[0]:(matchedCities.length>1?"both":null);
-    } else if(day.city&&day.city!=="both"){
-      matchedCities=[day.city]; ck=day.city;
-    } else {
-      matchedCities=cityKeys.filter(k=>{const cd=cities[k];return cd.startIso&&cd.endIso&&day.isoDate&&day.isoDate>=cd.startIso&&day.isoDate<=cd.endIso;});
-      ck=matchedCities.length===1?matchedCities[0]:(matchedCities.length>1?"both":null);
-    }
+    // Ordered day.cities is authoritative. Older Firebase rows that lost this
+    // field fall back to destination date windows, sorted by transition start.
+    const matchedCities=cityKeysForDay(day,cities);
+    const ck=matchedCities.length===1?matchedCities[0]:(matchedCities.length>1?"both":null);
     const ci=ck&&ck!=="both"?cities[ck]:null;
 
     const tab=document.createElement("button");
@@ -5826,6 +5894,7 @@ function applyFirebaseTripData(data,{source="server",tripId=""}={}){
     window.tripData=data;
     updateTripLibrarySummaryFromData(data);
   }
+  try{window.__destinationSettingsRefresh?.(data);}catch(error){}
   resolveTripLoaderWaiters(data);
   releaseDeferredTripBoot();
   // Only Firestore-ready data refreshes the app-owned render cache. Reading the
@@ -6643,6 +6712,77 @@ document.getElementById("trip-invite-inbox-list")?.addEventListener("click",asyn
 
 
 
+
+// =========================================================================
+// Phase 2F · v7.7.0.10 · Destination identity settings
+// =========================================================================
+const DESTINATION_COLOUR_PRESETS=["#4A90D9","#3F9F91","#5A9E5A","#D39F27","#E06040","#7B61D1","#C45B8C","#4D9DB0"];
+let tripDestinationServicePromise=null;
+let destinationColorSavingKey="";
+function getTripDestinationService(){
+  if(!tripDestinationServicePromise)tripDestinationServicePromise=import(`./assets/js/trip-destination-service.js?v=${APP_VERSION}`);
+  return tripDestinationServicePromise;
+}
+function destinationSettingsTripId(){return String(tripLoaderActiveId||dataTripId(window.tripData)||"").trim();}
+function destinationSettingsCanEdit(){const role=String(window.__appTripAccess?.role||"");return role==="owner"||role==="admin";}
+function destinationSettingsFriendlyError(error){
+  const code=String(error?.code||"");
+  if(code==="offline")return"目前離線，重新連線後先可以更新目的地顏色。";
+  if(code==="operation-busy")return"另一個雲端操作仍在進行，完成後再試。";
+  if(code==="insufficient-role"||code==="permission-denied")return"只有 Owner 或 Admin 可以修改目的地顏色。";
+  if(code==="destination-not-found")return"搵唔到呢個目的地設定，請先確認目前旅程資料。";
+  if(code==="invalid-colour")return"顏色格式無效。";
+  return error?.message||"未能更新目的地顏色。";
+}
+function renderDestinationSettingsPage(data=window.tripData){
+  const list=document.getElementById("destination-color-list"),status=document.getElementById("destination-color-status");if(!list)return;
+  const cities=data?.meta?.cities||{},keys=orderedCityKeys(data,cities),themes=buildCityThemeMap(cities),canEdit=destinationSettingsCanEdit();
+  if(!keys.length){list.innerHTML='<div class="destination-color-empty">目前旅程未設定目的地。</div>';if(status){status.textContent="Import 有 meta.cities 嘅 Trip 後，就可以喺呢度設定顏色。";status.classList.remove("is-error");}return;}
+  list.innerHTML=keys.map(key=>{
+    const cfg=cities[key]||{},theme=themes[key]||{},explicit=parseHexColour(cfg.color)?String(cfg.color).toUpperCase():"",current=explicit||String(theme.border||"#999999").toUpperCase();
+    const swatches=DESTINATION_COLOUR_PRESETS.map(hex=>`<button class="destination-color-swatch${explicit===hex?" is-selected":""}" type="button" data-destination-color-key="${escapeHtmlText(key)}" data-destination-color-value="${hex}" style="--swatch:${hex}" aria-label="將 ${escapeHtmlText(cfg.label||key)} 設為 ${hex}"${canEdit&&destinationColorSavingKey!==key?"":" disabled"}></button>`).join("");
+    return `<div class="destination-color-item" data-destination-item="${escapeHtmlText(key)}">
+      <div class="destination-color-head">
+        <span class="destination-color-preview" style="--destination-preview:${escapeHtmlText(current)}"></span>
+        <span class="destination-color-copy"><strong>${escapeHtmlText(cfg.label||key)}</strong><small>${explicit?`自訂 ${escapeHtmlText(explicit)}`:`預設 ${escapeHtmlText(current)}`}</small></span>
+        <span class="destination-color-default-pill">${destinationColorSavingKey===key?"儲存中…":(explicit?"已自訂":"預設")}</span>
+      </div>
+      <div class="destination-color-palette" aria-label="${escapeHtmlText(cfg.label||key)} 顏色選擇">${swatches}</div>
+      <div class="destination-color-actions">
+        <label class="destination-color-custom${canEdit&&destinationColorSavingKey!==key?"":" is-disabled"}">自訂顏色<input type="color" data-destination-custom-key="${escapeHtmlText(key)}" value="${escapeHtmlText(current)}"${canEdit&&destinationColorSavingKey!==key?"":" disabled"}></label>
+        <button class="destination-color-reset" type="button" data-destination-reset-key="${escapeHtmlText(key)}"${canEdit&&explicit&&destinationColorSavingKey!==key?"":" disabled"}>還原預設</button>
+      </div>
+    </div>`;
+  }).join("");
+  if(status){status.classList.remove("is-error");status.textContent=canEdit?"改色後會直接儲存到 Firebase，並同步更新 Day、跨城市漸變、天氣同城市標籤。":"目前為唯讀。只有 Owner 或 Admin 可以修改目的地顏色。";}
+}
+async function saveDestinationColour(cityKey,color,{reset=false}={}){
+  if(destinationColorSavingKey)return;
+  const tripId=destinationSettingsTripId();if(!tripId)return;
+  let finalMessage="",isError=false;
+  destinationColorSavingKey=cityKey;renderDestinationSettingsPage();
+  try{
+    const service=await getTripDestinationService();
+    if(reset)await service.resetDestinationColor(tripId,cityKey,{user:window.__appAuthUser||null});
+    else await service.updateDestinationColor(tripId,cityKey,color,{user:window.__appAuthUser||null});
+    finalMessage="已儲存到 Firebase，其他裝置會跟住同步。";
+  }catch(error){isError=true;finalMessage=destinationSettingsFriendlyError(error);}
+  finally{
+    destinationColorSavingKey="";renderDestinationSettingsPage();
+    const status=document.getElementById("destination-color-status");
+    if(status&&finalMessage){status.classList.toggle("is-error",isError);status.textContent=finalMessage;}
+  }
+}
+document.getElementById("destination-settings-open-btn")?.addEventListener("click",()=>setTimeout(()=>renderDestinationSettingsPage(),40));
+document.getElementById("destination-color-list")?.addEventListener("click",event=>{
+  const swatch=event.target.closest?.("[data-destination-color-key]");if(swatch&&!swatch.disabled){saveDestinationColour(swatch.dataset.destinationColorKey,swatch.dataset.destinationColorValue);return;}
+  const reset=event.target.closest?.("[data-destination-reset-key]");if(reset&&!reset.disabled)saveDestinationColour(reset.dataset.destinationResetKey,"",{reset:true});
+});
+document.getElementById("destination-color-list")?.addEventListener("change",event=>{
+  const input=event.target.closest?.("[data-destination-custom-key]");if(input&&!input.disabled)saveDestinationColour(input.dataset.destinationCustomKey,input.value);
+});
+window.__destinationSettingsRefresh=data=>{if(profileCurrentPage==="destination-settings")renderDestinationSettingsPage(data);};
+
 // =========================================================================
 // Phase 2F · v7.7.0 · network / cache / operation safety
 // =========================================================================
@@ -6704,6 +6844,7 @@ initCloudSafety();
 
 window.addEventListener("app-trip-access",event=>{
   const detail=event.detail||{};
+  try{window.__destinationSettingsRefresh?.(window.tripData);}catch(error){}
   const currentId=String(tripLoaderActiveId||"");
   accessRevokedState=Boolean(currentId && detail.ready && detail.signedIn && !detail.role);
   renderCloudSafetyStrip();
@@ -7267,7 +7408,7 @@ if(window.visualViewport&&bottomNav){
 // Android / Chrome PWA support. Network-only service worker, no aggressive cache.
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("./sw.js?v=7.7.0.9").catch(() => {});
+    navigator.serviceWorker.register("./sw.js?v=7.7.0.10").catch(() => {});
   });
 }
 

@@ -9,6 +9,14 @@ export const TRIP_STATUS = Object.freeze({
 function clean(value) { return String(value ?? "").trim(); }
 function clone(value) { return value == null ? value : JSON.parse(JSON.stringify(value)); }
 function safeArray(value) { return Array.isArray(value) ? value : []; }
+function orderedUniqueStrings(value) {
+  const out = [];
+  safeArray(value).forEach(item => {
+    const next = clean(item);
+    if (next && !out.includes(next)) out.push(next);
+  });
+  return out;
+}
 
 function fnv1a(input) {
   let hash = 0x811c9dc5;
@@ -147,12 +155,16 @@ export function normalizePortableTrip(rawInput = {}) {
       sortOrder: Number.isFinite(Number(item?.sortOrder)) ? Number(item.sortOrder) : itemIndex,
       images: normalizeImages(item)
     }));
-    return {
+    const orderedCities = orderedUniqueStrings(day?.cities);
+    const normalizedDay = {
       ...clone(day),
       dayId,
       sortOrder: Number.isFinite(Number(day?.sortOrder)) ? Number(day.sortOrder) : dayIndex,
       items
     };
+    if (orderedCities.length) normalizedDay.cities = orderedCities;
+    else if (Array.isArray(normalizedDay.cities)) normalizedDay.cities = [];
+    return normalizedDay;
   });
 
   const rawSnacks = raw.snacks;
@@ -192,9 +204,13 @@ export function validatePortableTrip(rawInput = {}) {
 
   const seenDays = new Set();
   const seenItems = new Set();
+  const knownCities = new Set(Object.keys(trip.meta?.cities || {}));
   trip.days.forEach(day => {
     if (seenDays.has(day.dayId)) errors.push(`Duplicate dayId: ${day.dayId}`);
     seenDays.add(day.dayId);
+    orderedUniqueStrings(day.cities).forEach(cityKey => {
+      if (knownCities.size && !knownCities.has(cityKey)) warnings.push(`Unknown destination key on ${day.dayId}: ${cityKey}`);
+    });
     day.items.forEach(item => {
       if (seenItems.has(item.itemId)) errors.push(`Duplicate itemId: ${item.itemId}`);
       seenItems.add(item.itemId);
@@ -269,6 +285,7 @@ export function buildFirestoreTripPlan(rawInput = {}, ownerUser = null) {
       title: clean(day.title),
       subtitle: clean(day.subtitle),
       city: clean(day.city),
+      ...(orderedUniqueStrings(day.cities).length ? { cities: orderedUniqueStrings(day.cities) } : {}),
       sortOrder: Number(day.sortOrder) || 0
     },
     items: day.items.map(item => ({
