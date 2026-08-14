@@ -399,211 +399,260 @@ export async function inspectTripImport(rawInput, userInput = null) {
 }
 
 export async function importTrip(rawInput, {
+  mode = "create",
+  user: userInput = null,
+  onProgress = null
+} = {}) {
   let localOperationToken = null;
   let serverOperation = null;
   let mutationStarted = false;
+  let user = null;
+  let plan = null;
+
   try {
-    localOperationToken = beginCloudOperation({type:"import",tripId:"",label:"匯入 trip.json"});
- mode = "create", user: userInput = null, onProgress = null } = {}) {
-  const user = await requireUser(userInput);
-  assertCloudOperationAvailable("匯入 trip.json");
-  const built = buildFirestoreTripPlan(rawInput, user);
-  if (!built.valid || !built.plan) {
-    const error = new Error(built.errors?.join("; ") || "Invalid portable trip JSON");
-    error.code = "invalid-trip";
-    error.validation = built;
-    throw error;
-  }
-  const plan = built.plan;
-  const contentHash = await planContentHash(plan);
-  const tripRef = doc(db, "trips", plan.tripId);
-  let tripSnap = null;
-  let exists = false;
-  if (mode === "replace") {
-    tripSnap = await getDoc(tripRef);
-    exists = tripSnap.exists();
-    if (!exists) mode = "create";
-  } else {
-    // With Phase 2F rules, non-members cannot read arbitrary Trip metadata.
-    // A permission-denied probe is therefore compatible with a genuinely new
-    // Trip or a private Trip owned by somebody else. The create write itself
-    // is the authoritative collision check.
-    try {
+    assertCloudOperationAvailable("匯入 trip.json");
+    user = await requireUser(userInput);
+
+    const built = buildFirestoreTripPlan(rawInput, user);
+    if (!built.valid || !built.plan) {
+      const error = new Error(built.errors?.join("; ") || "Invalid portable trip JSON");
+      error.code = "invalid-trip";
+      error.validation = built;
+      throw error;
+    }
+
+    plan = built.plan;
+    localOperationToken = beginCloudOperation({
+      type: "import",
+      tripId: plan.tripId,
+      label: "匯入 trip.json"
+    });
+
+    const contentHash = await planContentHash(plan);
+    const tripRef = doc(db, "trips", plan.tripId);
+    let tripSnap = null;
+    let exists = false;
+
+    if (mode === "replace") {
       tripSnap = await getDoc(tripRef);
       exists = tripSnap.exists();
-      if (exists) {
-        const error = new Error("Trip already exists");
-        error.code = "trip-exists";
+      if (!exists) mode = "create";
+    } else {
+      try {
+        tripSnap = await getDoc(tripRef);
+        exists = tripSnap.exists();
+        if (exists) {
+          const error = new Error("Trip already exists");
+          error.code = "trip-exists";
+          throw error;
+        }
+      } catch (error) {
+        if (error?.code !== "permission-denied") throw error;
+        tripSnap = null;
+        exists = false;
+      }
+    }
+
+    let existing = null;
+    let snapshotId = null;
+    let existingRole = null;
+    let changeSummary = null;
+
+    if (mode === "replace") {
+      const parentData = tripSnap.data() || {};
+      if (!Array.isArray(parentData.memberUids) || !parentData.memberUids.includes(user.uid)) {
+        const error = new Error("Current user is not a member of this trip");
+        error.code = "insufficient-role";
         throw error;
       }
-    } catch (error) {
-      if (error?.code !== "permission-denied") throw error;
-      tripSnap = null;
-      exists = false;
-    }
-  }
 
-  let existing = null;
-  let snapshotId = null;
-  let existingRole = null;
-  let changeSummary = null;
-  if (mode === "replace") {
-    const parentData = tripSnap.data() || {};
-    if (!Array.isArray(parentData.memberUids) || !parentData.memberUids.includes(user.uid)) {
-      const error = new Error("Current user is not a member of this trip");
-      error.code = "insufficient-role";
-      throw error;
-    }
-    const memberSnap = await getDoc(doc(db, "trips", plan.tripId, "members", user.uid));
-    existingRole = memberSnap.exists() ? clean(memberSnap.data()?.role) : null;
-    if (!VALID_REPLACE_ROLES.has(existingRole)) {
-      const error = new Error("Owner or Admin role required to replace an existing trip");
-      error.code = "insufficient-role";
-      throw error;
+      const memberSnap = await getDoc(doc(db, "trips", plan.tripId, "members", user.uid));
+      existingRole = memberSnap.exists() ? clean(memberSnap.data()?.role) : null;
+      if (!VALID_REPLACE_ROLES.has(existingRole)) {
+        const error = new Error("Owner or Admin role required to replace an existing trip");
+        error.code = "insufficient-role";
+        throw error;
+      }
+
+      const comparison = await inspectExistingAgainstPlan(parentData, plan, plan.tripId);
+      changeSummary = comparison.changeSummary;
+      existing = comparison.existing;
+
+      if (comparison.unchanged) {
+        return {
+          tripId: plan.tripId,
+          mode: "unchanged",
+          role: existingRole,
+          revision: Number(parentData.revision) || 1,
+          snapshotId: null,
+          contentHash,
+          changeSummary,
+          normalizedTrip: normalizePortableTrip(rawInput),
+          summary: getTripSummary(rawInput)
+        };
+      }
+
+      if (!existing) existing = await readExistingStructure(plan.tripId);
+      serverOperation = await acquireTripOperation(plan.tripId, "import", user);
+
+      if (typeof onProgress === "function") {
+        onProgress({ completed: 0.15, total: 1, stage: "snapshot" });
+      }
+      snapshotId = await createSnapshot(existing, user);
+      if (typeof onProgress === "function") {
+        onProgress({ completed: 0.22, total: 1, stage: "prepare" });
+      }
     }
 
-    const comparison = await inspectExistingAgainstPlan(parentData, plan, plan.tripId);
-    changeSummary = comparison.changeSummary;
-    existing = comparison.existing;
-    if (comparison.unchanged) {
-      return {
-        tripId: plan.tripId,
-        mode: "unchanged",
-        role: existingRole,
-        revision: Number(parentData.revision) || 1,
-        snapshotId: null,
+    const baseExisting = exists && tripSnap ? tripSnap.data() || {} : {};
+    const finalRevision = mode === "replace"
+      ? Math.max(Number(baseExisting.revision || 0) + 1, Number(plan.tripDoc.revision || 1))
+      : Math.max(1, Number(plan.tripDoc.revision || 1));
+
+    mutationStarted = true;
+
+    if (mode === "create") {
+      const batch = writeBatch(db);
+      batch.set(tripRef, {
+        ...plan.tripDoc,
+        revision: finalRevision,
         contentHash,
-        changeSummary,
-        normalizedTrip: normalizePortableTrip(rawInput),
-        summary: getTripSummary(rawInput)
-      };
+        contentHashVersion: CONTENT_HASH_VERSION,
+        importState: "importing",
+        importedBy: user.uid,
+        importedAt: serverTimestamp(),
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      });
+      batch.set(doc(db, "trips", plan.tripId, "members", user.uid), {
+        ...plan.memberDoc,
+        joinedAt: serverTimestamp(),
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      });
+      await batch.commit();
+    } else {
+      const batch = writeBatch(db);
+      batch.set(tripRef, {
+        ...baseExisting,
+        ...plan.tripDoc,
+        revision: finalRevision,
+        contentHash,
+        contentHashVersion: CONTENT_HASH_VERSION,
+        memberUids: Array.isArray(baseExisting.memberUids) ? baseExisting.memberUids : plan.tripDoc.memberUids,
+        memberCount: Number(baseExisting.memberCount) || (Array.isArray(baseExisting.memberUids) ? baseExisting.memberUids.length : 1),
+        createdBy: clean(baseExisting.createdBy) || plan.tripDoc.createdBy,
+        createdAt: baseExisting.createdAt || serverTimestamp(),
+        archived: baseExisting.archived === true,
+        archivedAt: baseExisting.archivedAt || null,
+        archivedBy: clean(baseExisting.archivedBy),
+        importState: "importing",
+        importedBy: user.uid,
+        importedAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      });
+      await batch.commit();
     }
-    if (!existing) existing = await readExistingStructure(plan.tripId);
-    serverOperation = await acquireTripOperation(plan.tripId, "import", user);
-    if (typeof onProgress === "function") onProgress({ completed: 0.15, total: 1, stage: "snapshot" });
-    snapshotId = await createSnapshot(existing, user);
-    if (typeof onProgress === "function") onProgress({ completed: 0.22, total: 1, stage: "prepare" });
-  }
 
-  const baseExisting = exists ? tripSnap.data() || {} : {};
-  const finalRevision = mode === "replace"
-    ? Math.max(Number(baseExisting.revision || 0) + 1, Number(plan.tripDoc.revision || 1))
-    : Math.max(1, Number(plan.tripDoc.revision || 1));
+    const writes = contentWriteOps(plan, user);
+    const deletes = staleDeleteOps(existing, plan);
+    const totalOps = writes.length + deletes.length + 2;
 
-  mutationStarted = true;
-  if (mode === "create") {
-    const batch = writeBatch(db);
-    batch.set(tripRef, {
-      ...plan.tripDoc,
+    if (typeof onProgress === "function") {
+      onProgress({ completed: 1, total: totalOps, stage: "prepare" });
+    }
+
+    const contentProgress = ({ completed, total }) => {
+      if (typeof onProgress === "function") {
+        onProgress({
+          completed,
+          total,
+          stage: "content",
+          detail: `${Math.max(0, Math.round(completed - 1))}/${Math.max(1, totalOps - 2)}`
+        });
+      }
+    };
+
+    await commitOps(writes, contentProgress, 1, totalOps);
+    await commitOps(deletes, contentProgress, 1 + writes.length, totalOps);
+
+    if (typeof onProgress === "function") {
+      onProgress({ completed: totalOps - 1, total: totalOps, stage: "finalize" });
+    }
+
+    const finalBatch = writeBatch(db);
+    finalBatch.set(tripRef, {
       revision: finalRevision,
+      schemaVersion: Number(plan.tripDoc.schemaVersion) || 2,
       contentHash,
       contentHashVersion: CONTENT_HASH_VERSION,
-      importState: "importing",
-      importedBy: user.uid,
-      importedAt: serverTimestamp(),
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp()
-    });
-    batch.set(doc(db, "trips", plan.tripId, "members", user.uid), {
-      ...plan.memberDoc,
-      joinedAt: serverTimestamp(),
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp()
-    });
-    await batch.commit();
-  } else {
-    await writeBatch(db).set(tripRef, {
-      ...baseExisting,
-      ...plan.tripDoc,
-      revision: finalRevision,
-      contentHash,
-      contentHashVersion: CONTENT_HASH_VERSION,
-      memberUids: Array.isArray(baseExisting.memberUids) ? baseExisting.memberUids : plan.tripDoc.memberUids,
-      memberCount: Number(baseExisting.memberCount) || (Array.isArray(baseExisting.memberUids) ? baseExisting.memberUids.length : 1),
-      createdBy: clean(baseExisting.createdBy) || plan.tripDoc.createdBy,
-      createdAt: baseExisting.createdAt || serverTimestamp(),
-      archived: baseExisting.archived === true,
-      archivedAt: baseExisting.archivedAt || null,
-      archivedBy: clean(baseExisting.archivedBy),
-      importState: "importing",
+      importState: "ready",
+      lastImportMode: mode,
+      lastSnapshotId: snapshotId || "",
       importedBy: user.uid,
       importedAt: serverTimestamp(),
       updatedAt: serverTimestamp()
-    }).commit();
-  }
+    }, { merge: true });
 
-  const writes = contentWriteOps(plan, user);
-  const deletes = staleDeleteOps(existing, plan);
-  const totalOps = writes.length + deletes.length + 2;
-  if (typeof onProgress === "function") onProgress({ completed: 1, total: totalOps, stage: "prepare" });
-  const contentProgress = ({ completed, total }) => {
-    if (typeof onProgress === "function") onProgress({ completed, total, stage: "content", detail: `${Math.max(0, Math.round(completed - 1))}/${Math.max(1, totalOps - 2)}` });
-  };
-  await commitOps(writes, contentProgress, 1, totalOps);
-  await commitOps(deletes, contentProgress, 1 + writes.length, totalOps);
-  if (typeof onProgress === "function") onProgress({ completed: totalOps - 1, total: totalOps, stage: "finalize" });
+    const logRef = doc(collection(db, "trips", plan.tripId, "activityLogs"));
+    const importType = mode === "replace" ? "trip.import.replace" : "trip.import.create";
+    finalBatch.set(logRef, {
+      type: importType,
+      actionType: importType,
+      category: "itinerary",
+      title: mode === "replace" ? "匯入 trip.json" : "建立旅程",
+      summary: mode === "replace" ? `更新 Firebase 旅程 · Revision ${finalRevision}` : `首次匯入 trip.json · Revision ${finalRevision}`,
+      actorUid: user.uid,
+      actorName: clean(user.displayName),
+      revision: finalRevision,
+      schemaVersion: Number(plan.tripDoc.schemaVersion) || 2,
+      snapshotId: snapshotId || "",
+      changeSummary: changeSummary || null,
+      createdAt: serverTimestamp()
+    });
+    await finalBatch.commit();
 
-  const finalBatch = writeBatch(db);
-  finalBatch.set(tripRef, {
-    revision: finalRevision,
-    schemaVersion: Number(plan.tripDoc.schemaVersion) || 2,
-    contentHash,
-    contentHashVersion: CONTENT_HASH_VERSION,
-    importState: "ready",
-    lastImportMode: mode,
-    lastSnapshotId: snapshotId || "",
-    importedBy: user.uid,
-    importedAt: serverTimestamp(),
-    updatedAt: serverTimestamp()
-  }, { merge: true });
-  const logRef = doc(collection(db, "trips", plan.tripId, "activityLogs"));
-  const importType = mode === "replace" ? "trip.import.replace" : "trip.import.create";
-  finalBatch.set(logRef, {
-    type: importType,
-    actionType: importType,
-    category: "itinerary",
-    title: mode === "replace" ? "匯入 trip.json" : "建立旅程",
-    summary: mode === "replace" ? `更新 Firebase 旅程 · Revision ${finalRevision}` : `首次匯入 trip.json · Revision ${finalRevision}`,
-    actorUid: user.uid,
-    actorName: clean(user.displayName),
-    revision: finalRevision,
-    schemaVersion: Number(plan.tripDoc.schemaVersion) || 2,
-    snapshotId: snapshotId || "",
-    changeSummary: changeSummary || null,
-    createdAt: serverTimestamp()
-  });
-  await finalBatch.commit();
-  if (typeof onProgress === "function") onProgress({ completed: totalOps, total: totalOps, stage: "done" });
+    if (typeof onProgress === "function") {
+      onProgress({ completed: totalOps, total: totalOps, stage: "done" });
+    }
 
-  return {
-    tripId: plan.tripId,
-    mode,
-    role: mode === "create" ? "owner" : existingRole,
-    revision: finalRevision,
-    snapshotId,
-    contentHash,
-    changeSummary,
-    normalizedTrip: normalizePortableTrip(rawInput),
-    summary: getTripSummary(rawInput)
-  };
-}
+    return {
+      tripId: plan.tripId,
+      mode,
+      role: mode === "create" ? "owner" : existingRole,
+      revision: finalRevision,
+      snapshotId,
+      contentHash,
+      changeSummary,
+      normalizedTrip: normalizePortableTrip(rawInput),
+      summary: getTripSummary(rawInput)
+    };
   } catch (error) {
     try {
-      if (mutationStarted && typeof plan !== "undefined" && plan?.tripId) {
-        await writeBatch(db).set(doc(db,"trips",plan.tripId),{
-          importState:"failed",updatedAt:serverTimestamp(),updatedBy:user?.uid||""
-        },{merge:true}).commit();
+      if (mutationStarted && plan?.tripId && user?.uid) {
+        const failedBatch = writeBatch(db);
+        failedBatch.set(doc(db, "trips", plan.tripId), {
+          importState: "failed",
+          updatedAt: serverTimestamp(),
+          updatedBy: user.uid
+        }, { merge: true });
+        await failedBatch.commit();
       }
     } catch (stateError) {
-      console.warn("Unable to mark failed import",stateError);
+      console.warn("Unable to mark failed import", stateError);
     }
+
     if (error?.code === "permission-denied" && mode === "create") {
       error.code = "trip-id-unavailable";
     }
     throw error;
   } finally {
-    if (serverOperation) await releaseTripOperation(serverOperation,user);
-    if (localOperationToken) endCloudOperation(localOperationToken);
+    if (serverOperation && user?.uid) {
+      await releaseTripOperation(serverOperation, user);
+    }
+    if (localOperationToken) {
+      endCloudOperation(localOperationToken);
+    }
   }
 }
 export async function setTripArchived(tripIdInput, archived, { user: userInput = null } = {}) {

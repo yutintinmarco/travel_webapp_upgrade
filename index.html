@@ -3069,12 +3069,78 @@ body.expenses-view-active #app-version-note{
   margin:8px 0 calc(var(--tabbar-h) + env(safe-area-inset-bottom,0px) + 24px) !important;
 }
 
+
+/* ==========================================================================
+   v7.7.0.3 · Stable per-view version footer
+   ========================================================================== */
+#app-version-note,
+.app-version-note{
+  display:none !important;
+}
+#itinerary-view::after,
+#snacks-view::after,
+#info-view::after,
+#profile-view::after{
+  content:"v7.7.0.3" !important;
+  display:block !important;
+  width:100%;
+  box-sizing:border-box;
+  margin:8px 0 0;
+  padding:0 8px;
+  color:rgba(63,63,63,.62);
+  font-size:calc(9px * var(--font-scale));
+  line-height:1.3;
+  font-weight:600;
+  text-align:center;
+  opacity:.72;
+  pointer-events:none;
+  user-select:none;
+  -webkit-user-select:none;
+}
+#expenses-view::after{
+  content:none !important;
+  display:none !important;
+}
+body.expenses-view-active .expenses-module .expenses-app::after{
+  content:"v7.7.0.3" !important;
+  display:block !important;
+  width:100%;
+  box-sizing:border-box;
+  margin:6px 0 0;
+  padding:0 8px;
+  color:rgba(63,63,63,.62);
+  font-size:calc(9px * var(--font-scale));
+  line-height:1.3;
+  font-weight:600;
+  text-align:center;
+  opacity:.72;
+  pointer-events:none;
+  user-select:none;
+  -webkit-user-select:none;
+}
+html.theme-dark #itinerary-view::after,
+html.theme-dark #snacks-view::after,
+html.theme-dark #info-view::after,
+html.theme-dark #profile-view::after,
+html.theme-dark body.expenses-view-active .expenses-module .expenses-app::after,
+html:not(.theme-light):not(.theme-dark) #itinerary-view::after,
+html:not(.theme-light):not(.theme-dark) #snacks-view::after,
+html:not(.theme-light):not(.theme-dark) #info-view::after,
+html:not(.theme-light):not(.theme-dark) #profile-view::after,
+html:not(.theme-light):not(.theme-dark) body.expenses-view-active .expenses-module .expenses-app::after{
+  color:rgba(220,220,232,.48);
+}
+body.profile-navigation-active #profile-view::after,
+body.profile-edge-swipe-active #profile-view::after{
+  visibility:hidden !important;
+}
+
 </style>
             <link rel="apple-touch-icon" href="assets/icon/trip_icon.png">
   <link rel="icon" type="image/png" href="assets/icon/trip_icon.png">
-  <link rel="manifest" href="manifest.json?v=7.7.0.2">
+  <link rel="manifest" href="manifest.json?v=7.7.0.3">
   <meta name="apple-mobile-web-app-title" content="關嘉露西生日之旅">
-  <link rel="stylesheet" href="assets/css/expenses.css?v=7.7.0.2">
+  <link rel="stylesheet" href="assets/css/expenses.css?v=7.7.0.3">
 </head>
 <body>
 <div class="bg-fixed"></div>
@@ -3481,7 +3547,7 @@ body.expenses-view-active #app-version-note{
         <span class="profile-detail-spacer"></span>
       </div>
       <section class="profile-card" aria-label="App 資料">
-        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.7.0.2</strong></div>
+        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.7.0.3</strong></div>
         <div class="profile-meta-row"><span>資料架構</span><strong>Phase 2F</strong></div>
         <div class="profile-meta-row"><span>主要資料來源</span><strong id="app-data-source-label">Firebase / 本機快取</strong></div>
       </section>
@@ -3502,10 +3568,7 @@ body.expenses-view-active #app-version-note{
     </div>
   </div>
 </div>
-<div class="app-version-note" id="app-version-note">v7.7.0.2</div>
-
-
-  </div>
+</div>
 </div>
 
 <nav class="bottom-nav" id="bottom-nav" aria-label="主要導覽">
@@ -3603,7 +3666,7 @@ body.expenses-view-active #app-version-note{
 </div>
 
 <script>
-const APP_VERSION = "7.7.0.2";
+const APP_VERSION = "7.7.0.3";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 window.EXPENSES_MODULE_VERSION = EXPENSES_MODULE_VERSION;
@@ -4751,11 +4814,9 @@ let currentAppView="itinerary";
 let baseTripTitle="旅程";
 let collapseRaf=0;
 
-const appVersionNote = document.getElementById("app-version-note");
-if (appVersionNote) appVersionNote.textContent = `v${APP_VERSION}`;
+const appVersionNote = null;
 function placeAppVersionNote(viewKey){
-  // v7.7.0.2: the version note is a single global footer.
-  // It intentionally never moves between views.
+  // v7.7.0.3: each active view owns its own CSS footer.
   return;
 }
 let expensesModuleImportPromise = null;
@@ -5576,8 +5637,14 @@ const tripImportConfirm=document.getElementById("trip-import-confirm");
 const tripImportCancel=document.getElementById("trip-import-cancel");
 let tripImportState={raw:null,inspection:null,done:false,busy:false};
 let tripImportServicePromise=null;
+function tripCloudOffline(){
+  return navigator.onLine===false || cloudSafetyState?.online===false;
+}
 function getTripImportService(){
-  if(!tripImportServicePromise) tripImportServicePromise=import(`./assets/js/trip-import-service.js?v=${APP_VERSION}`);
+  if(!tripImportServicePromise){
+    tripImportServicePromise=import(`./assets/js/trip-import-service.js?v=${APP_VERSION}`)
+      .catch(error=>{tripImportServicePromise=null;throw error;});
+  }
   return tripImportServicePromise;
 }
 function openTripImportModal(){
@@ -5603,11 +5670,14 @@ function tripImportSetError(message=""){
 function tripImportPermissionMessage(error){
   if(error?.code==="auth-required") return "請先登入 Google 帳戶，再繼續匯入。";
   if(error?.code==="permission-denied") return "目前帳戶冇權限覆蓋呢個 Trip，或者 Trip ID 已被其他旅程使用。";
-  if(error?.code==="offline") return "目前離線，請連線後先匯入 trip.json。";
+  if(error?.code==="offline") return "目前離線，無法連接 Firebase。請重新連線後再試。";
   if(error?.code==="operation-busy"||error?.code==="trip-operation-busy") return cloudSafetyFriendlyError(error);
   if(error?.code==="snapshot-too-large") return "現有 Trip 太大，未能安全建立單一 pre-import snapshot。今次唔會覆蓋任何資料。";
   if(error?.code==="insufficient-role") return "呢個 tripId 已存在，但目前帳戶唔係 Owner / Admin，所以唔可以覆蓋。";
-  return error?.message||"暫時未能檢查或匯入呢份 trip.json。";
+  const rawMessage=String(error?.message||"");
+  if(tripCloudOffline()) return "目前離線，無法連接 Firebase。你仍然可以查看已快取旅程；重新連線後先再匯入、封存或還原。";
+  if(/module script failed|failed to fetch dynamically imported module|abbreviated destructuring/i.test(rawMessage)) return "功能模組未能載入。請重新整理 App 後再試；現有 Firebase 旅程資料不受影響。";
+  return rawMessage||"暫時未能檢查或匯入呢份 trip.json。";
 }
 function renderTripImportChanges(changeSummary){
   const box=document.getElementById("trip-import-changes");
@@ -5690,6 +5760,14 @@ async function prepareTripImportFile(file){
     tripImportState={raw,inspection:localInspection,done:false,busy:false};
     renderTripImportPreview(localInspection,{checking:validation.valid});
     if(!validation.valid){tripImportSetError(validation.errors.join("；"));return;}
+    if(tripCloudOffline()){
+      const offlineInspection={...localInspection,mode:"offline",canImport:false};
+      tripImportState.inspection=offlineInspection;
+      renderTripImportPreview(offlineInspection);
+      tripImportSetError("目前離線，無法連接 Firebase 比較或匯入。你仍然可以查看已快取旅程；重新連線後再試。");
+      if(tripImportConfirm)tripImportConfirm.disabled=true;
+      return;
+    }
     const user=await getImportFirebaseUser();
     if(!user?.uid){
       const authInspection={...localInspection,mode:"auth-required",canImport:false};
@@ -5713,6 +5791,10 @@ tripImportCancel?.addEventListener("click",closeTripImportModal);
 tripImportBackdrop?.addEventListener("click",event=>{if(event.target===tripImportBackdrop)closeTripImportModal();});
 tripImportConfirm?.addEventListener("click",async()=>{
   if(tripImportState.done){closeTripImportModal();return;}
+  if(tripCloudOffline()){
+    tripImportSetError("目前離線，無法連接 Firebase 匯入旅程。請重新連線後再試。");
+    return;
+  }
   let inspection=tripImportState.inspection;
   if(!tripImportState.raw||tripImportState.busy)return;
   if(inspection?.mode==="unchanged"){closeTripImportModal();return;}
@@ -5773,6 +5855,10 @@ async function handleTripArchiveAction(button,archived){
   const tripId=button?.dataset?.tripArchiveId||button?.dataset?.tripRestoreId;
   if(!tripId||button.disabled)return;
   const verb=archived?"封存":"還原";
+  if(tripCloudOffline()){
+    alert(`目前離線，無法${verb}旅程。請重新連線後再試。`);
+    return;
+  }
   if(!window.confirm(`${verb}「${tripId}」？${archived?"資料會繼續留喺 Firebase。":"旅程會重新出現喺 Active Trips。"}`))return;
   button.disabled=true;
   try{const service=await getTripImportService();const user=await getImportFirebaseUser();await service.setTripArchived(tripId,archived,{user});}
@@ -5790,7 +5876,10 @@ let tripBackupSnapshots=[];
 let tripBackupSelectedSnapshot=null;
 let tripBackupBusy=false;
 function getTripBackupService(){
-  if(!tripBackupServicePromise)tripBackupServicePromise=import(`./assets/js/trip-backup-service.js?v=${APP_VERSION}`);
+  if(!tripBackupServicePromise){
+    tripBackupServicePromise=import(`./assets/js/trip-backup-service.js?v=${APP_VERSION}`)
+      .catch(error=>{tripBackupServicePromise=null;throw error;});
+  }
   return tripBackupServicePromise;
 }
 function currentBackupTripId(){return String(tripLibrarySummary?.tripId||window.__activeTripId||"").trim();}
@@ -5802,7 +5891,10 @@ function backupFriendlyError(error){
   if(error?.code==="snapshot-too-large")return "目前旅程太大，未能建立單一 Snapshot。";
   if(error?.code==="permission-denied"||error?.code==="firestore/permission-denied")return "Firebase 權限不足，請確認旅程角色。";
   if(error?.code==="offline"||error?.code==="operation-busy"||error?.code==="trip-operation-busy")return cloudSafetyFriendlyError(error);
-  return error?.message||"操作未完成。";
+  const rawMessage=String(error?.message||"");
+  if(tripCloudOffline())return "目前離線，無法建立或還原 Firebase Snapshot。請重新連線後再試。";
+  if(/module script failed|failed to fetch dynamically imported module/i.test(rawMessage))return "備份模組未能載入。請重新整理 App 後再試。";
+  return rawMessage||"操作未完成。";
 }
 function backupFormatDate(value){
   if(!value)return "—";
@@ -6806,7 +6898,7 @@ if(window.visualViewport&&bottomNav){
 // Android / Chrome PWA support. Network-only service worker, no aggressive cache.
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("./sw.js?v=7.7.0.2").catch(() => {});
+    navigator.serviceWorker.register("./sw.js?v=7.7.0.3").catch(() => {});
   });
 }
 
