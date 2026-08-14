@@ -1,3 +1,27 @@
+# Travel WebApp — v7.7.1.3
+
+## Phase 2F Harmony · Appearance Menu Harmony
+
+### Shared Settings row system
+
+• Rebuilt **外觀與顯示** on the same `profile-menu-card` / `profile-row` system used by **我的旅程** and **旅程設定**.
+• **文字大小**, **顯示模式**, **目的地顏色** and **Team 顏色** now share one card geometry, icon column, text inset, hairline separators, edge padding and row spacing.
+• Direct controls remain direct controls: the text-size stepper stays inline, while the theme segmented control stays inside its own expanded Settings row.
+• Navigation rows retain the standard disclosure chevron and press feedback; direct-control rows do not flash the whole row when the embedded control is touched.
+• Team colour remains visible but disabled when the current Trip has no Team data.
+
+### Scope
+
+• UI hierarchy only. No destination colour, Team colour, Firebase, ordering, permission, itinerary, expense or navigation-compositor behaviour changed.
+• Layer 0 + 1 Service Worker / first-paint work and Layer 2 scroll-frame optimisations are retained unchanged apart from the required version bump.
+
+### Deployment
+
+• Service Worker shell cache updated to `travel-shell-v7.7.1.3`.
+• Firestore Rules and indexes are unchanged. No Rules deployment is required.
+
+---
+
 # Travel WebApp — v7.7.1.2
 
 ## Phase 2F Harmony · Appearance settings consolidation
