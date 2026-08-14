@@ -1546,6 +1546,71 @@ html:not(.theme-light):not(.theme-dark) .day-tab.city-both.active {
 }
 
 
+
+/* Phase 2F · v7.7.0.8 · destination identity colour system
+   Every city keeps one visual identity across weather pills, active Day pills,
+   and the city badge beside the day heading. Legacy Kyoto / Osaka / Kobe
+   colours are preserved exactly; other city keys receive a stable palette. */
+.city-tab[data-city-key] {
+  background: var(--city-soft-bg, rgba(248,248,250,.86)) !important;
+  border-color: var(--city-soft-border, rgba(60,60,67,.18)) !important;
+  color: var(--city-text, #555) !important;
+  box-shadow: none !important;
+}
+.city-tab[data-city-key].active {
+  background: var(--city-bg, rgba(225,240,255,.96)) !important;
+  border-color: var(--city-border, rgba(10,132,255,.78)) !important;
+  color: var(--city-text, #075fae) !important;
+  box-shadow: inset 0 0 0 1px var(--city-ring, rgba(10,132,255,.08)), 0 2px 8px var(--city-shadow, rgba(10,132,255,.12)) !important;
+}
+.day-tab[data-city-key].active {
+  background: var(--city-bg, #ffe58f) !important;
+  border-color: var(--city-border, #f5c542) !important;
+  color: var(--city-text, #111) !important;
+}
+.city-badge[data-city-key] {
+  background: var(--city-bg, rgba(248,248,250,.86)) !important;
+  border: 1px solid var(--city-border, rgba(60,60,67,.18)) !important;
+  color: var(--city-text, #555) !important;
+}
+.day-tab[data-city-multi="true"].active {
+  border: 1px solid transparent !important;
+  background: var(--city-multi-bg-light) padding-box, var(--city-multi-border-light) border-box !important;
+  color: #3a3a2a !important;
+}
+
+html.theme-dark .city-tab[data-city-key],
+html:not(.theme-light):not(.theme-dark) .city-tab[data-city-key] {
+  background: var(--city-dark-soft-bg, rgba(36,36,44,.72)) !important;
+  border-color: var(--city-dark-soft-border, rgba(255,255,255,.12)) !important;
+  color: var(--city-dark-text, rgba(210,210,222,.80)) !important;
+}
+html.theme-dark .city-tab[data-city-key].active,
+html:not(.theme-light):not(.theme-dark) .city-tab[data-city-key].active {
+  background: var(--city-dark-bg, rgba(10,132,255,.24)) !important;
+  border-color: var(--city-dark-border, rgba(102,174,255,.88)) !important;
+  color: var(--city-dark-text, #d8ecff) !important;
+  box-shadow: inset 0 0 0 1px var(--city-dark-ring, rgba(102,174,255,.08)), 0 2px 10px rgba(0,0,0,.18) !important;
+}
+html.theme-dark .day-tab[data-city-key].active,
+html:not(.theme-light):not(.theme-dark) .day-tab[data-city-key].active {
+  background: var(--city-dark-bg, rgba(120,96,10,.75)) !important;
+  border-color: var(--city-dark-border, #c9a030) !important;
+  color: var(--city-dark-text, #ffe9a0) !important;
+}
+html.theme-dark .city-badge[data-city-key],
+html:not(.theme-light):not(.theme-dark) .city-badge[data-city-key] {
+  background: var(--city-dark-bg, rgba(36,36,44,.72)) !important;
+  border-color: var(--city-dark-border, rgba(255,255,255,.12)) !important;
+  color: var(--city-dark-text, rgba(210,210,222,.80)) !important;
+}
+html.theme-dark .day-tab[data-city-multi="true"].active,
+html:not(.theme-light):not(.theme-dark) .day-tab[data-city-multi="true"].active {
+  border: 1px solid transparent !important;
+  background: var(--city-multi-bg-dark) padding-box, var(--city-multi-border-dark) border-box !important;
+  color: #f0f0f2 !important;
+}
+
 /* Phase 1 · v7.2.2 · harmonised disclosure, clear flight details and balanced dark glass */
 
 /* The disclosure returns to intrinsic grid-track expansion so its final
@@ -3077,7 +3142,7 @@ body.expenses-view-active #app-version-note{
 #snacks-view::after,
 #info-view::after,
 #profile-view::after{
-  content:"v7.7.0.7" !important;
+  content:"v7.7.0.8" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3098,7 +3163,7 @@ body.expenses-view-active #app-version-note{
   display:none !important;
 }
 body.expenses-view-active .expenses-module .expenses-app::after{
-  content:"v7.7.0.7" !important;
+  content:"v7.7.0.8" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3133,7 +3198,7 @@ body.profile-edge-swipe-active #profile-view::after{
 
 
 /* ==========================================================================
-   v7.7.0.7 · Weather city selector UX
+   v7.7.0.8 · Weather city selector UX
    ========================================================================== */
 .trip-boot-placeholder{
   display:flex;align-items:center;justify-content:center;gap:9px;
@@ -3163,9 +3228,9 @@ html:not(.theme-light):not(.theme-dark) .trip-boot-placeholder{
 </style>
             <link rel="apple-touch-icon" href="assets/icon/trip_icon.png">
   <link rel="icon" type="image/png" href="assets/icon/trip_icon.png">
-  <link rel="manifest" href="manifest.json?v=7.7.0.7">
+  <link rel="manifest" href="manifest.json?v=7.7.0.8">
   <meta name="apple-mobile-web-app-title" content="關嘉露西生日之旅">
-  <link rel="stylesheet" href="assets/css/expenses.css?v=7.7.0.7">
+  <link rel="stylesheet" href="assets/css/expenses.css?v=7.7.0.8">
 </head>
 <body>
 <div class="bg-fixed"></div>
@@ -3577,7 +3642,7 @@ html:not(.theme-light):not(.theme-dark) .trip-boot-placeholder{
         <span class="profile-detail-spacer"></span>
       </div>
       <section class="profile-card" aria-label="App 資料">
-        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.7.0.7</strong></div>
+        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.7.0.8</strong></div>
         <div class="profile-meta-row"><span>資料架構</span><strong>Phase 2F</strong></div>
         <div class="profile-meta-row"><span>主要資料來源</span><strong id="app-data-source-label">Firebase / 本機快取</strong></div>
       </section>
@@ -3696,7 +3761,7 @@ html:not(.theme-light):not(.theme-dark) .trip-boot-placeholder{
 </div>
 
 <script>
-const APP_VERSION = "7.7.0.7";
+const APP_VERSION = "7.7.0.8";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 window.EXPENSES_MODULE_VERSION = EXPENSES_MODULE_VERSION;
@@ -3723,6 +3788,59 @@ function getGalleryForItem(item, day, cityKey, matchedCities, meta){
     if(byCity[c])return normGallery(byCity[c]);
   }
   return normGallery(defs.fallback);
+}
+
+
+// Phase 2F v7.7.0.8: one destination colour identity across all city UI.
+const LEGACY_CITY_THEMES={
+  kyoto:{bg:"#d4ecd4",softBg:"rgba(212,236,212,.66)",softBorder:"rgba(90,158,90,.58)",border:"#5a9e5a",text:"#2a5a2a",ring:"rgba(90,158,90,.10)",shadow:"rgba(90,158,90,.16)",darkBg:"rgba(38,80,38,.75)",darkSoftBg:"rgba(38,80,38,.32)",darkSoftBorder:"rgba(90,158,90,.58)",darkBorder:"#5a9e5a",darkText:"#a8dba8",darkRing:"rgba(90,158,90,.10)"},
+  osaka:{bg:"#ffddd4",softBg:"rgba(255,221,212,.66)",softBorder:"rgba(224,96,64,.56)",border:"#e06040",text:"#6a2010",ring:"rgba(224,96,64,.10)",shadow:"rgba(224,96,64,.15)",darkBg:"rgba(100,40,20,.75)",darkSoftBg:"rgba(100,40,20,.32)",darkSoftBorder:"rgba(224,96,64,.58)",darkBorder:"#e06040",darkText:"#ffb09a",darkRing:"rgba(224,96,64,.10)"},
+  kobe:{bg:"#e5ddff",softBg:"rgba(229,221,255,.66)",softBorder:"rgba(123,97,209,.54)",border:"#7b61d1",text:"#3e2a84",ring:"rgba(123,97,209,.10)",shadow:"rgba(123,97,209,.15)",darkBg:"rgba(74,58,130,.75)",darkSoftBg:"rgba(74,58,130,.32)",darkSoftBorder:"rgba(155,138,240,.58)",darkBorder:"#9b8af0",darkText:"#d8d0ff",darkRing:"rgba(155,138,240,.10)"}
+};
+const GENERIC_CITY_THEMES=[
+  {bg:"#dceeff",softBg:"rgba(220,238,255,.68)",softBorder:"rgba(74,144,217,.54)",border:"#4a90d9",text:"#245c91",ring:"rgba(74,144,217,.10)",shadow:"rgba(74,144,217,.15)",darkBg:"rgba(30,75,115,.76)",darkSoftBg:"rgba(30,75,115,.30)",darkSoftBorder:"rgba(106,175,245,.56)",darkBorder:"#6aaff5",darkText:"#b8dcff",darkRing:"rgba(106,175,245,.10)"},
+  {bg:"#d8f1ec",softBg:"rgba(216,241,236,.68)",softBorder:"rgba(63,159,145,.54)",border:"#3f9f91",text:"#245f57",ring:"rgba(63,159,145,.10)",shadow:"rgba(63,159,145,.15)",darkBg:"rgba(26,83,76,.76)",darkSoftBg:"rgba(26,83,76,.30)",darkSoftBorder:"rgba(91,191,177,.56)",darkBorder:"#5bbfb1",darkText:"#b9eee6",darkRing:"rgba(91,191,177,.10)"},
+  {bg:"#d4ecd4",softBg:"rgba(212,236,212,.66)",softBorder:"rgba(90,158,90,.58)",border:"#5a9e5a",text:"#2a5a2a",ring:"rgba(90,158,90,.10)",shadow:"rgba(90,158,90,.16)",darkBg:"rgba(38,80,38,.75)",darkSoftBg:"rgba(38,80,38,.32)",darkSoftBorder:"rgba(90,158,90,.58)",darkBorder:"#5a9e5a",darkText:"#a8dba8",darkRing:"rgba(90,158,90,.10)"},
+  {bg:"#fff0c2",softBg:"rgba(255,240,194,.68)",softBorder:"rgba(211,159,39,.56)",border:"#d39f27",text:"#704f00",ring:"rgba(211,159,39,.10)",shadow:"rgba(211,159,39,.15)",darkBg:"rgba(104,75,10,.76)",darkSoftBg:"rgba(104,75,10,.30)",darkSoftBorder:"rgba(230,184,75,.56)",darkBorder:"#e6b84b",darkText:"#ffe2a0",darkRing:"rgba(230,184,75,.10)"},
+  {bg:"#ffddd4",softBg:"rgba(255,221,212,.66)",softBorder:"rgba(224,96,64,.56)",border:"#e06040",text:"#6a2010",ring:"rgba(224,96,64,.10)",shadow:"rgba(224,96,64,.15)",darkBg:"rgba(100,40,20,.75)",darkSoftBg:"rgba(100,40,20,.32)",darkSoftBorder:"rgba(224,96,64,.58)",darkBorder:"#e06040",darkText:"#ffb09a",darkRing:"rgba(224,96,64,.10)"},
+  {bg:"#e5ddff",softBg:"rgba(229,221,255,.66)",softBorder:"rgba(123,97,209,.54)",border:"#7b61d1",text:"#3e2a84",ring:"rgba(123,97,209,.10)",shadow:"rgba(123,97,209,.15)",darkBg:"rgba(74,58,130,.75)",darkSoftBg:"rgba(74,58,130,.32)",darkSoftBorder:"rgba(155,138,240,.58)",darkBorder:"#9b8af0",darkText:"#d8d0ff",darkRing:"rgba(155,138,240,.10)"},
+  {bg:"#f8ddeb",softBg:"rgba(248,221,235,.68)",softBorder:"rgba(196,91,140,.54)",border:"#c45b8c",text:"#793658",ring:"rgba(196,91,140,.10)",shadow:"rgba(196,91,140,.15)",darkBg:"rgba(105,45,73,.76)",darkSoftBg:"rgba(105,45,73,.30)",darkSoftBorder:"rgba(224,117,167,.56)",darkBorder:"#e075a7",darkText:"#ffd0e5",darkRing:"rgba(224,117,167,.10)"},
+  {bg:"#d9f0f4",softBg:"rgba(217,240,244,.68)",softBorder:"rgba(77,157,176,.54)",border:"#4d9db0",text:"#285e6a",ring:"rgba(77,157,176,.10)",shadow:"rgba(77,157,176,.15)",darkBg:"rgba(31,82,94,.76)",darkSoftBg:"rgba(31,82,94,.30)",darkSoftBorder:"rgba(102,187,207,.56)",darkBorder:"#66bbcf",darkText:"#c0edf6",darkRing:"rgba(102,187,207,.10)"}
+];
+function cityThemeHash(key){let h=2166136261;for(const ch of String(key||"")){h^=ch.charCodeAt(0);h=Math.imul(h,16777619);}return h>>>0;}
+function parseHexColour(value){const m=String(value||"").trim().match(/^#([0-9a-f]{6})$/i);if(!m)return null;const n=parseInt(m[1],16);return{r:(n>>16)&255,g:(n>>8)&255,b:n&255};}
+function mixRgb(a,b,t){return{r:Math.round(a.r+(b.r-a.r)*t),g:Math.round(a.g+(b.g-a.g)*t),b:Math.round(a.b+(b.b-a.b)*t)};}
+function rgbHex(c){return`#${[c.r,c.g,c.b].map(v=>Math.max(0,Math.min(255,v)).toString(16).padStart(2,"0")).join("")}`;}
+function rgba(c,a){return`rgba(${c.r},${c.g},${c.b},${a})`;}
+function cityThemeFromAccent(value){const c=parseHexColour(value);if(!c)return null;const white={r:255,g:255,b:255},black={r:0,g:0,b:0};return{bg:rgbHex(mixRgb(c,white,.78)),softBg:rgba(mixRgb(c,white,.82),.70),softBorder:rgba(c,.55),border:rgbHex(c),text:rgbHex(mixRgb(c,black,.48)),ring:rgba(c,.10),shadow:rgba(c,.15),darkBg:rgba(mixRgb(c,black,.40),.78),darkSoftBg:rgba(mixRgb(c,black,.40),.30),darkSoftBorder:rgba(mixRgb(c,white,.18),.58),darkBorder:rgbHex(mixRgb(c,white,.18)),darkText:rgbHex(mixRgb(c,white,.60)),darkRing:rgba(mixRgb(c,white,.18),.10)};}
+function buildCityThemeMap(cities={}){
+  const result={},used=new Set();
+  const reserveTheme=theme=>{const idx=GENERIC_CITY_THEMES.findIndex(t=>t.border===theme?.border);if(idx>=0)used.add(idx);};
+  Object.keys(cities).forEach(key=>{
+    const cfg=cities[key]||{};
+    if(LEGACY_CITY_THEMES[key]){result[key]=LEGACY_CITY_THEMES[key];reserveTheme(result[key]);return;}
+    const explicit=cityThemeFromAccent(cfg.color||cfg.accentColor||cfg.themeColor);
+    if(explicit){result[key]=explicit;reserveTheme(explicit);return;}
+    let idx=cityThemeHash(key)%GENERIC_CITY_THEMES.length;
+    const start=idx;
+    while(used.has(idx)){idx=(idx+1)%GENERIC_CITY_THEMES.length;if(idx===start)break;}
+    used.add(idx);result[key]=GENERIC_CITY_THEMES[idx];
+  });
+  return result;
+}
+function applyCityTheme(el,key,cfg,theme){
+  if(!el||!theme)return;
+  el.dataset.cityKey=key;
+  el.style.setProperty("--city-bg",theme.bg);el.style.setProperty("--city-soft-bg",theme.softBg);el.style.setProperty("--city-soft-border",theme.softBorder);el.style.setProperty("--city-border",theme.border);el.style.setProperty("--city-text",theme.text);el.style.setProperty("--city-ring",theme.ring);el.style.setProperty("--city-shadow",theme.shadow);
+  el.style.setProperty("--city-dark-bg",theme.darkBg);el.style.setProperty("--city-dark-soft-bg",theme.darkSoftBg);el.style.setProperty("--city-dark-soft-border",theme.darkSoftBorder);el.style.setProperty("--city-dark-border",theme.darkBorder);el.style.setProperty("--city-dark-text",theme.darkText);el.style.setProperty("--city-dark-ring",theme.darkRing);
+}
+function applyMultiCityTheme(el,keys,themeMap){
+  if(!el)return;const themes=(keys||[]).map(k=>themeMap[k]).filter(Boolean);if(!themes.length)return;
+  el.dataset.cityMulti="true";
+  el.style.setProperty("--city-multi-bg-light",`linear-gradient(to right, ${themes.map(t=>t.bg).join(", ")})`);
+  el.style.setProperty("--city-multi-border-light",`linear-gradient(to right, ${themes.map(t=>t.border).join(", ")})`);
+  el.style.setProperty("--city-multi-bg-dark",`linear-gradient(to right, ${themes.map(t=>t.darkBg).join(", ")})`);
+  el.style.setProperty("--city-multi-border-dark",`linear-gradient(to right, ${themes.map(t=>t.darkBorder).join(", ")})`);
 }
 
 // Font / Refresh
@@ -3965,6 +4083,7 @@ function renderWeather(data){
   }
   const cities=validCities;
   const keys=Object.keys(cities);
+  const cityThemes=buildCityThemeMap(cities);
   ctEl.style.display=keys.length>1?"flex":"none";ctEl.innerHTML="";
   let activeKey=keys[0];
   function setCityTabActive(activeK){
@@ -3990,7 +4109,7 @@ function renderWeather(data){
   }
   keys.forEach(k=>{
     const btn=document.createElement("button");btn.type="button";btn.className="city-tab"+(k===activeKey?" active":"");
-    btn.dataset.cityKey=k;btn.textContent=cities[k].label||k;
+    applyCityTheme(btn,k,cities[k],cityThemes[k]);btn.textContent=cities[k].label||k;
     btn.setAttribute("aria-pressed",k===activeKey?"true":"false");
     btn.setAttribute("aria-label",`查看${cities[k].label||k}天氣`);
     btn.addEventListener("click",()=>{
@@ -4823,6 +4942,7 @@ function render(data){
   tabsEl.style.setProperty("--day-count",String(data.days.length));
   tabsEl.classList.toggle("is-scrollable-days",data.days.length>7);
   const cityKeys=Object.keys(cities);
+  const cityThemes=buildCityThemeMap(cities);
 
   data.days.forEach((day,idx)=>{
     // Find which city/cities this day belongs to
@@ -4845,6 +4965,8 @@ function render(data){
     const tab=document.createElement("button");
     tab.className=`day-tab${idx===0?" active":""}${ck?` city-${ck}`:""}`;
     tab.dataset.dayIndex=String(idx);tab.textContent=day.label||("Day "+(idx+1));
+    if(ck==="both")applyMultiCityTheme(tab,matchedCities,cityThemes);
+    else if(ci)applyCityTheme(tab,ck,ci,cityThemes[ck]);
     tabsEl.appendChild(tab);
 
     const content=document.createElement("div");content.className="day-content"+(idx===0?" active":"");content.dataset.dayIndex=String(idx);
@@ -4852,9 +4974,9 @@ function render(data){
     titleEl.textContent=(day.date?day.date+"  ":"")+(day.title||"");
     if(ck==="both"){
       // Show both city badges
-      matchedCities.forEach(k=>{const b=document.createElement("span");b.className=`city-badge city-badge-${k}`;b.textContent=cities[k].label||k;titleEl.appendChild(b);});
+      matchedCities.forEach(k=>{const b=document.createElement("span");b.className=`city-badge city-badge-${k}`;applyCityTheme(b,k,cities[k],cityThemes[k]);b.textContent=cities[k].label||k;titleEl.appendChild(b);});
     } else if(ci){
-      const b=document.createElement("span");b.className=`city-badge city-badge-${ck}`;b.textContent=ci.label||ck;titleEl.appendChild(b);
+      const b=document.createElement("span");b.className=`city-badge city-badge-${ck}`;applyCityTheme(b,ck,ci,cityThemes[ck]);b.textContent=ci.label||ck;titleEl.appendChild(b);
     }
     if(day.pass){const b=document.createElement("span");b.classList.add("pass-badge");if(String(day.pass).includes("JR"))b.classList.add("pass-jr");else if(String(day.pass).includes("ICOCA"))b.classList.add("pass-icoca");else if(String(day.pass).includes("地鐵"))b.classList.add("pass-metro");b.textContent=day.pass;titleEl.appendChild(b);}
     content.appendChild(titleEl);
@@ -7140,7 +7262,7 @@ if(window.visualViewport&&bottomNav){
 // Android / Chrome PWA support. Network-only service worker, no aggressive cache.
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("./sw.js?v=7.7.0.7").catch(() => {});
+    navigator.serviceWorker.register("./sw.js?v=7.7.0.8").catch(() => {});
   });
 }
 

@@ -1,3 +1,39 @@
+# Travel WebApp — v7.7.0.8
+
+## Phase 2F current build
+
+### Destination Colour Identity Restoration
+
+• Fixed the regression introduced by v7.7.0.7 where every selected Weather city pill used the same generic iOS blue colour.
+• Restored the original destination identity colours for the bundled trip: Kyoto remains green, Osaka remains coral/red, and Kobe remains purple.
+• The same destination colour is now reused consistently across three UI surfaces: Weather city pills, the active Day pill, and the city badge beside the day heading.
+• Weather city pills now remain softly tinted by destination even when not selected; the active city uses the stronger version of that same destination colour.
+• Removed the old limitation where only hard coded `kyoto`, `osaka`, and `kobe` CSS classes could display coloured Day badges. Any city key imported through `meta.cities` now receives a stable destination colour.
+• Imported trips without explicit city colours receive a deterministic palette based on the city key, so Tokyo and Yokohama in the Phase 2F QA demo display as distinct coloured pills instead of plain text / colourless badges.
+• Optional future city metadata fields `color`, `accentColor`, or `themeColor` are supported when a six digit hex colour is supplied. If present, the UI derives the light and dark destination theme from that accent.
+• Multi city days continue to use a gradient Day pill assembled from the actual colours of the cities assigned to that day.
+• No re import is required. Existing Firebase trips are recoloured at render time from their current `meta.cities` data.
+
+### Package and Firebase
+
+• Service Worker shell cache updated to v7.7.0.8.
+• Firestore Rules are unchanged.
+• Firestore indexes are unchanged.
+• No Firebase Rules redeploy is required for this build.
+• Package continues to keep only one development document: CHANGELOG.md.
+
+## Build QA
+
+• `node --check` passed for every JavaScript module, both inline scripts, and `sw.js`.
+• JSON validation passed for `manifest.json`, `firebase.json`, `firestore.indexes.json`, and `trip.json`.
+• No duplicate static HTML IDs were found.
+• Firestore Rules structural sanity passed.
+• `firestore.rules` and `firestore.indexes.json` are byte for byte unchanged from v7.7.0.7.
+• The protected v7.3.13 Profile Navigation compositor source is unchanged from the validated v7.7.0.7 baseline.
+• ZIP integrity test passed.
+
+---
+
 # Travel WebApp — v7.7.0.7
 
 ## Phase 2F current build
