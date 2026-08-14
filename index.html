@@ -2445,21 +2445,21 @@ body.expenses-view-active #expenses-root{
 
 
 /* v7.6.3.5 · App & Data diagnostics */
-#profile-page-app-data .profile-meta-row{
+.profile-nav-page[data-profile-page="app-data"] .profile-meta-row{
   gap:18px;
   align-items:flex-start;
 }
-#profile-page-app-data .profile-meta-row > span{
+.profile-nav-page[data-profile-page="app-data"] .profile-meta-row > span{
   flex:0 0 auto;
 }
-#profile-page-app-data .profile-meta-row > strong{
+.profile-nav-page[data-profile-page="app-data"] .profile-meta-row > strong{
   min-width:0;
   max-width:68%;
   text-align:right;
   overflow-wrap:anywhere;
   word-break:break-word;
 }
-#profile-page-app-data .profile-section-label{
+.profile-nav-page[data-profile-page="app-data"] .profile-section-label{
   margin:14px 14px 7px;
   font-size:12px;
   font-weight:650;
@@ -2574,7 +2574,7 @@ html.theme-dark .trip-member-role-tabs button,html:not(.theme-light):not(.theme-
 
 /* 2) Profile status/help lines are text, not another translucent card.
       This removes the pale full-width slab visible in Dark Mode. */
-#profile-view .trip-library-status{
+.profile-nav-page .trip-library-status{
   background:transparent !important;
   box-shadow:none !important;
   border:0 !important;
@@ -2582,8 +2582,8 @@ html.theme-dark .trip-member-role-tabs button,html:not(.theme-light):not(.theme-
   padding-left:2px !important;
   padding-right:2px !important;
 }
-html.theme-dark #profile-view .trip-library-status,
-html:not(.theme-light):not(.theme-dark) #profile-view .trip-library-status{
+html.theme-dark .profile-nav-page .trip-library-status,
+html:not(.theme-light):not(.theme-dark) .profile-nav-page .trip-library-status{
   background:transparent !important;
 }
 
@@ -2930,12 +2930,89 @@ html:not(.theme-light):not(.theme-dark) .cloud-safety-strip{
   box-shadow:0 6px 16px rgba(0,0,0,.14);
 }
 
+
+/* ==========================================================================
+   v7.7.0.1 · Profile snapshot style parity + stable version footer
+   ========================================================================== */
+
+/* Legacy singleton stays in the DOM for compatibility with older code, but
+   never participates in layout or paint. */
+#app-version-note{
+  display:none !important;
+}
+
+/* Each normal view paints its own footer in its natural final position.
+   No visible DOM reparenting occurs when changing tabs. */
+#itinerary-view::after,
+#snacks-view::after,
+#info-view::after,
+#profile-view::after{
+  content:"v7.7.0.1";
+  display:block;
+  width:100%;
+  box-sizing:border-box;
+  margin:8px 0 0;
+  padding:0 8px;
+  color:rgba(63,63,63,.62);
+  font-size:calc(9px * var(--font-scale));
+  line-height:1.3;
+  font-weight:600;
+  text-align:center;
+  pointer-events:none;
+  user-select:none;
+  -webkit-user-select:none;
+}
+html.theme-dark #itinerary-view::after,
+html.theme-dark #snacks-view::after,
+html.theme-dark #info-view::after,
+html.theme-dark #profile-view::after,
+html:not(.theme-light):not(.theme-dark) #itinerary-view::after,
+html:not(.theme-light):not(.theme-dark) #snacks-view::after,
+html:not(.theme-light):not(.theme-dark) #info-view::after,
+html:not(.theme-light):not(.theme-dark) #profile-view::after{
+  color:rgba(220,220,232,.48);
+}
+
+/* During a protected Profile push/pop, page geometry is being swapped.
+   Keep the footer out of that animation and reveal it only at the settled
+   final position. */
+body.profile-navigation-active #profile-view::after,
+body.profile-edge-swipe-active #profile-view::after{
+  visibility:hidden;
+}
+
+/* Expenses keeps the v7.6.3.4 visual structure: version after the real
+   expense content, with bottom-nav clearance below it. */
+#expenses-view::after{
+  content:none !important;
+}
+body.expenses-view-active .expenses-module .expenses-app::after{
+  content:"v7.7.0.1";
+  display:block;
+  width:100%;
+  box-sizing:border-box;
+  margin:4px 0 0;
+  padding:0 8px;
+  color:rgba(63,63,63,.62);
+  font-size:calc(9px * var(--font-scale));
+  line-height:1.3;
+  font-weight:600;
+  text-align:center;
+  pointer-events:none;
+  user-select:none;
+  -webkit-user-select:none;
+}
+html.theme-dark body.expenses-view-active .expenses-module .expenses-app::after,
+html:not(.theme-light):not(.theme-dark) body.expenses-view-active .expenses-module .expenses-app::after{
+  color:rgba(220,220,232,.48);
+}
+
 </style>
             <link rel="apple-touch-icon" href="assets/icon/trip_icon.png">
   <link rel="icon" type="image/png" href="assets/icon/trip_icon.png">
-  <link rel="manifest" href="manifest.json?v=7.7.0">
+  <link rel="manifest" href="manifest.json?v=7.7.0.1">
   <meta name="apple-mobile-web-app-title" content="關嘉露西生日之旅">
-  <link rel="stylesheet" href="assets/css/expenses.css?v=7.7.0">
+  <link rel="stylesheet" href="assets/css/expenses.css?v=7.7.0.1">
 </head>
 <body>
 <div class="bg-fixed"></div>
@@ -3342,7 +3419,7 @@ html:not(.theme-light):not(.theme-dark) .cloud-safety-strip{
         <span class="profile-detail-spacer"></span>
       </div>
       <section class="profile-card" aria-label="App 資料">
-        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.7.0</strong></div>
+        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.7.0.1</strong></div>
         <div class="profile-meta-row"><span>資料架構</span><strong>Phase 2F</strong></div>
         <div class="profile-meta-row"><span>主要資料來源</span><strong id="app-data-source-label">Firebase / 本機快取</strong></div>
       </section>
@@ -3363,7 +3440,7 @@ html:not(.theme-light):not(.theme-dark) .cloud-safety-strip{
     </div>
   </div>
 </div>
-<div class="app-version-note" id="app-version-note">v7.7.0</div>
+<div class="app-version-note" id="app-version-note">v7.7.0.1</div>
 
 
   </div>
@@ -3464,7 +3541,7 @@ html:not(.theme-light):not(.theme-dark) .cloud-safety-strip{
 </div>
 
 <script>
-const APP_VERSION = "7.7.0";
+const APP_VERSION = "7.7.0.1";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 window.EXPENSES_MODULE_VERSION = EXPENSES_MODULE_VERSION;
@@ -6670,7 +6747,7 @@ if(window.visualViewport&&bottomNav){
 // Android / Chrome PWA support. Network-only service worker, no aggressive cache.
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("./sw.js?v=7.7.0").catch(() => {});
+    navigator.serviceWorker.register("./sw.js?v=7.7.0.1").catch(() => {});
   });
 }
 
