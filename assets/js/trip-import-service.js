@@ -1,5 +1,7 @@
 import { auth, db } from "./firebase-service.js";
 import { buildFirestoreTripPlan, getTripSummary, normalizePortableTrip, validatePortableTrip } from "./trip-schema-service.js";
+import { assertCloudOperationAvailable, beginCloudOperation, endCloudOperation } from "./cloud-safety-service.js";
+import { acquireTripOperation, releaseTripOperation } from "./trip-operation-service.js";
 import {
   collection,
   doc,
@@ -30,7 +32,8 @@ const IGNORED_CONTENT_KEYS = new Set([
   "archivedAt",
   "archivedBy",
   "contentHash",
-  "contentHashVersion"
+  "contentHashVersion",
+  "activeOperationId","activeOperationType","activeOperationBy","activeOperationStartedAtMs","activeOperationStartedAt"
 ]);
 
 function clean(value) { return String(value ?? "").trim(); }
@@ -331,7 +334,15 @@ export async function inspectTripImport(rawInput, userInput = null) {
   if (!validation.valid || !built.plan) return { ...validation, summary, exists: false, role: null, canImport: false, mode: "invalid" };
 
   const tripRef = doc(db, "trips", validation.trip.tripId);
-  const tripSnap = await getDoc(tripRef);
+  let tripSnap = null;
+  try {
+    tripSnap = await getDoc(tripRef);
+  } catch (error) {
+    if (error?.code === "permission-denied") {
+      return { ...validation, summary, exists: false, role: null, canImport: true, mode: "create", existingTrip: null, changeSummary: null, protectedProbe: true };
+    }
+    throw error;
+  }
   if (!tripSnap.exists()) {
     return { ...validation, summary, exists: false, role: null, canImport: true, mode: "create", existingTrip: null, changeSummary: null };
   }
@@ -387,8 +398,15 @@ export async function inspectTripImport(rawInput, userInput = null) {
   };
 }
 
-export async function importTrip(rawInput, { mode = "create", user: userInput = null, onProgress = null } = {}) {
+export async function importTrip(rawInput, {
+  let localOperationToken = null;
+  let serverOperation = null;
+  let mutationStarted = false;
+  try {
+    localOperationToken = beginCloudOperation({type:"import",tripId:"",label:"匯入 trip.json"});
+ mode = "create", user: userInput = null, onProgress = null } = {}) {
   const user = await requireUser(userInput);
+  assertCloudOperationAvailable("匯入 trip.json");
   const built = buildFirestoreTripPlan(rawInput, user);
   if (!built.valid || !built.plan) {
     const error = new Error(built.errors?.join("; ") || "Invalid portable trip JSON");
@@ -399,15 +417,31 @@ export async function importTrip(rawInput, { mode = "create", user: userInput = 
   const plan = built.plan;
   const contentHash = await planContentHash(plan);
   const tripRef = doc(db, "trips", plan.tripId);
-  const tripSnap = await getDoc(tripRef);
-  const exists = tripSnap.exists();
-
-  if (mode === "create" && exists) {
-    const error = new Error("Trip already exists");
-    error.code = "trip-exists";
-    throw error;
+  let tripSnap = null;
+  let exists = false;
+  if (mode === "replace") {
+    tripSnap = await getDoc(tripRef);
+    exists = tripSnap.exists();
+    if (!exists) mode = "create";
+  } else {
+    // With Phase 2F rules, non-members cannot read arbitrary Trip metadata.
+    // A permission-denied probe is therefore compatible with a genuinely new
+    // Trip or a private Trip owned by somebody else. The create write itself
+    // is the authoritative collision check.
+    try {
+      tripSnap = await getDoc(tripRef);
+      exists = tripSnap.exists();
+      if (exists) {
+        const error = new Error("Trip already exists");
+        error.code = "trip-exists";
+        throw error;
+      }
+    } catch (error) {
+      if (error?.code !== "permission-denied") throw error;
+      tripSnap = null;
+      exists = false;
+    }
   }
-  if (mode === "replace" && !exists) mode = "create";
 
   let existing = null;
   let snapshotId = null;
@@ -445,6 +479,7 @@ export async function importTrip(rawInput, { mode = "create", user: userInput = 
       };
     }
     if (!existing) existing = await readExistingStructure(plan.tripId);
+    serverOperation = await acquireTripOperation(plan.tripId, "import", user);
     if (typeof onProgress === "function") onProgress({ completed: 0.15, total: 1, stage: "snapshot" });
     snapshotId = await createSnapshot(existing, user);
     if (typeof onProgress === "function") onProgress({ completed: 0.22, total: 1, stage: "prepare" });
@@ -455,6 +490,7 @@ export async function importTrip(rawInput, { mode = "create", user: userInput = 
     ? Math.max(Number(baseExisting.revision || 0) + 1, Number(plan.tripDoc.revision || 1))
     : Math.max(1, Number(plan.tripDoc.revision || 1));
 
+  mutationStarted = true;
   if (mode === "create") {
     const batch = writeBatch(db);
     batch.set(tripRef, {
@@ -551,9 +587,30 @@ export async function importTrip(rawInput, { mode = "create", user: userInput = 
     summary: getTripSummary(rawInput)
   };
 }
-
+  } catch (error) {
+    try {
+      if (mutationStarted && typeof plan !== "undefined" && plan?.tripId) {
+        await writeBatch(db).set(doc(db,"trips",plan.tripId),{
+          importState:"failed",updatedAt:serverTimestamp(),updatedBy:user?.uid||""
+        },{merge:true}).commit();
+      }
+    } catch (stateError) {
+      console.warn("Unable to mark failed import",stateError);
+    }
+    if (error?.code === "permission-denied" && mode === "create") {
+      error.code = "trip-id-unavailable";
+    }
+    throw error;
+  } finally {
+    if (serverOperation) await releaseTripOperation(serverOperation,user);
+    if (localOperationToken) endCloudOperation(localOperationToken);
+  }
+}
 export async function setTripArchived(tripIdInput, archived, { user: userInput = null } = {}) {
   const user = await requireUser(userInput);
+  assertCloudOperationAvailable("封存旅程");
+  const localOperationToken = beginCloudOperation({type:"archive",tripId:String(tripIdInput||""),label:"封存旅程"});
+  try {
   const tripId = clean(tripIdInput);
   if (!tripId) throw new Error("Missing tripId");
   const memberSnap = await getDoc(doc(db, "trips", tripId, "members", user.uid));
@@ -585,4 +642,7 @@ export async function setTripArchived(tripIdInput, archived, { user: userInput =
   });
   await batch.commit();
   return { tripId, archived: shouldArchive };
+  } finally {
+    endCloudOperation(localOperationToken);
+  }
 }

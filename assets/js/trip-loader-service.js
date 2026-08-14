@@ -167,6 +167,13 @@ export function subscribeTripData(tripIdInput, callback) {
       });
       return;
     }
+    if (importState === "failed" || restoreState === "failed") {
+      emitStatus("recovery-needed", {
+        reason: importState === "failed" ? "import" : "restore",
+        source: state.allFromCache() ? "cache" : "server"
+      });
+      return;
+    }
     clearTimeout(emitTimer);
     emitTimer = setTimeout(() => {
       if (stopped || !readyForEmit() || !state.tripDoc) return;

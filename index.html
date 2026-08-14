@@ -2887,12 +2887,55 @@ html.theme-dark #info-view .info-team-card{
   }
 }
 
+
+/* ==========================================================================
+   Phase 2F · v7.7.0 · Cloud safety / offline status
+   ========================================================================== */
+.cloud-safety-strip{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  min-height:30px;
+  margin:-2px 0 10px;
+  padding:6px 11px;
+  border-radius:12px;
+  background:rgba(255,255,255,.14);
+  border:1px solid rgba(255,255,255,.38);
+  box-shadow:0 4px 12px rgba(15,23,42,.05);
+  backdrop-filter:blur(18px) saturate(1.05);
+  -webkit-backdrop-filter:blur(18px) saturate(1.05);
+  color:var(--label-secondary);
+  font-size:calc(10px * var(--font-scale));
+  font-weight:650;
+  line-height:1.35;
+}
+.cloud-safety-strip[hidden]{display:none !important;}
+.cloud-safety-dot{
+  width:7px;height:7px;border-radius:999px;flex:0 0 auto;
+  background:#ff9f0a;box-shadow:0 0 0 3px rgba(255,159,10,.12);
+}
+.cloud-safety-strip.is-offline .cloud-safety-dot{
+  background:#ff9f0a;box-shadow:0 0 0 3px rgba(255,159,10,.12);
+}
+.cloud-safety-strip.is-busy .cloud-safety-dot{
+  background:#0a84ff;box-shadow:0 0 0 3px rgba(10,132,255,.12);
+}
+.cloud-safety-strip.is-revoked .cloud-safety-dot{
+  background:#ff453a;box-shadow:0 0 0 3px rgba(255,69,58,.12);
+}
+html.theme-dark .cloud-safety-strip,
+html:not(.theme-light):not(.theme-dark) .cloud-safety-strip{
+  background:rgba(24,24,30,.24);
+  border-color:rgba(255,255,255,.09);
+  box-shadow:0 6px 16px rgba(0,0,0,.14);
+}
+
 </style>
             <link rel="apple-touch-icon" href="assets/icon/trip_icon.png">
   <link rel="icon" type="image/png" href="assets/icon/trip_icon.png">
-  <link rel="manifest" href="manifest.json?v=7.6.5.3">
+  <link rel="manifest" href="manifest.json?v=7.7.0">
   <meta name="apple-mobile-web-app-title" content="關嘉露西生日之旅">
-  <link rel="stylesheet" href="assets/css/expenses.css?v=7.6.5.3">
+  <link rel="stylesheet" href="assets/css/expenses.css?v=7.7.0">
 </head>
 <body>
 <div class="bg-fixed"></div>
@@ -2928,6 +2971,10 @@ html.theme-dark #info-view .info-team-card{
       </div>
     </div>
 
+    <div class="cloud-safety-strip" id="cloud-safety-strip" hidden aria-live="polite">
+      <span class="cloud-safety-dot"></span>
+      <span class="cloud-safety-copy" id="cloud-safety-copy"></span>
+    </div>
 
 <div id="itinerary-view" class="app-view active-view">
   <div class="team-bar" id="team-bar" style="display:none;"></div>
@@ -3295,8 +3342,8 @@ html.theme-dark #info-view .info-team-card{
         <span class="profile-detail-spacer"></span>
       </div>
       <section class="profile-card" aria-label="App 資料">
-        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.6.5.3</strong></div>
-        <div class="profile-meta-row"><span>資料架構</span><strong>Phase 2E</strong></div>
+        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.7.0</strong></div>
+        <div class="profile-meta-row"><span>資料架構</span><strong>Phase 2F</strong></div>
         <div class="profile-meta-row"><span>主要資料來源</span><strong id="app-data-source-label">Firebase / 本機快取</strong></div>
       </section>
 
@@ -3309,11 +3356,14 @@ html.theme-dark #info-view .info-team-card{
         <div class="profile-meta-row"><span>寫入狀態</span><strong id="app-data-write-status">—</strong></div>
         <div class="profile-meta-row"><span>Google 帳戶</span><strong id="app-data-google-account">—</strong></div>
         <div class="profile-meta-row"><span>旅程角色</span><strong id="app-data-role">—</strong></div>
+        <div class="profile-meta-row"><span>網絡狀態</span><strong id="app-data-network">—</strong></div>
+        <div class="profile-meta-row"><span>本機快取</span><strong id="app-data-cache">—</strong></div>
+        <div class="profile-meta-row"><span>雲端操作</span><strong id="app-data-operation">—</strong></div>
       </section>
     </div>
   </div>
 </div>
-<div class="app-version-note" id="app-version-note">v7.6.5.3</div>
+<div class="app-version-note" id="app-version-note">v7.7.0</div>
 
 
   </div>
@@ -3414,7 +3464,7 @@ html.theme-dark #info-view .info-team-card{
 </div>
 
 <script>
-const APP_VERSION = "7.6.5.3";
+const APP_VERSION = "7.7.0";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 window.EXPENSES_MODULE_VERSION = EXPENSES_MODULE_VERSION;
@@ -5143,6 +5193,7 @@ function refreshAppDataDiagnostics(){
   else if(loader.status==="local") syncLabel="使用本機資料";
   else if(loader.status==="permission-denied") syncLabel="權限不足";
   else if(loader.status==="not-found") syncLabel="Firebase 找不到旅程";
+  else if(loader.status==="recovery-needed") syncLabel="更新未完成 · 需重新匯入／還原";
   else if(loader.status==="error") syncLabel="同步錯誤";
 
   const lifecycleStatus=meta.status||data.status||"";
@@ -5159,6 +5210,9 @@ function refreshAppDataDiagnostics(){
   appDataSet("app-data-write-status",writeStatus);
   appDataSet("app-data-google-account",account);
   appDataSet("app-data-role",role);
+  appDataSet("app-data-network",cloudSafetyState.online===false?"離線":"在線");
+  appDataSet("app-data-cache",window.__firestorePersistence==="persistent"?"Persistent IndexedDB":"Memory");
+  appDataSet("app-data-operation",phase2fOperationLabel(cloudSafetyState.operation));
 }
 function updateTripUrl(tripId){
   try{const url=new URL(location.href);if(tripId)url.searchParams.set("trip",tripId);else url.searchParams.delete("trip");history.replaceState(history.state,"",url);}catch(error){}
@@ -5246,6 +5300,7 @@ async function startFirebaseTripLoader(tripIdInput){
     if(tripLoaderActiveId!==tripId)return;
     if(event.status==="ready"){applyFirebaseTripData(event.data,{source:event.fromCache?"cache":"server",tripId});return;}
     if(event.status==="syncing"){tripLoaderState={...tripLoaderState,status:"syncing",source:event.source||tripLoaderState.source};setDataSourceLabel(event.reason==="restore"?"Firebase 還原中…":"Firebase 更新中…");return;}
+    if(event.status==="recovery-needed"){tripLoaderState={...tripLoaderState,status:"recovery-needed",source:event.source||tripLoaderState.source};setDataSourceLabel("Firebase 更新未完成");renderCloudSafetyStrip();return;}
     if(event.status==="permission-denied"||event.status==="error"||event.status==="not-found"){
       tripLoaderState={status:event.status,source:"firebase",tripId,error:event.error||null};
       console.warn("Firebase Trip Loader",event.status,event.error||tripId);
@@ -5268,7 +5323,7 @@ async function reconcileFirebaseTripLoader(){
 }
 async function switchActiveCloudTrip(tripId){
   const id=String(tripId||"").trim();if(!id||id===tripLoaderActiveId)return;
-  if(document.body.classList.contains("app-progress-active"))return;
+  if(document.body.classList.contains("app-progress-active")||cloudSafetyState.operation)return;
   const allowed=(tripLibraryCloudState.trips||[]).some(t=>t.tripId===id&&t.archived!==true);if(!allowed)return;
   const {session}=await getTripLoaderServices();
   // Expense module currently owns long-lived listeners. If it has already been
@@ -5411,7 +5466,9 @@ function tripImportSetError(message=""){
 }
 function tripImportPermissionMessage(error){
   if(error?.code==="auth-required") return "請先登入 Google 帳戶，再繼續匯入。";
-  if(error?.code==="permission-denied") return "Firestore 仍然係 Locked rules。請先喺 Firebase Console publish 呢個 ZIP 入面嘅 firestore.rules，再重新選擇 trip.json。";
+  if(error?.code==="permission-denied") return "目前帳戶冇權限覆蓋呢個 Trip，或者 Trip ID 已被其他旅程使用。";
+  if(error?.code==="offline") return "目前離線，請連線後先匯入 trip.json。";
+  if(error?.code==="operation-busy"||error?.code==="trip-operation-busy") return cloudSafetyFriendlyError(error);
   if(error?.code==="snapshot-too-large") return "現有 Trip 太大，未能安全建立單一 pre-import snapshot。今次唔會覆蓋任何資料。";
   if(error?.code==="insufficient-role") return "呢個 tripId 已存在，但目前帳戶唔係 Owner / Admin，所以唔可以覆蓋。";
   return error?.message||"暫時未能檢查或匯入呢份 trip.json。";
@@ -5607,7 +5664,8 @@ function backupFriendlyError(error){
   if(error?.code==="trip-not-found")return "Firebase 暫時未有呢個旅程。請先匯入 trip.json。";
   if(error?.code==="snapshot-not-found")return "搵唔到呢個 Snapshot，可能已經被刪除。";
   if(error?.code==="snapshot-too-large")return "目前旅程太大，未能建立單一 Snapshot。";
-  if(error?.code==="permission-denied"||error?.code==="firestore/permission-denied")return "Firebase 權限不足，請確認 Firestore Rules 同旅程角色。";
+  if(error?.code==="permission-denied"||error?.code==="firestore/permission-denied")return "Firebase 權限不足，請確認旅程角色。";
+  if(error?.code==="offline"||error?.code==="operation-busy"||error?.code==="trip-operation-busy")return cloudSafetyFriendlyError(error);
   return error?.message||"操作未完成。";
 }
 function backupFormatDate(value){
@@ -5923,7 +5981,8 @@ function tripMemberFriendlyError(error){
   if(code==="insufficient-role")return"目前角色冇權限進行呢個操作。";
   if(code==="invite-not-found")return"搵唔到呢個邀請，可能已被取消。";
   if(code==="invite-email-mismatch")return"呢個邀請唔屬於目前登入嘅 Google email。";
-  if(code==="permission-denied"||code==="firestore/permission-denied")return"Firestore 權限不足，請確認已 Publish v7.6.4.2 嘅 firestore.rules。";
+  if(code==="permission-denied"||code==="firestore/permission-denied")return"Firestore 權限不足，請確認旅程角色同 Phase 2F Rules 已生效。";
+  if(code==="offline"||code==="operation-busy"||code==="trip-operation-busy")return cloudSafetyFriendlyError(error);
   return error?.message||"操作未完成。";
 }
 
@@ -5986,6 +6045,76 @@ document.getElementById("trip-invite-inbox-list")?.addEventListener("click",asyn
   }
 });
 
+
+
+// =========================================================================
+// Phase 2F · v7.7.0 · network / cache / operation safety
+// =========================================================================
+let cloudSafetyService=null;
+let cloudSafetyState={online:navigator.onLine!==false,operation:null};
+let accessRevokedState=false;
+
+function phase2fOperationLabel(operation){
+  if(!operation)return"閒置";
+  return ({import:"匯入中",restore:"還原中",snapshot:"備份中",archive:"封存中",member:"成員更新中"})[operation.type]||"雲端操作中";
+}
+function renderCloudSafetyStrip(){
+  const strip=document.getElementById("cloud-safety-strip");
+  const copy=document.getElementById("cloud-safety-copy");
+  if(!strip||!copy)return;
+
+  strip.classList.remove("is-offline","is-busy","is-revoked");
+  if(accessRevokedState){
+    strip.hidden=false;
+    strip.classList.add("is-revoked");
+    copy.textContent="目前旅程權限已失效，正在切換至你仍有權存取嘅旅程。";
+    return;
+  }
+  if(cloudSafetyState.online===false){
+    strip.hidden=false;
+    strip.classList.add("is-offline");
+    copy.textContent="離線模式 · 顯示已快取資料；匯入、還原、封存及權限管理暫停。";
+    return;
+  }
+  if(cloudSafetyState.operation){
+    strip.hidden=false;
+    strip.classList.add("is-busy");
+    copy.textContent=`${phase2fOperationLabel(cloudSafetyState.operation)} · 完成前暫停切換旅程及其他高風險操作。`;
+    return;
+  }
+  strip.hidden=true;
+  copy.textContent="";
+}
+function cloudSafetyFriendlyError(error){
+  const code=String(error?.code||"");
+  if(code==="offline")return"目前處於離線模式。此操作需要先連接網絡。";
+  if(code==="operation-busy")return"另一個雲端操作仍在進行，完成後先再試。";
+  if(code==="trip-operation-busy")return"另一部裝置正更新呢個 Trip，請完成後再試。";
+  if(code==="access-revoked"||code==="permission-denied")return"目前帳戶已無此旅程權限。";
+  return error?.message||"操作未完成。";
+}
+function initCloudSafety(){
+  import("./assets/js/cloud-safety-service.js").then(service=>{
+    cloudSafetyService=service;
+    service.subscribeCloudSafety(state=>{
+      cloudSafetyState=state;
+      window.__cloudSafetyState=state;
+      renderCloudSafetyStrip();
+      refreshAppDataDiagnostics();
+    });
+  }).catch(error=>console.warn("Cloud safety init",error));
+}
+initCloudSafety();
+
+window.addEventListener("app-trip-access",event=>{
+  const detail=event.detail||{};
+  const currentId=String(tripLoaderActiveId||"");
+  accessRevokedState=Boolean(currentId && detail.ready && detail.signedIn && !detail.role);
+  renderCloudSafetyStrip();
+  if(accessRevokedState){
+    reconcileFirebaseTripLoader().catch(error=>console.warn("Access revoke reconcile",error));
+  }
+});
 
 // v7.3.13: fade-through navigation for 我的, with the end-of-transition
 // "pop" removed.
@@ -6541,7 +6670,7 @@ if(window.visualViewport&&bottomNav){
 // Android / Chrome PWA support. Network-only service worker, no aggressive cache.
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("./sw.js?v=1.6.3").catch(() => {});
+    navigator.serviceWorker.register("./sw.js?v=7.7.0").catch(() => {});
   });
 }
 

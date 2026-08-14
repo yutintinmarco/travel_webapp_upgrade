@@ -1,4 +1,6 @@
 import { auth, db } from "./firebase-service.js";
+import { assertCloudOperationAvailable, beginCloudOperation, endCloudOperation } from "./cloud-safety-service.js";
+import { acquireTripOperation, releaseTripOperation } from "./trip-operation-service.js";
 import {
   collection,
   doc,
@@ -90,7 +92,9 @@ function stripTripOperational(data = {}) {
     "revision", "memberUids", "memberCount", "createdBy", "createdAt", "updatedBy", "updatedAt",
     "archived", "archivedAt", "archivedBy", "contentHash", "contentHashVersion", "importState",
     "lastImportMode", "lastSnapshotId", "importedBy", "importedAt", "restoredBy", "restoredAt",
-    "restoredFromSnapshotId", "restoreState"
+    "restoredFromSnapshotId", "restoreState",
+    "activeOperationId", "activeOperationType", "activeOperationBy",
+    "activeOperationStartedAtMs", "activeOperationStartedAt"
   ].forEach(key => delete output[key]);
   return output;
 }
@@ -398,7 +402,10 @@ export async function exportSnapshotTrip(tripIdInput, snapshotIdInput, { user: u
 
 export async function createManualSnapshot(tripIdInput, { user: userInput = null } = {}) {
   const user = await requireUser(userInput);
+  assertCloudOperationAvailable("建立手動備份");
   const tripId = clean(tripIdInput);
+  const localOperationToken = beginCloudOperation({type:"snapshot",tripId,label:"建立手動備份"});
+  try {
   if (!tripId) throw new Error("Missing tripId");
   const role = await requireManageRole(tripId, user);
   const structure = await readTripStructure(tripId);
@@ -418,14 +425,22 @@ export async function createManualSnapshot(tripIdInput, { user: userInput = null
   });
   await batch.commit();
   return { tripId, role, roleLabel: roleLabel(role), ...result };
+  } finally {
+    endCloudOperation(localOperationToken);
+  }
 }
-
 export async function restoreTripSnapshot(tripIdInput, snapshotIdInput, { user: userInput = null, onProgress = null } = {}) {
   const user = await requireUser(userInput);
+  assertCloudOperationAvailable("還原旅程");
   const tripId = clean(tripIdInput);
   const snapshotId = clean(snapshotIdInput);
   if (!tripId || !snapshotId) throw new Error("Missing snapshot reference");
+  const localOperationToken = beginCloudOperation({type:"restore",tripId,label:"還原旅程"});
+  let serverOperation = null;
+  let mutationStarted = false;
+  try {
   const role = await requireManageRole(tripId, user);
+  serverOperation = await acquireTripOperation(tripId,"restore",user);
   const snapshot = await getTripSnapshot(tripId, snapshotId, { user });
   const target = snapshot.payload;
   const current = await readTripStructure(tripId);
@@ -444,6 +459,7 @@ export async function restoreTripSnapshot(tripIdInput, snapshotIdInput, { user: 
 
   // Phase 2E loader suppresses partial renders while a restore is writing many
   // documents. Mark the trip as restoring before replacing parent/content docs.
+  mutationStarted = true;
   await writeBatch(db).set(tripRef, {
     restoreState: "restoring",
     updatedAt: serverTimestamp(),
@@ -460,6 +476,11 @@ export async function restoreTripSnapshot(tripIdInput, snapshotIdInput, { user: 
     archived: currentTrip.archived === true,
     archivedAt: currentTrip.archivedAt || null,
     archivedBy: clean(currentTrip.archivedBy),
+    activeOperationId: clean(currentTrip.activeOperationId),
+    activeOperationType: clean(currentTrip.activeOperationType),
+    activeOperationBy: clean(currentTrip.activeOperationBy),
+    activeOperationStartedAtMs: Number(currentTrip.activeOperationStartedAtMs)||0,
+    activeOperationStartedAt: currentTrip.activeOperationStartedAt || null,
     contentHash: "",
     contentHashVersion: 1,
     importState: "ready",
@@ -522,4 +543,20 @@ export async function restoreTripSnapshot(tripIdInput, snapshotIdInput, { user: 
     revision: nextRevision,
     counts: structureCounts(target)
   };
+
+  } catch (error) {
+    try {
+      if (mutationStarted) {
+        await writeBatch(db).set(doc(db,"trips",tripId),{
+          restoreState:"failed",updatedAt:serverTimestamp(),updatedBy:user.uid
+        },{merge:true}).commit();
+      }
+    } catch (stateError) {
+      console.warn("Unable to mark failed restore",stateError);
+    }
+    throw error;
+  } finally {
+    if (serverOperation) await releaseTripOperation(serverOperation,user);
+    endCloudOperation(localOperationToken);
+  }
 }

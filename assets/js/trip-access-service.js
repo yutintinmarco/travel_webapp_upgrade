@@ -18,6 +18,7 @@ let stopMember = null;
 let stopAuth = null;
 let latestMemberData = null;
 let latestUser = null;
+let memberResolved = false;
 
 function validRole(value) {
   return Object.values(TRIP_ROLES).includes(value) ? value : null;
@@ -32,7 +33,7 @@ function computeAccess() {
     roleLabel: role ? ROLE_LABELS[role] : "",
     signedIn: !!latestUser,
     source: memberRole ? "member-doc" : (latestUser ? "no-membership" : "signed-out"),
-    ready: !!activeTripId
+    ready: !activeTripId || !latestUser || memberResolved
   };
   window.__appTripAccess = { ...currentAccess };
   window.dispatchEvent(new CustomEvent("app-trip-access", { detail: { ...currentAccess } }));
@@ -42,6 +43,7 @@ function resetMemberListener() {
   if (stopMember) stopMember();
   stopMember = null;
   latestMemberData = null;
+  memberResolved = false;
 }
 
 function attachMemberListener() {
@@ -52,9 +54,11 @@ function attachMemberListener() {
   }
 
   stopMember = onSnapshot(doc(db, "trips", activeTripId, "members", latestUser.uid), snapshot => {
+    memberResolved = true;
     latestMemberData = snapshot.exists() ? snapshot.data() : null;
     computeAccess();
   }, error => {
+    memberResolved = true;
     latestMemberData = null;
     if (error?.code !== "permission-denied") console.warn("Trip member access listener", error);
     computeAccess();

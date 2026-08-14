@@ -13,15 +13,23 @@ service cloud.firestore {
     function validInviteRole(role) { return role in ['admin', 'member', 'viewer']; }
 
     function canReadTrip(tripId) {
-      return signedIn() && request.auth.uid in get(tripPath(tripId)).data.memberUids;
+      return signedIn()
+        && request.auth.uid in get(tripPath(tripId)).data.memberUids;
     }
     function roleFor(tripId) {
       return signedIn() && exists(memberPath(tripId, request.auth.uid))
         ? get(memberPath(tripId, request.auth.uid)).data.role
         : null;
     }
-    function canManageTrip(tripId) { return canReadTrip(tripId) && roleFor(tripId) in ['owner', 'admin']; }
-    function isOwner(tripId) { return canReadTrip(tripId) && roleFor(tripId) == 'owner'; }
+    function canManageTrip(tripId) {
+      return canReadTrip(tripId) && roleFor(tripId) in ['owner', 'admin'];
+    }
+    function isOwner(tripId) {
+      return canReadTrip(tripId) && roleFor(tripId) == 'owner';
+    }
+    function canUseExpenses(tripId) {
+      return canReadTrip(tripId) && roleFor(tripId) in ['owner', 'admin', 'member'];
+    }
     function canAssignInviteRole(tripId, role) {
       return (isOwner(tripId) && validInviteRole(role))
         || (canReadTrip(tripId) && roleFor(tripId) == 'admin' && role in ['member', 'viewer']);
@@ -44,10 +52,13 @@ service cloud.firestore {
       let removed = resource.data.memberUids.removeAll(request.resource.data.memberUids);
       return signedIn()
         && request.resource.data.createdBy == resource.data.createdBy
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['memberUids', 'memberCount', 'updatedBy', 'updatedAt'])
+        && request.resource.data.createdAt == resource.data.createdAt
+        && request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['memberUids', 'memberCount', 'updatedBy', 'updatedAt'])
         && added.size() == 1
         && added[0] == request.auth.uid
         && removed.size() == 0
+        && request.resource.data.memberCount == resource.data.memberCount + 1
         && memberListValid(request.resource.data)
         && existsAfter(memberPath(tripId, request.auth.uid))
         && getAfter(memberPath(tripId, request.auth.uid)).data.uid == request.auth.uid
@@ -64,9 +75,12 @@ service cloud.firestore {
       let removed = resource.data.memberUids.removeAll(request.resource.data.memberUids);
       return canManageTrip(tripId)
         && request.resource.data.createdBy == resource.data.createdBy
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['memberUids', 'memberCount', 'updatedBy', 'updatedAt'])
+        && request.resource.data.createdAt == resource.data.createdAt
+        && request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['memberUids', 'memberCount', 'updatedBy', 'updatedAt'])
         && added.size() == 0
         && removed.size() == 1
+        && request.resource.data.memberCount == resource.data.memberCount - 1
         && get(memberPath(tripId, removed[0])).data.role != 'owner'
         && !existsAfter(memberPath(tripId, removed[0]))
         && memberListValid(request.resource.data);
@@ -79,6 +93,12 @@ service cloud.firestore {
     function managerCanDeleteMember(tripId, targetRole) {
       return (isOwner(tripId) && targetRole != 'owner')
         || (canReadTrip(tripId) && roleFor(tripId) == 'admin' && targetRole in ['member', 'viewer']);
+    }
+    function allowedMemberActivity(actionType) {
+      return actionType in [
+        'expense_created','expense_updated','expense_deleted','expense_restored',
+        'settlement_recorded','settlement_cancelled'
+      ];
     }
 
     match /users/{uid} {
@@ -132,11 +152,12 @@ service cloud.firestore {
         && request.auth.uid in request.resource.data.memberUids
         && memberListValid(request.resource.data);
 
-      // Phase 2C import probe retained until Phase 2F hardening.
-      allow get: if signedIn();
+      // Phase 2F: arbitrary signed-in users can no longer probe private Trip metadata.
+      allow get: if canReadTrip(tripId);
       allow list: if signedIn() && request.auth.uid in resource.data.memberUids;
 
       allow update: if request.resource.data.createdBy == resource.data.createdBy
+        && request.resource.data.createdAt == resource.data.createdAt
         && (
           (canManageTrip(tripId)
             && request.resource.data.memberUids == resource.data.memberUids
@@ -151,12 +172,14 @@ service cloud.firestore {
         allow read: if canReadTrip(tripId);
 
         allow create: if signedIn() && (
+          // First-import Owner bootstrap.
           (uid == request.auth.uid
             && request.resource.data.role == 'owner'
             && request.resource.data.uid == request.auth.uid
             && request.auth.uid in getAfter(tripPath(tripId)).data.memberUids
             && getAfter(tripPath(tripId)).data.createdBy == request.auth.uid)
           ||
+          // Invite acceptance.
           (uid == request.auth.uid
             && request.resource.data.uid == request.auth.uid
             && request.resource.data.status == 'active'
@@ -170,7 +193,8 @@ service cloud.firestore {
         allow update: if signedIn()
           && request.resource.data.uid == resource.data.uid
           && request.resource.data.email == resource.data.email
-          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['role', 'updatedBy', 'updatedAt'])
+          && request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(['role', 'updatedBy', 'updatedAt'])
           && managerCanModifyMember(tripId, resource.data.role, request.resource.data.role);
 
         allow delete: if signedIn()
@@ -186,20 +210,25 @@ service cloud.firestore {
           allow create, update, delete: if canManageTrip(tripId);
         }
       }
+
       match /savedPlaces/{placeId} {
         allow read: if canReadTrip(tripId);
         allow create, update, delete: if canManageTrip(tripId);
       }
+
       match /settings/{settingId} {
         allow read: if canReadTrip(tripId);
         allow create, update, delete: if canManageTrip(tripId);
       }
+
       match /snapshots/{snapshotId} {
         allow read: if canManageTrip(tripId);
-        allow create: if canManageTrip(tripId) && request.resource.data.createdBy == request.auth.uid;
+        allow create: if canManageTrip(tripId)
+          && request.resource.data.createdBy == request.auth.uid;
         allow update: if false;
         allow delete: if isOwner(tripId);
       }
+
       match /activityLogs/{logId} {
         allow read: if canReadTrip(tripId);
         allow create: if signedIn()
@@ -207,16 +236,28 @@ service cloud.firestore {
           && (
             canManageTrip(tripId)
             || (canReadTrip(tripId) && request.resource.data.actionType == 'trip.member.accept')
+            || (roleFor(tripId) == 'member' && allowedMemberActivity(request.resource.data.actionType))
           );
         allow update, delete: if false;
       }
+
       match /expenses/{expenseId} {
         allow read: if canReadTrip(tripId);
-        allow create, update, delete: if canManageTrip(tripId) || roleFor(tripId) == 'member';
+        allow create: if canUseExpenses(tripId)
+          && request.resource.data.createdBy == request.auth.uid
+          && request.resource.data.updatedBy == request.auth.uid;
+        allow update: if canUseExpenses(tripId)
+          && request.resource.data.updatedBy == request.auth.uid;
+        // Expenses use soft delete for auditability.
+        allow delete: if false;
       }
+
       match /settlements/{settlementId} {
         allow read: if canReadTrip(tripId);
-        allow create, update, delete: if canManageTrip(tripId) || roleFor(tripId) == 'member';
+        allow create: if canUseExpenses(tripId)
+          && request.resource.data.createdBy == request.auth.uid;
+        allow update: if canUseExpenses(tripId);
+        allow delete: if canUseExpenses(tripId);
       }
     }
   }

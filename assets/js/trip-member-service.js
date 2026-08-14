@@ -1,5 +1,6 @@
 import { db } from "./firebase-service.js";
 import { getCurrentUser, waitForInitialAuth } from "./auth-service.js";
+import { assertCloudOperationAvailable } from "./cloud-safety-service.js";
 import {
   arrayRemove, arrayUnion, collection, doc, getDoc, getDocs, increment,
   onSnapshot, query, serverTimestamp, setDoc, updateDoc, where, writeBatch
@@ -45,6 +46,7 @@ export function subscribeMyPendingInvites(userInput,callback){
 
 export async function createTripInvite(tripIdInput,emailInput,roleInput,{user:userInput=null}={}){
   const tripId=clean(tripIdInput),email=normalizeEmail(emailInput),role=clean(roleInput||"member").toLowerCase(),user=await requireUser(userInput);
+  assertCloudOperationAvailable("邀請成員");
   if(!tripId){const e=new Error("Missing tripId");e.code="trip-not-found";throw e;}
   if(!validEmail(email)){const e=new Error("Invalid email");e.code="invalid-email";throw e;}
   const actor=await actorRole(tripId,user);if(!canAssign(actor,role)){const e=new Error("Insufficient role");e.code="insufficient-role";throw e;}
@@ -64,101 +66,48 @@ export async function cancelTripInvite(inviteIdInput,{user:userInput=null}={}){
   const batch=writeBatch(db);batch.delete(inviteRef);addActivity(batch,invite.tripId,user,{actionType:"trip.member.cancel-invite",title:"取消旅程邀請",summary:`取消 ${invite.emailLower} 嘅 ${roleLabel(invite.role)} 邀請`,targetEmail:invite.emailLower,role:invite.role});await batch.commit();
 }
 export async function acceptTripInvite(inviteIdInput,{user:userInput=null}={}){
-  const inviteId=clean(inviteIdInput),user=await requireUser(userInput),inviteRef=doc(db,"tripInvites",inviteId),inviteSnap=await getDoc(inviteRef);
+  const inviteId=clean(inviteIdInput),user=await requireUser(userInput);
+  assertCloudOperationAvailable("加入旅程");
+  const inviteRef=doc(db,"tripInvites",inviteId),inviteSnap=await getDoc(inviteRef);
   if(!inviteSnap.exists()){const e=new Error("Invite not found");e.code="invite-not-found";throw e;}
   const invite=normalizeInvite(inviteSnap);
   if(invite.status!=="pending"){const e=new Error("Invite no longer pending");e.code="invite-not-found";throw e;}
   if(normalizeEmail(user.email)!==invite.emailLower){const e=new Error("Email mismatch");e.code="invite-email-mismatch";throw e;}
   if(!ASSIGNABLE_ROLES.has(invite.role)){const e=new Error("Invalid invite role");e.code="insufficient-role";throw e;}
 
+  // Phase 2F: do not read the private Trip parent before membership exists.
+  // The pending invite authorises one atomic self-join in Security Rules.
   const tripRef=doc(db,"trips",invite.tripId),memberRef=doc(db,"trips",invite.tripId,"members",user.uid);
-  // IMPORTANT: before the invitation is accepted the invitee is not yet a
-  // Trip member, so Security Rules intentionally do not allow reading
-  // trips/{tripId}/members/{uid}. Use the parent Trip membership index first.
-  const tripSnap=await getDoc(tripRef);
-  if(!tripSnap.exists()){const e=new Error("Trip not found");e.code="trip-not-found";throw e;}
-
-  const tripData=tripSnap.data()||{};
-  const currentUids=Array.isArray(tripData.memberUids)?tripData.memberUids.filter(Boolean):[];
-
-  // Idempotent retry path. Only after the UID is already present in the
-  // parent memberUids are we allowed to read the member document.
-  if(currentUids.includes(user.uid)){
-    let existingRole=invite.role;
-    try{
-      const memberSnap=await getDoc(memberRef);
-      if(memberSnap.exists()) existingRole=clean(memberSnap.data()?.role)||existingRole;
-    }catch(error){
-      console.warn("Already in memberUids; member profile read skipped",error);
-    }
-    try{
-      await updateDoc(inviteRef,{status:"accepted",acceptedBy:user.uid,acceptedAt:serverTimestamp(),updatedAt:serverTimestamp()});
-    }catch(error){
-      console.warn("Invite already joined; unable to mark invite accepted",error);
-    }
-    return{tripId:invite.tripId,tripTitle:invite.tripTitle,role:existingRole,alreadyMember:true};
-  }
-
-  const nextUids=[...new Set([...currentUids,user.uid])];
-
   const batch=writeBatch(db);
   batch.set(memberRef,{
-    uid:user.uid,
-    role:invite.role,
-    status:"active",
-    displayName:clean(user.displayName),
-    email:normalizeEmail(user.email),
-    photoURL:clean(user.photoURL),
-    inviteId,
-    invitedBy:invite.invitedBy,
-    joinedAt:serverTimestamp(),
-    createdAt:serverTimestamp(),
-    updatedAt:serverTimestamp()
+    uid:user.uid,role:invite.role,status:"active",
+    displayName:clean(user.displayName),email:normalizeEmail(user.email),photoURL:clean(user.photoURL),
+    inviteId,invitedBy:invite.invitedBy,
+    joinedAt:serverTimestamp(),createdAt:serverTimestamp(),updatedAt:serverTimestamp()
   });
   batch.update(tripRef,{
-    memberUids:nextUids,
-    memberCount:nextUids.length,
+    memberUids:arrayUnion(user.uid),
+    memberCount:increment(1),
     updatedBy:user.uid,
     updatedAt:serverTimestamp()
   });
   batch.update(inviteRef,{
-    status:"accepted",
-    acceptedBy:user.uid,
-    acceptedAt:serverTimestamp(),
-    updatedAt:serverTimestamp()
+    status:"accepted",acceptedBy:user.uid,acceptedAt:serverTimestamp(),updatedAt:serverTimestamp()
   });
+  await batch.commit();
 
-  try{
-    await batch.commit();
-  }catch(error){
-    const wrapped=new Error(error?.message||"Membership write failed");
-    wrapped.code=error?.code||"membership-write-failed";
-    wrapped.stage="membership";
-    wrapped.cause=error;
-    throw wrapped;
-  }
-
-  // Membership is already committed at this point. Audit logging is useful,
-  // but must never make the UI report that joining the Trip failed.
   try{
     await setDoc(doc(collection(db,"trips",invite.tripId,"activityLogs")),{
-      type:"trip.member.accept",
-      actionType:"trip.member.accept",
-      category:"member",
-      title:"加入旅程",
+      type:"trip.member.accept",actionType:"trip.member.accept",category:"member",title:"加入旅程",
       summary:`${clean(user.displayName||user.email)} 以 ${roleLabel(invite.role)} 身份加入旅程`,
-      actorUid:user.uid,
-      actorName:clean(user.displayName),
-      actorEmail:normalizeEmail(user.email),
-      role:invite.role,
-      createdAt:serverTimestamp()
+      actorUid:user.uid,actorName:clean(user.displayName),actorEmail:normalizeEmail(user.email),
+      role:invite.role,createdAt:serverTimestamp()
     });
-  }catch(error){
-    console.warn("Trip joined successfully; activity log write skipped",error);
-  }
+  }catch(error){console.warn("Trip joined; activity log skipped",error);}
 
   return{tripId:invite.tripId,tripTitle:invite.tripTitle,role:invite.role};
 }
+
 export async function declineTripInvite(inviteIdInput,{user:userInput=null}={}){
   const inviteId=clean(inviteIdInput),user=await requireUser(userInput),inviteRef=doc(db,"tripInvites",inviteId),inviteSnap=await getDoc(inviteRef);
   if(!inviteSnap.exists()){const e=new Error("Invite not found");e.code="invite-not-found";throw e;}
