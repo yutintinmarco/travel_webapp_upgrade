@@ -1,3 +1,33 @@
+# Travel WebApp — v7.7.0.9
+
+## Phase 2F current build
+
+### Weather Destination Pill State Parity
+
+• Weather destination pills now use the same selection logic as the Day tabs.
+• Unselected destinations now use the same neutral Liquid Glass shell as unselected Day tabs in Light Mode instead of carrying a soft version of their destination colour.
+• Only the selected destination shows its own identity colour: Kyoto green, Osaka coral / red, Kobe purple, and imported cities use their assigned or deterministic city colour.
+• Dark Mode and Auto Dark Mode follow the same Day-tab state rule and neutral glass treatment: neutral unselected pills, destination-coloured selected pill.
+• The coloured city badge beside each day heading remains unchanged, so destination identity is still visible in the itinerary heading.
+• Weather switching behaviour, city-specific weather cache, request race protection, and generic imported-city support remain unchanged.
+• No re-import is required; this is a render-only UX correction.
+
+### Package and Firebase
+
+• Service Worker shell cache updated to v7.7.0.9.
+• Firestore Rules are unchanged.
+• Firestore indexes are unchanged.
+• No Firebase Rules redeploy is required for this build.
+• Package continues to keep only one development document: CHANGELOG.md.
+
+## Build QA
+
+• JavaScript syntax, JSON validity, duplicate static IDs, Firestore Rules structural sanity, and ZIP integrity checked.
+• `firestore.rules` and `firestore.indexes.json` are byte for byte unchanged from v7.7.0.8.
+• The protected v7.3.13 Profile Navigation compositor source is unchanged from the v7.7.0.8 baseline.
+
+---
+
 # Travel WebApp — v7.7.0.8
 
 ## Phase 2F current build

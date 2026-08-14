@@ -1,4 +1,4 @@
-const SW_VERSION = "travel-shell-v7.7.0.8";
+const SW_VERSION = "travel-shell-v7.7.0.9";
 const CORE_CACHE = SW_VERSION;
 const CORE_ASSETS = [
   "./",
