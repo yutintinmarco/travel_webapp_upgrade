@@ -1,3 +1,35 @@
+# Travel WebApp — v7.7.1.1
+
+## Phase 2F Harmony · Team identity + Appearance colour settings
+
+### Team ordering
+
+• Team display order now follows Team `label` alphabetically, with numeric-aware Traditional Chinese / English collation.
+• `sortOrder` is no longer a Team display source of truth. Portable traveller normalisation removes the short-lived v7.7.1.0 Team `sortOrder` field so JSON ↔ Firebase round trips cannot create a competing order.
+• Team selector, Travel Details Team cards and Flight Team sections use the same label-derived order.
+
+### Team colour settings
+
+• Added **外觀與顯示 → Team 顏色** using the same iOS-safe palette / native colour-picker behaviour as destination colours.
+• Team colours are stored in Firebase `settings/general.travellers.{teamKey}.color` and remain part of Portable JSON / backup data.
+• Team colour changes update Team selector, flight labels, itinerary accent stripes, Team badges and Travel Details cards.
+• Pure Team colour changes use in-place visual refresh instead of full Trip redraw, preserving the smoother no-flash update path.
+• Team 1 / Team 2 legacy defaults remain blue / orange when no explicit colour is stored; other Team defaults are stable and deterministic.
+• If the current Trip has no Team data, the **Team 顏色** row remains visible but disabled in the same visual style as **旅程鎖定**.
+
+### Appearance information architecture
+
+• Moved **目的地顏色** out of **旅程設定** and into **外觀與顯示**.
+• Destination and Team colour controls now live together under Appearance & Display.
+• Destination / Team colour detail pages return to **外觀與顯示**.
+
+### Deployment
+
+• Service Worker shell cache updated to `travel-shell-v7.7.1.1` and the new Team colour service is included as an optional precache module.
+• Firestore Rules and indexes are unchanged. No Rules deployment is required.
+
+---
+
 # Travel WebApp — v7.7.1.0
 
 ## Phase 2F Harmony & Performance · Layer 2 + deterministic Team ordering

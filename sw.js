@@ -1,5 +1,5 @@
 /* Travel WebApp Service Worker
- * v7.7.1.0 · Layer 0 + 1 stable shell; Layer 2 app runtime harmony
+ * v7.7.1.1 · Layer 0 + 1 stable shell; Layer 2 app runtime harmony
  *
  * Keeps the v7.7.0.14 cold-start behaviour, while hardening installation:
  *  1. Critical shell assets are transactional. If any critical file cannot be
@@ -13,7 +13,7 @@
  *     explicit reload stays network-first.
  */
 
-const SW_VERSION = "travel-shell-v7.7.1.0";
+const SW_VERSION = "travel-shell-v7.7.1.1";
 const CORE_CACHE = SW_VERSION;
 
 // Required for a useful offline launch and remembered-Trip boot.
@@ -48,6 +48,7 @@ const OPTIONAL_ASSETS = [
   "./assets/js/trip-import-service.js",
   "./assets/js/trip-member-service.js",
   "./assets/js/trip-operation-service.js",
+  "./assets/js/trip-team-service.js",
   "./assets/icon/cx_logo.png",
   "./assets/gallery/demo_city.svg",
   "./assets/gallery/demo_food.svg",

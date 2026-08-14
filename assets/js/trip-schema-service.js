@@ -18,16 +18,15 @@ function orderedUniqueStrings(value) {
   return out;
 }
 
-function hasExplicitSortOrder(value) {
-  return value !== null && value !== undefined && clean(value) !== "" && Number.isFinite(Number(value));
-}
-
 export function normalizeTravellers(rawTravellers = {}) {
   const source = rawTravellers && typeof rawTravellers === "object" && !Array.isArray(rawTravellers) ? rawTravellers : {};
   const out = {};
-  Object.entries(source).forEach(([key, value], index) => {
+  Object.entries(source).forEach(([key, value]) => {
     const traveller = value && typeof value === "object" && !Array.isArray(value) ? clone(value) : { label: clean(value) };
-    traveller.sortOrder = hasExplicitSortOrder(traveller.sortOrder) ? Number(traveller.sortOrder) : index;
+    // Team display order is a presentation rule derived from label, not stored
+    // metadata. Remove the short-lived v7.7.1.0 sortOrder field so JSON ↔
+    // Firebase round trips cannot create a second ordering source of truth.
+    delete traveller.sortOrder;
     out[key] = traveller;
   });
   return out;

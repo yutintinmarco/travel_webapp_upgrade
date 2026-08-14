@@ -4,7 +4,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <!-- v7.7.1.0: the no-store cache meta tags were removed. Freshness is owned
+  <!-- v7.7.1.1: the no-store cache meta tags were removed. Freshness is owned
        by the Service Worker shell version plus the "?v=" cache busters, and the
        old tags only forced every cold start back onto the network. -->
   <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
@@ -3186,7 +3186,7 @@ body.expenses-view-active #app-version-note{
 #snacks-view::after,
 #info-view::after,
 #profile-view::after{
-  content:"v7.7.1.0" !important;
+  content:"v7.7.1.1" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3207,7 +3207,7 @@ body.expenses-view-active #app-version-note{
   display:none !important;
 }
 body.expenses-view-active .expenses-module .expenses-app::after{
-  content:"v7.7.1.0" !important;
+  content:"v7.7.1.1" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3272,16 +3272,16 @@ html:not(.theme-light):not(.theme-dark) .trip-boot-placeholder{
 </style>
             <link rel="apple-touch-icon" href="assets/icon/trip_icon.png">
   <link rel="icon" type="image/png" href="assets/icon/trip_icon.png">
-  <link rel="manifest" href="manifest.json?v=7.7.1.0">
+  <link rel="manifest" href="manifest.json?v=7.7.1.1">
   <meta name="apple-mobile-web-app-title" content="關嘉露西生日之旅">
-  <!-- v7.7.1.0: expenses.css is 144KB and every rule is scoped under
+  <!-- v7.7.1.1: expenses.css is 144KB and every rule is scoped under
        .expenses-module, yet it used to block the very first paint of the
        itinerary. media="print" keeps the download running in parallel at low
        priority without blocking paint; ensureExpensesStylesheet() flips it to
        media="all" before the 支出 view is ever mounted, so the styling is
        byte-for-byte identical by the time anything expenses-related renders. -->
-  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?v=7.7.1.0" media="print">
-  <noscript><link rel="stylesheet" href="assets/css/expenses.css?v=7.7.1.0"></noscript>
+  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?v=7.7.1.1" media="print">
+  <noscript><link rel="stylesheet" href="assets/css/expenses.css?v=7.7.1.1"></noscript>
 </head>
 <body>
 <div class="bg-fixed"></div>
@@ -3405,7 +3405,7 @@ html:not(.theme-light):not(.theme-dark) .trip-boot-placeholder{
         </button>
         <button class="profile-row" type="button" data-profile-open="appearance">
           <span class="profile-row-icon profile-icon-purple">◐</span>
-          <span class="profile-row-copy"><strong>外觀與顯示</strong><small>主題、文字大小及顯示偏好</small></span>
+          <span class="profile-row-copy"><strong>外觀與顯示</strong><small>主題、文字大小及顏色設定</small></span>
           <span class="profile-chevron">›</span>
         </button>
         <button class="profile-row" type="button" data-profile-open="trip-management">
@@ -3492,6 +3492,19 @@ html:not(.theme-light):not(.theme-dark) .trip-boot-placeholder{
           <button class="theme-btn profile-theme-compat" id="theme-btn" type="button" title="切換主題" data-theme="auto" aria-hidden="true" tabindex="-1"></button>
         </div>
       </section>
+      <section class="profile-card profile-menu-card" aria-label="顏色設定">
+        <button class="profile-row" id="destination-settings-open-btn" type="button" data-profile-open="destination-settings">
+          <span class="profile-row-icon profile-icon-purple">🎨</span>
+          <span class="profile-row-copy"><strong>目的地顏色</strong><small>統一 Day、天氣及城市標籤嘅目的地識別色</small></span>
+          <span class="profile-chevron">›</span>
+        </button>
+        <button class="profile-row" id="team-settings-open-btn" type="button" data-profile-open="team-settings">
+          <span class="profile-row-icon profile-icon-blue">👥</span>
+          <span class="profile-row-copy"><strong>Team 顏色</strong><small id="team-settings-open-subtitle">統一 Team、航班及行程標籤嘅識別色</small></span>
+          <span class="profile-chevron" id="team-settings-open-chevron">›</span>
+          <span class="profile-status-pill" id="team-settings-open-status" hidden>無</span>
+        </button>
+      </section>
     </div>
 
     <div class="profile-nav-page" id="profile-page-trip-management" data-profile-page="trip-management" hidden>
@@ -3510,11 +3523,6 @@ html:not(.theme-light):not(.theme-dark) .trip-boot-placeholder{
           <span class="profile-row-icon profile-icon-red">🔒</span>
           <span class="profile-row-copy"><strong>旅程鎖定</strong><small>獨立於支出鎖定，於正式權限階段啟用</small></span>
           <span class="profile-status-pill">2F</span>
-        </button>
-        <button class="profile-row" id="destination-settings-open-btn" type="button" data-profile-open="destination-settings">
-          <span class="profile-row-icon profile-icon-purple">🎨</span>
-          <span class="profile-row-copy"><strong>目的地顏色</strong><small>統一 Day、天氣及城市標籤嘅目的地識別色</small></span>
-          <span class="profile-chevron">›</span>
         </button>
         <button class="profile-row" type="button" data-profile-open="expense-settings">
           <span class="profile-row-icon profile-icon-orange">💳</span>
@@ -3537,7 +3545,7 @@ html:not(.theme-light):not(.theme-dark) .trip-boot-placeholder{
 
     <div class="profile-nav-page" id="profile-page-destination-settings" data-profile-page="destination-settings" hidden>
       <div class="profile-detail-bar">
-        <button class="profile-detail-back" type="button" data-profile-back aria-label="返回旅程設定"><span class="profile-back-glyph">‹</span><span class="profile-detail-back-label">旅程設定</span></button>
+        <button class="profile-detail-back" type="button" data-profile-back aria-label="返回外觀與顯示"><span class="profile-back-glyph">‹</span><span class="profile-detail-back-label">外觀與顯示</span></button>
         <h2>目的地顏色</h2>
         <span class="profile-detail-spacer"></span>
       </div>
@@ -3546,6 +3554,19 @@ html:not(.theme-light):not(.theme-dark) .trip-boot-placeholder{
         <div class="destination-color-status" id="destination-color-status">顏色會同步套用至 Day、跨城市漸變、天氣及城市標籤。</div>
       </section>
       <div class="profile-backup-note">目的地次序由實際 itinerary 自動推導；同一日跨城市嘅方向會保存喺該 Day，唔需要另外設定排序。</div>
+    </div>
+
+    <div class="profile-nav-page" id="profile-page-team-settings" data-profile-page="team-settings" hidden>
+      <div class="profile-detail-bar">
+        <button class="profile-detail-back" type="button" data-profile-back aria-label="返回外觀與顯示"><span class="profile-back-glyph">‹</span><span class="profile-detail-back-label">外觀與顯示</span></button>
+        <h2>Team 顏色</h2>
+        <span class="profile-detail-spacer"></span>
+      </div>
+      <section class="profile-card destination-settings-card" aria-label="Team 顏色設定">
+        <div class="destination-color-list" id="team-color-list"></div>
+        <div class="destination-color-status" id="team-color-status">顏色會同步套用至 Team selector、航班、行程標籤及資料卡。</div>
+      </section>
+      <div class="profile-backup-note">Team 顯示次序會按 Team label 字母排序；顏色只改識別外觀，唔會改動行程資料。</div>
     </div>
 
     <div class="profile-nav-page" id="profile-page-trip-members" data-profile-page="trip-members" hidden>
@@ -3711,7 +3732,7 @@ html:not(.theme-light):not(.theme-dark) .trip-boot-placeholder{
         <span class="profile-detail-spacer"></span>
       </div>
       <section class="profile-card" aria-label="App 資料">
-        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.7.1.0</strong></div>
+        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.7.1.1</strong></div>
         <div class="profile-meta-row"><span>資料架構</span><strong>Phase 2F</strong></div>
         <div class="profile-meta-row"><span>主要資料來源</span><strong id="app-data-source-label">Firebase / 本機快取</strong></div>
       </section>
@@ -3830,7 +3851,7 @@ html:not(.theme-light):not(.theme-dark) .trip-boot-placeholder{
 </div>
 
 <script>
-const APP_VERSION = "7.7.1.0";
+const APP_VERSION = "7.7.1.1";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 window.EXPENSES_MODULE_VERSION = EXPENSES_MODULE_VERSION;
@@ -3922,6 +3943,26 @@ function refreshDestinationThemeInPlace(data){
   document.querySelectorAll('[data-city-multi="true"]').forEach(el=>{
     const keys=String(el.dataset.cityKeys||"").split(",").map(v=>v.trim()).filter(v=>v&&cities[v]);
     if(keys.length)applyMultiCityTheme(el,keys,themes);
+  });
+}
+function refreshTeamThemeInPlace(data){
+  const travellers=data?.meta?.travellers||{};
+  Object.entries(travellers).forEach(([key,cfg])=>{
+    const color=teamDisplayColour(key,cfg);
+    document.documentElement.style.setProperty(`--${key}-color`,color);
+    if(key==="team1")document.documentElement.style.setProperty("--team1-color",color);
+    if(key==="team2")document.documentElement.style.setProperty("--team2-color",color);
+    document.querySelectorAll(`.team-btn[data-team="${CSS.escape(key)}"]`).forEach(btn=>{
+      btn.dataset.color=color;btn.style.setProperty("--team-accent",color);
+      if(btn.dataset.team===activeTeam){btn.style.background=color;btn.style.border=`1px solid ${color}`;btn.style.borderColor=color;btn.style.color="#fff";btn.style.fontWeight="700";}
+    });
+    document.querySelectorAll(`.flight-team-row[data-team="${CSS.escape(key)}"] .flight-team-label`).forEach(label=>{label.style.background=color;});
+    document.querySelectorAll(`.timeline-item[data-who="${CSS.escape(key)}"]`).forEach(item=>{item.style.borderLeft=`3px solid ${color}`;});
+    document.querySelectorAll(`.who-tag[data-team="${CSS.escape(key)}"]`).forEach(tag=>{tag.style.setProperty("--badge-color",color);});
+    document.querySelectorAll(`.info-team-card[data-team="${CSS.escape(key)}"]`).forEach(card=>{
+      card.style.setProperty("--info-team-color",color);card.style.borderLeftColor=color;
+      const label=card.querySelector(".info-team-label");if(label)label.style.background=color;
+    });
   });
 }
 
@@ -4512,12 +4553,22 @@ document.getElementById("detail-booking-btn").addEventListener("click",()=>{if(c
 
 // Team filter
 let activeTeam="all";
+const TEAM_COLOUR_PRESETS=["#4A90D9","#E8A838","#7B61D1","#5A9E5A","#E06040","#3F9F91","#C45B8C","#4D9DB0"];
+const TEAM_LABEL_COLLATOR=new Intl.Collator(["zh-Hant","en"],{sensitivity:"base",numeric:true});
+function teamColourHash(value){let hash=2166136261;for(const ch of String(value||"")){hash^=ch.charCodeAt(0);hash=Math.imul(hash,16777619);}return hash>>>0;}
+function teamDefaultColour(key){
+  const normalized=String(key||"").trim();
+  if(normalized==="team1")return"#4A90D9";
+  if(normalized==="team2")return"#E8A838";
+  return TEAM_COLOUR_PRESETS[teamColourHash(normalized)%TEAM_COLOUR_PRESETS.length];
+}
+function teamDisplayColour(key,cfg={}){return parseHexColour(cfg?.color)?String(cfg.color).toUpperCase():teamDefaultColour(key);}
 function orderedTravellerKeys(travellers){
-  return Object.keys(travellers||{}).map((key,index)=>({
-    key,
-    index,
-    sortOrder:(travellers?.[key]?.sortOrder!==null&&travellers?.[key]?.sortOrder!==undefined&&String(travellers[key].sortOrder).trim()!==""&&Number.isFinite(Number(travellers[key].sortOrder)))?Number(travellers[key].sortOrder):index
-  })).sort((a,b)=>a.sortOrder-b.sortOrder||a.index-b.index).map(entry=>entry.key);
+  return Object.keys(travellers||{}).sort((a,b)=>{
+    const al=String(travellers?.[a]?.label||a).trim();
+    const bl=String(travellers?.[b]?.label||b).trim();
+    return TEAM_LABEL_COLLATOR.compare(al,bl)||TEAM_LABEL_COLLATOR.compare(String(a),String(b));
+  });
 }
 function applyTeam(team){
   activeTeam=team;
@@ -4809,7 +4860,7 @@ function renderInfo(data){
 
   teamKeys.forEach(tk=>{
     const ti=travellers[tk];
-    const teamColor=ti.color||"#888";
+    const teamColor=teamDisplayColour(tk,ti);
     const tf=flights.find(f=>f.teamKey===tk)||null;
     const card=document.createElement("div");
     card.className="info-team-card";
@@ -5017,7 +5068,7 @@ function render(data){
   const meta=data.meta||{},travellers=meta.travellers||{},cities=meta.cities||{};
   requestAnimationFrame(updateBottomNavIndicator);
   // Set CSS colour variables for every traveller key dynamically (e.g. --team1-color, --solo-color)
-  Object.entries(travellers).forEach(([tk,ti])=>{if(ti.color)document.documentElement.style.setProperty(`--${tk}-color`,ti.color);});
+  Object.entries(travellers).forEach(([tk,ti])=>{const c=teamDisplayColour(tk,ti);document.documentElement.style.setProperty(`--${tk}-color`,c);if(tk==="team1")document.documentElement.style.setProperty("--team1-color",c);if(tk==="team2")document.documentElement.style.setProperty("--team2-color",c);});
 
   // Team bars — itinerary and Travel Details use the same selector, style and state.
   const tKeys=orderedTravellerKeys(travellers);
@@ -5040,8 +5091,9 @@ function render(data){
       const btn=document.createElement("button");
       btn.className="team-btn";
       btn.dataset.team=tk;
-      btn.dataset.color=ti.color||"#888";
-      btn.style.setProperty("--team-accent",ti.color||"#888");
+      const tc=teamDisplayColour(tk,ti);
+      btn.dataset.color=tc;
+      btn.style.setProperty("--team-accent",tc);
       btn.textContent=ti.label||tk;
       teamBar.appendChild(btn);
     });
@@ -5064,11 +5116,12 @@ function render(data){
   const flights=meta.flights,lo=meta.outbound,li=meta.inbound;
   if(flights?.length){
     fcard.style.display="block";fc.innerHTML="";
-    flights.forEach(f=>{
+    const teamRank=new Map(orderedTravellerKeys(travellers).map((key,index)=>[key,index]));
+    flights.map((flight,index)=>({flight,index})).sort((a,b)=>(teamRank.get(a.flight?.teamKey)??9999)-(teamRank.get(b.flight?.teamKey)??9999)||a.index-b.index).forEach(({flight:f})=>{
       const ti=travellers[f.teamKey];
       const row=document.createElement("div");row.className="flight-team-row";
       row.setAttribute("data-team",f.teamKey);
-      if(ti){const lbl=document.createElement("div");lbl.className="flight-team-label";lbl.style.background=ti.color||"#888";lbl.textContent=`${ti.label||f.teamKey}${ti.members?" "+ti.members:""}`;row.appendChild(lbl);}
+      if(ti){const lbl=document.createElement("div");lbl.className="flight-team-label";lbl.style.background=teamDisplayColour(f.teamKey,ti);lbl.textContent=`${ti.label||f.teamKey}${ti.members?" "+ti.members:""}`;row.appendChild(lbl);}
       const tr=document.createElement("div");tr.className="trip-row trip-row-with-logo";
       const oc=document.createElement("div");oc.className="trip-col";oc.innerHTML=`<div class="trip-col-title">去程</div><div class="trip-col-main">${f.outbound?.date||""}  ${f.outbound?.flight||""}</div><div class="trip-col-sub">${f.outbound?.route||""}  ${f.outbound?.time||""}</div>`;
       const ic2=document.createElement("div");ic2.className="trip-col trip-col-right";ic2.innerHTML=`<div class="trip-col-title">回程</div><div class="trip-col-main">${f.inbound?.date||""}  ${f.inbound?.flight||""}</div><div class="trip-col-sub">${f.inbound?.route||""}  ${f.inbound?.time||""}</div>`;
@@ -5122,7 +5175,7 @@ function render(data){
       const el=document.createElement("div");el.className="timeline-item itinerary-item";
       if(item.booked)el.classList.add("is-booked");
       const who=item.who||"all";el.setAttribute("data-who",who);
-      if(who!=="all"&&travellers[who]?.color){el.style.borderLeft=`3px solid ${travellers[who].color}`;}
+      if(who!=="all"&&travellers[who]){el.style.borderLeft=`3px solid ${teamDisplayColour(who,travellers[who])}`;}
       let itemGallery=[];
       if(item.popup){
         el.classList.add("clickable");
@@ -5134,7 +5187,7 @@ function render(data){
       const noteRow=document.createElement("div");noteRow.className="content-note-row";
       if(item.note){const n=document.createElement("div");n.className="content-note";n.textContent=item.note;noteRow.appendChild(n);}
       if(item.booked){const b=document.createElement("div");b.className="booked-badge";b.textContent="✓ 已預約";noteRow.appendChild(b);}
-      if(who!=="all"&&travellers[who]){const tag=document.createElement("div");tag.className="who-tag";const tc=travellers[who].color||"#888";tag.style.setProperty("--badge-color",tc);tag.textContent=travellers[who].label||who;noteRow.appendChild(tag);}
+      if(who!=="all"&&travellers[who]){const tag=document.createElement("div");tag.className="who-tag";tag.dataset.team=who;const tc=teamDisplayColour(who,travellers[who]);tag.style.setProperty("--badge-color",tc);tag.textContent=travellers[who].label||who;noteRow.appendChild(tag);}
       const title=document.createElement("div");title.className="content-title";title.textContent=item.title||"";cw.append(title,noteRow);
       const timeEl=document.createElement("div");timeEl.className="time";timeEl.textContent=item.time||"";
       const iconEl=document.createElement("div");iconEl.className="icon";iconEl.textContent=item.icon||"";
@@ -5180,7 +5233,7 @@ const bottomNav=document.getElementById("bottom-nav");
 const headerTitleSmallEl=document.getElementById("header-title-small");
 const headerTitleMainEl=document.getElementById("header-title-main");
 const headerSubEl=document.getElementById("header-sub");
-// v7.7.1.0 · Layer 2: cache the static chrome nodes once. Scroll frames must
+// v7.7.1.1 · Layer 2: cache the static chrome nodes once. Scroll frames must
 // not repeatedly query the DOM or resolve computed CSS values.
 const largeHeaderEl=document.querySelector(".header");
 const largeHeaderMainEl=largeHeaderEl?.querySelector(".header-title-main")||null;
@@ -5251,7 +5304,7 @@ async function bootstrapLegacyTripExpenses(){
   })().catch(error=>{legacyExpenseBootstrapPromise=null;showExpensesLoadError(error);return false;});
   return legacyExpenseBootstrapPromise;
 }
-/* v7.7.1.0 · expenses.css activation gate.
+/* v7.7.1.1 · expenses.css activation gate.
  * The stylesheet starts as media="print" so it never blocks the itinerary's
  * first paint. It is switched to media="all" here, before any expenses markup
  * is mounted, so the 支出 view can never render unstyled. Resolves instantly
@@ -5557,6 +5610,7 @@ let tripInstantBootToken=0;
 let tripRenderSignature="";
 let tripWeatherSignature="";
 let tripDestinationThemeSignature="";
+let tripTeamThemeSignature="";
 let nowIndicatorTimer=0;
 
 function tripLibraryEsc(value){return escapeHtmlText(value);}
@@ -5714,6 +5768,7 @@ function initTripLibrarySafe(data){
   if(!tripBootDeferred&&!tripRenderSignature)tripRenderSignature=tripContentRenderSignature(data);
   if(!tripBootDeferred&&!tripWeatherSignature)tripWeatherSignature=weatherRenderSignature(data);
   if(!tripBootDeferred&&!tripDestinationThemeSignature)tripDestinationThemeSignature=destinationThemeRenderSignature(data);
+  if(!tripBootDeferred&&!tripTeamThemeSignature)tripTeamThemeSignature=teamThemeRenderSignature(data);
   import(`./assets/js/trip-schema-service.js?v=${APP_VERSION}`)
     .then(schemaService=>{
       tripLibrarySchemaService=schemaService;
@@ -5826,23 +5881,29 @@ function currentActiveDayId(){
   const idx=Number(document.querySelector(".day-tab.active")?.dataset?.dayIndex||0);
   return String(window.tripData?.days?.[idx]?.dayId||"");
 }
-function tripDataWithoutDestinationColours(data){
+function tripDataWithoutIdentityColours(data){
   if(!data)return null;
   try{
     const copy=JSON.parse(JSON.stringify(data));delete copy.cloudMeta;
     const cities=copy?.meta?.cities||{};
     Object.values(cities).forEach(cfg=>{if(cfg&&typeof cfg==="object"){delete cfg.color;delete cfg.accentColor;delete cfg.themeColor;}});
+    const travellers=copy?.meta?.travellers||{};
+    Object.values(travellers).forEach(cfg=>{if(cfg&&typeof cfg==="object")delete cfg.color;});
     return copy;
   }catch(error){return data;}
 }
 function tripContentRenderSignature(data){
   if(!data)return"";
-  const copy=tripDataWithoutDestinationColours(data);
+  const copy=tripDataWithoutIdentityColours(data);
   try{return JSON.stringify(copy);}catch(error){return `${dataTripId(data)}:${Number(data?.revision)||0}`;}
 }
 function destinationThemeRenderSignature(data){
   const cities=data?.meta?.cities||{};
   try{return JSON.stringify(Object.fromEntries(Object.entries(cities).map(([key,cfg])=>[key,{color:cfg?.color||"",accentColor:cfg?.accentColor||"",themeColor:cfg?.themeColor||""}])));}catch(error){return"";}
+}
+function teamThemeRenderSignature(data){
+  const travellers=data?.meta?.travellers||{};
+  try{return JSON.stringify(Object.fromEntries(Object.entries(travellers).map(([key,cfg])=>[key,{label:cfg?.label||key,color:cfg?.color||""}])));}catch(error){return"";}
 }
 function weatherRenderSignature(data){
   const meta=data?.meta||{};const cities={};
@@ -5989,6 +6050,7 @@ function applyFirebaseTripData(data,{source="server",tripId=""}={}){
   if(!data)return;
   const nextSignature=tripContentRenderSignature(data);
   const nextDestinationThemeSignature=destinationThemeRenderSignature(data);
+  const nextTeamThemeSignature=teamThemeRenderSignature(data);
   const currentId=dataTripId(window.tripData),nextId=dataTripId(data)||tripId;
   const sameTrip=currentId&&nextId&&currentId===nextId;
   const oldDayId=sameTrip?currentActiveDayId():"";
@@ -6009,15 +6071,22 @@ function applyFirebaseTripData(data,{source="server",tripId=""}={}){
     requestAnimationFrame(()=>{if(sameTrip&&scrollShell)scrollShell.scrollTo({top:oldScroll,behavior:"auto"});updateBottomNavIndicator();updateCollapsingChrome();updateNowIndicator();});
     tripRenderSignature=nextSignature;
     tripDestinationThemeSignature=nextDestinationThemeSignature;
+    tripTeamThemeSignature=nextTeamThemeSignature;
   }else{
     window.tripData=data;
     if(nextDestinationThemeSignature!==tripDestinationThemeSignature){
       refreshDestinationThemeInPlace(data);
       tripDestinationThemeSignature=nextDestinationThemeSignature;
     }
+    if(nextTeamThemeSignature!==tripTeamThemeSignature){
+      refreshTeamThemeInPlace(data);
+      tripTeamThemeSignature=nextTeamThemeSignature;
+    }
     updateTripLibrarySummaryFromData(data);
   }
   try{window.__destinationSettingsRefresh?.(data);}catch(error){}
+  try{window.__teamSettingsRefresh?.(data);}catch(error){}
+  try{refreshAppearanceColourMenuState(data);}catch(error){}
   resolveTripLoaderWaiters(data);
   releaseDeferredTripBoot();
   // Only Firestore-ready data refreshes the app-owned render cache. Reading the
@@ -6029,9 +6098,11 @@ function applyBundledTripFallback(){
   if(dataTripId(window.tripData)===dataTripId(bundledTripData)&&tripLoaderState.status==="local")return;
   const sig=tripContentRenderSignature(bundledTripData);
   window.tripData=bundledTripData;
-  if(sig!==tripRenderSignature){render(bundledTripData);runOptionalAppStep("Local travel info render",()=>renderInfo(bundledTripData));runOptionalAppStep("Local weather render",()=>renderWeather(bundledTripData));tripRenderSignature=sig;tripWeatherSignature=weatherRenderSignature(bundledTripData);tripDestinationThemeSignature=destinationThemeRenderSignature(bundledTripData);updateLargeHeaderForView();updateCompactHeader();}
+  if(sig!==tripRenderSignature){render(bundledTripData);runOptionalAppStep("Local travel info render",()=>renderInfo(bundledTripData));runOptionalAppStep("Local weather render",()=>renderWeather(bundledTripData));tripRenderSignature=sig;tripWeatherSignature=weatherRenderSignature(bundledTripData);tripDestinationThemeSignature=destinationThemeRenderSignature(bundledTripData);tripTeamThemeSignature=teamThemeRenderSignature(bundledTripData);updateLargeHeaderForView();updateCompactHeader();}
   tripLoaderState={status:"local",source:"local",tripId:dataTripId(bundledTripData),updatedAt:"",error:null};
   setDataSourceLabel("本機 trip.json");updateTripLibrarySummaryFromData(bundledTripData);
+  try{refreshAppearanceColourMenuState(bundledTripData);}catch(error){}
+  try{window.__teamSettingsRefresh?.(bundledTripData);}catch(error){}
   releaseDeferredTripBoot();
 }
 function stopFirebaseTripLoader({fallback=false}={}){
@@ -6972,6 +7043,141 @@ window.__destinationSettingsRefresh=data=>{
   renderDestinationSettingsPage(data);
 };
 
+
+// =========================================================================
+// Phase 2F · v7.7.1.1 · Team identity colour settings
+// =========================================================================
+let tripTeamServicePromise=null;
+let teamColorSavingKey="";
+let teamCustomColourPickerKey="";
+let teamCustomColourSaveSeq=0;
+let teamCustomColourSaveTimer=0;
+let teamCustomColourSaveChain=Promise.resolve();
+function getTripTeamService(){
+  if(!tripTeamServicePromise)tripTeamServicePromise=import(`./assets/js/trip-team-service.js?v=${APP_VERSION}`);
+  return tripTeamServicePromise;
+}
+function teamSettingsTripId(){return String(tripLoaderActiveId||dataTripId(window.tripData)||"").trim();}
+function teamSettingsCanEdit(){const role=String(window.__appTripAccess?.role||"");return role==="owner"||role==="admin";}
+function teamSettingsFriendlyError(error){
+  const code=String(error?.code||"");
+  if(code==="offline")return"目前離線，重新連線後先可以更新 Team 顏色。";
+  if(code==="operation-busy")return"另一個雲端操作仍在進行，完成後再試。";
+  if(code==="insufficient-role"||code==="permission-denied")return"只有 Owner 或 Admin 可以修改 Team 顏色。";
+  if(code==="team-not-found")return"搵唔到呢個 Team 設定，請先確認目前旅程資料。";
+  if(code==="invalid-colour")return"顏色格式無效。";
+  return error?.message||"未能更新 Team 顏色。";
+}
+function refreshAppearanceColourMenuState(data=window.tripData){
+  const button=document.getElementById("team-settings-open-btn");if(!button)return;
+  const hasTeams=orderedTravellerKeys(data?.meta?.travellers||{}).length>0;
+  const subtitle=document.getElementById("team-settings-open-subtitle");
+  const chevron=document.getElementById("team-settings-open-chevron");
+  const status=document.getElementById("team-settings-open-status");
+  button.disabled=!hasTeams;
+  button.classList.toggle("profile-row-disabled",!hasTeams);
+  if(subtitle)subtitle.textContent=hasTeams?"統一 Team、航班及行程標籤嘅識別色":"目前旅程未設定 Team";
+  if(chevron)chevron.hidden=!hasTeams;
+  if(status){status.hidden=hasTeams;status.textContent="無";}
+}
+function renderTeamSettingsPage(data=window.tripData){
+  const list=document.getElementById("team-color-list"),status=document.getElementById("team-color-status");if(!list)return;
+  const travellers=data?.meta?.travellers||{},keys=orderedTravellerKeys(travellers),canEdit=teamSettingsCanEdit();
+  if(!keys.length){
+    list.innerHTML='<div class="destination-color-empty">目前旅程未設定 Team。</div>';
+    if(status){status.textContent="建立或匯入有 Team 資料嘅旅程後，就可以喺呢度設定顏色。";status.classList.remove("is-error");}
+    return;
+  }
+  list.innerHTML=keys.map(key=>{
+    const cfg=travellers[key]||{},explicit=parseHexColour(cfg.color)?String(cfg.color).toUpperCase():"",current=explicit||teamDefaultColour(key);
+    const swatches=TEAM_COLOUR_PRESETS.map(hex=>`<button class="destination-color-swatch${explicit===hex?" is-selected":""}" type="button" data-team-color-key="${escapeHtmlText(key)}" data-team-color-value="${hex}" style="--swatch:${hex}" aria-label="將 ${escapeHtmlText(cfg.label||key)} 設為 ${hex}"${canEdit&&teamColorSavingKey!==key?"":" disabled"}></button>`).join("");
+    return `<div class="destination-color-item" data-team-color-item="${escapeHtmlText(key)}">
+      <div class="destination-color-head">
+        <span class="destination-color-preview" style="--destination-preview:${escapeHtmlText(current)}"></span>
+        <span class="destination-color-copy"><strong>${escapeHtmlText(cfg.label||key)}</strong><small>${explicit?`自訂 ${escapeHtmlText(explicit)}`:`預設 ${escapeHtmlText(current)}`}</small></span>
+        <span class="destination-color-default-pill">${teamColorSavingKey===key?"儲存中…":(explicit?"已自訂":"預設")}</span>
+      </div>
+      <div class="destination-color-palette" aria-label="${escapeHtmlText(cfg.label||key)} 顏色選擇">${swatches}</div>
+      <div class="destination-color-actions">
+        <label class="destination-color-custom${canEdit&&teamColorSavingKey!==key?"":" is-disabled"}">自訂顏色<input type="color" data-team-custom-key="${escapeHtmlText(key)}" value="${escapeHtmlText(current)}"${canEdit&&teamColorSavingKey!==key?"":" disabled"}></label>
+        <button class="destination-color-reset" type="button" data-team-reset-key="${escapeHtmlText(key)}"${canEdit&&explicit&&teamColorSavingKey!==key?"":" disabled"}>還原預設</button>
+      </div>
+    </div>`;
+  }).join("");
+  if(status){status.classList.remove("is-error");status.textContent=canEdit?"改色後會直接儲存到 Firebase，並同步更新 Team selector、航班、行程標籤及資料卡。":"目前為唯讀。只有 Owner 或 Admin 可以修改 Team 顏色。";}
+}
+function applyTeamCustomColourLocalUI(teamKey,color){
+  if(!parseHexColour(color))return;
+  const hex=String(color||"").trim().toUpperCase();
+  const item=document.querySelector(`[data-team-color-item="${CSS.escape(String(teamKey))}"]`);if(!item)return;
+  const preview=item.querySelector(".destination-color-preview");if(preview)preview.style.setProperty("--destination-preview",hex);
+  const copy=item.querySelector(".destination-color-copy small");if(copy)copy.textContent=`自訂 ${hex}`;
+  const pill=item.querySelector(".destination-color-default-pill");if(pill)pill.textContent="已自訂";
+  item.querySelectorAll("[data-team-color-value]").forEach(button=>button.classList.toggle("is-selected",String(button.dataset.teamColorValue||"").toUpperCase()===hex));
+  const reset=item.querySelector("[data-team-reset-key]");if(reset)reset.disabled=false;
+  // Mirror the preview into the currently rendered app immediately. Firestore
+  // remains authoritative, but the colour interaction itself should never flash.
+  const live=window.tripData?.meta?.travellers?.[teamKey];
+  if(live){
+    const previewData={...window.tripData,meta:{...(window.tripData.meta||{}),travellers:{...(window.tripData.meta?.travellers||{}),[teamKey]:{...live,color:hex}}}};
+    refreshTeamThemeInPlace(previewData);
+  }
+}
+function cancelTeamCustomColourSave(){if(teamCustomColourSaveTimer){clearTimeout(teamCustomColourSaveTimer);teamCustomColourSaveTimer=0;}}
+function queueTeamCustomColourSave(teamKey,color){
+  cancelTeamCustomColourSave();
+  teamCustomColourSaveTimer=setTimeout(()=>{
+    teamCustomColourSaveTimer=0;
+    teamCustomColourSaveChain=teamCustomColourSaveChain.catch(()=>{}).then(()=>saveTeamColour(teamKey,color,{preserveNativePicker:true}));
+  },500);
+}
+async function saveTeamColour(teamKey,color,{reset=false,preserveNativePicker=false}={}){
+  if(teamColorSavingKey&&!preserveNativePicker)return;
+  const tripId=teamSettingsTripId();if(!tripId)return;
+  let finalMessage="",isError=false;
+  const saveSeq=++teamCustomColourSaveSeq;
+  if(!preserveNativePicker){
+    teamCustomColourPickerKey="";teamColorSavingKey=teamKey;renderTeamSettingsPage();
+  }else{
+    applyTeamCustomColourLocalUI(teamKey,color);
+    const status=document.getElementById("team-color-status");if(status){status.classList.remove("is-error");status.textContent="正在儲存自訂顏色…";}
+  }
+  try{
+    const service=await getTripTeamService();
+    if(reset)await service.resetTeamColor(tripId,teamKey,{user:window.__appAuthUser||null});
+    else await service.updateTeamColor(tripId,teamKey,color,{user:window.__appAuthUser||null});
+    finalMessage="已儲存到 Firebase，其他裝置會跟住同步。";
+  }catch(error){isError=true;finalMessage=teamSettingsFriendlyError(error);}
+  finally{
+    if(!preserveNativePicker){teamColorSavingKey="";renderTeamSettingsPage();}
+    else if(isError){teamCustomColourPickerKey="";renderTeamSettingsPage();}
+    const status=document.getElementById("team-color-status");
+    if(status&&finalMessage&&saveSeq===teamCustomColourSaveSeq){status.classList.toggle("is-error",isError);status.textContent=finalMessage;}
+  }
+}
+document.getElementById("team-settings-open-btn")?.addEventListener("click",()=>{cancelTeamCustomColourSave();teamCustomColourPickerKey="";setTimeout(()=>renderTeamSettingsPage(),40);});
+document.getElementById("team-color-list")?.addEventListener("click",event=>{
+  const custom=event.target.closest?.("[data-team-custom-key]");
+  if(custom&&!custom.disabled){teamCustomColourPickerKey=String(custom.dataset.teamCustomKey||"");return;}
+  const swatch=event.target.closest?.("[data-team-color-key]");if(swatch&&!swatch.disabled){cancelTeamCustomColourSave();teamCustomColourPickerKey="";saveTeamColour(swatch.dataset.teamColorKey,swatch.dataset.teamColorValue);return;}
+  const reset=event.target.closest?.("[data-team-reset-key]");if(reset&&!reset.disabled){cancelTeamCustomColourSave();teamCustomColourPickerKey="";saveTeamColour(reset.dataset.teamResetKey,"",{reset:true});}
+});
+document.getElementById("team-color-list")?.addEventListener("input",event=>{
+  const input=event.target.closest?.("[data-team-custom-key]");
+  if(input&&!input.disabled){const key=String(input.dataset.teamCustomKey||"");teamCustomColourPickerKey=key;applyTeamCustomColourLocalUI(key,input.value);queueTeamCustomColourSave(key,input.value);}
+});
+document.getElementById("team-color-list")?.addEventListener("change",event=>{
+  const input=event.target.closest?.("[data-team-custom-key]");
+  if(input&&!input.disabled){const key=String(input.dataset.teamCustomKey||"");teamCustomColourPickerKey=key;queueTeamCustomColourSave(key,input.value);}
+});
+window.__teamSettingsRefresh=data=>{
+  refreshAppearanceColourMenuState(data);
+  if(profileCurrentPage!=="team-settings")return;
+  if(teamCustomColourPickerKey)return;
+  renderTeamSettingsPage(data);
+};
+refreshAppearanceColourMenuState(window.tripData);
+
 // =========================================================================
 // Phase 2F · v7.7.0 · network / cache / operation safety
 // =========================================================================
@@ -7095,6 +7301,8 @@ function describeTripActivity(item={}){
   if(type==="trip.restore")return {...base,icon:"↩",title:"還原已封存旅程",summary:"旅程重新加入 Active Trips。"};
   if(type==="trip.snapshot.manual")return {...base,category:"backup",categoryLabel:"備份",icon:"▣",title:"建立手動備份",summary:`Snapshot${item.revision?` · Revision ${item.revision}`:""}`};
   if(type==="trip.snapshot.restore")return {...base,category:"backup",categoryLabel:"備份",icon:"↶",title:"還原旅程版本",summary:`${item.sourceRevision?`由 Revision ${item.sourceRevision} 還原`:"已還原 Snapshot"}${item.revision?` · 新 Revision ${item.revision}`:""}`};
+  if(type==="trip.destination.color_updated")return {...base,icon:"🎨",title:"更新目的地顏色",summary:message||"目的地識別色已更新"};
+  if(type==="trip.team.color_updated")return {...base,icon:"●",title:"更新 Team 顏色",summary:message||"Team 識別色已更新"};
   if(type==="expense_created")return {...base,category:"expense",categoryLabel:"支出",icon:"＋",title:"新增支出",summary:message||"新增一筆支出"};
   if(type==="expense_updated")return {...base,category:"expense",categoryLabel:"支出",icon:"✎",title:"修改支出",summary:message||"修改一筆支出"};
   if(type==="expense_deleted")return {...base,category:"expense",categoryLabel:"支出",icon:"−",title:"刪除支出",summary:message||"刪除一筆支出"};
@@ -7599,7 +7807,7 @@ refreshCollapseMetrics();
 // Android / Chrome PWA support. Versioned app-shell Service Worker; normal launches are cache-first while explicit reloads stay network-first.
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("./sw.js?v=7.7.1.0").catch(() => {});
+    navigator.serviceWorker.register("./sw.js?v=7.7.1.1").catch(() => {});
   });
 }
 
