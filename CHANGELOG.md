@@ -1,3 +1,21 @@
+# Travel WebApp — v7.7.1.2
+
+## Phase 2F Harmony · Appearance settings consolidation
+
+### Appearance information architecture
+
+• Merged the direct appearance controls and colour navigation rows into one Liquid Glass Settings card under **外觀與顯示**.
+• **文字大小**, **顯示模式**, **目的地顏色** and **Team 顏色** now read as one coherent settings group instead of two visually separate menus.
+• No destination / Team colour behaviour, Firebase data, ordering, permission or detail-page logic changed.
+• Team colour remains visible but disabled when the current Trip has no Team data.
+
+### Deployment
+
+• Service Worker shell cache updated to `travel-shell-v7.7.1.2` for the cache-first navigation model.
+• Firestore Rules and indexes are unchanged. No Rules deployment is required.
+
+---
+
 # Travel WebApp — v7.7.1.1
 
 ## Phase 2F Harmony · Team identity + Appearance colour settings
