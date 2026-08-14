@@ -1,3 +1,39 @@
+# Travel WebApp — v7.7.0.13
+
+## Phase 2F current build
+
+### Trip Settings Menu Visual Parity
+
+• `我的 → 旅程設定` now uses the exact same inset grouped menu shell as the root `我的旅程 / 外觀與顯示 / 旅程設定 / App 與資料` menu.
+• Removed the generic card padding around the six Trip Settings rows. Icon alignment, row height, text inset, separators, press feedback, chevrons and rounded card clipping now come from the same `profile-menu-card` component as the preferred root menu.
+• No navigation compositor code was changed.
+
+### Smooth Firebase Live Update / Background Stability
+
+• Fixed the full-screen background visibly flashing whenever a same-Trip Firebase update arrived, including Destination Colour saves.
+• Root cause: every full render reset `--trip-bg-source` to a generated fallback gradient before asynchronously loading the same trip background image again. Glass cards therefore briefly recomposited against a different backdrop.
+• Same-Trip updates with the same background now leave the existing decoded background untouched. When the actual Trip background changes, the next image is preloaded and swapped atomically instead of showing a fallback in between.
+• Destination colour-only Firestore updates no longer rebuild the whole itinerary page. Colour identity is refreshed in place across Day pills, multi-city gradients, city badges and Weather destination pills.
+• Weather data is no longer refetched merely because a destination colour changed.
+• Other structural Firebase updates may still re-render affected app content, but the fixed background remains stable throughout instead of flashing.
+
+### Package and Firebase
+
+• Service Worker shell cache updated to v7.7.0.13.
+• Corrected stale manifest / stylesheet / Service Worker cache-buster query strings to v7.7.0.13.
+• Firestore Rules are unchanged.
+• Firestore indexes are unchanged.
+• No Firebase Rules redeploy is required for this build.
+• Package continues to keep only one development document: CHANGELOG.md.
+
+## Build QA
+
+• JavaScript syntax, JSON validity, duplicate static IDs, Firestore Rules structural sanity, and ZIP integrity checked.
+• `firestore.rules` and `firestore.indexes.json` are byte for byte unchanged from v7.7.0.12.
+• The protected v7.3.13 Profile Navigation compositor source is unchanged from the v7.7.0.12 baseline.
+
+---
+
 # Travel WebApp — v7.7.0.12
 
 ## Phase 2F current build
