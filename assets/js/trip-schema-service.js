@@ -18,6 +18,21 @@ function orderedUniqueStrings(value) {
   return out;
 }
 
+function hasExplicitSortOrder(value) {
+  return value !== null && value !== undefined && clean(value) !== "" && Number.isFinite(Number(value));
+}
+
+export function normalizeTravellers(rawTravellers = {}) {
+  const source = rawTravellers && typeof rawTravellers === "object" && !Array.isArray(rawTravellers) ? rawTravellers : {};
+  const out = {};
+  Object.entries(source).forEach(([key, value], index) => {
+    const traveller = value && typeof value === "object" && !Array.isArray(value) ? clone(value) : { label: clean(value) };
+    traveller.sortOrder = hasExplicitSortOrder(traveller.sortOrder) ? Number(traveller.sortOrder) : index;
+    out[key] = traveller;
+  });
+  return out;
+}
+
 function fnv1a(input) {
   let hash = 0x811c9dc5;
   const text = String(input || "");
@@ -184,6 +199,7 @@ export function normalizePortableTrip(rawInput = {}) {
     meta: {
       ...clone(meta),
       tripId,
+      travellers: normalizeTravellers(meta.travellers || {}),
       tripIcon: clean(meta.tripIcon || meta.icon || raw.tripIcon || raw.icon),
       backgroundImage: clean(meta.backgroundImage || meta.bgImage || meta.background || meta.coverImage || raw.backgroundImage || raw.bgImage || raw.background)
     },

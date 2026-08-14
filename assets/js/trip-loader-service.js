@@ -1,4 +1,5 @@
 import { db } from "./firebase-service.js";
+import { normalizeTravellers } from "./trip-schema-service.js";
 import {
   collection,
   doc,
@@ -80,7 +81,7 @@ function assemblePortableTrip(tripId, state) {
       coverImage: clean(tripDoc.coverImage),
       tripIcon: clean(tripDoc.tripIcon || general.tripIcon),
       backgroundImage: clean(tripDoc.backgroundImage || general.backgroundImage),
-      travellers: clonePlain(general.travellers || {}) || {},
+      travellers: normalizeTravellers(clonePlain(general.travellers || {}) || {}),
       cities: clonePlain(general.cities || {}) || {},
       flights: clonePlain(general.flights || []) || [],
       outbound: clonePlain(general.outbound || null) || null,

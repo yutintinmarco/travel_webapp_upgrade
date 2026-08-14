@@ -1,4 +1,5 @@
 import { auth, db } from "./firebase-service.js";
+import { normalizeTravellers } from "./trip-schema-service.js";
 import { assertCloudOperationAvailable, beginCloudOperation, endCloudOperation } from "./cloud-safety-service.js";
 import { acquireTripOperation, releaseTripOperation } from "./trip-operation-service.js";
 import {
@@ -192,7 +193,7 @@ function structureToPortableTrip(structure, { snapshotId = "" } = {}) {
       coverImage: clean(tripDoc.coverImage),
       tripIcon: clean(tripDoc.tripIcon || general.tripIcon),
       backgroundImage: clean(tripDoc.backgroundImage || general.backgroundImage),
-      travellers: clone(general.travellers || {}),
+      travellers: normalizeTravellers(clone(general.travellers || {})),
       cities: clone(general.cities || {}),
       flights: clone(general.flights || []),
       outbound: clone(general.outbound || null),

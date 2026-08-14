@@ -1,3 +1,34 @@
+# Travel WebApp — v7.7.1.0
+
+## Phase 2F Harmony & Performance · Layer 2 + deterministic Team ordering
+
+### Team ordering
+
+• `meta.travellers[*].sortOrder` is now the canonical Team display order.
+• Portable JSON normalisation assigns a stable `sortOrder` when an older Trip does not have one yet.
+• Firebase runtime loader normalises legacy traveller maps so 行程 and 資料 use the same deterministic order.
+• Export / backup now carries Team `sortOrder`, so future JSON → Firebase → JSON round trips preserve the order.
+• Old Trips remain compatible: if no explicit order exists, their current source order becomes the stable fallback order.
+
+### Layer 2 scroll-frame optimisation
+
+• Removed the unused per-frame `--collapse-progress` CSS custom-property write.
+• Cached static header, header child and Day Bar element references instead of querying them every animation frame.
+• Reordered collapsing-header work into a read phase followed by a write phase, avoiding style-write → layout-read thrashing while scrolling.
+• Resolved the Day Bar sticky top metric once and refresh it only on viewport resize / orientation changes, instead of calling `getComputedStyle()` on every scroll frame.
+• UI, animation timing, collapse thresholds and Day Bar sticky behaviour are intentionally unchanged.
+
+### Layer 0 + 1
+
+• v7.7.0.15 Service Worker resilience, cache-first launch, explicit reload network semantics, deferred Expenses stylesheet and resource hints are retained unchanged apart from the required version bump.
+
+### Deployment
+
+• Service Worker shell cache updated to `travel-shell-v7.7.1.0`.
+• Firestore Rules and indexes are unchanged. No Rules deployment is required.
+
+---
+
 # Travel WebApp — v7.7.0.15
 
 ## Phase 2F · Layer 0 + 1 resilience polish
