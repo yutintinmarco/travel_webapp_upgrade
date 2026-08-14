@@ -1,3 +1,44 @@
+# Travel WebApp — v7.7.0.7
+
+## Phase 2F current build
+
+### Weather City Selector UX Fix
+
+• Replaced hard coded weather selector active classes for Kyoto, Osaka, and Kobe with one generic active state that works for every city key imported through `meta.cities`.
+• The selected weather city now receives an obvious iOS blue active pill in Light Mode, Auto Dark Mode, and explicit Dark Mode.
+• Weather city pills now expose `aria-pressed` state and a city specific accessibility label.
+• Tapping another city updates the selected pill immediately, recentres that pill when necessary, then loads that city's cached or live weather.
+• The weather summary now prefixes the selected city name, for example `橫濱｜今日（08/14）`, so similar forecasts cannot make the switch look ineffective.
+• Loading and error states also carry the selected city name.
+• Added a request selection token so an older, slower weather response cannot overwrite the city the user selected more recently.
+• Weather city tabs can horizontally scroll when a Trip has more destinations, without showing a scrollbar.
+
+### Metadata QA Result
+
+• The Phase 2F metadata demo successfully displayed both imported cities and the structured flight card in v7.7.0.6.
+• The Firebase export retained `cities`, `flights`, `hotels`, `infoCard`, `galleryDefaults`, itinerary location coordinates, and saved place metadata.
+• This confirms the current Import → Firestore → Loader → Export metadata path preserves the tested structured fields. The older Hokkaido JSON is missing its own `meta.cities` and `meta.flights`, rather than those fields being dropped by the current pipeline.
+
+### Package and Firebase
+
+• Service Worker shell cache updated to v7.7.0.7.
+• Firestore Rules are unchanged.
+• Firestore indexes are unchanged.
+• No Firebase Rules redeploy is required for this build.
+• Package continues to keep only one development document: CHANGELOG.md.
+
+## Build QA
+
+• `node --check` passed for every JavaScript module, both inline scripts, and `sw.js`.
+• JSON validation passed for `manifest.json`, `firebase.json`, `firestore.indexes.json`, and `trip.json`.
+• No duplicate static HTML IDs were found.
+• Firestore Rules structural sanity passed.
+• `firestore.rules` and `firestore.indexes.json` are byte for byte unchanged from v7.7.0.6.
+• The protected v7.3.13 Profile Navigation compositor source is unchanged by this release; the v7.7.0.7 source diff is limited to weather selector UX, build version references, Service Worker cache version, manifest start URL, and this changelog.
+• ZIP integrity test passed.
+
+---
+
 # Travel WebApp — v7.7.0.6
 
 ## Phase 2F current build
