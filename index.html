@@ -3081,7 +3081,7 @@ body.expenses-view-active #app-version-note{
 #snacks-view::after,
 #info-view::after,
 #profile-view::after{
-  content:"v7.7.0.3" !important;
+  content:"v7.7.0.4" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3102,7 +3102,7 @@ body.expenses-view-active #app-version-note{
   display:none !important;
 }
 body.expenses-view-active .expenses-module .expenses-app::after{
-  content:"v7.7.0.3" !important;
+  content:"v7.7.0.4" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3135,12 +3135,41 @@ body.profile-edge-swipe-active #profile-view::after{
   visibility:hidden !important;
 }
 
+
+/* ==========================================================================
+   v7.7.0.4 · Multi-Trip boot gate
+   ========================================================================== */
+.trip-boot-placeholder{
+  display:flex;align-items:center;justify-content:center;gap:9px;
+  min-height:58px;margin:2px 0 12px;padding:12px 14px;border-radius:16px;
+  background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.36);
+  box-shadow:0 5px 16px rgba(15,23,42,.05);
+  backdrop-filter:blur(20px) saturate(1.05);
+  -webkit-backdrop-filter:blur(20px) saturate(1.05);
+  color:var(--label-secondary);font-size:calc(11px * var(--font-scale));
+  font-weight:650;
+}
+.trip-boot-placeholder[hidden]{display:none !important;}
+.trip-boot-spinner{
+  width:16px;height:16px;border-radius:999px;
+  border:2px solid rgba(120,120,128,.22);border-top-color:#0a84ff;
+  animation:tripBootSpin .8s linear infinite;
+}
+@keyframes tripBootSpin{to{transform:rotate(360deg)}}
+body.trip-boot-deferred .app-view{visibility:hidden !important;pointer-events:none !important;}
+body.trip-boot-deferred .cloud-safety-strip{display:none !important;}
+html.theme-dark .trip-boot-placeholder,
+html:not(.theme-light):not(.theme-dark) .trip-boot-placeholder{
+  background:rgba(24,24,30,.25);border-color:rgba(255,255,255,.09);
+}
+.profile-nav-surface .trip-boot-placeholder{display:none !important;}
+
 </style>
             <link rel="apple-touch-icon" href="assets/icon/trip_icon.png">
   <link rel="icon" type="image/png" href="assets/icon/trip_icon.png">
-  <link rel="manifest" href="manifest.json?v=7.7.0.3">
+  <link rel="manifest" href="manifest.json?v=7.7.0.4">
   <meta name="apple-mobile-web-app-title" content="關嘉露西生日之旅">
-  <link rel="stylesheet" href="assets/css/expenses.css?v=7.7.0.3">
+  <link rel="stylesheet" href="assets/css/expenses.css?v=7.7.0.4">
 </head>
 <body>
 <div class="bg-fixed"></div>
@@ -3174,6 +3203,11 @@ body.profile-edge-swipe-active #profile-view::after{
           <div class="status-sub" id="status-sub"></div>
         </div>
       </div>
+    </div>
+
+    <div class="trip-boot-placeholder" id="trip-boot-placeholder" hidden aria-live="polite">
+      <span class="trip-boot-spinner" aria-hidden="true"></span>
+      <span>正在載入上次旅程…</span>
     </div>
 
     <div class="cloud-safety-strip" id="cloud-safety-strip" hidden aria-live="polite">
@@ -3547,7 +3581,7 @@ body.profile-edge-swipe-active #profile-view::after{
         <span class="profile-detail-spacer"></span>
       </div>
       <section class="profile-card" aria-label="App 資料">
-        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.7.0.3</strong></div>
+        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.7.0.4</strong></div>
         <div class="profile-meta-row"><span>資料架構</span><strong>Phase 2F</strong></div>
         <div class="profile-meta-row"><span>主要資料來源</span><strong id="app-data-source-label">Firebase / 本機快取</strong></div>
       </section>
@@ -3666,7 +3700,7 @@ body.profile-edge-swipe-active #profile-view::after{
 </div>
 
 <script>
-const APP_VERSION = "7.7.0.3";
+const APP_VERSION = "7.7.0.4";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 window.EXPENSES_MODULE_VERSION = EXPENSES_MODULE_VERSION;
@@ -5295,8 +5329,8 @@ function loadArchivedTrips(){
 
 function initTripLibrarySafe(data){
   bundledTripData=data;
-  if(!tripRenderSignature)tripRenderSignature=tripContentRenderSignature(data);
-  if(!tripWeatherSignature)tripWeatherSignature=weatherRenderSignature(data);
+  if(!tripBootDeferred&&!tripRenderSignature)tripRenderSignature=tripContentRenderSignature(data);
+  if(!tripBootDeferred&&!tripWeatherSignature)tripWeatherSignature=weatherRenderSignature(data);
   import(`./assets/js/trip-schema-service.js?v=${APP_VERSION}`)
     .then(schemaService=>{
       tripLibrarySchemaService=schemaService;
@@ -5330,6 +5364,7 @@ function initTripLibrarySafe(data){
         console.warn("Phase 2B cloud trip catalog unavailable",error);
         tripLibraryCloudState={status:"error",trips:[],error};
         renderTripLibrary();
+        if(tripBootDeferred)stopFirebaseTripLoader({fallback:true});
       });
     })
     .catch(error=>{
@@ -5349,6 +5384,49 @@ let tripLoaderReconcileToken=0;
 const tripLoaderRevisionWaiters=new Set();
 
 function dataTripId(data){return String(data?.tripId||data?.meta?.tripId||data?.meta?.expenses?.tripId||"").trim();}
+
+const TRIP_SESSION_STORAGE_KEY="travel_active_trip_id";
+let tripBootDeferred=false;
+let tripBootPreferredId="";
+function resolveBootPreferredTripId(){
+  try{
+    const url=new URL(location.href);
+    const deep=String(url.searchParams.get("trip")||url.searchParams.get("expensesTrip")||"").trim();
+    if(deep)return deep;
+  }catch(error){}
+  try{return String(localStorage.getItem(TRIP_SESSION_STORAGE_KEY)||"").trim();}catch(error){return"";}
+}
+function beginDeferredTripBoot(bundledData){
+  tripBootPreferredId=resolveBootPreferredTripId();
+  const bundledId=dataTripId(bundledData);
+  tripBootDeferred=Boolean(tripBootPreferredId&&bundledId&&tripBootPreferredId!==bundledId);
+  document.body.classList.toggle("trip-boot-deferred",tripBootDeferred);
+  const placeholder=document.getElementById("trip-boot-placeholder");
+  if(placeholder)placeholder.hidden=!tripBootDeferred;
+  if(tripBootDeferred){
+    const small=document.getElementById("header-title-small");
+    const main=document.getElementById("header-title-main");
+    const chip=document.getElementById("today-chip");
+    const sub=document.getElementById("header-sub");
+    const status=document.getElementById("status-square");
+    if(small)small.textContent="My Trip";
+    if(main)main.textContent="旅程";
+    if(chip)chip.textContent="同步旅程中…";
+    if(sub)sub.textContent="";
+    if(status)status.style.display="none";
+  }
+  return tripBootDeferred;
+}
+function releaseDeferredTripBoot(){
+  if(!tripBootDeferred)return;
+  tripBootDeferred=false;
+  document.body.classList.remove("trip-boot-deferred");
+  const placeholder=document.getElementById("trip-boot-placeholder");
+  if(placeholder)placeholder.hidden=true;
+  const status=document.getElementById("status-square");
+  if(status)status.style.display="";
+  requestAnimationFrame(()=>{updateBottomNavIndicator();updateCollapsingChrome();});
+}
 function currentActiveDayId(){
   const idx=Number(document.querySelector(".day-tab.active")?.dataset?.dayIndex||0);
   return String(window.tripData?.days?.[idx]?.dayId||"");
@@ -5471,6 +5549,7 @@ function applyFirebaseTripData(data,{source="server",tripId=""}={}){
     updateTripLibrarySummaryFromData(data);
   }
   resolveTripLoaderWaiters(data);
+  releaseDeferredTripBoot();
 }
 function applyBundledTripFallback(){
   if(!bundledTripData)return;
@@ -5480,6 +5559,7 @@ function applyBundledTripFallback(){
   if(sig!==tripRenderSignature){render(bundledTripData);runOptionalAppStep("Local travel info render",()=>renderInfo(bundledTripData));runOptionalAppStep("Local weather render",()=>renderWeather(bundledTripData));tripRenderSignature=sig;tripWeatherSignature=weatherRenderSignature(bundledTripData);updateLargeHeaderForView();updateCompactHeader();}
   tripLoaderState={status:"local",source:"local",tripId:dataTripId(bundledTripData),updatedAt:"",error:null};
   setDataSourceLabel("本機 trip.json");updateTripLibrarySummaryFromData(bundledTripData);
+  releaseDeferredTripBoot();
 }
 function stopFirebaseTripLoader({fallback=false}={}){
   if(tripLoaderStop){try{tripLoaderStop();}catch(error){}tripLoaderStop=null;}
@@ -5501,6 +5581,7 @@ async function startFirebaseTripLoader(tripIdInput){
     if(event.status==="permission-denied"||event.status==="error"||event.status==="not-found"){
       tripLoaderState={status:event.status,source:"firebase",tripId,error:event.error||null};
       console.warn("Firebase Trip Loader",event.status,event.error||tripId);
+      if(tripBootDeferred)stopFirebaseTripLoader({fallback:true});
     }
   });
 }
@@ -6898,7 +6979,7 @@ if(window.visualViewport&&bottomNav){
 // Android / Chrome PWA support. Network-only service worker, no aggressive cache.
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("./sw.js?v=7.7.0.3").catch(() => {});
+    navigator.serviceWorker.register("./sw.js?v=7.7.0.4").catch(() => {});
   });
 }
 
@@ -6908,12 +6989,15 @@ fetch(getTripJsonUrl())
   .then(r=>{if(!r.ok)throw new Error("HTTP "+r.status);return r.json();})
   .then(data=>{
     bundledTripData=data;
-    window.tripData=data;
-    // Only the itinerary renderer is critical. Weather, visa data, Firebase and profile
-    // enhancements are isolated so none of them can overwrite an already rendered trip.
-    render(data);
-    runOptionalAppStep("Weather render",()=>renderWeather(data));
-    runOptionalAppStep("Travel info render",()=>renderInfo(data));
+    const deferBundled=beginDeferredTripBoot(data);
+    window.tripData=deferBundled?null:data;
+    // A remembered/deep-linked Firebase Trip wins before first paint.
+    // If it differs from bundled trip.json, never paint the bundled Trip.
+    if(!deferBundled){
+      render(data);
+      runOptionalAppStep("Weather render",()=>renderWeather(data));
+      runOptionalAppStep("Travel info render",()=>renderInfo(data));
+    }
     runOptionalAppStep("Trip library init",()=>initTripLibrarySafe(data));
     runOptionalAppStep("Compact header init",()=>updateCompactHeader());
     requestAnimationFrame(()=>{runOptionalAppStep("Bottom nav update",updateBottomNavIndicator);runOptionalAppStep("Chrome update",updateCollapsingChrome);});

@@ -4882,3 +4882,75 @@ html.theme-light .expenses-module .card{
     -webkit-backdrop-filter:blur(24px) saturate(1.08) !important;
   }
 }
+
+
+/* ==========================================================================
+   v7.7.0.4 · Expense participant selector — iOS-safe custom checkbox
+   ========================================================================== */
+.expenses-module .expense-form-body .checkbox-grid{
+  grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+  gap:8px 10px !important;
+}
+.expenses-module .expense-form-body .checkbox-item{
+  position:relative !important;
+  display:grid !important;
+  grid-template-columns:24px minmax(0,1fr) !important;
+  align-items:center !important;
+  column-gap:9px !important;
+  min-width:0 !important;
+  min-height:42px !important;
+  margin:0 !important;
+  padding:7px 9px !important;
+  border-radius:12px !important;
+  overflow:hidden !important;
+  cursor:pointer;
+}
+.expenses-module .expense-form-body .expense-participant-checkbox{
+  position:absolute !important;
+  width:1px !important;height:1px !important;
+  min-width:1px !important;min-height:1px !important;
+  margin:0 !important;padding:0 !important;border:0 !important;
+  opacity:0 !important;clip-path:inset(50%) !important;
+  -webkit-appearance:none !important;appearance:none !important;
+  pointer-events:none !important;
+}
+.expenses-module .expense-form-body .expense-participant-check{
+  grid-column:1 !important;
+  width:22px !important;height:22px !important;
+  min-width:22px !important;min-height:22px !important;
+  box-sizing:border-box !important;
+  display:grid !important;place-items:center !important;
+  border-radius:7px !important;
+  border:1.5px solid rgba(118,118,128,.34) !important;
+  background:rgba(255,255,255,.50) !important;
+  color:#fff !important;line-height:1 !important;
+  transition:background .12s ease,border-color .12s ease,transform .12s ease !important;
+}
+.expenses-module .expense-form-body .expense-participant-checkbox:checked + .expense-participant-check{
+  background:#0a84ff !important;border-color:#0a84ff !important;
+}
+.expenses-module .expense-form-body .expense-participant-checkbox:checked + .expense-participant-check::after{
+  content:"✓";display:block;font-size:16px;font-weight:850;line-height:1;
+  transform:translateY(-.5px);
+}
+.expenses-module .expense-form-body .checkbox-item:active .expense-participant-check{
+  transform:scale(.94);
+}
+.expenses-module .expense-form-body .expense-participant-name{
+  grid-column:2 !important;
+  min-width:0 !important;display:block !important;
+  font-size:calc(12px * var(--font-scale)) !important;
+  font-weight:650 !important;line-height:1.25 !important;
+  color:var(--expense-text) !important;
+  overflow-wrap:anywhere !important;word-break:normal !important;
+  text-align:left !important;
+}
+html.theme-dark .expenses-module .expense-form-body .expense-participant-check,
+html:not(.theme-light):not(.theme-dark) .expenses-module .expense-form-body .expense-participant-check{
+  background:rgba(255,255,255,.07) !important;
+  border-color:rgba(255,255,255,.18) !important;
+}
+html.theme-dark .expenses-module .expense-form-body .expense-participant-checkbox:checked + .expense-participant-check,
+html:not(.theme-light):not(.theme-dark) .expenses-module .expense-form-body .expense-participant-checkbox:checked + .expense-participant-check{
+  background:#0a84ff !important;border-color:#0a84ff !important;
+}

@@ -1859,8 +1859,9 @@ function initMembers() {
 
   sharedByGroup.innerHTML = members.map(member => `
     <label class="checkbox-item">
-      <input type="checkbox" value="${safeEscape(member)}" checked />
-      ${safeEscape(member)}
+      <input class="expense-participant-checkbox" type="checkbox" value="${safeEscape(member)}" checked />
+      <span class="expense-participant-check" aria-hidden="true"></span>
+      <span class="expense-participant-name">${safeEscape(member)}</span>
     </label>
   `).join("");
   renderMemberManager();
