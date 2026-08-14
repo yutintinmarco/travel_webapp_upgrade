@@ -1,30 +1,53 @@
-const SW_VERSION = "travel-shell-v7.7.0.13";
+/* Travel WebApp Service Worker
+ * v7.7.0.15 · Layer 0 + 1 resilience polish
+ *
+ * Keeps the v7.7.0.14 cold-start behaviour, while hardening installation:
+ *  1. Critical shell assets are transactional. If any critical file cannot be
+ *     fetched, the new worker does not activate and the last working worker / 
+ *     cache remain in control.
+ *  2. Optional assets are best-effort. One missing optional file cannot abort
+ *     the whole precache.
+ *  3. Cache canonicalisation removes only the app's "v" cache-buster. Other
+ *     query parameters are preserved so future semantic URLs cannot collide.
+ *  4. Normal navigation stays cache-first with background revalidation; an
+ *     explicit reload stays network-first.
+ */
+
+const SW_VERSION = "travel-shell-v7.7.0.15";
 const CORE_CACHE = SW_VERSION;
-const CORE_ASSETS = [
+
+// Required for a useful offline launch and remembered-Trip boot.
+const CRITICAL_ASSETS = [
   "./",
   "./index.html",
   "./manifest.json",
   "./trip.json",
-  "./assets/css/expenses.css",
   "./assets/js/auth-service.js",
-  "./assets/js/cloud-safety-service.js",
-  "./assets/js/expenses-module.js",
   "./assets/js/firebase-config.js",
   "./assets/js/firebase-service.js",
   "./assets/js/trip-access-service.js",
-  "./assets/js/trip-activity-service.js",
-  "./assets/js/trip-backup-service.js",
   "./assets/js/trip-catalog-service.js",
-  "./assets/js/trip-destination-service.js",
-  "./assets/js/trip-import-service.js",
   "./assets/js/trip-loader-service.js",
-  "./assets/js/trip-member-service.js",
-  "./assets/js/trip-operation-service.js",
   "./assets/js/trip-render-cache-service.js",
   "./assets/js/trip-schema-service.js",
   "./assets/js/trip-session-service.js",
   "./assets/js/user-preferences-service.js",
   "./assets/icon/trip_icon.png",
+  "./assets/bg/bg_trip_mobile.webp"
+];
+
+// Useful after launch, but a missing file here must never replace a known-good
+// shell with a broken update. These are fetched again on demand if necessary.
+const OPTIONAL_ASSETS = [
+  "./assets/css/expenses.css",
+  "./assets/js/cloud-safety-service.js",
+  "./assets/js/expenses-module.js",
+  "./assets/js/trip-activity-service.js",
+  "./assets/js/trip-backup-service.js",
+  "./assets/js/trip-destination-service.js",
+  "./assets/js/trip-import-service.js",
+  "./assets/js/trip-member-service.js",
+  "./assets/js/trip-operation-service.js",
   "./assets/icon/cx_logo.png",
   "./assets/gallery/demo_city.svg",
   "./assets/gallery/demo_food.svg",
@@ -34,56 +57,126 @@ const CORE_ASSETS = [
   "./assets/gallery/demo_transport.svg"
 ];
 
+const SHELL_KEY = new URL("./index.html", self.location).href;
+
+/* Dynamic imports use ?v=<APP_VERSION> to force a real network check after a
+ * deployment. Cache storage removes only that version key. Any other query
+ * parameter remains part of the cache identity. */
+function cacheKeyFor(request) {
+  const url = new URL(request.url);
+  if (url.origin !== self.location.origin) return request;
+  url.searchParams.delete("v");
+  url.hash = "";
+  return url.href;
+}
+
+function isForcedReload(request) {
+  return request.cache === "reload" || request.cache === "no-store";
+}
+
+async function fetchAndCache(cache, path, { required = false } = {}) {
+  const request = new Request(new URL(path, self.location).href, { cache: "reload" });
+  try {
+    const response = await fetch(request);
+    if (!response || !response.ok) {
+      throw new Error(`Precache HTTP ${response?.status || "unknown"}: ${path}`);
+    }
+    await cache.put(cacheKeyFor(request), response);
+    return true;
+  } catch (error) {
+    if (required) throw error;
+    console.warn("Optional precache skipped", path, error);
+    return false;
+  }
+}
+
 self.addEventListener("install", event => {
-  event.waitUntil(
-    caches.open(CORE_CACHE)
-      .then(cache => cache.addAll(CORE_ASSETS))
-      .then(() => self.skipWaiting())
-  );
+  event.waitUntil((async () => {
+    const cache = await caches.open(CORE_CACHE);
+
+    // Critical shell must be complete before this worker is allowed to replace
+    // the last known-good version.
+    await Promise.all(
+      CRITICAL_ASSETS.map(path => fetchAndCache(cache, path, { required: true }))
+    );
+
+    // Optional UI/modules are best-effort and cannot abort the install.
+    await Promise.all(
+      OPTIONAL_ASSETS.map(path => fetchAndCache(cache, path))
+    );
+
+    await self.skipWaiting();
+  })());
 });
 
 self.addEventListener("activate", event => {
   event.waitUntil(
     caches.keys()
-      .then(keys => Promise.all(keys.filter(key => key.startsWith("travel-shell-") && key !== CORE_CACHE).map(key => caches.delete(key))))
+      .then(keys => Promise.all(
+        keys.filter(key => key.startsWith("travel-shell-") && key !== CORE_CACHE)
+            .map(key => caches.delete(key))
+      ))
       .then(() => self.clients.claim())
   );
 });
 
+function revalidate(request, key) {
+  return fetch(request)
+    .then(response => {
+      if (response && response.ok) {
+        const copy = response.clone();
+        caches.open(CORE_CACHE).then(cache => cache.put(key, copy)).catch(() => {});
+      }
+      return response;
+    });
+}
+
 self.addEventListener("fetch", event => {
-  if (event.request.method !== "GET") return;
-  const url = new URL(event.request.url);
+  const request = event.request;
+  if (request.method !== "GET") return;
+
+  const url = new URL(request.url);
 
   // Firebase / Google requests stay network controlled; Firestore's own
-  // persistent IndexedDB cache is responsible for offline cloud data.
+  // persistent IndexedDB cache remains responsible for offline cloud data.
   if (url.origin !== self.location.origin) {
-    event.respondWith(fetch(event.request));
+    event.respondWith(fetch(request));
     return;
   }
 
-  if (event.request.mode === "navigate") {
+  if (request.mode === "navigate") {
+    // 下拉更新行程 and any explicit hard reload keep network-first semantics.
+    if (isForcedReload(request)) {
+      event.respondWith(
+        revalidate(request, SHELL_KEY).catch(() => caches.match(SHELL_KEY))
+      );
+      return;
+    }
+
+    // Normal launch: paint the last known shell immediately and refresh it in
+    // the background for the next launch.
     event.respondWith(
-      fetch(event.request)
-        .then(response => {
-          const copy = response.clone();
-          caches.open(CORE_CACHE).then(cache => cache.put("./index.html", copy));
-          return response;
-        })
-        .catch(() => caches.match("./index.html"))
+      caches.match(SHELL_KEY).then(cached => {
+        if (cached) {
+          event.waitUntil(revalidate(request, SHELL_KEY).catch(() => {}));
+          return cached;
+        }
+        return revalidate(request, SHELL_KEY);
+      })
     );
     return;
   }
 
+  const key = cacheKeyFor(request);
   event.respondWith(
-    caches.match(event.request).then(cached => {
-      const network = fetch(event.request).then(response => {
-        if (response && response.ok) {
-          const copy = response.clone();
-          caches.open(CORE_CACHE).then(cache => cache.put(event.request, copy));
-        }
-        return response;
-      }).catch(() => cached);
-      return cached || network;
+    caches.match(key).then(cached => {
+      if (cached) {
+        event.waitUntil(revalidate(request, key).catch(() => {}));
+        return cached;
+      }
+      // Preserve the real fetch failure when offline; never resolve a cache miss
+      // to undefined / an opaque broken response.
+      return revalidate(request, key);
     })
   );
 });

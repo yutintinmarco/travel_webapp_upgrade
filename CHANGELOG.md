@@ -1,3 +1,108 @@
+# Travel WebApp — v7.7.0.15
+
+## Phase 2F · Layer 0 + 1 resilience polish
+
+### Service Worker install hardening
+
+• Split App Shell precache into critical and optional groups.
+• Critical shell assets are now transactional: if any required file cannot be fetched, the new Service Worker does not activate, so the last known-good worker and cache remain in control.
+• Optional modules and gallery assets remain best-effort; one missing optional file cannot abort the whole install.
+• Cache canonicalisation now removes only the `v` cache-buster instead of deleting the entire query string. Future semantic query parameters therefore remain part of the cache identity.
+• Normal navigation remains cache-first with background revalidation. Explicit reload / pull-to-refresh remains network-first.
+• Offline + uncached requests continue to surface the real network failure rather than resolving to an invalid undefined response.
+
+### Layer 0 + 1 behaviour retained from v7.7.0.14
+
+• `expenses.css` stays non-render-blocking at boot and is activated before the Expense view mounts.
+• Firebase / Google resource hints remain enabled.
+• `bg_trip_mobile.webp` remains part of the offline shell.
+• Removed stale source comment that described the Service Worker as network-only.
+
+### Package and Firebase
+
+• App / manifest / Service Worker version references updated to v7.7.0.15.
+• Firestore Rules are unchanged.
+• Firestore indexes are unchanged.
+• No Firebase Rules redeploy is required.
+
+## Build QA
+
+• JavaScript syntax, inline JavaScript, JSON validity, duplicate static IDs, Service Worker precache paths, Firestore Rules structural sanity, ZIP integrity and byte-identity of untouched files checked.
+• Protected v7.3.13 Profile Navigation compositor source remains unchanged from v7.7.0.14.
+
+---
+
+# Travel WebApp — v7.7.0.14
+
+## Phase 2F Cold-Start Pass (Layer 0 + Layer 1)
+
+Internal only. No UI change, no UX change, no feature change, no Firestore
+schema change, no permission model change, no navigation compositor change.
+Three files touched: `sw.js`, `index.html`, `manifest.json`.
+
+### 1. Service Worker precache was silently dead (correctness fix)
+
+• `CORE_ASSETS` stored bare paths such as `./assets/js/trip-loader-service.js`, but every real request carried `?v=<APP_VERSION>`.
+• `caches.match(request)` counts the query string by default, so **every precached file missed on every request** and the entire precache had been unused since cache busting was introduced.
+• Same-origin requests are now normalised to a search-stripped cache key for both reads and writes. The `?v=` buster still forces a genuine network fetch when the app version changes, but it no longer fragments or bypasses the cache.
+• Writes use the same normalised key, so repeated versions cannot accumulate duplicate cache entries.
+• `install` now puts each asset individually instead of `cache.addAll()`, so one unavailable optional asset can no longer abort the whole precache.
+
+### 2. Navigation changed from network-first to cache-first
+
+• Previously every launch waited for a 433KB `index.html` over the network before the first paint, which cancelled out the IndexedDB instant cache entirely.
+• Normal launches are now served from the shell cache immediately, with a background revalidate so the next launch already holds the newer build.
+• **A forced reload keeps network-first semantics.** `下拉更新行程` and the refresh button issue a reload-mode navigation, which is detected and routed to the network first. Pull to refresh behaves exactly as before.
+• Offline navigation still falls back to the cached shell. An offline request with no cache entry now surfaces the real network failure instead of resolving with `undefined`.
+
+### 3. Cache-blocking meta tags removed
+
+• `Cache-Control: no-cache, no-store, must-revalidate`, `Pragma` and `Expires` were removed from `<head>`.
+• They forced every cold start back onto the network and directly contradicted the Service Worker shell strategy. Freshness is now owned by `SW_VERSION` plus the `?v=` cache busters.
+
+### 4. `expenses.css` is no longer render-blocking
+
+• 144KB of CSS was blocking the itinerary's first paint even though every rule is scoped under `.expenses-module` and the matching JavaScript module is lazily imported.
+• First-paint CSS drops from roughly 315KB to roughly 171KB, a 46% reduction, with no change to the inline stylesheet.
+• The link now starts as `media="print"`, so the browser still downloads it in parallel at low priority but never blocks paint or costs a style recalculation during boot.
+• `ensureExpensesStylesheet()` flips it to `media="all"` and waits for it **before** the 支出 view mounts, so expenses markup can never render unstyled. Second and later opens mount synchronously.
+• A failed or stalled stylesheet can never leave a dead 支出 tab: the gate falls through on `error` and on a 3 second timeout.
+• A `<noscript>` fallback keeps the stylesheet fully blocking when JavaScript is unavailable.
+
+### 5. Resource hints added
+
+• The app makes 17 dynamic imports to `www.gstatic.com` and had zero resource hints, so the first Firebase import paid a full DNS plus TLS handshake.
+• Added `preconnect` for `www.gstatic.com` and `firestore.googleapis.com`, and `dns-prefetch` for `identitytoolkit.googleapis.com` and `api.open-meteo.com`.
+
+### 6. Offline shell completeness
+
+• `assets/bg/bg_trip_mobile.webp` (176KB) is now precached. It is the largest and most visible asset and had been missing from the offline shell, while a 70KB airline logo was already included.
+
+### Package and Firebase
+
+• Service Worker shell cache updated to `travel-shell-v7.7.0.14`.
+• Manifest, stylesheet and Service Worker cache-buster query strings updated to v7.7.0.14.
+• Firestore Rules unchanged. Firestore indexes unchanged. No Firebase Rules redeploy required.
+• `expenses-module.js`, `expenses.css` and every service under `assets/js/` are byte-identical to v7.7.0.13.
+
+## Build QA
+
+• 10 Service Worker behaviour tests pass: versioned asset cache hit, versioned stylesheet cache hit, cache-first navigation, background revalidate, forced-reload network-first, no duplicate cache entries, cross-origin passthrough, offline shell fallback, uncached network fallthrough, offline-and-uncached rejection.
+• 7 stylesheet gate tests pass: no boot-time media flip, no unstyled mount, instant mount when already loaded, synchronous re-open, error fallthrough, stall timeout, missing-element fallthrough.
+• Both `index.html` script blocks and `sw.js` pass syntax validation.
+• `index.html` diff versus v7.7.0.13: 48 lines added, 10 removed, of which the majority are comments and version strings.
+
+### Verification checklist after deploy
+
+1. Open DevTools, Application, Service Workers and confirm `travel-shell-v7.7.0.14` is active, then Cache Storage should show entries **without** `?v=` suffixes.
+2. Hard reload once, then close and relaunch. The second launch should paint the shell with no network request for `index.html` on the critical path.
+3. Network tab: `expenses.css` should show priority Lowest and must not appear as render-blocking.
+4. Tap 支出 and confirm the module renders fully styled on first open, including dark mode.
+5. Pull to refresh on the itinerary and confirm `index.html` is fetched from the network.
+6. Switch to airplane mode and relaunch. The shell, the background image and the itinerary from the render cache should all still appear.
+
+---
+
 # Travel WebApp — v7.7.0.13
 
 ## Phase 2F current build
