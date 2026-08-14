@@ -3081,7 +3081,7 @@ body.expenses-view-active #app-version-note{
 #snacks-view::after,
 #info-view::after,
 #profile-view::after{
-  content:"v7.7.0.4" !important;
+  content:"v7.7.0.5" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3102,7 +3102,7 @@ body.expenses-view-active #app-version-note{
   display:none !important;
 }
 body.expenses-view-active .expenses-module .expenses-app::after{
-  content:"v7.7.0.4" !important;
+  content:"v7.7.0.5" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3137,7 +3137,7 @@ body.profile-edge-swipe-active #profile-view::after{
 
 
 /* ==========================================================================
-   v7.7.0.4 · Multi-Trip boot gate
+   v7.7.0.5 · Multi-Trip boot gate
    ========================================================================== */
 .trip-boot-placeholder{
   display:flex;align-items:center;justify-content:center;gap:9px;
@@ -3167,9 +3167,9 @@ html:not(.theme-light):not(.theme-dark) .trip-boot-placeholder{
 </style>
             <link rel="apple-touch-icon" href="assets/icon/trip_icon.png">
   <link rel="icon" type="image/png" href="assets/icon/trip_icon.png">
-  <link rel="manifest" href="manifest.json?v=7.7.0.4">
+  <link rel="manifest" href="manifest.json?v=7.7.0.5">
   <meta name="apple-mobile-web-app-title" content="關嘉露西生日之旅">
-  <link rel="stylesheet" href="assets/css/expenses.css?v=7.7.0.4">
+  <link rel="stylesheet" href="assets/css/expenses.css?v=7.7.0.5">
 </head>
 <body>
 <div class="bg-fixed"></div>
@@ -3581,7 +3581,7 @@ html:not(.theme-light):not(.theme-dark) .trip-boot-placeholder{
         <span class="profile-detail-spacer"></span>
       </div>
       <section class="profile-card" aria-label="App 資料">
-        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.7.0.4</strong></div>
+        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.7.0.5</strong></div>
         <div class="profile-meta-row"><span>資料架構</span><strong>Phase 2F</strong></div>
         <div class="profile-meta-row"><span>主要資料來源</span><strong id="app-data-source-label">Firebase / 本機快取</strong></div>
       </section>
@@ -3700,7 +3700,7 @@ html:not(.theme-light):not(.theme-dark) .trip-boot-placeholder{
 </div>
 
 <script>
-const APP_VERSION = "7.7.0.4";
+const APP_VERSION = "7.7.0.5";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 window.EXPENSES_MODULE_VERSION = EXPENSES_MODULE_VERSION;
@@ -5173,6 +5173,9 @@ let tripAccessService=null;
 let tripLoaderStop=null;
 let tripLoaderActiveId="";
 let tripLoaderState={status:"local",source:"local",tripId:"",updatedAt:"",error:null};
+let tripRenderCacheServicePromise=null;
+let tripRenderCacheService=null;
+let tripInstantBootToken=0;
 let tripRenderSignature="";
 let tripWeatherSignature="";
 let nowIndicatorTimer=0;
@@ -5195,7 +5198,7 @@ function currentTripLibraryRow(){
     <span class="trip-library-copy">
       <strong>${tripLibraryEsc(tripLibrarySummary.title||currentId)}</strong>
       <small>${tripLibraryEsc(tripLibrarySummary.dateRange||[tripLibrarySummary.startDate,tripLibrarySummary.endDate].filter(Boolean).join(" → ")||currentId)}</small>
-      <span class="trip-library-meta"><span class="trip-library-pill is-current">目前</span><span class="trip-library-pill">${tripLoaderState.status==="ready"&&tripLoaderState.tripId===currentId?(tripLoaderState.source==="cache"?"Firebase 快取":"Firebase"):"本機 JSON"}</span>${statusLabel?`<span class="trip-library-pill">${statusLabel}</span>`:""}${importPill}${currentRole?`<span class="trip-library-pill is-role">${currentRole}</span>`:""}</span>
+      <span class="trip-library-meta"><span class="trip-library-pill is-current">目前</span><span class="trip-library-pill">${tripLoaderState.status==="ready"&&tripLoaderState.tripId===currentId?(tripLoaderState.source==="instant-cache"?"即時快取":(tripLoaderState.source==="cache"?"Firebase 快取":"Firebase")):"本機 JSON"}</span>${statusLabel?`<span class="trip-library-pill">${statusLabel}</span>`:""}${importPill}${currentRole?`<span class="trip-library-pill is-role">${currentRole}</span>`:""}</span>
     </span>
     <span class="trip-library-side"><strong>${tripLibrarySummary.dayCount} 日</strong><small>${tripLibrarySummary.itemCount} 項</small></span>
   </div>`;
@@ -5358,6 +5361,10 @@ function initTripLibrarySafe(data){
           if(archiveToggle) archiveToggle.setAttribute("aria-expanded","false");
           restartMyTripInviteSubscription(user||null);
           if(!user){tripLibraryCloudState={status:"signed-out",trips:[],error:null};renderTripLibrary();stopFirebaseTripLoader({fallback:true});return;}
+          // v7.7.0.5: do not wait for the full Trip catalog + role fan-out before
+          // restoring the last active Trip. Auth identity is enough to safely read
+          // the user-bound render cache and start the Firestore listener directly.
+          bootstrapRememberedFirebaseTrip(user).catch(error=>console.warn("Instant Trip bootstrap",error));
           restartActiveTripCatalog();
         });
       }).catch(error=>{
@@ -5462,7 +5469,7 @@ function refreshAppDataDiagnostics(){
   const revision=Number(data.revision||0);
 
   let syncLabel="未連接";
-  if(loader.status==="ready") syncLabel=loader.source==="cache"?"Firebase 快取已載入":"已同步";
+  if(loader.status==="ready") syncLabel=loader.source==="instant-cache"?"即時旅程快取已載入":(loader.source==="cache"?"Firebase 快取已載入":"已同步");
   else if(loader.status==="loading") syncLabel="正在連接 Firebase…";
   else if(loader.status==="syncing") syncLabel="正在同步…";
   else if(loader.status==="local") syncLabel="使用本機資料";
@@ -5500,6 +5507,52 @@ async function getTripLoaderServices(){
   ]).then(([loader,session,access])=>{tripLoaderService=loader;tripSessionService=session;tripAccessService=access;return{loader,session,access};});
   return tripLoaderInitPromise;
 }
+async function getTripRenderCacheService(){
+  if(!tripRenderCacheServicePromise)tripRenderCacheServicePromise=import(`./assets/js/trip-render-cache-service.js?v=${APP_VERSION}`).then(service=>{tripRenderCacheService=service;return service;});
+  return tripRenderCacheServicePromise;
+}
+function currentCacheUid(user=tripLibraryCurrentUser||window.__appAuthUser){return String(user?.uid||"").trim();}
+async function persistInstantTripCache(data){
+  const tripId=dataTripId(data),uid=currentCacheUid();
+  if(!tripId||!uid)return false;
+  try{const service=await getTripRenderCacheService();return await service.writeTripRenderCache(uid,tripId,data);}catch(error){console.warn("Trip render cache persist",error);return false;}
+}
+async function invalidateInstantTripCache(tripIdInput,user=tripLibraryCurrentUser||window.__appAuthUser){
+  const tripId=String(tripIdInput||"").trim(),uid=currentCacheUid(user);
+  if(!tripId||!uid)return false;
+  try{const service=await getTripRenderCacheService();return await service.deleteTripRenderCache(uid,tripId);}catch(error){return false;}
+}
+async function applyInstantTripCache(tripIdInput,user){
+  const tripId=String(tripIdInput||"").trim(),uid=currentCacheUid(user);
+  if(!tripId||!uid)return false;
+  try{
+    const service=await getTripRenderCacheService();
+    const cached=await service.readTripRenderCache(uid,tripId);
+    if(!cached?.data||dataTripId(cached.data)!==tripId)return false;
+    // A Firestore result that arrived while IndexedDB was opening always wins.
+    if(tripLoaderActiveId===tripId&&tripLoaderState.status==="ready"&&tripLoaderState.source!=="instant-cache")return false;
+    const liveRevision=dataTripId(window.tripData)===tripId?Number(window.tripData?.revision)||0:0;
+    if(liveRevision>Number(cached.revision||0)&&tripLoaderState.source!=="instant-cache")return false;
+    applyFirebaseTripData(cached.data,{source:"instant-cache",tripId});
+    return true;
+  }catch(error){
+    console.warn("Trip render cache read skipped",error);
+    return false;
+  }
+}
+async function bootstrapRememberedFirebaseTrip(user){
+  const uid=currentCacheUid(user);
+  const tripId=tripBootPreferredId||resolveBootPreferredTripId();
+  if(!uid||!tripId)return false;
+  const token=++tripInstantBootToken;
+  // Read the fully assembled app cache and start Firestore at the same time.
+  // The cache can paint immediately; Firestore remains authoritative and will
+  // replace it as soon as cache/server snapshots finish assembling.
+  const cacheTask=applyInstantTripCache(tripId,user);
+  const loaderTask=startFirebaseTripLoader(tripId);
+  await Promise.allSettled([cacheTask,loaderTask]);
+  return token===tripInstantBootToken;
+}
 function resolveTripLoaderWaiters(data){
   const id=dataTripId(data),revision=Number(data?.revision)||0;
   [...tripLoaderRevisionWaiters].forEach(waiter=>{if(waiter.tripId===id&&revision>=waiter.revision){tripLoaderRevisionWaiters.delete(waiter);clearTimeout(waiter.timer);waiter.resolve(true);}});
@@ -5531,7 +5584,7 @@ function applyFirebaseTripData(data,{source="server",tripId=""}={}){
   const oldTeam=sameTrip?activeTeam:"all";
   const oldScroll=sameTrip?Math.max(0,Number(scrollShell?.scrollTop||0)):0;
   tripLoaderState={status:"ready",source,tripId:nextId,updatedAt:data?.cloudMeta?.updatedAt||"",error:null};
-  setDataSourceLabel(source==="cache"?"Firebase 快取":"Firebase");
+  setDataSourceLabel(source==="instant-cache"?"即時旅程快取":(source==="cache"?"Firebase 快取":"Firebase"));
   if(nextSignature!==tripRenderSignature){
     window.tripData=data;
     render(data);
@@ -5550,6 +5603,9 @@ function applyFirebaseTripData(data,{source="server",tripId=""}={}){
   }
   resolveTripLoaderWaiters(data);
   releaseDeferredTripBoot();
+  // Only Firestore-ready data refreshes the app-owned render cache. Reading the
+  // render cache itself must never rewrite the same stale entry.
+  if(source!=="instant-cache")persistInstantTripCache(data).catch(()=>{});
 }
 function applyBundledTripFallback(){
   if(!bundledTripData)return;
@@ -5581,7 +5637,13 @@ async function startFirebaseTripLoader(tripIdInput){
     if(event.status==="permission-denied"||event.status==="error"||event.status==="not-found"){
       tripLoaderState={status:event.status,source:"firebase",tripId,error:event.error||null};
       console.warn("Firebase Trip Loader",event.status,event.error||tripId);
-      if(tripBootDeferred)stopFirebaseTripLoader({fallback:true});
+      if(event.status==="permission-denied"||event.status==="not-found"){
+        invalidateInstantTripCache(tripId).catch(()=>{});
+        stopFirebaseTripLoader({fallback:true});
+        if(tripLibraryCloudState.status==="ready")reconcileFirebaseTripLoader().catch(()=>{});
+      }else if(tripBootDeferred){
+        stopFirebaseTripLoader({fallback:true});
+      }
     }
   });
 }
@@ -6421,6 +6483,7 @@ window.addEventListener("app-trip-access",event=>{
   accessRevokedState=Boolean(currentId && detail.ready && detail.signedIn && !detail.role);
   renderCloudSafetyStrip();
   if(accessRevokedState){
+    invalidateInstantTripCache(currentId).catch(()=>{});
     reconcileFirebaseTripLoader().catch(error=>console.warn("Access revoke reconcile",error));
   }
 });
@@ -6979,7 +7042,7 @@ if(window.visualViewport&&bottomNav){
 // Android / Chrome PWA support. Network-only service worker, no aggressive cache.
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("./sw.js?v=7.7.0.4").catch(() => {});
+    navigator.serviceWorker.register("./sw.js?v=7.7.0.5").catch(() => {});
   });
 }
 

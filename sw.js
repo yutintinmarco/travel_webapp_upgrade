@@ -1,4 +1,4 @@
-const SW_VERSION = "travel-shell-v7.7.0.4";
+const SW_VERSION = "travel-shell-v7.7.0.5";
 const CORE_CACHE = SW_VERSION;
 const CORE_ASSETS = [
   "./",
@@ -19,6 +19,7 @@ const CORE_ASSETS = [
   "./assets/js/trip-loader-service.js",
   "./assets/js/trip-member-service.js",
   "./assets/js/trip-operation-service.js",
+  "./assets/js/trip-render-cache-service.js",
   "./assets/js/trip-schema-service.js",
   "./assets/js/trip-session-service.js",
   "./assets/js/user-preferences-service.js",
