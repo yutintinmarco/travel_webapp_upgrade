@@ -5052,3 +5052,107 @@ html:not(.theme-light):not(.theme-dark) .expenses-module .expense-form-body .exp
     max-height: min(52dvh, 460px) !important;
   }
 }
+
+
+/* ==========================================================================
+   v7.7.4.2 · App-wide sheet action harmony
+   One placement model for modal-level actions: header close, content body,
+   then a bottom action dock. Inline field actions remain beside their field.
+   ========================================================================== */
+.expenses-module .expense-presentation-sheet .modal-footer-actions,
+.expenses-module .expense-presentation-sheet .sticky-modal-actions {
+  grid-auto-flow: row !important;
+  grid-auto-columns: auto !important;
+  grid-template-columns: repeat(auto-fit, minmax(0, 1fr)) !important;
+  gap: 8px !important;
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 8px 16px max(8px, calc(env(safe-area-inset-bottom, 0px) - 10px)) !important;
+  border-top: 0 !important;
+  background: rgba(248,248,250,0.96) !important;
+  box-shadow: 0 -8px 20px rgba(15,23,42,0.025) !important;
+  backdrop-filter: blur(24px) saturate(1.18) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(1.18) !important;
+}
+.expenses-module .expense-presentation-sheet .modal-footer-actions.expense-action-stack {
+  grid-template-columns: 1fr !important;
+}
+.expenses-module .expense-presentation-sheet .modal-footer-actions.expense-actions-unavailable {
+  display: none !important;
+}
+.expenses-module .expense-presentation-sheet .modal-footer-actions button:not(.modal-close-btn),
+.expenses-module .expense-presentation-sheet .sticky-modal-actions button:not(.modal-close-btn) {
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 48px !important;
+  margin: 0 !important;
+  padding: 11px 14px !important;
+  border-radius: 14px !important;
+  border: 1px solid transparent !important;
+  font-size: calc(13px * var(--font-scale)) !important;
+  font-weight: 760 !important;
+  line-height: 1.15 !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.20) !important;
+}
+.expenses-module .expense-sheet-action-primary {
+  background: var(--expense-primary) !important;
+  border-color: color-mix(in srgb, var(--expense-primary) 86%, #fff) !important;
+  color: var(--expense-primary-text) !important;
+}
+.expenses-module .expense-sheet-action-secondary {
+  background: rgba(255,255,255,0.68) !important;
+  border-color: rgba(60,60,67,0.15) !important;
+  color: var(--expense-text) !important;
+}
+.expenses-module .expense-sheet-action-danger {
+  background: #ff3b30 !important;
+  border-color: #ff3b30 !important;
+  color: #fff !important;
+}
+.expenses-module .expense-presentation-sheet #expenseDetailFooterActions.modal-footer-actions {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+}
+.expenses-module .expense-presentation-sheet #expenseDetailFooterActions.modal-footer-actions button {
+  min-height: 48px !important;
+  height: auto !important;
+  border-radius: 14px !important;
+}
+.expenses-module .expense-presentation-sheet .backup-actions:empty,
+.expenses-module .expense-presentation-sheet .form-actions:empty {
+  display: none !important;
+}
+
+/* The home-indicator clearance remains safe, but no longer reads as a second
+   white bar beneath the primary action. */
+.expenses-module .expense-presentation-sheet > .modal-card {
+  background: rgba(248,248,250,0.96) !important;
+}
+.expenses-module .expense-presentation-sheet .modal-body-scroll {
+  padding-bottom: 12px !important;
+}
+.expenses-module .expense-presentation-sheet[data-sheet-size="compact"] .modal-body-scroll {
+  padding-bottom: 10px !important;
+}
+
+html.theme-dark .expenses-module .expense-presentation-sheet .modal-footer-actions,
+html.theme-dark .expenses-module .expense-presentation-sheet .sticky-modal-actions {
+  background: rgba(28,28,34,0.96) !important;
+  box-shadow: 0 -8px 20px rgba(0,0,0,0.08) !important;
+}
+html.theme-dark .expenses-module .expense-sheet-action-secondary {
+  background: rgba(255,255,255,0.075) !important;
+  border-color: rgba(255,255,255,0.13) !important;
+  color: #f5f5f7 !important;
+}
+@media (prefers-color-scheme: dark) {
+  html:not(.theme-light):not(.theme-dark) .expenses-module .expense-presentation-sheet .modal-footer-actions,
+  html:not(.theme-light):not(.theme-dark) .expenses-module .expense-presentation-sheet .sticky-modal-actions {
+    background: rgba(28,28,34,0.96) !important;
+    box-shadow: 0 -8px 20px rgba(0,0,0,0.08) !important;
+  }
+  html:not(.theme-light):not(.theme-dark) .expenses-module .expense-sheet-action-secondary {
+    background: rgba(255,255,255,0.075) !important;
+    border-color: rgba(255,255,255,0.13) !important;
+    color: #f5f5f7 !important;
+  }
+}
