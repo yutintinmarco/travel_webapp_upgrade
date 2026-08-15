@@ -11,10 +11,10 @@
   <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
   <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
   <link rel="dns-prefetch" href="https://api.open-meteo.com">
-  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?v=7.7.2.1">
+  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?v=7.7.2.2">
   <title id="page-title">行程</title>
   <script>
-  // v7.7.2.1 · Native warm boot. Apply synchronous user / Trip appearance
+  // v7.7.2.2 · Native warm boot + temporal header harmony. Apply synchronous user / Trip appearance
   // state before the first body paint, then let IndexedDB + Firestore reconcile
   // silently. This prevents the default palette / background / font size from
   // flashing for a frame before the remembered Firebase Trip is available.
@@ -88,7 +88,13 @@
 .header-title-small { font-size: calc(13px * var(--font-scale)); color: #111; margin-bottom: 2px; text-shadow: 0 1px 1px rgba(255,255,255,0.18); }
 .header-title-main { font-size: calc(20px * var(--font-scale)); font-weight: 700; margin-bottom: 2px; text-shadow: 0 1px 3px rgba(0,0,0,0.10); }
 .header-sub-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-top: 6px; }
-.header-sub-text { font-size: calc(12px * var(--font-scale)); color: #000; line-height: 1.5; flex: 1; }
+.header-sub-copy { flex: 1; min-width: 0; }
+.header-sub-text { font-size: calc(12px * var(--font-scale)); color: #000; line-height: 1.5; }
+.trip-temporal-note { margin-top: 4px; display: flex; align-items: center; gap: 6px; font-size: calc(10px * var(--font-scale)); line-height: 1.35; color: rgba(40,40,46,0.68); }
+.trip-temporal-note[hidden] { display: none !important; }
+.trip-temporal-note::before { content: ""; width: 5px; height: 5px; border-radius: 999px; flex: 0 0 auto; background: var(--accent-color); opacity: 0.72; box-shadow: 0 0 0 2px rgba(255,255,255,0.20); }
+.trip-temporal-note[data-state="completed"] { color: rgba(40,40,46,0.58); }
+.trip-temporal-note[data-state="completed"]::before { opacity: 0.42; }
 .header-right { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
 .today-chip { font-size: calc(11px * var(--font-scale)); padding: 3px 10px; border-radius: 999px; background: rgba(255,255,255,0.82); border: 1px solid rgba(255,255,255,0.72); color: #333; max-width: 150px; text-align: right; line-height: 1.4; box-shadow: 0 2px 6px rgba(15,23,42,0.08); }
 .today-chip.active { border-color: #f5c542; background: #fff7d1; color: #5c4300; }
@@ -127,9 +133,6 @@
   -webkit-appearance: none;
   appearance: none;
 }
-.status-square { min-width: 88px; min-height: 44px; padding: 4px 8px; border-radius: 12px; background: rgba(245,245,247,0.55); border: 1px solid rgba(255,255,255,0.45); box-shadow: 0 4px 10px rgba(15,23,42,0.05); text-align: center; display: none; flex-direction: column; justify-content: center; align-items: center; }
-.status-main { font-size: calc(12px * var(--font-scale)); font-weight: 600; margin-bottom: 1px; color: #222; }
-.status-sub { font-size: calc(9px * var(--font-scale)); color: #666; }
 .pull-indicator { font-size: calc(11px * var(--font-scale)); color: #777; text-align: center; margin-bottom: 8px; opacity: 0; transform: translateY(-6px); transition: opacity 0.15s ease, transform 0.15s ease; }
 .pull-indicator.show { opacity: 1; transform: translateY(0); }
 
@@ -407,9 +410,8 @@ html.theme-light .theme-btn { color: #111; }
   html:not(.theme-light):not(.theme-dark) .font-btn:active,
   html:not(.theme-light):not(.theme-dark) .refresh-btn:active,
   html:not(.theme-light):not(.theme-dark) .theme-btn:active { background: rgba(60,60,68,0.90); }
-  html:not(.theme-light):not(.theme-dark) .status-square { background: rgba(30,30,36,0.72); border-color: rgba(255,255,255,0.10); }
-  html:not(.theme-light):not(.theme-dark) .status-main { color: #f0f0f2; }
-  html:not(.theme-light):not(.theme-dark) .status-sub { color: rgba(200,200,210,0.75); }
+  html:not(.theme-light):not(.theme-dark) .trip-temporal-note { color: rgba(230,230,236,0.68); }
+  html:not(.theme-light):not(.theme-dark) .trip-temporal-note[data-state="completed"] { color: rgba(230,230,236,0.56); }
   html:not(.theme-light):not(.theme-dark) .pull-indicator { color: rgba(200,200,210,0.70); }
   html:not(.theme-light):not(.theme-dark) .team-btn { background: rgba(36,36,42,0.75); border-color: rgba(255,255,255,0.12); color: rgba(220,220,228,0.80); }
   html:not(.theme-light):not(.theme-dark) .team-btn.active-all { background: rgba(200,200,210,0.18); border: 2px solid rgba(220,220,230,0.70); color: #f0f0f2; font-weight: 700; }
@@ -486,9 +488,8 @@ html.theme-dark .today-chip { background: rgba(40,40,46,0.80); border-color: rgb
 html.theme-dark .today-chip.active { background: rgba(92,67,0,0.75); border-color: #c9a030; color: #ffe9a0; }
 html.theme-dark .font-btn, html.theme-dark .refresh-btn, html.theme-dark .theme-btn { background: rgba(44,44,50,0.80); border-color: rgba(255,255,255,0.14); color: #e0e0e4; -webkit-text-fill-color: #e0e0e4; }
 html.theme-dark .font-btn:active, html.theme-dark .refresh-btn:active, html.theme-dark .theme-btn:active { background: rgba(60,60,68,0.90); }
-html.theme-dark .status-square { background: rgba(30,30,36,0.72); border-color: rgba(255,255,255,0.10); }
-html.theme-dark .status-main { color: #f0f0f2; }
-html.theme-dark .status-sub { color: rgba(200,200,210,0.75); }
+html.theme-dark .trip-temporal-note { color: rgba(230,230,236,0.68); }
+html.theme-dark .trip-temporal-note[data-state="completed"] { color: rgba(230,230,236,0.56); }
 html.theme-dark .pull-indicator { color: rgba(200,200,210,0.70); }
 html.theme-dark .team-btn { background: rgba(36,36,42,0.75); border-color: rgba(255,255,255,0.12); color: rgba(220,220,228,0.80); }
 html.theme-dark .team-btn.active-all { background: rgba(200,200,210,0.18); border: 2px solid rgba(220,220,230,0.70); color: #f0f0f2; font-weight: 700; }
@@ -1868,7 +1869,7 @@ body.expenses-view-active .expense-header-actions { display: flex; }
 body.expenses-view-active #today-chip,
 body.expenses-view-active .font-controls { display: none !important; }
 body.expenses-view-active .header-sub-row { margin-top: 4px; }
-body.expenses-view-active #status-square { display: none !important; }
+body.expenses-view-active #trip-temporal-note { display: none !important; }
 html.theme-dark .expense-header-action {
   background: rgba(44,44,52,0.72);
   border-color: rgba(255,255,255,0.10);
@@ -1921,7 +1922,7 @@ html.theme-dark .expense-compact-action { color: #64a8ff; }
 .expense-compact-actions { display: none !important; }
 body.expenses-view-active #today-chip,
 body.expenses-view-active .font-controls { display: flex !important; }
-body.expenses-view-active #status-square { display: none !important; }
+body.expenses-view-active #trip-temporal-note { display: none !important; }
 .header-right { gap: 7px; }
 .profile-theme-compat { position: absolute !important; width: 1px !important; height: 1px !important; opacity: 0 !important; pointer-events: none !important; overflow: hidden !important; }
 #profile-view { padding-bottom: calc(118px + env(safe-area-inset-bottom, 0px)); }
@@ -3239,7 +3240,7 @@ body.expenses-view-active #app-version-note{
 #snacks-view::after,
 #info-view::after,
 #profile-view::after{
-  content:"v7.7.2.1" !important;
+  content:"v7.7.2.2" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3260,7 +3261,7 @@ body.expenses-view-active #app-version-note{
   display:none !important;
 }
 body.expenses-view-active .expenses-module .expenses-app::after{
-  content:"v7.7.2.1" !important;
+  content:"v7.7.2.2" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3325,7 +3326,7 @@ html:not(.theme-light):not(.theme-dark) .trip-boot-placeholder{
 </style>
             <link rel="apple-touch-icon" href="assets/icon/trip_icon.png">
   <link rel="icon" type="image/png" href="assets/icon/trip_icon.png">
-  <link rel="manifest" href="manifest.json?v=7.7.2.1">
+  <link rel="manifest" href="manifest.json?v=7.7.2.2">
   <meta name="apple-mobile-web-app-title" content="關嘉露西生日之旅">
   <!-- v7.7.1.2: expenses.css is 144KB and every rule is scoped under
        .expenses-module, yet it used to block the very first paint of the
@@ -3333,8 +3334,8 @@ html:not(.theme-light):not(.theme-dark) .trip-boot-placeholder{
        priority without blocking paint; ensureExpensesStylesheet() flips it to
        media="all" before the 支出 view is ever mounted, so the styling is
        byte-for-byte identical by the time anything expenses-related renders. -->
-  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?v=7.7.2.1" media="print">
-  <noscript><link rel="stylesheet" href="assets/css/expenses.css?v=7.7.2.1"></noscript>
+  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?v=7.7.2.2" media="print">
+  <noscript><link rel="stylesheet" href="assets/css/expenses.css?v=7.7.2.2"></noscript>
 </head>
 <body>
 <div class="bg-fixed"></div>
@@ -3362,10 +3363,9 @@ html:not(.theme-light):not(.theme-dark) .trip-boot-placeholder{
         </div>
       </div>
       <div class="header-sub-row">
-        <div class="header-sub-text" id="header-sub"></div>
-        <div class="status-square" id="status-square">
-          <div class="status-main" id="status-main"></div>
-          <div class="status-sub" id="status-sub"></div>
+        <div class="header-sub-copy">
+          <div class="header-sub-text" id="header-sub"></div>
+          <div class="trip-temporal-note" id="trip-temporal-note" hidden></div>
         </div>
       </div>
     </div>
@@ -3784,7 +3784,7 @@ html:not(.theme-light):not(.theme-dark) .trip-boot-placeholder{
         <span class="profile-detail-spacer"></span>
       </div>
       <section class="profile-card" aria-label="App 資料">
-        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.7.2.1</strong></div>
+        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.7.2.2</strong></div>
         <div class="profile-meta-row"><span>資料架構</span><strong>Phase 2F</strong></div>
         <div class="profile-meta-row"><span>主要資料來源</span><strong id="app-data-source-label">Firebase / 本機快取</strong></div>
       </section>
@@ -3903,7 +3903,7 @@ html:not(.theme-light):not(.theme-dark) .trip-boot-placeholder{
 </div>
 
 <script>
-const APP_VERSION = "7.7.2.1";
+const APP_VERSION = "7.7.2.2";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 window.EXPENSES_MODULE_VERSION = EXPENSES_MODULE_VERSION;
@@ -4685,27 +4685,39 @@ function updateNowIndicator(){
 
 // Today chip
 function updateChip(data){
-  const chip=document.getElementById("today-chip"),sq=document.getElementById("status-square");
-  if(!data.days?.length||!chip)return;
+  const chip=document.getElementById("today-chip"),note=document.getElementById("trip-temporal-note");
+  function setNote(text,state=""){
+    if(!note)return;
+    const value=String(text||"").trim();
+    note.textContent=value;
+    note.dataset.state=state||"";
+    note.hidden=!value;
+  }
+  if(!data.days?.length||!chip){setNote("");return;}
   const cities=data.meta?.cities;
   const tz=cities?Object.values(cities)[0]?.timezone:(data.meta?.weather?.timezone||"UTC");
   const tzLbl=data.meta?.weather?.timezoneLabel||"當地時間";
   const today=dateInTZ(tz),start=data.meta?.tripStartIso,end=data.meta?.tripEndIso;
   const idx=data.days.findIndex(d=>d.isoDate===today);
   function diffD(a,b){return Math.round((new Date(b)-new Date(a))/86400000);}
-  function showSq(m,s){sq.style.display="flex";document.getElementById("status-main").textContent=m;document.getElementById("status-sub").textContent=s;}
   if(idx>=0){
     const compactDate=String(data.days[idx].date||"").replace(/（[^）]*）/g,"");
-    chip.innerHTML=`Day ${idx+1} · ${compactDate}`;chip.classList.add("active");sq.style.display="none";
+    chip.innerHTML=`Day ${idx+1} · ${compactDate}`;chip.classList.add("active");setNote("");
     document.querySelectorAll(".day-tab").forEach(t=>t.classList.remove("active"));
     document.querySelectorAll(".day-content").forEach(c=>c.classList.remove("active"));
     document.querySelector(`.day-tab[data-day-index="${idx}"]`)?.classList.add("active");
     document.querySelector(`.day-content[data-day-index="${idx}"]`)?.classList.add("active");
     updateCompactHeader();
     ss.scrollTo({top:0,behavior:"smooth"});
-  } else if(start&&today<start){chip.textContent="尚未出發";chip.classList.remove("active");showSq(`距離出發尚餘 ${diffD(today,start)} 日`,`以${tzLbl}計算`);}
-  else if(end&&today>end){chip.textContent="行程已完成";chip.classList.remove("active");showSq("行程已完成","多謝自己好好玩返轉");}
-  else{chip.textContent="行程日期以外";chip.classList.remove("active");}
+  } else if(start&&today<start){
+    chip.textContent="尚未出發";chip.classList.remove("active");
+    setNote(`距離出發尚餘 ${diffD(today,start)} 日 · 以${tzLbl}計算`,"upcoming");
+  }
+  else if(end&&today>end){
+    chip.textContent="行程已完成";chip.classList.remove("active");
+    setNote("多謝自己好好玩返轉","completed");
+  }
+  else{chip.textContent="行程日期以外";chip.classList.remove("active");setNote("");}
 }
 
 // Snacks
@@ -5059,6 +5071,8 @@ function persistBootVisualSnapshot(data){
     titleMain:String((meta.titleMain||meta.titleSmall||"旅程").replace?.(/<[^>]*>/g,"")||"旅程"),
     headerSub:String(document.getElementById("header-sub")?.textContent||""),
     todayChip:String(document.getElementById("today-chip")?.textContent||""),
+    temporalNote:String(document.getElementById("trip-temporal-note")?.textContent||""),
+    temporalState:String(document.getElementById("trip-temporal-note")?.dataset?.state||""),
     savedAt:Date.now()
   };
   try{localStorage.setItem(TRIP_BOOT_VISUAL_KEY,JSON.stringify(snapshot));window.__tripBootVisualSnapshot=snapshot;return true;}catch(error){return false;}
@@ -5961,7 +5975,7 @@ function beginDeferredTripBoot(bundledData){
     const main=document.getElementById("header-title-main");
     const chip=document.getElementById("today-chip");
     const sub=document.getElementById("header-sub");
-    const status=document.getElementById("status-square");
+    const temporal=document.getElementById("trip-temporal-note");
     const snapshot=window.__tripBootVisualSnapshot;
     const canReuseHeader=sameRememberedTrip&&snapshot&&String(snapshot.tripId||"")===tripBootPreferredId;
     if(canReuseHeader){
@@ -5969,13 +5983,14 @@ function beginDeferredTripBoot(bundledData){
       if(main)main.textContent=String(snapshot.titleMain||"旅程");
       if(chip)chip.textContent=String(snapshot.todayChip||"");
       if(sub)sub.textContent=String(snapshot.headerSub||"");
+      if(temporal){const text=String(snapshot.temporalNote||"").trim();temporal.textContent=text;temporal.dataset.state=String(snapshot.temporalState||"");temporal.hidden=!text;}
     }else{
       if(small)small.textContent="My Trip";
       if(main)main.textContent="旅程";
       if(chip)chip.textContent="同步旅程中…";
       if(sub)sub.textContent="";
+      if(temporal){temporal.textContent="";temporal.hidden=true;temporal.dataset.state="";}
     }
-    if(status)status.style.display="none";
   }
   return tripBootDeferred;
 }
@@ -5985,8 +6000,6 @@ function releaseDeferredTripBoot(){
   document.body.classList.remove("trip-boot-deferred","trip-boot-warm-same");
   const placeholder=document.getElementById("trip-boot-placeholder");
   if(placeholder)placeholder.hidden=true;
-  const status=document.getElementById("status-square");
-  if(status)status.style.display="";
   requestAnimationFrame(()=>{updateBottomNavIndicator();updateCollapsingChrome();});
 }
 function currentActiveDayId(){
@@ -8052,7 +8065,7 @@ refreshCollapseMetrics();
 // Android / Chrome PWA support. Versioned app-shell Service Worker; normal launches are cache-first while explicit reloads stay network-first.
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("./sw.js?v=7.7.2.1").catch(() => {});
+    navigator.serviceWorker.register("./sw.js?v=7.7.2.2").catch(() => {});
   });
 }
 

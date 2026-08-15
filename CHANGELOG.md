@@ -1,3 +1,29 @@
+# Travel WebApp — v7.7.2.2
+
+## Phase 2F · Temporal Header Harmony
+
+### Status hierarchy cleanup
+
+• Removed the floating secondary status card from the itinerary header.
+• The top-right chip is now the single primary lifecycle indicator: 尚未出發 / Day N / 行程已完成 / 行程日期以外.
+• Before departure, the countdown is shown as a lightweight contextual line below the trip date instead of a second card.
+• After completion, the duplicate “行程已完成” message is removed; only the softer “多謝自己好好玩返轉” context remains below the date.
+• During the trip, no secondary lifecycle note is shown because the Day chip already carries the active context.
+
+### Deterministic warm-boot state
+
+• Replaced imperative `status-square` display toggling with one deterministic `trip-temporal-note` state.
+• Warm-boot visual snapshots now preserve the temporal note text/state together with the header chip, preventing the note from appearing or disappearing depending on cache timing.
+• The temporal note is restored only for the matching remembered Trip and remains hidden in the Expense view.
+
+### Scope / deployment
+
+• No itinerary data, Firebase schema, permissions, destination / Team colour logic, Layer 3 runtime engine, Expense module or navigation compositor changed.
+• Service Worker shell cache updated to `travel-shell-v7.7.2.2`.
+• Firestore Rules and indexes are unchanged. No Rules deployment is required.
+
+---
+
 # Travel WebApp — v7.7.2.1
 
 ## Phase 2F · Native Warm Boot / Visual State Persistence
