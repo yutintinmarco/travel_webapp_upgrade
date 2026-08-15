@@ -1,3 +1,12 @@
+# v7.7.3.3 · Recent Expenses Warm Cache
+
+• 最近支出不再先顯示一張空白 card 再突然彈入資料。
+• 支出模組 mount 後會先以固定高度 skeleton 保持 layout 穩定。
+• 已登入且有 Persistent IndexedDB cache 時，會用 Firestore `getDocsFromCache()` 讀最近 5 筆作 warm preview。
+• Cache only preview 不會建立額外 server request，也不增加 Firebase billing read；原本 realtime listener仍然係 authoritative source。
+• Live snapshot 到達後原位替換 preview，避免整張 card 高度由零突然跳大。
+• Auth / write throttle、Firestore I/O Audit、Layer 0 至 3、Native Warm Boot 全部保留。
+
 # Travel WebApp — v7.7.3.2
 
 ## Phase 2F · Auth Singleton + Profile Write Throttle
