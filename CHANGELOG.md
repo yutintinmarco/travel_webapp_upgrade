@@ -1,3 +1,36 @@
+# Travel WebApp — v7.7.3.2
+
+## Phase 2F · Auth Singleton + Profile Write Throttle
+
+This build removes a confirmed no-value Firestore write path found by the v7.7.3.1 I/O audit. No UI/UX behaviour changes.
+
+### 1. Canonical Auth module identity
+
+• The main UI now imports `assets/js/auth-service.js` using the same canonical URL used by dependent services.
+• This removes the duplicate ES-module instance previously created by mixing `auth-service.js?v=<APP_VERSION>` with `auth-service.js`.
+• Result: one Firebase Auth observer, one subscriber set, one profile-sync decision path per page process.
+
+### 2. User profile heartbeat instead of write-on-every-boot
+
+• `users/{uid}` is no longer updated on every refresh / cold launch solely to refresh `lastSeenAt`.
+• Profile sync is now limited to: a genuinely new account/device, a changed Google display name/email/photo, or a 12-hour heartbeat.
+• Existing installs are seeded from the remembered signed-in UID so upgrading to this build does not create a one-off migration write.
+• The heartbeat marker is local only and does not add any Firebase reads.
+
+### Expected I/O result
+
+• A normal warm refresh or reopen with an unchanged Google profile should show `Writes issued: 0 calls · 0 docs`.
+• First login on a new device/account, a Google identity change, or a heartbeat that is due may legitimately show one profile write.
+
+### Scope / safety
+
+• No Firestore Rules changes.
+• No Firestore index changes.
+• No Trip schema changes.
+• No Loader / realtime subscription changes yet; the 74-server-document read footprint remains intentionally unchanged for the next measured optimisation step.
+
+---
+
 # Travel WebApp — v7.7.3.1
 
 ## Phase 2F · Firestore I/O Audit Lite
