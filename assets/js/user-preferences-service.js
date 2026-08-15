@@ -1,6 +1,6 @@
 import { db } from "./firebase-service.js";
 import { subscribeAuthState } from "./auth-service.js";
-import { doc, getDoc, serverTimestamp, setDoc } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js";
+import { doc, getDoc, serverTimestamp, setDoc } from "./firestore-observed-service.js";
 
 const LOCAL_THEME = "trip_theme";
 const LOCAL_FONT = "trip_font_scale";

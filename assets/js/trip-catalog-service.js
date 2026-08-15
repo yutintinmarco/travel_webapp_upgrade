@@ -6,7 +6,7 @@ import {
   onSnapshot,
   query,
   where
-} from "https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js";
+} from "./firestore-observed-service.js";
 
 function clean(value) { return String(value ?? "").trim(); }
 

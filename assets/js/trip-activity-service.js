@@ -1,5 +1,5 @@
 import { db } from "./firebase-service.js";
-import { collection, getDocs, limit, orderBy, query } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js";
+import { collection, getDocs, limit, orderBy, query } from "./firestore-observed-service.js";
 
 function clean(value = "") { return String(value ?? "").trim(); }
 

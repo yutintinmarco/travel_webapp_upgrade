@@ -4,7 +4,7 @@ import { assertCloudOperationAvailable } from "./cloud-safety-service.js";
 import {
   arrayRemove, arrayUnion, collection, doc, getDoc, getDocs, increment,
   onSnapshot, query, serverTimestamp, setDoc, updateDoc, where, writeBatch
-} from "https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js";
+} from "./firestore-observed-service.js";
 
 const ROLE_RANK=Object.freeze({viewer:1,member:2,admin:3,owner:4});
 const VALID_ROLES=new Set(["owner","admin","member","viewer"]);

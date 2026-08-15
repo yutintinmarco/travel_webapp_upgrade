@@ -11,7 +11,7 @@ import {
   doc,
   serverTimestamp,
   setDoc
-} from "https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js";
+} from "./firestore-observed-service.js";
 
 const provider = new GoogleAuthProvider();
 provider.setCustomParameters({ prompt: "select_account" });

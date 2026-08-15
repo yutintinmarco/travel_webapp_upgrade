@@ -7,7 +7,7 @@ import {
   getDoc,
   serverTimestamp,
   writeBatch
-} from "https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js";
+} from "./firestore-observed-service.js";
 
 const MANAGER_ROLES = new Set(["owner", "admin"]);
 

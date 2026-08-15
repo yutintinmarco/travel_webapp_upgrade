@@ -3,7 +3,7 @@ import {
   doc,
   runTransaction,
   serverTimestamp
-} from "https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js";
+} from "./firestore-observed-service.js";
 import { assertCloudOnline } from "./cloud-safety-service.js";
 
 const LOCK_TTL_MS=12*60*1000;

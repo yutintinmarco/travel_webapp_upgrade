@@ -4,7 +4,7 @@ import {
   collection,
   doc,
   onSnapshot
-} from "https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js";
+} from "./firestore-observed-service.js";
 
 const AUDIT_KEYS = new Set(["createdAt", "createdBy", "updatedAt", "updatedBy"]);
 const EMIT_DEBOUNCE_MS = 120;

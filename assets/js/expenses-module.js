@@ -17,7 +17,7 @@ import {
   orderBy,
   getDoc,
   setDoc
-} from "https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js";
+} from "./firestore-observed-service.js";
 
 function mountExpensesHtml(root) {
   root.innerHTML = `<div class="expenses-module">

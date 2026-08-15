@@ -9,7 +9,7 @@ import {
   getDocs,
   serverTimestamp,
   writeBatch
-} from "https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js";
+} from "./firestore-observed-service.js";
 
 const WRITE_CHUNK_SIZE = 8;
 const SNAPSHOT_SOFT_LIMIT_BYTES = 760_000;

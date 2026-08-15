@@ -1,6 +1,6 @@
 import { db } from "./firebase-service.js";
 import { subscribeAuthState } from "./auth-service.js";
-import { doc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js";
+import { doc, onSnapshot } from "./firestore-observed-service.js";
 
 export const TRIP_ROLES = Object.freeze({
   OWNER: "owner",
