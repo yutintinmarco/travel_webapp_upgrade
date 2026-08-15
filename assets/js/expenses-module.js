@@ -982,6 +982,8 @@ function updateTripStatusUi() {
 
   if (lockTripBtn) lockTripBtn.classList.toggle("hidden", locked || !isAdmin());
   if (unlockTripBtn) unlockTripBtn.classList.toggle("hidden", !locked || !isAdmin());
+  const lockActionFooter = lockTripBtn?.closest(".modal-footer-actions");
+  if (lockActionFooter) lockActionFooter.classList.toggle("expense-actions-unavailable", !isAdmin());
 
   const readOnly = !canWriteExpenses();
   setFormDisabled(locked || readOnly);
@@ -1542,6 +1544,50 @@ function unlockExpenseBackgroundScroll() {
   }
 }
 
+function harmonizeExpenseSheetActions(modal) {
+  if (!modal || modal.dataset.actionHarmonyReady === "true") return;
+  modal.dataset.actionHarmonyReady = "true";
+
+  const card = modal.querySelector(":scope > .modal-card");
+  const footer = card?.querySelector(":scope > .modal-footer-actions, :scope > form > .modal-footer-actions");
+  if (!card || !footer) return;
+
+  const moveToFooter = (id) => {
+    const button = card.querySelector(`#${id}`);
+    if (button && button.parentElement !== footer) footer.prepend(button);
+    return button;
+  };
+  const mark = (id, kind) => {
+    const button = card.querySelector(`#${id}`);
+    if (!button) return;
+    button.classList.remove("expense-sheet-action-primary", "expense-sheet-action-secondary", "expense-sheet-action-danger");
+    button.classList.add(`expense-sheet-action-${kind}`);
+  };
+
+  if (modal.id === "backupSettingsModal") {
+    moveToFooter("exportExcelReportBtn");
+    moveToFooter("exportJsonBackupBtn");
+    footer.classList.add("expense-action-stack");
+    mark("exportJsonBackupBtn", "secondary");
+    mark("exportExcelReportBtn", "secondary");
+    card.querySelectorAll(".backup-actions:empty").forEach(node => node.remove());
+  }
+
+  if (modal.id === "lockSettingsModal") {
+    moveToFooter("unlockTripBtn");
+    moveToFooter("lockTripBtn");
+    mark("lockTripBtn", "danger");
+    mark("unlockTripBtn", "primary");
+    card.querySelectorAll(".form-actions:empty").forEach(node => node.remove());
+  }
+
+  mark("submitBtn", "primary");
+  mark("cancelEditBtn", "secondary");
+  mark("ocrScanBtn", "primary");
+  mark("saveRatesBtn", "primary");
+  mark("confirmAiFillBtn", "primary");
+}
+
 function prepareExpenseModal(modal) {
   if (!modal || modal.dataset.presentationReady === "true") return;
   modal.dataset.presentationReady = "true";
@@ -1550,6 +1596,7 @@ function prepareExpenseModal(modal) {
   const presentation = modal.dataset.presentation || (modal.classList.contains("expense-presentation-push") ? "push" : "sheet");
 
   if (presentation === "sheet") {
+    harmonizeExpenseSheetActions(modal);
     if (card && !card.querySelector(":scope > .expense-sheet-grabber-zone")) {
       const grabber = document.createElement("div");
       grabber.className = "expense-sheet-grabber-zone";
@@ -2592,8 +2639,8 @@ function openExpenseDetail(expenseId) {
 
   if (expenseDetailFooterActions) {
     expenseDetailFooterActions.innerHTML = `
-      <button type="button" class="edit-btn" data-detail-edit-id="${safeEscape(expense.id)}" ${isTripLocked() ? "disabled" : ""}>編輯</button>
-      <button type="button" class="delete-btn" data-detail-delete-id="${safeEscape(expense.id)}" ${isTripLocked() ? "disabled" : ""}>刪除</button>
+      <button type="button" class="edit-btn expense-sheet-action-secondary" data-detail-edit-id="${safeEscape(expense.id)}" ${isTripLocked() ? "disabled" : ""}>編輯</button>
+      <button type="button" class="delete-btn expense-sheet-action-danger" data-detail-delete-id="${safeEscape(expense.id)}" ${isTripLocked() ? "disabled" : ""}>刪除</button>
       <button type="button" class="modal-close-btn" id="closeExpenseDetailModalBtn">關閉</button>
     `;
 
