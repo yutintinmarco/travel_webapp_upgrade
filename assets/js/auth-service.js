@@ -40,15 +40,71 @@ function dispatchAuthState(user) {
   });
 }
 
+const PROFILE_HEARTBEAT_MS = 12 * 60 * 60 * 1000;
+const PROFILE_SYNC_KEY_PREFIX = "travel_profile_sync_v1:";
+const LAST_AUTH_UID_KEY = "travel_last_auth_uid";
+
+function profileFingerprint(user) {
+  return JSON.stringify([
+    String(user?.displayName || ""),
+    String(user?.email || "").trim().toLowerCase(),
+    String(user?.photoURL || "")
+  ]);
+}
+
+function readProfileSyncState(uid) {
+  if (!uid) return null;
+  try {
+    const raw = localStorage.getItem(`${PROFILE_SYNC_KEY_PREFIX}${uid}`);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    return { at: Number(parsed?.at) || 0, fingerprint: String(parsed?.fingerprint || "") };
+  } catch (error) {
+    return null;
+  }
+}
+
+function saveProfileSyncState(uid, fingerprint, at = Date.now()) {
+  if (!uid) return;
+  try {
+    localStorage.setItem(`${PROFILE_SYNC_KEY_PREFIX}${uid}`, JSON.stringify({ at, fingerprint }));
+  } catch (error) {}
+}
+
+function isRememberedAuthUid(uid) {
+  try { return String(localStorage.getItem(LAST_AUTH_UID_KEY) || "").trim() === String(uid || "").trim(); }
+  catch (error) { return false; }
+}
+
 async function ensureUserProfile(user) {
   if (!user?.uid) return;
+
+  const uid = String(user.uid);
+  const now = Date.now();
+  const fingerprint = profileFingerprint(user);
+  const previous = readProfileSyncState(uid);
+
+  // Existing installs before v7.7.3.2 already wrote this profile on every boot.
+  // Seed the local heartbeat marker from the remembered signed-in UID without
+  // creating one more migration-only Firestore write. A genuinely new account /
+  // device has no matching remembered UID, so its profile is still created now.
+  if (!previous && isRememberedAuthUid(uid)) {
+    saveProfileSyncState(uid, fingerprint, now);
+    return;
+  }
+
+  const identityChanged = Boolean(previous && previous.fingerprint !== fingerprint);
+  const heartbeatDue = !previous || (now - previous.at >= PROFILE_HEARTBEAT_MS);
+  if (!identityChanged && !heartbeatDue) return;
+
   try {
-    await setDoc(doc(db, "users", user.uid), {
+    await setDoc(doc(db, "users", uid), {
       displayName: user.displayName || "",
       email: String(user.email || "").trim().toLowerCase(),
       photoURL: user.photoURL || "",
       lastSeenAt: serverTimestamp()
     }, { merge: true });
+    saveProfileSyncState(uid, fingerprint, now);
   } catch (error) {
     // Existing Phase 1 rules may not allow /users yet. Phase 2F will deploy the new rules.
     if (error?.code !== "permission-denied") console.warn("Unable to update user profile", error);
