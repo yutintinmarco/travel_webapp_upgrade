@@ -1,3 +1,43 @@
+# Travel WebApp — v7.7.3.1
+
+## Phase 2F · Firestore I/O Audit Lite
+
+### Observed Firestore activity, with zero extra cloud traffic
+
+• Added a memory-only Firestore observation layer around the existing Firebase modular SDK calls.
+• The audit does not issue any additional Firestore read, write, listener, transaction, or background polling request.
+• App & Data now shows active / peak listeners, listener subscriptions, snapshot callback count, cache/server documents delivered to listeners, explicit read calls/documents, writes, deletes, and transaction attempts for the current app process.
+• The UI explicitly labels these counters as app-observed activity rather than Firebase billing metrics. Firebase Console remains the source of truth for billed reads / writes.
+• All counters reset naturally on page reload / app relaunch and are never stored in localStorage, IndexedDB, Firestore, Analytics, or any remote service.
+
+### Coverage
+
+• Existing Firestore imports in Auth, Trip Loader, Trip Catalog, Trip Access, user preferences, member management, import / backup / restore, destination / Team colour settings, operation locks, activity logs, and Expenses now pass through the observation wrapper.
+• Snapshot observation separates cache-delivered and server-delivered documents so Phase 2F quota analysis can distinguish local warm boot behaviour from server reconciliation.
+• Explicit reads show both request count and returned document count.
+• Batched writes count the number of document set/update/delete operations only after a successful commit.
+• Transactions count calls and retry attempts; transaction reads and committed document writes are observed without changing transaction semantics.
+
+### Architecture / behaviour
+
+• No Firestore schema change.
+• No Firestore Rules change.
+• No Firestore indexes change.
+• No UI / UX flow change outside the App & Data diagnostic rows.
+• Layer 0–3, Native Warm Boot, Temporal Header Harmony, Team / Destination colour logic, offline behaviour, permissions, and Profile Navigation compositor are retained.
+• Service Worker shell cache updated to `travel-shell-v7.7.3.1` and now precaches the observation wrapper because core modules depend on it.
+
+## Build QA
+
+• JavaScript syntax validation passed for all modules, inline scripts, and `sw.js`.
+• JSON validation passed for `manifest.json`, `firebase.json`, `firestore.indexes.json`, and `trip.json`.
+• No duplicate static HTML IDs were found.
+• Firestore Rules structural sanity passed.
+• `firestore.rules`, `firestore.indexes.json`, and `trip.json` remain unchanged from v7.7.3.0.
+• ZIP integrity test passed.
+
+---
+
 # Travel WebApp — v7.7.3.0
 
 ## Phase 2F · Performance Lite Diagnostics
