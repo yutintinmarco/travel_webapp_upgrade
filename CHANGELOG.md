@@ -1,3 +1,14 @@
+# v7.7.4.2 · Action Button Harmony + Expense Safe Area Polish
+
+• Audited modal-level action buttons across the App and formalised one hierarchy: primary actions use the active accent colour, destructive actions use iOS red, and utility / secondary actions use neutral glass.
+• Expense bottom sheets now keep modal-level actions in one bottom action dock. Close remains the circular X in the header; footer text Close buttons stay suppressed.
+• Moved 支出備份 export actions and 支出鎖定 lock / unlock actions into the bottom action dock so compact sheets no longer mix top-body and bottom action placement.
+• Normalised sheet CTA geometry to 48px height, 14px radius and full-width/equal-width layouts. Two long backup export actions stack vertically; detail Edit/Delete remain an equal two-column pair.
+• Lock uses destructive red; Unlock / Save / Submit / OCR Confirm use the Trip accent; export utility actions use neutral glass.
+• Reduced the extra expense footer clearance while preserving safe Home Indicator spacing, and matched footer/card backgrounds so the remaining safe area reads as one continuous sheet instead of a white bar.
+• Harmonised non-expense modal CTAs (Trip Import, progress completion and itinerary detail utility actions) to the same height/radius/semantic colour tokens without changing menu rows, Day tabs or inline field controls.
+• No Firestore schema, Rules, loader, caching or billing behaviour changes.
+
 # v7.7.4.1 · Sheet Polish + Trip Status Fix
 
 • Expense bottom sheets now use content-driven height instead of forcing every medium sheet to a 72% detent. Short sheets such as 資料備份 and 鎖定旅程 are explicitly compact.
