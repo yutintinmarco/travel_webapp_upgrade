@@ -46,6 +46,15 @@ function changedTopLevelKeys(previous, next) {
   const keys = new Set([...Object.keys(a), ...Object.keys(b)]);
   return [...keys].filter(key => contentSignature(a[key]) !== contentSignature(b[key]));
 }
+function mapSignature(map) {
+  try {
+    return JSON.stringify([...map.entries()]
+      .map(([id, row]) => [id, row?.signature || contentSignature(row?.data || {})])
+      .sort((a, b) => String(a[0]).localeCompare(String(b[0]))));
+  } catch (error) {
+    return "";
+  }
+}
 
 function assemblePortableTrip(tripId, state) {
   const tripDoc = state.tripDoc || {};
@@ -119,9 +128,26 @@ function assemblePortableTrip(tripId, state) {
   };
 }
 
-export function subscribeTripData(tripIdInput, callback) {
+/*
+ * v7.7.4.0 · Active-Day Realtime
+ *
+ * Returning users already have a complete render cache. Keep only the active
+ * day's item collection live, while inactive days continue to render from the
+ * trusted local seed. A newly seen day is hydrated once, and a revision change
+ * temporarily hydrates every day before returning to active-day-only realtime.
+ * This reduces Firestore listener/read fan-out without making Day switching
+ * wait on the network.
+ */
+export function subscribeTripData(tripIdInput, callback, options = {}) {
   const tripId = clean(tripIdInput);
   if (!tripId || typeof callback !== "function") return () => {};
+
+  const seedData = options?.seedData && clean(options.seedData?.tripId || options.seedData?.meta?.tripId) === tripId
+    ? options.seedData
+    : null;
+  const seedRevision = seedData ? Math.max(1, numberOr(seedData.revision, 1)) : 0;
+  const seedDays = Array.isArray(seedData?.days) ? seedData.days : [];
+  const seedComplete = seedDays.length > 0 && seedDays.every(day => Array.isArray(day?.items));
 
   const unsubs = [];
   const itemUnsubs = new Map();
@@ -129,6 +155,9 @@ export function subscribeTripData(tripIdInput, callback) {
   const documentSignatures = new Map();
   const initial = { trip: false, days: false, saved: false, general: false, expenses: false };
   const itemReady = new Set();
+  const itemListenerPrimed = new Set();
+  const itemServerReady = new Set();
+  const seededItemDays = new Set();
   const state = {
     tripDoc: null,
     days: new Map(),
@@ -144,6 +173,23 @@ export function subscribeTripData(tripIdInput, callback) {
     }
   };
 
+  seedDays.forEach(day => {
+    const dayId = clean(day?.dayId);
+    if (!dayId || !Array.isArray(day?.items)) return;
+    const map = new Map();
+    day.items.forEach((item, index) => {
+      const itemId = clean(item?.itemId) || `seed_${index}`;
+      const data = clonePlain(item || {}) || {};
+      map.set(itemId, { id: itemId, data, signature: contentSignature(data) });
+    });
+    state.itemsByDay.set(dayId, map);
+    itemReady.add(dayId);
+    seededItemDays.add(dayId);
+  });
+
+  let desiredRealtimeDayId = clean(options?.activeDayId);
+  if (!desiredRealtimeDayId && seedDays.length) desiredRealtimeDayId = clean(seedDays[0]?.dayId);
+  let fullHydrationNeeded = !seedComplete;
   let stopped = false;
   let emitTimer = 0;
   let firstReadyEmitted = false;
@@ -210,9 +256,6 @@ export function subscribeTripData(tripIdInput, callback) {
       const sectionsNow = [...dirtySections];
       dirtySections.clear();
 
-      // Metadata-only cache → server transitions are common with
-      // includeMetadataChanges. They should update diagnostics, not rebuild and
-      // stringify the whole portable Trip or trigger an app render/cache write.
       if (firstReadyEmitted && sectionsNow.length === 0) {
         if (metadataState !== lastMetadataState) {
           lastMetadataState = metadataState;
@@ -236,20 +279,39 @@ export function subscribeTripData(tripIdInput, callback) {
         source: data.cloudMeta?.source || "server",
         fromCache: data.cloudMeta?.source === "cache",
         hasPendingWrites: data.cloudMeta?.hasPendingWrites === true,
-        updatedAt: data.cloudMeta?.updatedAt || ""
+        updatedAt: data.cloudMeta?.updatedAt || "",
+        realtimeDayId: desiredRealtimeDayId,
+        realtimeMode: fullHydrationNeeded ? "full-hydration" : "active-day"
       });
     }, EMIT_DEBOUNCE_MS);
   }
 
-  function stopItemListener(dayId) {
+  function detachItemListener(dayId, { dropData = false } = {}) {
     const stop = itemUnsubs.get(dayId);
     if (stop) {
       try { stop(); } catch (error) {}
       itemUnsubs.delete(dayId);
     }
-    itemReady.delete(dayId);
-    state.itemsByDay.delete(dayId);
+    itemListenerPrimed.delete(dayId);
     sourceMeta.delete(`items:${dayId}`);
+    if (dropData) {
+      itemReady.delete(dayId);
+      itemServerReady.delete(dayId);
+      seededItemDays.delete(dayId);
+      state.itemsByDay.delete(dayId);
+    }
+  }
+
+  function replaceItemSnapshot(dayId, snapshot) {
+    const previous = state.itemsByDay.get(dayId) || new Map();
+    const next = new Map();
+    snapshot.docs.forEach(docSnap => {
+      const data = docSnap.data() || {};
+      next.set(docSnap.id, { id: docSnap.id, data, signature: contentSignature(data) });
+    });
+    const changed = mapSignature(previous) !== mapSignature(next);
+    state.itemsByDay.set(dayId, next);
+    return changed;
   }
 
   function applyCollectionChanges(snapshot, targetMap, { idField = "", section = "" } = {}) {
@@ -271,19 +333,65 @@ export function subscribeTripData(tripIdInput, callback) {
     return contentChanged;
   }
 
+  function allDaysServerHydrated() {
+    const dayIds = [...state.days.keys()];
+    return dayIds.length === 0 || dayIds.every(dayId => itemServerReady.has(dayId));
+  }
+
+  function finishFullHydrationIfReady() {
+    if (!fullHydrationNeeded || !allDaysServerHydrated()) return false;
+    fullHydrationNeeded = false;
+    state.days.forEach((_, dayId) => seededItemDays.add(dayId));
+    return true;
+  }
+
+  function reconcileItemListeners() {
+    if (stopped || !initial.days) return;
+    const dayIds = [...state.days.keys()];
+    if ((!desiredRealtimeDayId || !state.days.has(desiredRealtimeDayId)) && dayIds.length) {
+      desiredRealtimeDayId = dayIds[0];
+    }
+
+    dayIds.forEach(dayId => {
+      const active = dayId === desiredRealtimeDayId;
+      const missingLocalData = !itemReady.has(dayId);
+      const needsOneShotServerHydration = missingLocalData && !itemServerReady.has(dayId);
+      if (fullHydrationNeeded || active || needsOneShotServerHydration) attachItemListener(dayId);
+      else detachItemListener(dayId);
+    });
+
+    [...itemUnsubs.keys()].forEach(dayId => {
+      if (!state.days.has(dayId)) detachItemListener(dayId, { dropData: true });
+    });
+  }
+
   function attachItemListener(dayId) {
-    if (itemUnsubs.has(dayId)) return;
-    state.itemsByDay.set(dayId, new Map());
+    if (!dayId || itemUnsubs.has(dayId)) return;
+    if (!state.itemsByDay.has(dayId)) state.itemsByDay.set(dayId, new Map());
+
     const stop = onSnapshot(
       collection(db, "trips", tripId, "days", dayId, "items"),
       { includeMetadataChanges: true },
       snapshot => {
         snapshotMeta(`items:${dayId}`, snapshot);
-        const map = state.itemsByDay.get(dayId) || new Map();
-        const changed = applyCollectionChanges(snapshot, map, { section: `items:${dayId}` });
-        state.itemsByDay.set(dayId, map);
+        const firstSnapshot = !itemListenerPrimed.has(dayId);
+        let changed = false;
+        if (firstSnapshot) {
+          changed = replaceItemSnapshot(dayId, snapshot);
+          itemListenerPrimed.add(dayId);
+          if (changed) markDirty(`items:${dayId}`);
+        } else {
+          const map = state.itemsByDay.get(dayId) || new Map();
+          changed = applyCollectionChanges(snapshot, map, { section: `items:${dayId}` });
+          state.itemsByDay.set(dayId, map);
+        }
         itemReady.add(dayId);
+        if (snapshot.metadata?.fromCache !== true) itemServerReady.add(dayId);
+        const finishedHydration = finishFullHydrationIfReady();
         scheduleEmit(snapshot.metadata?.fromCache ? "cache" : "items", changed ? [`items:${dayId}`] : []);
+        if (finishedHydration || (dayId !== desiredRealtimeDayId && itemServerReady.has(dayId))) {
+          queueMicrotask(reconcileItemListeners);
+        }
       },
       error => emitStatus(error?.code === "permission-denied" ? "permission-denied" : "error", { error })
     );
@@ -310,6 +418,13 @@ export function subscribeTripData(tripIdInput, callback) {
       const previous = state.tripDoc;
       documentSignatures.set("trip", sig);
       state.tripDoc = next;
+
+      const serverRevision = Math.max(1, numberOr(next.revision, 1));
+      if (seedRevision && serverRevision !== seedRevision) {
+        fullHydrationNeeded = true;
+        reconcileItemListeners();
+      }
+
       const sections = changed ? (hadPrevious ? changedTopLevelKeys(previous, next).map(key => `trip:${key}`) : ["trip"]) : [];
       scheduleEmit(snapshot.metadata?.fromCache ? "cache" : "trip", sections.length ? sections : (changed ? ["trip"] : []));
     },
@@ -328,7 +443,7 @@ export function subscribeTripData(tripIdInput, callback) {
         const dayId = change.doc.id;
         if (change.type === "removed") {
           if (state.days.delete(dayId)) changed = true;
-          stopItemListener(dayId);
+          detachItemListener(dayId, { dropData: true });
           return;
         }
         const data = change.doc.data() || {};
@@ -337,7 +452,7 @@ export function subscribeTripData(tripIdInput, callback) {
         if (!prev || prev.signature !== sig) changed = true;
         state.days.set(dayId, { id: dayId, data, signature: sig });
       });
-      state.days.forEach((_, dayId) => attachItemListener(dayId));
+      reconcileItemListeners();
       scheduleEmit(snapshot.metadata?.fromCache ? "cache" : "days", changed ? ["days"] : []);
     },
     error => emitStatus(error?.code === "permission-denied" ? "permission-denied" : "error", { error })
@@ -384,7 +499,7 @@ export function subscribeTripData(tripIdInput, callback) {
     ));
   });
 
-  return () => {
+  const stopAll = () => {
     stopped = true;
     clearTimeout(emitTimer);
     unsubs.forEach(stop => { try { stop(); } catch (error) {} });
@@ -392,4 +507,15 @@ export function subscribeTripData(tripIdInput, callback) {
     itemUnsubs.clear();
     dirtySections.clear();
   };
+
+  stopAll.setActiveDayId = dayIdInput => {
+    const dayId = clean(dayIdInput);
+    if (!dayId || dayId === desiredRealtimeDayId) return;
+    desiredRealtimeDayId = dayId;
+    reconcileItemListeners();
+  };
+  stopAll.getActiveDayId = () => desiredRealtimeDayId;
+  stopAll.getRealtimeMode = () => fullHydrationNeeded ? "full-hydration" : "active-day";
+
+  return stopAll;
 }
