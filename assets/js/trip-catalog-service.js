@@ -10,6 +10,26 @@ import {
 
 function clean(value) { return String(value ?? "").trim(); }
 
+function localIsoDate() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function effectiveTripStatus(storedStatus, startDate, endDate) {
+  const stored = clean(storedStatus).toLowerCase();
+  if (stored === "draft") return "draft";
+  const start = clean(startDate);
+  const end = clean(endDate);
+  const today = localIsoDate();
+  if (start && today < start) return "upcoming";
+  if (end && today > end) return "completed";
+  if ((start && today >= start) || (end && today <= end)) return "active";
+  return stored || "upcoming";
+}
+
 function normalizeTripDoc(snapshot) {
   const data = snapshot.data() || {};
   return {
@@ -21,7 +41,7 @@ function normalizeTripDoc(snapshot) {
     dateRange: clean(data.dateRange),
     startDate: clean(data.startDate),
     endDate: clean(data.endDate),
-    status: clean(data.status || "upcoming"),
+    status: effectiveTripStatus(data.status, data.startDate, data.endDate),
     archived: data.archived === true,
     archivedAt: data.archivedAt || null,
     archivedBy: clean(data.archivedBy),

@@ -322,7 +322,7 @@ function mountExpensesHtml(root) {
     </div>
   </div>
 
-  <div id="backupSettingsModal" class="modal expense-presentation-sheet hidden" data-presentation="sheet" data-sheet-size="medium">
+  <div id="backupSettingsModal" class="modal expense-presentation-sheet hidden" data-presentation="sheet" data-sheet-size="compact">
     <div class="modal-card">
       <div class="modal-heading-row"><h3><span class="modal-title-icon">📦</span><span>資料備份</span></h3></div>
       <div class="modal-body-scroll">
@@ -404,7 +404,7 @@ function mountExpensesHtml(root) {
     </div>
   </div>
 
-  <div id="lockSettingsModal" class="modal expense-presentation-sheet hidden" data-presentation="sheet" data-sheet-size="medium">
+  <div id="lockSettingsModal" class="modal expense-presentation-sheet hidden" data-presentation="sheet" data-sheet-size="compact">
     <div class="modal-card">
       <div class="modal-heading-row"><h3><span class="modal-title-icon">🔒</span><span>鎖定旅程</span></h3></div>
       <div class="modal-body-scroll">
