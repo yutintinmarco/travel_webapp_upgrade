@@ -1,3 +1,28 @@
+# Travel WebApp — v7.7.3.0
+
+## Phase 2F · Performance Lite Diagnostics
+
+### Memory-only instrumentation
+
+• Added a lightweight “效能診斷 · 本次啟動” card under 我的 → App 與資料.
+• Records only a few `performance.now()` milestones and integer counters already reached by the normal runtime.
+• No additional Firebase reads, Firebase writes, IndexedDB diagnostic writes, localStorage diagnostic logs, background polling or scroll-frame instrumentation are added.
+• All diagnostic values reset naturally when the page process restarts.
+
+### Milestones shown
+
+• Visual Boot, App Shell, first Trip paint, Instant Render Cache paint, Google Auth ready, Firebase first data and Firebase server-ready timing.
+• Full / partial render counts, Trip Loader callback count and render-cache save scheduling count.
+• Navigation type identifies a normal launch versus explicit refresh.
+
+### Scope / deployment
+
+• Diagnostics observe existing code paths only; Firebase, Firestore schema, permissions, Loader data model, render-cache storage format, UI content and navigation behaviour are unchanged.
+• Service Worker shell cache updated to `travel-shell-v7.7.3.0`.
+• Firestore Rules and indexes are unchanged. No Rules deployment is required.
+
+---
+
 # Travel WebApp — v7.7.2.2
 
 ## Phase 2F · Temporal Header Harmony

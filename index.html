@@ -11,10 +11,29 @@
   <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
   <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
   <link rel="dns-prefetch" href="https://api.open-meteo.com">
-  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?v=7.7.2.2">
+  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?v=7.7.3.0">
   <title id="page-title">行程</title>
   <script>
-  // v7.7.2.2 · Native warm boot + temporal header harmony. Apply synchronous user / Trip appearance
+  // v7.7.3.0 · Performance Lite. Memory only: no Firebase reads/writes, no
+  // persistent diagnostic log and no scroll-frame instrumentation.
+  (function(){
+    var startedAt=performance.now();
+    var marks=Object.create(null),counters=Object.create(null);
+    var navigationType="navigate";
+    try{var nav=performance.getEntriesByType&&performance.getEntriesByType("navigation")[0];if(nav&&nav.type)navigationType=nav.type;}catch(e){}
+    function notify(){try{if(typeof window.__refreshPerfLiteDiagnostics==="function")window.__refreshPerfLiteDiagnostics();}catch(e){}}
+    window.__perfLite={
+      navigationType:navigationType,
+      marks:marks,
+      counters:counters,
+      mark:function(name){if(!name||marks[name]!=null)return marks[name];var value=Math.max(0,performance.now()-startedAt);marks[name]=value;notify();return value;},
+      inc:function(name,amount){if(!name)return 0;var step=Number(amount);if(!Number.isFinite(step))step=1;counters[name]=(Number(counters[name])||0)+step;notify();return counters[name];},
+      snapshot:function(){return{navigationType:navigationType,marks:Object.assign({},marks),counters:Object.assign({},counters)};}
+    };
+    marks.appStart=0;
+  })();
+
+  // v7.7.3.0 · Native warm boot + temporal header harmony. Apply synchronous user / Trip appearance
   // state before the first body paint, then let IndexedDB + Firestore reconcile
   // silently. This prevents the default palette / background / font size from
   // flashing for a frame before the remembered Firebase Trip is available.
@@ -60,6 +79,7 @@
         window.__tripBootVisualSnapshot=snapshot;
       }
     }catch(e){}
+    try{window.__perfLite&&window.__perfLite.mark("visualBootApplied");}catch(e){}
   })();
   </script>
   <style>
@@ -3240,7 +3260,7 @@ body.expenses-view-active #app-version-note{
 #snacks-view::after,
 #info-view::after,
 #profile-view::after{
-  content:"v7.7.2.2" !important;
+  content:"v7.7.3.0" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3261,7 +3281,7 @@ body.expenses-view-active #app-version-note{
   display:none !important;
 }
 body.expenses-view-active .expenses-module .expenses-app::after{
-  content:"v7.7.2.2" !important;
+  content:"v7.7.3.0" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3326,7 +3346,7 @@ html:not(.theme-light):not(.theme-dark) .trip-boot-placeholder{
 </style>
             <link rel="apple-touch-icon" href="assets/icon/trip_icon.png">
   <link rel="icon" type="image/png" href="assets/icon/trip_icon.png">
-  <link rel="manifest" href="manifest.json?v=7.7.2.2">
+  <link rel="manifest" href="manifest.json?v=7.7.3.0">
   <meta name="apple-mobile-web-app-title" content="關嘉露西生日之旅">
   <!-- v7.7.1.2: expenses.css is 144KB and every rule is scoped under
        .expenses-module, yet it used to block the very first paint of the
@@ -3334,8 +3354,8 @@ html:not(.theme-light):not(.theme-dark) .trip-boot-placeholder{
        priority without blocking paint; ensureExpensesStylesheet() flips it to
        media="all" before the 支出 view is ever mounted, so the styling is
        byte-for-byte identical by the time anything expenses-related renders. -->
-  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?v=7.7.2.2" media="print">
-  <noscript><link rel="stylesheet" href="assets/css/expenses.css?v=7.7.2.2"></noscript>
+  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?v=7.7.3.0" media="print">
+  <noscript><link rel="stylesheet" href="assets/css/expenses.css?v=7.7.3.0"></noscript>
 </head>
 <body>
 <div class="bg-fixed"></div>
@@ -3784,7 +3804,7 @@ html:not(.theme-light):not(.theme-dark) .trip-boot-placeholder{
         <span class="profile-detail-spacer"></span>
       </div>
       <section class="profile-card" aria-label="App 資料">
-        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.7.2.2</strong></div>
+        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.7.3.0</strong></div>
         <div class="profile-meta-row"><span>資料架構</span><strong>Phase 2F</strong></div>
         <div class="profile-meta-row"><span>主要資料來源</span><strong id="app-data-source-label">Firebase / 本機快取</strong></div>
       </section>
@@ -3802,6 +3822,22 @@ html:not(.theme-light):not(.theme-dark) .trip-boot-placeholder{
         <div class="profile-meta-row"><span>本機快取</span><strong id="app-data-cache">—</strong></div>
         <div class="profile-meta-row"><span>雲端操作</span><strong id="app-data-operation">—</strong></div>
       </section>
+
+      <div class="profile-section-label">效能診斷 · 本次啟動</div>
+      <section class="profile-card" aria-label="效能診斷">
+        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>啟動方式</span><strong id="perf-lite-navigation">—</strong></div>
+        <div class="profile-meta-row"><span>Visual Boot</span><strong id="perf-lite-visual">—</strong></div>
+        <div class="profile-meta-row"><span>App Shell</span><strong id="perf-lite-shell">—</strong></div>
+        <div class="profile-meta-row"><span>首次 Trip 畫面</span><strong id="perf-lite-first-paint">—</strong></div>
+        <div class="profile-meta-row"><span>Instant Cache</span><strong id="perf-lite-instant">—</strong></div>
+        <div class="profile-meta-row"><span>Google Auth</span><strong id="perf-lite-auth">—</strong></div>
+        <div class="profile-meta-row"><span>Firebase 首次資料</span><strong id="perf-lite-firebase-first">—</strong></div>
+        <div class="profile-meta-row"><span>Firebase Server</span><strong id="perf-lite-firebase-server">—</strong></div>
+        <div class="profile-meta-row"><span>Render</span><strong id="perf-lite-render-count">—</strong></div>
+        <div class="profile-meta-row"><span>Loader callbacks</span><strong id="perf-lite-loader-events">—</strong></div>
+        <div class="profile-meta-row"><span>快取保存排程</span><strong id="perf-lite-cache-schedules">—</strong></div>
+      </section>
+      <div class="trip-library-status">只記錄今次啟動嘅記憶體數值；唔會額外讀取／寫入 Firebase，亦唔會保存效能紀錄。</div>
     </div>
   </div>
 </div>
@@ -3903,9 +3939,12 @@ html:not(.theme-light):not(.theme-dark) .trip-boot-placeholder{
 </div>
 
 <script>
-const APP_VERSION = "7.7.2.2";
+const APP_VERSION = "7.7.3.0";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
+function perfLiteMark(name){try{return window.__perfLite?.mark(name);}catch(error){return null;}}
+function perfLiteInc(name,amount=1){try{return window.__perfLite?.inc(name,amount);}catch(error){return 0;}}
+perfLiteMark("appShellReady");
 window.EXPENSES_MODULE_VERSION = EXPENSES_MODULE_VERSION;
 
 function getTripJsonUrl(){const p=new URLSearchParams(location.search);return p.get("data")||"trip.json";}
@@ -5164,6 +5203,7 @@ function resetTripScopedUi(data){
 
 // Main render
 function render(data,{includeSnacks=true}={}){
+  perfLiteInc("fullRender");
   resetTripScopedUi(data);
   const meta=data.meta||{},travellers=meta.travellers||{},cities=meta.cities||{};
   requestAnimationFrame(updateBottomNavIndicator);
@@ -5238,7 +5278,7 @@ function render(data,{includeSnacks=true}={}){
   // Days
   const tabsEl=document.getElementById("day-tabs"),conEl=document.getElementById("day-contents");
   tabsEl.innerHTML="";conEl.innerHTML="";
-  if(!data.days?.length)return;
+  if(!data.days?.length){requestAnimationFrame(()=>perfLiteMark("firstTripPaint"));return;}
   tabsEl.style.setProperty("--day-count",String(data.days.length));
   tabsEl.classList.toggle("is-scrollable-days",data.days.length>7);
   const cityKeys=orderedCityKeys(data,cities);
@@ -5319,6 +5359,7 @@ function render(data,{includeSnacks=true}={}){
   // Refresh now indicator every minute. Cloud re-renders must not stack timers.
   if(nowIndicatorTimer) clearInterval(nowIndicatorTimer);
   nowIndicatorTimer=setInterval(updateNowIndicator, 60000);
+  requestAnimationFrame(()=>perfLiteMark("firstTripPaint"));
 }
 
 // Phase 1 app shell navigation
@@ -5667,6 +5708,7 @@ function initGlobalAuthSafe(){
   getGlobalAuthService()
     .then(({subscribeAuthState})=>{
       subscribeAuthState((user,safeUser)=>{
+        perfLiteMark("authReady");
         const displayUser=safeUser||user||null;
         window.__appAuthUser=displayUser;
         renderProfileAuthState(displayUser);
@@ -6085,6 +6127,24 @@ function appDataSet(id,value){
 function appDataTripStatusLabel(status){
   return ({draft:"草稿",upcoming:"即將出發",active:"旅程中",completed:"已完成",locked:"已鎖定"})[String(status||"").toLowerCase()]||status||"—";
 }
+function perfLiteMs(value){const n=Number(value);return Number.isFinite(n)?`${Math.round(n)} ms`:"—";}
+function perfLiteNavigationLabel(type){return({reload:"重新整理",navigate:"新啟動",back_forward:"返回／前進",prerender:"預載"})[String(type||"")]||String(type||"—");}
+function refreshPerfLiteDiagnostics(){
+  const perf=window.__perfLite?.snapshot?.();if(!perf)return;
+  const marks=perf.marks||{},counts=perf.counters||{};
+  appDataSet("perf-lite-navigation",perfLiteNavigationLabel(perf.navigationType));
+  appDataSet("perf-lite-visual",perfLiteMs(marks.visualBootApplied));
+  appDataSet("perf-lite-shell",perfLiteMs(marks.appShellReady));
+  appDataSet("perf-lite-first-paint",perfLiteMs(marks.firstTripPaint));
+  appDataSet("perf-lite-instant",perfLiteMs(marks.instantTripPaint));
+  appDataSet("perf-lite-auth",perfLiteMs(marks.authReady));
+  appDataSet("perf-lite-firebase-first",perfLiteMs(marks.firebaseFirstData));
+  appDataSet("perf-lite-firebase-server",perfLiteMs(marks.firebaseServerReady));
+  appDataSet("perf-lite-render-count",`Full ${Number(counts.fullRender)||0} · Partial ${Number(counts.partialRender)||0}`);
+  appDataSet("perf-lite-loader-events",Number(counts.loaderEvents)||0);
+  appDataSet("perf-lite-cache-schedules",Number(counts.cacheSchedules)||0);
+}
+window.__refreshPerfLiteDiagnostics=refreshPerfLiteDiagnostics;
 function refreshAppDataDiagnostics(){
   const data=window.tripData||{};
   const meta=data.meta||{};
@@ -6121,6 +6181,7 @@ function refreshAppDataDiagnostics(){
   appDataSet("app-data-network",cloudSafetyState.online===false?"離線":"在線");
   appDataSet("app-data-cache",window.__firestorePersistence==="persistent"?"Persistent IndexedDB":"Memory");
   appDataSet("app-data-operation",phase2fOperationLabel(cloudSafetyState.operation));
+  refreshPerfLiteDiagnostics();
 }
 function updateTripUrl(tripId){
   try{const url=new URL(location.href);if(tripId)url.searchParams.set("trip",tripId);else url.searchParams.delete("trip");history.replaceState(history.state,"",url);}catch(error){}
@@ -6142,6 +6203,7 @@ async function persistInstantTripCache(data,{immediate=false}={}){
   const tripId=dataTripId(data),uid=currentCacheUid();
   if(!tripId||!uid)return false;
   rememberCacheUid(uid);
+  perfLiteInc("cacheSchedules");
   try{
     const service=await getTripRenderCacheService();
     if(immediate||typeof service.queueTripRenderCacheWrite!=="function")return await service.writeTripRenderCache(uid,tripId,data);
@@ -6171,6 +6233,7 @@ async function applyInstantTripCache(tripIdInput,user){
     const liveRevision=dataTripId(window.tripData)===tripId?Number(window.tripData?.revision)||0:0;
     if(liveRevision>Number(cached.revision||0)&&tripLoaderState.source!=="instant-cache")return false;
     applyFirebaseTripData(cached.data,{source:"instant-cache",tripId});
+    requestAnimationFrame(()=>perfLiteMark("instantTripPaint"));
     return true;
   }catch(error){
     console.warn("Trip render cache read skipped",error);
@@ -6265,6 +6328,7 @@ function applyFirebaseTripData(data,{source="server",tripId="",dirtySections=[]}
   const needsExpenses=!sameTrip||nextExpensesSignature!==tripExpensesSignature;
   const needsDestinationTheme=!sameTrip||nextDestinationThemeSignature!==tripDestinationThemeSignature;
   const needsTeamTheme=!sameTrip||nextTeamThemeSignature!==tripTeamThemeSignature;
+  if(sameTrip&&!needsItinerary&&(needsVisual||needsSnacks||needsInfo||needsWeather||needsExpenses||needsDestinationTheme||needsTeamTheme))perfLiteInc("partialRender");
 
   const oldDayId=sameTrip&&needsItinerary?currentActiveDayId():"";
   const oldTeam=sameTrip&&needsItinerary?activeTeam:"all";
@@ -6370,11 +6434,18 @@ async function startFirebaseTripLoader(tripIdInput){
   access.initTripAccess?.(tripId);
   tripLoaderStop=loader.subscribeTripData(tripId,event=>{
     if(tripLoaderActiveId!==tripId)return;
-    if(event.status==="ready"){applyFirebaseTripData(event.data,{source:event.fromCache?"cache":"server",tripId,dirtySections:event.dirtySections||[]});return;}
+    perfLiteInc("loaderEvents");
+    if(event.status==="ready"){
+      applyFirebaseTripData(event.data,{source:event.fromCache?"cache":"server",tripId,dirtySections:event.dirtySections||[]});
+      perfLiteMark("firebaseFirstData");
+      if(!event.fromCache)perfLiteMark("firebaseServerReady");
+      return;
+    }
     if(event.status==="metadata"){
       const metaSource=event.fromCache?"cache":"server";
       tripLoaderState={...tripLoaderState,status:"ready",source:metaSource};
       setDataSourceLabel(metaSource==="cache"?"Firebase 快取":"Firebase");
+      if(metaSource==="server")perfLiteMark("firebaseServerReady");
       renderTripLibrary();
       return;
     }
@@ -8065,7 +8136,7 @@ refreshCollapseMetrics();
 // Android / Chrome PWA support. Versioned app-shell Service Worker; normal launches are cache-first while explicit reloads stay network-first.
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("./sw.js?v=7.7.2.2").catch(() => {});
+    navigator.serviceWorker.register("./sw.js?v=7.7.3.0").catch(() => {});
   });
 }
 
