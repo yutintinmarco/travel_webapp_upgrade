@@ -4996,3 +4996,59 @@ html:not(.theme-light):not(.theme-dark) .expenses-module .expense-form-body .exp
   font-size: calc(11px * var(--font-scale));
   color: var(--expense-muted-2);
 }
+
+
+/* ==========================================================================
+   v7.7.4.1 · Native sheet polish
+   Content-driven detents, safe-area backdrop coverage and single bottom inset.
+   ========================================================================== */
+/* iOS standalone can expose a hairline above a fixed 100dvh overlay. Extend the
+   backdrop into the top safe-area without moving the bottom-attached sheet. */
+.expenses-module .expense-presentation-sheet {
+  top: calc(-1 * env(safe-area-inset-top, 0px)) !important;
+  bottom: 0 !important;
+  height: auto !important;
+}
+
+/* Sheets size to their content and only use the detent as a ceiling. This keeps
+   short actions compact while long forms retain a scrollable native sheet. */
+.expenses-module .expense-presentation-sheet > .modal-card {
+  height: auto !important;
+  max-height: min(72dvh, calc(100dvh - env(safe-area-inset-top, 0px) - 12px)) !important;
+  padding-bottom: 0 !important;
+}
+.expenses-module .expense-presentation-sheet[data-sheet-size="large"] > .modal-card {
+  height: auto !important;
+  max-height: min(92dvh, calc(100dvh - env(safe-area-inset-top, 0px) - 8px)) !important;
+}
+.expenses-module .expense-presentation-sheet[data-sheet-size="compact"] > .modal-card {
+  height: auto !important;
+  max-height: min(52dvh, 460px) !important;
+}
+.expenses-module .expense-presentation-sheet[data-sheet-size="compact"] .modal-body-scroll {
+  flex: 0 1 auto !important;
+  overflow-y: auto !important;
+  padding-bottom: calc(18px + env(safe-area-inset-bottom, 0px)) !important;
+}
+
+/* The footer already owns the home-indicator inset. Avoid a second card-level
+   inset which appeared as a thick blank band below the primary action. */
+.expenses-module .expense-presentation-sheet .modal-footer-actions,
+.expenses-module .expense-presentation-sheet .sticky-modal-actions {
+  padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px)) !important;
+}
+
+@media (min-width: 700px) {
+  .expenses-module .expense-presentation-sheet > .modal-card {
+    height: auto !important;
+    max-height: min(72dvh, 720px) !important;
+  }
+  .expenses-module .expense-presentation-sheet[data-sheet-size="large"] > .modal-card {
+    height: auto !important;
+    max-height: min(88dvh, 820px) !important;
+  }
+  .expenses-module .expense-presentation-sheet[data-sheet-size="compact"] > .modal-card {
+    height: auto !important;
+    max-height: min(52dvh, 460px) !important;
+  }
+}
