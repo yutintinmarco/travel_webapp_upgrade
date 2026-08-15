@@ -1,3 +1,36 @@
+# Travel WebApp — v7.7.2.1
+
+## Phase 2F · Native Warm Boot / Visual State Persistence
+
+### First-paint appearance restore
+
+• Added a tiny synchronous `travel_boot_visual_v1` localStorage snapshot for the active Trip.
+• The document head now restores the remembered Trip background, accent colour, Team colours and saved font scale before the first body paint.
+• The visual snapshot contains appearance/header hints only; Firestore remains authoritative and IndexedDB remains the complete render cache.
+• The stored background is never cleared while the same Trip is being reconciled, so refresh / PWA reopen no longer falls back to the generic pink/generated background before restoring the real one.
+
+### Same-Trip Instant Cache boot
+
+• A remembered Firebase Trip now prefers the IndexedDB render cache even when its Trip ID is the same as bundled `trip.json`.
+• This closes the default-colour flash where bundled destination / Team colours painted first and Firebase custom colours replaced them about a second later.
+• A warm same-Trip boot keeps the itinerary views hidden until the cached Trip is ready, then reveals the correct state atomically instead of visibly rebuilding the page.
+• The generic “正在載入上次旅程…” card is suppressed for a trusted same-Trip warm boot; it remains available when switching to a different remembered/deep-linked Trip.
+• The last rendered header title/date/status hint is reused during the short cache bootstrap window so the top of the app does not jump back to generic placeholders.
+
+### Warm-boot path acceleration
+
+• Added a module preload hint for `trip-render-cache-service.js`, which is the first module required by pre-auth warm boot.
+• Saved font scale is now applied in the head alongside Light / Dark Mode, preventing a visible text-size resize after first paint.
+• The existing Layer 3 partial-render, Firebase dirty-section and batched IndexedDB logic is unchanged.
+
+### Scope / deployment
+
+• No Firestore schema, permissions, itinerary UI, destination / Team colour logic, navigation compositor or Expense behaviour changed.
+• Service Worker shell cache updated to `travel-shell-v7.7.2.1`.
+• Firestore Rules and indexes are unchanged. No Rules deployment is required.
+
+---
+
 # Travel WebApp — v7.7.2.0
 
 ## Phase 2F Harmony · Layer 3 Runtime Slimming
