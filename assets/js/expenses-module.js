@@ -5,6 +5,7 @@ import {
   signInWithGoogle,
   signOutCurrentUser
 } from "./auth-service.js";
+import { getDocsFromCache } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js";
 import {
   collection,
   addDoc,
@@ -15,6 +16,7 @@ import {
   serverTimestamp,
   query,
   orderBy,
+  limit,
   getDoc,
   setDoc
 } from "./firestore-observed-service.js";
@@ -110,7 +112,13 @@ function mountExpensesHtml(root) {
 
       <section class="card recent-expenses-card">
         <h2>最近支出</h2>
-        <div id="recentExpenseList"></div>
+        <div id="recentExpenseList" class="recent-expense-list is-pending" aria-busy="true">
+          <div class="recent-expense-skeleton" aria-hidden="true">
+            <div class="recent-expense-skeleton-row"><span></span><i></i></div>
+            <div class="recent-expense-skeleton-row"><span></span><i></i></div>
+            <div class="recent-expense-skeleton-row"><span></span><i></i></div>
+          </div>
+        </div>
       </section>
 
     </section>
@@ -590,6 +598,8 @@ const expenseSnapshotTotal = document.getElementById("expenseSnapshotTotal");
 const expenseSnapshotCats = document.getElementById("expenseSnapshotCats");
 const expenseSnapshotPersons = document.getElementById("expenseSnapshotPersons");
 const recentExpenseList = document.getElementById("recentExpenseList");
+let recentExpenseCacheHydrationStarted = false;
+let recentExpensesLiveReady = false;
 const openFullAddBtn = document.getElementById("openFullAddBtn");
 const openOcrEntryBtn = document.getElementById("openOcrEntryBtn");
 const expenseFormModal = document.getElementById("expenseFormModal");
@@ -2100,10 +2110,61 @@ function startTripListener() {
   });
 }
 
+function setRecentExpensesPending(pending) {
+  if (!recentExpenseList) return;
+  recentExpenseList.classList.toggle("is-pending", Boolean(pending));
+  recentExpenseList.setAttribute("aria-busy", pending ? "true" : "false");
+}
+
+function renderWarmRecentExpenseRows(list) {
+  if (!recentExpenseList || recentExpensesLiveReady || !Array.isArray(list) || !list.length) return;
+  const base = tripSettings.baseCurrency || "HKD";
+  const rows = sortExpensesForDisplay(list).filter(item => item?.isDeleted !== true).slice(0, 5);
+  if (!rows.length) return;
+
+  recentExpenseList.innerHTML = rows.map(expense => {
+    const originalAmount = Number(expense.originalAmount ?? expense.amount ?? 0);
+    const originalCurrency = expense.originalCurrency ?? expense.currency ?? base;
+    const convertedAmount = Number(expense.convertedAmount ?? convertToBase(originalAmount, originalCurrency) ?? 0);
+    const splitLabel = getSplitMethodLabel(expense.splitMethod || "equal");
+    return `
+      <div class="expense-list-row recent-expense-warm-row" data-category="${safeEscape(expense.category || 'Other')}">
+        <span class="expense-row-main">
+          <strong>${safeEscape(expense.title)}</strong>
+          <small>${safeEscape(expense.date)} · ${safeEscape(expense.category || "Other")} · Paid by ${safeEscape(expense.paidBy || "-")}</small>
+        </span>
+        <span class="expense-row-side">
+          <strong>${safeEscape(originalCurrency)} ${originalAmount.toFixed(2)}</strong>
+          <small>${safeEscape(base)} ${convertedAmount.toFixed(2)}</small>
+        </span>
+        <span class="expense-row-badge">${safeEscape(splitLabel)}</span>
+      </div>`;
+  }).join("");
+  recentExpenseList.classList.add("is-warm-cache");
+  setRecentExpensesPending(true);
+}
+
+async function hydrateRecentExpensesFromLocalFirestoreCache() {
+  if (recentExpenseCacheHydrationStarted || recentExpensesLiveReady || !currentUser || !phase2TripRole) return;
+  recentExpenseCacheHydrationStarted = true;
+  try {
+    const q = query(getExpensesCollection(), orderBy("date", "desc"), limit(5));
+    const snap = await getDocsFromCache(q);
+    if (recentExpensesLiveReady) return;
+    const cachedRows = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    renderWarmRecentExpenseRows(cachedRows);
+  } catch (error) {
+    // Cache-only hydration is best-effort. The live listener below remains the source of truth.
+  }
+}
+
 function listenToExpenses() {
   if (stopExpensesListener) stopExpensesListener();
   const q = query(getExpensesCollection(), orderBy("date", "desc"));
   stopExpensesListener = onSnapshot(q, snap => {
+    recentExpensesLiveReady = true;
+    if (recentExpenseList) recentExpenseList.classList.remove("is-warm-cache");
+    setRecentExpensesPending(false);
     allExpenses = sortExpensesForDisplay(snap.docs.map(d => ({ id: d.id, ...d.data() })));
     expenses = getActiveExpenses();
     renderExpenses();
@@ -2480,6 +2541,7 @@ function renderExpenseRows(targetEl, list, options = {}) {
 function renderExpenses() {
   renderExpenseRows(expenseList, expenses);
   renderExpenseRows(recentExpenseList, expenses, { limit: 5 });
+  if (recentExpensesLiveReady) setRecentExpensesPending(false);
 }
 
 function openExpenseDetail(expenseId) {
@@ -4167,6 +4229,10 @@ async function startExpenseCloudIfAllowed() {
   }
   cloudExpenseStarted = true;
   setModuleStatus(`Connected · ${phase2TripRole}`);
+  // v7.7.3.3 · Read only from Firestore's existing persistent local cache so
+  // 最近支出 can paint immediately without creating any extra server read.
+  // The realtime listener remains authoritative and replaces this warm preview.
+  void hydrateRecentExpensesFromLocalFirestoreCache();
   try {
     await ensureTripMembersAndSettings();
     initMembers();
@@ -4208,6 +4274,8 @@ subscribeAuthState(async (user) => {
     if (stopActivityLogsListener) stopActivityLogsListener();
     allExpenses = [];
     expenses = [];
+    recentExpenseCacheHydrationStarted = false;
+    recentExpensesLiveReady = false;
     settlements = [];
     activityLogs = [];
     tripStatus = "open";
