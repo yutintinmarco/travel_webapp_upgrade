@@ -1,5 +1,5 @@
 /* Travel WebApp Service Worker
- * v7.7.3.3 · Performance Lite QA; Layer 0–3 retained
+ * v7.7.4.0 · Performance Lite QA; Layer 0–3 retained
  *
  * Keeps the v7.7.0.14 cold-start behaviour, while hardening installation:
  *  1. Critical shell assets are transactional. If any critical file cannot be
@@ -13,7 +13,7 @@
  *     explicit reload stays network-first.
  */
 
-const SW_VERSION = "travel-shell-v7.7.3.3";
+const SW_VERSION = "travel-shell-v7.7.4.0";
 const CORE_CACHE = SW_VERSION;
 
 // Required for a useful offline launch and remembered-Trip boot.

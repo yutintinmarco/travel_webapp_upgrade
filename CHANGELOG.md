@@ -1,3 +1,12 @@
+# v7.7.4.0 · Active Day Realtime / Firestore Read Efficiency
+
+• Returning Firebase trips now seed inactive Day items from the trusted IndexedDB render cache instead of keeping every Day item collection subscribed in realtime.
+• Only the currently selected Day keeps a live item listener during normal warm boot. Switching Day is instant from local cache, then that Day is refreshed live in the background.
+• A newly seen Day hydrates once from Firestore, and a Trip revision mismatch temporarily performs a full Day-item hydration before automatically returning to active-Day-only realtime.
+• Day selection is preserved across scoped Firebase item refreshes, so a live update cannot jump the itinerary back to Day 1.
+• This is intentionally a quota-efficiency change with no Firebase schema or Rules change. Existing persistent cache, offline behaviour, operation locks and partial-render logic are retained.
+• Expected Birthday Trip steady-state listener count after a warm boot: approximately 9 instead of 14, with inactive Day item documents no longer re-subscribed on every launch. Exact observed reads remain subject to Firestore cache/server behaviour and Firebase billing semantics.
+
 # v7.7.3.3 · Recent Expenses Warm Cache
 
 • 最近支出不再先顯示一張空白 card 再突然彈入資料。
