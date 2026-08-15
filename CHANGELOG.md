@@ -1,3 +1,12 @@
+# v7.7.4.1 · Sheet Polish + Trip Status Fix
+
+• Expense bottom sheets now use content-driven height instead of forcing every medium sheet to a 72% detent. Short sheets such as 資料備份 and 鎖定旅程 are explicitly compact.
+• The sheet backdrop extends into the iOS top safe area to remove the exposed white hairline seen while a sheet is open.
+• Removed the duplicate card-level bottom safe-area padding. The sticky footer is now the single owner of the home-indicator inset, eliminating the thick blank band below the full expense form action.
+• Long sheets and 完整新增支出 keep their existing maximum detents and internal scrolling; only unused empty height is removed.
+• My Trips now derives upcoming / active / completed display status from the Trip start and end dates at runtime. A Trip whose start date is today is therefore shown as 旅程中 even if an older imported Firestore status still says upcoming.
+• No Firestore schema, Rules or index changes. Active-Day realtime, I/O diagnostics, warm boot and all Layer 0–3 optimisations are retained.
+
 # v7.7.4.0 · Active Day Realtime / Firestore Read Efficiency
 
 • Returning Firebase trips now seed inactive Day items from the trusted IndexedDB render cache instead of keeping every Day item collection subscribed in realtime.
