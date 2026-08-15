@@ -4954,3 +4954,45 @@ html.theme-dark .expenses-module .expense-form-body .expense-participant-checkbo
 html:not(.theme-light):not(.theme-dark) .expenses-module .expense-form-body .expense-participant-checkbox:checked + .expense-participant-check{
   background:#0a84ff !important;border-color:#0a84ff !important;
 }
+
+/* v7.7.3.3 · Recent expenses warm-cache staging.
+ * Keep the card visually occupied while Firestore auth/settings settle, and
+ * show a cache-only preview when Persistent IndexedDB already has recent rows. */
+.expenses-module .recent-expense-list.is-pending {
+  min-height: 174px;
+}
+.expenses-module .recent-expense-skeleton {
+  display: grid;
+  gap: 8px;
+}
+.expenses-module .recent-expense-skeleton-row {
+  min-height: 50px;
+  border-radius: 12px;
+  border: 1px solid var(--expense-line);
+  background: var(--expense-soft-bg);
+  padding: 11px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+.expenses-module .recent-expense-skeleton-row span,
+.expenses-module .recent-expense-skeleton-row i {
+  display: block;
+  height: 9px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--expense-muted) 20%, transparent);
+}
+.expenses-module .recent-expense-skeleton-row span { width: 48%; }
+.expenses-module .recent-expense-skeleton-row i { width: 24%; }
+.expenses-module .recent-expense-list.is-warm-cache .recent-expense-warm-row {
+  opacity: 0.92;
+  cursor: default;
+}
+.expenses-module .recent-expense-list.is-warm-cache::after {
+  content: "正在同步最新支出…";
+  display: block;
+  margin-top: 7px;
+  font-size: calc(11px * var(--font-scale));
+  color: var(--expense-muted-2);
+}
