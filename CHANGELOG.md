@@ -1,3 +1,12 @@
+# v7.7.4.3 · Expense Sheet Footer Architecture Cleanup
+
+• Replaced the stacked v7.7.4.1 / v7.7.4.2 expense-sheet footer overrides with one authoritative finishing layer.
+• Confirmed the remaining light band under the primary action was the iPhone bottom safe-area itself, not a hidden browser bar or an extra modal container.
+• The full gesture-safe inset is still reserved. It is now rendered as a continuous action-dock surface with a subtle Trip-accent wash instead of an empty white strip.
+• Sheet body, footer and modal card now share one surface model; footer backdrop blur / shadow layers that visually split the bottom area were removed.
+• Content-driven compact / medium / large sheet ceilings and the v7.7.4.2 action-button hierarchy are preserved.
+• No Firestore schema, rules, loader, expense data, or permission behaviour changed.
+
 # v7.7.4.2 · Action Button Harmony + Expense Safe Area Polish
 
 • Audited modal-level action buttons across the App and formalised one hierarchy: primary actions use the active accent colour, destructive actions use iOS red, and utility / secondary actions use neutral glass.

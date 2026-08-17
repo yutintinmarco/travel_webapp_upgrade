@@ -4997,25 +4997,29 @@ html:not(.theme-light):not(.theme-dark) .expenses-module .expense-form-body .exp
   color: var(--expense-muted-2);
 }
 
-
 /* ==========================================================================
-   v7.7.4.1 · Native sheet polish
-   Content-driven detents, safe-area backdrop coverage and single bottom inset.
+   v7.7.4.3 · Expense sheet footer architecture cleanup
+   One authoritative bottom-sheet finishing layer for detents, action placement
+   and iPhone safe-area presentation. The safe area remains fully reserved for
+   gestures, but is rendered as part of the action dock instead of a blank bar.
    ========================================================================== */
+
 /* iOS standalone can expose a hairline above a fixed 100dvh overlay. Extend the
    backdrop into the top safe-area without moving the bottom-attached sheet. */
 .expenses-module .expense-presentation-sheet {
   top: calc(-1 * env(safe-area-inset-top, 0px)) !important;
   bottom: 0 !important;
   height: auto !important;
+  --expense-sheet-surface: rgba(248,248,250,0.96);
+  --expense-sheet-dock-surface: color-mix(in srgb, var(--expense-primary) 8%, rgba(248,248,250,0.98));
 }
 
-/* Sheets size to their content and only use the detent as a ceiling. This keeps
-   short actions compact while long forms retain a scrollable native sheet. */
+/* Sheets size to content. The detent is a ceiling, not a forced height. */
 .expenses-module .expense-presentation-sheet > .modal-card {
   height: auto !important;
   max-height: min(72dvh, calc(100dvh - env(safe-area-inset-top, 0px) - 12px)) !important;
   padding-bottom: 0 !important;
+  background: var(--expense-sheet-surface) !important;
 }
 .expenses-module .expense-presentation-sheet[data-sheet-size="large"] > .modal-card {
   height: auto !important;
@@ -5025,61 +5029,70 @@ html:not(.theme-light):not(.theme-dark) .expenses-module .expense-form-body .exp
   height: auto !important;
   max-height: min(52dvh, 460px) !important;
 }
+.expenses-module .expense-presentation-sheet .modal-form {
+  min-height: 0 !important;
+  display: flex !important;
+  flex: 1 1 auto !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+}
+.expenses-module .expense-presentation-sheet .modal-body-scroll {
+  min-height: 0 !important;
+  flex: 1 1 auto !important;
+  overflow-y: auto !important;
+  padding-bottom: 12px !important;
+}
 .expenses-module .expense-presentation-sheet[data-sheet-size="compact"] .modal-body-scroll {
   flex: 0 1 auto !important;
   overflow-y: auto !important;
-  padding-bottom: calc(18px + env(safe-area-inset-bottom, 0px)) !important;
+  padding-bottom: 10px !important;
 }
 
-/* The footer already owns the home-indicator inset. Avoid a second card-level
-   inset which appeared as a thick blank band below the primary action. */
+/* Action dock architecture.
+   The footer owns the entire bottom inset exactly once. Its surface gently
+   inherits the active Trip accent toward the physical bottom edge, so the
+   gesture-safe area reads as one intentional dock instead of a white strip. */
 .expenses-module .expense-presentation-sheet .modal-footer-actions,
 .expenses-module .expense-presentation-sheet .sticky-modal-actions {
-  padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px)) !important;
-}
-
-@media (min-width: 700px) {
-  .expenses-module .expense-presentation-sheet > .modal-card {
-    height: auto !important;
-    max-height: min(72dvh, 720px) !important;
-  }
-  .expenses-module .expense-presentation-sheet[data-sheet-size="large"] > .modal-card {
-    height: auto !important;
-    max-height: min(88dvh, 820px) !important;
-  }
-  .expenses-module .expense-presentation-sheet[data-sheet-size="compact"] > .modal-card {
-    height: auto !important;
-    max-height: min(52dvh, 460px) !important;
-  }
-}
-
-
-/* ==========================================================================
-   v7.7.4.2 · App-wide sheet action harmony
-   One placement model for modal-level actions: header close, content body,
-   then a bottom action dock. Inline field actions remain beside their field.
-   ========================================================================== */
-.expenses-module .expense-presentation-sheet .modal-footer-actions,
-.expenses-module .expense-presentation-sheet .sticky-modal-actions {
+  position: static !important;
+  flex: 0 0 auto !important;
   grid-auto-flow: row !important;
   grid-auto-columns: auto !important;
   grid-template-columns: repeat(auto-fit, minmax(0, 1fr)) !important;
   gap: 8px !important;
   width: 100% !important;
   margin: 0 !important;
-  padding: 8px 16px max(8px, calc(env(safe-area-inset-bottom, 0px) - 10px)) !important;
+  padding: 8px 16px max(10px, env(safe-area-inset-bottom, 0px)) !important;
+  border: 0 !important;
   border-top: 0 !important;
-  background: rgba(248,248,250,0.96) !important;
-  box-shadow: 0 -8px 20px rgba(15,23,42,0.025) !important;
-  backdrop-filter: blur(24px) saturate(1.18) !important;
-  -webkit-backdrop-filter: blur(24px) saturate(1.18) !important;
+  background:
+    linear-gradient(
+      to bottom,
+      var(--expense-sheet-surface) 0%,
+      color-mix(in srgb, var(--expense-primary) 2%, var(--expense-sheet-surface)) 44%,
+      var(--expense-sheet-dock-surface) 100%
+    ) !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
 }
 .expenses-module .expense-presentation-sheet .modal-footer-actions.expense-action-stack {
   grid-template-columns: 1fr !important;
 }
-.expenses-module .expense-presentation-sheet .modal-footer-actions.expense-actions-unavailable {
+.expenses-module .expense-presentation-sheet .modal-footer-actions.expense-actions-unavailable,
+.expenses-module .expense-presentation-sheet .modal-footer-actions:has(> .modal-close-btn:only-child),
+.expenses-module .expense-presentation-sheet .modal-footer-actions:empty {
   display: none !important;
 }
+.expenses-module .expense-presentation-sheet .modal-footer-actions > .modal-close-btn {
+  display: none !important;
+}
+.expenses-module .expense-presentation-sheet .backup-actions:empty,
+.expenses-module .expense-presentation-sheet .form-actions:empty {
+  display: none !important;
+}
+
+/* Modal-level button geometry and semantic colours. */
 .expenses-module .expense-presentation-sheet .modal-footer-actions button:not(.modal-close-btn),
 .expenses-module .expense-presentation-sheet .sticky-modal-actions button:not(.modal-close-btn) {
   width: 100% !important;
@@ -5117,42 +5130,35 @@ html:not(.theme-light):not(.theme-dark) .expenses-module .expense-form-body .exp
   height: auto !important;
   border-radius: 14px !important;
 }
-.expenses-module .expense-presentation-sheet .backup-actions:empty,
-.expenses-module .expense-presentation-sheet .form-actions:empty {
-  display: none !important;
-}
 
-/* The home-indicator clearance remains safe, but no longer reads as a second
-   white bar beneath the primary action. */
-.expenses-module .expense-presentation-sheet > .modal-card {
-  background: rgba(248,248,250,0.96) !important;
+/* Dark mode uses the same dock model with a subtle accent wash. */
+html.theme-dark .expenses-module .expense-presentation-sheet,
+html:not(.theme-light):not(.theme-dark) .expenses-module .expense-presentation-sheet {
+  --expense-sheet-surface: rgba(28,28,34,0.96);
+  --expense-sheet-dock-surface: color-mix(in srgb, var(--expense-primary) 12%, rgba(28,28,34,0.98));
 }
-.expenses-module .expense-presentation-sheet .modal-body-scroll {
-  padding-bottom: 12px !important;
-}
-.expenses-module .expense-presentation-sheet[data-sheet-size="compact"] .modal-body-scroll {
-  padding-bottom: 10px !important;
-}
-
-html.theme-dark .expenses-module .expense-presentation-sheet .modal-footer-actions,
-html.theme-dark .expenses-module .expense-presentation-sheet .sticky-modal-actions {
-  background: rgba(28,28,34,0.96) !important;
-  box-shadow: 0 -8px 20px rgba(0,0,0,0.08) !important;
-}
-html.theme-dark .expenses-module .expense-sheet-action-secondary {
+html.theme-dark .expenses-module .expense-sheet-action-secondary,
+html:not(.theme-light):not(.theme-dark) .expenses-module .expense-sheet-action-secondary {
   background: rgba(255,255,255,0.075) !important;
   border-color: rgba(255,255,255,0.13) !important;
   color: #f5f5f7 !important;
 }
-@media (prefers-color-scheme: dark) {
-  html:not(.theme-light):not(.theme-dark) .expenses-module .expense-presentation-sheet .modal-footer-actions,
-  html:not(.theme-light):not(.theme-dark) .expenses-module .expense-presentation-sheet .sticky-modal-actions {
-    background: rgba(28,28,34,0.96) !important;
-    box-shadow: 0 -8px 20px rgba(0,0,0,0.08) !important;
+
+@media (min-width: 700px) {
+  .expenses-module .expense-presentation-sheet > .modal-card {
+    height: auto !important;
+    max-height: min(72dvh, 720px) !important;
   }
-  html:not(.theme-light):not(.theme-dark) .expenses-module .expense-sheet-action-secondary {
-    background: rgba(255,255,255,0.075) !important;
-    border-color: rgba(255,255,255,0.13) !important;
-    color: #f5f5f7 !important;
+  .expenses-module .expense-presentation-sheet[data-sheet-size="large"] > .modal-card {
+    height: auto !important;
+    max-height: min(88dvh, 820px) !important;
+  }
+  .expenses-module .expense-presentation-sheet[data-sheet-size="compact"] > .modal-card {
+    height: auto !important;
+    max-height: min(52dvh, 460px) !important;
+  }
+  .expenses-module .expense-presentation-sheet .modal-footer-actions,
+  .expenses-module .expense-presentation-sheet .sticky-modal-actions {
+    padding-bottom: 12px !important;
   }
 }
