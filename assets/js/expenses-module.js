@@ -183,8 +183,7 @@ function mountExpensesHtml(root) {
       <div class="modal-heading-row">
         <h3 id="expenseFormModalTitle"><span class="modal-title-icon">➕</span><span>完整新增支出</span></h3>
       </div>
-      <form id="expenseForm" class="modal-form modal-form-with-footer">
-        <div class="modal-body-scroll expense-form-body">
+      <form id="expenseForm" class="modal-body-scroll expense-form-body">
           <label>
             日期
             <input type="date" id="date" required />
@@ -254,14 +253,12 @@ function mountExpensesHtml(root) {
             備註
             <textarea id="note" rows="2" placeholder="Optional"></textarea>
           </label>
-        </div>
-
-        <div class="modal-footer-actions sticky-modal-actions">
-          <button type="submit" id="submitBtn">新增</button>
-          <button type="button" id="cancelEditBtn" class="secondary-btn hidden">取消編輯</button>
-          <button type="button" id="closeExpenseFormModalBtn" class="modal-close-btn">關閉</button>
-        </div>
       </form>
+      <div class="modal-footer-actions">
+        <button type="submit" id="submitBtn" form="expenseForm">新增</button>
+        <button type="button" id="cancelEditBtn" class="secondary-btn hidden">取消編輯</button>
+        <button type="button" id="closeExpenseFormModalBtn" class="modal-close-btn">關閉</button>
+      </div>
     </div>
   </div>
 

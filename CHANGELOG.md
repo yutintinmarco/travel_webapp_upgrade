@@ -1,3 +1,20 @@
+# v7.7.4.4 · Full Add Uses OCR Sheet Layout
+
+## Expense full-add sheet
+
+• Rebuilt the Full Add sheet footer structure to match the working OCR Entry sheet instead of adding another safe-area CSS hotfix.
+• `expenseForm` is now the scrollable sheet body directly under the modal card, matching OCR's `heading → body → footer` hierarchy.
+• The primary action footer is now a direct child of the modal card, exactly like OCR Entry, rather than being nested inside the flex form.
+• Removed the Full Add-only `sticky-modal-actions` path. The submit button uses the standard HTML `form="expenseForm"` association, so validation and the existing submit handler are unchanged.
+• This deliberately leaves the v7.7.4.3 shared safe-area architecture untouched. The only remaining layout difference between OCR and Full Add is content length / detent, not footer ownership.
+
+## Regression scope
+
+• No Firestore schema, rules, indexes, loader, cache, auth, permissions, trip data or expense persistence logic changed.
+• No visual changes to OCR Entry. It is the reference implementation for this fix.
+
+---
+
 # v7.7.4.3 · Expense Sheet Footer Architecture Cleanup
 
 • Replaced the stacked v7.7.4.1 / v7.7.4.2 expense-sheet footer overrides with one authoritative finishing layer.
