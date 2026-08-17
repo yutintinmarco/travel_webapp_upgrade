@@ -1,3 +1,33 @@
+# v7.7.4.5 · Snapshot Export + Operation Lock Reliability
+
+## Snapshot export repair
+
+• Fixed 「版本紀錄 → 匯出此版本」 by routing Current Trip and Snapshot exports through one canonical Portable JSON export boundary.
+• The exporter now accepts both the current Firestore snapshot structure and older / imported snapshot payloads that already resemble Portable JSON.
+• Snapshot export preserves the selected Snapshot revision and export metadata while keeping the same Portable JSON contract used by current Trip export.
+• No backup restore semantics are expanded in this build; the planned Full Backup / Trip Only / Expenses Only restore work remains for v7.7.5.0.
+
+## Multi device operation lock repair
+
+• Moved the high risk Import / Restore coordination lock from `trips/{tripId}` to `trips/{tripId}/operations/current`.
+• Import and Restore can now update the Trip parent document without invalidating the transaction that decides which device owns the operation lock.
+• A second Owner / Admin attempting Import or Restore while another device holds the lock should fail quickly with the existing 「另一部裝置正在更新此旅程」 path instead of remaining stuck at 「準備還原」.
+• The operation document is deleted on release and retains the existing 12 minute stale lock takeover behaviour.
+• Snapshot restore no longer copies the legacy parent level `activeOperation*` fields back into the Trip document.
+
+## Firebase deployment
+
+• `firestore.rules` changed to permit Owner / Admin access to the new `operations/current` coordination document only.
+• Firestore indexes are unchanged.
+• **Firestore Rules must be redeployed for this build before testing Import / Restore concurrency.**
+
+## Regression scope
+
+• No itinerary UI, expense UI, active Day realtime loader, warm cache, Auth, member roles or expense lock behaviour changed.
+• The protected v7.3.13 Profile Navigation compositor remains untouched.
+
+---
+
 # v7.7.4.4 · Full Add Uses OCR Sheet Layout
 
 ## Expense full-add sheet

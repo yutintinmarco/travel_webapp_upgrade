@@ -8,45 +8,51 @@ import { assertCloudOnline } from "./cloud-safety-service.js";
 
 const LOCK_TTL_MS=12*60*1000;
 function clean(v){return String(v??"").trim();}
+function timestampMillis(value){
+  try{
+    if(typeof value?.toMillis==="function")return Number(value.toMillis())||0;
+    if(value?.seconds!=null)return Number(value.seconds)*1000;
+  }catch(error){}
+  return 0;
+}
 function lockId(type){return`${clean(type)||"operation"}_${Date.now()}_${Math.random().toString(36).slice(2,9)}`;}
+function operationRef(tripId){return doc(db,"trips",tripId,"operations","current");}
 
 export async function acquireTripOperation(tripIdInput,typeInput,user){
   assertCloudOnline("旅程更新");
   const tripId=clean(tripIdInput),type=clean(typeInput)||"operation";
   if(!tripId||!user?.uid)throw new Error("Missing trip operation context");
-  const ref=doc(db,"trips",tripId);
+  const ref=operationRef(tripId);
   const operationId=lockId(type);
   const now=Date.now();
 
+  // v7.7.4.5: the coordination lock lives in its own document. Import /
+  // restore can now update trips/{tripId} freely without invalidating the
+  // transaction that decides which device owns the operation lock.
   await runTransaction(db,async tx=>{
     const snap=await tx.get(ref);
-    if(!snap.exists()){
-      const error=new Error("Trip not found");
-      error.code="trip-not-found";
-      throw error;
-    }
-    const data=snap.data()||{};
-    const existingId=clean(data.activeOperationId);
-    const existingStarted=Number(data.activeOperationStartedAtMs)||0;
-    const existingBy=clean(data.activeOperationBy);
+    const data=snap.exists()?(snap.data()||{}):{};
+    const existingId=clean(data.operationId);
+    const existingStarted=timestampMillis(data.startedAt)||Number(data.startedAtMs)||0;
+    const existingBy=clean(data.actorUid);
     const stale=!existingStarted||now-existingStarted>LOCK_TTL_MS;
     if(existingId&&!stale){
       const error=new Error("Another device is updating this Trip");
       error.code="trip-operation-busy";
       error.operation={
         operationId:existingId,
-        type:clean(data.activeOperationType),
+        type:clean(data.type),
         actorUid:existingBy,
         startedAtMs:existingStarted
       };
       throw error;
     }
-    tx.update(ref,{
-      activeOperationId:operationId,
-      activeOperationType:type,
-      activeOperationBy:user.uid,
-      activeOperationStartedAtMs:now,
-      activeOperationStartedAt:serverTimestamp()
+    tx.set(ref,{
+      operationId,
+      type,
+      actorUid:user.uid,
+      startedAtMs:now,
+      startedAt:serverTimestamp()
     });
   });
   return{tripId,type,operationId};
@@ -54,21 +60,15 @@ export async function acquireTripOperation(tripIdInput,typeInput,user){
 
 export async function releaseTripOperation(lock,user,{force=false}={}){
   if(!lock?.tripId||!lock?.operationId)return;
-  const ref=doc(db,"trips",lock.tripId);
+  const ref=operationRef(lock.tripId);
   try{
     await runTransaction(db,async tx=>{
       const snap=await tx.get(ref);
       if(!snap.exists())return;
       const data=snap.data()||{};
-      if(!force&&clean(data.activeOperationId)!==clean(lock.operationId))return;
-      if(!force&&user?.uid&&clean(data.activeOperationBy)!==clean(user.uid))return;
-      tx.update(ref,{
-        activeOperationId:"",
-        activeOperationType:"",
-        activeOperationBy:"",
-        activeOperationStartedAtMs:0,
-        activeOperationStartedAt:null
-      });
+      if(!force&&clean(data.operationId)!==clean(lock.operationId))return;
+      if(!force&&user?.uid&&clean(data.actorUid)!==clean(user.uid))return;
+      tx.delete(ref);
     });
   }catch(error){
     console.warn("Unable to release trip operation lock",error);

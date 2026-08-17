@@ -1,5 +1,5 @@
 import { auth, db } from "./firebase-service.js";
-import { normalizeTravellers } from "./trip-schema-service.js";
+import { normalizePortableTrip, normalizeTravellers } from "./trip-schema-service.js";
 import { assertCloudOperationAvailable, beginCloudOperation, endCloudOperation } from "./cloud-safety-service.js";
 import { acquireTripOperation, releaseTripOperation } from "./trip-operation-service.js";
 import {
@@ -220,6 +220,44 @@ function structureToPortableTrip(structure, { snapshotId = "" } = {}) {
   return portable;
 }
 
+function canonicalPortableExport(sourceInput, { tripId = "", snapshotId = "", revision = 0 } = {}) {
+  // v7.7.4.5: Current Trip and Snapshot export now enter through one
+  // compatibility boundary. Modern snapshots store the Firestore structure,
+  // while older / imported snapshot payloads may already look like Portable
+  // JSON. Both shapes are normalised into the same export contract.
+  const source = sourceInput?.structure && typeof sourceInput.structure === "object"
+    ? sourceInput.structure
+    : sourceInput;
+
+  if (source?.tripDoc || source?.settings || safeArray(source?.savedPlaces).length) {
+    const structure = { ...source, tripId: clean(source?.tripId || tripId) };
+    const portable = structureToPortableTrip(structure, { snapshotId });
+    if (revision) portable.revision = Math.max(1, Number(revision) || Number(portable.revision) || 1);
+    portable.tripId = clean(portable.tripId || tripId);
+    portable.meta = { ...(portable.meta || {}), tripId: clean(portable.tripId || tripId) };
+    return portable;
+  }
+
+  if (source?.meta || Array.isArray(source?.days) || source?.tripId) {
+    const portable = normalizePortableTrip({
+      ...clone(source),
+      tripId: clean(source?.tripId || source?.meta?.tripId || tripId),
+      revision: Math.max(1, Number(revision) || Number(source?.revision) || 1)
+    });
+    portable.exportMeta = {
+      ...(portable.exportMeta && typeof portable.exportMeta === "object" ? portable.exportMeta : {}),
+      source: snapshotId ? "firebase-snapshot" : "firebase-current",
+      snapshotId: clean(snapshotId),
+      exportedAt: new Date().toISOString()
+    };
+    return portable;
+  }
+
+  const error = new Error("Snapshot payload format is not supported");
+  error.code = "snapshot-invalid";
+  throw error;
+}
+
 async function writeSnapshot(tripId, structure, user, { type = "manual", restoreTargetSnapshotId = "" } = {}) {
   const size = approxJsonBytes(structure);
   if (size > SNAPSHOT_SOFT_LIMIT_BYTES) {
@@ -306,7 +344,7 @@ export async function exportCurrentTrip(tripIdInput, { user: userInput = null } 
     error.code = "insufficient-role";
     throw error;
   }
-  const json = structureToPortableTrip(structure);
+  const json = canonicalPortableExport(structure, { tripId });
   const revision = Math.max(1, Number(structure?.tripDoc?.revision) || 1);
   return {
     tripId,
@@ -397,9 +435,12 @@ export async function getTripSnapshot(tripIdInput, snapshotIdInput, { user: user
 
 export async function exportSnapshotTrip(tripIdInput, snapshotIdInput, { user: userInput = null } = {}) {
   const snapshot = await getTripSnapshot(tripIdInput, snapshotIdInput, { user: userInput });
-  const json = structureToPortableTrip(snapshot.payload, { snapshotId: snapshot.snapshotId });
-  const revision = Math.max(1, Number(snapshot.sourceRevision) || Number(json.revision) || 1);
-  json.revision = revision;
+  const revision = Math.max(1, Number(snapshot.sourceRevision) || Number(snapshot.payload?.revision) || 1);
+  const json = canonicalPortableExport(snapshot.payload, {
+    tripId: snapshot.tripId,
+    snapshotId: snapshot.snapshotId,
+    revision
+  });
   return {
     ...snapshot,
     json,
@@ -483,11 +524,6 @@ export async function restoreTripSnapshot(tripIdInput, snapshotIdInput, { user: 
     archived: currentTrip.archived === true,
     archivedAt: currentTrip.archivedAt || null,
     archivedBy: clean(currentTrip.archivedBy),
-    activeOperationId: clean(currentTrip.activeOperationId),
-    activeOperationType: clean(currentTrip.activeOperationType),
-    activeOperationBy: clean(currentTrip.activeOperationBy),
-    activeOperationStartedAtMs: Number(currentTrip.activeOperationStartedAtMs)||0,
-    activeOperationStartedAt: currentTrip.activeOperationStartedAt || null,
     contentHash: "",
     contentHashVersion: 1,
     importState: "ready",

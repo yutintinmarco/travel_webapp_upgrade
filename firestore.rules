@@ -229,6 +229,24 @@ service cloud.firestore {
         allow delete: if isOwner(tripId);
       }
 
+      // v7.7.4.5: high-risk import / restore coordination lives outside the
+      // Trip parent document so normal Trip writes cannot keep retrying the
+      // lock transaction. The document carries coordination metadata only.
+      match /operations/{operationId} {
+        allow read: if canManageTrip(tripId) && operationId == 'current';
+        allow create, update: if canManageTrip(tripId)
+          && operationId == 'current'
+          && request.resource.data.keys().hasAll(['operationId', 'type', 'actorUid', 'startedAtMs', 'startedAt'])
+          && request.resource.data.keys().hasOnly(['operationId', 'type', 'actorUid', 'startedAtMs', 'startedAt'])
+          && request.resource.data.operationId is string
+          && request.resource.data.type in ['import', 'restore']
+          && request.resource.data.actorUid == request.auth.uid
+          && request.resource.data.startedAtMs is int;
+        allow delete: if signedIn()
+          && operationId == 'current'
+          && (resource.data.actorUid == request.auth.uid || canManageTrip(tripId));
+      }
+
       match /activityLogs/{logId} {
         allow read: if canReadTrip(tripId);
         allow create: if signedIn()
