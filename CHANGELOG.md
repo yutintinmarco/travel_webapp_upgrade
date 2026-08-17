@@ -1,3 +1,26 @@
+# v7.7.4.6 · Import Cold Start Reliability
+
+## First import readiness
+
+• Fixed the cold-start path where a valid JSON could remain stuck at 「正在比較 Firebase」 with the Import button disabled until the PWA was force-quit and reopened.
+• Import inspection now reuses the App's already-known authenticated identity before waiting for a second auth initialisation path.
+• The Trip Import service and Auth dependency are prewarmed during browser idle time and again when the Import control is touched; this loads code only and does not issue an extra Firestore read.
+• JSON validation and Firebase inspection are decoupled from the file-picker event so a slow first Firebase handshake cannot leave the picker workflow itself pending indefinitely.
+
+## Slow-response recovery
+
+• Added an 8 second inspection watchdog. If Firebase is still responding, the modal changes to 「Firebase 回應較慢」 and offers 「重新檢查」 instead of remaining permanently disabled.
+• The already-selected JSON stays in memory, so retry does not require choosing the file again.
+• A slow original inspection may still complete normally and automatically enable the correct Import / Replace action; stale results are ignored if the user closes the sheet or starts a newer retry.
+• Genuine offline state remains blocked, and no write is enabled until Firebase inspection has positively determined the import mode and permission.
+
+## Regression scope
+
+• No Firestore schema, Rules, indexes, Import write semantics, Snapshot logic, active-Day realtime loader, expense module, member roles or protected Profile Navigation compositor changed.
+• Normal successful inspection does not add any Firestore read. An additional inspection occurs only if the user explicitly uses 「重新檢查」 after a slow / failed attempt.
+
+---
+
 # v7.7.4.5 · Snapshot Export + Operation Lock Reliability
 
 ## Snapshot export repair
