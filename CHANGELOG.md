@@ -1,3 +1,25 @@
+# v7.7.5.3 · Restore Preview Card Harmony
+
+## Restore Preview card parity
+
+• Rebuilt 「還原預覽」 using the same `profile-card + profile-backup-history-card` structure as 「版本紀錄」 instead of the separate `profile-menu-card + profile-meta-row` layout.
+• Trip ID, backup content counts, media state and the append-only Audit Log note are now standard Settings rows inside the same card grammar as Snapshot history.
+• Long Trip IDs and count summaries wrap inside `profile-row-copy` rather than stretching the card.
+• Restore actions keep their existing Full / Trip Only / Expenses Only semantics and now sit in the same inset-row geometry as the version list below.
+• Removed the v7.7.5.2 bespoke two-column Restore Preview containment rules; the preview now relies on the proven Version History card layout rather than a parallel card system.
+
+## Regression scope
+
+• No Backup data format, Restore logic, Expense logic, Firebase writes, Rules, indexes, Trip schema or protected Profile Navigation compositor changed.
+
+## Deployment
+
+• Functional file changed: `index.html` only.
+• Version/cache files changed: `sw.js`, `manifest.json`, `CHANGELOG.md`.
+• `assets/` is unchanged. Firestore Rules and indexes are unchanged.
+
+---
+
 # v7.7.5.2 · Expense Cold Start + Restore Preview Polish
 
 ## Expense Cold Start Self Healing
