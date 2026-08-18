@@ -1,3 +1,33 @@
+# v7.7.6.0 · Data Management Menu & Unified Operation Sheets
+
+## Data Management information architecture
+
+• Added a dedicated 「資料管理」 page under 「我的」. The bottom navigation 「資料」 tab is unchanged and remains reserved for Visa / passport / travel-document information.
+• Moved trip.json import, Full Backup export / restore, current trip.json export, Expense Excel, manual Snapshot and Version History into 「我的 → 資料管理」.
+• Removed the duplicate trip.json import entry from 「我的旅程」, the old 行程匯出與備份 entry from 「旅程設定」, and the Expense Excel shortcut from 「支出管理」.
+• Renamed 「App 與資料」 to 「App 資訊」 so system diagnostics are clearly separated from Trip data management.
+• 「版本紀錄」 is now a child page of 「資料管理」; Snapshot detail returns to Version History.
+
+## Unified Data Operation Sheets
+
+• Promoted the proven 「匯入旅程」 bottom-sheet grammar to the canonical data-operation workflow. Export, Full Backup restore, Snapshot creation / export / restore and Expense Excel now use the same title, summary, status/warning and bottom-action hierarchy.
+• Full Backup restore no longer renders an inline Settings-card preview. After file validation it opens a dedicated operation sheet with Trip summary, Backup type, settlement count and explicit Full / Trip-only / Expense-only restore scope selection.
+• Snapshot restore no longer relies on a browser confirm dialog; the selected revision is previewed in the same operation sheet before the destructive action starts.
+• Data Only v1 media limitations remain explicit. No Backup schema, Restore scope semantics or Firebase membership rules changed.
+
+## Expense report route
+
+• Added a direct `export:excel` Expense module action so 「資料管理 → 支出 Excel 報表」 can start the existing report exporter without opening the legacy Expense backup/settings sheet. The request waits for the live expense, settlement and activity-log snapshots before generating the workbook, avoiding an empty cold-start export.
+• Removed the old Expense internal 「資料備份」 settings entry to avoid parallel export surfaces. The existing Excel engine itself is unchanged.
+
+## Deployment
+
+• Functional files changed: `index.html` and `assets/js/expenses-module.js`.
+• Version/cache files changed: `sw.js`, `manifest.json`, `CHANGELOG.md`.
+• Firestore Rules, indexes, Firebase configuration, `trip.json`, protected bottom navigation 「資料」 tab and protected Profile Navigation compositor are unchanged.
+
+---
+
 # v7.7.5.3 · Restore Preview Card Harmony
 
 ## Restore Preview card parity

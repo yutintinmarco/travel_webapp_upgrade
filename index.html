@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
   <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
   <link rel="dns-prefetch" href="https://api.open-meteo.com">
-  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?v=7.7.5.3">
+  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?v=7.7.6.0">
   <title id="page-title">行程</title>
   <script>
   // v7.7.5.0 · Performance Lite. Memory only: no Firebase reads/writes, no
@@ -2502,19 +2502,24 @@ html.theme-dark .trip-import-preview,html.theme-dark .trip-import-stat,html.them
 #trip-backup-status[hidden]{display:none!important;}
 html.theme-dark .snapshot-restore-row .profile-row-copy strong,html:not(.theme-light):not(.theme-dark) .snapshot-restore-row .profile-row-copy strong{color:#ff6961;}
 
-/* v7.7.5.3 · Restore Preview Card Harmony.
-   The Full Backup preview now uses the exact same grouped-card grammar as
-   Snapshot 版本紀錄: one padded profile card, one standard section heading,
-   and standard Settings rows for both metadata and restore actions. */
-.profile-full-backup-preview-card{overflow:hidden;}
-.profile-full-backup-preview-card .profile-row{--row-sep-inset:48px;--row-sep-bleed:-15px;}
-.profile-full-backup-preview-card .profile-backup-preview-static{cursor:default;}
-.profile-full-backup-preview-card .profile-backup-preview-static:active{background:transparent;}
-.profile-full-backup-preview-card .profile-row-copy strong,
-.profile-full-backup-preview-card .profile-row-copy small{
-  min-width:0;max-width:100%;white-space:normal;overflow-wrap:anywhere;word-break:break-word;
-}
-.profile-full-backup-preview-card .profile-backup-preview-static .profile-row-copy small{line-height:1.42;}
+/* v7.7.6.0 · Data Management operation sheets.
+   Import, export, backup, restore, Snapshot and report workflows now share
+   the proven Portable Import sheet grammar instead of rendering workflow
+   previews inline inside Settings cards. */
+.data-operation-backdrop{z-index:3210;}
+.data-operation-options{display:grid;gap:7px;}
+.data-operation-option{width:100%;display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:10px;text-align:left;border:1px solid rgba(118,118,128,.12);border-radius:13px;padding:10px 11px;background:rgba(118,118,128,.055);color:var(--label-primary);font:inherit;}
+.data-operation-option::before{content:"";width:17px;height:17px;border-radius:999px;border:2px solid rgba(118,118,128,.35);box-sizing:border-box;}
+.data-operation-option strong{display:block;font-size:calc(10.5px * var(--font-scale));line-height:1.3;}
+.data-operation-option small{display:block;margin-top:2px;color:var(--label-secondary);font-size:calc(9.5px * var(--font-scale));line-height:1.4;}
+.data-operation-option.is-selected{border-color:color-mix(in srgb,var(--accent-color) 36%,transparent);background:color-mix(in srgb,var(--accent-color) 10%,transparent);}
+.data-operation-option.is-selected::before{border:5px solid var(--accent-color);background:#fff;}
+.data-operation-option:disabled{opacity:.5;}
+.data-operation-secondary{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 10px;border-radius:11px;background:rgba(118,118,128,.055);color:var(--label-secondary);font-size:calc(9.5px * var(--font-scale));line-height:1.4;}
+.data-operation-secondary strong{color:var(--label-primary);overflow-wrap:anywhere;text-align:right;}
+.data-management-note{margin:10px 4px 0;color:var(--label-secondary);font-size:calc(9.5px * var(--font-scale));line-height:1.45;}
+html.theme-dark .data-operation-option,html.theme-dark .data-operation-secondary{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.08);}
+@media(prefers-color-scheme:dark){html:not(.theme-light):not(.theme-dark) .data-operation-option,html:not(.theme-light):not(.theme-dark) .data-operation-secondary{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.08);}}
 
 /* Phase 2E · v7.6.3 · legacy trip compatibility, visual reset + expense bootstrap */
 .app-progress-backdrop{position:fixed;inset:0;z-index:3900;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(13,18,28,.28);-webkit-backdrop-filter:blur(8px) saturate(1.05);backdrop-filter:blur(8px) saturate(1.05);opacity:0;visibility:hidden;pointer-events:none;transition:opacity .22s ease,visibility .22s step-end;}
@@ -3280,7 +3285,7 @@ body.expenses-view-active #app-version-note{
 #snacks-view::after,
 #info-view::after,
 #profile-view::after{
-  content:"v7.7.5.3" !important;
+  content:"v7.7.6.0" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3301,7 +3306,7 @@ body.expenses-view-active #app-version-note{
   display:none !important;
 }
 body.expenses-view-active .expenses-module .expenses-app::after{
-  content:"v7.7.5.3" !important;
+  content:"v7.7.6.0" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3427,7 +3432,7 @@ html.theme-dark .modal-actions .modal-close-btn{
 </style>
             <link rel="apple-touch-icon" href="assets/icon/trip_icon.png">
   <link rel="icon" type="image/png" href="assets/icon/trip_icon.png">
-  <link rel="manifest" href="manifest.json?v=7.7.5.3">
+  <link rel="manifest" href="manifest.json?v=7.7.6.0">
   <meta name="apple-mobile-web-app-title" content="關嘉露西生日之旅">
   <!-- v7.7.1.2: expenses.css is 144KB and every rule is scoped under
        .expenses-module, yet it used to block the very first paint of the
@@ -3435,8 +3440,8 @@ html.theme-dark .modal-actions .modal-close-btn{
        priority without blocking paint; ensureExpensesStylesheet() flips it to
        media="all" before the 支出 view is ever mounted, so the styling is
        byte-for-byte identical by the time anything expenses-related renders. -->
-  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?v=7.7.5.3" media="print">
-  <noscript><link rel="stylesheet" href="assets/css/expenses.css?v=7.7.5.3"></noscript>
+  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?v=7.7.6.0" media="print">
+  <noscript><link rel="stylesheet" href="assets/css/expenses.css?v=7.7.6.0"></noscript>
 </head>
 <body>
 <div class="bg-fixed"></div>
@@ -3554,7 +3559,7 @@ html.theme-dark .modal-actions .modal-close-btn{
       <section class="profile-card profile-menu-card" aria-label="我的設定">
         <button class="profile-row" type="button" data-profile-open="trips">
           <span class="profile-row-icon profile-icon-blue">🧳</span>
-          <span class="profile-row-copy"><strong>我的旅程</strong><small>切換、建立、匯入及封存旅程</small></span>
+          <span class="profile-row-copy"><strong>我的旅程</strong><small>切換、建立及封存旅程</small></span>
           <span class="profile-chevron">›</span>
         </button>
         <button class="profile-row" type="button" data-profile-open="appearance">
@@ -3562,14 +3567,19 @@ html.theme-dark .modal-actions .modal-close-btn{
           <span class="profile-row-copy"><strong>外觀與顯示</strong><small>主題、文字大小及顏色設定</small></span>
           <span class="profile-chevron">›</span>
         </button>
+        <button class="profile-row" type="button" data-profile-open="data-management">
+          <span class="profile-row-icon profile-icon-blue">⇅</span>
+          <span class="profile-row-copy"><strong>資料管理</strong><small>匯入、匯出、備份、還原及版本紀錄</small></span>
+          <span class="profile-chevron">›</span>
+        </button>
         <button class="profile-row" type="button" data-profile-open="trip-management">
           <span class="profile-row-icon profile-icon-green">⚙︎</span>
-          <span class="profile-row-copy"><strong>旅程設定</strong><small>權限、支出、備份及目前旅程設定</small></span>
+          <span class="profile-row-copy"><strong>旅程設定</strong><small>權限、支出及目前旅程設定</small></span>
           <span class="profile-chevron">›</span>
         </button>
         <button class="profile-row" type="button" data-profile-open="app-data">
           <span class="profile-row-icon profile-icon-grey">ⓘ</span>
-          <span class="profile-row-copy"><strong>App 與資料</strong><small>版本、系統資料及使用說明</small></span>
+          <span class="profile-row-copy"><strong>App 資訊</strong><small>版本、系統狀態及使用說明</small></span>
           <span class="profile-chevron">›</span>
         </button>
       </section>
@@ -3601,11 +3611,6 @@ html.theme-dark .modal-actions .modal-close-btn{
           <span class="profile-row-icon profile-icon-blue">＋</span>
           <span class="profile-row-copy"><strong>新增空白旅程</strong><small>Phase 3 編輯器完成後開放</small></span>
           <span class="profile-status-pill">3</span>
-        </button>
-        <button class="profile-row" id="trip-import-btn" type="button">
-          <span class="profile-row-icon profile-icon-grey">⇅</span>
-          <span class="profile-row-copy"><strong>匯入 trip.json</strong><small>驗證後寫入 Firebase，建立者自動成為 Owner</small></span>
-          <span class="profile-chevron">›</span>
         </button>
         <button class="profile-row" id="trip-archive-toggle" type="button" aria-expanded="false">
           <span class="profile-row-icon profile-icon-grey">🗄️</span>
@@ -3713,12 +3718,7 @@ html.theme-dark .modal-actions .modal-close-btn{
         </button>
         <button class="profile-row" type="button" data-profile-open="expense-settings">
           <span class="profile-row-icon profile-icon-orange">💳</span>
-          <span class="profile-row-copy"><strong>支出管理</strong><small>匯率、分帳成員、Excel及已刪除項目</small></span>
-          <span class="profile-chevron">›</span>
-        </button>
-        <button class="profile-row" id="trip-backup-open-btn" type="button" data-profile-open="trip-backup">
-          <span class="profile-row-icon profile-icon-grey">⇅</span>
-          <span class="profile-row-copy"><strong>行程匯出與備份</strong><small>匯出 Firebase JSON、查看 Snapshot 及安全還原</small></span>
+          <span class="profile-row-copy"><strong>支出管理</strong><small>匯率、分帳成員、鎖定及已刪除項目</small></span>
           <span class="profile-chevron">›</span>
         </button>
         <button class="profile-row" id="trip-activity-open-btn" type="button" data-profile-open="activity-log">
@@ -3824,11 +3824,6 @@ html.theme-dark .modal-actions .modal-close-btn{
           <span class="profile-row-copy"><strong>支出鎖定</strong><small>停止新增及修改支出</small></span>
           <span class="profile-chevron">›</span>
         </button>
-        <button class="profile-row" type="button" data-global-setting="backup">
-          <span class="profile-row-icon profile-icon-grey">📦</span>
-          <span class="profile-row-copy"><strong>支出 Excel 報表</strong><small>匯出對數、報銷及保存用 Excel</small></span>
-          <span class="profile-chevron">›</span>
-        </button>
         <button class="profile-row" type="button" data-global-setting="deleted">
           <span class="profile-row-icon profile-icon-red">🗑️</span>
           <span class="profile-row-copy"><strong>已刪除項目</strong><small>查看及還原已刪除支出</small></span>
@@ -3837,80 +3832,80 @@ html.theme-dark .modal-actions .modal-close-btn{
       </section>
     </div>
 
-    <div class="profile-nav-page" id="profile-page-trip-backup" data-profile-page="trip-backup" hidden>
+    <div class="profile-nav-page" id="profile-page-data-management" data-profile-page="data-management" hidden>
       <div class="profile-detail-bar">
-        <button class="profile-detail-back" type="button" data-profile-back aria-label="返回旅程設定"><span class="profile-back-glyph">‹</span><span class="profile-detail-back-label">旅程設定</span></button>
-        <h2>行程備份</h2>
+        <button class="profile-detail-back" type="button" data-profile-back aria-label="返回我的"><span class="profile-back-glyph">‹</span><span class="profile-detail-back-label">我的</span></button>
+        <h2>資料管理</h2>
         <span class="profile-detail-spacer"></span>
       </div>
-      <section class="profile-card profile-menu-card" aria-label="行程備份操作">
+
+      <div class="profile-section-label">匯入與還原</div>
+      <section class="profile-card profile-menu-card" aria-label="匯入與還原">
+        <button class="profile-row" id="trip-import-btn" type="button">
+          <span class="profile-row-icon profile-icon-blue">↥</span>
+          <span class="profile-row-copy"><strong>匯入 trip.json</strong><small>驗證 Portable Trip Data，再建立或更新 Firebase 旅程</small></span>
+          <span class="profile-chevron">›</span>
+        </button>
+        <button class="profile-row" id="trip-full-backup-restore-open" type="button">
+          <span class="profile-row-icon profile-icon-orange">↶</span>
+          <span class="profile-row-copy"><strong>還原完整 Backup</strong><small>選擇完整、只還原行程或只還原支出</small></span>
+          <span class="profile-chevron">›</span>
+        </button>
+        <input id="trip-full-backup-file" type="file" accept="application/json,.json" hidden>
+      </section>
+
+      <div class="profile-section-label">備份與匯出</div>
+      <section class="profile-card profile-menu-card" aria-label="備份與匯出">
         <button class="profile-row" id="trip-full-backup-export" type="button">
           <span class="profile-row-icon profile-icon-green">⬇</span>
           <span class="profile-row-copy"><strong>匯出完整 Backup JSON</strong><small>Data Only v1 · 行程、收藏、設定、支出及找數</small></span>
           <span class="profile-chevron">›</span>
         </button>
-        <button class="profile-row" id="trip-full-backup-restore-open" type="button">
-          <span class="profile-row-icon profile-icon-orange">↥</span>
-          <span class="profile-row-copy"><strong>還原完整 Backup JSON</strong><small>可選完整、只還原行程或只還原支出</small></span>
-          <span class="profile-chevron">›</span>
-        </button>
-        <input id="trip-full-backup-file" type="file" accept="application/json,.json" hidden>
         <button class="profile-row" id="trip-backup-export-current" type="button">
           <span class="profile-row-icon profile-icon-blue">⇩</span>
           <span class="profile-row-copy"><strong>匯出目前 trip.json</strong><small>Portable Trip Data · 不包含實際支出交易</small></span>
           <span class="profile-chevron">›</span>
         </button>
+        <button class="profile-row" id="data-management-expenses-excel" type="button">
+          <span class="profile-row-icon profile-icon-green">▦</span>
+          <span class="profile-row-copy"><strong>支出 Excel 報表</strong><small>匯出對數、報銷及保存用 Excel</small></span>
+          <span class="profile-chevron">›</span>
+        </button>
+      </section>
+
+      <div class="profile-section-label">版本與 Snapshot</div>
+      <section class="profile-card profile-menu-card" aria-label="版本與 Snapshot">
         <button class="profile-row" id="trip-backup-create-manual" type="button">
           <span class="profile-row-icon profile-icon-green">＋</span>
           <span class="profile-row-copy"><strong>建立手動 Snapshot</strong><small>保存目前 Firebase 行程，方便日後還原</small></span>
           <span class="profile-chevron">›</span>
         </button>
+        <button class="profile-row" id="trip-backup-open-btn" type="button" data-profile-open="trip-backup">
+          <span class="profile-row-icon profile-icon-grey">↶</span>
+          <span class="profile-row-copy"><strong>版本紀錄</strong><small>查看、匯出及還原最近 Snapshot</small></span>
+          <span class="profile-chevron">›</span>
+        </button>
       </section>
-      <section class="profile-card profile-backup-history-card profile-full-backup-preview-card" id="trip-full-backup-preview" aria-label="完整備份還原預覽" hidden>
-        <div class="profile-inline-section-heading"><strong>還原預覽</strong><span class="trip-library-count" id="trip-full-backup-version">—</span></div>
-        <div class="profile-row profile-backup-preview-static">
-          <span class="profile-row-icon profile-icon-grey">ID</span>
-          <span class="profile-row-copy"><strong>Trip ID</strong><small id="trip-full-backup-trip-id">—</small></span>
-        </div>
-        <div class="profile-row profile-backup-preview-static">
-          <span class="profile-row-icon profile-icon-grey">Σ</span>
-          <span class="profile-row-copy"><strong>內容</strong><small id="trip-full-backup-counts">—</small></span>
-        </div>
-        <div class="profile-row profile-backup-preview-static">
-          <span class="profile-row-icon profile-icon-grey">▧</span>
-          <span class="profile-row-copy"><strong>媒體</strong><small id="trip-full-backup-media">Data Only</small></span>
-        </div>
-        <button class="profile-row" type="button" data-full-backup-restore-scope="all">
-          <span class="profile-row-icon profile-icon-red">↶</span>
-          <span class="profile-row-copy"><strong>完整還原</strong><small>還原行程及支出資料</small></span>
-          <span class="profile-chevron">›</span>
-        </button>
-        <button class="profile-row" type="button" data-full-backup-restore-scope="trip">
-          <span class="profile-row-icon profile-icon-blue">↶</span>
-          <span class="profile-row-copy"><strong>只還原行程</strong><small>保留目前所有支出及找數紀錄</small></span>
-          <span class="profile-chevron">›</span>
-        </button>
-        <button class="profile-row" type="button" data-full-backup-restore-scope="expenses">
-          <span class="profile-row-icon profile-icon-orange">↶</span>
-          <span class="profile-row-copy"><strong>只還原支出</strong><small>保留目前行程、收藏及一般顯示設定</small></span>
-          <span class="profile-chevron">›</span>
-        </button>
-        <div class="profile-row profile-backup-preview-static">
-          <span class="profile-row-icon profile-icon-grey">i</span>
-          <span class="profile-row-copy"><strong>操作紀錄</strong><small id="trip-full-backup-preview-status">操作記錄採 append-only：備份會保存 Log，但原有 Audit Log 不會被回滾或刪除。</small></span>
-        </div>
-      </section>
+      <div class="data-management-note">完整 Backup v1 暫時係 Data Only，不包含相片／媒體；Phase 3A 會沿用同一資料管理流程升級成 Media-aware Backup Package。</div>
+    </div>
+
+    <div class="profile-nav-page" id="profile-page-trip-backup" data-profile-page="trip-backup" hidden>
+      <div class="profile-detail-bar">
+        <button class="profile-detail-back" type="button" data-profile-back aria-label="返回資料管理"><span class="profile-back-glyph">‹</span><span class="profile-detail-back-label">資料管理</span></button>
+        <h2>版本紀錄</h2>
+        <span class="profile-detail-spacer"></span>
+      </div>
       <section class="profile-card profile-backup-history-card" aria-label="Snapshot 版本紀錄">
         <div class="profile-inline-section-heading"><strong>版本紀錄</strong><span class="trip-library-count" id="trip-backup-count">—</span></div>
         <div id="trip-backup-list"></div>
         <div class="trip-library-status" id="trip-backup-status">開啟此頁後會讀取最近 Snapshot。</div>
       </section>
-      <div class="profile-backup-note" id="trip-backup-note">Full Backup v1 係 Data Only，暫未包含相片／媒體；Phase 3A 會升級成 Media-aware Backup Package。Activity Logs 會收入備份作完整保存，但還原時保留現有 append-only audit trail；Snapshot 仍只處理行程版本。</div>
+      <div class="profile-backup-note" id="trip-backup-note">Snapshot 只保存行程版本，不包括實際支出交易。完整 Backup、trip.json 及支出 Excel 已集中到「資料管理」。</div>
     </div>
 
     <div class="profile-nav-page" id="profile-page-snapshot-detail" data-profile-page="snapshot-detail" hidden>
       <div class="profile-detail-bar">
-        <button class="profile-detail-back" type="button" data-profile-back aria-label="返回行程備份"><span class="profile-back-glyph">‹</span><span class="profile-detail-back-label">行程備份</span></button>
+        <button class="profile-detail-back" type="button" data-profile-back aria-label="返回版本紀錄"><span class="profile-back-glyph">‹</span><span class="profile-detail-back-label">版本紀錄</span></button>
         <h2>版本詳情</h2>
         <span class="profile-detail-spacer"></span>
       </div>
@@ -3960,11 +3955,11 @@ html.theme-dark .modal-actions .modal-close-btn{
     <div class="profile-nav-page" id="profile-page-app-data" data-profile-page="app-data" hidden>
       <div class="profile-detail-bar">
         <button class="profile-detail-back" type="button" data-profile-back aria-label="返回我的"><span class="profile-back-glyph">‹</span><span class="profile-detail-back-label">我的</span></button>
-        <h2>App 與資料</h2>
+        <h2>App 資訊</h2>
         <span class="profile-detail-spacer"></span>
       </div>
-      <section class="profile-card" aria-label="App 資料">
-        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.7.5.3</strong></div>
+      <section class="profile-card" aria-label="App 資訊">
+        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.7.6.0</strong></div>
         <div class="profile-meta-row"><span>資料架構</span><strong>Phase 2F</strong></div>
         <div class="profile-meta-row"><span>主要資料來源</span><strong id="app-data-source-label">Firebase / 本機快取</strong></div>
       </section>
@@ -4091,6 +4086,36 @@ html.theme-dark .modal-actions .modal-close-btn{
   </div>
 </div>
 
+<div class="modal-backdrop trip-import-backdrop data-operation-backdrop" id="data-operation-backdrop" aria-hidden="true">
+  <div class="modal trip-import-modal" role="dialog" aria-modal="true" aria-labelledby="data-operation-title">
+    <div class="sheet-grabber-zone" aria-hidden="true"><span class="sheet-grabber"></span></div>
+    <div class="trip-import-scroll">
+      <div class="trip-import-title-row">
+        <div><h3 id="data-operation-title">資料管理</h3><p id="data-operation-subtitle">準備資料操作。</p></div>
+      </div>
+      <div class="trip-import-preview">
+        <div><div class="trip-import-tripname" id="data-operation-name">—</div><div class="trip-import-id" id="data-operation-id">—</div></div>
+        <div class="trip-import-stats">
+          <div class="trip-import-stat"><strong id="data-operation-stat-1">—</strong><span id="data-operation-label-1">Days</span></div>
+          <div class="trip-import-stat"><strong id="data-operation-stat-2">—</strong><span id="data-operation-label-2">Items</span></div>
+          <div class="trip-import-stat"><strong id="data-operation-stat-3">—</strong><span id="data-operation-label-3">Saved</span></div>
+          <div class="trip-import-stat"><strong id="data-operation-stat-4">—</strong><span id="data-operation-label-4">Type</span></div>
+        </div>
+        <div class="trip-import-mode" id="data-operation-mode">—</div>
+        <div class="data-operation-options" id="data-operation-options" hidden></div>
+        <div class="data-operation-secondary" id="data-operation-secondary" hidden></div>
+      </div>
+      <div class="trip-import-warnings" id="data-operation-warnings"></div>
+      <div class="trip-import-error" id="data-operation-error" hidden></div>
+      <div class="trip-import-progress" id="data-operation-progress" hidden><span></span></div>
+      <div class="trip-import-actions">
+        <button class="trip-import-cancel" id="data-operation-cancel" type="button">取消</button>
+        <button class="trip-import-confirm" id="data-operation-confirm" type="button">繼續</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="modal-backdrop" id="detail-backdrop" aria-hidden="true">
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="detail-title">
     <div class="sheet-grabber-zone" id="detail-sheet-grabber" aria-hidden="true"><span class="sheet-grabber"></span></div>
@@ -4111,7 +4136,7 @@ html.theme-dark .modal-actions .modal-close-btn{
 </div>
 
 <script>
-const APP_VERSION = "7.7.5.3";
+const APP_VERSION = "7.7.6.0";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 function perfLiteMark(name){try{return window.__perfLite?.mark(name);}catch(error){return null;}}
@@ -6403,7 +6428,7 @@ function refreshPerfLiteDiagnostics(){
 window.__refreshPerfLiteDiagnostics=refreshPerfLiteDiagnostics;
 window.addEventListener("app-firestore-io-audit",refreshPerfLiteDiagnostics);
 function refreshAppDataDiagnostics(){
-  const data=window.tripData||{};
+  const data=(typeof tripData!=="undefined"&&tripData)?tripData:{};
   const meta=data.meta||{};
   const loader=tripLoaderState||{};
   const user=window.__appAuthUser||null;
@@ -6451,7 +6476,7 @@ async function getTripLoaderServices(){
   ]).then(([loader,session,access])=>{tripLoaderService=loader;tripSessionService=session;tripAccessService=access;return{loader,session,access};});
   return tripLoaderInitPromise;
 }
-// v7.7.5.3 · Expenses can become interactive before the first membership
+// v7.7.6.0 · Expenses can become interactive before the first membership
 // snapshot resolves on an iOS cold start. Let that module request a refresh
 // through this already-versioned access-service instance, avoiding a duplicate
 // ES-module instance and avoiding a Quit / relaunch recovery path.
@@ -7174,8 +7199,8 @@ document.getElementById("trip-archive-list")?.addEventListener("click",event=>{
 let tripBackupServicePromise=null;
 let tripBackupSnapshots=[];
 let tripBackupSelectedSnapshot=null;
-let tripFullBackupSelected=null;
 let tripBackupBusy=false;
+let dataOperationState={kind:"",busy:false,done:false,payload:null,scope:"all",handler:null};
 function getTripBackupService(){
   if(!tripBackupServicePromise){
     tripBackupServicePromise=import(`./assets/js/trip-backup-service.js?v=${APP_VERSION}`)
@@ -7197,8 +7222,8 @@ function backupFriendlyError(error){
   if(error?.code==="permission-denied"||error?.code==="firestore/permission-denied")return "Firebase 權限不足，請確認旅程角色。";
   if(error?.code==="offline"||error?.code==="operation-busy"||error?.code==="trip-operation-busy")return cloudSafetyFriendlyError(error);
   const rawMessage=String(error?.message||"");
-  if(tripCloudOffline())return "目前離線，無法建立或還原 Firebase Snapshot。請重新連線後再試。";
-  if(/module script failed|failed to fetch dynamically imported module/i.test(rawMessage))return "備份模組未能載入。請重新整理 App 後再試。";
+  if(tripCloudOffline())return "目前離線，無法完成呢個資料操作。請重新連線後再試。";
+  if(/module script failed|failed to fetch dynamically imported module/i.test(rawMessage))return "資料管理模組未能載入。請重新整理 App 後再試。";
   return rawMessage||"操作未完成。";
 }
 function backupFormatDate(value){
@@ -7232,12 +7257,8 @@ function renderTripBackupList(){
 async function loadTripBackupPage(){
   if(tripBackupBusy)return;
   const tripId=currentBackupTripId();
-  const manual=document.getElementById("trip-backup-create-manual");
-  const fullExport=document.getElementById("trip-full-backup-export");
-  const fullRestore=document.getElementById("trip-full-backup-restore-open");
   if(!tripId){backupSetStatus("暫時未有目前旅程。",{error:true});return;}
   tripBackupBusy=true;backupSetStatus("正在讀取 Firebase Snapshot…");
-  if(manual)manual.disabled=true;if(fullExport)fullExport.disabled=true;if(fullRestore)fullRestore.disabled=true;
   try{
     const service=await getTripBackupService();
     const user=await getImportFirebaseUser();
@@ -7250,7 +7271,6 @@ async function loadTripBackupPage(){
     const result=await service.listTripSnapshots(tripId,{user,maxItems:10});
     tripBackupSnapshots=result.snapshots||[];renderTripBackupList();
     backupSetStatus(tripBackupSnapshots.length?`顯示最近 ${tripBackupSnapshots.length} 個 Snapshot。`:`目前未有 Snapshot。`);
-    if(manual)manual.disabled=false;if(fullExport)fullExport.disabled=false;if(fullRestore)fullRestore.disabled=false;
   }catch(error){
     console.error("Load trip backups",error);tripBackupSnapshots=[];renderTripBackupList();backupSetStatus(backupFriendlyError(error),{error:true});
   }finally{tripBackupBusy=false;}
@@ -7263,133 +7283,186 @@ async function openSnapshotDetail(snapshotId){
   document.getElementById("snapshot-detail-revision").textContent=summary?String(summary.sourceRevision||0):"—";
   document.getElementById("snapshot-detail-counts").textContent=summary?`${summary.dayCount||0} Days · ${summary.itemCount||0} Items · ${summary.savedPlaceCount||0} Saved`:"—";
   document.getElementById("snapshot-detail-id").textContent=snapshotId;
-  document.getElementById("snapshot-detail-status").textContent="還原只影響 Firebase 行程內容及設定，不會刪除成員或支出交易。";
+  document.getElementById("snapshot-detail-status").textContent="Snapshot 只影響 Firebase 行程內容及設定，不會刪除成員或實際支出交易。";
   openProfilePage("snapshot-detail");
 }
-document.getElementById("trip-backup-open-btn")?.addEventListener("click",()=>{clearFullBackupPreview();setTimeout(loadTripBackupPage,40);});
+document.getElementById("trip-backup-open-btn")?.addEventListener("click",()=>setTimeout(loadTripBackupPage,40));
 document.getElementById("trip-backup-list")?.addEventListener("click",event=>{
   const button=event.target.closest?.("[data-snapshot-open]");if(button)openSnapshotDetail(button.dataset.snapshotOpen);
 });
-function clearFullBackupPreview(){
-  tripFullBackupSelected=null;
-  const preview=document.getElementById("trip-full-backup-preview");if(preview)preview.hidden=true;
-  const input=document.getElementById("trip-full-backup-file");if(input)input.value="";
+
+function dataOperationElements(){
+  return {
+    backdrop:document.getElementById("data-operation-backdrop"),title:document.getElementById("data-operation-title"),subtitle:document.getElementById("data-operation-subtitle"),
+    name:document.getElementById("data-operation-name"),id:document.getElementById("data-operation-id"),mode:document.getElementById("data-operation-mode"),
+    warnings:document.getElementById("data-operation-warnings"),error:document.getElementById("data-operation-error"),options:document.getElementById("data-operation-options"),secondary:document.getElementById("data-operation-secondary"),
+    progress:document.getElementById("data-operation-progress"),confirm:document.getElementById("data-operation-confirm"),cancel:document.getElementById("data-operation-cancel")
+  };
 }
-function renderFullBackupPreview(inspection){
-  const preview=document.getElementById("trip-full-backup-preview");if(!preview)return;
-  const c=inspection?.counts||{};
-  document.getElementById("trip-full-backup-version").textContent=`v${inspection?.backupVersion||1}`;
-  document.getElementById("trip-full-backup-trip-id").textContent=inspection?.tripId||"—";
-  document.getElementById("trip-full-backup-counts").textContent=`${c.dayCount||0} Days · ${c.itemCount||0} Items · ${c.savedPlaceCount||0} Saved · ${c.expenseCount||0} Expenses · ${c.settlementCount||0} Settlements`;
-  document.getElementById("trip-full-backup-media").textContent=inspection?.mediaIncluded?"包含媒體":"Data Only · 不含媒體";
-  const status=document.getElementById("trip-full-backup-preview-status");
-  if(status)status.textContent="操作記錄會完整保存在 Backup 檔案；原 Trip 內 Audit Log 採 append-only，不會因還原而刪除或倒退。";
-  preview.hidden=false;
+function dataOperationCurrentSummary(){
+  const data=(typeof tripData!=="undefined"&&tripData)?tripData:{};
+  const days=Array.isArray(data.days)?data.days:[];
+  const items=days.reduce((sum,day)=>sum+(Array.isArray(day?.items)?day.items.length:0),0);
+  const saved=Array.isArray(data.savedPlaces)?data.savedPlaces.length:0;
+  const title=String(data?.meta?.title||data?.title||tripLibrarySummary?.title||currentBackupTripId()||"目前旅程");
+  return {title,tripId:currentBackupTripId(),dayCount:days.length,itemCount:items,savedPlaceCount:saved};
 }
-document.getElementById("trip-full-backup-export")?.addEventListener("click",async()=>{
-  const button=document.getElementById("trip-full-backup-export");if(button?.disabled)return;
-  button.disabled=true;backupSetStatus("正在建立 Data Only Full Backup…");
-  try{
+function dataOperationSetStats(stats=[]){
+  for(let i=0;i<4;i++){
+    const item=stats[i]||{value:"—",label:"—"};
+    const value=document.getElementById(`data-operation-stat-${i+1}`),label=document.getElementById(`data-operation-label-${i+1}`);
+    if(value)value.textContent=String(item.value??"—");if(label)label.textContent=String(item.label||"—");
+  }
+}
+function dataOperationSetError(message=""){
+  const el=dataOperationElements().error;if(!el)return;el.textContent=message;el.hidden=!message;
+}
+function dataOperationOpen(config={}){
+  const el=dataOperationElements();
+  dataOperationState={kind:config.kind||"",busy:false,done:false,payload:config.payload||null,scope:config.scope||"all",handler:config.handler||null};
+  el.title.textContent=config.title||"資料管理";el.subtitle.textContent=config.subtitle||"確認內容後再繼續。";
+  el.name.textContent=config.name||"目前旅程";el.id.textContent=config.id||`tripId · ${currentBackupTripId()||"—"}`;
+  dataOperationSetStats(config.stats||[]);
+  el.mode.innerHTML=config.modeHtml||escapeHtmlText(config.mode||"");
+  el.warnings.innerHTML=(config.warnings||[]).map(text=>`<div class="trip-import-warning">${escapeHtmlText(text)}</div>`).join("");
+  dataOperationSetError("");
+  if(el.progress){el.progress.hidden=true;const bar=el.progress.querySelector("span");if(bar)bar.style.width="0%";}
+  if(el.secondary){el.secondary.hidden=!config.secondaryHtml;el.secondary.innerHTML=config.secondaryHtml||"";}
+  if(el.options){
+    el.options.hidden=!Array.isArray(config.options)||!config.options.length;
+    el.options.innerHTML=(config.options||[]).map(opt=>`<button class="data-operation-option${opt.value===dataOperationState.scope?" is-selected":""}" type="button" data-data-operation-scope="${escapeHtmlText(opt.value)}"><span><strong>${escapeHtmlText(opt.label)}</strong><small>${escapeHtmlText(opt.detail||"")}</small></span></button>`).join("");
+  }
+  el.cancel.textContent="取消";el.cancel.disabled=false;el.confirm.textContent=config.confirmLabel||"繼續";el.confirm.disabled=Boolean(config.confirmDisabled);
+  el.backdrop.classList.add("active");el.backdrop.setAttribute("aria-hidden","false");document.body.classList.add("modal-open");
+}
+function dataOperationClose(){
+  if(dataOperationState.busy)return;
+  const el=dataOperationElements();el.backdrop?.classList.remove("active");el.backdrop?.setAttribute("aria-hidden","true");document.body.classList.remove("modal-open");
+  dataOperationState={kind:"",busy:false,done:false,payload:null,scope:"all",handler:null};
+}
+function dataOperationMarkDone({title="完成",detail="操作已完成。"}={}){
+  const el=dataOperationElements();dataOperationState.done=true;dataOperationState.busy=false;
+  el.mode.innerHTML=`<strong>${escapeHtmlText(title)}</strong><br>${escapeHtmlText(detail)}`;
+  el.confirm.textContent="完成";el.confirm.disabled=false;el.cancel.disabled=true;
+  if(el.progress){el.progress.hidden=true;}
+}
+function dataOperationSetBusy(busy,detail=""){
+  const el=dataOperationElements();dataOperationState.busy=busy;el.cancel.disabled=busy;el.confirm.disabled=busy;
+  if(busy&&detail)el.mode.innerHTML=`<strong>處理中</strong><br>${escapeHtmlText(detail)}`;
+  if(el.progress){el.progress.hidden=!busy;const bar=el.progress.querySelector("span");if(bar)bar.style.width=busy?"18%":"0%";}
+}
+function dataOperationBaseConfig({kind,title,subtitle,mode,confirmLabel,typeLabel="Data",warnings=[],handler}={}){
+  const summary=dataOperationCurrentSummary();
+  return {kind,title,subtitle,name:summary.title,id:`tripId · ${summary.tripId||"—"}`,stats:[{value:summary.dayCount,label:"Days"},{value:summary.itemCount,label:"Items"},{value:summary.savedPlaceCount,label:"Saved"},{value:typeLabel,label:"Type"}],mode,warnings,confirmLabel,handler};
+}
+function openFullBackupExportOperation(){
+  dataOperationOpen(dataOperationBaseConfig({kind:"export-full",title:"匯出完整 Backup",subtitle:"建立可供還原嘅 Data Only Full Backup JSON。",typeLabel:"Full",mode:"包含行程、收藏、一般設定、支出、找數及備份內操作記錄。",warnings:["Full Backup v1 暫時不包含相片／媒體；Phase 3A 會升級成 Media-aware Backup Package。"],confirmLabel:"匯出 Backup",handler:async()=>{
     const service=await getTripBackupService(),user=await getImportFirebaseUser();
-    const result=await service.exportFullBackup(currentBackupTripId(),{user});
-    backupDownloadJson(result.json,result.filename);
-    backupSetStatus(`完整 Backup 已匯出 · ${result.counts.dayCount||0} Days · ${result.counts.expenseCount||0} Expenses · ${result.counts.settlementCount||0} Settlements。`);
-  }catch(error){console.error("Export full backup",error);backupSetStatus(backupFriendlyError(error),{error:true});}
-  finally{button.disabled=false;}
-});
-document.getElementById("trip-full-backup-restore-open")?.addEventListener("click",()=>{
-  if(document.getElementById("trip-full-backup-restore-open")?.disabled)return;
-  clearFullBackupPreview();document.getElementById("trip-full-backup-file")?.click();
-});
-document.getElementById("trip-full-backup-file")?.addEventListener("change",async event=>{
-  const file=event.target.files?.[0];if(!file)return;
-  backupSetStatus("正在驗證 Full Backup JSON…");
-  try{
-    const raw=JSON.parse(await file.text());
-    const service=await getTripBackupService(),inspection=service.inspectFullBackup(raw);
-    if(String(inspection.tripId)!==currentBackupTripId()){
-      const e=new Error("Backup Trip ID does not match current Trip");e.code="backup-trip-mismatch";throw e;
-    }
-    tripFullBackupSelected={raw,inspection};renderFullBackupPreview(inspection);
-    backupSetStatus("Backup 已驗證。請選擇還原範圍。",{hidden:false});
-  }catch(error){console.error("Inspect full backup",error);clearFullBackupPreview();backupSetStatus(backupFriendlyError(error),{error:true});}
-});
-document.getElementById("trip-full-backup-preview")?.addEventListener("click",async event=>{
-  const button=event.target.closest?.("[data-full-backup-restore-scope]");if(!button||button.disabled||!tripFullBackupSelected?.raw)return;
-  const scope=button.dataset.fullBackupRestoreScope;
-  const label=scope==="all"?"完整還原":scope==="trip"?"只還原行程":"只還原支出";
-  const detail=scope==="all"?"行程及支出會回到 Backup 狀態。成員權限不會改動。":scope==="trip"?"行程、收藏及一般設定會還原；現有支出完全不動。":"支出、找數及支出設定會還原；現有行程完全不動。";
-  if(!window.confirm(`${label}？\n\n${detail}\n\nFull Backup v1 係 Data Only，暫未包含相片／媒體。`))return;
-  document.querySelectorAll("[data-full-backup-restore-scope]").forEach(btn=>btn.disabled=true);
-  const status=document.getElementById("trip-full-backup-preview-status");if(status)status.textContent=`正在${label}…`;
-  appProgressOpen({kicker:"FULL BACKUP",title:label,subtitle:"正在安全還原 Firebase Data。完成前請保持 App 開啟。",percent:5,stageTitle:"準備還原",stageDetail:"正在驗證 Backup 同目前 Trip。",icon:"↶"});
-  try{
+    const result=await service.exportFullBackup(currentBackupTripId(),{user});backupDownloadJson(result.json,result.filename);
+    return {title:"Backup 已匯出",detail:`${result.counts.dayCount||0} Days · ${result.counts.expenseCount||0} Expenses · ${result.counts.settlementCount||0} Settlements`};
+  }}));
+}
+function openTripJsonExportOperation(){
+  dataOperationOpen(dataOperationBaseConfig({kind:"export-trip",title:"匯出 trip.json",subtitle:"建立輕量 Portable Trip Data。",typeLabel:"JSON",mode:"適合分享、AI／人手修改及再次匯入；不包含實際支出交易。",confirmLabel:"匯出 trip.json",handler:async()=>{
     const service=await getTripBackupService(),user=await getImportFirebaseUser();
-    const result=await service.restoreFullBackup(tripFullBackupSelected.raw,{scope,user,onProgress:progress=>{
+    const result=await service.exportCurrentTrip(currentBackupTripId(),{user});backupDownloadJson(result.json,result.filename);
+    return {title:"trip.json 已匯出",detail:`Revision ${result.revision} · ${result.counts.dayCount} Days · ${result.counts.itemCount} Items`};
+  }}));
+}
+function openManualSnapshotOperation(){
+  dataOperationOpen(dataOperationBaseConfig({kind:"snapshot-create",title:"建立手動 Snapshot",subtitle:"保存目前 Firebase 行程版本，方便日後回復。",typeLabel:"Snap",mode:"Snapshot 只保存行程版本及設定，不包含實際支出交易。",confirmLabel:"建立 Snapshot",handler:async()=>{
+    const service=await getTripBackupService(),user=await getImportFirebaseUser();
+    const result=await service.createManualSnapshot(currentBackupTripId(),{user});tripBackupBusy=false;
+    return {title:"Snapshot 已建立",detail:`Revision ${result.sourceRevision}`};
+  }}));
+}
+function openExpenseExcelOperation(){
+  dataOperationOpen(dataOperationBaseConfig({kind:"expenses-excel",title:"匯出支出 Excel",subtitle:"建立方便對數、報銷及保存嘅 Excel 報表。",typeLabel:"Excel",mode:"Excel 係人用報表，不參與 Backup／Restore。",confirmLabel:"匯出 Excel",handler:async()=>{
+    return await new Promise((resolve,reject)=>{
+      let settled=false;
+      const timer=setTimeout(()=>{if(settled)return;settled=true;window.removeEventListener("expense-excel-export-result",onResult);reject(new Error("支出 Excel 匯出逾時，請稍後再試。"));},12000);
+      const onResult=event=>{
+        if(settled)return;settled=true;clearTimeout(timer);window.removeEventListener("expense-excel-export-result",onResult);
+        if(event?.detail?.ok)resolve({title:"Excel 已匯出",detail:"報表已交畀瀏覽器下載。"});
+        else reject(new Error(event?.detail?.message||"匯出 Excel 失敗。"));
+      };
+      window.addEventListener("expense-excel-export-result",onResult);
+      window.__pendingExpenseUiAction="export:excel";initExpensesViewSafe();window.dispatchEvent(new CustomEvent("expense-ui-action",{detail:{action:"export:excel"}}));
+    });
+  }}));
+}
+function openSnapshotExportOperation(snapshot){
+  dataOperationOpen({kind:"snapshot-export",title:"匯出此版本",subtitle:"將所選 Snapshot 轉成 Portable trip.json。",name:`${backupFormatDate(snapshot.createdAtIso||snapshot.createdAtMillis)} · ${snapshot.typeLabel||"Snapshot"}`,id:`Snapshot · ${snapshot.snapshotId||"—"}`,stats:[{value:snapshot.sourceRevision||0,label:"Revision"},{value:snapshot.dayCount||0,label:"Days"},{value:snapshot.itemCount||0,label:"Items"},{value:snapshot.savedPlaceCount||0,label:"Saved"}],mode:"匯出只建立檔案，不會修改目前 Firebase 旅程。",confirmLabel:"匯出此版本",payload:snapshot,handler:async()=>{
+    const service=await getTripBackupService(),user=await getImportFirebaseUser();
+    const result=await service.exportSnapshotTrip(currentBackupTripId(),snapshot.snapshotId,{user});backupDownloadJson(result.json,result.filename);
+    return {title:"版本已匯出",detail:`Snapshot Revision ${result.sourceRevision}`};
+  }});
+}
+function openSnapshotRestoreOperation(snapshot){
+  dataOperationOpen({kind:"snapshot-restore",title:`還原 Revision ${snapshot.sourceRevision||0}`,subtitle:"系統會先保存目前版本，再還原所選 Snapshot。",name:`${backupFormatDate(snapshot.createdAtIso||snapshot.createdAtMillis)} · ${snapshot.typeLabel||"Snapshot"}`,id:`Snapshot · ${snapshot.snapshotId||"—"}`,stats:[{value:snapshot.sourceRevision||0,label:"Revision"},{value:snapshot.dayCount||0,label:"Days"},{value:snapshot.itemCount||0,label:"Items"},{value:snapshot.savedPlaceCount||0,label:"Saved"}],mode:"還原只影響行程內容及設定；成員權限及實際支出交易不會被刪除。",warnings:["開始前會自動建立還原前安全 Snapshot。"],confirmLabel:"開始還原",payload:snapshot,handler:async()=>{
+    const service=await getTripBackupService(),user=await getImportFirebaseUser();
+    appProgressOpen({kicker:"SNAPSHOT RESTORE",title:`還原 Revision ${snapshot.sourceRevision||0}`,subtitle:"系統會先保存目前版本，再還原所選 Snapshot。完成前請保持 App 開啟。",percent:4,stageTitle:"準備還原",stageDetail:"正在讀取目前 Firebase 旅程及 Snapshot。",icon:"↶"});
+    const result=await service.restoreTripSnapshot(currentBackupTripId(),snapshot.snapshotId,{user,onProgress:progress=>appProgressUpdate(restoreProgressPresentation(progress))});
+    const liveSynced=result.tripId===tripLoaderActiveId?await waitForTripLoaderRevision(result.tripId,result.revision,7000):true;
+    appProgressFinish({title:"還原完成",detail:liveSynced?`Revision ${result.revision} 已建立，行程畫面已同步。`:`Revision ${result.revision} 已建立；畫面仍在背景同步。`});
+    tripBackupBusy=false;setTimeout(loadTripBackupPage,120);
+    return {title:"Snapshot 還原完成",detail:`新 Revision ${result.revision}`};
+  }});
+}
+function openFullBackupRestoreOperation(selected){
+  const inspection=selected.inspection||{},c=inspection.counts||{};
+  dataOperationOpen({kind:"restore-full",title:"還原完整 Backup",subtitle:"Backup 已驗證。選擇還原範圍，再寫入 Firebase。",name:selected.raw?.data?.portableTrip?.meta?.title||inspection.tripId||"Full Backup",id:`tripId · ${inspection.tripId||"—"}`,stats:[{value:c.dayCount||0,label:"Days"},{value:c.itemCount||0,label:"Items"},{value:c.savedPlaceCount||0,label:"Saved"},{value:c.expenseCount||0,label:"Expenses"}],mode:`Backup v${inspection.backupVersion||1} · ${inspection.mediaIncluded?"包含媒體":"Data Only · 不含媒體"}`,secondaryHtml:`<span>找數</span><strong>${escapeHtmlText(String(c.settlementCount||0))} Settlements</strong>`,warnings:["原 Trip 內 Audit Log 採 append-only；還原不會刪除或倒退現有操作記錄。"],options:[{value:"all",label:"完整還原",detail:"還原行程及支出資料；成員權限不變。"},{value:"trip",label:"只還原行程",detail:"保留目前所有支出及找數紀錄。"},{value:"expenses",label:"只還原支出",detail:"保留目前行程、收藏及一般顯示設定。"}],scope:"all",confirmLabel:"開始完整還原",payload:selected,handler:async()=>{
+    const scope=dataOperationState.scope,label=scope==="all"?"完整還原":scope==="trip"?"只還原行程":"只還原支出";
+    const service=await getTripBackupService(),user=await getImportFirebaseUser();
+    appProgressOpen({kicker:"FULL BACKUP",title:label,subtitle:"正在安全還原 Firebase Data。完成前請保持 App 開啟。",percent:5,stageTitle:"準備還原",stageDetail:"正在驗證 Backup 同目前 Trip。",icon:"↶"});
+    const result=await service.restoreFullBackup(selected.raw,{scope,user,onProgress:progress=>{
       const pct=Math.max(5,Math.min(96,Math.round(Number(progress?.completed||0)*100)));
       const stage=progress?.stage==="expense-content"?"還原支出資料":progress?.stage==="trip-content"?"還原行程資料":"完成還原";
-      if(status)status.textContent=`${stage}…`;
       appProgressUpdate({percent:pct,stageTitle:stage,stageDetail:progress?.stage==="expense-content"?"正在同步支出、找數及支出設定。":"正在同步 Days、Items、收藏及一般設定。",icon:"↶"});
     }});
     if(result.scope!=="expenses"&&result.tripId===tripLoaderActiveId)await waitForTripLoaderRevision(result.tripId,result.revision,7000);
-    if(status)status.textContent=`${label}完成。Audit Log 保持 append-only；Backup 內原有 Log 仍保存在本機檔案。`;
     appProgressFinish({title:`${label}完成`,detail:"Firebase Data 已完成還原。成員權限及目前 Audit Log 不受回滾。"});
-    tripBackupBusy=false;await loadTripBackupPage();
-  }catch(error){console.error("Restore full backup",error);if(status)status.textContent=backupFriendlyError(error);appProgressFail(backupFriendlyError(error));}
-  finally{document.querySelectorAll("[data-full-backup-restore-scope]").forEach(btn=>btn.disabled=false);}
+    tripBackupBusy=false;
+    return {title:`${label}完成`,detail:"Firebase Data 已完成還原；Audit Log 保持 append-only。"};
+  }});
+}
+
+document.getElementById("data-operation-options")?.addEventListener("click",event=>{
+  const button=event.target.closest?.("[data-data-operation-scope]");if(!button||dataOperationState.busy)return;
+  dataOperationState.scope=button.dataset.dataOperationScope||"all";
+  document.querySelectorAll("[data-data-operation-scope]").forEach(btn=>btn.classList.toggle("is-selected",btn===button));
+  const confirm=dataOperationElements().confirm;
+  if(dataOperationState.kind==="restore-full")confirm.textContent=dataOperationState.scope==="all"?"開始完整還原":dataOperationState.scope==="trip"?"只還原行程":"只還原支出";
+});
+document.getElementById("data-operation-cancel")?.addEventListener("click",dataOperationClose);
+document.getElementById("data-operation-backdrop")?.addEventListener("click",event=>{if(event.target===event.currentTarget)dataOperationClose();});
+document.getElementById("data-operation-confirm")?.addEventListener("click",async()=>{
+  const el=dataOperationElements();
+  if(dataOperationState.done){dataOperationClose();return;}
+  if(dataOperationState.busy||typeof dataOperationState.handler!=="function")return;
+  dataOperationSetError("");dataOperationSetBusy(true,"請保持 App 開啟，完成前請勿重複操作。");
+  try{
+    const result=await dataOperationState.handler();
+    dataOperationMarkDone(result||{});
+  }catch(error){console.error("Data management operation",dataOperationState.kind,error);dataOperationState.busy=false;el.cancel.disabled=false;el.confirm.disabled=false;if(el.progress)el.progress.hidden=true;dataOperationSetError(backupFriendlyError(error));}
 });
 
-document.getElementById("trip-backup-export-current")?.addEventListener("click",async()=>{
-  const button=document.getElementById("trip-backup-export-current");if(button?.disabled)return;
-  button.disabled=true;backupSetStatus("正在由 Firebase 產生 trip.json…");
+document.getElementById("trip-full-backup-export")?.addEventListener("click",openFullBackupExportOperation);
+document.getElementById("trip-backup-export-current")?.addEventListener("click",openTripJsonExportOperation);
+document.getElementById("trip-backup-create-manual")?.addEventListener("click",openManualSnapshotOperation);
+document.getElementById("data-management-expenses-excel")?.addEventListener("click",openExpenseExcelOperation);
+document.getElementById("trip-full-backup-restore-open")?.addEventListener("click",()=>{const input=document.getElementById("trip-full-backup-file");if(input){input.value="";input.click();}});
+document.getElementById("trip-full-backup-file")?.addEventListener("change",async event=>{
+  const file=event.target.files?.[0];if(!file)return;
   try{
-    const service=await getTripBackupService();const user=await getImportFirebaseUser();
-    const result=await service.exportCurrentTrip(currentBackupTripId(),{user});backupDownloadJson(result.json,result.filename);
-    backupSetStatus(`已匯出 Revision ${result.revision} · ${result.counts.dayCount} Days · ${result.counts.itemCount} Items。`);
-  }catch(error){console.error("Export current trip",error);backupSetStatus(backupFriendlyError(error),{error:true});}
-  finally{button.disabled=false;}
+    const raw=JSON.parse(await file.text());
+    const service=await getTripBackupService(),inspection=service.inspectFullBackup(raw);
+    if(String(inspection.tripId)!==currentBackupTripId()){const e=new Error("Backup Trip ID does not match current Trip");e.code="backup-trip-mismatch";throw e;}
+    openFullBackupRestoreOperation({raw,inspection});
+  }catch(error){console.error("Inspect full backup",error);dataOperationOpen(dataOperationBaseConfig({kind:"restore-full-error",title:"還原完整 Backup",subtitle:"未能驗證所選 Backup。",typeLabel:"Error",mode:"檔案未能進入還原流程。",confirmLabel:"完成"}));dataOperationState.done=true;dataOperationSetError(backupFriendlyError(error));}
 });
-document.getElementById("trip-backup-create-manual")?.addEventListener("click",async()=>{
-  const button=document.getElementById("trip-backup-create-manual");if(button?.disabled)return;
-  if(!window.confirm("建立一個目前 Firebase 行程嘅手動 Snapshot？"))return;
-  button.disabled=true;backupSetStatus("正在建立手動 Snapshot…");
-  try{
-    const service=await getTripBackupService();const user=await getImportFirebaseUser();
-    const result=await service.createManualSnapshot(currentBackupTripId(),{user});
-    backupSetStatus(`已建立 Snapshot · Revision ${result.sourceRevision}。`);tripBackupBusy=false;await loadTripBackupPage();
-  }catch(error){console.error("Create manual snapshot",error);backupSetStatus(backupFriendlyError(error),{error:true});}
-  finally{button.disabled=false;}
-});
-document.getElementById("snapshot-detail-export")?.addEventListener("click",async()=>{
-  const button=document.getElementById("snapshot-detail-export");if(button?.disabled||!tripBackupSelectedSnapshot?.snapshotId)return;
-  button.disabled=true;const status=document.getElementById("snapshot-detail-status");status.textContent="正在準備此版本嘅 trip.json…";
-  try{
-    const service=await getTripBackupService();const user=await getImportFirebaseUser();
-    const result=await service.exportSnapshotTrip(currentBackupTripId(),tripBackupSelectedSnapshot.snapshotId,{user});backupDownloadJson(result.json,result.filename);
-    status.textContent=`已匯出 Snapshot · Revision ${result.sourceRevision}。`;
-  }catch(error){console.error("Export snapshot",error);status.textContent=backupFriendlyError(error);}
-  finally{button.disabled=false;}
-});
-document.getElementById("snapshot-detail-restore")?.addEventListener("click",async()=>{
-  const button=document.getElementById("snapshot-detail-restore");if(button?.disabled||!tripBackupSelectedSnapshot?.snapshotId)return;
-  const snapshot=tripBackupSelectedSnapshot;
-  if(!window.confirm(`還原 Revision ${snapshot.sourceRevision||0}？\n\n系統會先自動 Snapshot 目前 Firebase 版本，再還原所選版本。成員及支出交易不會被刪除。`))return;
-  button.disabled=true;const status=document.getElementById("snapshot-detail-status");status.textContent="正在建立還原前安全備份…";
-  appProgressOpen({kicker:"SNAPSHOT RESTORE",title:`還原 Revision ${snapshot.sourceRevision||0}`,subtitle:"系統會先保存目前版本，再還原所選 Snapshot。完成前請保持 App 開啟。",percent:4,stageTitle:"準備還原",stageDetail:"正在讀取目前 Firebase 旅程及 Snapshot。",icon:"↶"});
-  try{
-    const service=await getTripBackupService();const user=await getImportFirebaseUser();
-    const result=await service.restoreTripSnapshot(currentBackupTripId(),snapshot.snapshotId,{user,onProgress:progress=>{
-      const stage=progress?.stage;
-      status.textContent=stage==="safety-snapshot"?"已保存目前版本，正在準備還原…":stage==="content"?`正在還原旅程內容${progress.detail?` · ${progress.detail}`:""}…`:stage==="done"?"正在完成還原…":"正在還原 Firebase 版本…";
-      appProgressUpdate(restoreProgressPresentation(progress));
-    }});
-    const liveSynced=result.tripId===tripLoaderActiveId?await waitForTripLoaderRevision(result.tripId,result.revision,7000):true;
-    status.textContent=`還原完成 · 新 Revision ${result.revision}${liveSynced?"，目前畫面已同步。":"，Firebase 已完成寫入。"}`;
-    appProgressFinish({title:"還原完成",detail:liveSynced?`Revision ${result.revision} 已建立，行程畫面已同步。`:`Revision ${result.revision} 已建立；畫面仍在背景同步。`});
-    await loadTripBackupPage();
-  }catch(error){console.error("Restore snapshot",error);status.textContent=backupFriendlyError(error);appProgressFail(backupFriendlyError(error));}
-  finally{button.disabled=false;}
-});
+document.getElementById("snapshot-detail-export")?.addEventListener("click",()=>{if(tripBackupSelectedSnapshot)openSnapshotExportOperation(tripBackupSelectedSnapshot);});
+document.getElementById("snapshot-detail-restore")?.addEventListener("click",()=>{if(tripBackupSelectedSnapshot)openSnapshotRestoreOperation(tripBackupSelectedSnapshot);});
 
 const tripQuickPopover=document.getElementById("trip-quick-popover");
 const largeTripSwitchTrigger=document.getElementById("header-title-small");
@@ -8605,6 +8678,10 @@ document.addEventListener("touchcancel",cancelProfileEdgeSwipe,{passive:true});
 document.querySelector('[data-profile-open="app-data"]')?.addEventListener("click",()=>{
   refreshAppDataDiagnostics();
 });
+document.querySelector('[data-profile-open="data-management"]')?.addEventListener("click",()=>{
+  getTripBackupService().catch(()=>{});
+  warmTripImportDependencies();
+});
 
 function initPhase2AccessContext(data){
   Promise.all([
@@ -8663,7 +8740,7 @@ refreshCollapseMetrics();
 // Android / Chrome PWA support. Versioned app-shell Service Worker; normal launches are cache-first while explicit reloads stay network-first.
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("./sw.js?v=7.7.5.3").catch(() => {});
+    navigator.serviceWorker.register("./sw.js?v=7.7.6.0").catch(() => {});
   });
 }
 

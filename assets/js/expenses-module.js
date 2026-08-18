@@ -169,7 +169,6 @@ function mountExpensesHtml(root) {
         <button type="button" class="settings-menu-btn" data-settings-open="members"><span>👥</span><strong>成員管理</strong><small>新增或移除分帳成員</small></button>
         <button type="button" class="settings-menu-btn" data-settings-open="rates" data-admin-only="true"><span>💱</span><strong>匯率設定</strong><small>基準貨幣及旅程匯率</small></button>
         <button type="button" class="settings-menu-btn" data-settings-open="lock" data-admin-only="true"><span>🔒</span><strong>鎖定旅程</strong><small>停止新增及修改支出</small></button>
-        <button type="button" class="settings-menu-btn" data-settings-open="backup"><span>📦</span><strong>資料備份</strong><small>匯出 Excel 或 JSON</small></button>
         <button type="button" class="settings-menu-btn" data-settings-open="deleted"><span>🗑️</span><strong>已刪除項目</strong><small>查看及還原支出</small></button>
       </div>
     </section>
@@ -596,6 +595,11 @@ const expenseSnapshotPersons = document.getElementById("expenseSnapshotPersons")
 const recentExpenseList = document.getElementById("recentExpenseList");
 let recentExpenseCacheHydrationStarted = false;
 let recentExpensesLiveReady = false;
+let settlementsLiveReady = false;
+let activityLogsLiveReady = false;
+let pendingExcelExportRequested = false;
+let pendingExcelExportTimer = null;
+let pendingExcelExportStartedAt = 0;
 const openFullAddBtn = document.getElementById("openFullAddBtn");
 const openOcrEntryBtn = document.getElementById("openOcrEntryBtn");
 const expenseFormModal = document.getElementById("expenseFormModal");
@@ -2258,6 +2262,7 @@ function listenToExpenses() {
     renderSummary();
     renderAnalytics();
     setModuleStatus(`Synced (${tripId})`);
+    tryRunPendingExcelExport();
   }, err => {
     console.error(err);
     setModuleStatus(err?.code === "permission-denied" ? "No access to expenses" : "Sync error");
@@ -2268,9 +2273,11 @@ function listenToSettlements() {
   if (stopSettlementsListener) stopSettlementsListener();
   const q = query(getSettlementsCollection(), orderBy("paidAt", "desc"));
   stopSettlementsListener = onSnapshot(q, snap => {
+    settlementsLiveReady = true;
     settlements = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     renderSummary();
     renderAnalytics();
+    tryRunPendingExcelExport();
   }, err => {
     console.error(err);
     setModuleStatus(err?.code === "permission-denied" ? "No access to settlements" : "Settlement sync error");
@@ -2281,8 +2288,10 @@ function listenToActivityLogs() {
   if (stopActivityLogsListener) stopActivityLogsListener();
   const q = query(getActivityLogsCollection(), orderBy("createdAt", "desc"));
   stopActivityLogsListener = onSnapshot(q, snap => {
+    activityLogsLiveReady = true;
     activityLogs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     renderActivityLogs();
+    tryRunPendingExcelExport();
   }, err => {
     console.error(err);
     setModuleStatus(err?.code === "permission-denied" ? "No access to activity logs" : "Activity log sync error");
@@ -3781,11 +3790,58 @@ async function handleExportExcel() {
     await ensureSheetJs();
     exportWorkbook();
     setModuleStatus(`Synced (${tripId})`);
+    window.dispatchEvent(new CustomEvent("expense-excel-export-result", { detail: { ok: true, tripId } }));
+    return true;
   } catch (error) {
     console.error(error);
     setModuleStatus("Export error");
+    window.dispatchEvent(new CustomEvent("expense-excel-export-result", { detail: { ok: false, tripId, message: error?.message || "Excel export failed" } }));
     alert("匯出 Excel 失敗，請稍後再試。");
+    return false;
   }
+}
+
+function clearPendingExcelExportTimer() {
+  if (pendingExcelExportTimer) clearTimeout(pendingExcelExportTimer);
+  pendingExcelExportTimer = null;
+}
+function schedulePendingExcelExportCheck(delay = 220) {
+  clearPendingExcelExportTimer();
+  pendingExcelExportTimer = setTimeout(() => tryRunPendingExcelExport(), delay);
+}
+async function tryRunPendingExcelExport() {
+  if (!pendingExcelExportRequested) return;
+  if (pendingExcelExportStartedAt && Date.now() - pendingExcelExportStartedAt > 10000) {
+    pendingExcelExportRequested = false;
+    clearPendingExcelExportTimer();
+    window.dispatchEvent(new CustomEvent("expense-excel-export-result", { detail: { ok: false, tripId, message: "支出資料同步逾時，請稍後再試。" } }));
+    return;
+  }
+  const access = expenseAccessState();
+  if (!currentUser || !access.ready || !access.role) {
+    setModuleStatus("Confirming Trip access");
+    if (currentUser) startExpenseCloudIfAllowed();
+    schedulePendingExcelExportCheck(260);
+    return;
+  }
+  if (!cloudExpenseStarted) {
+    startExpenseCloudIfAllowed();
+    schedulePendingExcelExportCheck(260);
+    return;
+  }
+  if (!(recentExpensesLiveReady && settlementsLiveReady && activityLogsLiveReady)) {
+    setModuleStatus("Preparing Excel data...");
+    schedulePendingExcelExportCheck(220);
+    return;
+  }
+  pendingExcelExportRequested = false;
+  clearPendingExcelExportTimer();
+  await handleExportExcel();
+}
+function requestExpenseExcelExport() {
+  pendingExcelExportRequested = true;
+  pendingExcelExportStartedAt = Date.now();
+  tryRunPendingExcelExport();
 }
 
 async function handleExportJsonBackup() {
@@ -4178,6 +4234,7 @@ function handleExpenseUiAction(action) {
     openExpenseFormModal("完整新增支出");
   }
   if (action === "settings") openSettingModal("root");
+  if (action === "export:excel") { requestExpenseExcelExport(); return; }
   if (action.startsWith("setting:")) openSettingModal(action.slice(8));
 }
 window.addEventListener("expense-ui-action", event => handleExpenseUiAction(event?.detail?.action));
@@ -4389,6 +4446,11 @@ subscribeAuthState(async (user) => {
     expenses = [];
     recentExpenseCacheHydrationStarted = false;
     recentExpensesLiveReady = false;
+    settlementsLiveReady = false;
+    activityLogsLiveReady = false;
+    pendingExcelExportRequested = false;
+    pendingExcelExportStartedAt = 0;
+    clearPendingExcelExportTimer();
     settlements = [];
     activityLogs = [];
     tripStatus = "open";
