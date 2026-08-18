@@ -1,3 +1,10 @@
+# v7.7.6.1 · Data Management Visual Harmony
+
+- Reused the established App Info section-heading grammar for Data Management group titles, including font size, weight, spacing, and inset.
+- Fixed empty optional operation-sheet containers rendering as blank grey rounded bars on iOS Safari. Hidden options, secondary metadata, and progress UI now stay fully removed when unused.
+- Applied the hidden-state fix to the shared Import/Data Operation sheet primitives so Backup export, trip.json export, Expenses Excel, manual Snapshot, Snapshot export/restore, and Full Backup restore follow one consistent behaviour.
+- No Firebase schema, Rules, indexes, Expense data logic, Backup data logic, or protected Profile Navigation compositor changes.
+
 # v7.7.6.0 · Data Management Menu & Unified Operation Sheets
 
 ## Data Management information architecture
