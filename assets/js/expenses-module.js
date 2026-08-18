@@ -641,6 +641,8 @@ function renderCompactModuleStatus(message = lastModuleStatus) {
     raw === "No access to expenses" ? "支出資料暫時未能同步" :
     raw === "No access to activity logs" ? "操作記錄暫時未能同步" :
     raw === "Waiting for Firestore Rules" ? "Firebase 權限設定尚未完成" :
+    raw === "Confirming Trip access" ? "正在確認旅程權限…" :
+    raw === "No Trip access" ? "目前帳戶沒有此旅程的支出寫入權限" :
     raw === "Connecting" ? "正在同步支出資料…" :
     getCleanModuleStatus(raw);
 
@@ -658,6 +660,10 @@ function setModuleStatus(message) {
 
 let currentUser = null;
 let phase2TripRole = null;
+let phase2TripAccessReady = Boolean(window.__appTripAccess?.ready);
+let phase2TripAccessTripId = String(window.__appTripAccess?.tripId || "");
+let expenseAccessRecoveryTimer = null;
+let expenseAccessRecoveryAttempt = 0;
 let cloudExpenseStarted = false;
 let allExpenses = [];
 let expenses = [];
@@ -947,16 +953,51 @@ function getDeletedExpenses() {
   return sortExpensesForDisplay(allExpenses.filter(expense => expense.isDeleted === true));
 }
 
-function setFormDisabled(disabled) {
+function setFormDisabled(disabled, reason = "") {
   Array.from(form.elements).forEach(el => {
     el.disabled = disabled;
   });
   if (disabled) {
-    submitBtn.textContent = "旅程已鎖定";
+    submitBtn.textContent = reason === "locked"
+      ? "旅程已鎖定"
+      : (reason === "access-pending" ? "正在確認權限…" : "只讀");
     cancelEditBtn.classList.add("hidden");
   } else if (!editingExpenseId) {
     submitBtn.textContent = "新增";
   }
+}
+
+function expenseAccessState() {
+  const live = window.__appTripAccess || {};
+  const accessTripId = String(live.tripId || phase2TripAccessTripId || "");
+  // A signed-out or not-yet-initialised access snapshot may legitimately have
+  // ready:true. It is not authoritative for a signed-in Expense workspace.
+  // Require both the exact active Trip and a signed-in access snapshot before
+  // interpreting role:null as genuine no-access.
+  const matchesTrip = accessTripId === tripId;
+  const signedInMatches = !currentUser || live.signedIn === true;
+  const ready = matchesTrip && signedInMatches && (live.ready === true || phase2TripAccessReady === true);
+  const role = ready ? (live.role || phase2TripRole || null) : null;
+  return { ready, role, accessTripId, matchesTrip };
+}
+
+function clearExpenseAccessRecoveryTimer() {
+  if (expenseAccessRecoveryTimer) clearTimeout(expenseAccessRecoveryTimer);
+  expenseAccessRecoveryTimer = null;
+}
+
+function scheduleExpenseAccessRecovery() {
+  clearExpenseAccessRecoveryTimer();
+  if (!currentUser || expenseAccessState().ready) return;
+  const delays = [700, 2200, 5000];
+  const delay = delays[Math.min(expenseAccessRecoveryAttempt, delays.length - 1)];
+  expenseAccessRecoveryTimer = setTimeout(() => {
+    expenseAccessRecoveryTimer = null;
+    if (!currentUser || expenseAccessState().ready) return;
+    expenseAccessRecoveryAttempt += 1;
+    window.dispatchEvent(new CustomEvent("expense-trip-access-refresh-request", { detail: { tripId } }));
+    if (!expenseAccessState().ready && expenseAccessRecoveryAttempt < delays.length) scheduleExpenseAccessRecovery();
+  }, delay);
 }
 
 function updateTripStatusUi() {
@@ -981,11 +1022,13 @@ function updateTripStatusUi() {
   const lockActionFooter = lockTripBtn?.closest(".modal-footer-actions");
   if (lockActionFooter) lockActionFooter.classList.toggle("expense-actions-unavailable", !isAdmin());
 
-  const readOnly = !canWriteExpenses();
-  setFormDisabled(locked || readOnly);
+  const access = expenseAccessState();
+  const accessPending = Boolean(currentUser && !access.ready);
+  const readOnly = access.ready ? !canWriteExpenses() : true;
+  setFormDisabled(locked || readOnly || accessPending, locked ? "locked" : (accessPending ? "access-pending" : (readOnly ? "read-only" : "")));
 
-  if (addMemberBtn) addMemberBtn.disabled = locked || readOnly;
-  if (memberNameInput) memberNameInput.disabled = locked || readOnly;
+  if (addMemberBtn) addMemberBtn.disabled = locked || readOnly || accessPending;
+  if (memberNameInput) memberNameInput.disabled = locked || readOnly || accessPending;
   if (saveRatesBtn) saveRatesBtn.disabled = locked || !isAdmin();
   if (baseCurrencyInput) baseCurrencyInput.disabled = locked || !isAdmin();
   if (ratesContainer) {
@@ -4249,7 +4292,21 @@ if (unlockTripBtn) unlockTripBtn.addEventListener("click", unlockTrip);
 
 async function startExpenseCloudIfAllowed() {
   if (!currentUser) return;
-  phase2TripRole = window.__appTripAccess?.role || phase2TripRole || null;
+  const access = expenseAccessState();
+  phase2TripAccessTripId = access.accessTripId || phase2TripAccessTripId;
+  phase2TripAccessReady = access.ready;
+  phase2TripRole = access.role || null;
+
+  if (!access.ready) {
+    cloudExpenseStarted = false;
+    setModuleStatus("Confirming Trip access");
+    updateTripStatusUi();
+    scheduleExpenseAccessRecovery();
+    return;
+  }
+
+  clearExpenseAccessRecoveryTimer();
+  expenseAccessRecoveryAttempt = 0;
 
   if (!phase2TripRole) {
     cloudExpenseStarted = false;
@@ -4261,7 +4318,7 @@ async function startExpenseCloudIfAllowed() {
     renderAllowedEmails();
     renderAdminEmails();
     tripStatus = "unknown";
-    setModuleStatus("Signed in · Trip not imported");
+    setModuleStatus("No Trip access");
     updateTripStatusUi();
     return;
   }
@@ -4297,8 +4354,17 @@ async function startExpenseCloudIfAllowed() {
 }
 
 window.addEventListener("app-trip-access", event => {
-  phase2TripRole = event.detail?.role || null;
-  cloudExpenseStarted = false;
+  const detail = event.detail || {};
+  const eventTripId = String(detail.tripId || "");
+  if (eventTripId !== tripId) return;
+
+  phase2TripAccessTripId = eventTripId;
+  phase2TripAccessReady = detail.ready === true;
+  phase2TripRole = detail.role || null;
+  if (phase2TripAccessReady) {
+    clearExpenseAccessRecoveryTimer();
+    expenseAccessRecoveryAttempt = 0;
+  }
   updateTripStatusUi();
   if (currentUser) startExpenseCloudIfAllowed();
 });
@@ -4309,6 +4375,10 @@ subscribeAuthState(async (user) => {
 
   if (!user) {
     phase2TripRole = null;
+    phase2TripAccessReady = Boolean(window.__appTripAccess?.ready);
+    phase2TripAccessTripId = String(window.__appTripAccess?.tripId || "");
+    clearExpenseAccessRecoveryTimer();
+    expenseAccessRecoveryAttempt = 0;
     cloudExpenseStarted = false;
     setModuleStatus("Please sign in");
     if (stopTripListener) stopTripListener();
@@ -4339,6 +4409,8 @@ subscribeAuthState(async (user) => {
     return;
   }
 
+  phase2TripAccessReady = window.__appTripAccess?.ready === true;
+  phase2TripAccessTripId = String(window.__appTripAccess?.tripId || "");
   phase2TripRole = window.__appTripAccess?.role || null;
   await startExpenseCloudIfAllowed();
 });

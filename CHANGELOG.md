@@ -1,3 +1,25 @@
+# v7.7.5.2 · Expense Cold Start + Restore Preview Polish
+
+## Expense Cold Start Self Healing
+
+• Fixed a cold-start race where the 支出 module could mount before the current Trip membership snapshot had resolved, interpret the temporary `role: null / ready: false` state as read-only, and remain unusable until the PWA was quit and reopened.
+• The Expense module now treats unresolved access as a distinct pending state, shows 「正在確認旅程權限…」, and only treats a missing role as genuine no-access after the Trip access service reports `ready: true`.
+• Added a bounded self-healing refresh path at 0.7s / 2.2s / 5s while access remains unresolved. Refresh requests are routed through the App shell's existing versioned `trip-access-service` instance, so no duplicate Firebase module instance is created.
+• Access refresh responses are Trip-scoped. A stale access event for another Trip cannot enable Expense writes against the currently mounted Trip.
+• Full Add / Quick Add / OCR actions remain disabled while access is genuinely unresolved and immediately re-enable once an Owner / Admin / Member role becomes authoritative. The submit label now distinguishes access checking, read-only access and a locked Trip.
+
+## Full Backup Restore Preview Responsive Polish
+
+• Fixed long Trip IDs, backup count summaries and append-only audit notes overflowing the Restore Preview card on narrow iPhone layouts.
+• Restore Preview metadata now uses a constrained two-column grid with a shrinkable value column, safe `overflow-wrap`, and normal multiline flow.
+• The fix is scoped to `#trip-full-backup-preview`; the protected Profile navigation compositor and the general Apple Settings row geometry are unchanged.
+
+## Deployment
+
+• Functional files changed: `index.html` and `assets/js/expenses-module.js`.
+• Version/cache files changed: `sw.js`, `manifest.json`, `CHANGELOG.md`.
+• Firestore Rules and indexes are unchanged; no Firebase Rules deployment is required.
+
 # v7.7.5.1 · Deferred Boot Fail Safe
 
 ## Boot regression repair

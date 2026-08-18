@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
   <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
   <link rel="dns-prefetch" href="https://api.open-meteo.com">
-  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?v=7.7.5.1">
+  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?v=7.7.5.2">
   <title id="page-title">行程</title>
   <script>
   // v7.7.5.0 · Performance Lite. Memory only: no Firebase reads/writes, no
@@ -2502,6 +2502,28 @@ html.theme-dark .trip-import-preview,html.theme-dark .trip-import-stat,html.them
 #trip-backup-status[hidden]{display:none!important;}
 html.theme-dark .snapshot-restore-row .profile-row-copy strong,html:not(.theme-light):not(.theme-dark) .snapshot-restore-row .profile-row-copy strong{color:#ff6961;}
 
+/* v7.7.5.2 · Full Backup restore preview responsive containment.
+   Long opaque Trip IDs, count summaries and append-only audit notes must wrap
+   inside the Apple Settings card instead of forcing the card wider than the
+   iPhone viewport. */
+#trip-full-backup-preview{min-width:0;max-width:100%;overflow:hidden;}
+#trip-full-backup-preview .profile-meta-row{
+  display:grid;grid-template-columns:minmax(58px,auto) minmax(0,1fr);gap:12px;align-items:start;min-width:0;
+}
+#trip-full-backup-preview .profile-meta-row>span{min-width:0;}
+#trip-full-backup-preview .profile-meta-row>strong{
+  min-width:0;max-width:100%;text-align:right;white-space:normal;overflow-wrap:anywhere;word-break:break-word;line-height:1.35;
+}
+#trip-full-backup-preview .trip-library-status{
+  min-width:0;max-width:100%;box-sizing:border-box;white-space:normal;overflow-wrap:anywhere;word-break:break-word;
+}
+#trip-full-backup-preview .profile-row-copy{min-width:0;}
+#trip-full-backup-preview .profile-row-copy strong,
+#trip-full-backup-preview .profile-row-copy small{white-space:normal;overflow-wrap:anywhere;}
+@media(max-width:390px){
+  #trip-full-backup-preview .profile-meta-row{grid-template-columns:minmax(50px,auto) minmax(0,1fr);gap:9px;}
+}
+
 /* Phase 2E · v7.6.3 · legacy trip compatibility, visual reset + expense bootstrap */
 .app-progress-backdrop{position:fixed;inset:0;z-index:3900;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(13,18,28,.28);-webkit-backdrop-filter:blur(8px) saturate(1.05);backdrop-filter:blur(8px) saturate(1.05);opacity:0;visibility:hidden;pointer-events:none;transition:opacity .22s ease,visibility .22s step-end;}
 .app-progress-backdrop.active{opacity:1;visibility:visible;pointer-events:auto;transition:opacity .22s ease,visibility 0s;}
@@ -3266,7 +3288,7 @@ body.expenses-view-active #app-version-note{
 #snacks-view::after,
 #info-view::after,
 #profile-view::after{
-  content:"v7.7.5.1" !important;
+  content:"v7.7.5.2" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3287,7 +3309,7 @@ body.expenses-view-active #app-version-note{
   display:none !important;
 }
 body.expenses-view-active .expenses-module .expenses-app::after{
-  content:"v7.7.5.1" !important;
+  content:"v7.7.5.2" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3413,7 +3435,7 @@ html.theme-dark .modal-actions .modal-close-btn{
 </style>
             <link rel="apple-touch-icon" href="assets/icon/trip_icon.png">
   <link rel="icon" type="image/png" href="assets/icon/trip_icon.png">
-  <link rel="manifest" href="manifest.json?v=7.7.5.1">
+  <link rel="manifest" href="manifest.json?v=7.7.5.2">
   <meta name="apple-mobile-web-app-title" content="關嘉露西生日之旅">
   <!-- v7.7.1.2: expenses.css is 144KB and every rule is scoped under
        .expenses-module, yet it used to block the very first paint of the
@@ -3421,8 +3443,8 @@ html.theme-dark .modal-actions .modal-close-btn{
        priority without blocking paint; ensureExpensesStylesheet() flips it to
        media="all" before the 支出 view is ever mounted, so the styling is
        byte-for-byte identical by the time anything expenses-related renders. -->
-  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?v=7.7.5.1" media="print">
-  <noscript><link rel="stylesheet" href="assets/css/expenses.css?v=7.7.5.1"></noscript>
+  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?v=7.7.5.2" media="print">
+  <noscript><link rel="stylesheet" href="assets/css/expenses.css?v=7.7.5.2"></noscript>
 </head>
 <body>
 <div class="bg-fixed"></div>
@@ -3938,7 +3960,7 @@ html.theme-dark .modal-actions .modal-close-btn{
         <span class="profile-detail-spacer"></span>
       </div>
       <section class="profile-card" aria-label="App 資料">
-        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.7.5.1</strong></div>
+        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.7.5.2</strong></div>
         <div class="profile-meta-row"><span>資料架構</span><strong>Phase 2F</strong></div>
         <div class="profile-meta-row"><span>主要資料來源</span><strong id="app-data-source-label">Firebase / 本機快取</strong></div>
       </section>
@@ -4085,7 +4107,7 @@ html.theme-dark .modal-actions .modal-close-btn{
 </div>
 
 <script>
-const APP_VERSION = "7.7.5.1";
+const APP_VERSION = "7.7.5.2";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 function perfLiteMark(name){try{return window.__perfLite?.mark(name);}catch(error){return null;}}
@@ -6425,6 +6447,20 @@ async function getTripLoaderServices(){
   ]).then(([loader,session,access])=>{tripLoaderService=loader;tripSessionService=session;tripAccessService=access;return{loader,session,access};});
   return tripLoaderInitPromise;
 }
+// v7.7.5.2 · Expenses can become interactive before the first membership
+// snapshot resolves on an iOS cold start. Let that module request a refresh
+// through this already-versioned access-service instance, avoiding a duplicate
+// ES-module instance and avoiding a Quit / relaunch recovery path.
+window.addEventListener("expense-trip-access-refresh-request",async event=>{
+  const requestedId=String(event.detail?.tripId||"").trim();
+  const currentId=dataTripId(window.tripData);
+  if(!requestedId||requestedId!==currentId)return;
+  try{
+    const {access}=await getTripLoaderServices();
+    access.initTripAccess?.(currentId);
+    access.refreshTripAccess?.();
+  }catch(error){console.warn("Expense access refresh",error);}
+});
 async function getTripRenderCacheService(){
   if(!tripRenderCacheServicePromise)tripRenderCacheServicePromise=import(`./assets/js/trip-render-cache-service.js?v=${APP_VERSION}`).then(service=>{tripRenderCacheService=service;return service;});
   return tripRenderCacheServicePromise;
@@ -8623,7 +8659,7 @@ refreshCollapseMetrics();
 // Android / Chrome PWA support. Versioned app-shell Service Worker; normal launches are cache-first while explicit reloads stay network-first.
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("./sw.js?v=7.7.5.1").catch(() => {});
+    navigator.serviceWorker.register("./sw.js?v=7.7.5.2").catch(() => {});
   });
 }
 
