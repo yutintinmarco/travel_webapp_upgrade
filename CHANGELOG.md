@@ -1,3 +1,39 @@
+# v7.7.5.0 · Backup Foundation + Appearance Consolidation
+
+## Full Backup Foundation v1
+
+• Added a versioned `travel-full-backup` Data Only v1 format containing the Firebase Trip structure, Portable Trip representation, actual expense records, settlements and activity logs.
+• Added Owner / Admin Full Backup export from 「行程備份」. The file is explicitly marked `mediaIncluded: false`; Phase 3A will extend the same versioned lifecycle into a media-aware Backup Package rather than embedding photos in JSON.
+• Added in-place Full Backup restore with three scopes: 完整還原, 只還原行程, and 只還原支出. Trip-only restore leaves expense settings / transactions untouched; expense-only restore leaves itinerary / Saved Places / general appearance untouched.
+• Membership, Owner/Admin roles and access rights are never rolled back by Full Backup restore.
+• Existing Activity Logs remain append-only for audit integrity. The backup file contains the historical logs for archival / future disaster recovery, while an in-place restore does not delete or rewind the live audit trail.
+• Data Only v1 restore is intentionally limited to the same canonical Trip ID. Recreating a permanently deleted Trip from a local backup will be completed with Phase 2G creator entitlement / Trip lifecycle and Phase 3A media restore.
+
+## Backup / report separation
+
+• `trip.json` remains the lightweight Portable Trip format and continues to exclude actual expense transactions.
+• The expense settings entry now presents the Excel report as the primary human-facing export. The old expense-only JSON button is removed from the UI because disaster recovery now belongs to Full Trip Backup.
+• Existing Firebase Snapshots remain itinerary-version snapshots and keep their current safe restore behaviour.
+
+## Appearance consolidation
+
+• Added an editable Trip Accent Colour for Owner / Admin. This is the canonical `accentColor` already used by the App and is now manageable in the UI.
+• Added Saved Places and Expenses feature colours. Each follows the Trip Accent by default and can be independently overridden or reset to follow the Trip again.
+• Saved Places priority badges / filters now derive a tonal family from the Saved Places accent instead of fixed legacy pink / blue / beige colours.
+• Expenses now consume `--expense-accent`, falling back to the Trip Accent. Semantic destructive / success / warning colours remain independent.
+• Feature colours round-trip through Firebase general settings, Portable JSON, warm boot cache and Backup export to avoid first-paint colour flashes.
+
+## Deferred to Phase 2G
+
+• Trip ID registry creation is deliberately deferred until the new Entry & Access Gateway introduces Authorized Trip Creator entitlement. This prevents shipping a registry while arbitrary authenticated users can still create new Trips.
+• Personal Archive, global Trip Lock, Permanent Delete and invite-only creation remain Phase 2G lifecycle work.
+
+## Firebase deployment
+
+• No Firestore Rules or index changes are required in this build. The new appearance writes and Full Backup restore operations use existing Owner / Admin permissions.
+
+---
+
 # v7.7.4.6 · Import Cold Start Reliability
 
 ## First import readiness

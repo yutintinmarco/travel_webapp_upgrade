@@ -203,6 +203,7 @@ function structureToPortableTrip(structure, { snapshotId = "" } = {}) {
       hotels: clone(general.hotels || {}),
       infoCard: clone(general.infoCard || {}),
       galleryDefaults: clone(general.galleryDefaults || {}),
+      featureColors: clone(general.featureColors || {}),
       footerNote: clean(general.footerNote),
       expenses: clone(expenses || {})
     },
@@ -600,6 +601,412 @@ export async function restoreTripSnapshot(tripIdInput, snapshotIdInput, { user: 
     throw error;
   } finally {
     if (serverOperation) await releaseTripOperation(serverOperation,user);
+    endCloudOperation(localOperationToken);
+  }
+}
+// =========================================================================
+// v7.7.5.0 · Full Backup Foundation v1 (data-only; media plugs in at Phase 3A)
+// =========================================================================
+const FULL_BACKUP_FORMAT = "travel-full-backup";
+const FULL_BACKUP_VERSION = 1;
+const FULL_BACKUP_SCOPES = new Set(["all", "trip", "expenses"]);
+
+function fullBackupSerialize(value) {
+  if (value == null) return value;
+  try {
+    if (typeof value?.toDate === "function") {
+      const date = value.toDate();
+      return { __travelBackupType: "timestamp", iso: date.toISOString() };
+    }
+  } catch (error) {}
+  if (value instanceof Date) return { __travelBackupType: "timestamp", iso: value.toISOString() };
+  if (Array.isArray(value)) return value.map(fullBackupSerialize);
+  if (typeof value === "object") {
+    const out = {};
+    Object.entries(value).forEach(([key, item]) => {
+      if (typeof item !== "undefined") out[key] = fullBackupSerialize(item);
+    });
+    return out;
+  }
+  return value;
+}
+
+function fullBackupDeserialize(value) {
+  if (value == null) return value;
+  if (Array.isArray(value)) return value.map(fullBackupDeserialize);
+  if (typeof value === "object") {
+    if (value.__travelBackupType === "timestamp" && value.iso) {
+      const date = new Date(String(value.iso));
+      return Number.isFinite(date.getTime()) ? date : null;
+    }
+    const out = {};
+    Object.entries(value).forEach(([key, item]) => { out[key] = fullBackupDeserialize(item); });
+    return out;
+  }
+  return value;
+}
+
+async function readBackupCollection(tripId, collectionName) {
+  const snaps = await getDocs(collection(db, "trips", tripId, collectionName));
+  return snaps.docs.map(snap => ({ id: snap.id, data: fullBackupSerialize(snap.data() || {}) }));
+}
+
+function fullBackupCountsFromData(data = {}) {
+  const structure = fullBackupDeserialize(data.tripStructure || {});
+  const tripCounts = structureCounts(structure);
+  return {
+    ...tripCounts,
+    expenseCount: safeArray(data.expenses).length,
+    settlementCount: safeArray(data.settlements).length,
+    activityLogCount: safeArray(data.activityLogs).length
+  };
+}
+
+function normalizeFullBackupInput(rawInput) {
+  let raw = rawInput;
+  if (typeof rawInput === "string") {
+    try { raw = JSON.parse(rawInput); }
+    catch (error) {
+      const invalid = new Error("Backup JSON is invalid");
+      invalid.code = "backup-invalid-json";
+      throw invalid;
+    }
+  }
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) {
+    const invalid = new Error("Backup format is invalid");
+    invalid.code = "backup-invalid";
+    throw invalid;
+  }
+  const format = clean(raw.backupFormat);
+  const version = Number(raw.backupVersion) || 0;
+  const tripId = clean(raw.tripId || raw?.trip?.tripId);
+  if (format !== FULL_BACKUP_FORMAT || version !== FULL_BACKUP_VERSION || !tripId || !raw.data?.tripStructure) {
+    const invalid = new Error("Unsupported Full Backup format");
+    invalid.code = "backup-unsupported";
+    invalid.backupFormat = format;
+    invalid.backupVersion = version;
+    throw invalid;
+  }
+  const data = clone(raw.data) || {};
+  const counts = raw.counts && typeof raw.counts === "object" ? clone(raw.counts) : fullBackupCountsFromData(data);
+  return {
+    ...clone(raw),
+    backupFormat: format,
+    backupVersion: version,
+    tripId,
+    mediaIncluded: raw.mediaIncluded === true,
+    mediaManifest: safeArray(raw.mediaManifest),
+    counts,
+    data
+  };
+}
+
+export function inspectFullBackup(rawInput) {
+  const backup = normalizeFullBackupInput(rawInput);
+  return {
+    valid: true,
+    backupFormat: backup.backupFormat,
+    backupVersion: backup.backupVersion,
+    tripId: backup.tripId,
+    sourceRevision: Number(backup.sourceRevision) || Number(fullBackupDeserialize(backup.data.tripStructure)?.tripDoc?.revision) || 0,
+    exportedAt: clean(backup.exportedAt),
+    mediaIncluded: backup.mediaIncluded,
+    counts: backup.counts,
+    auditPolicy: "append-only"
+  };
+}
+
+export async function exportFullBackup(tripIdInput, { user: userInput = null } = {}) {
+  const user = await requireUser(userInput);
+  const tripId = clean(tripIdInput);
+  if (!tripId) throw new Error("Missing tripId");
+  const role = await requireManageRole(tripId, user);
+  const [structure, expenses, settlements, activityLogs] = await Promise.all([
+    readTripStructure(tripId),
+    readBackupCollection(tripId, "expenses"),
+    readBackupCollection(tripId, "settlements"),
+    readBackupCollection(tripId, "activityLogs")
+  ]);
+  const data = {
+    tripStructure: fullBackupSerialize(structure),
+    portableTrip: canonicalPortableExport(structure, { tripId }),
+    expenses,
+    settlements,
+    activityLogs
+  };
+  const counts = fullBackupCountsFromData(data);
+  const revision = Math.max(1, Number(structure?.tripDoc?.revision) || 1);
+  const json = {
+    backupFormat: FULL_BACKUP_FORMAT,
+    backupVersion: FULL_BACKUP_VERSION,
+    appName: "travel-webapp",
+    tripId,
+    sourceRevision: revision,
+    exportedAt: new Date().toISOString(),
+    exportedBy: {
+      uid: user.uid,
+      name: clean(user.displayName),
+      email: clean(user.email).toLowerCase()
+    },
+    mediaIncluded: false,
+    mediaManifest: [],
+    mediaNote: "Data-only Full Backup v1. Phase 3A will add media files through a versioned backup package.",
+    accessPolicy: "Trip membership / roles are not restored from this backup.",
+    activityLogPolicy: "Activity logs are backed up for archival integrity. Existing audit logs remain append-only during in-place restore.",
+    counts,
+    data
+  };
+  return {
+    tripId,
+    role,
+    roleLabel: roleLabel(role),
+    revision,
+    counts,
+    json,
+    filename: `${tripId}-full-backup-data-v1-r${revision}.json`
+  };
+}
+
+function fullRestoreTripWriteOps(target, tripId, user) {
+  const ops = [];
+  safeArray(target?.days).forEach(day => {
+    const dayData = { ...stripAudit(day.data || {}), dayId: clean(day?.data?.dayId || day.id), createdAt: serverTimestamp(), createdBy: user.uid, updatedAt: serverTimestamp(), updatedBy: user.uid };
+    ops.push(opSet(doc(db, "trips", tripId, "days", day.id), dayData));
+    safeArray(day?.items).forEach(item => {
+      const itemData = { ...stripAudit(item.data || {}), itemId: clean(item?.data?.itemId || item.id), createdAt: serverTimestamp(), createdBy: user.uid, updatedAt: serverTimestamp(), updatedBy: user.uid };
+      ops.push(opSet(doc(db, "trips", tripId, "days", day.id, "items", item.id), itemData));
+    });
+  });
+  safeArray(target?.savedPlaces).forEach(place => {
+    const placeData = { ...stripAudit(place.data || {}), placeId: clean(place?.data?.placeId || place.id), createdAt: serverTimestamp(), createdBy: user.uid, updatedAt: serverTimestamp(), updatedBy: user.uid };
+    ops.push(opSet(doc(db, "trips", tripId, "savedPlaces", place.id), placeData));
+  });
+  const generalData = { ...stripAudit(target?.settings?.general || {}), createdAt: serverTimestamp(), createdBy: user.uid, updatedAt: serverTimestamp(), updatedBy: user.uid };
+  ops.push(opSet(doc(db, "trips", tripId, "settings", "general"), generalData));
+  return ops;
+}
+
+async function restoreTripScopeFromBackup(target, current, tripId, user, { onProgress = null, progressOffset = 0, progressSpan = 1 } = {}) {
+  const tripRef = doc(db, "trips", tripId);
+  const currentTrip = current?.tripDoc || {};
+  const targetTrip = target?.tripDoc || {};
+  const nextRevision = Math.max(1, Number(currentTrip.revision) || 0) + 1;
+  const restoredTripContent = stripTripOperational(targetTrip);
+
+  await writeBatch(db).set(tripRef, {
+    restoreState: "restoring",
+    updatedAt: serverTimestamp(),
+    updatedBy: user.uid
+  }, { merge: true }).commit();
+
+  await writeBatch(db).set(tripRef, {
+    ...restoredTripContent,
+    revision: nextRevision,
+    memberUids: safeArray(currentTrip.memberUids),
+    memberCount: Number(currentTrip.memberCount) || safeArray(currentTrip.memberUids).length,
+    createdBy: clean(currentTrip.createdBy),
+    createdAt: currentTrip.createdAt || serverTimestamp(),
+    archived: currentTrip.archived === true,
+    archivedAt: currentTrip.archivedAt || null,
+    archivedBy: clean(currentTrip.archivedBy),
+    contentHash: "",
+    contentHashVersion: 1,
+    importState: "ready",
+    restoreState: "restoring",
+    lastImportMode: "full-backup-trip-restore",
+    restoredBy: user.uid,
+    restoredAt: serverTimestamp(),
+    updatedBy: user.uid,
+    updatedAt: serverTimestamp()
+  }, { merge: false }).commit();
+
+  const writes = fullRestoreTripWriteOps(target, tripId, user);
+  const deletes = staleDeleteOps(current, target, tripId);
+  const totalOps = Math.max(1, writes.length + deletes.length);
+  const progress = ({ completed, total }) => {
+    if (typeof onProgress !== "function") return;
+    const ratio = Math.min(1, completed / Math.max(1, total));
+    onProgress({ completed: progressOffset + ratio * progressSpan, total: 1, stage: "trip-content" });
+  };
+  await commitOps(writes, progress, 0, totalOps);
+  await commitOps(deletes, progress, writes.length, totalOps);
+  return { revision: nextRevision };
+}
+
+async function readCurrentExpenseCollections(tripId) {
+  const [expenseSnaps, settlementSnaps] = await Promise.all([
+    getDocs(collection(db, "trips", tripId, "expenses")),
+    getDocs(collection(db, "trips", tripId, "settlements"))
+  ]);
+  return {
+    expenses: new Map(expenseSnaps.docs.map(snap => [snap.id, snap.data() || {}])),
+    settlements: new Map(settlementSnaps.docs.map(snap => [snap.id, snap.data() || {}]))
+  };
+}
+
+function restoreExpenseWriteOps(backup, current, tripId, user) {
+  const ops = [];
+  const targetExpenses = new Map(safeArray(backup?.data?.expenses).map(entry => [clean(entry?.id), fullBackupDeserialize(entry?.data || {})]).filter(([id]) => id));
+  const targetSettlements = new Map(safeArray(backup?.data?.settlements).map(entry => [clean(entry?.id), fullBackupDeserialize(entry?.data || {})]).filter(([id]) => id));
+  const targetStructure = fullBackupDeserialize(backup?.data?.tripStructure || {});
+  const expenseSettings = { ...stripAudit(targetStructure?.settings?.expenses || {}), updatedBy: user.uid, updatedAt: serverTimestamp() };
+  ops.push(opSet(doc(db, "trips", tripId, "settings", "expenses"), expenseSettings, { merge: false }));
+
+  targetExpenses.forEach((data, id) => {
+    const existing = current.expenses.get(id) || null;
+    const restored = {
+      ...clone(data),
+      createdBy: existing ? (clean(data?.createdBy) || clean(existing.createdBy) || user.uid) : user.uid,
+      createdAt: existing ? (data?.createdAt || existing.createdAt || serverTimestamp()) : serverTimestamp(),
+      updatedBy: user.uid,
+      updatedAt: serverTimestamp()
+    };
+    ops.push(opSet(doc(db, "trips", tripId, "expenses", id), restored, { merge: false }));
+  });
+  current.expenses.forEach((data, id) => {
+    if (targetExpenses.has(id)) return;
+    ops.push(opSet(doc(db, "trips", tripId, "expenses", id), {
+      isDeleted: true,
+      deletedBy: user.uid,
+      deletedByName: clean(user.displayName),
+      deletedAt: serverTimestamp(),
+      updatedBy: user.uid,
+      updatedAt: serverTimestamp(),
+      restoreExcluded: true
+    }, { merge: true }));
+  });
+
+  targetSettlements.forEach((data, id) => {
+    const existing = current.settlements.get(id) || null;
+    const restored = {
+      ...clone(data),
+      createdBy: existing ? (clean(data?.createdBy) || clean(existing.createdBy) || user.uid) : user.uid
+    };
+    ops.push(opSet(doc(db, "trips", tripId, "settlements", id), restored, { merge: false }));
+  });
+  current.settlements.forEach((data, id) => {
+    if (!targetSettlements.has(id)) ops.push(opDelete(doc(db, "trips", tripId, "settlements", id)));
+  });
+  return ops;
+}
+
+export async function restoreFullBackup(rawInput, {
+  scope = "all",
+  user: userInput = null,
+  onProgress = null
+} = {}) {
+  const user = await requireUser(userInput);
+  const backup = normalizeFullBackupInput(rawInput);
+  const selectedScope = clean(scope).toLowerCase();
+  if (!FULL_BACKUP_SCOPES.has(selectedScope)) {
+    const error = new Error("Invalid restore scope");
+    error.code = "backup-invalid-scope";
+    throw error;
+  }
+  assertCloudOperationAvailable("還原完整備份");
+  const tripId = backup.tripId;
+  const currentTrip = await readTripStructure(tripId);
+  await requireManageRole(tripId, user);
+  if (clean(currentTrip?.tripId) !== tripId) {
+    const error = new Error("Backup Trip ID does not match current Trip");
+    error.code = "backup-trip-mismatch";
+    throw error;
+  }
+
+  const localOperationToken = beginCloudOperation({ type: "restore", tripId, label: "還原完整備份" });
+  let serverOperation = null;
+  let mutationStarted = false;
+  try {
+    serverOperation = await acquireTripOperation(tripId, "restore", user);
+    const targetStructure = fullBackupDeserialize(backup.data.tripStructure || {});
+    if (!targetStructure?.tripDoc) {
+      const error = new Error("Backup Trip payload is missing");
+      error.code = "backup-invalid";
+      throw error;
+    }
+    let revision = Number(currentTrip?.tripDoc?.revision) || 1;
+    let safetySnapshotId = "";
+
+    if (selectedScope === "all" || selectedScope === "trip") {
+      const safety = await writeSnapshot(tripId, currentTrip, user, { type: "pre-restore" });
+      safetySnapshotId = safety.snapshotId;
+      mutationStarted = true;
+      const tripResult = await restoreTripScopeFromBackup(targetStructure, currentTrip, tripId, user, {
+        onProgress,
+        progressOffset: 0.08,
+        progressSpan: selectedScope === "all" ? 0.47 : 0.82
+      });
+      revision = tripResult.revision;
+    }
+
+    if (selectedScope === "all" || selectedScope === "expenses") {
+      mutationStarted = true;
+      const currentExpenses = await readCurrentExpenseCollections(tripId);
+      const ops = restoreExpenseWriteOps(backup, currentExpenses, tripId, user);
+      await commitOps(ops, ({ completed, total }) => {
+        if (typeof onProgress !== "function") return;
+        const ratio = Math.min(1, completed / Math.max(1, total));
+        const base = selectedScope === "all" ? 0.58 : 0.08;
+        const span = selectedScope === "all" ? 0.32 : 0.82;
+        onProgress({ completed: base + ratio * span, total: 1, stage: "expense-content" });
+      });
+    }
+
+    const finalBatch = writeBatch(db);
+    finalBatch.set(doc(collection(db, "trips", tripId, "activityLogs")), {
+      type: "trip.full_backup.restore",
+      actionType: "trip.full_backup.restore",
+      category: "backup",
+      title: "還原完整備份",
+      summary: selectedScope === "all"
+        ? "完整還原行程及支出資料"
+        : selectedScope === "trip"
+          ? "只還原行程，現有支出保持不變"
+          : "只還原支出，現有行程保持不變",
+      actorUid: user.uid,
+      actorName: clean(user.displayName),
+      backupVersion: backup.backupVersion,
+      restoreScope: selectedScope,
+      sourceRevision: Number(backup.sourceRevision) || 0,
+      revision,
+      safetySnapshotId,
+      archivedActivityLogCount: safeArray(backup.data.activityLogs).length,
+      createdAt: serverTimestamp()
+    });
+    finalBatch.set(doc(db, "trips", tripId), {
+      restoreState: "ready",
+      updatedAt: serverTimestamp(),
+      updatedBy: user.uid
+    }, { merge: true });
+    await finalBatch.commit();
+    if (typeof onProgress === "function") onProgress({ completed: 1, total: 1, stage: "done" });
+
+    return {
+      tripId,
+      scope: selectedScope,
+      backupVersion: backup.backupVersion,
+      sourceRevision: Number(backup.sourceRevision) || 0,
+      revision,
+      safetySnapshotId,
+      counts: backup.counts,
+      activityLogsRestored: false,
+      activityLogPolicy: "append-only"
+    };
+  } catch (error) {
+    try {
+      if (mutationStarted) {
+        await writeBatch(db).set(doc(db, "trips", tripId), {
+          restoreState: "failed",
+          updatedAt: serverTimestamp(),
+          updatedBy: user.uid
+        }, { merge: true }).commit();
+      }
+    } catch (stateError) {
+      console.warn("Unable to mark failed Full Backup restore", stateError);
+    }
+    throw error;
+  } finally {
+    if (serverOperation) await releaseTripOperation(serverOperation, user);
     endCloudOperation(localOperationToken);
   }
 }

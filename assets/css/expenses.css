@@ -17,7 +17,7 @@
   --expense-border: rgba(255,255,255,0.60);
   --expense-line: rgba(0,0,0,0.08);
   --expense-shadow: 0 10px 24px rgba(15,23,42,0.10);
-  --expense-primary: var(--accent-color, #d93025);
+  --expense-primary: var(--expense-accent, var(--accent-color, #d93025));
   --expense-primary-text: #fff;
   --expense-radius: 16px;
   --expense-radius-sm: 12px;
@@ -4786,8 +4786,8 @@ html:not(.theme-light):not(.theme-dark) .expenses-module .expense-form-body .spl
   transform:scale(.96) !important;
 }
 .expenses-module .expenses-inner-tab.active{
-  background:color-mix(in srgb, var(--accent-color,#d85c8a) 18%, rgba(248,248,250,.94)) !important;
-  border-color:color-mix(in srgb, var(--accent-color,#d85c8a) 70%, rgba(255,255,255,.72)) !important;
+  background:color-mix(in srgb, var(--expense-primary) 18%, rgba(248,248,250,.94)) !important;
+  border-color:color-mix(in srgb, var(--expense-primary) 70%, rgba(255,255,255,.72)) !important;
   color:var(--expense-text) !important;
   font-weight:700 !important;
   box-shadow:0 4px 12px rgba(15,23,42,0.10), inset 0 1px 0 rgba(255,255,255,0.82) !important;
@@ -4807,8 +4807,8 @@ html:not(.theme-light):not(.theme-dark) .expenses-module .expenses-inner-tab{
 }
 html.theme-dark .expenses-module .expenses-inner-tab.active,
 html:not(.theme-light):not(.theme-dark) .expenses-module .expenses-inner-tab.active{
-  background:color-mix(in srgb, var(--accent-color,#d85c8a) 32%, rgba(38,38,46,.92)) !important;
-  border-color:color-mix(in srgb, var(--accent-color,#d85c8a) 75%, rgba(255,255,255,.18)) !important;
+  background:color-mix(in srgb, var(--expense-primary) 32%, rgba(38,38,46,.92)) !important;
+  border-color:color-mix(in srgb, var(--expense-primary) 75%, rgba(255,255,255,.18)) !important;
   color:#fff !important;
   box-shadow:0 4px 12px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.10) !important;
 }
@@ -4927,7 +4927,7 @@ html.theme-light .expenses-module .card{
   transition:background .12s ease,border-color .12s ease,transform .12s ease !important;
 }
 .expenses-module .expense-form-body .expense-participant-checkbox:checked + .expense-participant-check{
-  background:#0a84ff !important;border-color:#0a84ff !important;
+  background:var(--expense-primary) !important;border-color:var(--expense-primary) !important;
 }
 .expenses-module .expense-form-body .expense-participant-checkbox:checked + .expense-participant-check::after{
   content:"✓";display:block;font-size:16px;font-weight:850;line-height:1;
@@ -4952,7 +4952,7 @@ html:not(.theme-light):not(.theme-dark) .expenses-module .expense-form-body .exp
 }
 html.theme-dark .expenses-module .expense-form-body .expense-participant-checkbox:checked + .expense-participant-check,
 html:not(.theme-light):not(.theme-dark) .expenses-module .expense-form-body .expense-participant-checkbox:checked + .expense-participant-check{
-  background:#0a84ff !important;border-color:#0a84ff !important;
+  background:var(--expense-primary) !important;border-color:var(--expense-primary) !important;
 }
 
 /* v7.7.3.3 · Recent expenses warm-cache staging.

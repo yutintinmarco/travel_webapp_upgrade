@@ -11,10 +11,10 @@
   <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
   <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
   <link rel="dns-prefetch" href="https://api.open-meteo.com">
-  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?v=7.7.4.6">
+  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?v=7.7.5.0">
   <title id="page-title">行程</title>
   <script>
-  // v7.7.4.6 · Performance Lite. Memory only: no Firebase reads/writes, no
+  // v7.7.5.0 · Performance Lite. Memory only: no Firebase reads/writes, no
   // persistent diagnostic log and no scroll-frame instrumentation.
   (function(){
     var startedAt=performance.now();
@@ -33,7 +33,7 @@
     marks.appStart=0;
   })();
 
-  // v7.7.4.6 · Native warm boot + temporal header harmony. Apply synchronous user / Trip appearance
+  // v7.7.5.0 · Native warm boot + temporal header harmony. Apply synchronous user / Trip appearance
   // state before the first body paint, then let IndexedDB + Firestore reconcile
   // silently. This prevents the default palette / background / font size from
   // flashing for a frame before the remembered Firebase Trip is available.
@@ -66,6 +66,9 @@
       var snapshot=JSON.parse(localStorage.getItem("travel_boot_visual_v1")||"null");
       if(snapshot&&preferred&&String(snapshot.tripId||"")===preferred){
         if(snapshot.accentColor)root.style.setProperty("--accent-color",String(snapshot.accentColor));
+        var featureColours=snapshot.featureColors&&typeof snapshot.featureColors==="object"?snapshot.featureColors:{};
+        root.style.setProperty("--saved-accent",String(featureColours.savedPlaces||snapshot.accentColor||"#0a84ff"));
+        root.style.setProperty("--expense-accent",String(featureColours.expenses||snapshot.accentColor||"#0a84ff"));
         if(snapshot.backgroundCss)root.style.setProperty("--trip-bg-source",String(snapshot.backgroundCss));
         var colours=snapshot.teamColors&&typeof snapshot.teamColors==="object"?snapshot.teamColors:{};
         Object.keys(colours).forEach(function(key){
@@ -329,20 +332,20 @@ html.theme-dark .modal-actions { border-top-color: rgba(255,255,255,0.10); }
 .snack-filter-row { display: flex; gap: 7px; overflow-x: auto; padding: 2px 0 7px 0; -webkit-overflow-scrolling: touch; }
 .snack-filter-row + .snack-filter-row { margin-top: 2px; }
 .snack-filter-btn { flex: 0 0 auto; border: 1px solid rgba(0,0,0,0.12); background: rgba(255,255,255,0.62); color: #555; border-radius: 999px; padding: 6px 11px; font-size: calc(11px * var(--font-scale)); font-weight: 700; white-space: nowrap; }
-.snack-filter-btn.active { background: #111; color: #fff; border-color: #111; }
-.snack-filter-btn.priority-must.active { background: #d85c8a; border-color: #d85c8a; }
-.snack-filter-btn.priority-route.active { background: #f4d7e2; border-color: #e7b6ca; color: #9a2f59; }
-.snack-filter-btn.priority-backup.active { background: #e7f0ff; border-color: #bdd5ff; color: #2f5f9a; }
-.snack-filter-btn.priority-souvenir.active { background: #f6ead2; border-color: #e5ca93; color: #8a5a12; }
+.snack-filter-btn.active { background: var(--saved-accent,var(--accent-color,#111)); color: #fff; border-color: var(--saved-accent,var(--accent-color,#111)); }
+.snack-filter-btn.priority-must.active { background: var(--saved-accent,var(--accent-color,#d85c8a)); border-color: var(--saved-accent,var(--accent-color,#d85c8a)); }
+.snack-filter-btn.priority-route.active { background: color-mix(in srgb,var(--saved-accent,var(--accent-color,#d85c8a)) 28%,#fff); border-color: color-mix(in srgb,var(--saved-accent,var(--accent-color,#d85c8a)) 44%,#fff); color: color-mix(in srgb,var(--saved-accent,var(--accent-color,#d85c8a)) 78%,#333); }
+.snack-filter-btn.priority-backup.active { background: color-mix(in srgb,var(--saved-accent,var(--accent-color,#d85c8a)) 20%,#fff); border-color: color-mix(in srgb,var(--saved-accent,var(--accent-color,#d85c8a)) 34%,#fff); color: color-mix(in srgb,var(--saved-accent,var(--accent-color,#d85c8a)) 72%,#333); }
+.snack-filter-btn.priority-souvenir.active { background: color-mix(in srgb,var(--saved-accent,var(--accent-color,#d85c8a)) 13%,#fff); border-color: color-mix(in srgb,var(--saved-accent,var(--accent-color,#d85c8a)) 27%,#fff); color: color-mix(in srgb,var(--saved-accent,var(--accent-color,#d85c8a)) 68%,#333); }
 .snack-empty { font-size: calc(12px * var(--font-scale)); color: #666; padding: 14px 8px; text-align: center; }
 .snack-item { padding: 11px 11px; display: block; }
 .snack-item .time { width: 0; display: none; }
 .snack-card-top { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 6px; }
 .snack-badge { display: inline-flex; align-items: center; border-radius: 999px; padding: 3px 9px; font-size: calc(10px * var(--font-scale)); font-weight: 800; line-height: 1.2; }
-.snack-badge.must { background: #d85c8a; color: #fff; }
-.snack-badge.route { background: #f4d7e2; color: #9a2f59; }
-.snack-badge.backup { background: #e7f0ff; color: #2f5f9a; }
-.snack-badge.souvenir { background: #f6ead2; color: #8a5a12; }
+.snack-badge.must { background: var(--saved-accent,var(--accent-color,#d85c8a)); color: #fff; }
+.snack-badge.route { background: color-mix(in srgb,var(--saved-accent,var(--accent-color,#d85c8a)) 28%,#fff); color: color-mix(in srgb,var(--saved-accent,var(--accent-color,#d85c8a)) 78%,#333); }
+.snack-badge.backup { background: color-mix(in srgb,var(--saved-accent,var(--accent-color,#d85c8a)) 20%,#fff); color: color-mix(in srgb,var(--saved-accent,var(--accent-color,#d85c8a)) 72%,#333); }
+.snack-badge.souvenir { background: color-mix(in srgb,var(--saved-accent,var(--accent-color,#d85c8a)) 13%,#fff); color: color-mix(in srgb,var(--saved-accent,var(--accent-color,#d85c8a)) 68%,#333); }
 .snack-area-badge { display: inline-flex; align-items: center; border-radius: 999px; padding: 3px 9px; font-size: calc(10px * var(--font-scale)); font-weight: 700; background: rgba(255,255,255,0.56); color: #555; border: 1px solid rgba(0,0,0,0.08); }
 .snack-title-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 5px; }
 .snack-title { font-size: calc(14px * var(--font-scale)); font-weight: 800; color: #111; line-height: 1.35; flex: 1; }
@@ -355,7 +358,10 @@ html.theme-dark .modal-actions { border-top-color: rgba(255,255,255,0.10); }
 .snack-tags { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 7px; }
 .snack-tag { font-size: calc(9px * var(--font-scale)); padding: 2px 7px; border-radius: 999px; background: rgba(0,0,0,0.055); color: #666; font-weight: 700; }
 html.theme-dark .snack-filter-btn { background: rgba(36,36,44,0.70); border-color: rgba(255,255,255,0.12); color: rgba(220,220,228,0.78); }
-html.theme-dark .snack-filter-btn.active { background: rgba(230,230,238,0.90); border-color: rgba(230,230,238,0.90); color: #111; }
+html.theme-dark .snack-filter-btn.active { background: var(--saved-accent,var(--accent-color,#d85c8a)); border-color: var(--saved-accent,var(--accent-color,#d85c8a)); color: #fff; }
+html.theme-dark .snack-filter-btn.priority-route.active { background: color-mix(in srgb,var(--saved-accent,var(--accent-color,#d85c8a)) 38%,#1c1c1e); border-color: color-mix(in srgb,var(--saved-accent,var(--accent-color,#d85c8a)) 62%,#1c1c1e); color: color-mix(in srgb,var(--saved-accent,var(--accent-color,#d85c8a)) 78%,#fff); }
+html.theme-dark .snack-filter-btn.priority-backup.active { background: color-mix(in srgb,var(--saved-accent,var(--accent-color,#d85c8a)) 30%,#1c1c1e); border-color: color-mix(in srgb,var(--saved-accent,var(--accent-color,#d85c8a)) 52%,#1c1c1e); color: color-mix(in srgb,var(--saved-accent,var(--accent-color,#d85c8a)) 72%,#fff); }
+html.theme-dark .snack-filter-btn.priority-souvenir.active { background: color-mix(in srgb,var(--saved-accent,var(--accent-color,#d85c8a)) 22%,#1c1c1e); border-color: color-mix(in srgb,var(--saved-accent,var(--accent-color,#d85c8a)) 44%,#1c1c1e); color: color-mix(in srgb,var(--saved-accent,var(--accent-color,#d85c8a)) 68%,#fff); }
 html.theme-dark .snack-item { background: rgba(24,24,32,0.58); border-color: rgba(255,255,255,0.09); }
 html.theme-dark .snack-title { color: #f0f0f2; }
 html.theme-dark .snack-line { color: rgba(190,190,205,0.80); }
@@ -369,13 +375,13 @@ html.theme-dark .snack-tag { background: rgba(255,255,255,0.08); color: rgba(190
 .snack-detail-wrap { display: flex; flex-direction: column; gap: 10px; }
 .snack-detail-block { padding: 0 0 10px 0; border-bottom: 1px solid rgba(15,23,42,0.08); }
 .snack-detail-block:last-child { border-bottom: none; padding-bottom: 0; }
-.snack-detail-label { display: inline-flex; align-items: center; gap: 5px; font-size: calc(11px * var(--font-scale)); font-weight: 800; color: var(--accent-color); letter-spacing: 0.04em; margin-bottom: 4px; }
+.snack-detail-label { display: inline-flex; align-items: center; gap: 5px; font-size: calc(11px * var(--font-scale)); font-weight: 800; color: var(--saved-accent,var(--accent-color)); letter-spacing: 0.04em; margin-bottom: 4px; }
 .snack-detail-value { font-size: calc(13px * var(--font-scale)); line-height: 1.58; color: #333; font-weight: 500; }
 .snack-detail-meta { display: grid; grid-template-columns: 54px 1fr; gap: 6px 9px; padding: 10px 0 0; font-size: calc(12px * var(--font-scale)); }
 .snack-detail-meta-label { font-weight: 800; color: rgba(17,17,17,0.58); letter-spacing: 0.02em; }
 .snack-detail-meta-value { color: #333; font-weight: 600; line-height: 1.45; }
 html.theme-dark .snack-detail-block { border-bottom-color: rgba(255,255,255,0.09); }
-html.theme-dark .snack-detail-label { color: #ff8fb1; }
+html.theme-dark .snack-detail-label { color: color-mix(in srgb,var(--saved-accent,var(--accent-color,#d85c8a)) 78%,#fff); }
 html.theme-dark .snack-detail-value,
 html.theme-dark .snack-detail-meta-value { color: rgba(235,235,242,0.90); }
 html.theme-dark .snack-detail-meta-label { color: rgba(190,190,205,0.72); }
@@ -3260,7 +3266,7 @@ body.expenses-view-active #app-version-note{
 #snacks-view::after,
 #info-view::after,
 #profile-view::after{
-  content:"v7.7.4.6" !important;
+  content:"v7.7.5.0" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3281,7 +3287,7 @@ body.expenses-view-active #app-version-note{
   display:none !important;
 }
 body.expenses-view-active .expenses-module .expenses-app::after{
-  content:"v7.7.4.6" !important;
+  content:"v7.7.5.0" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3346,7 +3352,7 @@ html:not(.theme-light):not(.theme-dark) .trip-boot-placeholder{
 
 
 /* ==========================================================================
-   v7.7.4.6 · App action button harmony
+   v7.7.5.0 · App action button harmony
    Modal-level CTAs share one geometry and semantic colour hierarchy.
    Menu rows, tabs and inline field controls intentionally keep their own UI.
    ========================================================================== */
@@ -3407,7 +3413,7 @@ html.theme-dark .modal-actions .modal-close-btn{
 </style>
             <link rel="apple-touch-icon" href="assets/icon/trip_icon.png">
   <link rel="icon" type="image/png" href="assets/icon/trip_icon.png">
-  <link rel="manifest" href="manifest.json?v=7.7.4.6">
+  <link rel="manifest" href="manifest.json?v=7.7.5.0">
   <meta name="apple-mobile-web-app-title" content="關嘉露西生日之旅">
   <!-- v7.7.1.2: expenses.css is 144KB and every rule is scoped under
        .expenses-module, yet it used to block the very first paint of the
@@ -3415,8 +3421,8 @@ html.theme-dark .modal-actions .modal-close-btn{
        priority without blocking paint; ensureExpensesStylesheet() flips it to
        media="all" before the 支出 view is ever mounted, so the styling is
        byte-for-byte identical by the time anything expenses-related renders. -->
-  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?v=7.7.4.6" media="print">
-  <noscript><link rel="stylesheet" href="assets/css/expenses.css?v=7.7.4.6"></noscript>
+  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?v=7.7.5.0" media="print">
+  <noscript><link rel="stylesheet" href="assets/css/expenses.css?v=7.7.5.0"></noscript>
 </head>
 <body>
 <div class="bg-fixed"></div>
@@ -3626,6 +3632,16 @@ html.theme-dark .modal-actions .modal-close-btn{
           </div>
           <button class="theme-btn profile-theme-compat" id="theme-btn" type="button" title="切換主題" data-theme="auto" aria-hidden="true" tabindex="-1"></button>
         </div>
+        <button class="profile-row" id="trip-color-settings-open-btn" type="button" data-profile-open="trip-color-settings">
+          <span class="profile-row-icon profile-icon-purple">●</span>
+          <span class="profile-row-copy"><strong>旅程主色</strong><small>整個旅程嘅主要 Accent Color</small></span>
+          <span class="profile-chevron">›</span>
+        </button>
+        <button class="profile-row" id="feature-color-settings-open-btn" type="button" data-profile-open="feature-color-settings">
+          <span class="profile-row-icon profile-icon-orange">◉</span>
+          <span class="profile-row-copy"><strong>功能顏色</strong><small>收藏及支出可跟隨主色或獨立自訂</small></span>
+          <span class="profile-chevron">›</span>
+        </button>
         <button class="profile-row" id="destination-settings-open-btn" type="button" data-profile-open="destination-settings">
           <span class="profile-row-icon profile-icon-purple">🎨</span>
           <span class="profile-row-copy"><strong>目的地顏色</strong><small>統一 Day、天氣及城市標籤嘅目的地識別色</small></span>
@@ -3637,6 +3653,30 @@ html.theme-dark .modal-actions .modal-close-btn{
           <span class="profile-chevron" id="team-settings-open-chevron">›</span>
           <span class="profile-status-pill" id="team-settings-open-status" hidden>無</span>
         </button>
+      </section>
+    </div>
+
+    <div class="profile-nav-page" id="profile-page-trip-color-settings" data-profile-page="trip-color-settings" hidden>
+      <div class="profile-detail-bar">
+        <button class="profile-detail-back" type="button" data-profile-back aria-label="返回外觀與顯示"><span class="profile-back-glyph">‹</span><span class="profile-detail-back-label">外觀與顯示</span></button>
+        <h2>旅程主色</h2>
+        <span class="profile-detail-spacer"></span>
+      </div>
+      <section class="profile-card destination-settings-card" aria-label="旅程主色設定">
+        <div class="destination-color-list" id="trip-color-list"></div>
+        <div class="destination-color-status" id="trip-color-status">主色會套用至 App 主要互動元素；語意紅、綠、黃仍會保持獨立。</div>
+      </section>
+    </div>
+
+    <div class="profile-nav-page" id="profile-page-feature-color-settings" data-profile-page="feature-color-settings" hidden>
+      <div class="profile-detail-bar">
+        <button class="profile-detail-back" type="button" data-profile-back aria-label="返回外觀與顯示"><span class="profile-back-glyph">‹</span><span class="profile-detail-back-label">外觀與顯示</span></button>
+        <h2>功能顏色</h2>
+        <span class="profile-detail-spacer"></span>
+      </div>
+      <section class="profile-card destination-settings-card" aria-label="功能顏色設定">
+        <div class="destination-color-list" id="feature-color-list"></div>
+        <div class="destination-color-status" id="feature-color-status">預設跟隨旅程主色；自訂後只改該功能嘅識別色。</div>
       </section>
     </div>
 
@@ -3659,7 +3699,7 @@ html.theme-dark .modal-actions .modal-close-btn{
         </button>
         <button class="profile-row" type="button" data-profile-open="expense-settings">
           <span class="profile-row-icon profile-icon-orange">💳</span>
-          <span class="profile-row-copy"><strong>支出管理</strong><small>匯率、分帳成員、備份及已刪除項目</small></span>
+          <span class="profile-row-copy"><strong>支出管理</strong><small>匯率、分帳成員、Excel及已刪除項目</small></span>
           <span class="profile-chevron">›</span>
         </button>
         <button class="profile-row" id="trip-backup-open-btn" type="button" data-profile-open="trip-backup">
@@ -3772,7 +3812,7 @@ html.theme-dark .modal-actions .modal-close-btn{
         </button>
         <button class="profile-row" type="button" data-global-setting="backup">
           <span class="profile-row-icon profile-icon-grey">📦</span>
-          <span class="profile-row-copy"><strong>支出備份</strong><small>匯出 Excel 或 JSON</small></span>
+          <span class="profile-row-copy"><strong>支出 Excel 報表</strong><small>匯出對數、報銷及保存用 Excel</small></span>
           <span class="profile-chevron">›</span>
         </button>
         <button class="profile-row" type="button" data-global-setting="deleted">
@@ -3790,9 +3830,20 @@ html.theme-dark .modal-actions .modal-close-btn{
         <span class="profile-detail-spacer"></span>
       </div>
       <section class="profile-card profile-menu-card" aria-label="行程備份操作">
+        <button class="profile-row" id="trip-full-backup-export" type="button">
+          <span class="profile-row-icon profile-icon-green">⬇</span>
+          <span class="profile-row-copy"><strong>匯出完整 Backup JSON</strong><small>Data Only v1 · 行程、收藏、設定、支出及找數</small></span>
+          <span class="profile-chevron">›</span>
+        </button>
+        <button class="profile-row" id="trip-full-backup-restore-open" type="button">
+          <span class="profile-row-icon profile-icon-orange">↥</span>
+          <span class="profile-row-copy"><strong>還原完整 Backup JSON</strong><small>可選完整、只還原行程或只還原支出</small></span>
+          <span class="profile-chevron">›</span>
+        </button>
+        <input id="trip-full-backup-file" type="file" accept="application/json,.json" hidden>
         <button class="profile-row" id="trip-backup-export-current" type="button">
           <span class="profile-row-icon profile-icon-blue">⇩</span>
-          <span class="profile-row-copy"><strong>匯出目前 trip.json</strong><small>由 Firebase 現有版本產生 Portable JSON</small></span>
+          <span class="profile-row-copy"><strong>匯出目前 trip.json</strong><small>Portable Trip Data · 不包含實際支出交易</small></span>
           <span class="profile-chevron">›</span>
         </button>
         <button class="profile-row" id="trip-backup-create-manual" type="button">
@@ -3801,12 +3852,34 @@ html.theme-dark .modal-actions .modal-close-btn{
           <span class="profile-chevron">›</span>
         </button>
       </section>
+      <section class="profile-card profile-menu-card" id="trip-full-backup-preview" aria-label="完整備份還原預覽" hidden>
+        <div class="profile-inline-section-heading"><strong>還原預覽</strong><span class="trip-library-count" id="trip-full-backup-version">—</span></div>
+        <div class="profile-meta-row" style="border-top:0"><span>Trip ID</span><strong id="trip-full-backup-trip-id">—</strong></div>
+        <div class="profile-meta-row"><span>內容</span><strong id="trip-full-backup-counts">—</strong></div>
+        <div class="profile-meta-row"><span>媒體</span><strong id="trip-full-backup-media">Data Only</strong></div>
+        <button class="profile-row" type="button" data-full-backup-restore-scope="all">
+          <span class="profile-row-icon profile-icon-red">↶</span>
+          <span class="profile-row-copy"><strong>完整還原</strong><small>還原行程及支出資料</small></span>
+          <span class="profile-chevron">›</span>
+        </button>
+        <button class="profile-row" type="button" data-full-backup-restore-scope="trip">
+          <span class="profile-row-icon profile-icon-blue">↶</span>
+          <span class="profile-row-copy"><strong>只還原行程</strong><small>保留目前所有支出及找數紀錄</small></span>
+          <span class="profile-chevron">›</span>
+        </button>
+        <button class="profile-row" type="button" data-full-backup-restore-scope="expenses">
+          <span class="profile-row-icon profile-icon-orange">↶</span>
+          <span class="profile-row-copy"><strong>只還原支出</strong><small>保留目前行程、收藏及一般顯示設定</small></span>
+          <span class="profile-chevron">›</span>
+        </button>
+        <div class="trip-library-status" id="trip-full-backup-preview-status">操作記錄採 append-only：備份會保存 Log，但原有 Audit Log 不會被回滾或刪除。</div>
+      </section>
       <section class="profile-card profile-backup-history-card" aria-label="Snapshot 版本紀錄">
         <div class="profile-inline-section-heading"><strong>版本紀錄</strong><span class="trip-library-count" id="trip-backup-count">—</span></div>
         <div id="trip-backup-list"></div>
         <div class="trip-library-status" id="trip-backup-status">開啟此頁後會讀取最近 Snapshot。</div>
       </section>
-      <div class="profile-backup-note" id="trip-backup-note">Snapshot 只備份行程內容與設定。旅程成員及支出交易不會因還原而回滾。</div>
+      <div class="profile-backup-note" id="trip-backup-note">Full Backup v1 係 Data Only，暫未包含相片／媒體；Phase 3A 會升級成 Media-aware Backup Package。Activity Logs 會收入備份作完整保存，但還原時保留現有 append-only audit trail；Snapshot 仍只處理行程版本。</div>
     </div>
 
     <div class="profile-nav-page" id="profile-page-snapshot-detail" data-profile-page="snapshot-detail" hidden>
@@ -3865,7 +3938,7 @@ html.theme-dark .modal-actions .modal-close-btn{
         <span class="profile-detail-spacer"></span>
       </div>
       <section class="profile-card" aria-label="App 資料">
-        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.7.4.6</strong></div>
+        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.7.5.0</strong></div>
         <div class="profile-meta-row"><span>資料架構</span><strong>Phase 2F</strong></div>
         <div class="profile-meta-row"><span>主要資料來源</span><strong id="app-data-source-label">Firebase / 本機快取</strong></div>
       </section>
@@ -4012,7 +4085,7 @@ html.theme-dark .modal-actions .modal-close-btn{
 </div>
 
 <script>
-const APP_VERSION = "7.7.4.6";
+const APP_VERSION = "7.7.5.0";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 function perfLiteMark(name){try{return window.__perfLite?.mark(name);}catch(error){return null;}}
@@ -5179,6 +5252,7 @@ function persistBootVisualSnapshot(data){
   Object.entries(meta.travellers||{}).forEach(([key,cfg])=>{teamColors[key]=teamDisplayColour(key,cfg);});
   const snapshot={
     version:1,tripId,accentColor:String(meta.accentColor||"#0a84ff"),
+    featureColors:{...((meta.featureColors&&typeof meta.featureColors==="object")?meta.featureColors:{})},
     backgroundCss:bootVisualBackgroundCss(data),teamColors,
     titleSmall:String(meta.titleSmall||"My Trip"),
     titleMain:String((meta.titleMain||meta.titleSmall||"旅程").replace?.(/<[^>]*>/g,"")||"旅程"),
@@ -5196,7 +5270,11 @@ let tripBackgroundAppliedSource="";
 const tripBackgroundLoadedSources=new Set();
 function applyTripVisualTheme(data){
   const meta=data?.meta||{};const id=dataTripId(data)||"trip";
-  document.documentElement.style.setProperty("--accent-color",meta.accentColor||"#0a84ff");
+  const accent=meta.accentColor||"#0a84ff";
+  const featureColors=meta.featureColors&&typeof meta.featureColors==="object"?meta.featureColors:{};
+  document.documentElement.style.setProperty("--accent-color",accent);
+  document.documentElement.style.setProperty("--saved-accent",parseHexColour(featureColors.savedPlaces)?featureColors.savedPlaces:accent);
+  document.documentElement.style.setProperty("--expense-accent",parseHexColour(featureColors.expenses)?featureColors.expenses:accent);
   const hue=tripHashHue(id);
   const fallback=`linear-gradient(145deg,hsl(${hue} 48% 76%),hsl(${(hue+42)%360} 42% 88%))`;
   let candidate=legacyTripVisualMeta(data).background;
@@ -6205,7 +6283,7 @@ function weatherRenderSignature(data){
 }
 function tripVisualRenderSignature(data){
   const meta=data?.meta||{};
-  return renderSignature({tripId:dataTripId(data),accentColor:meta.accentColor||"",backgroundImage:meta.backgroundImage||"",coverImage:meta.coverImage||""},"");
+  return renderSignature({tripId:dataTripId(data),accentColor:meta.accentColor||"",featureColors:meta.featureColors||{},backgroundImage:meta.backgroundImage||"",coverImage:meta.coverImage||""},"");
 }
 function expensesRenderSignature(data){return renderSignature(data?.meta?.expenses||{},"");}
 function tripLibraryDataSignature(data){
@@ -6415,7 +6493,7 @@ function applyFirebaseTripData(data,{source="server",tripId="",dirtySections=[]}
   const snacksTouched=!sameTrip||dirtyUnknown||dirty.has("snacks")||["savedPlacesMeta","galleryDefaults"].some(generalField);
   const infoTouched=!sameTrip||["startDate","endDate"].some(tripField)||["travellers","cities","hotels","flights","outbound","inbound","infoCard"].some(generalField);
   const weatherTouched=!sameTrip||["startDate","endDate"].some(tripField)||["cities","weather"].some(generalField);
-  const visualTouched=!sameTrip||["accentColor","backgroundImage","coverImage"].some(tripField)||generalField("backgroundImage");
+  const visualTouched=!sameTrip||["accentColor","backgroundImage","coverImage"].some(tripField)||generalField("backgroundImage")||generalField("featureColors");
   const expensesTouched=!sameTrip||dirtyUnknown||dirty.has("expenses");
   const destinationThemeTouched=!sameTrip||generalField("cities");
   const teamThemeTouched=!sameTrip||generalField("travellers");
@@ -6491,6 +6569,7 @@ function applyFirebaseTripData(data,{source="server",tripId="",dirtySections=[]}
   const generalDirty=dirtyUnknown||!sameTrip||dirtyPrefix("general");
   if(generalDirty||needsDestinationTheme){try{window.__destinationSettingsRefresh?.(data);}catch(error){}}
   if(generalDirty||needsTeamTheme){try{window.__teamSettingsRefresh?.(data);}catch(error){}}
+  if(tripDirty||generalDirty){try{window.__appearanceColorSettingsRefresh?.(data);}catch(error){}}
   if(generalDirty||needsDestinationTheme||needsTeamTheme){try{refreshAppearanceColourMenuState(data);}catch(error){}}
 
   resolveTripLoaderWaiters(data);
@@ -7009,6 +7088,7 @@ document.getElementById("trip-archive-list")?.addEventListener("click",event=>{
 let tripBackupServicePromise=null;
 let tripBackupSnapshots=[];
 let tripBackupSelectedSnapshot=null;
+let tripFullBackupSelected=null;
 let tripBackupBusy=false;
 function getTripBackupService(){
   if(!tripBackupServicePromise){
@@ -7025,6 +7105,9 @@ function backupFriendlyError(error){
   if(error?.code==="snapshot-not-found")return "搵唔到呢個 Snapshot，可能已經被刪除。";
   if(error?.code==="snapshot-invalid")return "呢個 Snapshot 格式不完整，未能匯出或還原。";
   if(error?.code==="snapshot-too-large")return "目前旅程太大，未能建立單一 Snapshot。";
+  if(error?.code==="backup-invalid-json")return "呢個檔案唔係有效 JSON。";
+  if(error?.code==="backup-invalid"||error?.code==="backup-unsupported")return "呢個檔案唔係支援嘅 Full Backup JSON。";
+  if(error?.code==="backup-trip-mismatch")return "Backup Trip ID 同目前旅程唔一致。Data Only v1 暫時只支援原 Trip 內還原。";
   if(error?.code==="permission-denied"||error?.code==="firestore/permission-denied")return "Firebase 權限不足，請確認旅程角色。";
   if(error?.code==="offline"||error?.code==="operation-busy"||error?.code==="trip-operation-busy")return cloudSafetyFriendlyError(error);
   const rawMessage=String(error?.message||"");
@@ -7064,9 +7147,11 @@ async function loadTripBackupPage(){
   if(tripBackupBusy)return;
   const tripId=currentBackupTripId();
   const manual=document.getElementById("trip-backup-create-manual");
+  const fullExport=document.getElementById("trip-full-backup-export");
+  const fullRestore=document.getElementById("trip-full-backup-restore-open");
   if(!tripId){backupSetStatus("暫時未有目前旅程。",{error:true});return;}
   tripBackupBusy=true;backupSetStatus("正在讀取 Firebase Snapshot…");
-  if(manual)manual.disabled=true;
+  if(manual)manual.disabled=true;if(fullExport)fullExport.disabled=true;if(fullRestore)fullRestore.disabled=true;
   try{
     const service=await getTripBackupService();
     const user=await getImportFirebaseUser();
@@ -7079,7 +7164,7 @@ async function loadTripBackupPage(){
     const result=await service.listTripSnapshots(tripId,{user,maxItems:10});
     tripBackupSnapshots=result.snapshots||[];renderTripBackupList();
     backupSetStatus(tripBackupSnapshots.length?`顯示最近 ${tripBackupSnapshots.length} 個 Snapshot。`:`目前未有 Snapshot。`);
-    if(manual)manual.disabled=false;
+    if(manual)manual.disabled=false;if(fullExport)fullExport.disabled=false;if(fullRestore)fullRestore.disabled=false;
   }catch(error){
     console.error("Load trip backups",error);tripBackupSnapshots=[];renderTripBackupList();backupSetStatus(backupFriendlyError(error),{error:true});
   }finally{tripBackupBusy=false;}
@@ -7095,10 +7180,79 @@ async function openSnapshotDetail(snapshotId){
   document.getElementById("snapshot-detail-status").textContent="還原只影響 Firebase 行程內容及設定，不會刪除成員或支出交易。";
   openProfilePage("snapshot-detail");
 }
-document.getElementById("trip-backup-open-btn")?.addEventListener("click",()=>setTimeout(loadTripBackupPage,40));
+document.getElementById("trip-backup-open-btn")?.addEventListener("click",()=>{clearFullBackupPreview();setTimeout(loadTripBackupPage,40);});
 document.getElementById("trip-backup-list")?.addEventListener("click",event=>{
   const button=event.target.closest?.("[data-snapshot-open]");if(button)openSnapshotDetail(button.dataset.snapshotOpen);
 });
+function clearFullBackupPreview(){
+  tripFullBackupSelected=null;
+  const preview=document.getElementById("trip-full-backup-preview");if(preview)preview.hidden=true;
+  const input=document.getElementById("trip-full-backup-file");if(input)input.value="";
+}
+function renderFullBackupPreview(inspection){
+  const preview=document.getElementById("trip-full-backup-preview");if(!preview)return;
+  const c=inspection?.counts||{};
+  document.getElementById("trip-full-backup-version").textContent=`v${inspection?.backupVersion||1}`;
+  document.getElementById("trip-full-backup-trip-id").textContent=inspection?.tripId||"—";
+  document.getElementById("trip-full-backup-counts").textContent=`${c.dayCount||0} Days · ${c.itemCount||0} Items · ${c.savedPlaceCount||0} Saved · ${c.expenseCount||0} Expenses · ${c.settlementCount||0} Settlements`;
+  document.getElementById("trip-full-backup-media").textContent=inspection?.mediaIncluded?"包含媒體":"Data Only · 不含媒體";
+  const status=document.getElementById("trip-full-backup-preview-status");
+  if(status)status.textContent="操作記錄會完整保存在 Backup 檔案；原 Trip 內 Audit Log 採 append-only，不會因還原而刪除或倒退。";
+  preview.hidden=false;
+}
+document.getElementById("trip-full-backup-export")?.addEventListener("click",async()=>{
+  const button=document.getElementById("trip-full-backup-export");if(button?.disabled)return;
+  button.disabled=true;backupSetStatus("正在建立 Data Only Full Backup…");
+  try{
+    const service=await getTripBackupService(),user=await getImportFirebaseUser();
+    const result=await service.exportFullBackup(currentBackupTripId(),{user});
+    backupDownloadJson(result.json,result.filename);
+    backupSetStatus(`完整 Backup 已匯出 · ${result.counts.dayCount||0} Days · ${result.counts.expenseCount||0} Expenses · ${result.counts.settlementCount||0} Settlements。`);
+  }catch(error){console.error("Export full backup",error);backupSetStatus(backupFriendlyError(error),{error:true});}
+  finally{button.disabled=false;}
+});
+document.getElementById("trip-full-backup-restore-open")?.addEventListener("click",()=>{
+  if(document.getElementById("trip-full-backup-restore-open")?.disabled)return;
+  clearFullBackupPreview();document.getElementById("trip-full-backup-file")?.click();
+});
+document.getElementById("trip-full-backup-file")?.addEventListener("change",async event=>{
+  const file=event.target.files?.[0];if(!file)return;
+  backupSetStatus("正在驗證 Full Backup JSON…");
+  try{
+    const raw=JSON.parse(await file.text());
+    const service=await getTripBackupService(),inspection=service.inspectFullBackup(raw);
+    if(String(inspection.tripId)!==currentBackupTripId()){
+      const e=new Error("Backup Trip ID does not match current Trip");e.code="backup-trip-mismatch";throw e;
+    }
+    tripFullBackupSelected={raw,inspection};renderFullBackupPreview(inspection);
+    backupSetStatus("Backup 已驗證。請選擇還原範圍。",{hidden:false});
+  }catch(error){console.error("Inspect full backup",error);clearFullBackupPreview();backupSetStatus(backupFriendlyError(error),{error:true});}
+});
+document.getElementById("trip-full-backup-preview")?.addEventListener("click",async event=>{
+  const button=event.target.closest?.("[data-full-backup-restore-scope]");if(!button||button.disabled||!tripFullBackupSelected?.raw)return;
+  const scope=button.dataset.fullBackupRestoreScope;
+  const label=scope==="all"?"完整還原":scope==="trip"?"只還原行程":"只還原支出";
+  const detail=scope==="all"?"行程及支出會回到 Backup 狀態。成員權限不會改動。":scope==="trip"?"行程、收藏及一般設定會還原；現有支出完全不動。":"支出、找數及支出設定會還原；現有行程完全不動。";
+  if(!window.confirm(`${label}？\n\n${detail}\n\nFull Backup v1 係 Data Only，暫未包含相片／媒體。`))return;
+  document.querySelectorAll("[data-full-backup-restore-scope]").forEach(btn=>btn.disabled=true);
+  const status=document.getElementById("trip-full-backup-preview-status");if(status)status.textContent=`正在${label}…`;
+  appProgressOpen({kicker:"FULL BACKUP",title:label,subtitle:"正在安全還原 Firebase Data。完成前請保持 App 開啟。",percent:5,stageTitle:"準備還原",stageDetail:"正在驗證 Backup 同目前 Trip。",icon:"↶"});
+  try{
+    const service=await getTripBackupService(),user=await getImportFirebaseUser();
+    const result=await service.restoreFullBackup(tripFullBackupSelected.raw,{scope,user,onProgress:progress=>{
+      const pct=Math.max(5,Math.min(96,Math.round(Number(progress?.completed||0)*100)));
+      const stage=progress?.stage==="expense-content"?"還原支出資料":progress?.stage==="trip-content"?"還原行程資料":"完成還原";
+      if(status)status.textContent=`${stage}…`;
+      appProgressUpdate({percent:pct,stageTitle:stage,stageDetail:progress?.stage==="expense-content"?"正在同步支出、找數及支出設定。":"正在同步 Days、Items、收藏及一般設定。",icon:"↶"});
+    }});
+    if(result.scope!=="expenses"&&result.tripId===tripLoaderActiveId)await waitForTripLoaderRevision(result.tripId,result.revision,7000);
+    if(status)status.textContent=`${label}完成。Audit Log 保持 append-only；Backup 內原有 Log 仍保存在本機檔案。`;
+    appProgressFinish({title:`${label}完成`,detail:"Firebase Data 已完成還原。成員權限及目前 Audit Log 不受回滾。"});
+    tripBackupBusy=false;await loadTripBackupPage();
+  }catch(error){console.error("Restore full backup",error);if(status)status.textContent=backupFriendlyError(error);appProgressFail(backupFriendlyError(error));}
+  finally{document.querySelectorAll("[data-full-backup-restore-scope]").forEach(btn=>btn.disabled=false);}
+});
+
 document.getElementById("trip-backup-export-current")?.addEventListener("click",async()=>{
   const button=document.getElementById("trip-backup-export-current");if(button?.disabled)return;
   button.disabled=true;backupSetStatus("正在由 Firebase 產生 trip.json…");
@@ -7411,6 +7565,117 @@ document.getElementById("trip-invite-inbox-list")?.addEventListener("click",asyn
 
 
 
+
+// =========================================================================
+// v7.7.5.0 · Trip + feature colour harmony
+// =========================================================================
+const APPEARANCE_COLOUR_PRESETS=["#4A90D9","#3F9F91","#5A9E5A","#D39F27","#E06040","#7B61D1","#C45B8C","#4D9DB0"];
+let tripAppearanceServicePromise=null;
+let appearanceColourSavingKey="";
+let appearanceColourPickerKey="";
+let appearanceColourSaveTimer=0;
+let appearanceColourSaveChain=Promise.resolve();
+function getTripAppearanceService(){
+  if(!tripAppearanceServicePromise)tripAppearanceServicePromise=import(`./assets/js/trip-appearance-service.js?v=${APP_VERSION}`).catch(error=>{tripAppearanceServicePromise=null;throw error;});
+  return tripAppearanceServicePromise;
+}
+function appearanceSettingsTripId(){return String(tripLoaderActiveId||dataTripId(window.tripData)||"").trim();}
+function appearanceSettingsCanEdit(){const role=String(window.__appTripAccess?.role||"");return role==="owner"||role==="admin";}
+function appearanceFriendlyError(error){
+  const code=String(error?.code||"");
+  if(code==="offline")return"目前離線，重新連線後先可以更新顏色。";
+  if(code==="operation-busy"||code==="trip-operation-busy")return"另一個雲端操作仍在進行，完成後再試。";
+  if(code==="insufficient-role"||code==="permission-denied"||code==="firestore/permission-denied")return"只有 Owner 或 Admin 可以修改旅程顏色。";
+  if(code==="invalid-colour")return"顏色格式無效。";
+  return error?.message||"未能更新顏色。";
+}
+function colourSwatches({selected="",key="",kind="trip",disabled=false}={}){
+  return APPEARANCE_COLOUR_PRESETS.map(hex=>`<button class="destination-color-swatch${String(selected).toUpperCase()===hex?" is-selected":""}" type="button" data-appearance-kind="${kind}" data-appearance-key="${escapeHtmlText(key)}" data-appearance-color="${hex}" style="--swatch:${hex}" aria-label="選擇 ${hex}"${disabled?" disabled":""}></button>`).join("");
+}
+function renderTripColourSettings(data=window.tripData){
+  const list=document.getElementById("trip-color-list"),status=document.getElementById("trip-color-status");if(!list)return;
+  const canEdit=appearanceSettingsCanEdit(),current=String(data?.meta?.accentColor||"#0A84FF").toUpperCase();
+  list.innerHTML=`<div class="destination-color-item" data-appearance-item="trip">
+    <div class="destination-color-head"><span class="destination-color-preview" style="--destination-preview:${escapeHtmlText(current)}"></span><span class="destination-color-copy"><strong>旅程主色</strong><small>${escapeHtmlText(current)}</small></span><span class="destination-color-default-pill">${appearanceColourSavingKey==="trip"?"儲存中…":"目前"}</span></div>
+    <div class="destination-color-palette">${colourSwatches({selected:current,kind:"trip",disabled:!canEdit||!!appearanceColourSavingKey})}</div>
+    <div class="destination-color-actions"><label class="destination-color-custom${canEdit&&!appearanceColourSavingKey?"":" is-disabled"}">自訂顏色<input type="color" data-appearance-custom="trip" value="${escapeHtmlText(current)}"${canEdit&&!appearanceColourSavingKey?"":" disabled"}></label></div>
+  </div>`;
+  if(status){status.classList.remove("is-error");status.textContent=canEdit?"主色會即時套用至 App 主要 Accent；收藏及支出如設定為跟隨亦會同步。":"目前為唯讀。只有 Owner 或 Admin 可以修改旅程主色。";}
+}
+function renderFeatureColourSettings(data=window.tripData){
+  const list=document.getElementById("feature-color-list"),status=document.getElementById("feature-color-status");if(!list)return;
+  const canEdit=appearanceSettingsCanEdit(),accent=String(data?.meta?.accentColor||"#0A84FF").toUpperCase(),featureColors=data?.meta?.featureColors||{};
+  const defs=[{key:"savedPlaces",label:"收藏",desc:"收藏篩選及分類識別色"},{key:"expenses",label:"支出",desc:"支出主要操作及重點識別色"}];
+  list.innerHTML=defs.map(def=>{
+    const explicit=parseHexColour(featureColors?.[def.key])?String(featureColors[def.key]).toUpperCase():"";
+    const current=explicit||accent,isSaving=appearanceColourSavingKey===def.key;
+    return `<div class="destination-color-item" data-appearance-item="${def.key}">
+      <div class="destination-color-head"><span class="destination-color-preview" style="--destination-preview:${escapeHtmlText(current)}"></span><span class="destination-color-copy"><strong>${def.label}</strong><small>${explicit?`自訂 ${escapeHtmlText(explicit)}`:`跟隨旅程主色 ${escapeHtmlText(accent)}`}</small></span><span class="destination-color-default-pill">${isSaving?"儲存中…":(explicit?"已自訂":"跟隨")}</span></div>
+      <div class="destination-color-palette">${colourSwatches({selected:explicit,key:def.key,kind:"feature",disabled:!canEdit||!!appearanceColourSavingKey})}</div>
+      <div class="destination-color-actions"><label class="destination-color-custom${canEdit&&!appearanceColourSavingKey?"":" is-disabled"}">自訂顏色<input type="color" data-appearance-custom="${def.key}" value="${escapeHtmlText(current)}"${canEdit&&!appearanceColourSavingKey?"":" disabled"}></label><button class="destination-color-reset" type="button" data-appearance-follow="${def.key}"${canEdit&&explicit&&!appearanceColourSavingKey?"":" disabled"}>跟隨旅程主色</button></div>
+    </div>`;
+  }).join("");
+  if(status){status.classList.remove("is-error");status.textContent=canEdit?"預設跟隨旅程主色；只在你想刻意分開功能識別時先自訂。":"目前為唯讀。只有 Owner 或 Admin 可以修改功能顏色。";}
+}
+function applyAppearanceColourLocal(key,color,{feature=false,follow=false}={}){
+  if(follow){
+    const accent=String(window.tripData?.meta?.accentColor||"#0A84FF");
+    if(feature)document.documentElement.style.setProperty(key==="expenses"?"--expense-accent":"--saved-accent",accent);
+    return;
+  }
+  if(!parseHexColour(color))return;
+  const hex=String(color).toUpperCase();
+  if(key==="trip"){
+    document.documentElement.style.setProperty("--accent-color",hex);
+    const fc=window.tripData?.meta?.featureColors||{};
+    if(!parseHexColour(fc.savedPlaces))document.documentElement.style.setProperty("--saved-accent",hex);
+    if(!parseHexColour(fc.expenses))document.documentElement.style.setProperty("--expense-accent",hex);
+  }else if(feature)document.documentElement.style.setProperty(key==="expenses"?"--expense-accent":"--saved-accent",hex);
+}
+async function saveAppearanceColour(key,color,{follow=false,preservePicker=false}={}){
+  const tripId=appearanceSettingsTripId();if(!tripId||(!follow&&!parseHexColour(color)))return;
+  const saveKey=key||"trip";if(appearanceColourSavingKey&&!preservePicker)return;
+  if(!preservePicker)appearanceColourSavingKey=saveKey;
+  applyAppearanceColourLocal(saveKey,color,{feature:saveKey!=="trip",follow});
+  if(!preservePicker){renderTripColourSettings();renderFeatureColourSettings();}
+  const status=document.getElementById(saveKey==="trip"?"trip-color-status":"feature-color-status");
+  try{
+    const service=await getTripAppearanceService(),user=window.__appAuthUser||tripLibraryCurrentUser||null;
+    if(saveKey==="trip")await service.updateTripAccentColor(tripId,color,{user});
+    else if(follow)await service.resetFeatureColor(tripId,saveKey,{user});
+    else await service.updateFeatureColor(tripId,saveKey,color,{user});
+    if(status){status.classList.remove("is-error");status.textContent="已儲存到 Firebase，其他裝置會同步更新。";}
+  }catch(error){
+    if(status){status.classList.add("is-error");status.textContent=appearanceFriendlyError(error);}
+    try{applyTripVisualTheme(window.tripData);}catch(e){}
+  }finally{
+    if(!preservePicker){appearanceColourSavingKey="";renderTripColourSettings();renderFeatureColourSettings();}
+  }
+}
+function queueAppearanceColourSave(key,color){
+  if(appearanceColourSaveTimer)clearTimeout(appearanceColourSaveTimer);
+  appearanceColourSaveTimer=setTimeout(()=>{appearanceColourSaveTimer=0;appearanceColourSaveChain=appearanceColourSaveChain.catch(()=>{}).then(()=>saveAppearanceColour(key,color,{preservePicker:true}));},500);
+}
+document.getElementById("trip-color-settings-open-btn")?.addEventListener("click",()=>{appearanceColourPickerKey="";setTimeout(()=>renderTripColourSettings(),40);});
+document.getElementById("feature-color-settings-open-btn")?.addEventListener("click",()=>{appearanceColourPickerKey="";setTimeout(()=>renderFeatureColourSettings(),40);});
+[document.getElementById("trip-color-list"),document.getElementById("feature-color-list")].forEach(list=>{
+  list?.addEventListener("click",event=>{
+    const swatch=event.target.closest?.("[data-appearance-color]");if(swatch&&!swatch.disabled){appearanceColourPickerKey="";saveAppearanceColour(swatch.dataset.appearanceKind==="trip"?"trip":swatch.dataset.appearanceKey,swatch.dataset.appearanceColor);return;}
+    const follow=event.target.closest?.("[data-appearance-follow]");if(follow&&!follow.disabled){appearanceColourPickerKey="";saveAppearanceColour(follow.dataset.appearanceFollow,"",{follow:true});}
+  });
+  list?.addEventListener("input",event=>{
+    const input=event.target.closest?.("[data-appearance-custom]");if(!input||input.disabled)return;
+    const key=input.dataset.appearanceCustom;appearanceColourPickerKey=key;applyAppearanceColourLocal(key,input.value,{feature:key!=="trip"});queueAppearanceColourSave(key,input.value);
+  });
+  list?.addEventListener("change",event=>{
+    const input=event.target.closest?.("[data-appearance-custom]");if(input&&!input.disabled){appearanceColourPickerKey=input.dataset.appearanceCustom;queueAppearanceColourSave(input.dataset.appearanceCustom,input.value);}
+  });
+});
+window.__appearanceColorSettingsRefresh=data=>{
+  if(appearanceColourPickerKey)return;
+  if(profileCurrentPage==="trip-color-settings")renderTripColourSettings(data);
+  if(profileCurrentPage==="feature-color-settings")renderFeatureColourSettings(data);
+};
 
 // =========================================================================
 // Phase 2F · v7.7.0.10 · Destination identity settings
@@ -8312,7 +8577,7 @@ refreshCollapseMetrics();
 // Android / Chrome PWA support. Versioned app-shell Service Worker; normal launches are cache-first while explicit reloads stay network-first.
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("./sw.js?v=7.7.4.6").catch(() => {});
+    navigator.serviceWorker.register("./sw.js?v=7.7.5.0").catch(() => {});
   });
 }
 

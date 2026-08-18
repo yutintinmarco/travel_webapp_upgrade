@@ -200,7 +200,8 @@ export function normalizePortableTrip(rawInput = {}) {
       tripId,
       travellers: normalizeTravellers(meta.travellers || {}),
       tripIcon: clean(meta.tripIcon || meta.icon || raw.tripIcon || raw.icon),
-      backgroundImage: clean(meta.backgroundImage || meta.bgImage || meta.background || meta.coverImage || raw.backgroundImage || raw.bgImage || raw.background)
+      backgroundImage: clean(meta.backgroundImage || meta.bgImage || meta.background || meta.coverImage || raw.backgroundImage || raw.bgImage || raw.background),
+      featureColors: clone(meta.featureColors || {})
     },
     days,
     snacks
@@ -337,6 +338,7 @@ export function buildFirestoreTripPlan(rawInput = {}, ownerUser = null) {
         title: clean(trip.snacks?.title),
         subtitle: clean(trip.snacks?.subtitle)
       },
+      featureColors: clone(meta.featureColors || {}),
       footerNote: clean(meta.footerNote)
     },
     expenses: clone(meta.expenses || {})

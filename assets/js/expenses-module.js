@@ -321,11 +321,10 @@ function mountExpensesHtml(root) {
 
   <div id="backupSettingsModal" class="modal expense-presentation-sheet hidden" data-presentation="sheet" data-sheet-size="compact">
     <div class="modal-card">
-      <div class="modal-heading-row"><h3><span class="modal-title-icon">📦</span><span>資料備份</span></h3></div>
+      <div class="modal-heading-row"><h3><span class="modal-title-icon">📊</span><span>支出 Excel 報表</span></h3></div>
       <div class="modal-body-scroll">
-        <p class="hint">JSON Backup 係完整系統備份。Excel 主要用於對數及報銷。</p>
+        <p class="hint">Excel 係主要支出報表，用於對數、報銷及保存。完整 JSON 備份已整合到「行程備份」。</p>
         <div class="backup-actions">
-          <button type="button" id="exportJsonBackupBtn" data-action="export-json" class="secondary-btn">匯出 JSON Backup</button>
           <button type="button" id="exportExcelReportBtn" data-action="export-excel" class="secondary-btn">匯出 Excel Report</button>
         </div>
       </div>
