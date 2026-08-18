@@ -1,3 +1,25 @@
+# v7.7.5.1 · Deferred Boot Fail Safe
+
+## Boot regression repair
+
+• Fixed the v7.7.5.0 regression where the Trip header, background and bottom navigation could appear while every `.app-view` remained hidden behind `trip-boot-deferred`.
+• Root cause was identified in the new appearance refresh path: `applyFirebaseTripData()` referenced `tripDirty` without declaring it. The resulting runtime exception occurred after core rendering but before `releaseDeferredTripBoot()`, so the workspace stayed invisible.
+• Added the missing Trip dirty-scope calculation and moved deferred-boot release to the point immediately after the core itinerary / Saved Places / Info / Weather views are usable. Optional appearance and library refreshers can no longer keep the whole App hidden if they fail.
+• Destination and Team in-place theme refreshers are now non-critical guarded steps.
+
+## Deferred boot fail-safe
+
+• Added a 5 second boot watchdog. If the requested Trip has already rendered, the visibility gate is released. If the remembered Trip matches the bundled fallback, the same Trip can paint locally while Firebase continues reconciling in the background.
+• When the remembered Trip differs from the bundled fallback, the watchdog does not expose the wrong Trip; it shows an explicit reconnecting placeholder instead.
+• A schema-service startup failure now follows the same safe fallback rule instead of leaving the workspace permanently invisible.
+• Releasing the boot gate always clears the watchdog to prevent late fallback actions.
+
+## Regression scope
+
+• No Firestore schema, Rules, indexes, Backup semantics, Restore modes, expense persistence, member permissions, active-Day realtime strategy or protected v7.3.13 Profile Navigation compositor changed.
+
+---
+
 # v7.7.5.0 · Backup Foundation + Appearance Consolidation
 
 ## Full Backup Foundation v1
