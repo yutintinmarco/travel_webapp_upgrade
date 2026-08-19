@@ -2732,8 +2732,9 @@ function renderDeletedExpenses() {
         </span>
         <span class="expense-row-side deleted-expense-side">
           <strong>${safeEscape(oCur)} ${oAmt.toFixed(2)}</strong>
+          <small class="deleted-expense-side-spacer" aria-hidden="true">&nbsp;</small>
+          <button type="button" class="deleted-expense-restore-btn" data-restore-id="${safeEscape(expense.id)}" ${isTripLocked() ? "disabled" : ""}>還原</button>
         </span>
-        <button type="button" class="expense-row-badge deleted-expense-restore-btn" data-restore-id="${safeEscape(expense.id)}" ${isTripLocked() ? "disabled" : ""}>還原</button>
       </div>
     `;
   }).join("");

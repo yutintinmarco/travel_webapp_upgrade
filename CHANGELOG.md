@@ -1,4 +1,11 @@
-# v7.7.6.4 · Deleted Items Restore Button Placement
+# v7.7.6.5 · Deleted Items Restore Alignment
+
+## Deleted items row alignment
+
+- Moved the Restore action upward so it sits on the same visual row as the grey deletion audit detail, aligned on the right.
+- Kept the left title and metadata rhythm aligned with the existing Recent Expenses row design.
+- Preserved the category colour bar spacing and narrow-screen two-column alignment.
+
 
 - Refined 「已刪除項目」 rows to reuse the same visual rhythm as 「最近支出」, with a clear breathing gap between the category colour rail and the text block.
 - Kept the amount as the top-right anchor and placed the compact 「還原」 action directly beneath it as one tidy trailing amount/action column.

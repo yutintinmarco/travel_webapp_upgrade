@@ -5165,10 +5165,10 @@ html:not(.theme-light):not(.theme-dark) .expenses-module .expense-sheet-action-s
 
 
 /* ==========================================================================
-   v7.7.6.3 · Deleted Items Row Harmony
-   The deleted-items list now deliberately reuses the same visual grammar as
-   「最近支出」: category rail, comfortable content inset, title/meta hierarchy,
-   trailing amount, separator rhythm and a badge-style tertiary action.
+   v7.7.6.2 · Deleted expense list harmony
+   Reuse the live Expense list grammar instead of rendering each deleted row as
+   a tinted standalone card. The deleted-items sheet has no separate action dock;
+   its surface remains visually continuous to the physical bottom edge.
    ========================================================================== */
 .expenses-module #deletedItemsModal .modal-body-scroll {
   background: var(--expense-sheet-surface) !important;
@@ -5178,58 +5178,58 @@ html:not(.theme-light):not(.theme-dark) .expenses-module .expense-sheet-action-s
 }
 .expenses-module #deletedExpenseList {
   display: block;
-  margin-top: 6px;
+  margin-top: 4px;
 }
 .expenses-module #deletedExpenseList .deleted-expense-row {
   background: transparent !important;
   border-radius: 0 8px 8px 0 !important;
   opacity: 1 !important;
-  /* The normal expense row uses a category rail. Keep a real visual gutter
-     between that rail and the text instead of allowing the generic density
-     override to collapse the inset. */
-  padding: 13px 0 13px 16px !important;
-  grid-template-columns: minmax(0, 1fr) auto !important;
-  gap: 7px 14px !important;
-  align-items: start !important;
+  padding: 10px 0 10px 10px !important;
+  grid-template-columns: minmax(0,1fr) minmax(78px,auto) !important;
+  gap: 4px 12px !important;
+  align-items: stretch !important;
+}
+.expenses-module #deletedExpenseList .deleted-expense-main,
+.expenses-module #deletedExpenseList .deleted-expense-side {
+  grid-template-rows: auto auto auto;
+  align-content: start;
+  gap: 3px;
 }
 .expenses-module #deletedExpenseList .deleted-expense-main {
   min-width: 0;
-  gap: 4px !important;
-}
-.expenses-module #deletedExpenseList .deleted-expense-main strong {
-  line-height: 1.36 !important;
-}
-.expenses-module #deletedExpenseList .deleted-expense-main small {
-  line-height: 1.38 !important;
 }
 .expenses-module #deletedExpenseList .deleted-expense-audit {
   color: var(--expense-muted-2) !important;
   overflow-wrap: anywhere;
+  align-self: center;
 }
 .expenses-module #deletedExpenseList .deleted-expense-side {
-  min-width: 92px;
+  min-width: 78px;
   justify-items: end;
   text-align: right;
-  align-self: start !important;
-  padding-top: 1px !important;
+}
+.expenses-module #deletedExpenseList .deleted-expense-side-spacer {
+  visibility: hidden;
+  pointer-events: none;
+  line-height: 1.45;
 }
 .expenses-module #deletedExpenseList .deleted-expense-restore-btn {
-  grid-column: 1 / -1;
-  justify-self: start;
-  width: auto !important;
-  min-width: 0 !important;
-  min-height: 32px !important;
-  margin: 2px 0 0 !important;
-  padding: 6px 12px !important;
-  border: 0 !important;
-  border-radius: 999px !important;
-  background: rgba(17,17,17,0.08) !important;
-  color: var(--expense-primary) !important;
+  width: auto;
+  min-width: 60px;
+  min-height: 28px;
+  margin: 0;
+  padding: 5px 11px;
+  border: 1px solid color-mix(in srgb, var(--expense-primary) 26%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--expense-primary) 9%, transparent);
+  color: var(--expense-primary);
   font: inherit;
-  font-size: calc(10px * var(--font-scale)) !important;
-  font-weight: 760 !important;
-  line-height: 1.2 !important;
-  box-shadow: none !important;
+  font-size: calc(10px * var(--font-scale));
+  font-weight: 760;
+  line-height: 1.1;
+  box-shadow: none;
+  justify-self: end;
+  align-self: center;
 }
 .expenses-module #deletedExpenseList .deleted-expense-restore-btn:disabled {
   opacity: .42;
@@ -5238,17 +5238,16 @@ html.theme-dark .expenses-module #deletedExpenseList .deleted-expense-row,
 html:not(.theme-light):not(.theme-dark) .expenses-module #deletedExpenseList .deleted-expense-row {
   background: transparent !important;
 }
-html.theme-dark .expenses-module #deletedExpenseList .deleted-expense-restore-btn,
-html:not(.theme-light):not(.theme-dark) .expenses-module #deletedExpenseList .deleted-expense-restore-btn {
-  background: rgba(255,255,255,0.12) !important;
-  color: var(--expense-primary) !important;
-}
 @media (max-width: 390px) {
   .expenses-module #deletedExpenseList .deleted-expense-row {
-    grid-template-columns: minmax(0,1fr) auto !important;
-    padding-left: 14px !important;
+    grid-template-columns: minmax(0,1fr) minmax(72px,auto) !important;
+    gap: 4px 8px !important;
   }
   .expenses-module #deletedExpenseList .deleted-expense-side {
-    min-width: 80px;
+    min-width: 72px;
+  }
+  .expenses-module #deletedExpenseList .deleted-expense-restore-btn {
+    min-width: 58px;
+    padding-inline: 9px;
   }
 }
