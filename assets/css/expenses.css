@@ -5164,7 +5164,7 @@ html:not(.theme-light):not(.theme-dark) .expenses-module .expense-sheet-action-s
 }
 
 /* ==========================================================================
-   v7.7.6.7 · Deleted expense ultra-compact restore alignment
+   v7.7.6.8 · Deleted expense ultra-compact restore alignment
    Keep the familiar v7.7.6.4 capsule treatment, but make the restore control
    visually smaller. The amount remains top-right while the restore control is
    vertically centred across the two grey detail lines, so it contributes no
@@ -5195,6 +5195,7 @@ html:not(.theme-light):not(.theme-dark) .expenses-module .expense-sheet-action-s
   grid-template-rows: auto auto auto;
   align-content: start;
   gap: 1px;
+  padding-left: 7px;
 }
 .expenses-module #deletedExpenseList .deleted-expense-main > strong {
   line-height: 1.28 !important;
@@ -5208,14 +5209,16 @@ html:not(.theme-light):not(.theme-dark) .expenses-module .expense-sheet-action-s
 }
 .expenses-module #deletedExpenseList .deleted-expense-side {
   min-width: 72px;
-  display: grid;
-  grid-template-rows: auto minmax(0,1fr);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: flex-start;
   align-self: stretch;
-  justify-items: end;
   text-align: right;
+  padding-top: 1px;
 }
 .expenses-module #deletedExpenseList .deleted-expense-side > strong {
-  align-self: start;
+  align-self: end;
   white-space: nowrap;
   line-height: 1.28 !important;
 }
@@ -5223,7 +5226,7 @@ html:not(.theme-light):not(.theme-dark) .expenses-module .expense-sheet-action-s
   width: auto;
   min-width: 46px;
   min-height: 25px;
-  margin: 0;
+  margin: 6px 0 0;
   padding: 3px 8px;
   border: 1px solid color-mix(in srgb, var(--expense-primary) 26%, transparent);
   border-radius: 999px;
@@ -5234,8 +5237,6 @@ html:not(.theme-light):not(.theme-dark) .expenses-module .expense-sheet-action-s
   font-weight: 760;
   line-height: 1;
   box-shadow: none;
-  justify-self: end;
-  align-self: center;
 }
 .expenses-module #deletedExpenseList .deleted-expense-restore-btn:disabled {
   opacity: .42;
