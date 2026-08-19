@@ -2,7 +2,7 @@
   "name": "關嘉露西生日之旅",
   "short_name": "生日之旅🎂",
   "description": "關嘉露西生日之旅行程及支出記錄",
-  "start_url": "./index.html?v=7.7.6.6",
+  "start_url": "./index.html?v=7.7.6.7",
   "scope": "./",
   "display": "standalone",
   "background_color": "#f7f4f6",

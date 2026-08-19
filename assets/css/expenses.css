@@ -5163,12 +5163,12 @@ html:not(.theme-light):not(.theme-dark) .expenses-module .expense-sheet-action-s
   }
 }
 
-
 /* ==========================================================================
-   v7.7.6.6 · Deleted expense compact restore alignment
-   Keep the v7.7.6.2 compact row height. Amount stays top-right; the smaller
-   restore action occupies the same vertical detail band as the date/audit
-   lines, so it never creates an extra row or makes the item card thicker.
+   v7.7.6.7 · Deleted expense ultra-compact restore alignment
+   Keep the familiar v7.7.6.4 capsule treatment, but make the restore control
+   visually smaller. The amount remains top-right while the restore control is
+   vertically centred across the two grey detail lines, so it contributes no
+   extra row height. The deleted row itself is slimmer than v7.7.6.2.
    ========================================================================== */
 .expenses-module #deletedItemsModal .modal-body-scroll {
   background: var(--expense-sheet-surface) !important;
@@ -5178,15 +5178,15 @@ html:not(.theme-light):not(.theme-dark) .expenses-module .expense-sheet-action-s
 }
 .expenses-module #deletedExpenseList {
   display: block;
-  margin-top: 4px;
+  margin-top: 2px;
 }
 .expenses-module #deletedExpenseList .deleted-expense-row {
   background: transparent !important;
   border-radius: 0 8px 8px 0 !important;
   opacity: 1 !important;
-  padding: 11px 0 11px 10px !important;
-  grid-template-columns: minmax(0,1fr) minmax(76px,auto) !important;
-  gap: 0 10px !important;
+  padding: 7px 0 7px 10px !important;
+  grid-template-columns: minmax(0,1fr) minmax(72px,auto) !important;
+  gap: 0 8px !important;
   align-items: stretch !important;
 }
 .expenses-module #deletedExpenseList .deleted-expense-main {
@@ -5194,14 +5194,20 @@ html:not(.theme-light):not(.theme-dark) .expenses-module .expense-sheet-action-s
   display: grid;
   grid-template-rows: auto auto auto;
   align-content: start;
-  gap: 3px;
+  gap: 1px;
+}
+.expenses-module #deletedExpenseList .deleted-expense-main > strong {
+  line-height: 1.28 !important;
+}
+.expenses-module #deletedExpenseList .deleted-expense-main > small {
+  line-height: 1.24 !important;
 }
 .expenses-module #deletedExpenseList .deleted-expense-audit {
   color: var(--expense-muted-2) !important;
   overflow-wrap: anywhere;
 }
 .expenses-module #deletedExpenseList .deleted-expense-side {
-  min-width: 76px;
+  min-width: 72px;
   display: grid;
   grid-template-rows: auto minmax(0,1fr);
   align-self: stretch;
@@ -5210,21 +5216,23 @@ html:not(.theme-light):not(.theme-dark) .expenses-module .expense-sheet-action-s
 }
 .expenses-module #deletedExpenseList .deleted-expense-side > strong {
   align-self: start;
+  white-space: nowrap;
+  line-height: 1.28 !important;
 }
 .expenses-module #deletedExpenseList .deleted-expense-restore-btn {
   width: auto;
-  min-width: 48px;
-  min-height: 24px;
+  min-width: 46px;
+  min-height: 25px;
   margin: 0;
-  padding: 3px 9px;
-  border: 1px solid color-mix(in srgb, var(--expense-primary) 24%, transparent);
+  padding: 3px 8px;
+  border: 1px solid color-mix(in srgb, var(--expense-primary) 26%, transparent);
   border-radius: 999px;
-  background: color-mix(in srgb, var(--expense-primary) 8%, transparent);
+  background: color-mix(in srgb, var(--expense-primary) 9%, transparent);
   color: var(--expense-primary);
   font: inherit;
-  font-size: calc(9.5px * var(--font-scale));
+  font-size: calc(9.2px * var(--font-scale));
   font-weight: 760;
-  line-height: 1.05;
+  line-height: 1;
   box-shadow: none;
   justify-self: end;
   align-self: center;
@@ -5238,14 +5246,19 @@ html:not(.theme-light):not(.theme-dark) .expenses-module #deletedExpenseList .de
 }
 @media (max-width: 390px) {
   .expenses-module #deletedExpenseList .deleted-expense-row {
-    grid-template-columns: minmax(0,1fr) minmax(72px,auto) !important;
-    gap: 0 8px !important;
+    grid-template-columns: minmax(0,1fr) minmax(68px,auto) !important;
+    gap: 0 7px !important;
+    padding-top: 6px !important;
+    padding-bottom: 6px !important;
   }
   .expenses-module #deletedExpenseList .deleted-expense-side {
-    min-width: 72px;
+    min-width: 68px;
   }
   .expenses-module #deletedExpenseList .deleted-expense-restore-btn {
-    min-width: 46px;
-    padding-inline: 8px;
+    min-width: 44px;
+    min-height: 24px;
+    padding-inline: 7px;
+    font-size: calc(9px * var(--font-scale));
   }
 }
+

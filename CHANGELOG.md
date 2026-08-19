@@ -1,3 +1,11 @@
+# v7.7.6.7 · Deleted Items Ultra Compact
+
+- Kept the familiar v7.7.6.4 Restore capsule styling, but reduced its visual footprint.
+- Positioned Restore on the right within the same vertical band as the date / payer and deletion-audit detail lines, so it does not create an extra row.
+- Reduced deleted-item vertical padding and text gaps below the v7.7.6.2 rhythm for a slimmer list while preserving the existing title / metadata hierarchy and category colour rail.
+- Removed the duplicate inline deleted-row override from `index.html`; `assets/css/expenses.css` is now the single authoritative style source for this component.
+- No Expense data logic, Firebase writes, Firestore Rules or indexes changes.
+
 # v7.7.6.6 · Deleted Items Compact Restore Alignment
 
 - Restored the compact deleted-expense row height from the v7.7.6.2 layout.
