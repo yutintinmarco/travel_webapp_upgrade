@@ -5164,7 +5164,7 @@ html:not(.theme-light):not(.theme-dark) .expenses-module .expense-sheet-action-s
 }
 
 /* ==========================================================================
-   v7.7.6.8 · Deleted expense ultra-compact restore alignment
+   v7.7.6.7 · Deleted expense ultra-compact restore alignment
    Keep the familiar v7.7.6.4 capsule treatment, but make the restore control
    visually smaller. The amount remains top-right while the restore control is
    vertically centred across the two grey detail lines, so it contributes no
@@ -5195,7 +5195,6 @@ html:not(.theme-light):not(.theme-dark) .expenses-module .expense-sheet-action-s
   grid-template-rows: auto auto auto;
   align-content: start;
   gap: 1px;
-  padding-left: 7px;
 }
 .expenses-module #deletedExpenseList .deleted-expense-main > strong {
   line-height: 1.28 !important;
@@ -5209,34 +5208,41 @@ html:not(.theme-light):not(.theme-dark) .expenses-module .expense-sheet-action-s
 }
 .expenses-module #deletedExpenseList .deleted-expense-side {
   min-width: 72px;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  justify-content: flex-start;
+  display: grid;
+  grid-template-rows: auto minmax(0,1fr);
   align-self: stretch;
+  justify-items: end;
   text-align: right;
-  padding-top: 1px;
 }
 .expenses-module #deletedExpenseList .deleted-expense-side > strong {
-  align-self: end;
+  align-self: start;
   white-space: nowrap;
   line-height: 1.28 !important;
 }
 .expenses-module #deletedExpenseList .deleted-expense-restore-btn {
-  width: auto;
-  min-width: 46px;
-  min-height: 25px;
-  margin: 6px 0 0;
-  padding: 3px 8px;
-  border: 1px solid color-mix(in srgb, var(--expense-primary) 26%, transparent);
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--expense-primary) 9%, transparent);
-  color: var(--expense-primary);
+  min-width: 46px !important;
+  min-height: 31px !important;
+  height: 31px !important;
+  margin: 0 !important;
+  padding: 0 10px !important;
+  border: 0 !important;
+  border-radius: 999px !important;
+  background: color-mix(in srgb, var(--expense-primary) 8.5%, transparent) !important;
+  color: var(--expense-primary) !important;
   font: inherit;
-  font-size: calc(9.2px * var(--font-scale));
-  font-weight: 760;
-  line-height: 1;
-  box-shadow: none;
+  font-size: 9.5px !important;
+  font-weight: 780 !important;
+  line-height: 1 !important;
+  box-shadow: none !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  justify-self: end;
+  align-self: center;
+  white-space: nowrap !important;
+}
+.expenses-module #deletedExpenseList .deleted-expense-restore-btn:active {
+  transform: scale(.97);
 }
 .expenses-module #deletedExpenseList .deleted-expense-restore-btn:disabled {
   opacity: .42;
@@ -5256,10 +5262,12 @@ html:not(.theme-light):not(.theme-dark) .expenses-module #deletedExpenseList .de
     min-width: 68px;
   }
   .expenses-module #deletedExpenseList .deleted-expense-restore-btn {
-    min-width: 44px;
-    min-height: 24px;
-    padding-inline: 7px;
-    font-size: calc(9px * var(--font-scale));
+    min-width: 42px !important;
+    min-height: 31px !important;
+    height: 31px !important;
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+    font-size: 9.5px !important;
   }
 }
 
