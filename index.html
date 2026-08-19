@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
   <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
   <link rel="dns-prefetch" href="https://api.open-meteo.com">
-  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?v=7.7.6.1">
+  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?v=7.7.6.2">
   <title id="page-title">行程</title>
   <script>
   // v7.7.5.0 · Performance Lite. Memory only: no Firebase reads/writes, no
@@ -2503,7 +2503,7 @@ html.theme-dark .trip-import-preview,html.theme-dark .trip-import-stat,html.them
 #trip-backup-status[hidden]{display:none!important;}
 html.theme-dark .snapshot-restore-row .profile-row-copy strong,html:not(.theme-light):not(.theme-dark) .snapshot-restore-row .profile-row-copy strong{color:#ff6961;}
 
-/* v7.7.6.1 · Data Management visual harmony + optional state cleanup.
+/* v7.7.6.2 · Data Management visual harmony + optional state cleanup.
    Section labels now reuse the established App Info grammar, while optional
    operation-sheet containers obey hidden state consistently on iOS Safari.
 
@@ -2526,6 +2526,19 @@ html.theme-dark .snapshot-restore-row .profile-row-copy strong,html:not(.theme-l
 .data-management-note{margin:10px 4px 0;color:var(--label-secondary);font-size:calc(9.5px * var(--font-scale));line-height:1.45;}
 html.theme-dark .data-operation-option,html.theme-dark .data-operation-secondary{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.08);}
 @media(prefers-color-scheme:dark){html:not(.theme-light):not(.theme-dark) .data-operation-option,html:not(.theme-light):not(.theme-dark) .data-operation-secondary{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.08);}}
+
+/* v7.7.6.2 · Portrait-only mobile guard.
+   The manifest requests portrait-primary. iOS does not expose a reliable
+   programmatic orientation lock for this PWA, so touch devices also receive
+   an opaque rotate-back gate whenever the viewport enters landscape. */
+.portrait-lock-overlay{position:fixed;inset:0;z-index:10000;display:none;align-items:center;justify-content:center;padding:max(24px,env(safe-area-inset-top,0px)) max(24px,env(safe-area-inset-right,0px)) max(24px,env(safe-area-inset-bottom,0px)) max(24px,env(safe-area-inset-left,0px));background:var(--page-bg,#f7f4f6);color:var(--label-primary,#1c1c1e);text-align:center;}
+.portrait-lock-card{width:min(360px,82vw);display:grid;justify-items:center;gap:9px;padding:22px 20px;border:1px solid rgba(118,118,128,.14);border-radius:24px;background:rgba(255,255,255,.72);box-shadow:0 18px 48px rgba(24,24,28,.12);-webkit-backdrop-filter:blur(24px) saturate(1.1);backdrop-filter:blur(24px) saturate(1.1);}
+.portrait-lock-icon{width:48px;height:48px;display:grid;place-items:center;border-radius:14px;background:rgba(10,132,255,.11);color:#0a84ff;font-size:27px;font-weight:760;}
+.portrait-lock-card strong{font-size:20px;line-height:1.25;}
+.portrait-lock-card span{color:var(--label-secondary,#6e6e73);font-size:14px;line-height:1.45;}
+html.theme-dark .portrait-lock-overlay,html:not(.theme-light):not(.theme-dark) .portrait-lock-overlay{background:#1c1c22;}
+html.theme-dark .portrait-lock-card,html:not(.theme-light):not(.theme-dark) .portrait-lock-card{background:rgba(44,44,50,.88);border-color:rgba(255,255,255,.09);}
+@media (orientation:landscape) and (hover:none) and (pointer:coarse){.portrait-lock-overlay{display:flex!important;}}
 
 /* Phase 2E · v7.6.3 · legacy trip compatibility, visual reset + expense bootstrap */
 .app-progress-backdrop{position:fixed;inset:0;z-index:3900;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(13,18,28,.28);-webkit-backdrop-filter:blur(8px) saturate(1.05);backdrop-filter:blur(8px) saturate(1.05);opacity:0;visibility:hidden;pointer-events:none;transition:opacity .22s ease,visibility .22s step-end;}
@@ -3291,7 +3304,7 @@ body.expenses-view-active #app-version-note{
 #snacks-view::after,
 #info-view::after,
 #profile-view::after{
-  content:"v7.7.6.1" !important;
+  content:"v7.7.6.2" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3312,7 +3325,7 @@ body.expenses-view-active #app-version-note{
   display:none !important;
 }
 body.expenses-view-active .expenses-module .expenses-app::after{
-  content:"v7.7.6.1" !important;
+  content:"v7.7.6.2" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3438,7 +3451,7 @@ html.theme-dark .modal-actions .modal-close-btn{
 </style>
             <link rel="apple-touch-icon" href="assets/icon/trip_icon.png">
   <link rel="icon" type="image/png" href="assets/icon/trip_icon.png">
-  <link rel="manifest" href="manifest.json?v=7.7.6.1">
+  <link rel="manifest" href="manifest.json?v=7.7.6.2">
   <meta name="apple-mobile-web-app-title" content="關嘉露西生日之旅">
   <!-- v7.7.1.2: expenses.css is 144KB and every rule is scoped under
        .expenses-module, yet it used to block the very first paint of the
@@ -3446,11 +3459,18 @@ html.theme-dark .modal-actions .modal-close-btn{
        priority without blocking paint; ensureExpensesStylesheet() flips it to
        media="all" before the 支出 view is ever mounted, so the styling is
        byte-for-byte identical by the time anything expenses-related renders. -->
-  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?v=7.7.6.1" media="print">
-  <noscript><link rel="stylesheet" href="assets/css/expenses.css?v=7.7.6.1"></noscript>
+  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?v=7.7.6.2" media="print">
+  <noscript><link rel="stylesheet" href="assets/css/expenses.css?v=7.7.6.2"></noscript>
 </head>
 <body>
 <div class="bg-fixed"></div>
+<div id="portrait-lock-overlay" class="portrait-lock-overlay" role="status" aria-live="polite">
+  <div class="portrait-lock-card">
+    <div class="portrait-lock-icon" aria-hidden="true">↻</div>
+    <strong>請將裝置轉回直向</strong>
+    <span>Travel App 只支援直向使用，轉回直向後會自動繼續。</span>
+  </div>
+</div>
 <header class="ios-compact-header" id="ios-compact-header" aria-hidden="true">
   <div class="ios-compact-header-inner">
     <div class="ios-compact-copy">
@@ -3849,12 +3869,12 @@ html.theme-dark .modal-actions .modal-close-btn{
       <section class="profile-card profile-menu-card" aria-label="匯入與還原">
         <button class="profile-row" id="trip-import-btn" type="button">
           <span class="profile-row-icon profile-icon-blue">↥</span>
-          <span class="profile-row-copy"><strong>匯入 trip.json</strong><small>驗證 Portable Trip Data，再建立或更新 Firebase 旅程</small></span>
+          <span class="profile-row-copy"><strong>匯入 trip.json</strong><small>只接受 Portable Trip JSON；完整 Backup 會自動攔截</small></span>
           <span class="profile-chevron">›</span>
         </button>
         <button class="profile-row" id="trip-full-backup-restore-open" type="button">
           <span class="profile-row-icon profile-icon-orange">↶</span>
-          <span class="profile-row-copy"><strong>還原完整 Backup</strong><small>選擇完整、只還原行程或只還原支出</small></span>
+          <span class="profile-row-copy"><strong>還原完整 Backup</strong><small>只接受 Full Backup JSON；可選完整、行程或支出還原</small></span>
           <span class="profile-chevron">›</span>
         </button>
         <input id="trip-full-backup-file" type="file" accept="application/json,.json" hidden>
@@ -3965,7 +3985,7 @@ html.theme-dark .modal-actions .modal-close-btn{
         <span class="profile-detail-spacer"></span>
       </div>
       <section class="profile-card" aria-label="App 資訊">
-        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.7.6.1</strong></div>
+        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.7.6.2</strong></div>
         <div class="profile-meta-row"><span>資料架構</span><strong>Phase 2F</strong></div>
         <div class="profile-meta-row"><span>主要資料來源</span><strong id="app-data-source-label">Firebase / 本機快取</strong></div>
       </section>
@@ -4142,7 +4162,7 @@ html.theme-dark .modal-actions .modal-close-btn{
 </div>
 
 <script>
-const APP_VERSION = "7.7.6.1";
+const APP_VERSION = "7.7.6.2";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 function perfLiteMark(name){try{return window.__perfLite?.mark(name);}catch(error){return null;}}
@@ -6482,7 +6502,7 @@ async function getTripLoaderServices(){
   ]).then(([loader,session,access])=>{tripLoaderService=loader;tripSessionService=session;tripAccessService=access;return{loader,session,access};});
   return tripLoaderInitPromise;
 }
-// v7.7.6.1 · Expenses can become interactive before the first membership
+// v7.7.6.2 · Expenses can become interactive before the first membership
 // snapshot resolves on an iOS cold start. Let that module request a refresh
 // through this already-versioned access-service instance, avoiding a duplicate
 // ES-module instance and avoiding a Quit / relaunch recovery path.
@@ -6990,6 +7010,10 @@ function renderTripImportPreview(inspection,{checking=false}={}){
   warnings.innerHTML=(inspection?.warnings||[]).map(w=>`<div class="trip-import-warning">${escapeHtmlText(w)}</div>`).join("");
   renderTripImportChanges(inspection?.changeSummary||null);
   if(checking){mode.innerHTML="正在比較 Firebase 現有版本同呢份 JSON…";confirm.textContent="正在檢查…";confirm.disabled=true;return;}
+  if(inspection?.mode==="wrong-file-full-backup"){
+    mode.innerHTML="<strong>呢份係完整 Backup JSON</strong><br>唔可以經『匯入 trip.json』寫入 Firebase。請使用『還原完整 Backup』，系統已經阻止今次錯誤匯入。";
+    confirm.textContent="改用還原完整 Backup";confirm.disabled=false;return;
+  }
   if(!inspection?.valid){mode.innerHTML="JSON 驗證未通過。";confirm.textContent="匯入 Firebase";confirm.disabled=true;return;}
   if(inspection.mode==="inspection-slow"){
     mode.innerHTML="<strong>Firebase 回應較慢</strong><br>JSON 已經驗證完成。你可以繼續等候，檢查完成後會自動更新；或者直接重新檢查，唔使再揀檔案。";
@@ -7079,6 +7103,17 @@ async function inspectPreparedTripImport({showChecking=true}={}){
     clearTimeout(slowTimer);
   }
 }
+function detectTravelJsonKind(raw){
+  if(!raw||typeof raw!=="object"||Array.isArray(raw))return "unknown";
+  if(String(raw.backupFormat||"").trim()==="travel-full-backup")return "full-backup";
+  if(raw.schemaVersion!=null||raw.meta||Array.isArray(raw.days)||raw.snacks)return "trip-json";
+  return "unknown";
+}
+function fullBackupImportMismatchInspection(raw){
+  const portable=raw?.data?.portableTrip||{},counts=raw?.counts||{};
+  const title=String(portable?.meta?.titleSmall||portable?.meta?.titleMain||portable?.meta?.title||raw?.tripId||"完整 Backup");
+  return {valid:false,mode:"wrong-file-full-backup",canImport:false,warnings:["已阻止匯入：Firebase 未有任何改動。"],summary:{title,tripId:String(raw?.tripId||portable?.tripId||""),dayCount:Number(counts.dayCount||0),itemCount:Number(counts.itemCount||0),savedPlaceCount:Number(counts.savedPlaceCount||0),mapReferenceCount:0}};
+}
 async function prepareTripImportFile(file){
   if(!file)return;
   openTripImportModal();
@@ -7088,6 +7123,12 @@ async function prepareTripImportFile(file){
   try{
     if(file.size>5_000_000)throw new Error("trip.json 大過 5 MB；請先移除 base64 圖片或其他大型內嵌資料。");
     const raw=JSON.parse(await file.text());
+    if(detectTravelJsonKind(raw)==="full-backup"){
+      const mismatch=fullBackupImportMismatchInspection(raw);
+      tripImportState={raw,inspection:mismatch,done:false,busy:false};
+      renderTripImportPreview(mismatch);
+      return;
+    }
     const schema=await import(`./assets/js/trip-schema-service.js?v=${APP_VERSION}`);
     const validation=schema.validatePortableTrip(raw);
     const localInspection={...validation,summary:schema.getTripSummary(validation.trip),mode:validation.valid?"checking":"invalid",canImport:false};
@@ -7118,6 +7159,20 @@ tripImportCancel?.addEventListener("click",closeTripImportModal);
 tripImportBackdrop?.addEventListener("click",event=>{if(event.target===tripImportBackdrop)closeTripImportModal();});
 tripImportConfirm?.addEventListener("click",async()=>{
   if(tripImportState.done){closeTripImportModal();return;}
+  if(tripImportState.inspection?.mode==="wrong-file-full-backup"){
+    const raw=tripImportState.raw;
+    closeTripImportModal();
+    try{
+      const service=await getTripBackupService(),inspection=service.inspectFullBackup(raw);
+      if(String(inspection.tripId)!==currentBackupTripId()){const e=new Error("Backup Trip ID does not match current Trip");e.code="backup-trip-mismatch";throw e;}
+      openFullBackupRestoreOperation({raw,inspection});
+    }catch(error){
+      console.error("Route Full Backup from trip import",error);
+      dataOperationOpen(dataOperationBaseConfig({kind:"restore-full-error",title:"還原完整 Backup",subtitle:"呢份檔案已識別為 Full Backup，但未能進入目前旅程嘅還原流程。",typeLabel:"Error",mode:"請確認 Backup Trip ID 同目前旅程一致。",confirmLabel:"完成"}));
+      dataOperationState.done=true;dataOperationSetError(backupFriendlyError(error));
+    }
+    return;
+  }
   if(tripCloudOffline()){
     tripImportSetError("目前離線，無法連接 Firebase 匯入旅程。請重新連線後再試。");
     return;
@@ -7309,7 +7364,7 @@ function dataOperationCurrentSummary(){
   const data=(typeof tripData!=="undefined"&&tripData)?tripData:{};
   const days=Array.isArray(data.days)?data.days:[];
   const items=days.reduce((sum,day)=>sum+(Array.isArray(day?.items)?day.items.length:0),0);
-  const saved=Array.isArray(data.savedPlaces)?data.savedPlaces.length:0;
+  const saved=Array.isArray(data.savedPlaces)?data.savedPlaces.length:(Array.isArray(data?.snacks?.items)?data.snacks.items.length:0);
   const title=String(data?.meta?.title||data?.title||tripLibrarySummary?.title||currentBackupTripId()||"目前旅程");
   return {title,tripId:currentBackupTripId(),dayCount:days.length,itemCount:items,savedPlaceCount:saved};
 }
@@ -7462,6 +7517,11 @@ document.getElementById("trip-full-backup-file")?.addEventListener("change",asyn
   const file=event.target.files?.[0];if(!file)return;
   try{
     const raw=JSON.parse(await file.text());
+    if(detectTravelJsonKind(raw)==="trip-json"){
+      dataOperationOpen(dataOperationBaseConfig({kind:"restore-full-wrong-file",title:"呢份係 trip.json",subtitle:"Portable Trip JSON 唔可以經『還原完整 Backup』處理。",typeLabel:"JSON",mode:"請返回『資料管理』並使用『匯入 trip.json』。今次未有寫入 Firebase。",warnings:["已阻止錯誤還原，Firebase 未有任何改動。"],confirmLabel:"完成"}));
+      dataOperationState.done=true;
+      return;
+    }
     const service=await getTripBackupService(),inspection=service.inspectFullBackup(raw);
     if(String(inspection.tripId)!==currentBackupTripId()){const e=new Error("Backup Trip ID does not match current Trip");e.code="backup-trip-mismatch";throw e;}
     openFullBackupRestoreOperation({raw,inspection});
@@ -8730,7 +8790,14 @@ document.querySelectorAll("[data-global-setting]").forEach(button=>{
 });
 scrollShell?.addEventListener("scroll",scheduleCollapseUpdate,{passive:true});
 window.addEventListener("resize",()=>{refreshCollapseMetrics();updateBottomNavIndicator();scheduleCollapseUpdate();},{passive:true});
-window.addEventListener("orientationchange",()=>setTimeout(()=>{refreshCollapseMetrics();updateBottomNavIndicator();scheduleCollapseUpdate();},220),{passive:true});
+async function requestPortraitOrientationLock(){
+  try{
+    const standalone=window.matchMedia?.("(display-mode: standalone)")?.matches||navigator.standalone===true;
+    if(standalone&&screen?.orientation?.lock)await screen.orientation.lock("portrait-primary");
+  }catch(error){}
+}
+void requestPortraitOrientationLock();
+window.addEventListener("orientationchange",()=>setTimeout(()=>{void requestPortraitOrientationLock();refreshCollapseMetrics();updateBottomNavIndicator();scheduleCollapseUpdate();},220),{passive:true});
 
 if(window.visualViewport&&bottomNav){
   const updateKeyboardState=()=>{
@@ -8746,7 +8813,7 @@ refreshCollapseMetrics();
 // Android / Chrome PWA support. Versioned app-shell Service Worker; normal launches are cache-first while explicit reloads stay network-first.
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("./sw.js?v=7.7.6.1").catch(() => {});
+    navigator.serviceWorker.register("./sw.js?v=7.7.6.2").catch(() => {});
   });
 }
 

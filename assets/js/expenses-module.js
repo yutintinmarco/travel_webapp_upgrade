@@ -423,7 +423,7 @@ function mountExpensesHtml(root) {
         <p class="hint">已刪除支出會保留作 audit trail，不會參與結算。</p>
         <div id="deletedExpenseList"></div>
       </div>
-      <div class="modal-footer-actions"><button type="button" class="modal-close-btn" data-modal-close="deletedItemsModal">關閉</button></div>
+
     </div>
   </div>
 
@@ -2724,13 +2724,16 @@ function renderDeletedExpenses() {
     const oAmt = Number(expense.originalAmount ?? expense.amount ?? 0);
     const oCur = expense.originalCurrency ?? expense.currency ?? base;
     return `
-      <div class="expense-item deleted-item">
-        <div class="expense-title">${safeEscape(expense.title)} · ${safeEscape(oCur)} ${oAmt.toFixed(2)}</div>
-        <div class="expense-meta">${safeEscape(expense.date)} · Paid by ${safeEscape(expense.paidBy || "")}</div>
-        <div class="expense-audit">
-          <div>刪除：${safeEscape(expense.deletedByName || formatAuditUid(expense.deletedBy))} · ${formatTimestamp(expense.deletedAt)}</div>
-        </div>
-        <button class="edit-btn" data-restore-id="${safeEscape(expense.id)}" ${isTripLocked() ? "disabled" : ""}>還原</button>
+      <div class="expense-list-row deleted-expense-row" data-category="${safeEscape(expense.category || 'Other')}">
+        <span class="expense-row-main deleted-expense-main">
+          <strong>${safeEscape(expense.title)}</strong>
+          <small>${safeEscape(expense.date)} · ${safeEscape(expense.category || "Other")} · Paid by ${safeEscape(expense.paidBy || "-")}</small>
+          <small class="deleted-expense-audit">刪除：${safeEscape(expense.deletedByName || formatAuditUid(expense.deletedBy))} · ${formatTimestamp(expense.deletedAt)}</small>
+        </span>
+        <span class="expense-row-side deleted-expense-side">
+          <strong>${safeEscape(oCur)} ${oAmt.toFixed(2)}</strong>
+          <button type="button" class="deleted-expense-restore-btn" data-restore-id="${safeEscape(expense.id)}" ${isTripLocked() ? "disabled" : ""}>還原</button>
+        </span>
       </div>
     `;
   }).join("");

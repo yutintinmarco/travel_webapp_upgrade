@@ -1,3 +1,20 @@
+# v7.7.6.2 · JSON Type Guard + Portrait + Deleted Expense Harmony
+
+- Added explicit JSON file-type discrimination between Portable `trip.json` and Full Backup JSON. A Full Backup selected from 「匯入 trip.json」 is blocked before schema import or Firebase inspection, and the sheet offers to route the same file into 「還原完整 Backup」. The reverse mistake is also blocked with a clear instruction to use 「匯入 trip.json」 instead.
+- Added a schema-level guard so Full Backup JSON cannot be accepted by the Portable Trip validator even if the UI route is bypassed.
+- Kept the manifest portrait preference and strengthened it to `portrait-primary`. Touch devices that still rotate into landscape now show a full-screen rotate-back gate; supported standalone browsers also receive a best-effort Screen Orientation lock request.
+- Rebuilt 「已刪除項目」 rows using the existing Expense list grammar instead of tinted standalone cards. Deleted entries now use normal separators, existing typography, a trailing amount and a compact restore action. The deleted-items sheet no longer renders a separate tinted footer/dock surface.
+- Fixed Data Operation summary Saved counts to read the current Portable Trip `snacks.items` collection when `savedPlaces` is not present on the live `tripData` shape.
+- No Firestore Rules, indexes, Firebase configuration, membership logic, Backup payload schema, bottom navigation 「資料」 tab, or protected Profile Navigation compositor changes.
+
+## Deployment
+
+- Functional files changed: `index.html`, `assets/js/trip-schema-service.js`, `assets/js/expenses-module.js`, `assets/css/expenses.css`.
+- Version/cache files changed: `sw.js`, `manifest.json`, `CHANGELOG.md`.
+- Firestore Rules and indexes are unchanged; no Firebase Rules deployment is required.
+
+---
+
 # v7.7.6.1 · Data Management Visual Harmony
 
 - Reused the established App Info section-heading grammar for Data Management group titles, including font size, weight, spacing, and inset.

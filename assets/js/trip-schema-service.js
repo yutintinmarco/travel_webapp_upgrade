@@ -209,6 +209,14 @@ export function normalizePortableTrip(rawInput = {}) {
 }
 
 export function validatePortableTrip(rawInput = {}) {
+  if (rawInput && typeof rawInput === "object" && !Array.isArray(rawInput) && String(rawInput.backupFormat || "").trim() === "travel-full-backup") {
+    return {
+      valid: false,
+      errors: ["Full Backup JSON cannot be imported as Portable trip.json. Use Full Backup Restore instead."],
+      warnings: [],
+      trip: normalizePortableTrip({})
+    };
+  }
   const trip = normalizePortableTrip(rawInput);
   const errors = [];
   const warnings = [];

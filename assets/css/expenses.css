@@ -5162,3 +5162,79 @@ html:not(.theme-light):not(.theme-dark) .expenses-module .expense-sheet-action-s
     padding-bottom: 12px !important;
   }
 }
+
+
+/* ==========================================================================
+   v7.7.6.2 · Deleted expense list harmony
+   Reuse the live Expense list grammar instead of rendering each deleted row as
+   a tinted standalone card. The deleted-items sheet has no separate action dock;
+   its surface remains visually continuous to the physical bottom edge.
+   ========================================================================== */
+.expenses-module #deletedItemsModal .modal-body-scroll {
+  background: var(--expense-sheet-surface) !important;
+}
+.expenses-module #deletedItemsModal .modal-footer-actions {
+  display: none !important;
+}
+.expenses-module #deletedExpenseList {
+  display: block;
+  margin-top: 4px;
+}
+.expenses-module #deletedExpenseList .deleted-expense-row {
+  background: transparent !important;
+  border-radius: 0 !important;
+  opacity: 1 !important;
+  padding: 11px 0 !important;
+  grid-template-columns: minmax(0,1fr) auto !important;
+  align-items: start !important;
+}
+.expenses-module #deletedExpenseList .deleted-expense-main {
+  min-width: 0;
+}
+.expenses-module #deletedExpenseList .deleted-expense-audit {
+  color: var(--expense-muted-2) !important;
+  overflow-wrap: anywhere;
+}
+.expenses-module #deletedExpenseList .deleted-expense-side {
+  min-width: 92px;
+  justify-items: end;
+}
+.expenses-module #deletedExpenseList .deleted-expense-restore-btn {
+  width: auto;
+  min-width: 64px;
+  min-height: 34px;
+  margin: 4px 0 0;
+  padding: 7px 12px;
+  border: 1px solid color-mix(in srgb, var(--expense-primary) 26%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--expense-primary) 9%, transparent);
+  color: var(--expense-primary);
+  font: inherit;
+  font-size: calc(10.5px * var(--font-scale));
+  font-weight: 760;
+  line-height: 1.1;
+  box-shadow: none;
+}
+.expenses-module #deletedExpenseList .deleted-expense-restore-btn:disabled {
+  opacity: .42;
+}
+html.theme-dark .expenses-module #deletedExpenseList .deleted-expense-row,
+html:not(.theme-light):not(.theme-dark) .expenses-module #deletedExpenseList .deleted-expense-row {
+  background: transparent !important;
+}
+@media (max-width: 390px) {
+  .expenses-module #deletedExpenseList .deleted-expense-row {
+    grid-template-columns: minmax(0,1fr) !important;
+  }
+  .expenses-module #deletedExpenseList .deleted-expense-side {
+    width: 100%;
+    grid-template-columns: minmax(0,1fr) auto;
+    align-items: center;
+    justify-items: start;
+    text-align: left;
+  }
+  .expenses-module #deletedExpenseList .deleted-expense-restore-btn {
+    margin-top: 0;
+    justify-self: end;
+  }
+}
