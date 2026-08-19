@@ -1,26 +1,11 @@
-# v7.7.7.0 · Reentrant Export Reliability
+# v7.7.7.1 · Export Stage Diagnostics & Timeout Recovery
 
-## Fixed
-- Data Management export state is now completed before the browser/iOS file-download handoff.
-- Consecutive exports in the same App session no longer depend on JavaScript continuing after Safari takes over the first download.
-- Full Backup JSON, current trip.json and Snapshot version export share the same deferred download handoff.
-- Expenses Excel is generated fully in memory first, then returned to Data Management for the same deferred handoff.
-- Direct Expenses Excel export remains supported through the Expenses module.
+## What changed
+- Added explicit export stages for Data Management workflows: module load, auth check, Firebase read, file build, and download handoff.
+- Added bounded timeouts so a second export can no longer remain stuck indefinitely in 「處理中」.
+- When a stage times out, the sheet now names the exact stalled stage and re-enables the controls without requiring the App to be quit.
+- Full Backup JSON, trip.json, Snapshot export, and Expenses Excel now expose consistent progress diagnostics.
+- No export data model, Firestore rules, expense UI, or Deleted Items UI was changed.
 
-## Behaviour
-- Export preparation still completes before a file is offered to the browser.
-- No extra Firestore reads or writes are introduced by the download lifecycle change.
-- Backup, Restore, Snapshot, permissions and UI layout are otherwise unchanged.
-
-## Files changed from v7.7.6.9
-- index.html
-- sw.js
-- manifest.json
-- CHANGELOG.md
-- assets/js/expenses-module.js
-
-## Firebase
-- firestore.rules unchanged
-- firestore.indexes.json unchanged
-- firebase.json unchanged
-- trip.json unchanged
+## QA target
+Run consecutive exports in one App session. If the second export fails, record the exact stage shown (for example 「確認登入」 or 「讀取 Firebase」) so the next fix can target the proven subsystem rather than guessing.
