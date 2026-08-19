@@ -1,3 +1,11 @@
+# v7.7.6.6 · Deleted Items Compact Restore Alignment
+
+- Restored the compact deleted-expense row height from the v7.7.6.2 layout.
+- Reduced the 「還原」 control to a small capsule and aligned it at the right within the same vertical detail band as the date / payer and deletion-audit lines.
+- Removed the artificial spacer row that made deleted items taller than the live expense rows.
+- Preserved the existing category colour rail, amount placement, restore logic, permissions and Firestore behaviour.
+- No Firestore Rules or indexes changes.
+
 # v7.7.6.5 · Deleted Items Restore Alignment
 
 ## Deleted items row alignment

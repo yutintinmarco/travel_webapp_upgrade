@@ -5165,10 +5165,10 @@ html:not(.theme-light):not(.theme-dark) .expenses-module .expense-sheet-action-s
 
 
 /* ==========================================================================
-   v7.7.6.2 · Deleted expense list harmony
-   Reuse the live Expense list grammar instead of rendering each deleted row as
-   a tinted standalone card. The deleted-items sheet has no separate action dock;
-   its surface remains visually continuous to the physical bottom edge.
+   v7.7.6.6 · Deleted expense compact restore alignment
+   Keep the v7.7.6.2 compact row height. Amount stays top-right; the smaller
+   restore action occupies the same vertical detail band as the date/audit
+   lines, so it never creates an extra row or makes the item card thicker.
    ========================================================================== */
 .expenses-module #deletedItemsModal .modal-body-scroll {
   background: var(--expense-sheet-surface) !important;
@@ -5184,49 +5184,47 @@ html:not(.theme-light):not(.theme-dark) .expenses-module .expense-sheet-action-s
   background: transparent !important;
   border-radius: 0 8px 8px 0 !important;
   opacity: 1 !important;
-  padding: 10px 0 10px 10px !important;
-  grid-template-columns: minmax(0,1fr) minmax(78px,auto) !important;
-  gap: 4px 12px !important;
+  padding: 11px 0 11px 10px !important;
+  grid-template-columns: minmax(0,1fr) minmax(76px,auto) !important;
+  gap: 0 10px !important;
   align-items: stretch !important;
 }
-.expenses-module #deletedExpenseList .deleted-expense-main,
-.expenses-module #deletedExpenseList .deleted-expense-side {
+.expenses-module #deletedExpenseList .deleted-expense-main {
+  min-width: 0;
+  display: grid;
   grid-template-rows: auto auto auto;
   align-content: start;
   gap: 3px;
 }
-.expenses-module #deletedExpenseList .deleted-expense-main {
-  min-width: 0;
-}
 .expenses-module #deletedExpenseList .deleted-expense-audit {
   color: var(--expense-muted-2) !important;
   overflow-wrap: anywhere;
-  align-self: center;
 }
 .expenses-module #deletedExpenseList .deleted-expense-side {
-  min-width: 78px;
+  min-width: 76px;
+  display: grid;
+  grid-template-rows: auto minmax(0,1fr);
+  align-self: stretch;
   justify-items: end;
   text-align: right;
 }
-.expenses-module #deletedExpenseList .deleted-expense-side-spacer {
-  visibility: hidden;
-  pointer-events: none;
-  line-height: 1.45;
+.expenses-module #deletedExpenseList .deleted-expense-side > strong {
+  align-self: start;
 }
 .expenses-module #deletedExpenseList .deleted-expense-restore-btn {
   width: auto;
-  min-width: 60px;
-  min-height: 28px;
+  min-width: 48px;
+  min-height: 24px;
   margin: 0;
-  padding: 5px 11px;
-  border: 1px solid color-mix(in srgb, var(--expense-primary) 26%, transparent);
+  padding: 3px 9px;
+  border: 1px solid color-mix(in srgb, var(--expense-primary) 24%, transparent);
   border-radius: 999px;
-  background: color-mix(in srgb, var(--expense-primary) 9%, transparent);
+  background: color-mix(in srgb, var(--expense-primary) 8%, transparent);
   color: var(--expense-primary);
   font: inherit;
-  font-size: calc(10px * var(--font-scale));
+  font-size: calc(9.5px * var(--font-scale));
   font-weight: 760;
-  line-height: 1.1;
+  line-height: 1.05;
   box-shadow: none;
   justify-self: end;
   align-self: center;
@@ -5241,13 +5239,13 @@ html:not(.theme-light):not(.theme-dark) .expenses-module #deletedExpenseList .de
 @media (max-width: 390px) {
   .expenses-module #deletedExpenseList .deleted-expense-row {
     grid-template-columns: minmax(0,1fr) minmax(72px,auto) !important;
-    gap: 4px 8px !important;
+    gap: 0 8px !important;
   }
   .expenses-module #deletedExpenseList .deleted-expense-side {
     min-width: 72px;
   }
   .expenses-module #deletedExpenseList .deleted-expense-restore-btn {
-    min-width: 58px;
-    padding-inline: 9px;
+    min-width: 46px;
+    padding-inline: 8px;
   }
 }
