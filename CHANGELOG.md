@@ -1,3 +1,18 @@
+# v7.7.6.3 · Deleted Items Row Harmony
+
+- Rebuilt 「已刪除項目」 rows to reuse the proven 「最近支出」 row grammar instead of a separate deleted-row layout. The category colour rail now has a deliberate content gutter, so text no longer sits against the rail.
+- Matched the live Expense hierarchy: title and metadata on the left, amount aligned on the right, normal row separators, and a compact badge-style 「還原」 action below the row content.
+- Kept deletion audit information as tertiary metadata without introducing a separate tinted card or bottom action dock.
+- No Expense data semantics, Restore behaviour, Firestore Rules, indexes, Firebase configuration, Backup schema, bottom navigation 「資料」 tab, or protected Profile Navigation compositor changes.
+
+## Deployment
+
+- Functional files changed: `assets/js/expenses-module.js`, `assets/css/expenses.css`.
+- Version/cache files changed: `index.html`, `sw.js`, `manifest.json`, `CHANGELOG.md`.
+- Firestore Rules and indexes are unchanged; no Firebase Rules deployment is required.
+
+---
+
 # v7.7.6.2 · JSON Type Guard + Portrait + Deleted Expense Harmony
 
 - Added explicit JSON file-type discrimination between Portable `trip.json` and Full Backup JSON. A Full Backup selected from 「匯入 trip.json」 is blocked before schema import or Firebase inspection, and the sheet offers to route the same file into 「還原完整 Backup」. The reverse mistake is also blocked with a clear instruction to use 「匯入 trip.json」 instead.
