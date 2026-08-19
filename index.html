@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
   <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
   <link rel="dns-prefetch" href="https://api.open-meteo.com">
-  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?v=7.7.6.9">
+  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?v=7.7.7.0">
   <title id="page-title">行程</title>
   <script>
   // v7.7.5.0 · Performance Lite. Memory only: no Firebase reads/writes, no
@@ -2503,7 +2503,7 @@ html.theme-dark .trip-import-preview,html.theme-dark .trip-import-stat,html.them
 #trip-backup-status[hidden]{display:none!important;}
 html.theme-dark .snapshot-restore-row .profile-row-copy strong,html:not(.theme-light):not(.theme-dark) .snapshot-restore-row .profile-row-copy strong{color:#ff6961;}
 
-/* v7.7.6.9 · Data Management visual harmony + optional state cleanup.
+/* v7.7.7.0 · Data Management visual harmony + optional state cleanup.
    Section labels now reuse the established App Info grammar, while optional
    operation-sheet containers obey hidden state consistently on iOS Safari.
 
@@ -2527,7 +2527,7 @@ html.theme-dark .snapshot-restore-row .profile-row-copy strong,html:not(.theme-l
 html.theme-dark .data-operation-option,html.theme-dark .data-operation-secondary{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.08);}
 @media(prefers-color-scheme:dark){html:not(.theme-light):not(.theme-dark) .data-operation-option,html:not(.theme-light):not(.theme-dark) .data-operation-secondary{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.08);}}
 
-/* v7.7.6.9 · Portrait-only mobile guard.
+/* v7.7.7.0 · Portrait-only mobile guard.
    The manifest requests portrait-primary. iOS does not expose a reliable
    programmatic orientation lock for this PWA, so touch devices also receive
    an opaque rotate-back gate whenever the viewport enters landscape. */
@@ -3304,7 +3304,7 @@ body.expenses-view-active #app-version-note{
 #snacks-view::after,
 #info-view::after,
 #profile-view::after{
-  content:"v7.7.6.9" !important;
+  content:"v7.7.7.0" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3325,7 +3325,7 @@ body.expenses-view-active #app-version-note{
   display:none !important;
 }
 body.expenses-view-active .expenses-module .expenses-app::after{
-  content:"v7.7.6.9" !important;
+  content:"v7.7.7.0" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3452,7 +3452,7 @@ html.theme-dark .modal-actions .modal-close-btn{
 </style>
             <link rel="apple-touch-icon" href="assets/icon/trip_icon.png">
   <link rel="icon" type="image/png" href="assets/icon/trip_icon.png">
-  <link rel="manifest" href="manifest.json?v=7.7.6.9">
+  <link rel="manifest" href="manifest.json?v=7.7.7.0">
   <meta name="apple-mobile-web-app-title" content="關嘉露西生日之旅">
   <!-- v7.7.1.2: expenses.css is 144KB and every rule is scoped under
        .expenses-module, yet it used to block the very first paint of the
@@ -3460,8 +3460,8 @@ html.theme-dark .modal-actions .modal-close-btn{
        priority without blocking paint; ensureExpensesStylesheet() flips it to
        media="all" before the 支出 view is ever mounted, so the styling is
        byte-for-byte identical by the time anything expenses-related renders. -->
-  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?v=7.7.6.9" media="print">
-  <noscript><link rel="stylesheet" href="assets/css/expenses.css?v=7.7.6.9"></noscript>
+  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?v=7.7.7.0" media="print">
+  <noscript><link rel="stylesheet" href="assets/css/expenses.css?v=7.7.7.0"></noscript>
 </head>
 <body>
 <div class="bg-fixed"></div>
@@ -3986,7 +3986,7 @@ html.theme-dark .modal-actions .modal-close-btn{
         <span class="profile-detail-spacer"></span>
       </div>
       <section class="profile-card" aria-label="App 資訊">
-        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.7.6.9</strong></div>
+        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.7.7.0</strong></div>
         <div class="profile-meta-row"><span>資料架構</span><strong>Phase 2F</strong></div>
         <div class="profile-meta-row"><span>主要資料來源</span><strong id="app-data-source-label">Firebase / 本機快取</strong></div>
       </section>
@@ -4163,7 +4163,7 @@ html.theme-dark .modal-actions .modal-close-btn{
 </div>
 
 <script>
-const APP_VERSION = "7.7.6.9";
+const APP_VERSION = "7.7.7.0";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 function perfLiteMark(name){try{return window.__perfLite?.mark(name);}catch(error){return null;}}
@@ -6503,7 +6503,7 @@ async function getTripLoaderServices(){
   ]).then(([loader,session,access])=>{tripLoaderService=loader;tripSessionService=session;tripAccessService=access;return{loader,session,access};});
   return tripLoaderInitPromise;
 }
-// v7.7.6.9 · Expenses can become interactive before the first membership
+// v7.7.7.0 · Expenses can become interactive before the first membership
 // snapshot resolves on an iOS cold start. Let that module request a refresh
 // through this already-versioned access-service instance, avoiding a duplicate
 // ES-module instance and avoiding a Quit / relaunch recovery path.
@@ -7294,13 +7294,32 @@ function backupFormatDate(value){
   if(!Number.isFinite(d.getTime()))return "—";
   try{return new Intl.DateTimeFormat("zh-HK",{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit",hour12:false}).format(d);}catch(error){return d.toLocaleString();}
 }
-function backupDownloadJson(json,filename){
-  const blob=new Blob([JSON.stringify(json,null,2)],{type:"application/json;charset=utf-8"});
+function backupPrepareJsonDownload(json,filename){
+  return {
+    blob:new Blob([JSON.stringify(json,null,2)],{type:"application/json;charset=utf-8"}),
+    filename:filename||"trip.json"
+  };
+}
+function backupDownloadBlob(blob,filename){
+  if(!(blob instanceof Blob))throw new Error("Download payload is unavailable.");
   const url=URL.createObjectURL(blob);
   const a=document.createElement("a");
-  a.href=url;a.download=filename||"trip.json";a.style.display="none";
-  document.body.appendChild(a);a.click();a.remove();
-  setTimeout(()=>URL.revokeObjectURL(url),1200);
+  a.href=url;a.download=filename||"download";a.style.display="none";
+  document.body.appendChild(a);
+  try{a.click();}finally{
+    a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),4000);
+  }
+}
+function dataOperationHandoffDownload(download){
+  if(typeof download!=="function")return;
+  // v7.7.7.0: the Data Operation lifecycle is completed before iOS is asked
+  // to take over the file download. Safari/PWA may suspend JS immediately
+  // after the click, so no busy-state cleanup is allowed to depend on code
+  // that runs after the handoff.
+  requestAnimationFrame(()=>setTimeout(()=>{
+    try{download();}catch(error){console.error("Download handoff",error);}
+  },0));
 }
 function backupSetStatus(message,{error=false,hidden=false}={}){
   const el=document.getElementById("trip-backup-status");if(!el)return;
@@ -7420,15 +7439,17 @@ function dataOperationBaseConfig({kind,title,subtitle,mode,confirmLabel,typeLabe
 function openFullBackupExportOperation(){
   dataOperationOpen(dataOperationBaseConfig({kind:"export-full",title:"匯出完整 Backup",subtitle:"建立可供還原嘅 Data Only Full Backup JSON。",typeLabel:"Full",mode:"包含行程、收藏、一般設定、支出、找數及備份內操作記錄。",warnings:["Full Backup v1 暫時不包含相片／媒體；Phase 3A 會升級成 Media-aware Backup Package。"],confirmLabel:"匯出 Backup",handler:async()=>{
     const service=await getTripBackupService(),user=await getImportFirebaseUser();
-    const result=await service.exportFullBackup(currentBackupTripId(),{user});backupDownloadJson(result.json,result.filename);
-    return {title:"Backup 已匯出",detail:`${result.counts.dayCount||0} Days · ${result.counts.expenseCount||0} Expenses · ${result.counts.settlementCount||0} Settlements`};
+    const result=await service.exportFullBackup(currentBackupTripId(),{user});
+    const prepared=backupPrepareJsonDownload(result.json,result.filename);
+    return {title:"Backup 已匯出",detail:`${result.counts.dayCount||0} Days · ${result.counts.expenseCount||0} Expenses · ${result.counts.settlementCount||0} Settlements`,download:()=>backupDownloadBlob(prepared.blob,prepared.filename)};
   }}));
 }
 function openTripJsonExportOperation(){
   dataOperationOpen(dataOperationBaseConfig({kind:"export-trip",title:"匯出 trip.json",subtitle:"建立輕量 Portable Trip Data。",typeLabel:"JSON",mode:"適合分享、AI／人手修改及再次匯入；不包含實際支出交易。",confirmLabel:"匯出 trip.json",handler:async()=>{
     const service=await getTripBackupService(),user=await getImportFirebaseUser();
-    const result=await service.exportCurrentTrip(currentBackupTripId(),{user});backupDownloadJson(result.json,result.filename);
-    return {title:"trip.json 已匯出",detail:`Revision ${result.revision} · ${result.counts.dayCount} Days · ${result.counts.itemCount} Items`};
+    const result=await service.exportCurrentTrip(currentBackupTripId(),{user});
+    const prepared=backupPrepareJsonDownload(result.json,result.filename);
+    return {title:"trip.json 已匯出",detail:`Revision ${result.revision} · ${result.counts.dayCount} Days · ${result.counts.itemCount} Items`,download:()=>backupDownloadBlob(prepared.blob,prepared.filename)};
   }}));
 }
 function openManualSnapshotOperation(){
@@ -7445,8 +7466,10 @@ function openExpenseExcelOperation(){
       const timer=setTimeout(()=>{if(settled)return;settled=true;window.removeEventListener("expense-excel-export-result",onResult);reject(new Error("支出 Excel 匯出逾時，請稍後再試。"));},12000);
       const onResult=event=>{
         if(settled)return;settled=true;clearTimeout(timer);window.removeEventListener("expense-excel-export-result",onResult);
-        if(event?.detail?.ok)resolve({title:"Excel 已匯出",detail:"報表已交畀瀏覽器下載。"});
-        else reject(new Error(event?.detail?.message||"匯出 Excel 失敗。"));
+        if(event?.detail?.ok){
+          const blob=event.detail.blob,filename=event.detail.filename||"travel-expenses.xlsx";
+          resolve({title:"Excel 已匯出",detail:"報表已交畀瀏覽器下載。",download:()=>backupDownloadBlob(blob,filename)});
+        }else reject(new Error(event?.detail?.message||"匯出 Excel 失敗。"));
       };
       window.addEventListener("expense-excel-export-result",onResult);
       window.__pendingExpenseUiAction="export:excel";initExpensesViewSafe();window.dispatchEvent(new CustomEvent("expense-ui-action",{detail:{action:"export:excel"}}));
@@ -7456,8 +7479,9 @@ function openExpenseExcelOperation(){
 function openSnapshotExportOperation(snapshot){
   dataOperationOpen({kind:"snapshot-export",title:"匯出此版本",subtitle:"將所選 Snapshot 轉成 Portable trip.json。",name:`${backupFormatDate(snapshot.createdAtIso||snapshot.createdAtMillis)} · ${snapshot.typeLabel||"Snapshot"}`,id:`Snapshot · ${snapshot.snapshotId||"—"}`,stats:[{value:snapshot.sourceRevision||0,label:"Revision"},{value:snapshot.dayCount||0,label:"Days"},{value:snapshot.itemCount||0,label:"Items"},{value:snapshot.savedPlaceCount||0,label:"Saved"}],mode:"匯出只建立檔案，不會修改目前 Firebase 旅程。",confirmLabel:"匯出此版本",payload:snapshot,handler:async()=>{
     const service=await getTripBackupService(),user=await getImportFirebaseUser();
-    const result=await service.exportSnapshotTrip(currentBackupTripId(),snapshot.snapshotId,{user});backupDownloadJson(result.json,result.filename);
-    return {title:"版本已匯出",detail:`Snapshot Revision ${result.sourceRevision}`};
+    const result=await service.exportSnapshotTrip(currentBackupTripId(),snapshot.snapshotId,{user});
+    const prepared=backupPrepareJsonDownload(result.json,result.filename);
+    return {title:"版本已匯出",detail:`Snapshot Revision ${result.sourceRevision}`,download:()=>backupDownloadBlob(prepared.blob,prepared.filename)};
   }});
 }
 function openSnapshotRestoreOperation(snapshot){
@@ -7505,7 +7529,9 @@ document.getElementById("data-operation-confirm")?.addEventListener("click",asyn
   dataOperationSetError("");dataOperationSetBusy(true,"請保持 App 開啟，完成前請勿重複操作。");
   try{
     const result=await dataOperationState.handler();
+    const download=typeof result?.download==="function"?result.download:null;
     dataOperationMarkDone(result||{});
+    if(download)dataOperationHandoffDownload(download);
   }catch(error){console.error("Data management operation",dataOperationState.kind,error);dataOperationState.busy=false;el.cancel.disabled=false;el.confirm.disabled=false;if(el.progress)el.progress.hidden=true;dataOperationSetError(backupFriendlyError(error));}
 });
 
@@ -8814,7 +8840,7 @@ refreshCollapseMetrics();
 // Android / Chrome PWA support. Versioned app-shell Service Worker; normal launches are cache-first while explicit reloads stay network-first.
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("./sw.js?v=7.7.6.9").catch(() => {});
+    navigator.serviceWorker.register("./sw.js?v=7.7.7.0").catch(() => {});
   });
 }
 

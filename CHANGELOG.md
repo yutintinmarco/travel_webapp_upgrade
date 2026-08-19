@@ -1,14 +1,26 @@
-# v7.7.6.9 · Deleted Restore Button Harmony
+# v7.7.7.0 · Reentrant Export Reliability
 
-## What changed
-- Built directly from v7.7.6.7.
-- Deleted Items row layout, spacing, height, typography and positioning are unchanged.
-- Only the 「還原」 control is restyled to reuse the Trip Permissions member 「移除」 button geometry and interaction.
-- Restore semantics retain the expense accent colour instead of the destructive red colour.
+## Fixed
+- Data Management export state is now completed before the browser/iOS file-download handoff.
+- Consecutive exports in the same App session no longer depend on JavaScript continuing after Safari takes over the first download.
+- Full Backup JSON, current trip.json and Snapshot version export share the same deferred download handoff.
+- Expenses Excel is generated fully in memory first, then returned to Data Management for the same deferred handoff.
+- Direct Expenses Excel export remains supported through the Expenses module.
 
-## Files changed
+## Behaviour
+- Export preparation still completes before a file is offered to the browser.
+- No extra Firestore reads or writes are introduced by the download lifecycle change.
+- Backup, Restore, Snapshot, permissions and UI layout are otherwise unchanged.
+
+## Files changed from v7.7.6.9
 - index.html
 - sw.js
 - manifest.json
 - CHANGELOG.md
-- assets/css/expenses.css
+- assets/js/expenses-module.js
+
+## Firebase
+- firestore.rules unchanged
+- firestore.indexes.json unchanged
+- firebase.json unchanged
+- trip.json unchanged

@@ -1192,16 +1192,23 @@ function toPlainValue(value) {
   return value;
 }
 
-function downloadTextFile(filename, text, mimeType) {
-  const blob = new Blob([text], { type: mimeType });
+function downloadBlobFile(filename, blob) {
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;
   link.download = filename;
+  link.style.display = "none";
   document.body.appendChild(link);
-  link.click();
-  link.remove();
-  URL.revokeObjectURL(url);
+  try {
+    link.click();
+  } finally {
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 4000);
+  }
+}
+
+function downloadTextFile(filename, text, mimeType) {
+  downloadBlobFile(filename, new Blob([text], { type: mimeType }));
 }
 
 function setToday() { dateInput.value = localDateISO(); }
@@ -3739,7 +3746,10 @@ function exportWorkbook() {
   window.XLSX.utils.book_append_sheet(wb, worksheetFromRows(activityRows, activityHeaders), "Activity Log");
   window.XLSX.utils.book_append_sheet(wb, worksheetFromRows(deletedRows, deletedHeaders), "Deleted Items");
 
-  window.XLSX.writeFile(wb, getExportFileName());
+  const filename = getExportFileName();
+  const bytes = window.XLSX.write(wb, { bookType: "xlsx", type: "array" });
+  const blob = new Blob([bytes], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+  return { blob, filename };
 }
 
 function exportJsonBackup() {
@@ -3787,18 +3797,28 @@ function exportJsonBackup() {
   );
 }
 
-async function handleExportExcel() {
+async function handleExportExcel({ deferDownload = false } = {}) {
   try {
     setModuleStatus("Preparing Excel...");
     await ensureSheetJs();
-    exportWorkbook();
+    const prepared = exportWorkbook();
     setModuleStatus(`Synced (${tripId})`);
-    window.dispatchEvent(new CustomEvent("expense-excel-export-result", { detail: { ok: true, tripId } }));
+    if (deferDownload) {
+      // v7.7.7.0: Data Management owns the final iOS download handoff so its
+      // busy state can be released before Safari suspends the PWA.
+      window.dispatchEvent(new CustomEvent("expense-excel-export-result", {
+        detail: { ok: true, tripId, blob: prepared.blob, filename: prepared.filename }
+      }));
+    } else {
+      downloadBlobFile(prepared.filename, prepared.blob);
+    }
     return true;
   } catch (error) {
     console.error(error);
     setModuleStatus("Export error");
-    window.dispatchEvent(new CustomEvent("expense-excel-export-result", { detail: { ok: false, tripId, message: error?.message || "Excel export failed" } }));
+    if (deferDownload) {
+      window.dispatchEvent(new CustomEvent("expense-excel-export-result", { detail: { ok: false, tripId, message: error?.message || "Excel export failed" } }));
+    }
     alert("匯出 Excel 失敗，請稍後再試。");
     return false;
   }
@@ -3839,7 +3859,7 @@ async function tryRunPendingExcelExport() {
   }
   pendingExcelExportRequested = false;
   clearPendingExcelExportTimer();
-  await handleExportExcel();
+  await handleExportExcel({ deferDownload: true });
 }
 function requestExpenseExcelExport() {
   pendingExcelExportRequested = true;
