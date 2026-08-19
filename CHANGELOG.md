@@ -1,17 +1,8 @@
-# v7.7.6.3 · Deleted Items Row Harmony
+# v7.7.6.4 · Deleted Items Restore Button Placement
 
-- Rebuilt 「已刪除項目」 rows to reuse the proven 「最近支出」 row grammar instead of a separate deleted-row layout. The category colour rail now has a deliberate content gutter, so text no longer sits against the rail.
-- Matched the live Expense hierarchy: title and metadata on the left, amount aligned on the right, normal row separators, and a compact badge-style 「還原」 action below the row content.
-- Kept deletion audit information as tertiary metadata without introducing a separate tinted card or bottom action dock.
-- No Expense data semantics, Restore behaviour, Firestore Rules, indexes, Firebase configuration, Backup schema, bottom navigation 「資料」 tab, or protected Profile Navigation compositor changes.
-
-## Deployment
-
-- Functional files changed: `assets/js/expenses-module.js`, `assets/css/expenses.css`.
-- Version/cache files changed: `index.html`, `sw.js`, `manifest.json`, `CHANGELOG.md`.
-- Firestore Rules and indexes are unchanged; no Firebase Rules deployment is required.
-
----
+- Refined 「已刪除項目」 rows to reuse the same visual rhythm as 「最近支出」, with a clear breathing gap between the category colour rail and the text block.
+- Kept the amount as the top-right anchor and placed the compact 「還原」 action directly beneath it as one tidy trailing amount/action column.
+- No expense data logic, permissions, Firebase schema, or Firestore Rules were changed.
 
 # v7.7.6.2 · JSON Type Guard + Portrait + Deleted Expense Harmony
 
