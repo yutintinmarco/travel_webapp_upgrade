@@ -5,7 +5,9 @@ import {
   getFirestore,
   initializeFirestore,
   persistentLocalCache,
-  persistentMultipleTabManager
+  persistentMultipleTabManager,
+  disableNetwork,
+  enableNetwork
 } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js";
 
 const firebaseApp = getApps().length ? getApp() : initializeApp(firebaseConfig);
@@ -30,4 +32,27 @@ try {
 
 window.__firestorePersistence = firestorePersistence;
 
-export { firebaseApp, auth, db, firebaseConfig, firestorePersistence };
+// v7.7.7.2 · iOS PWA export-resume recovery.
+// After Safari hands a generated file to the system download UI, the existing
+// Firestore transport can occasionally remain alive but stop completing new
+// explicit reads until the PWA process is restarted. Cycling Firestore's
+// network state is the supported SDK-level way to rebuild those transports
+// while keeping the same app, cache, references and realtime listeners.
+let firestoreNetworkRecoveryPromise = null;
+async function recoverFirestoreNetwork() {
+  if (firestoreNetworkRecoveryPromise) return firestoreNetworkRecoveryPromise;
+  firestoreNetworkRecoveryPromise = (async () => {
+    const startedAt = Date.now();
+    await disableNetwork(db);
+    await enableNetwork(db);
+    try {
+      window.dispatchEvent(new CustomEvent("app-firestore-network-recovered", {
+        detail: { at: Date.now(), durationMs: Date.now() - startedAt }
+      }));
+    } catch (error) {}
+    return true;
+  })().finally(() => { firestoreNetworkRecoveryPromise = null; });
+  return firestoreNetworkRecoveryPromise;
+}
+
+export { firebaseApp, auth, db, firebaseConfig, firestorePersistence, recoverFirestoreNetwork };

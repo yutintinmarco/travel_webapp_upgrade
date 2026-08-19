@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
   <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
   <link rel="dns-prefetch" href="https://api.open-meteo.com">
-  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?v=7.7.7.1">
+  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?v=7.7.7.2">
   <title id="page-title">行程</title>
   <script>
   // v7.7.5.0 · Performance Lite. Memory only: no Firebase reads/writes, no
@@ -2503,7 +2503,7 @@ html.theme-dark .trip-import-preview,html.theme-dark .trip-import-stat,html.them
 #trip-backup-status[hidden]{display:none!important;}
 html.theme-dark .snapshot-restore-row .profile-row-copy strong,html:not(.theme-light):not(.theme-dark) .snapshot-restore-row .profile-row-copy strong{color:#ff6961;}
 
-/* v7.7.7.1 · Data Management visual harmony + optional state cleanup.
+/* v7.7.7.2 · Data Management visual harmony + optional state cleanup.
    Section labels now reuse the established App Info grammar, while optional
    operation-sheet containers obey hidden state consistently on iOS Safari.
 
@@ -2527,7 +2527,7 @@ html.theme-dark .snapshot-restore-row .profile-row-copy strong,html:not(.theme-l
 html.theme-dark .data-operation-option,html.theme-dark .data-operation-secondary{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.08);}
 @media(prefers-color-scheme:dark){html:not(.theme-light):not(.theme-dark) .data-operation-option,html:not(.theme-light):not(.theme-dark) .data-operation-secondary{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.08);}}
 
-/* v7.7.7.1 · Portrait-only mobile guard.
+/* v7.7.7.2 · Portrait-only mobile guard.
    The manifest requests portrait-primary. iOS does not expose a reliable
    programmatic orientation lock for this PWA, so touch devices also receive
    an opaque rotate-back gate whenever the viewport enters landscape. */
@@ -3304,7 +3304,7 @@ body.expenses-view-active #app-version-note{
 #snacks-view::after,
 #info-view::after,
 #profile-view::after{
-  content:"v7.7.7.1" !important;
+  content:"v7.7.7.2" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3325,7 +3325,7 @@ body.expenses-view-active #app-version-note{
   display:none !important;
 }
 body.expenses-view-active .expenses-module .expenses-app::after{
-  content:"v7.7.7.1" !important;
+  content:"v7.7.7.2" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3452,7 +3452,7 @@ html.theme-dark .modal-actions .modal-close-btn{
 </style>
             <link rel="apple-touch-icon" href="assets/icon/trip_icon.png">
   <link rel="icon" type="image/png" href="assets/icon/trip_icon.png">
-  <link rel="manifest" href="manifest.json?v=7.7.7.1">
+  <link rel="manifest" href="manifest.json?v=7.7.7.2">
   <meta name="apple-mobile-web-app-title" content="關嘉露西生日之旅">
   <!-- v7.7.1.2: expenses.css is 144KB and every rule is scoped under
        .expenses-module, yet it used to block the very first paint of the
@@ -3460,8 +3460,8 @@ html.theme-dark .modal-actions .modal-close-btn{
        priority without blocking paint; ensureExpensesStylesheet() flips it to
        media="all" before the 支出 view is ever mounted, so the styling is
        byte-for-byte identical by the time anything expenses-related renders. -->
-  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?v=7.7.7.1" media="print">
-  <noscript><link rel="stylesheet" href="assets/css/expenses.css?v=7.7.7.1"></noscript>
+  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?v=7.7.7.2" media="print">
+  <noscript><link rel="stylesheet" href="assets/css/expenses.css?v=7.7.7.2"></noscript>
 </head>
 <body>
 <div class="bg-fixed"></div>
@@ -3986,7 +3986,7 @@ html.theme-dark .modal-actions .modal-close-btn{
         <span class="profile-detail-spacer"></span>
       </div>
       <section class="profile-card" aria-label="App 資訊">
-        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.7.7.1</strong></div>
+        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.7.7.2</strong></div>
         <div class="profile-meta-row"><span>資料架構</span><strong>Phase 2F</strong></div>
         <div class="profile-meta-row"><span>主要資料來源</span><strong id="app-data-source-label">Firebase / 本機快取</strong></div>
       </section>
@@ -4163,7 +4163,7 @@ html.theme-dark .modal-actions .modal-close-btn{
 </div>
 
 <script>
-const APP_VERSION = "7.7.7.1";
+const APP_VERSION = "7.7.7.2";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 function perfLiteMark(name){try{return window.__perfLite?.mark(name);}catch(error){return null;}}
@@ -6503,7 +6503,7 @@ async function getTripLoaderServices(){
   ]).then(([loader,session,access])=>{tripLoaderService=loader;tripSessionService=session;tripAccessService=access;return{loader,session,access};});
   return tripLoaderInitPromise;
 }
-// v7.7.7.1 · Expenses can become interactive before the first membership
+// v7.7.7.2 · Expenses can become interactive before the first membership
 // snapshot resolves on an iOS cold start. Let that module request a refresh
 // through this already-versioned access-service instance, avoiding a duplicate
 // ES-module instance and avoiding a Quit / relaunch recovery path.
@@ -7263,6 +7263,28 @@ let tripBackupSnapshots=[];
 let tripBackupSelectedSnapshot=null;
 let tripBackupBusy=false;
 let dataOperationState={kind:"",busy:false,done:false,payload:null,scope:"all",handler:null};
+// v7.7.7.2: iOS can return from a file-download handoff with the existing
+// Firestore transport no longer completing explicit reads. Remember that a
+// handoff occurred, then rebuild the SDK network transport before the next
+// cloud-backed data operation. This is a network reconnect only: no extra
+// Firestore document read/write is issued by the recovery itself.
+let dataOperationFirestoreResumePending=false;
+let dataOperationFirestoreRecoveryPromise=null;
+async function dataOperationRecoverFirestoreIfNeeded({force=false}={}){
+  if(!force&&!dataOperationFirestoreResumePending)return false;
+  if(dataOperationFirestoreRecoveryPromise)return dataOperationFirestoreRecoveryPromise;
+  dataOperationFirestoreResumePending=false;
+  dataOperationFirestoreRecoveryPromise=(async()=>{
+    const firebaseService=await import(`./assets/js/firebase-service.js?v=${APP_VERSION}`);
+    if(typeof firebaseService.recoverFirestoreNetwork!=="function")return false;
+    await firebaseService.recoverFirestoreNetwork();
+    return true;
+  })().catch(error=>{
+    dataOperationFirestoreResumePending=true;
+    throw error;
+  }).finally(()=>{dataOperationFirestoreRecoveryPromise=null;});
+  return dataOperationFirestoreRecoveryPromise;
+}
 function getTripBackupService(){
   if(!tripBackupServicePromise){
     tripBackupServicePromise=import(`./assets/js/trip-backup-service.js?v=${APP_VERSION}`)
@@ -7314,10 +7336,11 @@ function backupDownloadBlob(blob,filename){
 }
 function dataOperationHandoffDownload(download){
   if(typeof download!=="function")return;
-  // v7.7.7.1: the Data Operation lifecycle is completed before iOS is asked
-  // to take over the file download. Safari/PWA may suspend JS immediately
-  // after the click, so no busy-state cleanup is allowed to depend on code
-  // that runs after the handoff.
+  // v7.7.7.2: complete UI state first, then remember that iOS has taken over
+  // a generated file. The next Firebase-backed data operation will cycle the
+  // Firestore network transport before issuing reads.
+  dataOperationFirestoreResumePending=true;
+  window.__lastDataOperationDownloadHandoffAt=Date.now();
   requestAnimationFrame(()=>setTimeout(()=>{
     try{download();}catch(error){console.error("Download handoff",error);}
   },0));
@@ -7565,6 +7588,9 @@ document.getElementById("data-operation-confirm")?.addEventListener("click",asyn
   if(dataOperationState.busy||typeof dataOperationState.handler!=="function")return;
   dataOperationSetError("");dataOperationSetBusy(true,"請保持 App 開啟，完成前請勿重複操作。");
   try{
+    if(dataOperationFirestoreResumePending){
+      await dataOperationAwait(dataOperationRecoverFirestoreIfNeeded(),{stage:"恢復 Firebase",detail:"上次下載後正在重新連接 Firestore，再繼續今次操作。",percent:8,timeoutMs:10000});
+    }
     const result=await dataOperationState.handler();
     const download=typeof result?.download==="function"?result.download:null;
     dataOperationMarkDone(result||{});
@@ -7574,6 +7600,9 @@ document.getElementById("data-operation-confirm")?.addEventListener("click",asyn
     dataOperationState.busy=false;el.cancel.disabled=false;el.confirm.disabled=false;
     if(el.progress)el.progress.hidden=true;
     const message=backupFriendlyError(error);
+    if(error?.code==="data-operation-timeout"&&/Firebase/i.test(String(error?.stage||""))){
+      dataOperationFirestoreResumePending=true;
+    }
     el.mode.innerHTML=`<strong>未完成</strong><br>${escapeHtmlText(message)}`;
     dataOperationSetError(message);
   }
@@ -8884,7 +8913,7 @@ refreshCollapseMetrics();
 // Android / Chrome PWA support. Versioned app-shell Service Worker; normal launches are cache-first while explicit reloads stay network-first.
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("./sw.js?v=7.7.7.1").catch(() => {});
+    navigator.serviceWorker.register("./sw.js?v=7.7.7.2").catch(() => {});
   });
 }
 

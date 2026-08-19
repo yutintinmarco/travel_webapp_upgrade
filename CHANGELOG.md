@@ -1,11 +1,13 @@
-# v7.7.7.1 · Export Stage Diagnostics & Timeout Recovery
+# v7.7.7.2 · Firestore Resume Recovery
 
-## What changed
-- Added explicit export stages for Data Management workflows: module load, auth check, Firebase read, file build, and download handoff.
-- Added bounded timeouts so a second export can no longer remain stuck indefinitely in 「處理中」.
-- When a stage times out, the sheet now names the exact stalled stage and re-enables the controls without requiring the App to be quit.
-- Full Backup JSON, trip.json, Snapshot export, and Expenses Excel now expose consistent progress diagnostics.
-- No export data model, Firestore rules, expense UI, or Deleted Items UI was changed.
+## Fixed
+- v7.7.7.1 diagnostics confirmed the second export reaches the Firebase read stage and times out there; Auth and Data Operation busy-state cleanup are not the blocker.
+- After any generated-file download handoff, the next Firebase-backed Data Management operation now cycles the existing Firestore SDK network state with `disableNetwork()` then `enableNetwork()` before issuing reads.
+- The recovery keeps the same Firebase app, Firestore instance, persistent IndexedDB cache, document references and realtime listeners; it only rebuilds the network transport.
+- If a Firebase-stage timeout still occurs, the session is flagged so pressing Retry performs the network recovery before trying again instead of repeating the same stalled read.
+- Recovery itself issues no extra Firestore document read or write.
 
-## QA target
-Run consecutive exports in one App session. If the second export fails, record the exact stage shown (for example 「確認登入」 or 「讀取 Firebase」) so the next fix can target the proven subsystem rather than guessing.
+## Regression scope
+- Export / Backup / Snapshot / Restore business logic unchanged.
+- Deleted Items UI unchanged.
+- Firestore Rules and indexes unchanged.
