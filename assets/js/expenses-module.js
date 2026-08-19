@@ -1192,6 +1192,44 @@ function toPlainValue(value) {
   return value;
 }
 
+
+function toFullBackupValue(value) {
+  if (value == null) return value;
+  try {
+    if (typeof value?.toDate === "function") {
+      const date = value.toDate();
+      return { __travelBackupType: "timestamp", iso: date.toISOString() };
+    }
+  } catch (error) {}
+  if (value instanceof Date) return { __travelBackupType: "timestamp", iso: value.toISOString() };
+  if (Array.isArray(value)) return value.map(item => toFullBackupValue(item));
+  if (typeof value === "object") {
+    return Object.fromEntries(Object.entries(value).map(([key, val]) => [key, toFullBackupValue(val)]));
+  }
+  return value;
+}
+
+function localBackupEntries(rows = []) {
+  return (Array.isArray(rows) ? rows : []).map((row, index) => {
+    const source = row && typeof row === "object" ? row : {};
+    const id = String(source.id || `row-${index + 1}`);
+    const data = { ...source };
+    delete data.id;
+    return { id, data: toFullBackupValue(data) };
+  });
+}
+
+window.__getExpenseLocalExportSnapshot = () => ({
+  tripId,
+  ready: Boolean(cloudExpenseStarted && recentExpensesLiveReady && settlementsLiveReady && activityLogsLiveReady),
+  role: phase2TripRole || null,
+  settings: toFullBackupValue(tripSettings),
+  expenses: localBackupEntries(allExpenses),
+  settlements: localBackupEntries(settlements),
+  activityLogs: localBackupEntries(activityLogs),
+  capturedAt: new Date().toISOString()
+});
+
 function downloadBlobFile(filename, blob) {
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");

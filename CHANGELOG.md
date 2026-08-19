@@ -1,13 +1,23 @@
-# v7.7.7.2 · Firestore Resume Recovery
+# v7.7.7.3 · Local First Export Engine
 
-## Fixed
-- v7.7.7.1 diagnostics confirmed the second export reaches the Firebase read stage and times out there; Auth and Data Operation busy-state cleanup are not the blocker.
-- After any generated-file download handoff, the next Firebase-backed Data Management operation now cycles the existing Firestore SDK network state with `disableNetwork()` then `enableNetwork()` before issuing reads.
-- The recovery keeps the same Firebase app, Firestore instance, persistent IndexedDB cache, document references and realtime listeners; it only rebuilds the network transport.
-- If a Firebase-stage timeout still occurs, the session is flagged so pressing Retry performs the network recovery before trying again instead of repeating the same stalled read.
-- Recovery itself issues no extra Firestore document read or write.
+## What changed
+- Read-only exports no longer re-read Firestore after the first iOS file-download handoff.
+- Entering Data Management now prepares the local export sources while Firestore is still healthy: current Trip state, expense/settlement/activity state, and recent Snapshot payloads.
+- `trip.json` is built from the current synchronized in-memory Trip state.
+- Full Backup JSON is built from a frozen local Trip + expense snapshot and refuses to export if required local data is incomplete.
+- Expense Excel uses the already synchronized local expense state.
+- Snapshot export uses the Snapshot payload preloaded with Version History data instead of fetching the Snapshot again.
+- Snapshot History reuses the preloaded local Snapshot cache when available.
+- Removed the failed Firestore network-cycle recovery from the read-only export path.
 
-## Regression scope
-- Export / Backup / Snapshot / Restore business logic unchanged.
-- Deleted Items UI unchanged.
-- Firestore Rules and indexes unchanged.
+## Files changed
+- index.html
+- sw.js
+- manifest.json
+- CHANGELOG.md
+- assets/js/trip-backup-service.js
+- assets/js/expenses-module.js
+
+## Firebase
+- Firestore Rules unchanged.
+- Firestore indexes unchanged.

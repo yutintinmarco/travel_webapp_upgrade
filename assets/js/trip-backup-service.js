@@ -259,6 +259,127 @@ function canonicalPortableExport(sourceInput, { tripId = "", snapshotId = "", re
   throw error;
 }
 
+
+function portableTripToStructure(portableInput, { expenseSettings = null } = {}) {
+  const portable = normalizePortableTrip(clone(portableInput) || {});
+  const tripId = clean(portable?.tripId || portable?.meta?.tripId);
+  const meta = portable?.meta || {};
+  if (!tripId || !safeArray(portable?.days).every(day => Array.isArray(day?.items))) {
+    const error = new Error("Local Trip data is incomplete");
+    error.code = "local-export-incomplete";
+    throw error;
+  }
+  const snackMeta = clone(portable?.snacks || {}) || {};
+  delete snackMeta.items;
+  const tripDoc = {
+    schemaVersion: Math.max(2, Number(portable.schemaVersion) || 2),
+    tripId,
+    revision: Math.max(1, Number(portable.revision) || 1),
+    titleSmall: clean(meta.titleSmall),
+    title: clean(meta.titleMain),
+    titleHtml: clean(meta.titleMain),
+    dateRange: clean(meta.dateRange),
+    route: clean(meta.route),
+    accentColor: clean(meta.accentColor),
+    startDate: clean(meta.tripStartIso),
+    endDate: clean(meta.tripEndIso),
+    status: clean(meta.status),
+    coverImage: clean(meta.coverImage),
+    tripIcon: clean(meta.tripIcon),
+    backgroundImage: clean(meta.backgroundImage)
+  };
+  const general = {
+    tripIcon: clean(meta.tripIcon),
+    backgroundImage: clean(meta.backgroundImage),
+    travellers: clone(meta.travellers || {}),
+    cities: clone(meta.cities || {}),
+    flights: clone(meta.flights || []),
+    outbound: clone(meta.outbound || null),
+    inbound: clone(meta.inbound || null),
+    airlineLogo: clean(meta.airlineLogo),
+    weather: clone(meta.weather || {}),
+    hotels: clone(meta.hotels || {}),
+    infoCard: clone(meta.infoCard || {}),
+    galleryDefaults: clone(meta.galleryDefaults || {}),
+    featureColors: clone(meta.featureColors || {}),
+    footerNote: clean(meta.footerNote),
+    savedPlacesMeta: snackMeta
+  };
+  const days = safeArray(portable.days).map((day, index) => {
+    const dayId = clean(day?.dayId || `day-${index + 1}`);
+    const dayData = clone(day) || {};
+    const items = safeArray(dayData.items);
+    delete dayData.items;
+    return {
+      id: dayId,
+      data: { ...dayData, dayId },
+      items: items.map((item, itemIndex) => {
+        const itemId = clean(item?.itemId || `${dayId}-item-${itemIndex + 1}`);
+        return { id: itemId, data: { ...(clone(item) || {}), itemId } };
+      })
+    };
+  });
+  const savedPlaces = safeArray(portable?.snacks?.items).map((place, index) => {
+    const placeId = clean(place?.placeId || `saved-${index + 1}`);
+    return { id: placeId, data: { ...(clone(place) || {}), placeId } };
+  });
+  return {
+    tripId,
+    tripDoc,
+    days,
+    savedPlaces,
+    settings: {
+      general,
+      expenses: clone(expenseSettings || meta.expenses || {}) || {}
+    }
+  };
+}
+
+export function exportLocalTrip(localTripInput, { role = "" } = {}) {
+  const portable = canonicalPortableExport(localTripInput, {
+    tripId: clean(localTripInput?.tripId || localTripInput?.meta?.tripId),
+    revision: Number(localTripInput?.revision) || 1
+  });
+  const tripId = clean(portable.tripId || portable?.meta?.tripId);
+  const revision = Math.max(1, Number(portable.revision) || 1);
+  const structure = portableTripToStructure(portable);
+  return {
+    tripId,
+    revision,
+    role: clean(role),
+    roleLabel: roleLabel(clean(role)),
+    json: portable,
+    filename: `${tripId}-r${revision}.json`,
+    counts: structureCounts(structure),
+    source: "local-live-state"
+  };
+}
+
+export function exportLocalSnapshotTrip(snapshotInput) {
+  const snapshot = snapshotInput || {};
+  const payload = snapshot.payload || snapshot.structure || null;
+  if (!payload) {
+    const error = new Error("Snapshot payload is not cached locally");
+    error.code = "snapshot-invalid";
+    throw error;
+  }
+  const tripId = clean(snapshot.tripId || payload?.tripId || payload?.tripDoc?.tripId);
+  const revision = Math.max(1, Number(snapshot.sourceRevision) || Number(payload?.tripDoc?.revision) || Number(payload?.revision) || 1);
+  const json = canonicalPortableExport(payload, {
+    tripId,
+    snapshotId: clean(snapshot.snapshotId),
+    revision
+  });
+  return {
+    tripId,
+    snapshotId: clean(snapshot.snapshotId),
+    sourceRevision: revision,
+    json,
+    filename: `${tripId}-snapshot-r${revision}-${clean(snapshot.snapshotId)}.json`,
+    source: "local-snapshot-cache"
+  };
+}
+
 async function writeSnapshot(tripId, structure, user, { type = "manual", restoreTargetSnapshotId = "" } = {}) {
   const size = approxJsonBytes(structure);
   if (size > SNAPSHOT_SOFT_LIMIT_BYTES) {
@@ -358,11 +479,12 @@ export async function exportCurrentTrip(tripIdInput, { user: userInput = null } 
   };
 }
 
-export async function listTripSnapshots(tripIdInput, { user: userInput = null, maxItems = SNAPSHOT_LIST_LIMIT } = {}) {
+export async function listTripSnapshots(tripIdInput, { user: userInput = null, maxItems = SNAPSHOT_LIST_LIMIT, knownRole = "" } = {}) {
   const user = await requireUser(userInput);
   const tripId = clean(tripIdInput);
   if (!tripId) throw new Error("Missing tripId");
-  const role = await requireManageRole(tripId, user);
+  const suppliedRole = clean(knownRole);
+  const role = MANAGE_ROLES.has(suppliedRole) ? suppliedRole : await requireManageRole(tripId, user);
   const q = query(
     collection(db, "trips", tripId, "snapshots"),
     orderBy("createdAt", "desc"),
@@ -389,6 +511,8 @@ export async function listTripSnapshots(tripIdInput, { user: userInput = null, m
       title: clean(data.title || payload?.tripDoc?.title),
       approxBytes: Number(data.approxBytes) || approxJsonBytes(payload),
       restoreTargetSnapshotId: clean(data.restoreTargetSnapshotId),
+      payload,
+      tripId,
       ...counts
     };
   });
@@ -713,6 +837,72 @@ export function inspectFullBackup(rawInput) {
     mediaIncluded: backup.mediaIncluded,
     counts: backup.counts,
     auditPolicy: "append-only"
+  };
+}
+
+
+export function exportLocalFullBackup(localTripInput, expenseSnapshotInput, { user = null, role = "" } = {}) {
+  const normalizedRole = clean(role);
+  if (!MANAGE_ROLES.has(normalizedRole)) {
+    const error = new Error("Owner or Admin role required");
+    error.code = "insufficient-role";
+    error.role = normalizedRole;
+    throw error;
+  }
+  const expenseSnapshot = expenseSnapshotInput || {};
+  const tripId = clean(localTripInput?.tripId || localTripInput?.meta?.tripId);
+  if (!tripId || clean(expenseSnapshot.tripId) !== tripId || expenseSnapshot.ready !== true) {
+    const error = new Error("Local expense data is not fully synchronized");
+    error.code = "local-export-incomplete";
+    throw error;
+  }
+  const portableTrip = canonicalPortableExport(localTripInput, {
+    tripId,
+    revision: Number(localTripInput?.revision) || 1
+  });
+  const structure = portableTripToStructure(portableTrip, { expenseSettings: expenseSnapshot.settings || portableTrip?.meta?.expenses || {} });
+  const data = {
+    tripStructure: fullBackupSerialize(structure),
+    portableTrip,
+    expenses: safeArray(expenseSnapshot.expenses),
+    settlements: safeArray(expenseSnapshot.settlements),
+    activityLogs: safeArray(expenseSnapshot.activityLogs)
+  };
+  const counts = fullBackupCountsFromData(data);
+  const revision = Math.max(1, Number(portableTrip.revision) || 1);
+  const json = {
+    backupFormat: FULL_BACKUP_FORMAT,
+    backupVersion: FULL_BACKUP_VERSION,
+    appName: "travel-webapp",
+    tripId,
+    sourceRevision: revision,
+    exportedAt: new Date().toISOString(),
+    exportedBy: {
+      uid: clean(user?.uid),
+      name: clean(user?.displayName),
+      email: clean(user?.email).toLowerCase()
+    },
+    mediaIncluded: false,
+    mediaManifest: [],
+    mediaNote: "Data-only Full Backup v1. Phase 3A will add media files through a versioned backup package.",
+    accessPolicy: "Trip membership / roles are not restored from this backup.",
+    activityLogPolicy: "Activity logs are backed up for archival integrity. Existing audit logs remain append-only during in-place restore.",
+    localExport: {
+      source: "local-live-state",
+      capturedAt: clean(expenseSnapshot.capturedAt) || new Date().toISOString()
+    },
+    counts,
+    data
+  };
+  return {
+    tripId,
+    role: normalizedRole,
+    roleLabel: roleLabel(normalizedRole),
+    revision,
+    counts,
+    json,
+    filename: `${tripId}-full-backup-data-v1-r${revision}.json`,
+    source: "local-live-state"
   };
 }
 
