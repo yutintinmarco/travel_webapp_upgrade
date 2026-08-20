@@ -1,3 +1,10 @@
+# v7.8.2.2 — Profile Keyboard Regression Hotfix
+
+- Reverted the v7.8.2.1 custom Profile keyboard repositioning layer after iOS testing showed repeated viewport/scroll bouncing while typing.
+- Restored the proven pre-v7.8.2.1 keyboard behaviour used by existing Email/Profile inputs: only the existing bottom-navigation keyboard visibility hook remains; no custom page anchoring or repeated scrollTop repositioning.
+- Permanent Delete confirmation now uses the same established Profile input behaviour as existing Email fields rather than a special DELETE-only keyboard system.
+- Permanent Delete backend, Firestore Rules, indexes and cleanup logic are unchanged.
+
 # v7.8.2.1 · Permanent Delete Runtime & iOS Keyboard Hotfix
 
 ## Permanent Delete Runtime

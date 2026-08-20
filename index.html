@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
   <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
   <link rel="dns-prefetch" href="https://api.open-meteo.com">
-  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?v=7.8.2.1">
+  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?v=7.8.2.2">
   <title id="page-title">行程</title>
   <script>
   // v7.7.5.0 · Performance Lite. Memory only: no Firebase reads/writes, no
@@ -2768,29 +2768,6 @@ body.expenses-view-active #expenses-root{
 }
 .trip-member-field input:focus{box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--accent-color,#0a84ff) 72%,transparent);}
 
-/* v7.8.2.1 · iOS keyboard harmony for Profile forms.
-   Keep navigation chrome visually anchored while WebKit resizes/pans the
-   visual viewport. Content may scroll to expose the focused field, but the
-   whole PWA must not look like a webpage being pushed upward. */
-body.profile-form-keyboard-active .bottom-nav{
-  opacity:0!important;
-  pointer-events:none!important;
-  transform:translate3d(0,calc(100% + env(safe-area-inset-bottom,0px) + 32px),0)!important;
-}
-body.profile-form-keyboard-active .profile-nav-page:not([hidden]) .profile-detail-bar{
-  position:sticky;
-  top:env(safe-area-inset-top,0px);
-  z-index:32;
-  background:var(--nav-material);
-  backdrop-filter:blur(24px) saturate(160%);
-  -webkit-backdrop-filter:blur(24px) saturate(160%);
-}
-#trip-delete-confirm-input{
-  /* 16px also avoids iOS treating a focused form field like a zoom target. */
-  font-size:16px;
-  scroll-margin-top:88px;
-  scroll-margin-bottom:220px;
-}
 .trip-member-role-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;}
 .trip-member-role-tabs button{
   min-width:0;height:34px;border:1px solid rgba(255,255,255,.58);border-radius:999px;
@@ -3357,7 +3334,7 @@ body.expenses-view-active #app-version-note{
 #snacks-view::after,
 #info-view::after,
 #profile-view::after{
-  content:"v7.8.2.1" !important;
+  content:"v7.8.2.2" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3378,7 +3355,7 @@ body.expenses-view-active #app-version-note{
   display:none !important;
 }
 body.expenses-view-active .expenses-module .expenses-app::after{
-  content:"v7.8.2.1" !important;
+  content:"v7.8.2.2" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3606,7 +3583,7 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
 </style>
             <link rel="apple-touch-icon" href="assets/icon/trip_icon.png">
   <link rel="icon" type="image/png" href="assets/icon/trip_icon.png">
-  <link rel="manifest" href="manifest.json?v=7.8.2.1">
+  <link rel="manifest" href="manifest.json?v=7.8.2.2">
   <meta name="apple-mobile-web-app-title" content="關嘉露西生日之旅">
   <!-- v7.7.1.2: expenses.css is 144KB and every rule is scoped under
        .expenses-module, yet it used to block the very first paint of the
@@ -3614,8 +3591,8 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
        priority without blocking paint; ensureExpensesStylesheet() flips it to
        media="all" before the 支出 view is ever mounted, so the styling is
        byte-for-byte identical by the time anything expenses-related renders. -->
-  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?v=7.8.2.1" media="print">
-  <noscript><link rel="stylesheet" href="assets/css/expenses.css?v=7.8.2.1"></noscript>
+  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?v=7.8.2.2" media="print">
+  <noscript><link rel="stylesheet" href="assets/css/expenses.css?v=7.8.2.2"></noscript>
 </head>
 <body class="app-entry-gated app-entry-pending">
 <div class="bg-fixed"></div>
@@ -4331,7 +4308,7 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
         <span class="profile-detail-spacer"></span>
       </div>
       <section class="profile-card" aria-label="App 資訊">
-        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.8.2.1</strong></div>
+        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.8.2.2</strong></div>
         <div class="profile-meta-row"><span>資料架構</span><strong>Phase 2G.2</strong></div>
         <div class="profile-meta-row"><span>主要資料來源</span><strong id="app-data-source-label">Firebase / 本機快取</strong></div>
       </section>
@@ -4508,7 +4485,7 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
 </div>
 
 <script>
-const APP_VERSION = "7.8.2.1";
+const APP_VERSION = "7.8.2.2";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 function perfLiteMark(name){try{return window.__perfLite?.mark(name);}catch(error){return null;}}
@@ -10337,67 +10314,13 @@ async function requestPortraitOrientationLock(){
 void requestPortraitOrientationLock();
 window.addEventListener("orientationchange",()=>setTimeout(()=>{void requestPortraitOrientationLock();refreshCollapseMetrics();updateBottomNavIndicator();scheduleCollapseUpdate();},220),{passive:true});
 
-const keyboardViewport=window.visualViewport||null;
-let keyboardBaselineHeight=Math.max(window.innerHeight,Number(keyboardViewport?.height)||0);
-let profileFormKeyboardFocus=false;
-let tripDeleteKeyboardReturnScrollTop=null;
-function focusedFormControl(){
-  const active=document.activeElement;
-  return active instanceof HTMLElement&&active.matches?.("input, textarea, select, [contenteditable='true']")?active:null;
-}
-function profileKeyboardIsOpen(){
-  if(profileFormKeyboardFocus)return true;
-  if(!keyboardViewport)return false;
-  keyboardBaselineHeight=Math.max(keyboardBaselineHeight,window.innerHeight,Number(keyboardViewport.height)||0);
-  return keyboardBaselineHeight-Number(keyboardViewport.height||0)>120;
-}
-function applyProfileKeyboardState(){
-  const open=profileKeyboardIsOpen();
-  bottomNav?.classList.toggle("is-keyboard-open",open);
-  document.body.classList.toggle("profile-form-keyboard-active",open&&profileFormKeyboardFocus);
-  if(open&&profileFormKeyboardFocus){
-    // Keep the layout viewport itself anchored. Only #scroll-shell is allowed to
-    // move to reveal the focused field, matching native Settings-style forms.
-    if(window.scrollY!==0)window.scrollTo(0,0);
-  }else if(!open){
-    keyboardBaselineHeight=Math.max(window.innerHeight,Number(keyboardViewport?.height)||0);
-  }
-}
-function positionFocusedProfileField(control){
-  if(!control||!scrollShell)return;
-  const page=control.closest?.(".profile-nav-page");
-  if(!page)return;
-  const viewportHeight=Math.max(280,Number(keyboardViewport?.height)||window.innerHeight);
-  const rect=control.getBoundingClientRect();
-  const desiredTop=Math.max(118,Math.min(178,viewportHeight*.34));
-  const delta=rect.top-desiredTop;
-  if(Math.abs(delta)>6)scrollShell.scrollTop=Math.max(0,scrollShell.scrollTop+delta);
-  if(window.scrollY!==0)window.scrollTo(0,0);
-}
-document.addEventListener("focusin",event=>{
-  const control=event.target instanceof HTMLElement&&event.target.matches?.("input, textarea, select, [contenteditable='true']")?event.target:null;
-  if(!control)return;
-  profileFormKeyboardFocus=!!control.closest?.(".profile-nav-page");
-  if(control.id==="trip-delete-confirm-input"&&scrollShell)tripDeleteKeyboardReturnScrollTop=scrollShell.scrollTop;
-  applyProfileKeyboardState();
-  if(profileFormKeyboardFocus)setTimeout(()=>{applyProfileKeyboardState();positionFocusedProfileField(control);},70);
-},{passive:true});
-document.addEventListener("focusout",event=>{
-  const leavingDelete=event.target?.id==="trip-delete-confirm-input";
-  setTimeout(()=>{
-    const active=focusedFormControl();
-    profileFormKeyboardFocus=!!active?.closest?.(".profile-nav-page");
-    applyProfileKeyboardState();
-    if(!profileFormKeyboardFocus&&leavingDelete&&scrollShell&&tripDeleteKeyboardReturnScrollTop!=null){
-      const restore=tripDeleteKeyboardReturnScrollTop;tripDeleteKeyboardReturnScrollTop=null;
-      setTimeout(()=>{if(!focusedFormControl())scrollShell.scrollTop=restore;},90);
-    }
-  },80);
-},{passive:true});
-if(keyboardViewport){
-  const onViewportKeyboardChange=()=>{applyProfileKeyboardState();const control=focusedFormControl();if(control&&profileFormKeyboardFocus)positionFocusedProfileField(control);};
-  keyboardViewport.addEventListener("resize",onViewportKeyboardChange,{passive:true});
-  keyboardViewport.addEventListener("scroll",onViewportKeyboardChange,{passive:true});
+if(window.visualViewport&&bottomNav){
+  const updateKeyboardState=()=>{
+    const keyboardOpen=(window.innerHeight-window.visualViewport.height)>150;
+    bottomNav.classList.toggle("is-keyboard-open",keyboardOpen);
+  };
+  window.visualViewport.addEventListener("resize",updateKeyboardState,{passive:true});
+  window.visualViewport.addEventListener("scroll",updateKeyboardState,{passive:true});
 }
 
 refreshCollapseMetrics();
@@ -10405,7 +10328,7 @@ refreshCollapseMetrics();
 // Android / Chrome PWA support. Versioned app-shell Service Worker; normal launches are cache-first while explicit reloads stay network-first.
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("./sw.js?v=7.8.2.1").catch(() => {});
+    navigator.serviceWorker.register("./sw.js?v=7.8.2.2").catch(() => {});
   });
 }
 
