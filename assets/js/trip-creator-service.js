@@ -21,13 +21,20 @@ export async function getTripCreatorEntitlement(userInput = null, { force = fals
   const user = await requireUser(userInput);
   if (!force && entitlementCache && entitlementUid === user.uid) return { ...entitlementCache };
 
-  const snapshot = await getDoc(doc(db, "authorizedTripCreators", user.uid));
-  const data = snapshot.exists() ? snapshot.data() || {} : {};
+  const [creatorSnapshot, adminSnapshot] = await Promise.all([
+    getDoc(doc(db, "authorizedTripCreators", user.uid)),
+    getDoc(doc(db, "appAdmins", user.uid))
+  ]);
+  const creatorData = creatorSnapshot.exists() ? creatorSnapshot.data() || {} : {};
+  const adminData = adminSnapshot.exists() ? adminSnapshot.data() || {} : {};
+  const isAdmin = adminSnapshot.exists() && adminData.enabled === true;
+  const isCreator = creatorSnapshot.exists() && creatorData.enabled === true;
   entitlementUid = user.uid;
   entitlementCache = {
     uid: user.uid,
-    enabled: snapshot.exists() && data.enabled === true,
-    source: snapshot.metadata?.fromCache === true ? "cache" : "server"
+    enabled: isAdmin || isCreator,
+    via: isAdmin ? "app-admin" : (isCreator ? "creator" : "none"),
+    source: (creatorSnapshot.metadata?.fromCache === true || adminSnapshot.metadata?.fromCache === true) ? "cache" : "server"
   };
   return { ...entitlementCache };
 }

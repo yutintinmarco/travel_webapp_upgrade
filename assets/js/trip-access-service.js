@@ -74,12 +74,13 @@ function attachMemberListener({ preserveState = false } = {}) {
   }, error => {
     memberResolved = true;
     memberFromCache = false;
-    // A permission-denied response is an authoritative server rejection for the
-    // current authenticated identity. Treat it as confirmed no-access so the
-    // entry gate can purge stale local UI instead of waiting indefinitely.
-    memberServerConfirmed = error?.code === "permission-denied" || navigator.onLine !== false;
-    latestMemberData = null;
-    if (error?.code !== "permission-denied") console.warn("Trip member access listener", error);
+    // Only an explicit permission-denied response is an authoritative revoke.
+    // A transient online/network listener error must never throw away a usable
+    // local Trip just because the device happens to be connected to Wi-Fi.
+    const denied = error?.code === "permission-denied";
+    memberServerConfirmed = denied;
+    if (denied) latestMemberData = null;
+    else console.warn("Trip member access listener", error);
     computeAccess();
   });
 }

@@ -154,6 +154,21 @@ export async function grantTripCreatorByEmail(emailInput, { user: userInput = nu
     throw error;
   }
 
+  const [adminSnapshot, creatorSnapshot] = await Promise.all([
+    getDoc(doc(db, "appAdmins", target.uid)),
+    getDoc(doc(db, "authorizedTripCreators", target.uid))
+  ]);
+  if (adminSnapshot.exists() && adminSnapshot.data()?.enabled === true) {
+    const error = new Error("User is already an App Admin");
+    error.code = "already-app-admin";
+    throw error;
+  }
+  if (creatorSnapshot.exists() && creatorSnapshot.data()?.enabled === true) {
+    const error = new Error("User is already a Trip Creator");
+    error.code = "already-creator";
+    throw error;
+  }
+
   await setDoc(doc(db, "authorizedTripCreators", target.uid), {
     uid: target.uid,
     enabled: true,

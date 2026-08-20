@@ -1,3 +1,23 @@
+# v7.8.0.2 · Phase 2G.1 UX & Local-First Access Polish
+
+## What changed
+
+* Reworked the signed-out Entry Gateway into a proper app login screen using the existing Travel App icon, current iOS typography, card geometry and safe-area system.
+* Restored speed-first local boot after Firebase Auth confirms the same Google UID: the remembered IndexedDB Trip cache can paint immediately while membership is revalidated in the background.
+* A server-confirmed revoke now clears the optimistic cache window, invalidates the Trip render cache and ejects the Trip without requiring an app restart.
+* Transient network/listener errors no longer masquerade as a revoke or hide a usable local Trip; only an explicit permission-denied decision ejects access.
+* App Admin is now a superset of Trip Creator for new-Trip creation. App Admin no longer needs to add their own email as a separate Creator.
+* Creator management now reports `already-app-admin` and `already-creator` instead of silently rewriting an existing entitlement.
+* No Phase 2G.2 lifecycle work is included in this build.
+
+## Deployment
+
+* Deploy `firestore.rules`.
+* No Firestore index deployment is required.
+* No Cloud Function deployment is required.
+
+---
+
 # v7.8.0.1 · Phase 2G.1 App Admin Completion
 
 ## Scope

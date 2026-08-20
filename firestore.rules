@@ -22,8 +22,9 @@ service cloud.firestore {
     }
     function isAuthorizedTripCreator() {
       return signedIn()
-        && exists(creatorPath(request.auth.uid))
-        && get(creatorPath(request.auth.uid)).data.enabled == true;
+        && (isAppAdmin()
+          || (exists(creatorPath(request.auth.uid))
+            && get(creatorPath(request.auth.uid)).data.enabled == true));
     }
     function validCreatorGrant(uid, data) {
       return data.keys().hasAll([
@@ -151,7 +152,7 @@ service cloud.firestore {
     // intentionally NOT client-manageable. The first trusted UID is seeded once
     // from Firebase Console; Creator management can then stay inside the WebApp.
     match /appAdmins/{uid} {
-      allow get: if signedIn() && request.auth.uid == uid;
+      allow get: if signedIn() && (request.auth.uid == uid || isAppAdmin());
       allow list, create, update, delete: if false;
     }
 
