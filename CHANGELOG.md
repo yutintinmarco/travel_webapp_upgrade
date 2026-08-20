@@ -1,3 +1,10 @@
+# v7.8.2.4 · Proven Native Keyboard Handoff
+
+- Keyboard interaction only. No app feature, page layout, Profile navigation, Permanent Delete backend, Firebase Rules, indexes, assets, or data flow changed.
+- Replaced the Travel App viewport-height-only keyboard detector with the proven Price Tracker PWA focus + visualViewport implementation: keyboard-capable focus hides Bottom Navigation immediately; focus/viewport state restores it when the keyboard closes.
+- Bottom Navigation keyboard exit motion now uses the same interaction timing/distance as the reference implementation.
+- No keyboard handler may write scrollTop, reposition the page, or alter form geometry.
+
 # v7.8.2.3 · Legacy iOS Keyboard Restore
 
 - Restores the v7.7.7.4 keyboard interaction contract directly from the frozen baseline: Bottom Navigation keyboard CSS, visualViewport keyboard detection, and Profile `trip-member-field` input CSS are copied verbatim.
