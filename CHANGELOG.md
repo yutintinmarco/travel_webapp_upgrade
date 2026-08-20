@@ -1,3 +1,27 @@
+# v7.8.1.2 · Phase 2G.2 Harmony & Stability
+
+## UI Harmony
+
+* Trip Lock status-row geometry is now class-based so the v7.3.13 Profile compositor clone keeps the status pill and chevron on one line after push / pop navigation.
+* Global Lock disabled Import / Restore / Snapshot Restore rows now reuse the existing no-Team disabled appearance, including muted text, icon and chevron.
+* System Management now uses a full Profile navigation page built only from the existing Profile detail bar, grouped card, member list, field and primary-action components. The old management sheet is removed.
+* A zero-Trip App Admin opens that same System Management page from Access Lobby; no duplicate management UI is introduced.
+
+## Transition & Revoke Stability
+
+* A server-confirmed revoke is now treated as a Trip-switch event rather than an App-entry event. If another known active Trip is available, the App switches directly to it and keeps local-first rendering while access is rechecked in the background.
+* Access Lobby is shown only when no other active accessible Trip is available. Revoke no longer intentionally routes through Login / resolving UI while Firebase Auth is still valid.
+* Existing Expense listener safety remains intact. A hard reload is retained only when the Expenses module has already mounted long-lived listeners for a different Trip; the replacement Trip ID is persisted first so Fast Resume reopens the correct Trip.
+* Existing local-first boot, last-known access, permissions, Global Lock, Personal Archive and Restore logic remain functionally unchanged.
+
+## Compatibility
+
+* No Firestore Rules or index changes.
+* No image, icon, background or Expenses CSS changes.
+* v7.3.13 Profile Navigation compositor remains protected and unmodified.
+
+---
+
 # v7.8.1.1 · Phase 2G.2 Restore Preflight Hotfix
 
 ## Fixed

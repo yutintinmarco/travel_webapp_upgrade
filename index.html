@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
   <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
   <link rel="dns-prefetch" href="https://api.open-meteo.com">
-  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?v=7.8.1.1">
+  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?v=7.8.1.2">
   <title id="page-title">行程</title>
   <script>
   // v7.7.5.0 · Performance Lite. Memory only: no Firebase reads/writes, no
@@ -2396,12 +2396,23 @@ html:not(.theme-light):not(.theme-dark) .profile-chevron{
   letter-spacing:.01em;
 }
 
-/* v7.8.1.1 · Trip Lock row alignment + locked Data Management affordance */
-#trip-global-lock-open-btn{grid-template-columns:36px minmax(0,1fr) auto auto;column-gap:7px;}
-#trip-global-lock-open-btn .profile-status-pill{justify-self:end;margin-right:1px;white-space:nowrap;}
-#trip-global-lock-open-btn .profile-chevron{justify-self:end;}
+/* v7.8.1.2 · Clone-safe Settings row geometry + existing disabled treatment.
+   The v7.3.13 compositor deliberately strips IDs from snapshot clones, so any
+   layout that must survive push / pop transitions is class-based. */
+.profile-row.profile-row-with-status{grid-template-columns:36px minmax(0,1fr) auto auto;column-gap:7px;}
+.profile-row.profile-row-with-status .profile-status-pill{justify-self:end;margin-right:1px;white-space:nowrap;}
+.profile-row.profile-row-with-status .profile-chevron{justify-self:end;}
 .profile-row[disabled] .profile-chevron{opacity:.48;}
 .profile-row[disabled] .profile-row-icon{filter:saturate(.18);}
+/* Reuse the same visual language as the existing no-Team disabled row. */
+.profile-row[disabled].profile-row-disabled .profile-row-copy strong,
+.profile-row[disabled].profile-row-disabled .profile-row-copy small{color:var(--label-secondary);}
+
+/* Zero-Trip App Admin still uses the exact same Profile page. Entry chrome stays
+   hidden while the normal Profile navigation host is temporarily exposed. */
+body.app-entry-gated.app-admin-entry-route .app-entry-gateway{display:none!important;}
+body.app-entry-gated.app-admin-entry-route #scroll-shell{visibility:visible!important;pointer-events:auto!important;}
+body.app-entry-gated.app-admin-entry-route #bottom-nav{visibility:hidden!important;pointer-events:none!important;}
 
 /* 5 · Navigation bar -------------------------------------------------
    A back control that names where it goes is the single strongest iOS cue.
@@ -3321,7 +3332,7 @@ body.expenses-view-active #app-version-note{
 #snacks-view::after,
 #info-view::after,
 #profile-view::after{
-  content:"v7.8.1.1" !important;
+  content:"v7.8.1.2" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3342,7 +3353,7 @@ body.expenses-view-active #app-version-note{
   display:none !important;
 }
 body.expenses-view-active .expenses-module .expenses-app::after{
-  content:"v7.8.1.1" !important;
+  content:"v7.8.1.2" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3570,7 +3581,7 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
 </style>
             <link rel="apple-touch-icon" href="assets/icon/trip_icon.png">
   <link rel="icon" type="image/png" href="assets/icon/trip_icon.png">
-  <link rel="manifest" href="manifest.json?v=7.8.1.1">
+  <link rel="manifest" href="manifest.json?v=7.8.1.2">
   <meta name="apple-mobile-web-app-title" content="關嘉露西生日之旅">
   <!-- v7.7.1.2: expenses.css is 144KB and every rule is scoped under
        .expenses-module, yet it used to block the very first paint of the
@@ -3578,8 +3589,8 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
        priority without blocking paint; ensureExpensesStylesheet() flips it to
        media="all" before the 支出 view is ever mounted, so the styling is
        byte-for-byte identical by the time anything expenses-related renders. -->
-  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?v=7.8.1.1" media="print">
-  <noscript><link rel="stylesheet" href="assets/css/expenses.css?v=7.8.1.1"></noscript>
+  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?v=7.8.1.2" media="print">
+  <noscript><link rel="stylesheet" href="assets/css/expenses.css?v=7.8.1.2"></noscript>
 </head>
 <body class="app-entry-gated app-entry-pending">
 <div class="bg-fixed"></div>
@@ -3800,7 +3811,7 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
           <span class="profile-row-copy"><strong>旅程設定</strong><small>權限、支出及目前旅程設定</small></span>
           <span class="profile-chevron">›</span>
         </button>
-        <button class="profile-row" id="system-admin-open-btn" type="button" hidden>
+        <button class="profile-row" id="system-admin-open-btn" type="button" data-profile-open="system-admin" hidden>
           <span class="profile-row-icon profile-icon-grey">⚙︎</span>
           <span class="profile-row-copy"><strong>系統管理</strong><small>旅程建立權限</small></span>
           <span class="profile-chevron">›</span>
@@ -3939,7 +3950,7 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
           <span class="profile-row-copy"><strong>旅程權限</strong><small>邀請成員、角色及存取權限</small></span>
           <span class="profile-chevron">›</span>
         </button>
-        <button class="profile-row" id="trip-global-lock-open-btn" type="button" data-profile-open="trip-global-lock">
+        <button class="profile-row profile-row-with-status" id="trip-global-lock-open-btn" type="button" data-profile-open="trip-global-lock">
           <span class="profile-row-icon profile-icon-red">🔒</span>
           <span class="profile-row-copy"><strong>旅程鎖定</strong><small id="trip-global-lock-menu-subtitle">全域唯讀，獨立於支出鎖定</small></span>
           <span class="profile-status-pill" id="trip-global-lock-menu-status">可修改</span>
@@ -4204,6 +4215,35 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
       <div class="trip-activity-status" id="trip-activity-status">操作記錄屬於整個 Trip，而唔再只係支出紀錄。</div>
     </div>
 
+    <div class="profile-nav-page" id="profile-page-system-admin" data-profile-page="system-admin" hidden>
+      <div class="profile-detail-bar">
+        <button class="profile-detail-back" id="system-admin-back" type="button" aria-label="返回我的"><span class="profile-back-glyph">‹</span><span class="profile-detail-back-label">我的</span></button>
+        <h2>系統管理</h2>
+        <span class="profile-detail-spacer"></span>
+      </div>
+
+      <div class="profile-section-label">旅程建立權限</div>
+      <section class="profile-card trip-member-pending-card" aria-label="旅程建立權限">
+        <div class="profile-inline-section-heading"><strong>已授權 Creator</strong><span class="trip-library-count" id="app-admin-creator-count">—</span></div>
+        <div class="trip-member-list" id="app-admin-creator-list"></div>
+        <div class="trip-library-status" id="app-admin-list-status">開啟後會讀取目前 Creator 名單。</div>
+      </section>
+
+      <section class="profile-card trip-member-invite-card" aria-label="新增 Creator">
+        <div class="trip-member-card-title">
+          <strong>新增 Creator</strong>
+          <small>授權已登入過 Travel App 嘅 Google 帳戶建立全新 Firebase Trip。</small>
+        </div>
+        <label class="trip-member-field">
+          <span>Google email</span>
+          <input id="app-admin-creator-email" type="email" inputmode="email" autocomplete="email" placeholder="name@gmail.com">
+        </label>
+        <button class="trip-member-primary-action" id="app-admin-add-creator" type="button">新增 Creator</button>
+        <div class="trip-member-inline-status" id="app-admin-action-status">對方需要至少登入過 Travel App 一次，系統先可以安全對應 Google UID。</div>
+      </section>
+      <div class="profile-backup-note">App Admin 已自動具備建立新 Trip 權限，毋須另外加入 Creator；Creator 只代表可以建立新 Trip，唔會取得其他 Trip 嘅權限。</div>
+    </div>
+
     <div class="profile-nav-page" id="profile-page-app-data" data-profile-page="app-data" hidden>
       <div class="profile-detail-bar">
         <button class="profile-detail-back" type="button" data-profile-back aria-label="返回我的"><span class="profile-back-glyph">‹</span><span class="profile-detail-back-label">我的</span></button>
@@ -4211,8 +4251,8 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
         <span class="profile-detail-spacer"></span>
       </div>
       <section class="profile-card" aria-label="App 資訊">
-        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.8.1.1</strong></div>
-        <div class="profile-meta-row"><span>資料架構</span><strong>Phase 2G.1</strong></div>
+        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.8.1.2</strong></div>
+        <div class="profile-meta-row"><span>資料架構</span><strong>Phase 2G.2</strong></div>
         <div class="profile-meta-row"><span>主要資料來源</span><strong id="app-data-source-label">Firebase / 本機快取</strong></div>
       </section>
 
@@ -4368,31 +4408,6 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
   </div>
 </div>
 
-<div class="modal-backdrop trip-import-backdrop" id="app-admin-backdrop" aria-hidden="true">
-  <div class="modal trip-import-modal" role="dialog" aria-modal="true" aria-labelledby="app-admin-title">
-    <div class="sheet-grabber-zone" aria-hidden="true"><span class="sheet-grabber"></span></div>
-    <div class="trip-import-scroll">
-      <div class="trip-import-title-row">
-        <div><h3 id="app-admin-title">系統管理</h3><p>管理邊啲已登入過 Travel App 嘅 Google 帳戶可以建立全新 Firebase Trip。</p></div>
-      </div>
-      <div class="trip-import-mode" id="app-admin-mode">App Admin · 旅程建立權限</div>
-      <div class="profile-inline-section-heading app-admin-sheet-heading"><strong>旅程建立權限</strong><span class="trip-library-count" id="app-admin-creator-count">—</span></div>
-      <div class="trip-member-list app-admin-sheet-list" id="app-admin-creator-list"></div>
-      <div class="trip-library-status" id="app-admin-list-status">開啟後會讀取目前 Creator 名單。</div>
-      <label class="trip-member-field">
-        <span>Google email</span>
-        <input id="app-admin-creator-email" type="email" inputmode="email" autocomplete="email" placeholder="name@gmail.com">
-      </label>
-      <button class="trip-member-primary-action" id="app-admin-add-creator" type="button">新增 Creator</button>
-      <div class="trip-member-inline-status" id="app-admin-action-status">對方需要至少登入過 Travel App 一次，系統先可以安全對應 Google UID。</div>
-      <div class="trip-library-status app-admin-bootstrap-note">App Admin 已自動具備建立新 Trip 權限，毋須另外加入 Creator；Creator 只代表可以建立新 Trip，唔會取得其他 Trip 嘅權限。</div>
-      <div class="trip-import-actions app-admin-actions">
-        <button class="trip-import-cancel" id="app-admin-close" type="button">完成</button>
-      </div>
-    </div>
-  </div>
-</div>
-
 <div class="modal-backdrop" id="detail-backdrop" aria-hidden="true">
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="detail-title">
     <div class="sheet-grabber-zone" id="detail-sheet-grabber" aria-hidden="true"><span class="sheet-grabber"></span></div>
@@ -4413,7 +4428,7 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
 </div>
 
 <script>
-const APP_VERSION = "7.8.1.1";
+const APP_VERSION = "7.8.1.2";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 function perfLiteMark(name){try{return window.__perfLite?.mark(name);}catch(error){return null;}}
@@ -6500,6 +6515,7 @@ let tripLibraryCatalogService=null;
 let tripLibrarySchemaService=null;
 let tripLibraryCurrentUser=null;
 let tripLibraryCloudState={status:"signed-out",trips:[],error:null,fromCache:false,serverConfirmed:false};
+let tripLibraryLastReadyCatalog={uid:"",trips:[]};
 
 // Phase 2E · Firebase is the live trip source once an authenticated member trip
 // is available. Bundled trip.json remains the safe bootstrap / signed-out fallback.
@@ -6672,6 +6688,7 @@ function restartActiveTripCatalog(){
   tripLibraryCloudState={status:"loading",trips:[],error:null,fromCache:false,serverConfirmed:false};renderTripLibrary();refreshAppEntryState();
   tripLibraryStopCatalog=tripLibraryCatalogService.subscribeUserTrips(tripLibraryCurrentUser,state=>{
     tripLibraryCloudState=state;
+    if(state?.status==="ready")tripLibraryLastReadyCatalog={uid:String(tripLibraryCurrentUser?.uid||""),trips:(state.trips||[]).map(trip=>({...trip}))};
     if(state?.status==="ready"&&state?.serverConfirmed===true&&appEntryResumeLatch.tripId){
       const latchedId=String(appEntryResumeLatch.tripId||"");
       const stillActive=(state.trips||[]).some(trip=>String(trip?.tripId||"")===latchedId&&trip?.archived!==true);
@@ -6713,6 +6730,8 @@ function initTripLibrarySafe(data){
         if(tripLibraryAuthUnsubscribe) tripLibraryAuthUnsubscribe();
         tripLibraryAuthUnsubscribe=authService.subscribeAuthState(user=>{
           tripLibraryCurrentUser=user||null;
+          const catalogUid=String(user?.uid||"");
+          if(String(tripLibraryLastReadyCatalog.uid||"")!==catalogUid)tripLibraryLastReadyCatalog={uid:catalogUid,trips:[]};
           rememberCacheUid(user?.uid||"");
           if(tripLibraryStopCatalog){tripLibraryStopCatalog();tripLibraryStopCatalog=null;}
           stopArchivedTripSubscription();
@@ -7321,6 +7340,52 @@ function stopFirebaseTripLoader({fallback=false}={}){
   tripLoaderActiveId="";
   if(fallback)applyBundledTripFallback();
 }
+let accessRevokeRoutePromise=null;
+let accessRevokeRouteSourceId="";
+async function routeAwayFromRevokedTrip(revokedTripIdInput){
+  const revokedTripId=String(revokedTripIdInput||"").trim();
+  if(!revokedTripId)return false;
+  if(accessRevokeRoutePromise&&accessRevokeRouteSourceId===revokedTripId)return accessRevokeRoutePromise;
+  accessRevokeRouteSourceId=revokedTripId;
+  accessRevokeRoutePromise=(async()=>{
+    const uid=String(window.__appAuthUser?.uid||tripLibraryCurrentUser?.uid||"").trim();
+    const currentTrips=Array.isArray(tripLibraryCloudState.trips)?tripLibraryCloudState.trips:[];
+    const fallbackTrips=String(tripLibraryLastReadyCatalog.uid||"")===uid?tripLibraryLastReadyCatalog.trips:[];
+    const knownTrips=currentTrips.length?currentTrips:fallbackTrips;
+    const candidates=knownTrips.filter(trip=>trip?.archived!==true&&String(trip?.tripId||"")!==revokedTripId);
+    const target=candidates[0]||null;
+    const {session,access}=await getTripLoaderServices();
+    if(!target){
+      session.clearActiveTripId?.();updateTripUrl("");
+      appEntryOptimisticTripId="";appEntryOptimisticUid="";clearAppEntryResumeLatch();
+      stopFirebaseTripLoader({fallback:false});
+      accessRevokedState=false;renderCloudSafetyStrip();refreshAppEntryState();
+      return false;
+    }
+    const targetId=String(target.tripId||"").trim();
+    session.setActiveTripId(targetId);updateTripUrl(targetId);tripBootPreferredId=targetId;
+    appEntryOptimisticTripId=targetId;appEntryOptimisticUid=uid;setAppEntryResumeLatch(targetId,uid);
+
+    // Expenses owns long-lived Trip-specific listeners. If it was already
+    // mounted for the revoked Trip, reload only after the new active Trip has
+    // been persisted. v7.8.0.5 Fast Resume then opens the replacement Trip
+    // directly, preserving data integrity without routing through Login.
+    const mountedExpenseTrip=String(window.__expensesModuleTripId||"");
+    if(mountedExpenseTrip&&mountedExpenseTrip!==targetId){location.reload();return true;}
+
+    const cacheTask=applyInstantTripCache(targetId,window.__appAuthUser||tripLibraryCurrentUser);
+    const loaderTask=startFirebaseTripLoader(targetId);
+    try{access.initTripAccess?.(targetId);access.refreshTripAccess?.();}catch(error){console.warn("Fallback Trip access refresh",error);}
+    await Promise.race([Promise.resolve(cacheTask),new Promise(resolve=>setTimeout(resolve,160))]);
+    accessRevokedState=false;renderCloudSafetyStrip();
+    // Do not gate the UI while the replacement Trip is reconnecting. The
+    // user-bound latch keeps the usable local workspace visible.
+    refreshAppEntryState();
+    Promise.allSettled([cacheTask,loaderTask]).then(()=>refreshAppEntryState()).catch(()=>{});
+    return true;
+  })().finally(()=>{accessRevokeRoutePromise=null;accessRevokeRouteSourceId="";});
+  return accessRevokeRoutePromise;
+}
 async function startFirebaseTripLoader(tripIdInput){
   const tripId=String(tripIdInput||"").trim();if(!tripId)return;
   const {loader,access}=await getTripLoaderServices();
@@ -7361,8 +7426,9 @@ async function startFirebaseTripLoader(tripIdInput){
         if(String(appEntryOptimisticTripId||"")===tripId){appEntryOptimisticTripId="";appEntryOptimisticUid="";}
         if(String(appEntryResumeLatch.tripId||"")===tripId)clearAppEntryResumeLatch();
         invalidateInstantTripCache(tripId).catch(()=>{});
-        stopFirebaseTripLoader({fallback:false});refreshAppEntryState();
-        if(tripLibraryCloudState.status==="ready")reconcileFirebaseTripLoader().catch(()=>{});
+        stopFirebaseTripLoader({fallback:false});
+        if(tripLibraryCloudState.status==="ready")routeAwayFromRevokedTrip(tripId).catch(error=>{console.warn("Revoked Trip fallback",error);refreshAppEntryState();});
+        else refreshAppEntryState();
       }else if(optimisticVisible){
         // Travel-first behaviour: keep the already rendered local Trip usable
         // through a transient sync failure. Firestore/access listeners retry in
@@ -7415,9 +7481,11 @@ function renderDataManagementLockState(){
   const locked=currentTripGlobalLocked();
   const importBtn=document.getElementById("trip-import-btn"),restoreBtn=document.getElementById("trip-full-backup-restore-open"),snapshotRestore=document.getElementById("snapshot-detail-restore");
   const importSubtitle=document.getElementById("trip-import-menu-subtitle"),restoreSubtitle=document.getElementById("trip-restore-menu-subtitle");
-  if(importBtn){importBtn.disabled=locked;importBtn.setAttribute("aria-disabled",locked?"true":"false");}
-  if(restoreBtn){restoreBtn.disabled=locked;restoreBtn.setAttribute("aria-disabled",locked?"true":"false");}
-  if(snapshotRestore){snapshotRestore.disabled=locked;snapshotRestore.setAttribute("aria-disabled",locked?"true":"false");}
+  [importBtn,restoreBtn,snapshotRestore].forEach(button=>{
+    if(!button)return;
+    button.disabled=locked;button.setAttribute("aria-disabled",locked?"true":"false");
+    button.classList.toggle("profile-row-disabled",locked);
+  });
   if(importSubtitle)importSubtitle.textContent=locked?"旅程已鎖定，請先解除鎖定後再匯入":"只接受 Portable Trip JSON；完整 Backup 會自動攔截";
   if(restoreSubtitle)restoreSubtitle.textContent=locked?"旅程已鎖定，請先解除鎖定後再還原":"只接受 Full Backup JSON；可選完整、行程或支出還原";
 }
@@ -8654,13 +8722,13 @@ document.getElementById("trip-member-pending-list")?.addEventListener("click",as
   try{const service=await getTripMemberService();await service.cancelTripInvite(button.dataset.memberCancelInvite,{user:tripLibraryCurrentUser});}
   catch(error){alert(tripMemberFriendlyError(error));button.disabled=false;}
 });
-// v7.8.0.1 · App Admin / Trip Creator management.
-// Both the normal Profile Settings row and the zero-Trip Access Lobby open the
-// same proven bottom-sheet surface, so global management never depends on
-// having an active Trip and does not create a parallel UI system.
+// v7.8.1.2 · App Admin / Trip Creator management.
+// Normal management now lives in the existing Profile navigation stack instead
+// of a bottom sheet. The zero-Trip Access Lobby temporarily exposes this exact
+// same page, so there is still only one management UI.
 let appAdminCreatorRows=[];
 let appAdminBusy=false;
-function appAdminBackdrop(){return document.getElementById("app-admin-backdrop");}
+let appAdminOpenedFromEntry=false;
 function appAdminFriendlyError(error){
   const code=String(error?.code||"");
   if(code==="invalid-email")return"請輸入有效 Google email。";
@@ -8711,27 +8779,38 @@ async function loadAppAdminCreators(){
     if(status)status.textContent=appAdminFriendlyError(error);
   }
 }
-async function openAppAdminManagement(){
-  if(appAdminState.status!=="ready"||appAdminState.enabled!==true){
-    const state=await refreshAppAdminEntitlement(window.__appAuthUser,{force:true});
-    if(!state.enabled){alert("目前帳戶唔係 App Admin。");return;}
-  }
-  const backdrop=appAdminBackdrop();if(!backdrop)return;
+function resetAppAdminEditor(){
   const action=document.getElementById("app-admin-action-status"),input=document.getElementById("app-admin-creator-email");
   if(action){action.classList.remove("is-error");action.textContent="對方需要至少登入過 Travel App 一次，系統先可以安全對應 Google UID。";}
   if(input)input.value="";
-  backdrop.setAttribute("aria-hidden","false");document.body.classList.add("app-admin-modal-open");lockScroll();requestAnimationFrame(()=>backdrop.classList.add("active"));
-  loadAppAdminCreators();
 }
-function closeAppAdminManagement(){
-  if(appAdminBusy)return;
-  const backdrop=appAdminBackdrop();if(!backdrop)return;
-  backdrop.classList.remove("active");backdrop.setAttribute("aria-hidden","true");document.body.classList.remove("app-admin-modal-open");unlockScroll();
+async function ensureAppAdminAccess(){
+  if(appAdminState.status==="ready"&&appAdminState.enabled===true)return true;
+  const state=await refreshAppAdminEntitlement(window.__appAuthUser,{force:true});
+  if(state.enabled)return true;
+  alert("目前帳戶唔係 App Admin。");return false;
 }
-document.getElementById("system-admin-open-btn")?.addEventListener("click",openAppAdminManagement);
-document.getElementById("entry-system-admin-btn")?.addEventListener("click",openAppAdminManagement);
-document.getElementById("app-admin-close")?.addEventListener("click",closeAppAdminManagement);
-document.getElementById("app-admin-backdrop")?.addEventListener("click",event=>{if(event.target===event.currentTarget)closeAppAdminManagement();});
+async function openAppAdminFromEntry(){
+  if(!(await ensureAppAdminAccess()))return;
+  appAdminOpenedFromEntry=true;
+  document.body.classList.add("app-admin-entry-route");
+  setView("profile",{restoreScroll:false});
+  profileNavStack=[{key:"root",scrollTop:0,snapshot:null}];
+  profileSetLivePage("root",0);
+  resetAppAdminEditor();
+  loadAppAdminCreators();requestAnimationFrame(()=>openProfilePage("system-admin"));
+}
+function closeAppAdminEntryRoute(){
+  appAdminOpenedFromEntry=false;
+  profileNavStack=[{key:"root",scrollTop:0,snapshot:null}];
+  profileSetLivePage("root",0);
+  setView("itinerary",{restoreScroll:false});
+  document.body.classList.remove("app-admin-entry-route");
+  refreshAppEntryState();
+}
+document.getElementById("system-admin-open-btn")?.addEventListener("click",()=>{resetAppAdminEditor();loadAppAdminCreators();});
+document.getElementById("entry-system-admin-btn")?.addEventListener("click",openAppAdminFromEntry);
+document.getElementById("system-admin-back")?.addEventListener("click",()=>{if(appAdminOpenedFromEntry)closeAppAdminEntryRoute();else backProfilePage();});
 document.getElementById("app-admin-add-creator")?.addEventListener("click",async()=>{
   const button=document.getElementById("app-admin-add-creator"),input=document.getElementById("app-admin-creator-email"),status=document.getElementById("app-admin-action-status");
   if(!button||!input||appAdminBusy)return;
@@ -9255,8 +9334,10 @@ window.addEventListener("app-trip-access",event=>{
     if(sameOptimistic){appEntryOptimisticTripId="";appEntryOptimisticUid="";}
     invalidateInstantTripCache(currentId).catch(()=>{});
     if(dataTripId(window.tripData)===currentId)stopFirebaseTripLoader({fallback:false});
-    refreshAppEntryState();
-    reconcileFirebaseTripLoader().catch(error=>console.warn("Access revoke reconcile",error));
+    // Revoke is a Trip-switch event, not an App-entry event. Prefer another
+    // already-known accessible Trip immediately; only fall back to Access
+    // Lobby when there genuinely is no replacement Trip.
+    routeAwayFromRevokedTrip(currentId).catch(error=>{console.warn("Access revoke fallback",error);refreshAppEntryState();});
   }else if(serverDecision){
     refreshAppEntryState();
   }
@@ -9848,7 +9929,7 @@ refreshCollapseMetrics();
 // Android / Chrome PWA support. Versioned app-shell Service Worker; normal launches are cache-first while explicit reloads stay network-first.
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("./sw.js?v=7.8.1.1").catch(() => {});
+    navigator.serviceWorker.register("./sw.js?v=7.8.1.2").catch(() => {});
   });
 }
 
