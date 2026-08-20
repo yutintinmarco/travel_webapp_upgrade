@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
   <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
   <link rel="dns-prefetch" href="https://api.open-meteo.com">
-  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?v=7.8.0.2">
+  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?v=7.8.0.3">
   <title id="page-title">行程</title>
   <script>
   // v7.7.5.0 · Performance Lite. Memory only: no Firebase reads/writes, no
@@ -21,6 +21,14 @@
     var marks=Object.create(null),counters=Object.create(null);
     var navigationType="navigate";
     try{var nav=performance.getEntriesByType&&performance.getEntriesByType("navigation")[0];if(nav&&nav.type)navigationType=nav.type;}catch(e){}
+    var entryWarmRefresh=false;
+    try{
+      var rememberedUid=String(localStorage.getItem("travel_last_auth_uid")||"").trim();
+      var rememberedTrip=String(localStorage.getItem("travel_active_trip_id")||"").trim();
+      entryWarmRefresh=navigationType==="reload"&&!!rememberedUid&&!!rememberedTrip;
+    }catch(e){}
+    window.__entryWarmRefreshCandidate=entryWarmRefresh;
+    document.documentElement.classList.toggle("app-entry-refresh-warm",entryWarmRefresh);
     function notify(){try{if(typeof window.__refreshPerfLiteDiagnostics==="function")window.__refreshPerfLiteDiagnostics();}catch(e){}}
     window.__perfLite={
       navigationType:navigationType,
@@ -3304,7 +3312,7 @@ body.expenses-view-active #app-version-note{
 #snacks-view::after,
 #info-view::after,
 #profile-view::after{
-  content:"v7.8.0.2" !important;
+  content:"v7.8.0.3" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3325,7 +3333,7 @@ body.expenses-view-active #app-version-note{
   display:none !important;
 }
 body.expenses-view-active .expenses-module .expenses-app::after{
-  content:"v7.8.0.2" !important;
+  content:"v7.8.0.3" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3450,8 +3458,8 @@ html.theme-dark .modal-actions .modal-close-btn{
 
 /* Phase 2G.1 · Entry / Access Gateway
    Lobby and restricted states keep the proven 我的 Apple Settings cards.
-   v7.8.0.2 gives signed-out launch a proper app-login composition while
-   reusing the same surfaces, radii, typography and safe-area system. */
+   v7.8.0.3 keeps a true signed-out Login Gateway, but ordinary in-app reloads
+   stay on the warm App shell instead of replaying a full login/loading screen. */
 .app-entry-gateway{
   position:fixed;inset:0;z-index:1800;display:none;overflow:auto;-webkit-overflow-scrolling:touch;
   background:var(--page-bg,#f7f4f6);color:var(--label-primary);
@@ -3461,6 +3469,15 @@ body.app-entry-gated .ios-compact-header,
 body.app-entry-gated #scroll-shell,
 body.app-entry-gated #bottom-nav,
 body.app-entry-gated #trip-quick-popover{visibility:hidden!important;pointer-events:none!important;}
+/* A same-tab / in-app reload is continuation, not a fresh login journey.
+   Keep the remembered App shell visible while IndexedDB + Auth + Firestore
+   reconcile behind it. If Auth later resolves signed-out / different-user, JS
+   removes this class and the real Login Gateway becomes authoritative. */
+html.app-entry-refresh-warm body.app-entry-gated .app-entry-gateway{display:none!important;}
+html.app-entry-refresh-warm body.app-entry-gated .ios-compact-header,
+html.app-entry-refresh-warm body.app-entry-gated #scroll-shell,
+html.app-entry-refresh-warm body.app-entry-gated #bottom-nav,
+html.app-entry-refresh-warm body.app-entry-gated #trip-quick-popover{visibility:visible!important;pointer-events:auto!important;}
 .app-entry-shell{
   width:min(480px,100%);min-height:100%;margin:0 auto;box-sizing:border-box;
   padding:calc(env(safe-area-inset-top,0px) + 28px) 16px calc(env(safe-area-inset-bottom,0px) + 32px);
@@ -3486,6 +3503,19 @@ body.app-entry-gated #trip-quick-popover{visibility:hidden!important;pointer-eve
 .app-entry-gateway[data-entry-state="pending"] .app-entry-login-button,
 .app-entry-gateway[data-entry-state="pending"] .app-entry-login-note{display:none;}
 .app-entry-gateway[data-entry-state="pending"] .app-entry-login-opening{display:flex;}
+/* After a deliberate Google login, remain on the new Login Gateway until the
+   destination is resolved. Never flash the legacy identity/access cards in
+   between the Login Gateway and the Trip workspace. */
+.app-entry-gateway[data-login-handoff="true"][data-entry-state="resolving"] .app-entry-login-panel{display:flex;}
+.app-entry-gateway[data-login-handoff="true"][data-entry-state="resolving"] .app-entry-login-button,
+.app-entry-gateway[data-login-handoff="true"][data-entry-state="resolving"] .app-entry-login-note{display:none;}
+.app-entry-gateway[data-login-handoff="true"][data-entry-state="resolving"] .app-entry-login-opening{display:flex;}
+.app-entry-gateway[data-login-handoff="true"][data-entry-state="resolving"] #entry-identity-card,
+.app-entry-gateway[data-login-handoff="true"][data-entry-state="resolving"] #entry-state-card,
+.app-entry-gateway[data-login-handoff="true"][data-entry-state="resolving"] #entry-invite-card,
+.app-entry-gateway[data-login-handoff="true"][data-entry-state="resolving"] #entry-creator-card,
+.app-entry-gateway[data-login-handoff="true"][data-entry-state="resolving"] #entry-system-admin-card,
+.app-entry-gateway[data-login-handoff="true"][data-entry-state="resolving"] #entry-signout-card{display:none!important;}
 .app-entry-gateway[data-entry-state="pending"] #entry-identity-card,
 .app-entry-gateway[data-entry-state="pending"] #entry-state-card,
 .app-entry-gateway[data-entry-state="login"] #entry-identity-card,
@@ -3516,7 +3546,7 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
 </style>
             <link rel="apple-touch-icon" href="assets/icon/trip_icon.png">
   <link rel="icon" type="image/png" href="assets/icon/trip_icon.png">
-  <link rel="manifest" href="manifest.json?v=7.8.0.2">
+  <link rel="manifest" href="manifest.json?v=7.8.0.3">
   <meta name="apple-mobile-web-app-title" content="關嘉露西生日之旅">
   <!-- v7.7.1.2: expenses.css is 144KB and every rule is scoped under
        .expenses-module, yet it used to block the very first paint of the
@@ -3524,8 +3554,8 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
        priority without blocking paint; ensureExpensesStylesheet() flips it to
        media="all" before the 支出 view is ever mounted, so the styling is
        byte-for-byte identical by the time anything expenses-related renders. -->
-  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?v=7.8.0.2" media="print">
-  <noscript><link rel="stylesheet" href="assets/css/expenses.css?v=7.8.0.2"></noscript>
+  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?v=7.8.0.3" media="print">
+  <noscript><link rel="stylesheet" href="assets/css/expenses.css?v=7.8.0.3"></noscript>
 </head>
 <body class="app-entry-gated app-entry-pending">
 <div class="bg-fixed"></div>
@@ -3550,7 +3580,7 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
           <span>使用 Google 帳戶登入</span>
         </button>
         <p class="app-entry-login-note">使用你嘅 Google 帳戶安全登入，旅程資料會按現有權限顯示。</p>
-        <div class="app-entry-login-opening" aria-live="polite"><span class="trip-boot-spinner" aria-hidden="true"></span><span>正在開啟 Travel App…</span></div>
+        <div class="app-entry-login-opening" aria-live="polite"><span class="trip-boot-spinner" aria-hidden="true"></span><span id="entry-login-opening-text">正在開啟 Travel App…</span></div>
       </div>
     </section>
     <div class="profile-section-label">Travel App</div>
@@ -4127,7 +4157,7 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
         <span class="profile-detail-spacer"></span>
       </div>
       <section class="profile-card" aria-label="App 資訊">
-        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.8.0.2</strong></div>
+        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.8.0.3</strong></div>
         <div class="profile-meta-row"><span>資料架構</span><strong>Phase 2G.1</strong></div>
         <div class="profile-meta-row"><span>主要資料來源</span><strong id="app-data-source-label">Firebase / 本機快取</strong></div>
       </section>
@@ -4329,7 +4359,7 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
 </div>
 
 <script>
-const APP_VERSION = "7.8.0.2";
+const APP_VERSION = "7.8.0.3";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 function perfLiteMark(name){try{return window.__perfLite?.mark(name);}catch(error){return null;}}
@@ -6147,6 +6177,7 @@ function initGlobalAuthSafe(){
         const displayUser=safeUser||user||null;
         appEntryAuthResolved=true;
         window.__appAuthUser=displayUser;
+        reconcileWarmRefreshIdentity(displayUser);
         renderProfileAuthState(displayUser);
         renderEntryAuthState(displayUser);
         renderProfileAccessState(window.__appTripAccess||currentProfileAccess);
@@ -6158,6 +6189,7 @@ function initGlobalAuthSafe(){
 window.addEventListener("app-auth-state",event=>{
   appEntryAuthResolved=true;
   window.__appAuthUser=event.detail?.user||null;
+  reconcileWarmRefreshIdentity(window.__appAuthUser);
   renderProfileAuthState(window.__appAuthUser);
   renderEntryAuthState(window.__appAuthUser);
   renderProfileAccessState(window.__appTripAccess||currentProfileAccess);
@@ -6180,12 +6212,33 @@ let appEntryCreatorState={status:"idle",enabled:false,error:null};
 let appEntryTargetInviteId=(()=>{try{const direct=String(new URL(location.href).searchParams.get("invite")||"").trim();if(direct)return direct;return String(sessionStorage.getItem("travel_entry_invite_return_v1")||"").trim();}catch(error){return"";}})();
 let appEntryRegistryBackfillBusy=false;
 let appEntryForcedTripId="";
-// v7.8.0.2 · Speed-first travel boot. After Firebase Auth confirms the same
+// v7.8.0.3 · Speed-first travel boot. After Firebase Auth confirms the same
 // Google UID, a trusted user-bound IndexedDB Trip cache may render immediately
 // while membership is revalidated in the background. A server-confirmed revoke
 // clears this optimistic window and ejects the Trip immediately.
 let appEntryOptimisticTripId="";
 let appEntryOptimisticUid="";
+const APP_ENTRY_LOGIN_HANDOFF_KEY="travel_entry_login_handoff_v1";
+let appEntryLoginHandoff=(()=>{try{return sessionStorage.getItem(APP_ENTRY_LOGIN_HANDOFF_KEY)==="1";}catch(error){return false;}})();
+let appEntryWarmRefresh=window.__entryWarmRefreshCandidate===true;
+const appEntryWarmRefreshUid=(()=>{try{return String(localStorage.getItem("travel_last_auth_uid")||"").trim();}catch(error){return"";}})();
+function setAppEntryLoginHandoff(active){
+  appEntryLoginHandoff=!!active;
+  try{if(appEntryLoginHandoff)sessionStorage.setItem(APP_ENTRY_LOGIN_HANDOFF_KEY,"1");else sessionStorage.removeItem(APP_ENTRY_LOGIN_HANDOFF_KEY);}catch(error){}
+  const gateway=document.getElementById("app-entry-gateway");if(gateway)gateway.dataset.loginHandoff=appEntryLoginHandoff?"true":"false";
+}
+function endWarmRefreshGate(){
+  if(!appEntryWarmRefresh)return;
+  appEntryWarmRefresh=false;
+  document.documentElement.classList.remove("app-entry-refresh-warm");
+}
+function reconcileWarmRefreshIdentity(user){
+  if(!appEntryWarmRefresh)return;
+  const uid=String(user?.uid||"").trim();
+  if(!uid||!appEntryWarmRefreshUid||uid!==appEntryWarmRefreshUid){
+    appEntryOptimisticTripId="";appEntryOptimisticUid="";endWarmRefreshGate();
+  }
+}
 
 function getAppEntryService(){
   if(!appEntryServicePromise)appEntryServicePromise=import(`./assets/js/app-entry-service.js?v=${APP_VERSION}`).then(service=>{appEntryService=service;appEntryTargetInviteId=appEntryTargetInviteId||service.inviteIdFromLocation?.()||"";return service;});
@@ -6253,9 +6306,12 @@ function entryWorkspaceVisualReady(service){
   return ready;
 }
 function applyAppEntryState(nextState){
-  const gateway=document.getElementById("app-entry-gateway"),title=document.getElementById("entry-state-title"),subtitle=document.getElementById("entry-state-subtitle"),pill=document.getElementById("entry-state-pill"),icon=document.getElementById("entry-state-icon"),creator=document.getElementById("entry-creator-card");
+  const gateway=document.getElementById("app-entry-gateway"),title=document.getElementById("entry-state-title"),subtitle=document.getElementById("entry-state-subtitle"),pill=document.getElementById("entry-state-pill"),icon=document.getElementById("entry-state-icon"),creator=document.getElementById("entry-creator-card"),openingText=document.getElementById("entry-login-opening-text");
   appEntryState=String(nextState||"pending");
-  if(gateway){gateway.dataset.entryState=appEntryState;gateway.setAttribute("aria-busy",["pending","resolving"].includes(appEntryState)?"true":"false");}
+  if(["workspace","lobby","error"].includes(appEntryState)&&appEntryLoginHandoff)setAppEntryLoginHandoff(false);
+  if(appEntryState==="workspace")endWarmRefreshGate();
+  if(gateway){gateway.dataset.entryState=appEntryState;gateway.dataset.loginHandoff=appEntryLoginHandoff?"true":"false";gateway.setAttribute("aria-busy",["pending","resolving"].includes(appEntryState)?"true":"false");}
+  if(openingText)openingText.textContent=appEntryLoginHandoff&&appEntryState==="resolving"?"正在開啟旅程…":"正在開啟 Travel App…";
   const gated=appEntryState!=="workspace";
   document.body.classList.toggle("app-entry-gated",gated);document.body.classList.toggle("app-entry-workspace",!gated);document.body.classList.toggle("app-entry-pending",["pending","resolving"].includes(appEntryState));
   if(appEntryState==="pending"){if(title)title.textContent="正在確認帳戶";if(subtitle)subtitle.textContent="正在讀取 Firebase Authentication 狀態。";if(pill)pill.textContent="確認中";}
@@ -6579,7 +6635,7 @@ function initTripLibrarySafe(data){
           restartMyTripInviteSubscription(user||null);
           refreshTripCreatorEntitlement(user||null).catch(()=>{});
           if(!user){tripLibraryCloudState={status:"signed-out",trips:[],error:null,fromCache:false,serverConfirmed:false};renderTripLibrary();stopFirebaseTripLoader({fallback:false});refreshAppEntryState();return;}
-          // v7.8.0.2: Auth identity is enough to restore the same user's local
+          // v7.8.0.3: Auth identity is enough to restore the same user's local
           // Trip cache immediately. Membership is rechecked in the background; a
           // server-confirmed revoke ejects the Trip and clears that cache.
           bootstrapRememberedFirebaseTrip(user).catch(error=>console.warn("Optimistic Trip bootstrap",error));
@@ -6936,6 +6992,17 @@ async function applyInstantTripCache(tripIdInput,user){
     return false;
   }
 }
+async function bootstrapRememberedTripBeforeAuthOnReload(){
+  if(!appEntryWarmRefresh)return false;
+  const tripId=String(tripBootPreferredId||resolveBootPreferredTripId()||"").trim();
+  const uid=String(appEntryWarmRefreshUid||rememberedCacheUid()||"").trim();
+  if(!tripId||!uid)return false;
+  appEntryOptimisticTripId=tripId;appEntryOptimisticUid=uid;
+  const applied=await applyInstantTripCache(tripId,{uid});
+  if(applied){releaseDeferredTripBoot();refreshAppEntryState();}
+  return applied;
+}
+
 async function waitForVerifiedTripAccess(tripIdInput,{timeoutMs=6500}={}){
   const tripId=String(tripIdInput||"").trim();if(!tripId)return false;
   const {access}=await getTripLoaderServices();
@@ -8386,7 +8453,7 @@ function appAdminFriendlyError(error){
   if(code==="already-app-admin")return"呢個帳戶已經係 App Admin，已自動具備建立旅程權限，毋須再加入 Creator。";
   if(code==="already-creator")return"呢個帳戶已經有旅程建立權限，毋須重複新增。";
   if(code==="app-admin-required")return"目前帳戶唔係 App Admin。";
-  if(code==="permission-denied"||code==="firestore/permission-denied")return"Firestore 權限不足，請確認 v7.8.0.2 Rules 已部署，同 App Admin bootstrap 已建立。";
+  if(code==="permission-denied"||code==="firestore/permission-denied")return"Firestore 權限不足，請確認 Phase 2G.1 Rules 已部署，同 App Admin bootstrap 已建立。";
   if(navigator.onLine===false)return"目前離線。系統權限修改需要重新連線後先進行。";
   return error?.message||"操作未完成。";
 }
@@ -9505,12 +9572,15 @@ function dispatchExpenseUiAction(action){
   window.dispatchEvent(new CustomEvent("expense-ui-action",{detail:{action}}));
 }
 
-async function startGoogleSignIn({preserveInvite=false}={}){
+async function startGoogleSignIn({preserveInvite=false,entryHandoff=false}={}){
   if(window.__appAuthUser)return;
+  if(entryHandoff)setAppEntryLoginHandoff(true);
   try{
     if(preserveInvite){const entry=await getAppEntryService();const invite=appEntryTargetInviteId||entry.inviteIdFromLocation?.()||"";if(invite)entry.rememberInviteReturn?.(invite);}
     const {signInWithGoogle}=await getGlobalAuthService();await signInWithGoogle();
   }catch(error){
+    if(entryHandoff)setAppEntryLoginHandoff(false);
+    refreshAppEntryState();
     console.error(error);
     if(error?.code!=="auth/popup-closed-by-user")alert(`Google 登入失敗：${error?.code||"unknown"}`);
   }
@@ -9522,8 +9592,8 @@ async function signOutTravelUser(){
   }catch(error){console.error("Google sign out error",error);alert("暫時未能登出 Google 帳戶。");}
 }
 document.getElementById("my-account-btn")?.addEventListener("click",()=>startGoogleSignIn());
-document.getElementById("entry-account-btn")?.addEventListener("click",()=>startGoogleSignIn({preserveInvite:true}));
-document.getElementById("entry-login-btn")?.addEventListener("click",()=>startGoogleSignIn({preserveInvite:true}));
+document.getElementById("entry-account-btn")?.addEventListener("click",()=>startGoogleSignIn({preserveInvite:true,entryHandoff:true}));
+document.getElementById("entry-login-btn")?.addEventListener("click",()=>startGoogleSignIn({preserveInvite:true,entryHandoff:true}));
 document.getElementById("profile-signout-btn")?.addEventListener("click",signOutTravelUser);
 document.getElementById("entry-signout-btn")?.addEventListener("click",signOutTravelUser);
 document.getElementById("entry-import-btn")?.addEventListener("pointerdown",()=>warmTripImportDependencies(),{passive:true});
@@ -9559,7 +9629,7 @@ refreshCollapseMetrics();
 // Android / Chrome PWA support. Versioned app-shell Service Worker; normal launches are cache-first while explicit reloads stay network-first.
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("./sw.js?v=7.8.0.2").catch(() => {});
+    navigator.serviceWorker.register("./sw.js?v=7.8.0.3").catch(() => {});
   });
 }
 
@@ -9584,9 +9654,13 @@ fetch(getTripJsonUrl())
       runOptionalAppStep("Weather render",()=>renderWeather(data));
       runOptionalAppStep("Travel info render",()=>renderInfo(data));
     }else{
-      // v7.8.0.2: wait only for Firebase Auth identity. The same user's IndexedDB
-      // Trip cache then paints immediately while access is checked in background.
-      showDeferredTripBootPlaceholder("正在開啟上次旅程…");
+      // v7.8.0.3: an ordinary in-app reload is continuation. Repaint the
+      // remembered user's IndexedDB Trip cache immediately, even before Auth
+      // finishes restoring its session, then reconcile identity + access behind
+      // the already-visible App. Fresh launches still use the proper Gateway.
+      if(appEntryWarmRefresh){
+        bootstrapRememberedTripBeforeAuthOnReload().then(applied=>{if(!applied&&tripBootDeferred)showDeferredTripBootPlaceholder("正在開啟上次旅程…");}).catch(()=>showDeferredTripBootPlaceholder("正在開啟上次旅程…"));
+      }else showDeferredTripBootPlaceholder("正在開啟上次旅程…");
     }
     runOptionalAppStep("Trip library init",()=>initTripLibrarySafe(data));
     runOptionalAppStep("Compact header init",()=>updateCompactHeader());

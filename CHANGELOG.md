@@ -1,3 +1,20 @@
+# v7.8.0.3 · Phase 2G.1 Refresh Continuity & Login Handoff
+
+## Changed
+
+* Ordinary in app reloads now continue from the remembered App shell and IndexedDB Trip render cache instead of replaying the full Login Gateway as a loading screen.
+* Warm reload can repaint the remembered user bound Trip cache before Firebase Auth finishes restoring the session. Auth and Trip access are still reconciled immediately in the background.
+* If Auth resolves signed out or to a different Google UID, the warm refresh bypass is cancelled and the proper Login Gateway takes over.
+* A deliberate Google login now stays on the new Login Gateway while the destination Trip is resolving. The legacy identity plus access confirmation cards no longer flash between Login and Workspace.
+* Signed out launches, zero Trip Access Lobby, Invite flow, Creator management and all Phase 2G.1 security rules remain unchanged.
+
+## QA target
+
+* Refresh while signed in with a remembered Trip: App shell and local Trip appear without Login Gateway replay.
+* Sign out then launch: proper Login Gateway appears.
+* Login from Gateway: no legacy confirmation screen flashes before Workspace.
+* Auth mismatch or signed out result cancels optimistic refresh view.
+
 # v7.8.0.2 · Phase 2G.1 UX & Local-First Access Polish
 
 ## What changed
