@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
   <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
   <link rel="dns-prefetch" href="https://api.open-meteo.com">
-  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?v=7.8.0.4">
+  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?v=7.8.0.5">
   <title id="page-title">行程</title>
   <script>
   // v7.7.5.0 · Performance Lite. Memory only: no Firebase reads/writes, no
@@ -21,7 +21,7 @@
     var marks=Object.create(null),counters=Object.create(null);
     var navigationType="navigate";
     try{var nav=performance.getEntriesByType&&performance.getEntriesByType("navigation")[0];if(nav&&nav.type)navigationType=nav.type;}catch(e){}
-    // v7.8.0.4 · Fast Resume applies to both a Home Screen PWA launch and an
+    // v7.8.0.5 · Fast Resume applies to both a Home Screen PWA launch and an
     // in-app reload whenever this device remembers a user-bound active Trip.
     var entryWarmRefresh=false;
     try{
@@ -3314,7 +3314,7 @@ body.expenses-view-active #app-version-note{
 #snacks-view::after,
 #info-view::after,
 #profile-view::after{
-  content:"v7.8.0.4" !important;
+  content:"v7.8.0.5" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3335,7 +3335,7 @@ body.expenses-view-active #app-version-note{
   display:none !important;
 }
 body.expenses-view-active .expenses-module .expenses-app::after{
-  content:"v7.8.0.4" !important;
+  content:"v7.8.0.5" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3460,7 +3460,7 @@ html.theme-dark .modal-actions .modal-close-btn{
 
 /* Phase 2G.1 · Entry / Access Gateway
    Lobby and restricted states keep the proven 我的 Apple Settings cards.
-   v7.8.0.4 keeps a true signed-out Login Gateway, but ordinary in-app reloads
+   v7.8.0.5 keeps a true signed-out Login Gateway, but ordinary in-app reloads
    stay on the warm App shell instead of replaying a full login/loading screen. */
 .app-entry-gateway{
   position:fixed;inset:0;z-index:1800;display:none;overflow:auto;-webkit-overflow-scrolling:touch;
@@ -3563,7 +3563,7 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
 </style>
             <link rel="apple-touch-icon" href="assets/icon/trip_icon.png">
   <link rel="icon" type="image/png" href="assets/icon/trip_icon.png">
-  <link rel="manifest" href="manifest.json?v=7.8.0.4">
+  <link rel="manifest" href="manifest.json?v=7.8.0.5">
   <meta name="apple-mobile-web-app-title" content="關嘉露西生日之旅">
   <!-- v7.7.1.2: expenses.css is 144KB and every rule is scoped under
        .expenses-module, yet it used to block the very first paint of the
@@ -3571,8 +3571,8 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
        priority without blocking paint; ensureExpensesStylesheet() flips it to
        media="all" before the 支出 view is ever mounted, so the styling is
        byte-for-byte identical by the time anything expenses-related renders. -->
-  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?v=7.8.0.4" media="print">
-  <noscript><link rel="stylesheet" href="assets/css/expenses.css?v=7.8.0.4"></noscript>
+  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?v=7.8.0.5" media="print">
+  <noscript><link rel="stylesheet" href="assets/css/expenses.css?v=7.8.0.5"></noscript>
 </head>
 <body class="app-entry-gated app-entry-pending">
 <div class="bg-fixed"></div>
@@ -4174,7 +4174,7 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
         <span class="profile-detail-spacer"></span>
       </div>
       <section class="profile-card" aria-label="App 資訊">
-        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.8.0.4</strong></div>
+        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.8.0.5</strong></div>
         <div class="profile-meta-row"><span>資料架構</span><strong>Phase 2G.1</strong></div>
         <div class="profile-meta-row"><span>主要資料來源</span><strong id="app-data-source-label">Firebase / 本機快取</strong></div>
       </section>
@@ -4376,7 +4376,7 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
 </div>
 
 <script>
-const APP_VERSION = "7.8.0.4";
+const APP_VERSION = "7.8.0.5";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 function perfLiteMark(name){try{return window.__perfLite?.mark(name);}catch(error){return null;}}
@@ -6214,7 +6214,14 @@ window.addEventListener("app-auth-state",event=>{
   refreshAppEntryState();
   refreshAppDataDiagnostics();
 });
-window.addEventListener("app-trip-access",event=>{renderProfileAccessState(event.detail||null);refreshAppEntryState();refreshAppDataDiagnostics();});
+window.addEventListener("app-trip-access",event=>{
+  const access=event.detail||null;
+  if(access?.serverConfirmed===true&&String(access?.tripId||"")===String(appEntryResumeLatch.tripId||"")){
+    if(access?.role)maybeReleaseAppEntryResumeLatch();
+    else{appEntryOptimisticTripId="";appEntryOptimisticUid="";clearAppEntryResumeLatch();endWarmRefreshGate();}
+  }
+  renderProfileAccessState(access);refreshAppEntryState();refreshAppDataDiagnostics();
+});
 renderProfileAuthState(null);
 renderEntryAuthState(null);
 
@@ -6229,7 +6236,7 @@ let appEntryCreatorState={status:"idle",enabled:false,error:null};
 let appEntryTargetInviteId=(()=>{try{const direct=String(new URL(location.href).searchParams.get("invite")||"").trim();if(direct)return direct;return String(sessionStorage.getItem("travel_entry_invite_return_v1")||"").trim();}catch(error){return"";}})();
 let appEntryRegistryBackfillBusy=false;
 let appEntryForcedTripId="";
-// v7.8.0.4 · Speed-first travel boot. After Firebase Auth confirms the same
+// v7.8.0.5 · Speed-first travel boot. After Firebase Auth confirms the same
 // Google UID, a trusted user-bound IndexedDB Trip cache may render immediately
 // while membership is revalidated in the background. A server-confirmed revoke
 // clears this optimistic window and ejects the Trip immediately.
@@ -6239,6 +6246,35 @@ const APP_ENTRY_LOGIN_HANDOFF_KEY="travel_entry_login_handoff_v1";
 let appEntryLoginHandoff=(()=>{try{return sessionStorage.getItem(APP_ENTRY_LOGIN_HANDOFF_KEY)==="1";}catch(error){return false;}})();
 let appEntryWarmRefresh=window.__entryWarmRefreshCandidate===true;
 const appEntryWarmRefreshUid=(()=>{try{return String(localStorage.getItem("travel_last_auth_uid")||"").trim();}catch(error){return"";}})();
+// v7.8.0.5 · Once a valid user-bound local Trip has been selected for Fast
+// Resume, keep that workspace latched on screen while Firebase Auth, catalog and
+// realtime listeners reconnect. This prevents the Entry Gateway from briefly
+// replacing an already-visible Trip during ordinary launch / refresh.
+let appEntryResumeLatch={tripId:"",uid:""};
+function setAppEntryResumeLatch(tripIdInput,uidInput){
+  const tripId=String(tripIdInput||"").trim(),uid=String(uidInput||"").trim();
+  appEntryResumeLatch=tripId&&uid?{tripId,uid}:{tripId:"",uid:""};
+}
+function clearAppEntryResumeLatch(){appEntryResumeLatch={tripId:"",uid:""};}
+function appEntryResumeLatchMatchesVisible(){
+  const tripId=String(appEntryResumeLatch.tripId||"").trim(),uid=String(appEntryResumeLatch.uid||"").trim();
+  if(!tripId||!uid)return false;
+  const visibleId=dataTripId(window.tripData);
+  if(visibleId&&visibleId!==tripId)return false;
+  const liveUid=String(window.__appAuthUser?.uid||"").trim();
+  return !liveUid||liveUid===uid;
+}
+function maybeReleaseAppEntryResumeLatch(){
+  const tripId=String(appEntryResumeLatch.tripId||"").trim();
+  if(!tripId)return false;
+  const access=window.__appTripAccess||currentProfileAccess||null;
+  const visibleId=dataTripId(window.tripData);
+  const loaderReady=tripLoaderState?.status==="ready"&&tripLoaderState?.source!=="local"&&!!visibleId&&visibleId===tripId;
+  const accessReady=access?.serverConfirmed===true&&!!access?.role&&String(access?.tripId||"")===tripId;
+  if(!loaderReady||!accessReady)return false;
+  clearAppEntryResumeLatch();endWarmRefreshGate();
+  return true;
+}
 function setAppEntryLoginHandoff(active){
   appEntryLoginHandoff=!!active;
   try{if(appEntryLoginHandoff)sessionStorage.setItem(APP_ENTRY_LOGIN_HANDOFF_KEY,"1");else sessionStorage.removeItem(APP_ENTRY_LOGIN_HANDOFF_KEY);}catch(error){}
@@ -6250,11 +6286,16 @@ function endWarmRefreshGate(){
   document.documentElement.classList.remove("app-entry-refresh-warm");
 }
 function reconcileWarmRefreshIdentity(user){
-  if(!appEntryWarmRefresh)return;
+  if(!appEntryWarmRefresh&&!appEntryResumeLatch.uid)return;
   const uid=String(user?.uid||"").trim();
-  if(!uid||!appEntryWarmRefreshUid||uid!==appEntryWarmRefreshUid){
-    appEntryOptimisticTripId="";appEntryOptimisticUid="";endWarmRefreshGate();
+  const expectedUid=String(appEntryResumeLatch.uid||appEntryWarmRefreshUid||"").trim();
+  if(!uid||!expectedUid||uid!==expectedUid){
+    appEntryOptimisticTripId="";appEntryOptimisticUid="";clearAppEntryResumeLatch();endWarmRefreshGate();
+    return;
   }
+  // Identity matched the remembered cache owner. The normal body state now owns
+  // visibility, so the early HTML warm class can retire without showing Gateway.
+  endWarmRefreshGate();
 }
 
 function getAppEntryService(){
@@ -6304,7 +6345,12 @@ function renderEntryInvites(){
   }
 }
 function entryWorkspaceVisualReady(service){
-  if(!service||appEntryState==="login"||!window.__appAuthUser?.uid)return false;
+  if(!service||appEntryState==="login")return false;
+  // Returning users may keep the local workspace visible while Auth / Firestore
+  // reconnect. The latch is user-bound and is cleared immediately if Auth later
+  // resolves to a different / signed-out account or Firebase explicitly revokes it.
+  if(!appEntryTargetInviteId&&appEntryResumeLatchMatchesVisible())return true;
+  if(!window.__appAuthUser?.uid)return false;
   const access=window.__appTripAccess||currentProfileAccess||null;
   const online=navigator.onLine!==false;
   const catalog=tripLibraryCloudState||{};
@@ -6326,7 +6372,6 @@ function applyAppEntryState(nextState){
   const gateway=document.getElementById("app-entry-gateway"),title=document.getElementById("entry-state-title"),subtitle=document.getElementById("entry-state-subtitle"),pill=document.getElementById("entry-state-pill"),icon=document.getElementById("entry-state-icon"),creator=document.getElementById("entry-creator-card"),openingText=document.getElementById("entry-login-opening-text");
   appEntryState=String(nextState||"pending");
   if(["workspace","lobby","error"].includes(appEntryState)&&appEntryLoginHandoff)setAppEntryLoginHandoff(false);
-  if(appEntryState==="workspace")endWarmRefreshGate();
   if(gateway){gateway.dataset.entryState=appEntryState;gateway.dataset.loginHandoff=appEntryLoginHandoff?"true":"false";gateway.setAttribute("aria-busy",["pending","resolving"].includes(appEntryState)?"true":"false");}
   if(openingText)openingText.textContent=appEntryLoginHandoff&&appEntryState==="resolving"?"正在開啟旅程…":"正在開啟 Travel App…";
   const gated=appEntryState!=="workspace";
@@ -6361,9 +6406,10 @@ async function refreshAppEntryState(){
       service.clearInviteFromLocation?.({keepTrip:true});appEntryTargetInviteId="";
     }
   }
+  const resumeLatched=!appEntryTargetInviteId&&appEntryResumeLatchMatchesVisible();
   const optimisticReady=!appEntryTargetInviteId&&entryWorkspaceVisualReady(service)
     && String(appEntryOptimisticTripId||"")===dataTripId(window.tripData);
-  if(optimisticReady)next="workspace";
+  if(resumeLatched||optimisticReady)next="workspace";
   if(next==="workspace"&&!entryWorkspaceVisualReady(service))next="resolving";
   applyAppEntryState(next);
 }
@@ -6595,7 +6641,12 @@ function restartActiveTripCatalog(){
   if(!tripLibraryCurrentUser||!tripLibraryCatalogService)return;
   tripLibraryCloudState={status:"loading",trips:[],error:null,fromCache:false,serverConfirmed:false};renderTripLibrary();refreshAppEntryState();
   tripLibraryStopCatalog=tripLibraryCatalogService.subscribeUserTrips(tripLibraryCurrentUser,state=>{
-    tripLibraryCloudState=state;renderTripLibrary();refreshAppEntryState();
+    tripLibraryCloudState=state;
+    if(state?.status==="ready"&&state?.serverConfirmed===true&&appEntryResumeLatch.tripId){
+      const stillAllowed=(state.trips||[]).some(trip=>String(trip?.tripId||"")===String(appEntryResumeLatch.tripId||""));
+      if(!stillAllowed){appEntryOptimisticTripId="";appEntryOptimisticUid="";clearAppEntryResumeLatch();endWarmRefreshGate();}
+    }
+    renderTripLibrary();refreshAppEntryState();
     if(state?.status==="ready"&&state?.serverConfirmed===true)backfillOwnerTripRegistries(state).catch(()=>{});
     reconcileFirebaseTripLoader().catch(error=>console.error("Firebase loader reconcile",error));
   },{archived:false});
@@ -6652,7 +6703,7 @@ function initTripLibrarySafe(data){
           restartMyTripInviteSubscription(user||null);
           refreshTripCreatorEntitlement(user||null).catch(()=>{});
           if(!user){tripLibraryCloudState={status:"signed-out",trips:[],error:null,fromCache:false,serverConfirmed:false};renderTripLibrary();stopFirebaseTripLoader({fallback:false});refreshAppEntryState();return;}
-          // v7.8.0.4: Auth identity is enough to restore the same user's local
+          // v7.8.0.5: Auth identity is enough to restore the same user's local
           // Trip cache immediately. Membership is rechecked in the background; a
           // server-confirmed revoke ejects the Trip and clears that cache.
           bootstrapRememberedFirebaseTrip(user).catch(error=>console.warn("Optimistic Trip bootstrap",error));
@@ -7014,10 +7065,13 @@ async function bootstrapRememberedTripBeforeAuthFastResume(){
   const tripId=String(tripBootPreferredId||resolveBootPreferredTripId()||"").trim();
   const uid=String(appEntryWarmRefreshUid||rememberedCacheUid()||"").trim();
   if(!tripId||!uid)return false;
-  appEntryOptimisticTripId=tripId;appEntryOptimisticUid=uid;
+  appEntryOptimisticTripId=tripId;appEntryOptimisticUid=uid;setAppEntryResumeLatch(tripId,uid);
+  // Keep the existing workspace surface visible while IndexedDB opens. Do not
+  // transiently replace it with the branded Entry loading screen.
+  applyAppEntryState("workspace");
   const applied=await applyInstantTripCache(tripId,{uid});
   if(applied){releaseDeferredTripBoot();refreshAppEntryState();}
-  else endWarmRefreshGate();
+  else{clearAppEntryResumeLatch();endWarmRefreshGate();refreshAppEntryState();}
   return applied;
 }
 
@@ -7059,6 +7113,7 @@ async function bootstrapRememberedFirebaseTrip(user){
   const uid=currentCacheUid(user);if(!tripId||!uid)return false;
   const token=++tripInstantBootToken;
   appEntryOptimisticTripId=tripId;appEntryOptimisticUid=uid;
+  setAppEntryResumeLatch(tripId,uid);
   // Paint the user-bound local Trip cache immediately after Auth confirms this
   // Google UID. Firestore access and membership listeners continue in parallel.
   // If the server later says the user was revoked, the global access handler
@@ -7149,6 +7204,7 @@ function applyFirebaseTripData(data,{source="server",tripId="",dirtySections=[]}
   tripLoaderState={status:"ready",source,tripId:nextId,updatedAt:data?.cloudMeta?.updatedAt||"",error:null};
   window.tripData=data;
   setDataSourceLabel(source==="instant-cache"?"即時旅程快取":(source==="cache"?"Firebase 快取":"Firebase"));
+  if(source!=="instant-cache")maybeReleaseAppEntryResumeLatch();
   refreshAppEntryState();
   refreshAppDataDiagnostics();
 
@@ -7281,6 +7337,7 @@ async function startFirebaseTripLoader(tripIdInput){
       if(event.status==="permission-denied"||event.status==="not-found"){
         tripLoaderState={status:event.status,source:"firebase",tripId,error:event.error||null};
         if(String(appEntryOptimisticTripId||"")===tripId){appEntryOptimisticTripId="";appEntryOptimisticUid="";}
+        if(String(appEntryResumeLatch.tripId||"")===tripId)clearAppEntryResumeLatch();
         invalidateInstantTripCache(tripId).catch(()=>{});
         stopFirebaseTripLoader({fallback:false});refreshAppEntryState();
         if(tripLibraryCloudState.status==="ready")reconcileFirebaseTripLoader().catch(()=>{});
@@ -9647,19 +9704,19 @@ refreshCollapseMetrics();
 // Android / Chrome PWA support. Versioned app-shell Service Worker; normal launches are cache-first while explicit reloads stay network-first.
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("./sw.js?v=7.8.0.4").catch(() => {});
+    navigator.serviceWorker.register("./sw.js?v=7.8.0.5").catch(() => {});
   });
 }
 
 // Load
 function runOptionalAppStep(label,fn){try{return fn();}catch(error){console.error(`${label} error`,error);return null;}}
 // Phase 2G.1 root entry does not wait for trip.json before resolving Google
-// Authentication. Signed-out users therefore see the Login Gateway promptly,
-// while signed-in users remain on the neutral access gate until Trip access is
-// verified.
+// Authentication. Signed-out users still see the Login Gateway promptly. A
+// returning user with a valid local Trip cache stays on the workspace from the
+// first frame while Auth and Trip access reconcile silently in the background.
 initGlobalAuthSafe();
 getAppEntryService().then(()=>refreshAppEntryState()).catch(error=>console.error("Entry gate init",error));
-// v7.8.0.4 · Begin IndexedDB Fast Resume before the bundled trip.json network
+// v7.8.0.5 · Begin IndexedDB Fast Resume before the bundled trip.json network
 // request. Returning users should see their local Trip immediately on both a
 // Home Screen launch and an in-app reload; Auth and membership reconcile behind
 // the already-visible workspace.

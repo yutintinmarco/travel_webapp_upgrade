@@ -1,3 +1,24 @@
+# v7.8.0.5 · Phase 2G.1 Zero Flash Returning Boot
+
+## UX
+
+* Returning users with a remembered user-bound active Trip now keep the cached Workspace visible continuously from launch / refresh.
+* The branded `正在開啟 Travel App…` Entry loading screen no longer replaces an already-visible cached Trip while Auth, catalog or realtime listeners reconnect.
+* True signed-out, first-use and unusable-cache states still use the proper Login / Entry Gateway.
+
+## Access safety
+
+* Fast Resume remains bound to the remembered Firebase UID and active Trip ID.
+* A different or signed-out Firebase identity clears the optimistic workspace latch immediately.
+* A server-confirmed membership denial, missing Trip or authoritative catalog removal clears the latch and exits the Trip.
+* Transient network / listener errors continue to leave the local Trip usable.
+
+## Protected areas
+
+* No Profile Navigation compositor changes.
+* No bottom navigation `資料` changes.
+* No Data Management, Creator, Rules, Indexes or lifecycle feature changes.
+
 # v7.8.0.4 · Phase 2G.1 Fast Resume Boot Cleanup
 
 * Home Screen PWA launch and in-app reload now use the same Fast Resume path whenever a remembered user UID and active Trip are available.
