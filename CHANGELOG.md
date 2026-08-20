@@ -1,3 +1,9 @@
+# v7.8.2.3 · Legacy iOS Keyboard Restore
+
+- Restores the v7.7.7.4 keyboard interaction contract directly from the frozen baseline: Bottom Navigation keyboard CSS, visualViewport keyboard detection, and Profile `trip-member-field` input CSS are copied verbatim.
+- Removes later DELETE-specific keyboard attributes so the Permanent Delete confirmation uses the same ordinary Profile input behavior as the proven Google email form.
+- No Firebase Function, Firestore Rules, Index, backup, restore, or Permanent Delete backend logic changes.
+
 # v7.8.2.2 — Profile Keyboard Regression Hotfix
 
 - Reverted the v7.8.2.1 custom Profile keyboard repositioning layer after iOS testing showed repeated viewport/scroll bouncing while typing.
