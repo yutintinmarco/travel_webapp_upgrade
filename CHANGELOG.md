@@ -1,3 +1,22 @@
+# v7.8.1.1 · Phase 2G.2 Restore Preflight Hotfix
+
+## Fixed
+
+* Fixed the Trip Lock settings row so the status pill and chevron remain on the same line using the existing Settings row geometry.
+* Global Trip Lock now visibly disables `匯入 trip.json`, `還原完整 Backup`, and Snapshot restore while keeping backup/export/history viewing available.
+* Full Backup Restore and Snapshot Restore now expose granular preflight stages instead of sitting at an opaque 5% state.
+* Read only restore preflight Firestore calls now have a bounded timeout with a clear stage-specific error before Trip data writes begin.
+* Restore progress errors are surfaced on the foreground progress sheet instead of appearing to hang indefinitely.
+* Normal restore write logic remains unchanged; the hotfix targets preflight observability, timeout safety and locked-state affordance.
+
+## Compatibility
+
+* No Firestore Rules or indexes change.
+* No image, icon, background or Expenses CSS change.
+* v7.3.13 Profile Navigation compositor remains protected.
+
+---
+
 # v7.8.1.0 · Phase 2G.2 Access Continuity & Trip Lifecycle
 
 ## Personal Archive

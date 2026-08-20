@@ -18,6 +18,60 @@ const WRITE_CHUNK_SIZE = 8;
 const SNAPSHOT_SOFT_LIMIT_BYTES = 760_000;
 const SNAPSHOT_LIST_LIMIT = 10;
 const MANAGE_ROLES = new Set(["owner", "admin"]);
+const RESTORE_PREFLIGHT_TIMEOUT_MS = 14000;
+
+function emitRestoreProgress(onProgress, stage, completed, detail = "") {
+  if (typeof onProgress !== "function") return;
+  onProgress({ completed: Math.max(0, Math.min(1, Number(completed) || 0)), total: 1, stage, detail });
+}
+function restorePreflightTimeout(stage, timeoutMs = RESTORE_PREFLIGHT_TIMEOUT_MS) {
+  const error = new Error(`${stage} timed out before restore writes started`);
+  error.code = "restore-preflight-timeout";
+  error.stage = stage;
+  error.timeoutMs = timeoutMs;
+  error.mutationStarted = false;
+  return error;
+}
+async function awaitRestorePreflight(promise, { stage, timeoutMs = RESTORE_PREFLIGHT_TIMEOUT_MS } = {}) {
+  let timer = null;
+  try {
+    return await Promise.race([
+      Promise.resolve(promise),
+      new Promise((_, reject) => {
+        timer = setTimeout(() => reject(restorePreflightTimeout(stage || "Restore preflight", timeoutMs)), Math.max(1000, timeoutMs));
+      })
+    ]);
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
+}
+
+async function acquireRestoreOperationWithTimeout(tripId, user, { timeoutMs = 16000 } = {}) {
+  const pending = acquireTripOperation(tripId, "restore", user);
+  let timer = null;
+  try {
+    return await Promise.race([
+      pending,
+      new Promise((_, reject) => {
+        timer = setTimeout(() => {
+          const error = new Error("Restore operation lock timed out");
+          error.code = "restore-operation-timeout";
+          error.stage = "取得旅程操作鎖";
+          error.timeoutMs = timeoutMs;
+          error.mutationStarted = false;
+          reject(error);
+        }, Math.max(1000, timeoutMs));
+      })
+    ]);
+  } catch (error) {
+    if (error?.code === "restore-operation-timeout") {
+      pending.then(lock => releaseTripOperation(lock, user)).catch(() => {});
+    }
+    throw error;
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
+}
 
 function clean(value) { return String(value ?? "").trim(); }
 function clone(value) { return value == null ? value : JSON.parse(JSON.stringify(value)); }
@@ -128,28 +182,39 @@ function structureCounts(structure) {
   };
 }
 
-async function readTripStructure(tripId) {
+async function readTripStructure(tripId, { onProgress = null, progressBase = 0.04, progressSpan = 0.16 } = {}) {
+  const progress = (fraction, stage, detail = "") => emitRestoreProgress(onProgress, stage, progressBase + Math.max(0, Math.min(1, fraction)) * progressSpan, detail);
   const tripRef = doc(db, "trips", tripId);
-  const tripSnap = await getDoc(tripRef);
+  progress(0.02, "preflight-trip-root", "正在讀取目前旅程主資料。");
+  const tripSnap = await awaitRestorePreflight(getDoc(tripRef), { stage: "讀取目前旅程主資料" });
   if (!tripSnap.exists()) {
     const error = new Error("Firebase trip not found");
     error.code = "trip-not-found";
     throw error;
   }
+
+  progress(0.18, "preflight-trip-collections", "正在讀取 Days、收藏及旅程設定。");
   const [daySnaps, savedSnaps, settingsGeneral, settingsExpenses] = await Promise.all([
-    getDocs(collection(db, "trips", tripId, "days")),
-    getDocs(collection(db, "trips", tripId, "savedPlaces")),
-    getDoc(doc(db, "trips", tripId, "settings", "general")),
-    getDoc(doc(db, "trips", tripId, "settings", "expenses"))
+    awaitRestorePreflight(getDocs(collection(db, "trips", tripId, "days")), { stage: "讀取 Days" }),
+    awaitRestorePreflight(getDocs(collection(db, "trips", tripId, "savedPlaces")), { stage: "讀取收藏" }),
+    awaitRestorePreflight(getDoc(doc(db, "trips", tripId, "settings", "general")), { stage: "讀取一般設定" }),
+    awaitRestorePreflight(getDoc(doc(db, "trips", tripId, "settings", "expenses")), { stage: "讀取支出設定" })
   ]);
-  const days = await Promise.all(daySnaps.docs.map(async daySnap => {
-    const itemSnaps = await getDocs(collection(db, "trips", tripId, "days", daySnap.id, "items"));
+
+  progress(0.48, "preflight-day-items", `正在讀取 ${daySnaps.docs.length} 日嘅行程項目。`);
+  const days = await Promise.all(daySnaps.docs.map(async (daySnap, index) => {
+    const itemSnaps = await awaitRestorePreflight(
+      getDocs(collection(db, "trips", tripId, "days", daySnap.id, "items")),
+      { stage: `讀取 Day ${index + 1} 行程項目` }
+    );
+    progress(0.48 + ((index + 1) / Math.max(1, daySnaps.docs.length)) * 0.48, "preflight-day-items", `已讀取 ${index + 1} / ${daySnaps.docs.length} 日。`);
     return {
       id: daySnap.id,
       data: daySnap.data(),
       items: itemSnaps.docs.map(itemSnap => ({ id: itemSnap.id, data: itemSnap.data() }))
     };
   }));
+  progress(1, "preflight-trip-ready", "目前旅程資料已讀取完成。");
   return {
     tripId,
     tripDoc: tripSnap.data(),
@@ -615,21 +680,26 @@ export async function restoreTripSnapshot(tripIdInput, snapshotIdInput, { user: 
   let serverOperation = null;
   let mutationStarted = false;
   try {
-  const role = await requireManageRole(tripId, user);
-  const currentRoot = await getDoc(doc(db, "trips", tripId));
+  emitRestoreProgress(onProgress, "preflight-role", 0.06, "正在驗證 Owner / Admin 權限。");
+  const role = await awaitRestorePreflight(requireManageRole(tripId, user), { stage: "驗證旅程權限" });
+  emitRestoreProgress(onProgress, "preflight-lock", 0.10, "正在確認旅程未被全域鎖定。");
+  const currentRoot = await awaitRestorePreflight(getDoc(doc(db, "trips", tripId)), { stage: "確認旅程鎖定狀態" });
   if (currentRoot.exists() && currentRoot.data()?.globalLocked === true) {
     const error = new Error("Trip is globally locked"); error.code = "trip-global-locked"; throw error;
   }
-  serverOperation = await acquireTripOperation(tripId,"restore",user);
-  const snapshot = await getTripSnapshot(tripId, snapshotId, { user });
+  emitRestoreProgress(onProgress, "preflight-operation", 0.14, "正在取得旅程操作鎖。");
+  serverOperation = await acquireRestoreOperationWithTimeout(tripId,user);
+  emitRestoreProgress(onProgress, "preflight-snapshot", 0.18, "正在讀取所選 Snapshot。");
+  const snapshot = await awaitRestorePreflight(getTripSnapshot(tripId, snapshotId, { user }), { stage: "讀取所選 Snapshot" });
   const target = snapshot.payload;
-  const current = await readTripStructure(tripId);
+  const current = await readTripStructure(tripId, { onProgress, progressBase: 0.20, progressSpan: 0.12 });
 
+  emitRestoreProgress(onProgress, "preflight-safety-snapshot", 0.33, "正在建立還原前安全 Snapshot。");
   const safety = await writeSnapshot(tripId, current, user, {
     type: "pre-restore",
     restoreTargetSnapshotId: snapshotId
   });
-  if (typeof onProgress === "function") onProgress({ completed: 1, total: 4, stage: "safety-snapshot" });
+  emitRestoreProgress(onProgress, "safety-snapshot", 0.36, "還原前安全 Snapshot 已建立。");
 
   const tripRef = doc(db, "trips", tripId);
   const currentTrip = current.tripDoc || {};
@@ -675,7 +745,7 @@ export async function restoreTripSnapshot(tripIdInput, snapshotIdInput, { user: 
     updatedBy: user.uid,
     updatedAt: serverTimestamp()
   }, { merge: false }).commit();
-  if (typeof onProgress === "function") onProgress({ completed: 2, total: 4, stage: "trip" });
+  emitRestoreProgress(onProgress, "trip", 0.48, "Trip metadata 同 Revision 正在切換。");
 
   const writes = restoreWriteOps(target, tripId, user);
   const deletes = staleDeleteOps(current, target, tripId);
@@ -685,12 +755,12 @@ export async function restoreTripSnapshot(tripIdInput, snapshotIdInput, { user: 
     lastContentCompleted = completed;
     if (typeof onProgress === "function") {
       const ratio = Math.min(1, completed / Math.max(1, total));
-      onProgress({ completed: 2 + ratio, total: 4, stage: "content", detail: `${completed}/${total}` });
+      emitRestoreProgress(onProgress, "content", 0.48 + ratio * 0.42, `${completed}/${total}`);
     }
   };
   await commitOps(writes, contentProgress, 0, totalContentOps);
   await commitOps(deletes, contentProgress, writes.length, totalContentOps);
-  if (typeof onProgress === "function" && !lastContentCompleted) onProgress({ completed: 3, total: 4, stage: "content" });
+  if (typeof onProgress === "function" && !lastContentCompleted) emitRestoreProgress(onProgress, "content", 0.90, "0/0");
 
   const finalBatch = writeBatch(db);
   finalBatch.set(doc(collection(db, "trips", tripId, "activityLogs")), {
@@ -713,7 +783,7 @@ export async function restoreTripSnapshot(tripIdInput, snapshotIdInput, { user: 
     updatedBy: user.uid
   }, { merge: true });
   await finalBatch.commit();
-  if (typeof onProgress === "function") onProgress({ completed: 4, total: 4, stage: "done" });
+  emitRestoreProgress(onProgress, "done", 0.99, "Firebase restore writes 已完成。");
 
   return {
     tripId,
@@ -1116,8 +1186,11 @@ export async function restoreFullBackup(rawInput, {
   }
   assertCloudOperationAvailable("還原完整備份");
   const tripId = backup.tripId;
-  const currentTrip = await readTripStructure(tripId);
-  await requireManageRole(tripId, user);
+  emitRestoreProgress(onProgress, "preflight-start", 0.03, "Backup 已驗證，開始檢查目前旅程。");
+  const currentTrip = await readTripStructure(tripId, { onProgress, progressBase: 0.04, progressSpan: 0.16 });
+  emitRestoreProgress(onProgress, "preflight-role", 0.21, "正在驗證 Owner / Admin 權限。");
+  await awaitRestorePreflight(requireManageRole(tripId, user), { stage: "驗證旅程權限" });
+  emitRestoreProgress(onProgress, "preflight-lock", 0.235, "正在確認旅程未被全域鎖定。");
   if (currentTrip?.tripDoc?.globalLocked === true) {
     const error = new Error("Trip is globally locked"); error.code = "trip-global-locked"; throw error;
   }
@@ -1131,7 +1204,9 @@ export async function restoreFullBackup(rawInput, {
   let serverOperation = null;
   let mutationStarted = false;
   try {
-    serverOperation = await acquireTripOperation(tripId, "restore", user);
+    emitRestoreProgress(onProgress, "preflight-operation", 0.25, "正在取得旅程操作鎖，避免另一部裝置同時更新。");
+    serverOperation = await acquireRestoreOperationWithTimeout(tripId, user);
+    emitRestoreProgress(onProgress, "preflight-operation-ready", 0.27, "操作鎖已取得。");
     const targetStructure = fullBackupDeserialize(backup.data.tripStructure || {});
     if (!targetStructure?.tripDoc) {
       const error = new Error("Backup Trip payload is missing");
@@ -1142,13 +1217,15 @@ export async function restoreFullBackup(rawInput, {
     let safetySnapshotId = "";
 
     if (selectedScope === "all" || selectedScope === "trip") {
+      emitRestoreProgress(onProgress, "preflight-safety-snapshot", 0.29, "正在建立還原前安全 Snapshot。");
       const safety = await writeSnapshot(tripId, currentTrip, user, { type: "pre-restore" });
+      emitRestoreProgress(onProgress, "safety-snapshot", 0.32, "還原前安全 Snapshot 已建立。");
       safetySnapshotId = safety.snapshotId;
       mutationStarted = true;
       const tripResult = await restoreTripScopeFromBackup(targetStructure, currentTrip, tripId, user, {
         onProgress,
-        progressOffset: 0.08,
-        progressSpan: selectedScope === "all" ? 0.47 : 0.82
+        progressOffset: 0.33,
+        progressSpan: selectedScope === "all" ? 0.32 : 0.57
       });
       revision = tripResult.revision;
     }
@@ -1160,8 +1237,8 @@ export async function restoreFullBackup(rawInput, {
       await commitOps(ops, ({ completed, total }) => {
         if (typeof onProgress !== "function") return;
         const ratio = Math.min(1, completed / Math.max(1, total));
-        const base = selectedScope === "all" ? 0.58 : 0.08;
-        const span = selectedScope === "all" ? 0.32 : 0.82;
+        const base = selectedScope === "all" ? 0.68 : 0.30;
+        const span = selectedScope === "all" ? 0.22 : 0.60;
         onProgress({ completed: base + ratio * span, total: 1, stage: "expense-content" });
       });
     }

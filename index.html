@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
   <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
   <link rel="dns-prefetch" href="https://api.open-meteo.com">
-  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?v=7.8.1.0">
+  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?v=7.8.1.1">
   <title id="page-title">行程</title>
   <script>
   // v7.7.5.0 · Performance Lite. Memory only: no Firebase reads/writes, no
@@ -2396,6 +2396,13 @@ html:not(.theme-light):not(.theme-dark) .profile-chevron{
   letter-spacing:.01em;
 }
 
+/* v7.8.1.1 · Trip Lock row alignment + locked Data Management affordance */
+#trip-global-lock-open-btn{grid-template-columns:36px minmax(0,1fr) auto auto;column-gap:7px;}
+#trip-global-lock-open-btn .profile-status-pill{justify-self:end;margin-right:1px;white-space:nowrap;}
+#trip-global-lock-open-btn .profile-chevron{justify-self:end;}
+.profile-row[disabled] .profile-chevron{opacity:.48;}
+.profile-row[disabled] .profile-row-icon{filter:saturate(.18);}
+
 /* 5 · Navigation bar -------------------------------------------------
    A back control that names where it goes is the single strongest iOS cue.
    Bar buttons dim on press; only cells get a background highlight. */
@@ -3314,7 +3321,7 @@ body.expenses-view-active #app-version-note{
 #snacks-view::after,
 #info-view::after,
 #profile-view::after{
-  content:"v7.8.1.0" !important;
+  content:"v7.8.1.1" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3335,7 +3342,7 @@ body.expenses-view-active #app-version-note{
   display:none !important;
 }
 body.expenses-view-active .expenses-module .expenses-app::after{
-  content:"v7.8.1.0" !important;
+  content:"v7.8.1.1" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3563,7 +3570,7 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
 </style>
             <link rel="apple-touch-icon" href="assets/icon/trip_icon.png">
   <link rel="icon" type="image/png" href="assets/icon/trip_icon.png">
-  <link rel="manifest" href="manifest.json?v=7.8.1.0">
+  <link rel="manifest" href="manifest.json?v=7.8.1.1">
   <meta name="apple-mobile-web-app-title" content="關嘉露西生日之旅">
   <!-- v7.7.1.2: expenses.css is 144KB and every rule is scoped under
        .expenses-module, yet it used to block the very first paint of the
@@ -3571,8 +3578,8 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
        priority without blocking paint; ensureExpensesStylesheet() flips it to
        media="all" before the 支出 view is ever mounted, so the styling is
        byte-for-byte identical by the time anything expenses-related renders. -->
-  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?v=7.8.1.0" media="print">
-  <noscript><link rel="stylesheet" href="assets/css/expenses.css?v=7.8.1.0"></noscript>
+  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?v=7.8.1.1" media="print">
+  <noscript><link rel="stylesheet" href="assets/css/expenses.css?v=7.8.1.1"></noscript>
 </head>
 <body class="app-entry-gated app-entry-pending">
 <div class="bg-fixed"></div>
@@ -4088,12 +4095,12 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
       <section class="profile-card profile-menu-card" aria-label="匯入與還原">
         <button class="profile-row" id="trip-import-btn" type="button">
           <span class="profile-row-icon profile-icon-blue">↥</span>
-          <span class="profile-row-copy"><strong>匯入 trip.json</strong><small>只接受 Portable Trip JSON；完整 Backup 會自動攔截</small></span>
+          <span class="profile-row-copy"><strong>匯入 trip.json</strong><small id="trip-import-menu-subtitle">只接受 Portable Trip JSON；完整 Backup 會自動攔截</small></span>
           <span class="profile-chevron">›</span>
         </button>
         <button class="profile-row" id="trip-full-backup-restore-open" type="button">
           <span class="profile-row-icon profile-icon-orange">↶</span>
-          <span class="profile-row-copy"><strong>還原完整 Backup</strong><small>只接受 Full Backup JSON；可選完整、行程或支出還原</small></span>
+          <span class="profile-row-copy"><strong>還原完整 Backup</strong><small id="trip-restore-menu-subtitle">只接受 Full Backup JSON；可選完整、行程或支出還原</small></span>
           <span class="profile-chevron">›</span>
         </button>
         <input id="trip-full-backup-file" type="file" accept="application/json,.json" hidden>
@@ -4204,7 +4211,7 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
         <span class="profile-detail-spacer"></span>
       </div>
       <section class="profile-card" aria-label="App 資訊">
-        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.8.1.0</strong></div>
+        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.8.1.1</strong></div>
         <div class="profile-meta-row"><span>資料架構</span><strong>Phase 2G.1</strong></div>
         <div class="profile-meta-row"><span>主要資料來源</span><strong id="app-data-source-label">Firebase / 本機快取</strong></div>
       </section>
@@ -4406,7 +4413,7 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
 </div>
 
 <script>
-const APP_VERSION = "7.8.1.0";
+const APP_VERSION = "7.8.1.1";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 function perfLiteMark(name){try{return window.__perfLite?.mark(name);}catch(error){return null;}}
@@ -7404,6 +7411,16 @@ function currentTripCloudRecord(){
   return (tripLibraryCloudState.trips||[]).find(trip=>String(trip?.tripId||"")===tripId)||null;
 }
 function currentTripGlobalLocked(){return currentTripCloudRecord()?.globalLocked===true||window.tripData?.meta?.globalLocked===true;}
+function renderDataManagementLockState(){
+  const locked=currentTripGlobalLocked();
+  const importBtn=document.getElementById("trip-import-btn"),restoreBtn=document.getElementById("trip-full-backup-restore-open"),snapshotRestore=document.getElementById("snapshot-detail-restore");
+  const importSubtitle=document.getElementById("trip-import-menu-subtitle"),restoreSubtitle=document.getElementById("trip-restore-menu-subtitle");
+  if(importBtn){importBtn.disabled=locked;importBtn.setAttribute("aria-disabled",locked?"true":"false");}
+  if(restoreBtn){restoreBtn.disabled=locked;restoreBtn.setAttribute("aria-disabled",locked?"true":"false");}
+  if(snapshotRestore){snapshotRestore.disabled=locked;snapshotRestore.setAttribute("aria-disabled",locked?"true":"false");}
+  if(importSubtitle)importSubtitle.textContent=locked?"旅程已鎖定，請先解除鎖定後再匯入":"只接受 Portable Trip JSON；完整 Backup 會自動攔截";
+  if(restoreSubtitle)restoreSubtitle.textContent=locked?"旅程已鎖定，請先解除鎖定後再還原":"只接受 Full Backup JSON；可選完整、行程或支出還原";
+}
 function renderTripGlobalLockState(){
   const record=currentTripCloudRecord(),tripId=String(record?.tripId||tripLoaderActiveId||tripLibrarySummary?.tripId||"").trim();
   const locked=currentTripGlobalLocked();
@@ -7425,6 +7442,7 @@ function renderTripGlobalLockState(){
     status.classList.remove("is-error");
     status.textContent=!tripId?"暫時未有可管理旅程。":(!manager?"只有 Owner / Admin 可以鎖定或解鎖。":(locked?"全域鎖定已生效；安全權限管理仍然可以使用。":"鎖定係全 Trip 狀態，會同時影響所有成員。"));
   }
+  renderDataManagementLockState();
 }
 async function handleTripGlobalLockAction(){
   if(tripGlobalLockBusy||tripCloudOffline()){if(tripCloudOffline())alert("目前離線，旅程鎖定狀態需要重新連線後先可以修改。");return;}
@@ -7537,14 +7555,25 @@ function importProgressPresentation(progress,mode){
   return {percent:Math.max(20,pct),stageTitle:"寫入旅程內容",stageDetail:progress?.detail?`${progress.detail} 項操作已處理`:`正在同步 Days、行程項目、收藏及設定。`,icon:"↥"};
 }
 function restoreProgressPresentation(progress){
-  const total=Math.max(1,Number(progress?.total)||4),completed=Math.max(0,Number(progress?.completed)||0);
+  const total=Math.max(1,Number(progress?.total)||1),completed=Math.max(0,Number(progress?.completed)||0);
   const pct=Math.max(4,Math.min(99,(completed/total)*100));
   const stage=String(progress?.stage||"");
-  if(stage==="safety-snapshot")return {percent:25,stageTitle:"已保存目前版本",stageDetail:"還原前安全 Snapshot 已建立。",icon:"▣"};
-  if(stage==="trip")return {percent:50,stageTitle:"切換旅程版本",stageDetail:"正在更新 Trip metadata 同 Revision。",icon:"↶"};
-  if(stage==="content")return {percent:pct,stageTitle:"還原旅程內容",stageDetail:progress?.detail?`${progress.detail} 項操作已處理`:`正在還原 Days、行程項目、收藏及設定。`,icon:"↶"};
+  const detail=String(progress?.detail||"");
+  if(stage==="preflight-start")return {percent:pct,stageTitle:"驗證目前旅程",stageDetail:detail||"正在開始 Restore preflight。",icon:"↶"};
+  if(stage==="preflight-trip-root")return {percent:pct,stageTitle:"讀取目前旅程",stageDetail:detail||"正在讀取 Trip 主資料。",icon:"↶"};
+  if(stage==="preflight-trip-collections")return {percent:pct,stageTitle:"讀取旅程資料",stageDetail:detail||"正在讀取 Days、收藏及設定。",icon:"↶"};
+  if(stage==="preflight-day-items"||stage==="preflight-trip-ready")return {percent:pct,stageTitle:"讀取行程項目",stageDetail:detail||"正在確認目前行程內容。",icon:"↶"};
+  if(stage==="preflight-role")return {percent:pct,stageTitle:"驗證還原權限",stageDetail:detail||"正在確認 Owner / Admin 角色。",icon:"↶"};
+  if(stage==="preflight-lock")return {percent:pct,stageTitle:"檢查旅程狀態",stageDetail:detail||"正在確認旅程可以還原。",icon:"↶"};
+  if(stage==="preflight-operation"||stage==="preflight-operation-ready")return {percent:pct,stageTitle:"檢查操作狀態",stageDetail:detail||"正在避免多部裝置同時修改旅程。",icon:"↶"};
+  if(stage==="preflight-snapshot")return {percent:pct,stageTitle:"讀取 Snapshot",stageDetail:detail||"正在讀取所選版本。",icon:"↶"};
+  if(stage==="preflight-safety-snapshot")return {percent:pct,stageTitle:"建立安全 Snapshot",stageDetail:detail||"先保存目前版本，再開始還原。",icon:"▣"};
+  if(stage==="safety-snapshot")return {percent:Math.max(32,pct),stageTitle:"已保存目前版本",stageDetail:detail||"還原前安全 Snapshot 已建立。",icon:"▣"};
+  if(stage==="trip")return {percent:Math.max(48,pct),stageTitle:"切換旅程版本",stageDetail:"正在更新 Trip metadata 同 Revision。",icon:"↶"};
+  if(stage==="content"||stage==="trip-content")return {percent:pct,stageTitle:"還原行程資料",stageDetail:detail?`${detail} 項操作已處理`:`正在還原 Days、Items、收藏及一般設定。`,icon:"↶"};
+  if(stage==="expense-content")return {percent:pct,stageTitle:"還原支出資料",stageDetail:"正在同步支出、找數及支出設定。",icon:"↶"};
   if(stage==="done")return {percent:99,stageTitle:"同步最新版本",stageDetail:"Firebase Loader 正在接收已還原內容。",icon:"↶"};
-  return {percent:pct,stageTitle:"準備還原",stageDetail:"正在讀取 Snapshot 同目前旅程。",icon:"↶"};
+  return {percent:pct,stageTitle:"準備還原",stageDetail:detail||"正在驗證 Backup 同目前 Trip。",icon:"↶"};
 }
 
 // Phase 2C · Portable JSON -> Firestore import. This is deliberately isolated
@@ -7788,7 +7817,7 @@ async function prepareTripImportFile(file){
   }
 }
 tripImportButton?.addEventListener("pointerdown",()=>{warmTripImportDependencies();},{passive:true});
-tripImportButton?.addEventListener("click",()=>{warmTripImportDependencies();tripImportFile?.click();});
+tripImportButton?.addEventListener("click",()=>{if(currentTripGlobalLocked())return;warmTripImportDependencies();tripImportFile?.click();});
 tripImportFile?.addEventListener("change",()=>prepareTripImportFile(tripImportFile.files?.[0]||null));
 tripImportCancel?.addEventListener("click",closeTripImportModal);
 tripImportBackdrop?.addEventListener("click",event=>{if(event.target===tripImportBackdrop)closeTripImportModal();});
@@ -8061,6 +8090,8 @@ function backupFriendlyError(error){
   if(error?.code==="trip-global-locked")return "旅程已全域鎖定。Backup 仍然可以匯出，但 Restore 要先到「我的 → 旅程設定 → 旅程鎖定」解除鎖定。";
   if(error?.code==="permission-denied"||error?.code==="firestore/permission-denied")return "Firebase 權限不足，請確認旅程角色。";
   if(error?.code==="local-export-incomplete")return error?.message||"本機資料尚未完整同步，暫未能匯出。";
+  if(error?.code==="restore-preflight-timeout")return `${error?.stage||"Restore 準備階段"}逾時。還原尚未開始寫入旅程資料；請關閉後再試一次。如果只係某一個 Trip 出現，呢個階段名稱可以用嚟定位問題。`;
+  if(error?.code==="restore-operation-timeout")return "取得旅程操作鎖逾時。旅程內容尚未開始還原；系統會自動清理任何遲到嘅操作鎖。請關閉後再試一次。";
   if(error?.code==="data-operation-timeout")return `${error?.stage||"資料操作"}逾時。今次操作已停止，唔需要 Quit App；可以直接再試。`;
   if(error?.code==="offline"||error?.code==="operation-busy"||error?.code==="trip-operation-busy")return cloudSafetyFriendlyError(error);
   const rawMessage=String(error?.message||"");
@@ -8151,7 +8182,8 @@ async function openSnapshotDetail(snapshotId){
   document.getElementById("snapshot-detail-revision").textContent=summary?String(summary.sourceRevision||0):"—";
   document.getElementById("snapshot-detail-counts").textContent=summary?`${summary.dayCount||0} Days · ${summary.itemCount||0} Items · ${summary.savedPlaceCount||0} Saved`:"—";
   document.getElementById("snapshot-detail-id").textContent=snapshotId;
-  document.getElementById("snapshot-detail-status").textContent="Snapshot 只影響 Firebase 行程內容及設定，不會刪除成員或實際支出交易。";
+  document.getElementById("snapshot-detail-status").textContent=currentTripGlobalLocked()?"旅程目前已鎖定；可以查看或匯出 Snapshot，但要先解除鎖定先可以還原。":"Snapshot 只影響 Firebase 行程內容及設定，不會刪除成員或實際支出交易。";
+  renderDataManagementLockState();
   openProfilePage("snapshot-detail");
 }
 document.getElementById("trip-backup-open-btn")?.addEventListener("click",()=>setTimeout(loadTripBackupPage,40));
@@ -8315,11 +8347,13 @@ function openSnapshotRestoreOperation(snapshot){
   dataOperationOpen({kind:"snapshot-restore",title:`還原 Revision ${snapshot.sourceRevision||0}`,subtitle:"系統會先保存目前版本，再還原所選 Snapshot。",name:`${backupFormatDate(snapshot.createdAtIso||snapshot.createdAtMillis)} · ${snapshot.typeLabel||"Snapshot"}`,id:`Snapshot · ${snapshot.snapshotId||"—"}`,stats:[{value:snapshot.sourceRevision||0,label:"Revision"},{value:snapshot.dayCount||0,label:"Days"},{value:snapshot.itemCount||0,label:"Items"},{value:snapshot.savedPlaceCount||0,label:"Saved"}],mode:"還原只影響行程內容及設定；成員權限及實際支出交易不會被刪除。",warnings:["開始前會自動建立還原前安全 Snapshot。"],confirmLabel:"開始還原",payload:snapshot,handler:async()=>{
     const service=await getTripBackupService(),user=await getImportFirebaseUser();
     appProgressOpen({kicker:"SNAPSHOT RESTORE",title:`還原 Revision ${snapshot.sourceRevision||0}`,subtitle:"系統會先保存目前版本，再還原所選 Snapshot。完成前請保持 App 開啟。",percent:4,stageTitle:"準備還原",stageDetail:"正在讀取目前 Firebase 旅程及 Snapshot。",icon:"↶"});
-    const result=await service.restoreTripSnapshot(currentBackupTripId(),snapshot.snapshotId,{user,onProgress:progress=>appProgressUpdate(restoreProgressPresentation(progress))});
-    const liveSynced=result.tripId===tripLoaderActiveId?await waitForTripLoaderRevision(result.tripId,result.revision,7000):true;
-    appProgressFinish({title:"還原完成",detail:liveSynced?`Revision ${result.revision} 已建立，行程畫面已同步。`:`Revision ${result.revision} 已建立；畫面仍在背景同步。`});
-    tripBackupBusy=false;setTimeout(loadTripBackupPage,120);
-    return {title:"Snapshot 還原完成",detail:`新 Revision ${result.revision}`};
+    try{
+      const result=await service.restoreTripSnapshot(currentBackupTripId(),snapshot.snapshotId,{user,onProgress:progress=>appProgressUpdate(restoreProgressPresentation(progress))});
+      const liveSynced=result.tripId===tripLoaderActiveId?await waitForTripLoaderRevision(result.tripId,result.revision,7000):true;
+      appProgressFinish({title:"還原完成",detail:liveSynced?`Revision ${result.revision} 已建立，行程畫面已同步。`:`Revision ${result.revision} 已建立；畫面仍在背景同步。`});
+      tripBackupBusy=false;setTimeout(loadTripBackupPage,120);
+      return {title:"Snapshot 還原完成",detail:`新 Revision ${result.revision}`};
+    }catch(error){appProgressFail(backupFriendlyError(error));throw error;}
   }});
 }
 function openFullBackupRestoreOperation(selected){
@@ -8328,15 +8362,13 @@ function openFullBackupRestoreOperation(selected){
     const scope=dataOperationState.scope,label=scope==="all"?"完整還原":scope==="trip"?"只還原行程":"只還原支出";
     const service=await getTripBackupService(),user=await getImportFirebaseUser();
     appProgressOpen({kicker:"FULL BACKUP",title:label,subtitle:"正在安全還原 Firebase Data。完成前請保持 App 開啟。",percent:5,stageTitle:"準備還原",stageDetail:"正在驗證 Backup 同目前 Trip。",icon:"↶"});
-    const result=await service.restoreFullBackup(selected.raw,{scope,user,onProgress:progress=>{
-      const pct=Math.max(5,Math.min(96,Math.round(Number(progress?.completed||0)*100)));
-      const stage=progress?.stage==="expense-content"?"還原支出資料":progress?.stage==="trip-content"?"還原行程資料":"完成還原";
-      appProgressUpdate({percent:pct,stageTitle:stage,stageDetail:progress?.stage==="expense-content"?"正在同步支出、找數及支出設定。":"正在同步 Days、Items、收藏及一般設定。",icon:"↶"});
-    }});
-    if(result.scope!=="expenses"&&result.tripId===tripLoaderActiveId)await waitForTripLoaderRevision(result.tripId,result.revision,7000);
-    appProgressFinish({title:`${label}完成`,detail:"Firebase Data 已完成還原。成員權限及目前 Audit Log 不受回滾。"});
-    tripBackupBusy=false;
-    return {title:`${label}完成`,detail:"Firebase Data 已完成還原；Audit Log 保持 append-only。"};
+    try{
+      const result=await service.restoreFullBackup(selected.raw,{scope,user,onProgress:progress=>appProgressUpdate(restoreProgressPresentation(progress))});
+      if(result.scope!=="expenses"&&result.tripId===tripLoaderActiveId)await waitForTripLoaderRevision(result.tripId,result.revision,7000);
+      appProgressFinish({title:`${label}完成`,detail:"Firebase Data 已完成還原。成員權限及目前 Audit Log 不受回滾。"});
+      tripBackupBusy=false;
+      return {title:`${label}完成`,detail:"Firebase Data 已完成還原；Audit Log 保持 append-only。"};
+    }catch(error){appProgressFail(backupFriendlyError(error));throw error;}
   }});
 }
 
@@ -8373,7 +8405,7 @@ document.getElementById("trip-full-backup-export")?.addEventListener("click",ope
 document.getElementById("trip-backup-export-current")?.addEventListener("click",openTripJsonExportOperation);
 document.getElementById("trip-backup-create-manual")?.addEventListener("click",openManualSnapshotOperation);
 document.getElementById("data-management-expenses-excel")?.addEventListener("click",openExpenseExcelOperation);
-document.getElementById("trip-full-backup-restore-open")?.addEventListener("click",()=>{const input=document.getElementById("trip-full-backup-file");if(input){input.value="";input.click();}});
+document.getElementById("trip-full-backup-restore-open")?.addEventListener("click",()=>{if(currentTripGlobalLocked())return;const input=document.getElementById("trip-full-backup-file");if(input){input.value="";input.click();}});
 document.getElementById("trip-full-backup-file")?.addEventListener("change",async event=>{
   const file=event.target.files?.[0];if(!file)return;
   try{
@@ -8389,7 +8421,7 @@ document.getElementById("trip-full-backup-file")?.addEventListener("change",asyn
   }catch(error){console.error("Inspect full backup",error);dataOperationOpen(dataOperationBaseConfig({kind:"restore-full-error",title:"還原完整 Backup",subtitle:"未能驗證所選 Backup。",typeLabel:"Error",mode:"檔案未能進入還原流程。",confirmLabel:"完成"}));dataOperationState.done=true;dataOperationSetError(backupFriendlyError(error));}
 });
 document.getElementById("snapshot-detail-export")?.addEventListener("click",()=>{if(tripBackupSelectedSnapshot)openSnapshotExportOperation(tripBackupSelectedSnapshot);});
-document.getElementById("snapshot-detail-restore")?.addEventListener("click",()=>{if(tripBackupSelectedSnapshot)openSnapshotRestoreOperation(tripBackupSelectedSnapshot);});
+document.getElementById("snapshot-detail-restore")?.addEventListener("click",()=>{if(currentTripGlobalLocked())return;if(tripBackupSelectedSnapshot)openSnapshotRestoreOperation(tripBackupSelectedSnapshot);});
 
 const tripQuickPopover=document.getElementById("trip-quick-popover");
 const largeTripSwitchTrigger=document.getElementById("header-title-small");
@@ -9733,6 +9765,7 @@ document.querySelector('[data-profile-open="app-data"]')?.addEventListener("clic
   refreshAppDataDiagnostics();
 });
 document.querySelector('[data-profile-open="data-management"]')?.addEventListener("click",()=>{
+  renderDataManagementLockState();
   getTripBackupService().catch(()=>{});
   warmTripImportDependencies();
   // Prepare all read-only export sources before iOS gets a chance to suspend
@@ -9815,7 +9848,7 @@ refreshCollapseMetrics();
 // Android / Chrome PWA support. Versioned app-shell Service Worker; normal launches are cache-first while explicit reloads stay network-first.
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("./sw.js?v=7.8.1.0").catch(() => {});
+    navigator.serviceWorker.register("./sw.js?v=7.8.1.1").catch(() => {});
   });
 }
 
