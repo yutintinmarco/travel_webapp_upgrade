@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
   <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
   <link rel="dns-prefetch" href="https://api.open-meteo.com">
-  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?v=7.7.7.4">
+  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?v=7.8.0.1">
   <title id="page-title">行程</title>
   <script>
   // v7.7.5.0 · Performance Lite. Memory only: no Firebase reads/writes, no
@@ -3304,7 +3304,7 @@ body.expenses-view-active #app-version-note{
 #snacks-view::after,
 #info-view::after,
 #profile-view::after{
-  content:"v7.7.7.4" !important;
+  content:"v7.8.0.1" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3325,7 +3325,7 @@ body.expenses-view-active #app-version-note{
   display:none !important;
 }
 body.expenses-view-active .expenses-module .expenses-app::after{
-  content:"v7.7.7.4" !important;
+  content:"v7.8.0.1" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3448,11 +3448,47 @@ html.theme-dark .modal-actions .modal-close-btn{
 .app-progress-backdrop.is-success .app-progress-done{background:#30b35a !important;}
 .app-progress-backdrop.is-error .app-progress-done{background:var(--app-action-danger) !important;}
 
+/* Phase 2G.1 · Entry / Access Gateway
+   Reuses the proven 我的 Apple Settings cards. Only the root composition is
+   new; component geometry, typography, buttons and invitation rows stay shared. */
+.app-entry-gateway{
+  position:fixed;inset:0;z-index:1800;display:none;overflow:auto;-webkit-overflow-scrolling:touch;
+  background:var(--page-bg,#f7f4f6);color:var(--label-primary);
+}
+body.app-entry-gated .app-entry-gateway{display:block;}
+body.app-entry-gated .ios-compact-header,
+body.app-entry-gated #scroll-shell,
+body.app-entry-gated #bottom-nav,
+body.app-entry-gated #trip-quick-popover{visibility:hidden!important;pointer-events:none!important;}
+.app-entry-shell{
+  width:min(480px,100%);min-height:100%;margin:0 auto;box-sizing:border-box;
+  padding:calc(env(safe-area-inset-top,0px) + 28px) 16px calc(env(safe-area-inset-bottom,0px) + 32px);
+}
+.app-entry-shell>.profile-section-label{margin:0 4px 9px;}
+.app-entry-status-card .profile-row{pointer-events:none;}
+.app-entry-status-icon{overflow:hidden;}
+.app-entry-status-icon .trip-boot-spinner{width:17px;height:17px;border-width:2px;}
+.app-entry-gateway[data-entry-state="login"] #entry-state-card{display:none;}
+.app-entry-gateway[data-entry-state="pending"] #entry-account-btn,
+.app-entry-gateway[data-entry-state="resolving"] #entry-account-btn,
+.app-entry-gateway[data-entry-state="lobby"] #entry-account-btn,
+.app-entry-gateway[data-entry-state="error"] #entry-account-btn{display:none;}
+.app-entry-gateway[data-entry-state="workspace"]{display:none!important;}
+.app-entry-target-note{margin-top:8px;color:var(--label-secondary);font-size:calc(10px * var(--font-scale));line-height:1.45;}
+/* v7.8.0.1 · App Admin uses the same proven member rows and operation-sheet
+   geometry. This is deliberately not a second Settings design system. */
+.app-admin-sheet-heading{margin:2px 2px 8px;}
+.app-admin-sheet-list{display:grid;gap:8px;}
+.app-admin-actions{grid-template-columns:1fr;}
+.app-admin-bootstrap-note{margin-top:8px;}
+body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
+@media(max-width:370px){.app-entry-shell{padding-left:12px;padding-right:12px;}}
+
 
 </style>
             <link rel="apple-touch-icon" href="assets/icon/trip_icon.png">
   <link rel="icon" type="image/png" href="assets/icon/trip_icon.png">
-  <link rel="manifest" href="manifest.json?v=7.7.7.4">
+  <link rel="manifest" href="manifest.json?v=7.8.0.1">
   <meta name="apple-mobile-web-app-title" content="關嘉露西生日之旅">
   <!-- v7.7.1.2: expenses.css is 144KB and every rule is scoped under
        .expenses-module, yet it used to block the very first paint of the
@@ -3460,10 +3496,10 @@ html.theme-dark .modal-actions .modal-close-btn{
        priority without blocking paint; ensureExpensesStylesheet() flips it to
        media="all" before the 支出 view is ever mounted, so the styling is
        byte-for-byte identical by the time anything expenses-related renders. -->
-  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?v=7.7.7.4" media="print">
-  <noscript><link rel="stylesheet" href="assets/css/expenses.css?v=7.7.7.4"></noscript>
+  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?v=7.8.0.1" media="print">
+  <noscript><link rel="stylesheet" href="assets/css/expenses.css?v=7.8.0.1"></noscript>
 </head>
-<body>
+<body class="app-entry-gated app-entry-pending">
 <div class="bg-fixed"></div>
 <div id="portrait-lock-overlay" class="portrait-lock-overlay" role="status" aria-live="polite">
   <div class="portrait-lock-card">
@@ -3472,6 +3508,63 @@ html.theme-dark .modal-actions .modal-close-btn{
     <span>Travel App 只支援直向使用，轉回直向後會自動繼續。</span>
   </div>
 </div>
+<main class="app-entry-gateway" id="app-entry-gateway" data-entry-state="pending" aria-live="polite" aria-busy="true">
+  <div class="app-entry-shell">
+    <div class="profile-section-label">Travel App</div>
+    <section class="profile-card profile-identity-card" aria-label="Google 帳戶">
+      <div class="profile-user-card" id="entry-user-card">
+        <span class="profile-avatar" id="entry-avatar" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M12 12.2a4.1 4.1 0 1 0 0-8.2 4.1 4.1 0 0 0 0 8.2Z" stroke="currentColor" stroke-width="1.8"/><path d="M4.8 20c.65-3.55 3.28-5.55 7.2-5.55s6.55 2 7.2 5.55" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        </span>
+        <span class="profile-user-main">
+          <span class="profile-user-name" id="entry-user-name">正在確認帳戶…</span>
+          <span class="profile-user-email" id="entry-user-email">Firebase Authentication</span>
+        </span>
+        <span class="profile-status-pill profile-auth-status" id="entry-auth-status">確認中</span>
+      </div>
+      <button class="profile-row" id="entry-account-btn" type="button">
+        <span class="profile-row-icon profile-icon-blue">👤</span>
+        <span class="profile-row-copy"><strong>登入 Google 帳戶</strong><small>登入後只會顯示你有權使用嘅旅程</small></span>
+        <span class="profile-chevron">›</span>
+      </button>
+    </section>
+
+    <section class="profile-card profile-menu-card app-entry-status-card" id="entry-state-card" aria-label="旅程存取狀態">
+      <div class="profile-row">
+        <span class="profile-row-icon profile-icon-blue app-entry-status-icon" id="entry-state-icon"><span class="trip-boot-spinner" aria-hidden="true"></span></span>
+        <span class="profile-row-copy"><strong id="entry-state-title">正在確認旅程存取權</strong><small id="entry-state-subtitle">安全確認完成後會直接進入你上次使用嘅旅程。</small></span>
+        <span class="profile-status-pill" id="entry-state-pill">確認中</span>
+      </div>
+    </section>
+
+    <section class="profile-card trip-invite-inbox-card" id="entry-invite-card" aria-label="旅程邀請" hidden>
+      <div class="profile-inline-section-heading"><strong>旅程邀請</strong><span class="trip-library-count" id="entry-invite-count">0</span></div>
+      <div class="trip-invite-inbox-list" id="entry-invite-list"></div>
+      <div class="trip-library-status" id="entry-invite-status">收到嘅旅程邀請會顯示喺呢度。</div>
+      <div class="app-entry-target-note" id="entry-invite-target-note" hidden></div>
+    </section>
+
+    <section class="profile-card profile-menu-card" id="entry-creator-card" aria-label="建立旅程" hidden>
+      <button class="profile-row" id="entry-import-btn" type="button">
+        <span class="profile-row-icon profile-icon-blue">⇧</span>
+        <span class="profile-row-copy"><strong>匯入 trip.json 建立旅程</strong><small>你已獲授權建立新 Firebase Trip</small></span>
+        <span class="profile-chevron">›</span>
+      </button>
+    </section>
+
+    <section class="profile-card profile-menu-card" id="entry-system-admin-card" aria-label="系統管理" hidden>
+      <button class="profile-row" id="entry-system-admin-btn" type="button">
+        <span class="profile-row-icon profile-icon-grey">⚙︎</span>
+        <span class="profile-row-copy"><strong>系統管理</strong><small>管理邊啲帳戶可以建立新旅程</small></span>
+        <span class="profile-chevron">›</span>
+      </button>
+    </section>
+
+    <section class="profile-card profile-signout-card" id="entry-signout-card" hidden>
+      <button class="profile-signout-btn" id="entry-signout-btn" type="button">登出 Google 帳戶</button>
+    </section>
+  </div>
+</main>
 <header class="ios-compact-header" id="ios-compact-header" aria-hidden="true">
   <div class="ios-compact-header-inner">
     <div class="ios-compact-copy">
@@ -3602,6 +3695,11 @@ html.theme-dark .modal-actions .modal-close-btn{
         <button class="profile-row" type="button" data-profile-open="trip-management">
           <span class="profile-row-icon profile-icon-green">⚙︎</span>
           <span class="profile-row-copy"><strong>旅程設定</strong><small>權限、支出及目前旅程設定</small></span>
+          <span class="profile-chevron">›</span>
+        </button>
+        <button class="profile-row" id="system-admin-open-btn" type="button" hidden>
+          <span class="profile-row-icon profile-icon-grey">⚙︎</span>
+          <span class="profile-row-copy"><strong>系統管理</strong><small>旅程建立權限</small></span>
           <span class="profile-chevron">›</span>
         </button>
         <button class="profile-row" type="button" data-profile-open="app-data">
@@ -3986,8 +4084,8 @@ html.theme-dark .modal-actions .modal-close-btn{
         <span class="profile-detail-spacer"></span>
       </div>
       <section class="profile-card" aria-label="App 資訊">
-        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.7.7.4</strong></div>
-        <div class="profile-meta-row"><span>資料架構</span><strong>Phase 2F</strong></div>
+        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.8.0.1</strong></div>
+        <div class="profile-meta-row"><span>資料架構</span><strong>Phase 2G.1</strong></div>
         <div class="profile-meta-row"><span>主要資料來源</span><strong id="app-data-source-label">Firebase / 本機快取</strong></div>
       </section>
 
@@ -4143,6 +4241,31 @@ html.theme-dark .modal-actions .modal-close-btn{
   </div>
 </div>
 
+<div class="modal-backdrop trip-import-backdrop" id="app-admin-backdrop" aria-hidden="true">
+  <div class="modal trip-import-modal" role="dialog" aria-modal="true" aria-labelledby="app-admin-title">
+    <div class="sheet-grabber-zone" aria-hidden="true"><span class="sheet-grabber"></span></div>
+    <div class="trip-import-scroll">
+      <div class="trip-import-title-row">
+        <div><h3 id="app-admin-title">系統管理</h3><p>管理邊啲已登入過 Travel App 嘅 Google 帳戶可以建立全新 Firebase Trip。</p></div>
+      </div>
+      <div class="trip-import-mode" id="app-admin-mode">App Admin · 旅程建立權限</div>
+      <div class="profile-inline-section-heading app-admin-sheet-heading"><strong>旅程建立權限</strong><span class="trip-library-count" id="app-admin-creator-count">—</span></div>
+      <div class="trip-member-list app-admin-sheet-list" id="app-admin-creator-list"></div>
+      <div class="trip-library-status" id="app-admin-list-status">開啟後會讀取目前 Creator 名單。</div>
+      <label class="trip-member-field">
+        <span>Google email</span>
+        <input id="app-admin-creator-email" type="email" inputmode="email" autocomplete="email" placeholder="name@gmail.com">
+      </label>
+      <button class="trip-member-primary-action" id="app-admin-add-creator" type="button">新增 Creator</button>
+      <div class="trip-member-inline-status" id="app-admin-action-status">對方需要至少登入過 Travel App 一次，系統先可以安全對應 Google UID。</div>
+      <div class="trip-library-status app-admin-bootstrap-note">App Admin 本身係全域管理權限；Creator 只代表可以建立新 Trip，唔會自動取得其他 Trip 嘅權限。</div>
+      <div class="trip-import-actions app-admin-actions">
+        <button class="trip-import-cancel" id="app-admin-close" type="button">完成</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="modal-backdrop" id="detail-backdrop" aria-hidden="true">
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="detail-title">
     <div class="sheet-grabber-zone" id="detail-sheet-grabber" aria-hidden="true"><span class="sheet-grabber"></span></div>
@@ -4163,7 +4286,7 @@ html.theme-dark .modal-actions .modal-close-btn{
 </div>
 
 <script>
-const APP_VERSION = "7.7.7.4";
+const APP_VERSION = "7.8.0.1";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 function perfLiteMark(name){try{return window.__perfLite?.mark(name);}catch(error){return null;}}
@@ -5927,6 +6050,35 @@ function renderProfileAuthState(user){
   status.textContent="已登入";
 }
 
+let appAdminServicePromise=null;
+let appAdminState={status:"idle",enabled:false,error:null};
+function getAppAdminService(){
+  if(!appAdminServicePromise)appAdminServicePromise=import(`./assets/js/app-admin-service.js?v=${APP_VERSION}`).catch(error=>{appAdminServicePromise=null;throw error;});
+  return appAdminServicePromise;
+}
+function renderAppAdminControls(){
+  const profileButton=document.getElementById("system-admin-open-btn");
+  const entryCard=document.getElementById("entry-system-admin-card");
+  const gateway=document.getElementById("app-entry-gateway");
+  const enabled=appAdminState.status==="ready"&&appAdminState.enabled===true&&!!window.__appAuthUser?.uid;
+  if(profileButton)profileButton.hidden=!enabled;
+  if(entryCard)entryCard.hidden=!(enabled&&gateway?.dataset?.entryState==="lobby");
+}
+async function refreshAppAdminEntitlement(user,{force=false}={}){
+  if(!user?.uid){appAdminState={status:"idle",enabled:false,error:null};renderAppAdminControls();return appAdminState;}
+  appAdminState={status:"loading",enabled:false,error:null};renderAppAdminControls();
+  try{
+    const service=await getAppAdminService();
+    const result=await service.getAppAdminEntitlement(user,{force});
+    appAdminState={status:"ready",enabled:result?.enabled===true,error:null,source:result?.source||""};
+  }catch(error){
+    if(error?.code!=="permission-denied")console.warn("App Admin entitlement",error);
+    appAdminState={status:"ready",enabled:false,error};
+  }
+  renderAppAdminControls();
+  return appAdminState;
+}
+
 let currentProfileAccess=null;
 function renderProfileAccessState(access){
   currentProfileAccess=access||null;
@@ -5938,31 +6090,188 @@ function renderProfileAccessState(access){
 }
 
 let globalAuthServicePromise=null;
+let globalAuthInitStarted=false;
 function getGlobalAuthService(){
   if(!globalAuthServicePromise) globalAuthServicePromise=import("./assets/js/auth-service.js");
   return globalAuthServicePromise;
 }
 function initGlobalAuthSafe(){
+  if(globalAuthInitStarted)return;globalAuthInitStarted=true;
   getGlobalAuthService()
     .then(({subscribeAuthState})=>{
       subscribeAuthState((user,safeUser)=>{
         perfLiteMark("authReady");
         const displayUser=safeUser||user||null;
+        appEntryAuthResolved=true;
         window.__appAuthUser=displayUser;
         renderProfileAuthState(displayUser);
+        renderEntryAuthState(displayUser);
         renderProfileAccessState(window.__appTripAccess||currentProfileAccess);
+        refreshAppEntryState();
       });
     })
     .catch(error=>console.error("Global auth service load error",error));
 }
 window.addEventListener("app-auth-state",event=>{
+  appEntryAuthResolved=true;
   window.__appAuthUser=event.detail?.user||null;
   renderProfileAuthState(window.__appAuthUser);
+  renderEntryAuthState(window.__appAuthUser);
   renderProfileAccessState(window.__appTripAccess||currentProfileAccess);
+  refreshAppAdminEntitlement(window.__appAuthUser).catch(()=>{});
+  refreshAppEntryState();
   refreshAppDataDiagnostics();
 });
-window.addEventListener("app-trip-access",event=>{renderProfileAccessState(event.detail||null);refreshAppDataDiagnostics();});
+window.addEventListener("app-trip-access",event=>{renderProfileAccessState(event.detail||null);refreshAppEntryState();refreshAppDataDiagnostics();});
 renderProfileAuthState(null);
+renderEntryAuthState(null);
+
+// =========================================================================
+// Phase 2G.1 · Root Entry / Access Gate
+// =========================================================================
+let appEntryServicePromise=null;
+let appEntryService=null;
+let appEntryAuthResolved=false;
+let appEntryState="pending";
+let appEntryCreatorState={status:"idle",enabled:false,error:null};
+let appEntryTargetInviteId=(()=>{try{const direct=String(new URL(location.href).searchParams.get("invite")||"").trim();if(direct)return direct;return String(sessionStorage.getItem("travel_entry_invite_return_v1")||"").trim();}catch(error){return"";}})();
+let appEntryRegistryBackfillBusy=false;
+let appEntryForcedTripId="";
+
+function getAppEntryService(){
+  if(!appEntryServicePromise)appEntryServicePromise=import(`./assets/js/app-entry-service.js?v=${APP_VERSION}`).then(service=>{appEntryService=service;appEntryTargetInviteId=appEntryTargetInviteId||service.inviteIdFromLocation?.()||"";return service;});
+  return appEntryServicePromise;
+}
+function entryUserInitials(user){return profileInitials(user);}
+function renderEntryAuthState(user){
+  const avatar=document.getElementById("entry-avatar"),name=document.getElementById("entry-user-name"),email=document.getElementById("entry-user-email"),status=document.getElementById("entry-auth-status"),account=document.getElementById("entry-account-btn"),signout=document.getElementById("entry-signout-card");
+  if(!avatar||!name||!email||!status)return;
+  avatar.replaceChildren();avatar.classList.toggle("is-signed-in",!!user);
+  if(account)account.hidden=!!user;if(signout)signout.hidden=!user;
+  if(!user){avatar.innerHTML=signedOutProfileIcon;name.textContent="尚未登入";email.textContent="使用 Google 帳戶登入後顯示你有權使用嘅旅程";status.textContent="未登入";return;}
+  const fallback=()=>{avatar.replaceChildren();avatar.textContent=entryUserInitials(user);};
+  if(user.photoURL){const img=document.createElement("img");img.alt="";img.src=user.photoURL;img.referrerPolicy="no-referrer";img.addEventListener("error",fallback,{once:true});avatar.appendChild(img);}else fallback();
+  name.textContent=user.displayName||"Google 使用者";email.textContent=user.email||"已連接 Google 帳戶";status.textContent="已登入";
+}
+function entryInviteRowsMarkup(rows,{targetId=""}={}){
+  const target=String(targetId||"").trim();
+  return rows.map(invite=>`<div class="trip-invite-row${invite.inviteId===target?" is-target-invite":""}">
+    <span class="trip-member-avatar"><span>✉️</span></span>
+    <span class="trip-member-copy">
+      <strong>${tripMemberEsc(invite.tripTitle||invite.tripId)}</strong>
+      <small>${tripMemberEsc(invite.tripDateRange||invite.tripId)}</small>
+      <span class="trip-member-meta"><span class="trip-member-role-pill">${tripMemberEsc(tripLibraryRoleLabel(invite.role)||invite.role)}</span>${invite.invitedByName?`<span class="trip-library-pill">由 ${tripMemberEsc(invite.invitedByName)} 邀請</span>`:""}</span>
+    </span>
+    <span class="trip-invite-actions">
+      <button class="trip-invite-action is-decline" type="button" data-trip-invite-decline="${tripMemberEsc(invite.inviteId)}">拒絕</button>
+      <button class="trip-invite-action is-accept" type="button" data-trip-invite-accept="${tripMemberEsc(invite.inviteId)}">加入</button>
+    </span>
+  </div>`).join("");
+}
+function renderEntryInvites(){
+  const card=document.getElementById("entry-invite-card"),list=document.getElementById("entry-invite-list"),count=document.getElementById("entry-invite-count"),status=document.getElementById("entry-invite-status"),targetNote=document.getElementById("entry-invite-target-note");
+  if(!card||!list||!count||!status)return;
+  const rows=Array.isArray(tripMyPendingInvites)?[...tripMyPendingInvites]:[];
+  const target=String(appEntryTargetInviteId||"").trim();
+  rows.sort((a,b)=>(a.inviteId===target?-1:0)-(b.inviteId===target?-1:0));
+  const show=!!tripLibraryCurrentUser&&(rows.length>0||!!target);
+  card.hidden=!show;count.textContent=String(rows.length);list.innerHTML=entryInviteRowsMarkup(rows,{targetId:target});
+  if(rows.length)status.textContent="邀請綁定 Google email；加入後會直接進入你獲授權嘅 Firebase Trip。";
+  else status.textContent=target?"正在確認指定旅程邀請…":"暫時未有待接受邀請。";
+  if(targetNote){
+    const found=rows.some(invite=>invite.inviteId===target);
+    targetNote.hidden=!target||found||tripMyInviteState.status==="loading";
+    targetNote.textContent=target&&!found&&tripMyInviteState.status==="ready"?"指定邀請可能已接受、已取消，或者唔屬於目前登入嘅 Google 帳戶。":"";
+  }
+}
+function entryWorkspaceVisualReady(service){
+  if(!service||appEntryState==="login"||!window.__appAuthUser?.uid)return false;
+  const access=window.__appTripAccess||currentProfileAccess||null;
+  const online=navigator.onLine!==false;
+  const catalog=tripLibraryCloudState||{};
+  const allowed=new Set((catalog.trips||[]).map(trip=>String(trip.tripId||"").trim()).filter(Boolean));
+  if(service.accessIsVerified?.(access,{online})&&access?.tripId)allowed.add(String(access.tripId));
+  const visibleId=dataTripId(window.tripData),forced=String(appEntryForcedTripId||"").trim();
+  if(forced&&visibleId!==forced)return false;
+  const ready=tripLoaderState?.status==="ready"&&tripLoaderState?.source!=="local"&&!!visibleId&&allowed.has(visibleId);
+  if(ready&&forced===visibleId)appEntryForcedTripId="";
+  return ready;
+}
+function applyAppEntryState(nextState){
+  const gateway=document.getElementById("app-entry-gateway"),title=document.getElementById("entry-state-title"),subtitle=document.getElementById("entry-state-subtitle"),pill=document.getElementById("entry-state-pill"),icon=document.getElementById("entry-state-icon"),creator=document.getElementById("entry-creator-card");
+  appEntryState=String(nextState||"pending");
+  if(gateway){gateway.dataset.entryState=appEntryState;gateway.setAttribute("aria-busy",["pending","resolving"].includes(appEntryState)?"true":"false");}
+  const gated=appEntryState!=="workspace";
+  document.body.classList.toggle("app-entry-gated",gated);document.body.classList.toggle("app-entry-workspace",!gated);document.body.classList.toggle("app-entry-pending",["pending","resolving"].includes(appEntryState));
+  if(appEntryState==="pending"){if(title)title.textContent="正在確認帳戶";if(subtitle)subtitle.textContent="正在讀取 Firebase Authentication 狀態。";if(pill)pill.textContent="確認中";}
+  else if(appEntryState==="resolving"){if(title)title.textContent="正在確認旅程存取權";if(subtitle)subtitle.textContent="安全確認完成後會直接進入你上次使用嘅旅程。";if(pill)pill.textContent=navigator.onLine===false?"離線確認":"確認中";}
+  else if(appEntryState==="lobby"){
+    const targeted=!!appEntryTargetInviteId&&tripMyPendingInvites.some(invite=>invite.inviteId===appEntryTargetInviteId);
+    if(title)title.textContent=targeted?"收到旅程邀請":"暫時未有旅程";
+    if(subtitle)subtitle.textContent=targeted?"確認邀請後會直接進入指定旅程。":"收到旅程邀請後可以喺呢度加入；未獲授權前唔會顯示 Trip workspace。";
+    if(pill)pill.textContent=targeted?"待確認":"等待邀請";
+  }
+  else if(appEntryState==="error"){if(title)title.textContent="暫時未能確認旅程";if(subtitle)subtitle.textContent=tripLibraryCloudState.status==="index-required"?"Firestore index 尚未完成，請先部署今版所需設定。":"Firebase 存取檢查未完成；現有資料冇被修改。";if(pill)pill.textContent="需處理";}
+  if(icon){icon.innerHTML=["pending","resolving"].includes(appEntryState)?'<span class="trip-boot-spinner" aria-hidden="true"></span>':(appEntryState==="lobby"?"🧳":appEntryState==="error"?"!":"✓");}
+  if(creator)creator.hidden=!(appEntryState==="lobby"&&!appEntryTargetInviteId&&!!window.__appAuthUser?.uid&&appEntryCreatorState.status==="ready"&&appEntryCreatorState.enabled===true);
+  renderAppAdminControls();
+  renderEntryInvites();
+}
+async function refreshAppEntryState(){
+  let service=appEntryService;
+  if(!service){try{service=await getAppEntryService();}catch(error){console.error("Entry service",error);applyAppEntryState("error");return;}}
+  const online=navigator.onLine!==false,user=window.__appAuthUser||null;
+  let next=service.deriveAppEntryState?.({authResolved:appEntryAuthResolved,user,access:window.__appTripAccess||currentProfileAccess||null,catalog:tripLibraryCloudState||null,online})||"pending";
+  if(user?.uid&&appEntryTargetInviteId){
+    const targetPending=tripMyPendingInvites.some(invite=>invite.inviteId===appEntryTargetInviteId);
+    if(targetPending)next="lobby";
+    else if(["idle","loading"].includes(String(tripMyInviteState.status||"idle")))next="resolving";
+    else if(tripMyInviteState.status==="ready"){
+      // The deep link no longer points to a pending invite for this account.
+      // Clear only the routing hint; normal membership/catalog rules decide the
+      // workspace from here without leaking any private Trip information.
+      service.clearInviteFromLocation?.({keepTrip:true});appEntryTargetInviteId="";
+    }
+  }
+  if(next==="workspace"&&!entryWorkspaceVisualReady(service))next="resolving";
+  applyAppEntryState(next);
+}
+async function refreshTripCreatorEntitlement(user,{force=false}={}){
+  if(!user?.uid){appEntryCreatorState={status:"idle",enabled:false,error:null};await refreshAppEntryState();return;}
+  appEntryCreatorState={status:"loading",enabled:false,error:null};
+  try{
+    const service=await import(`./assets/js/trip-creator-service.js?v=${APP_VERSION}`);
+    const result=await service.getTripCreatorEntitlement(user,{force});
+    appEntryCreatorState={status:"ready",enabled:result?.enabled===true,error:null};
+  }catch(error){
+    if(error?.code!=="permission-denied")console.warn("Trip creator entitlement",error);
+    appEntryCreatorState={status:"ready",enabled:false,error};
+  }
+  await refreshAppEntryState();
+}
+window.addEventListener("app-trip-creator-changed",event=>{
+  const changedUid=String(event.detail?.uid||"").trim();
+  const currentUid=String(window.__appAuthUser?.uid||"").trim();
+  if(changedUid&&changedUid===currentUid){
+    import(`./assets/js/trip-creator-service.js?v=${APP_VERSION}`).then(service=>service.clearTripCreatorEntitlementCache?.()).catch(()=>{});
+    refreshTripCreatorEntitlement(window.__appAuthUser,{force:true}).catch(()=>{});
+  }
+});
+
+async function backfillOwnerTripRegistries(state=tripLibraryCloudState){
+  if(appEntryRegistryBackfillBusy||!tripLibraryCurrentUser?.uid||state?.status!=="ready"||state?.serverConfirmed!==true)return;
+  const ownerTrips=(state.trips||[]).filter(trip=>trip.role==="owner");if(!ownerTrips.length)return;
+  appEntryRegistryBackfillBusy=true;
+  try{
+    const service=await import(`./assets/js/trip-creator-service.js?v=${APP_VERSION}`);
+    for(const trip of ownerTrips){
+      const key=`travel_trip_registry_v1:${tripLibraryCurrentUser.uid}:${trip.tripId}`;
+      try{if(localStorage.getItem(key)==="1")continue;}catch(error){}
+      try{await service.ensureTripIdRegistry(trip.tripId,{user:tripLibraryCurrentUser});try{localStorage.setItem(key,"1");}catch(error){}}
+      catch(error){if(error?.code!=="permission-denied")console.warn("Trip ID registry backfill",trip.tripId,error);}
+    }
+  }finally{appEntryRegistryBackfillBusy=false;}
+}
 
 
 let tripLibraryStopCatalog=null;
@@ -5972,8 +6281,8 @@ let tripLibrarySummary=null;
 let tripLibraryCatalogService=null;
 let tripLibrarySchemaService=null;
 let tripLibraryCurrentUser=null;
-let tripLibraryCloudState={status:"signed-out",trips:[],error:null};
-let tripLibraryArchiveState={status:"idle",trips:[],error:null};
+let tripLibraryCloudState={status:"signed-out",trips:[],error:null,fromCache:false,serverConfirmed:false};
+let tripLibraryArchiveState={status:"idle",trips:[],error:null,fromCache:false,serverConfirmed:false};
 
 // Phase 2E · Firebase is the live trip source once an authenticated member trip
 // is available. Bundled trip.json remains the safe bootstrap / signed-out fallback.
@@ -6137,9 +6446,9 @@ function renderTripLibrary(){
     const state=tripLibraryCloudState.status;
     if(state==="signed-out") status.textContent="目前使用本機 trip.json。登入 Google 後會顯示你有權使用嘅 Active Trips。";
     else if(state==="loading") status.textContent="已登入 Google，正在讀取未封存旅程…";
-    else if(state==="rules-pending") status.textContent="Google 登入正常。請先 publish zip 內 firestore.rules，Phase 2C Import 先可以安全寫入 Firebase。";
+    else if(state==="rules-pending") status.textContent="Google 登入正常。請先部署 ZIP 內 firestore.rules，Phase 2G.1 Entry & Access 權限先可以安全寫入 Firebase。";
     else if(state==="index-required") status.textContent="Firestore 欠 Trip catalog composite index；按 Console error 提供嘅連結建立一次就得。";
-    else if(state==="ready"&&cloudTrips.length===0) status.textContent="暫時未有雲端旅程。你可以用「匯入 trip.json」建立第一個 Trip，建立者會自動成為 Owner。";
+    else if(state==="ready"&&cloudTrips.length===0) status.textContent=appEntryCreatorState.enabled?"暫時未有雲端旅程。你已獲授權，可用「匯入 trip.json」建立新 Trip；亦可以等待旅程邀請。":"暫時未有雲端旅程。收到旅程邀請後會自動顯示喺呢度。";
     else if(state==="ready") status.textContent=`已讀取 ${cloudTrips.length} 個未封存雲端旅程。Firebase Loader 已連接，可直接切換。`;
     else status.textContent="旅程清單暫時未能同步，但目前本機行程不受影響。";
   }
@@ -6153,8 +6462,12 @@ function stopArchivedTripSubscription(){
 function restartActiveTripCatalog(){
   if(tripLibraryStopCatalog){tripLibraryStopCatalog();tripLibraryStopCatalog=null;}
   if(!tripLibraryCurrentUser||!tripLibraryCatalogService)return;
-  tripLibraryCloudState={status:"loading",trips:[],error:null};renderTripLibrary();
-  tripLibraryStopCatalog=tripLibraryCatalogService.subscribeUserTrips(tripLibraryCurrentUser,state=>{tripLibraryCloudState=state;renderTripLibrary();reconcileFirebaseTripLoader().catch(error=>console.error("Firebase loader reconcile",error));},{archived:false});
+  tripLibraryCloudState={status:"loading",trips:[],error:null,fromCache:false,serverConfirmed:false};renderTripLibrary();refreshAppEntryState();
+  tripLibraryStopCatalog=tripLibraryCatalogService.subscribeUserTrips(tripLibraryCurrentUser,state=>{
+    tripLibraryCloudState=state;renderTripLibrary();refreshAppEntryState();
+    if(state?.status==="ready"&&state?.serverConfirmed===true)backfillOwnerTripRegistries(state).catch(()=>{});
+    reconcileFirebaseTripLoader().catch(error=>console.error("Firebase loader reconcile",error));
+  },{archived:false});
 }
 function loadArchivedTrips(){
   if(!tripLibraryCurrentUser){tripLibraryArchiveState={status:"signed-out",trips:[],error:null};renderArchivedTrips();return;}
@@ -6185,8 +6498,8 @@ function initTripLibrarySafe(data){
       tripLibrarySummary=schemaService.getTripSummary(result.trip);
       tripLibrarySummaryDataSignature=tripLibraryDataSignature(summarySource);
       window.__portableTripSchema=result;
-      tripLibraryCloudState={status:window.__appAuthUser?"loading":"signed-out",trips:[],error:null};
-      tripLibraryArchiveState={status:"idle",trips:[],error:null};
+      tripLibraryCloudState={status:window.__appAuthUser?"loading":"signed-out",trips:[],error:null,fromCache:false,serverConfirmed:false};
+      tripLibraryArchiveState={status:"idle",trips:[],error:null,fromCache:false,serverConfirmed:false};
       renderTripLibrary();
 
       Promise.all([
@@ -6200,23 +6513,25 @@ function initTripLibrarySafe(data){
           rememberCacheUid(user?.uid||"");
           if(tripLibraryStopCatalog){tripLibraryStopCatalog();tripLibraryStopCatalog=null;}
           stopArchivedTripSubscription();
-          tripLibraryArchiveState={status:user?"idle":"signed-out",trips:[],error:null};
+          tripLibraryArchiveState={status:user?"idle":"signed-out",trips:[],error:null,fromCache:false,serverConfirmed:false};
           const archivePanel=document.getElementById("trip-archive-panel");
           const archiveToggle=document.getElementById("trip-archive-toggle");
           if(archivePanel) archivePanel.hidden=true;
           if(archiveToggle) archiveToggle.setAttribute("aria-expanded","false");
           restartMyTripInviteSubscription(user||null);
-          if(!user){tripLibraryCloudState={status:"signed-out",trips:[],error:null};renderTripLibrary();stopFirebaseTripLoader({fallback:true});return;}
+          refreshTripCreatorEntitlement(user||null).catch(()=>{});
+          if(!user){tripLibraryCloudState={status:"signed-out",trips:[],error:null,fromCache:false,serverConfirmed:false};renderTripLibrary();stopFirebaseTripLoader({fallback:false});refreshAppEntryState();return;}
           // v7.7.0.6: do not wait for the full Trip catalog + role fan-out before
           // restoring the last active Trip. Auth identity is enough to safely read
           // the user-bound render cache and start the Firestore listener directly.
-          bootstrapRememberedFirebaseTrip(user).catch(error=>console.warn("Instant Trip bootstrap",error));
+          bootstrapRememberedFirebaseTrip(user).catch(error=>console.warn("Verified Trip bootstrap",error));
           restartActiveTripCatalog();
+          refreshAppEntryState();
         });
       }).catch(error=>{
         console.warn("Phase 2B cloud trip catalog unavailable",error);
-        tripLibraryCloudState={status:"error",trips:[],error};
-        renderTripLibrary();
+        tripLibraryCloudState={status:"error",trips:[],error,fromCache:false,serverConfirmed:false};
+        renderTripLibrary();refreshAppEntryState();
         if(tripBootDeferred)stopFirebaseTripLoader({fallback:true});
       });
     })
@@ -6563,25 +6878,42 @@ async function applyInstantTripCache(tripIdInput,user){
     return false;
   }
 }
-async function bootstrapRememberedTripBeforeAuth(){
-  if(!tripBootDeferred)return false;
-  const tripId=tripBootPreferredId||resolveBootPreferredTripId();
-  const uid=rememberedCacheUid();
-  if(!tripId||!uid)return false;
-  return applyInstantTripCache(tripId,{uid});
+async function waitForVerifiedTripAccess(tripIdInput,{timeoutMs=6500}={}){
+  const tripId=String(tripIdInput||"").trim();if(!tripId)return false;
+  const {access}=await getTripLoaderServices();
+  access.initTripAccess?.(tripId);
+  const usable=state=>!!state?.role&&(state.serverConfirmed===true||(navigator.onLine===false&&state.fromCache===true));
+  const terminalDenied=state=>state?.tripId===tripId&&state.serverConfirmed===true&&!state.role;
+  const first=access.getTripAccess?.()||{};if(usable(first))return true;if(terminalDenied(first))return false;
+  return new Promise(resolve=>{
+    let done=false,timer=0,stop=null;
+    const finish=value=>{if(done)return;done=true;clearTimeout(timer);try{stop?.();}catch(error){}resolve(value);};
+    stop=access.subscribeTripAccess?.(state=>{
+      if(state?.tripId!==tripId)return;
+      if(usable(state))finish(true);
+      else if(terminalDenied(state))finish(false);
+      else if(navigator.onLine===false&&state?.ready)finish(!!state.role&&state.fromCache===true);
+    },{immediate:true});
+    timer=setTimeout(()=>finish(false),timeoutMs);
+  });
 }
-async function bootstrapRememberedFirebaseTrip(user){
-  const uid=currentCacheUid(user);
-  const tripId=tripBootPreferredId||resolveBootPreferredTripId();
-  if(!uid||!tripId)return false;
+async function bootstrapVerifiedFirebaseTrip(tripIdInput,user){
+  const tripId=String(tripIdInput||"").trim(),uid=currentCacheUid(user);if(!uid||!tripId)return false;
+  const verified=await waitForVerifiedTripAccess(tripId);
+  if(!verified){await invalidateInstantTripCache(tripId,user);refreshAppEntryState();return false;}
   const token=++tripInstantBootToken;
-  // Read the fully assembled app cache and start Firestore at the same time.
-  // The cache can paint immediately; Firestore remains authoritative and will
-  // replace it as soon as cache/server snapshots finish assembling.
+  // Auth identity and Trip membership are now verified. Keep the Phase 2F
+  // parallel cache + Firestore warm boot, but never paint the cached Trip before
+  // that access gate has passed.
   const cacheTask=applyInstantTripCache(tripId,user);
   const loaderTask=startFirebaseTripLoader(tripId);
   await Promise.allSettled([cacheTask,loaderTask]);
+  refreshAppEntryState();
   return token===tripInstantBootToken;
+}
+async function bootstrapRememberedFirebaseTrip(user){
+  const tripId=tripBootPreferredId||resolveBootPreferredTripId();
+  return bootstrapVerifiedFirebaseTrip(tripId,user);
 }
 function resolveTripLoaderWaiters(data){
   const id=dataTripId(data),revision=Number(data?.revision)||0;
@@ -6661,6 +6993,7 @@ function applyFirebaseTripData(data,{source="server",tripId="",dirtySections=[]}
   tripLoaderState={status:"ready",source,tripId:nextId,updatedAt:data?.cloudMeta?.updatedAt||"",error:null};
   window.tripData=data;
   setDataSourceLabel(source==="instant-cache"?"即時旅程快取":(source==="cache"?"Firebase 快取":"Firebase"));
+  refreshAppEntryState();
   refreshAppDataDiagnostics();
 
   if(needsItinerary){
@@ -6781,7 +7114,7 @@ async function startFirebaseTripLoader(tripIdInput){
       tripLoaderState={...tripLoaderState,status:"ready",source:metaSource};
       setDataSourceLabel(metaSource==="cache"?"Firebase 快取":"Firebase");
       if(metaSource==="server")perfLiteMark("firebaseServerReady");
-      renderTripLibrary();
+      renderTripLibrary();refreshAppEntryState();
       return;
     }
     if(event.status==="syncing"){tripLoaderState={...tripLoaderState,status:"syncing",source:event.source||tripLoaderState.source};setDataSourceLabel(event.reason==="restore"?"Firebase 還原中…":"Firebase 更新中…");return;}
@@ -6791,7 +7124,7 @@ async function startFirebaseTripLoader(tripIdInput){
       console.warn("Firebase Trip Loader",event.status,event.error||tripId);
       if(event.status==="permission-denied"||event.status==="not-found"){
         invalidateInstantTripCache(tripId).catch(()=>{});
-        stopFirebaseTripLoader({fallback:true});
+        stopFirebaseTripLoader({fallback:false});refreshAppEntryState();
         if(tripLibraryCloudState.status==="ready")reconcileFirebaseTripLoader().catch(()=>{});
       }else if(tripBootDeferred){
         stopFirebaseTripLoader({fallback:true});
@@ -6802,10 +7135,10 @@ async function startFirebaseTripLoader(tripIdInput){
 async function reconcileFirebaseTripLoader(){
   const token=++tripLoaderReconcileToken;
   if(!bundledTripData)return;
-  if(!tripLibraryCurrentUser){stopFirebaseTripLoader({fallback:true});return;}
+  if(!tripLibraryCurrentUser){stopFirebaseTripLoader({fallback:false});refreshAppEntryState();return;}
   if(tripLibraryCloudState.status!=="ready")return;
   const trips=(tripLibraryCloudState.trips||[]).filter(t=>t.archived!==true);
-  if(!trips.length){stopFirebaseTripLoader({fallback:true});return;}
+  if(!trips.length){stopFirebaseTripLoader({fallback:false});refreshAppEntryState();return;}
   const {session}=await getTripLoaderServices();if(token!==tripLoaderReconcileToken)return;
   const desired=session.resolveTripId(bundledTripData);
   const bundledId=dataTripId(bundledTripData);
@@ -6976,7 +7309,9 @@ function tripImportSetError(message=""){
 }
 function tripImportPermissionMessage(error){
   if(error?.code==="auth-required") return "請先登入 Google 帳戶，再繼續匯入。";
-  if(error?.code==="permission-denied") return "目前帳戶冇權限覆蓋呢個 Trip，或者 Trip ID 已被其他旅程使用。";
+  if(error?.code==="permission-denied") return "目前帳戶冇權限進行呢個 Firebase 操作。";
+  if(error?.code==="creator-required") return "目前 Google 帳戶未獲授權建立新 Trip。你仍然可以接受旅程邀請，或者使用已有權限嘅 Trip。";
+  if(error?.code==="trip-id-unavailable"||error?.code==="trip-exists") return "呢個 Trip ID 已被使用。為保護其他旅程私隱，系統唔會顯示該 Trip 嘅名稱、Owner 或其他資料。";
   if(error?.code==="offline") return "目前離線，無法連接 Firebase。請重新連線後再試。";
   if(error?.code==="operation-busy"||error?.code==="trip-operation-busy") return cloudSafetyFriendlyError(error);
   if(error?.code==="snapshot-too-large") return "現有 Trip 太大，未能安全建立單一 pre-import snapshot。今次唔會覆蓋任何資料。";
@@ -7028,8 +7363,14 @@ function renderTripImportPreview(inspection,{checking=false}={}){
     mode.innerHTML="<strong>JSON 驗證完成</strong><br>登入 Google 後先檢查 Firebase 有冇相同 tripId，再決定建立或取代。";
     confirm.textContent="登入 Google 繼續";confirm.disabled=false;return;
   }
-  if(inspection.mode==="create"){
-    mode.innerHTML="<strong>建立新旅程</strong><br>寫入 Firebase 後，目前 Google 帳戶會自動成為 Owner。";
+  if(inspection.mode==="creator-required"){
+    mode.innerHTML="<strong>未獲授權建立新 Trip</strong><br>一般旅程成員可以接受邀請同使用已有 Trip，但建立全新 Firebase Trip 需要獨立 Creator 權限。";
+    confirm.textContent="未有建立權限";confirm.disabled=true;
+  }else if(inspection.mode==="collision"){
+    mode.innerHTML="<strong>Trip ID 已被使用</strong><br>呢個 canonical Trip ID 已經存在。系統唔會透露其他私人旅程嘅名稱、Owner 或成員資料。";
+    confirm.textContent="Trip ID 已使用";confirm.disabled=true;
+  }else if(inspection.mode==="create"){
+    mode.innerHTML="<strong>建立新旅程</strong><br>你已獲授權建立新 Trip；寫入 Firebase 後，目前 Google 帳戶會自動成為 Owner。";
     confirm.textContent="匯入 Firebase";confirm.disabled=!inspection.canImport;
   }else if(inspection.mode==="unchanged"){
     mode.innerHTML="<strong>沒有變更</strong><br>呢份 JSON 同 Firebase 現有旅程內容相同，所以唔會建立 Snapshot、唔會增加 revision，亦唔會重新寫入資料。";
@@ -7218,6 +7559,9 @@ tripImportConfirm?.addEventListener("click",async()=>{
     tripImportState.done=true;
     if(bar)bar.style.width="100%";
     if(result.mode!=="unchanged")restartActiveTripCatalog();
+    if(result.mode==="create"&&document.body.classList.contains("app-entry-gated")){
+      try{const {session}=await getTripLoaderServices();appEntryForcedTripId=String(result.tripId||"");session.setActiveTripId(result.tripId);updateTripUrl(result.tripId);bootstrapVerifiedFirebaseTrip(result.tripId,user).catch(error=>console.warn("Created Trip bootstrap",error));}catch(error){console.warn("Created Trip route",error);}
+    }
     if(result.mode!=="unchanged"&&result.tripId===tripLibrarySummary?.tripId){
       import(`./assets/js/trip-access-service.js?v=${APP_VERSION}`).then(service=>service.refreshTripAccess?.()).catch(()=>{});
     }
@@ -7766,6 +8110,7 @@ let tripMemberStopMyInvites=null;
 let tripMemberRows=[];
 let tripMemberPendingRows=[];
 let tripMyPendingInvites=[];
+let tripMyInviteState={status:"idle",invites:[]};
 let tripMemberInviteRole="member";
 let tripMemberPageTripId="";
 
@@ -7803,32 +8148,22 @@ function renderTripMemberInbox(){
   card.hidden=!tripLibraryCurrentUser||rows.length===0;
   count.textContent=String(rows.length);
   if(!rows.length){list.innerHTML="";return;}
-  list.innerHTML=rows.map(invite=>`<div class="trip-invite-row">
-    <span class="trip-member-avatar"><span>✉️</span></span>
-    <span class="trip-member-copy">
-      <strong>${tripMemberEsc(invite.tripTitle||invite.tripId)}</strong>
-      <small>${tripMemberEsc(invite.tripDateRange||invite.tripId)}</small>
-      <span class="trip-member-meta"><span class="trip-member-role-pill">${tripMemberEsc(tripLibraryRoleLabel(invite.role)||invite.role)}</span>${invite.invitedByName?`<span class="trip-library-pill">由 ${tripMemberEsc(invite.invitedByName)} 邀請</span>`:""}</span>
-    </span>
-    <span class="trip-invite-actions">
-      <button class="trip-invite-action is-decline" type="button" data-trip-invite-decline="${tripMemberEsc(invite.inviteId)}">拒絕</button>
-      <button class="trip-invite-action is-accept" type="button" data-trip-invite-accept="${tripMemberEsc(invite.inviteId)}">加入</button>
-    </span>
-  </div>`).join("");
+  list.innerHTML=entryInviteRowsMarkup(rows);
   status.textContent="邀請綁定 Google email；加入後呢個 Trip 會自動出現喺 Firebase 旅程清單。";
 }
 function stopMyTripInviteSubscription(){
   if(tripMemberStopMyInvites){tripMemberStopMyInvites();tripMemberStopMyInvites=null;}
 }
 async function restartMyTripInviteSubscription(user){
-  stopMyTripInviteSubscription();tripMyPendingInvites=[];renderTripMemberInbox();
+  stopMyTripInviteSubscription();tripMyPendingInvites=[];tripMyInviteState={status:user?"loading":"signed-out",invites:[]};renderTripMemberInbox();renderEntryInvites();
   if(!user?.uid||!user?.email)return;
   try{
     const service=await getTripMemberService();
     tripMemberStopMyInvites=service.subscribeMyPendingInvites(user,state=>{
-      tripMyPendingInvites=state?.invites||[];renderTripMemberInbox();
+      tripMyInviteState=state||{status:"ready",invites:[]};
+      tripMyPendingInvites=state?.invites||[];renderTripMemberInbox();renderEntryInvites();refreshAppEntryState();
     });
-  }catch(error){console.warn("Trip invite inbox",error);}
+  }catch(error){tripMyInviteState={status:"error",invites:[],error};console.warn("Trip invite inbox",error);renderEntryInvites();}
 }
 
 function stopTripMemberPageSubscriptions(){
@@ -7909,7 +8244,7 @@ function tripMemberFriendlyError(error){
   if(code==="insufficient-role")return"目前角色冇權限進行呢個操作。";
   if(code==="invite-not-found")return"搵唔到呢個邀請，可能已被取消。";
   if(code==="invite-email-mismatch")return"呢個邀請唔屬於目前登入嘅 Google email。";
-  if(code==="permission-denied"||code==="firestore/permission-denied")return"Firestore 權限不足，請確認旅程角色同 Phase 2F Rules 已生效。";
+  if(code==="permission-denied"||code==="firestore/permission-denied")return"Firestore 權限不足，請確認旅程角色同 Phase 2G.1 Rules 已生效。";
   if(code==="offline"||code==="operation-busy"||code==="trip-operation-busy")return cloudSafetyFriendlyError(error);
   return error?.message||"操作未完成。";
 }
@@ -7955,7 +8290,123 @@ document.getElementById("trip-member-pending-list")?.addEventListener("click",as
   try{const service=await getTripMemberService();await service.cancelTripInvite(button.dataset.memberCancelInvite,{user:tripLibraryCurrentUser});}
   catch(error){alert(tripMemberFriendlyError(error));button.disabled=false;}
 });
-document.getElementById("trip-invite-inbox-list")?.addEventListener("click",async event=>{
+// v7.8.0.1 · App Admin / Trip Creator management.
+// Both the normal Profile Settings row and the zero-Trip Access Lobby open the
+// same proven bottom-sheet surface, so global management never depends on
+// having an active Trip and does not create a parallel UI system.
+let appAdminCreatorRows=[];
+let appAdminBusy=false;
+function appAdminBackdrop(){return document.getElementById("app-admin-backdrop");}
+function appAdminFriendlyError(error){
+  const code=String(error?.code||"");
+  if(code==="invalid-email")return"請輸入有效 Google email。";
+  if(code==="user-not-found")return"搵唔到呢個帳戶。對方需要先用呢個 Google email 登入 Travel App 一次。";
+  if(code==="ambiguous-user")return"同一個 email 對應到多過一個使用者紀錄，暫時唔會修改權限。";
+  if(code==="app-admin-required")return"目前帳戶唔係 App Admin。";
+  if(code==="permission-denied"||code==="firestore/permission-denied")return"Firestore 權限不足，請確認 v7.8.0.1 Rules 已部署，同 App Admin bootstrap 已建立。";
+  if(navigator.onLine===false)return"目前離線。系統權限修改需要重新連線後先進行。";
+  return error?.message||"操作未完成。";
+}
+function renderAppAdminCreatorList(){
+  const list=document.getElementById("app-admin-creator-list"),count=document.getElementById("app-admin-creator-count"),status=document.getElementById("app-admin-list-status");
+  if(count)count.textContent=String(appAdminCreatorRows.length);
+  if(!list)return;
+  if(!appAdminCreatorRows.length){
+    list.innerHTML='<div class="trip-activity-empty">暫時未有已授權 Creator。</div>';
+    if(status)status.textContent="App Admin 可以用下方 Google email 新增旅程建立權限。";
+    return;
+  }
+  const currentUid=String(window.__appAuthUser?.uid||"");
+  list.innerHTML=appAdminCreatorRows.map(creator=>{
+    const identity=creator.displayName||creator.email||creator.uid;
+    const secondary=creator.email||creator.uid;
+    const isSelf=String(creator.uid||"")===currentUid;
+    return `<div class="trip-member-row is-manageable">
+      <span class="trip-member-avatar">${tripMemberAvatarMarkup(creator)}</span>
+      <span class="trip-member-copy">
+        <strong>${tripMemberEsc(identity)}</strong>
+        <small>${tripMemberEsc(secondary)}</small>
+        <span class="trip-member-meta">${isSelf?'<span class="trip-member-you-pill">你</span>':""}<span class="trip-library-pill">可建立旅程</span></span>
+      </span>
+      <span class="trip-member-side"><button class="trip-member-remove" type="button" data-app-admin-revoke="${tripMemberEsc(creator.uid)}">移除</button></span>
+    </div>`;
+  }).join("");
+  if(status)status.textContent="Creator 只可以建立新 Trip；唔會因為呢個權限而取得其他旅程內容。";
+}
+async function loadAppAdminCreators(){
+  const status=document.getElementById("app-admin-list-status");
+  if(status)status.textContent="正在讀取旅程建立權限…";
+  try{
+    const service=await getAppAdminService();
+    appAdminCreatorRows=await service.listTripCreators({user:window.__appAuthUser});
+    renderAppAdminCreatorList();
+  }catch(error){
+    console.error("App Admin creator list",error);appAdminCreatorRows=[];renderAppAdminCreatorList();
+    if(status)status.textContent=appAdminFriendlyError(error);
+  }
+}
+async function openAppAdminManagement(){
+  if(appAdminState.status!=="ready"||appAdminState.enabled!==true){
+    const state=await refreshAppAdminEntitlement(window.__appAuthUser,{force:true});
+    if(!state.enabled){alert("目前帳戶唔係 App Admin。");return;}
+  }
+  const backdrop=appAdminBackdrop();if(!backdrop)return;
+  const action=document.getElementById("app-admin-action-status"),input=document.getElementById("app-admin-creator-email");
+  if(action){action.classList.remove("is-error");action.textContent="對方需要至少登入過 Travel App 一次，系統先可以安全對應 Google UID。";}
+  if(input)input.value="";
+  backdrop.setAttribute("aria-hidden","false");document.body.classList.add("app-admin-modal-open");lockScroll();requestAnimationFrame(()=>backdrop.classList.add("active"));
+  loadAppAdminCreators();
+}
+function closeAppAdminManagement(){
+  if(appAdminBusy)return;
+  const backdrop=appAdminBackdrop();if(!backdrop)return;
+  backdrop.classList.remove("active");backdrop.setAttribute("aria-hidden","true");document.body.classList.remove("app-admin-modal-open");unlockScroll();
+}
+document.getElementById("system-admin-open-btn")?.addEventListener("click",openAppAdminManagement);
+document.getElementById("entry-system-admin-btn")?.addEventListener("click",openAppAdminManagement);
+document.getElementById("app-admin-close")?.addEventListener("click",closeAppAdminManagement);
+document.getElementById("app-admin-backdrop")?.addEventListener("click",event=>{if(event.target===event.currentTarget)closeAppAdminManagement();});
+document.getElementById("app-admin-add-creator")?.addEventListener("click",async()=>{
+  const button=document.getElementById("app-admin-add-creator"),input=document.getElementById("app-admin-creator-email"),status=document.getElementById("app-admin-action-status");
+  if(!button||!input||appAdminBusy)return;
+  appAdminBusy=true;button.disabled=true;if(status){status.classList.remove("is-error");status.textContent="正在確認 Google 帳戶…";}
+  try{
+    const service=await getAppAdminService();
+    const result=await service.grantTripCreatorByEmail(input.value,{user:window.__appAuthUser});
+    input.value="";
+    if(status)status.textContent=`已授權 ${result.displayName||result.email} 建立新 Trip。`;
+    await loadAppAdminCreators();
+  }catch(error){if(status){status.classList.add("is-error");status.textContent=appAdminFriendlyError(error);}}
+  finally{appAdminBusy=false;button.disabled=false;}
+});
+document.getElementById("app-admin-creator-list")?.addEventListener("click",async event=>{
+  const button=event.target.closest?.("[data-app-admin-revoke]");if(!button||appAdminBusy)return;
+  const uid=String(button.dataset.appAdminRevoke||""),creator=appAdminCreatorRows.find(item=>String(item.uid||"")===uid);
+  if(!uid||!window.confirm(`移除「${creator?.displayName||creator?.email||uid}」嘅旅程建立權限？`))return;
+  appAdminBusy=true;button.disabled=true;
+  const status=document.getElementById("app-admin-action-status");if(status){status.classList.remove("is-error");status.textContent="正在更新旅程建立權限…";}
+  try{
+    const service=await getAppAdminService();await service.revokeTripCreator(uid,{user:window.__appAuthUser});
+    if(status)status.textContent="已移除旅程建立權限。";
+    await loadAppAdminCreators();
+  }catch(error){if(status){status.classList.add("is-error");status.textContent=appAdminFriendlyError(error);}button.disabled=false;}
+  finally{appAdminBusy=false;}
+});
+
+async function routeAcceptedInviteToWorkspace(result,inviteId){
+  const directTarget=String(appEntryTargetInviteId||"")===String(inviteId||"");
+  const gated=document.body.classList.contains("app-entry-gated");
+  if(!directTarget&&!gated)return;
+  try{
+    const {session}=await getTripLoaderServices();
+    appEntryForcedTripId=String(result.tripId||"");session.setActiveTripId(result.tripId);updateTripUrl(result.tripId);
+    const entry=await getAppEntryService();entry.clearInviteFromLocation?.({keepTrip:true});
+    appEntryTargetInviteId="";applyAppEntryState("resolving");
+    restartActiveTripCatalog();
+    bootstrapVerifiedFirebaseTrip(result.tripId,tripLibraryCurrentUser).catch(error=>console.warn("Invite Trip bootstrap",error));
+  }catch(error){console.warn("Invite workspace route",error);}
+}
+async function handleTripInviteAction(event){
   const accept=event.target.closest?.("[data-trip-invite-accept]"),decline=event.target.closest?.("[data-trip-invite-decline]");
   const button=accept||decline;if(!button)return;
   const inviteId=accept?.dataset.tripInviteAccept||decline?.dataset.tripInviteDecline;button.disabled=true;
@@ -7965,13 +8416,19 @@ document.getElementById("trip-invite-inbox-list")?.addEventListener("click",asyn
       appProgressOpen({kicker:"旅程邀請",title:"加入旅程",subtitle:"正在建立你嘅旅程權限…",percent:18,stageTitle:"驗證 Google email",stageDetail:"確認邀請同目前登入帳戶相符",icon:"👤"});
       const result=await service.acceptTripInvite(inviteId,{user:tripLibraryCurrentUser});
       appProgressUpdate({percent:88,stageTitle:"同步旅程清單",stageDetail:`${result.tripTitle||result.tripId} 已加入你嘅 Firebase Trips`,icon:"☁️"});
-      appProgressFinish({title:"已加入旅程",detail:"旅程會自動出現喺「我的旅程」及左上角 Trip Switcher。"});
-    }else await service.declineTripInvite(inviteId,{user:tripLibraryCurrentUser});
+      await routeAcceptedInviteToWorkspace(result,inviteId);
+      appProgressFinish({title:"已加入旅程",detail:document.body.classList.contains("app-entry-gated")?"正在開啟你啱啱加入嘅旅程。":"旅程已加入「我的旅程」及 Trip Switcher。"});
+    }else{
+      await service.declineTripInvite(inviteId,{user:tripLibraryCurrentUser});
+      if(String(appEntryTargetInviteId||"")===String(inviteId||"")){const entry=await getAppEntryService();entry.clearInviteFromLocation?.({keepTrip:true});appEntryTargetInviteId="";}
+    }
   }catch(error){
     if(accept)appProgressFail(tripMemberFriendlyError(error));else alert(tripMemberFriendlyError(error));
     button.disabled=false;
   }
-});
+}
+document.getElementById("trip-invite-inbox-list")?.addEventListener("click",handleTripInviteAction);
+document.getElementById("entry-invite-list")?.addEventListener("click",handleTripInviteAction);
 
 
 
@@ -8955,23 +9412,30 @@ function dispatchExpenseUiAction(action){
   window.dispatchEvent(new CustomEvent("expense-ui-action",{detail:{action}}));
 }
 
-document.getElementById("my-account-btn")?.addEventListener("click",()=>{
+async function startGoogleSignIn({preserveInvite=false}={}){
   if(window.__appAuthUser)return;
-  getGlobalAuthService()
-    .then(({signInWithGoogle})=>signInWithGoogle())
-    .catch(error=>{
-      console.error(error);
-      if(error?.code!=="auth/popup-closed-by-user") alert(`Google 登入失敗：${error?.code||"unknown"}`);
-    });
-});
-document.getElementById("profile-signout-btn")?.addEventListener("click",()=>{
-  getGlobalAuthService()
-    .then(({signOutCurrentUser})=>signOutCurrentUser())
-    .catch(error=>{
-      console.error("Google sign out error",error);
-      alert("暫時未能登出 Google 帳戶。");
-    });
-});
+  try{
+    if(preserveInvite){const entry=await getAppEntryService();const invite=appEntryTargetInviteId||entry.inviteIdFromLocation?.()||"";if(invite)entry.rememberInviteReturn?.(invite);}
+    const {signInWithGoogle}=await getGlobalAuthService();await signInWithGoogle();
+  }catch(error){
+    console.error(error);
+    if(error?.code!=="auth/popup-closed-by-user")alert(`Google 登入失敗：${error?.code||"unknown"}`);
+  }
+}
+async function signOutTravelUser(){
+  try{
+    try{const creator=await import(`./assets/js/trip-creator-service.js?v=${APP_VERSION}`);creator.clearTripCreatorEntitlementCache?.();}catch(error){}
+    const {signOutCurrentUser}=await getGlobalAuthService();await signOutCurrentUser();
+  }catch(error){console.error("Google sign out error",error);alert("暫時未能登出 Google 帳戶。");}
+}
+document.getElementById("my-account-btn")?.addEventListener("click",()=>startGoogleSignIn());
+document.getElementById("entry-account-btn")?.addEventListener("click",()=>startGoogleSignIn({preserveInvite:true}));
+document.getElementById("profile-signout-btn")?.addEventListener("click",signOutTravelUser);
+document.getElementById("entry-signout-btn")?.addEventListener("click",signOutTravelUser);
+document.getElementById("entry-import-btn")?.addEventListener("pointerdown",()=>warmTripImportDependencies(),{passive:true});
+document.getElementById("entry-import-btn")?.addEventListener("click",()=>{warmTripImportDependencies();tripImportFile?.click();});
+window.addEventListener("online",()=>refreshAppEntryState(),{passive:true});
+window.addEventListener("offline",()=>refreshAppEntryState(),{passive:true});
 
 document.querySelectorAll("[data-global-setting]").forEach(button=>{
   button.addEventListener("click",()=>dispatchExpenseUiAction(`setting:${button.dataset.globalSetting}`));
@@ -9001,12 +9465,18 @@ refreshCollapseMetrics();
 // Android / Chrome PWA support. Versioned app-shell Service Worker; normal launches are cache-first while explicit reloads stay network-first.
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("./sw.js?v=7.7.7.4").catch(() => {});
+    navigator.serviceWorker.register("./sw.js?v=7.8.0.1").catch(() => {});
   });
 }
 
 // Load
 function runOptionalAppStep(label,fn){try{return fn();}catch(error){console.error(`${label} error`,error);return null;}}
+// Phase 2G.1 root entry does not wait for trip.json before resolving Google
+// Authentication. Signed-out users therefore see the Login Gateway promptly,
+// while signed-in users remain on the neutral access gate until Trip access is
+// verified.
+initGlobalAuthSafe();
+getAppEntryService().then(()=>refreshAppEntryState()).catch(error=>console.error("Entry gate init",error));
 fetch(getTripJsonUrl())
   .then(r=>{if(!r.ok)throw new Error("HTTP "+r.status);return r.json();})
   .then(data=>{
@@ -9020,10 +9490,10 @@ fetch(getTripJsonUrl())
       runOptionalAppStep("Weather render",()=>renderWeather(data));
       runOptionalAppStep("Travel info render",()=>renderInfo(data));
     }else{
-      // v7.7.0.6 trusted-device warm boot: use the last authenticated UID only
-      // as a local cache namespace hint. Firebase Auth still verifies the real
-      // session immediately afterwards and Firestore remains authoritative.
-      bootstrapRememberedTripBeforeAuth().catch(error=>console.warn("Pre-auth Trip cache bootstrap",error));
+      // Phase 2G.1: keep the workspace hidden until Firebase Auth confirms the
+      // current identity. The same IndexedDB warm cache is applied immediately
+      // after verified membership, never before authorization.
+      showDeferredTripBootPlaceholder("正在確認旅程存取權…");
     }
     runOptionalAppStep("Trip library init",()=>initTripLibrarySafe(data));
     runOptionalAppStep("Compact header init",()=>updateCompactHeader());

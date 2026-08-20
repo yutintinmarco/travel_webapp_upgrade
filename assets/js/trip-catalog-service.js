@@ -86,9 +86,29 @@ export function subscribeUserTrips(user, callback, { archived = false } = {}) {
     where("archived", "==", archived === true)
   );
   let runId = 0;
+  let lastTrips = null;
+  let serverConfirmed = false;
 
-  return onSnapshot(tripsQuery, snapshot => {
+  return onSnapshot(tripsQuery, { includeMetadataChanges: true }, snapshot => {
     const thisRun = ++runId;
+    const fromCache = snapshot.metadata?.fromCache === true;
+    if (!fromCache) serverConfirmed = true;
+
+    // Metadata-only cache → server confirmation must not repeat the per-Trip
+    // member role reads. Reuse the last normalized rows when document content
+    // did not change; this keeps the new entry gate authoritative without
+    // undoing the Phase 2F read optimisation.
+    let contentChanged = lastTrips === null;
+    if (!contentChanged) {
+      try { contentChanged = snapshot.docChanges({ includeMetadataChanges: false }).length > 0; }
+      catch (error) { contentChanged = true; }
+    }
+
+    if (!contentChanged && lastTrips) {
+      callback({ status: "ready", trips: lastTrips.map(trip => ({ ...trip })), error: null, fromCache, serverConfirmed });
+      return;
+    }
+
     const base = snapshot.docs.map(normalizeTripDoc);
     attachRoles(base, uid).then(trips => {
       if (thisRun !== runId) return;
@@ -97,9 +117,10 @@ export function subscribeUserTrips(user, callback, { archived = false } = {}) {
         const bd = b.startDate || "9999-99-99";
         return ad.localeCompare(bd) || a.title.localeCompare(b.title);
       });
-      callback({ status: "ready", trips, error: null });
+      lastTrips = trips.map(trip => ({ ...trip }));
+      callback({ status: "ready", trips, error: null, fromCache, serverConfirmed });
     });
   }, error => {
-    callback({ status: error?.code === "permission-denied" ? "rules-pending" : (error?.code === "failed-precondition" ? "index-required" : "error"), trips: [], error });
+    callback({ status: error?.code === "permission-denied" ? "rules-pending" : (error?.code === "failed-precondition" ? "index-required" : "error"), trips: [], error, fromCache: false, serverConfirmed: false });
   });
 }

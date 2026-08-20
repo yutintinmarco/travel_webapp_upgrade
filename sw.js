@@ -1,5 +1,5 @@
 /* Travel WebApp Service Worker
- * v7.7.7.4 · Local First Export Engine; Layer 0–3 retained
+ * v7.8.0.1 · Phase 2G.1 Entry & Access Foundation; Layer 0–3 retained
  *
  * Keeps the v7.7.0.14 cold-start behaviour, while hardening installation:
  *  1. Critical shell assets are transactional. If any critical file cannot be
@@ -13,7 +13,7 @@
  *     explicit reload stays network-first.
  */
 
-const SW_VERSION = "travel-shell-v7.7.7.4";
+const SW_VERSION = "travel-shell-v7.8.0.1";
 const CORE_CACHE = SW_VERSION;
 
 // Required for a useful offline launch and remembered-Trip boot.
@@ -26,6 +26,7 @@ const CRITICAL_ASSETS = [
   "./assets/js/firebase-config.js",
   "./assets/js/firebase-service.js",
   "./assets/js/firestore-observed-service.js",
+  "./assets/js/app-entry-service.js",
   "./assets/js/trip-access-service.js",
   "./assets/js/trip-catalog-service.js",
   "./assets/js/trip-loader-service.js",
@@ -42,11 +43,13 @@ const CRITICAL_ASSETS = [
 const OPTIONAL_ASSETS = [
   "./assets/css/expenses.css",
   "./assets/js/cloud-safety-service.js",
+  "./assets/js/app-admin-service.js",
   "./assets/js/expenses-module.js",
   "./assets/js/trip-activity-service.js",
   "./assets/js/trip-appearance-service.js",
   "./assets/js/trip-backup-service.js",
   "./assets/js/trip-destination-service.js",
+  "./assets/js/trip-creator-service.js",
   "./assets/js/trip-import-service.js",
   "./assets/js/trip-member-service.js",
   "./assets/js/trip-operation-service.js",

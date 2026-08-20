@@ -2,6 +2,7 @@ import { auth, db } from "./firebase-service.js";
 import { buildFirestoreTripPlan, getTripSummary, normalizePortableTrip, validatePortableTrip } from "./trip-schema-service.js";
 import { assertCloudOperationAvailable, beginCloudOperation, endCloudOperation } from "./cloud-safety-service.js";
 import { acquireTripOperation, releaseTripOperation } from "./trip-operation-service.js";
+import { getTripCreatorEntitlement, inspectTripIdRegistry, tripIdRegistryRecord } from "./trip-creator-service.js";
 import {
   collection,
   doc,
@@ -324,6 +325,32 @@ async function inspectExistingAgainstPlan(existingTripDoc, plan, tripId) {
   return { unchanged: changeSummary.unchanged, contentHash: nextHash, existing, changeSummary };
 }
 
+async function inspectCreateEligibility(validation, summary, user) {
+  let entitlement;
+  try { entitlement = await getTripCreatorEntitlement(user); }
+  catch (error) {
+    if (error?.code === "permission-denied") {
+      return { ...validation, summary, exists: false, role: null, canImport: false, mode: "creator-required", creatorRequired: true };
+    }
+    throw error;
+  }
+  if (!entitlement?.enabled) {
+    return { ...validation, summary, exists: false, role: null, canImport: false, mode: "creator-required", creatorRequired: true };
+  }
+
+  const registry = await inspectTripIdRegistry(validation.trip.tripId, { user });
+  if (registry.reserved) {
+    return {
+      ...validation, summary, exists: true, role: null, roleLabel: "", canImport: false,
+      mode: "collision", existingTrip: null, changeSummary: null, protectedProbe: true, tripIdReserved: true
+    };
+  }
+  return {
+    ...validation, summary, exists: false, role: null, canImport: true, mode: "create",
+    existingTrip: null, changeSummary: null, creatorAuthorized: true
+  };
+}
+
 export async function inspectTripImport(rawInput, userInput = null) {
   const user = await requireUser(userInput);
   const built = buildFirestoreTripPlan(rawInput, user);
@@ -339,13 +366,14 @@ export async function inspectTripImport(rawInput, userInput = null) {
     tripSnap = await getDoc(tripRef);
   } catch (error) {
     if (error?.code === "permission-denied") {
-      return { ...validation, summary, exists: false, role: null, canImport: true, mode: "create", existingTrip: null, changeSummary: null, protectedProbe: true };
+      // Private Trip documents deliberately cannot be probed. New-Trip creation
+      // is decided by the creator entitlement + privacy-preserving Trip ID
+      // registry instead of treating permission-denied as an available ID.
+      return inspectCreateEligibility(validation, summary, user);
     }
     throw error;
   }
-  if (!tripSnap.exists()) {
-    return { ...validation, summary, exists: false, role: null, canImport: true, mode: "create", existingTrip: null, changeSummary: null };
-  }
+  if (!tripSnap.exists()) return inspectCreateEligibility(validation, summary, user);
   const existingTrip = tripSnap.data() || {};
   const listedMember = Array.isArray(existingTrip.memberUids) && existingTrip.memberUids.includes(user.uid);
   if (!listedMember) {
@@ -453,6 +481,21 @@ export async function importTrip(rawInput, {
       }
     }
 
+    if (mode === "create") {
+      const entitlement = await getTripCreatorEntitlement(user);
+      if (!entitlement?.enabled) {
+        const error = new Error("Trip creator entitlement required");
+        error.code = "creator-required";
+        throw error;
+      }
+      const registry = await inspectTripIdRegistry(plan.tripId, { user });
+      if (registry.reserved) {
+        const error = new Error("Trip ID already used");
+        error.code = "trip-id-unavailable";
+        throw error;
+      }
+    }
+
     let existing = null;
     let snapshotId = null;
     let existingRole = null;
@@ -513,6 +556,7 @@ export async function importTrip(rawInput, {
 
     if (mode === "create") {
       const batch = writeBatch(db);
+      batch.set(doc(db, "tripIds", plan.tripId), tripIdRegistryRecord(plan.tripId, user));
       batch.set(tripRef, {
         ...plan.tripDoc,
         revision: finalRevision,
