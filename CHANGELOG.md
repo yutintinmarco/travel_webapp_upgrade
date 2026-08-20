@@ -1,3 +1,26 @@
+# v7.8.1.3 · Phase 2G.2 Revoke Handoff & UI Alignment
+
+## UI Harmony
+
+* Trip Lock row restores the canonical 10px icon-to-copy spacing used by the adjacent Trip Permission / Expense Management rows. The status pill remains clone-safe without shifting the title a few pixels left.
+* Existing Apple Settings row, status pill and chevron components are reused; no new visual system is introduced.
+
+## Revoke & Transition Stability
+
+* Server-confirmed revoke now starts a dedicated Trip-to-Trip handoff before any asynchronous loader teardown, so the already-visible Workspace stays on screen until the replacement Trip is hydrated.
+* Catalog removal of the revoked Trip can no longer clear the visual latch in the middle of that handoff. A few seconds of already-rendered cached itinerary may remain visible by design while Firebase write access is already denied.
+* Expenses no longer forces an immediate iOS PWA reload during revoke or normal Trip switching. Its Trip-specific Firestore listeners are suspended immediately, the App switches back to the existing itinerary view if necessary, and a safety reload is deferred until the user next opens 支出.
+* The deferred Expenses reload first persists the visible replacement Trip cache, preserving write isolation without using App Entry / Login as a routing mechanism.
+* No feature, permission rule, backup, restore, archive or lock semantics are reduced.
+
+## Compatibility
+
+* No Firestore Rules or index changes.
+* No image, icon, background or Expenses CSS changes.
+* v7.3.13 Profile Navigation compositor remains protected and unmodified.
+
+---
+
 # v7.8.1.2 · Phase 2G.2 Harmony & Stability
 
 ## UI Harmony

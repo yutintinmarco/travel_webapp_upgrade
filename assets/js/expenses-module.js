@@ -486,6 +486,7 @@ function mountExpensesHtml(root) {
 }
 
 let expensesModuleStarted = false;
+let expensesModuleSuspendedForTripSwitch = false;
 
 export function initExpensesModule(tripData) {
   if (expensesModuleStarted) return;
@@ -4464,6 +4465,7 @@ if (lockTripBtn) lockTripBtn.addEventListener("click", lockTrip);
 if (unlockTripBtn) unlockTripBtn.addEventListener("click", unlockTrip);
 
 async function startExpenseCloudIfAllowed() {
+  if (expensesModuleSuspendedForTripSwitch) return;
   if (!currentUser) return;
   const access = expenseAccessState();
   phase2TripAccessTripId = access.accessTripId || phase2TripAccessTripId;
@@ -4594,6 +4596,23 @@ subscribeAuthState(async (user) => {
   phase2TripRole = window.__appTripAccess?.role || null;
   await startExpenseCloudIfAllowed();
 });
+
+window.__suspendExpensesForTripSwitch = function suspendExpensesModuleForTripSwitch(){
+  expensesModuleSuspendedForTripSwitch = true;
+  cloudExpenseStarted = false;
+  clearExpenseAccessRecoveryTimer();
+  expenseAccessRecoveryAttempt = 0;
+  for (const stop of [stopTripListener, stopExpenseSettingsListener, stopExpensesListener, stopSettlementsListener, stopActivityLogsListener]) {
+    try { stop?.(); } catch (error) {}
+  }
+  stopTripListener = null;
+  stopExpenseSettingsListener = null;
+  stopExpensesListener = null;
+  stopSettlementsListener = null;
+  stopActivityLogsListener = null;
+  window.__expensesModuleSuspended = true;
+  return true;
+};
 
 }
 
