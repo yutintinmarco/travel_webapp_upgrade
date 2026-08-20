@@ -1,23 +1,19 @@
-# v7.7.7.3 · Local First Export Engine
+# v7.7.7.4 · Safari Firestore Persistence Stabilization
 
 ## What changed
-- Read-only exports no longer re-read Firestore after the first iOS file-download handoff.
-- Entering Data Management now prepares the local export sources while Firestore is still healthy: current Trip state, expense/settlement/activity state, and recent Snapshot payloads.
-- `trip.json` is built from the current synchronized in-memory Trip state.
-- Full Backup JSON is built from a frozen local Trip + expense snapshot and refuses to export if required local data is incomplete.
-- Expense Excel uses the already synchronized local expense state.
-- Snapshot export uses the Snapshot payload preloaded with Version History data instead of fetching the Snapshot again.
-- Snapshot History reuses the preloaded local Snapshot cache when available.
-- Removed the failed Firestore network-cycle recovery from the read-only export path.
+- Firestore web persistence now uses the default single-tab `persistentLocalCache()` mode.
+- Removed `persistentMultipleTabManager()` because the installed Travel PWA is intended to run as one primary app instance per device.
+- Removed the unused `disableNetwork()` / `enableNetwork()` recovery helper from `firebase-service.js`.
+- IndexedDB persistence, offline reads, warm boot cache and normal multi-device realtime sync remain enabled.
+- Local First Export from v7.7.7.3 is retained unchanged.
+
+## Expected trade-off
+- Opening the same Travel App simultaneously in multiple tabs / browser instances on the same device is no longer a supported persistence scenario.
+- Using different devices at the same time is unaffected.
 
 ## Files changed
 - index.html
 - sw.js
 - manifest.json
 - CHANGELOG.md
-- assets/js/trip-backup-service.js
-- assets/js/expenses-module.js
-
-## Firebase
-- Firestore Rules unchanged.
-- Firestore indexes unchanged.
+- assets/js/firebase-service.js
