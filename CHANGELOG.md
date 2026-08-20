@@ -1,3 +1,11 @@
+# v7.8.0.4 · Phase 2G.1 Fast Resume Boot Cleanup
+
+* Home Screen PWA launch and in-app reload now use the same Fast Resume path whenever a remembered user UID and active Trip are available.
+* IndexedDB Trip render cache starts before the bundled `trip.json` network request, removing the visible Travel App loading Gateway on normal returning-user launches.
+* A later bundled `trip.json` response can no longer overwrite a Trip already painted by Fast Resume.
+* The legacy identity plus「正在確認旅程存取權」transitional cards are removed from the resolving path; when no usable cache exists, resolving uses only the branded lightweight opening panel.
+* Firebase Auth and membership still reconcile in the background. Confirmed sign-out, account mismatch or revoke exits the optimistic local Trip as designed.
+
 # v7.8.0.3 · Phase 2G.1 Refresh Continuity & Login Handoff
 
 ## Changed
