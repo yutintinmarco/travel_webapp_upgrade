@@ -168,7 +168,7 @@ function mountExpensesHtml(root) {
       <div class="settings-menu-grid expense-inline-settings-grid">
         <button type="button" class="settings-menu-btn" data-settings-open="members"><span>👥</span><strong>成員管理</strong><small>新增或移除分帳成員</small></button>
         <button type="button" class="settings-menu-btn" data-settings-open="rates" data-admin-only="true"><span>💱</span><strong>匯率設定</strong><small>基準貨幣及旅程匯率</small></button>
-        <button type="button" class="settings-menu-btn" data-settings-open="lock" data-admin-only="true"><span>🔒</span><strong>鎖定旅程</strong><small>停止新增及修改支出</small></button>
+        <button type="button" class="settings-menu-btn" data-settings-open="lock" data-admin-only="true"><span>🔒</span><strong>支出鎖定</strong><small>停止新增及修改支出</small></button>
         <button type="button" class="settings-menu-btn" data-settings-open="deleted"><span>🗑️</span><strong>已刪除項目</strong><small>查看及還原支出</small></button>
       </div>
     </section>
@@ -386,7 +386,7 @@ function mountExpensesHtml(root) {
           <button type="button" id="addAllowedEmailBtn" class="secondary-btn">新增</button>
         </div>
         <div class="setting-subtitle" style="margin-top:16px">Admin Google Email</div>
-        <p class="hint">Admin 除了可登入，亦可管理權限、匯率及鎖定旅程。Creator 不能被移除。</p>
+        <p class="hint">Admin 除了可登入，亦可管理權限、匯率及支出鎖定。Creator 不能被移除。</p>
         <div id="adminEmailList" class="member-list"></div>
         <div class="member-add-row" style="margin-top:12px">
           <input type="email" id="adminEmailInput" placeholder="admin@gmail.com" />
@@ -401,16 +401,16 @@ function mountExpensesHtml(root) {
 
   <div id="lockSettingsModal" class="modal expense-presentation-sheet hidden" data-presentation="sheet" data-sheet-size="compact">
     <div class="modal-card">
-      <div class="modal-heading-row"><h3><span class="modal-title-icon">🔒</span><span>鎖定旅程</span></h3></div>
+      <div class="modal-heading-row"><h3><span class="modal-title-icon">🔒</span><span>支出鎖定</span></h3></div>
       <div class="modal-body-scroll">
       <section class="hidden" id="tripControlPanel">
         <p class="hint">鎖定後不可再新增、修改或刪除支出，亦不可修改成員及匯率；仍可記錄找數及匯出 Excel。</p>
         <div class="form-actions">
           <button type="button" id="lockTripBtn">鎖定此旅程</button>
-          <button type="button" id="unlockTripBtn" class="secondary-btn hidden">解鎖此旅程</button>
+          <button type="button" id="unlockTripBtn" class="secondary-btn hidden">解除支出鎖定</button>
         </div>
       </section>
-      <p id="lockNoAdminHint" class="hint">只有 Owner / Admin 可以鎖定或解鎖旅程。</p>
+      <p id="lockNoAdminHint" class="hint">只有 Owner / Admin 可以鎖定或解除支出鎖定。</p>
       </div>
       <div class="modal-footer-actions"><button type="button" class="modal-close-btn" data-modal-close="lockSettingsModal">關閉</button></div>
     </div>
@@ -677,8 +677,12 @@ let tripStatus = "open";
 let tripLockedAt = null;
 let tripLockedBy = null;
 let tripLockedByName = "";
+let expenseLockExplicit = false;
+let legacyExpenseLock = { locked:false, lockedAt:null, lockedBy:null, lockedByName:"" };
+let globalTripLocked = false;
 let editingExpenseId = null;
 let stopTripListener = null;
+let stopExpenseSettingsListener = null;
 let stopExpensesListener = null;
 let stopSettlementsListener = null;
 let stopActivityLogsListener = null;
@@ -940,13 +944,27 @@ function updateCategoryFromTitle(titleEl, categoryEl, sourceLabel = "") {
 function isTripLocked() {
   return tripStatus === "locked";
 }
-
-function assertTripOpen(message = "此旅程已鎖定，不能再修改支出或設定。") {
+function isGlobalTripLocked(){ return globalTripLocked === true; }
+function assertGlobalTripOpen(message = "此旅程已全域鎖定，目前只可查看資料。") {
+  if (isGlobalTripLocked()) { alert(message); return false; }
+  return true;
+}
+function assertTripOpen(message = "支出已鎖定，不能再修改支出或支出設定。") {
+  if (!assertGlobalTripOpen()) return false;
   if (isTripLocked()) {
     alert(message);
     return false;
   }
   return true;
+}
+function applyExpenseLockState(data = {}, { explicit = true } = {}) {
+  expenseLockExplicit = explicit && typeof data.expenseLocked === "boolean";
+  const locked = expenseLockExplicit ? data.expenseLocked === true : legacyExpenseLock.locked === true;
+  tripStatus = locked ? "locked" : "open";
+  tripLockedAt = expenseLockExplicit ? (data.expenseLockedAt || null) : legacyExpenseLock.lockedAt;
+  tripLockedBy = expenseLockExplicit ? (data.expenseLockedBy || null) : legacyExpenseLock.lockedBy;
+  tripLockedByName = expenseLockExplicit ? (data.expenseLockedByName || "") : legacyExpenseLock.lockedByName;
+  updateTripStatusUi();
 }
 
 function getActiveExpenses() {
@@ -963,7 +981,7 @@ function setFormDisabled(disabled, reason = "") {
   });
   if (disabled) {
     submitBtn.textContent = reason === "locked"
-      ? "旅程已鎖定"
+      ? "支出已鎖定"
       : (reason === "access-pending" ? "正在確認權限…" : "只讀");
     cancelEditBtn.classList.add("hidden");
   } else if (!editingExpenseId) {
@@ -1006,14 +1024,17 @@ function scheduleExpenseAccessRecovery() {
 
 function updateTripStatusUi() {
   const locked = isTripLocked();
+  const globallyLocked = isGlobalTripLocked();
   const lockInfo = locked
     ? `已鎖定${tripLockedByName ? ` · ${tripLockedByName}` : ""}${tripLockedAt ? ` · ${formatTimestamp(tripLockedAt)}` : ""}`
     : "Open，仍可新增及修改支出";
 
   if (tripStatusText) {
-    tripStatusText.innerHTML = locked
-      ? `<span class="locked-badge">Locked</span> ${safeEscape(lockInfo)}`
-      : `<span class="open-badge">Open</span> ${safeEscape(lockInfo)}`;
+    tripStatusText.innerHTML = globallyLocked
+      ? `<span class="locked-badge">Trip Locked</span> 全域唯讀；支出鎖定設定暫不可變更`
+      : (locked
+        ? `<span class="locked-badge">Locked</span> ${safeEscape(lockInfo)}`
+        : `<span class="open-badge">Open</span> ${safeEscape(lockInfo)}`);
   }
 
   if (tripControlPanel) {
@@ -1021,35 +1042,35 @@ function updateTripStatusUi() {
   }
   if (lockNoAdminHint) lockNoAdminHint.classList.toggle("hidden", isAdmin());
 
-  if (lockTripBtn) lockTripBtn.classList.toggle("hidden", locked || !isAdmin());
-  if (unlockTripBtn) unlockTripBtn.classList.toggle("hidden", !locked || !isAdmin());
+  if (lockTripBtn) { lockTripBtn.classList.toggle("hidden", locked || !isAdmin()); lockTripBtn.disabled = globallyLocked; }
+  if (unlockTripBtn) { unlockTripBtn.classList.toggle("hidden", !locked || !isAdmin()); unlockTripBtn.disabled = globallyLocked; }
   const lockActionFooter = lockTripBtn?.closest(".modal-footer-actions");
   if (lockActionFooter) lockActionFooter.classList.toggle("expense-actions-unavailable", !isAdmin());
 
   const access = expenseAccessState();
   const accessPending = Boolean(currentUser && !access.ready);
   const readOnly = access.ready ? !canWriteExpenses() : true;
-  setFormDisabled(locked || readOnly || accessPending, locked ? "locked" : (accessPending ? "access-pending" : (readOnly ? "read-only" : "")));
+  setFormDisabled(globallyLocked || locked || readOnly || accessPending, (globallyLocked || locked) ? "locked" : (accessPending ? "access-pending" : (readOnly ? "read-only" : "")));
 
-  if (addMemberBtn) addMemberBtn.disabled = locked || readOnly || accessPending;
-  if (memberNameInput) memberNameInput.disabled = locked || readOnly || accessPending;
-  if (saveRatesBtn) saveRatesBtn.disabled = locked || !isAdmin();
-  if (baseCurrencyInput) baseCurrencyInput.disabled = locked || !isAdmin();
+  if (addMemberBtn) addMemberBtn.disabled = globallyLocked || locked || readOnly || accessPending;
+  if (memberNameInput) memberNameInput.disabled = globallyLocked || locked || readOnly || accessPending;
+  if (saveRatesBtn) saveRatesBtn.disabled = globallyLocked || locked || !isAdmin();
+  if (baseCurrencyInput) baseCurrencyInput.disabled = globallyLocked || locked || !isAdmin();
   if (ratesContainer) {
     ratesContainer.querySelectorAll("input").forEach(input => {
-      input.disabled = locked || !isAdmin() || input.dataset.rateCode === tripSettings.baseCurrency;
+      input.disabled = globallyLocked || locked || !isAdmin() || input.dataset.rateCode === tripSettings.baseCurrency;
     });
   }
-  if (ocrBtn) ocrBtn.disabled = locked || readOnly;
-  if (ocrFileInput) ocrFileInput.disabled = locked || readOnly;
+  if (ocrBtn) ocrBtn.disabled = globallyLocked || locked || readOnly;
+  if (ocrFileInput) ocrFileInput.disabled = globallyLocked || locked || readOnly;
 
   [quickTitleInput, quickAmountInput, quickCurrencyInput, quickPaidByInput, quickCategoryInput, quickAddBtn].forEach(el => {
-    if (el) el.disabled = locked || readOnly;
+    if (el) el.disabled = globallyLocked || locked || readOnly;
   });
   document.querySelectorAll("[data-admin-only]").forEach(btn => {
     btn.classList.toggle("hidden", !isAdmin());
   });
-  if (quickAddFab) quickAddFab.disabled = locked || readOnly;
+  if (quickAddFab) quickAddFab.disabled = globallyLocked || locked || readOnly;
 }
 
 function expenseActivityDescriptor(action, message = "") {
@@ -2069,7 +2090,7 @@ async function saveTripSettings() {
   if (!nextRates[newBase]) nextRates[newBase] = 1;
   tripSettings = { ...tripSettings, baseCurrency: newBase, exchangeRates: nextRates, activeCurrencies: nextActiveCurrencies };
 
-  await setDoc(getTripDocRef(), { settings: tripSettings }, { merge: true });
+  await setDoc(doc(db, "trips", tripId, "settings", "expenses"), { ...tripSettings, updatedAt: serverTimestamp(), updatedBy: currentUser.uid }, { merge: true });
   updateCurrencySelectOptions();
   const refreshResult = await refreshAllExpenseFxAmounts();
   alert(`匯率設定已儲存，已重新換算 ${refreshResult.updated} 筆支出。${refreshResult.skipped ? ` 未能換算 ${refreshResult.skipped} 筆，請檢查匯率。` : ""}`);
@@ -2125,6 +2146,7 @@ async function ensureTripMembersAndSettings() {
           ...cloudSettings,
           exchangeRates: { ...tripSettings.exchangeRates, ...(cloudSettings.exchangeRates || cloudSettings.defaultExchangeRates || {}) }
         };
+        if (typeof cloudSettings.expenseLocked === "boolean") applyExpenseLockState(cloudSettings, { explicit:true });
       }
     } catch (error) {
       if (error?.code !== "permission-denied") console.warn("Expense settings read failed", error);
@@ -2194,6 +2216,24 @@ async function ensureTripMembersAndSettings() {
   }
 }
 
+function startExpenseSettingsListener() {
+  if (stopExpenseSettingsListener) stopExpenseSettingsListener();
+  const ref = doc(db, "trips", tripId, "settings", "expenses");
+  stopExpenseSettingsListener = onSnapshot(ref, snap => {
+    const data = snap.exists() ? (snap.data() || {}) : {};
+    if (typeof data.expenseLocked === "boolean") applyExpenseLockState(data, { explicit:true });
+    else applyExpenseLockState({}, { explicit:false });
+    if (snap.exists()) {
+      tripSettings = {
+        ...tripSettings,
+        ...data,
+        exchangeRates: { ...tripSettings.exchangeRates, ...(data.exchangeRates || data.defaultExchangeRates || {}) }
+      };
+      updateCurrencySelectOptions(); renderRateEditor(); renderSummary(); renderAnalytics(); renderExpenses();
+    }
+  }, error => { if (error?.code !== "permission-denied") console.warn("Expense settings listener", error); });
+}
+
 function startTripListener() {
   if (stopTripListener) stopTripListener();
 
@@ -2201,11 +2241,15 @@ function startTripListener() {
     if (!snap.exists()) return;
     const data = snap.data();
 
-    tripStatus = data.status === "locked" ? "locked" : "open";
-    tripLockedAt = data.lockedAt || null;
-    tripLockedBy = data.lockedBy || null;
-    tripLockedByName = data.lockedByName || "";
-    updateTripStatusUi();
+    globalTripLocked = data.globalLocked === true;
+    legacyExpenseLock = {
+      locked: data.status === "locked",
+      lockedAt: data.lockedAt || null,
+      lockedBy: data.lockedBy || null,
+      lockedByName: data.lockedByName || ""
+    };
+    if (!expenseLockExplicit) applyExpenseLockState({}, { explicit:false });
+    else updateTripStatusUi();
 
     if (Array.isArray(data.members) && data.members.length > 0) {
       const changed = JSON.stringify(data.members) !== JSON.stringify(members);
@@ -3472,6 +3516,7 @@ function renderSummary() {
 
 async function recordSettlementPayment(item) {
   if (!currentUser) return alert("請先登入。");
+  if (!assertGlobalTripOpen()) return;
 
   const input = (settlementActionContent || summary).querySelector(`[data-payment-input="${CSS.escape(item.settlementPairKey)}"]`);
   const paidAmount = Number(input?.value);
@@ -3513,6 +3558,7 @@ async function recordSettlementPayment(item) {
 }
 
 async function cancelSettlementPaid(settlementId) {
+  if (!assertGlobalTripOpen()) return;
   if (!confirm("取消此已找數標記？")) return;
   const record = settlements.find(item => item.id === settlementId);
   await deleteDoc(doc(db, "trips", tripId, "settlements", settlementId));
@@ -3918,7 +3964,7 @@ async function handleExportJsonBackup() {
 }
 
 async function lockTrip() {
-  if (!isAdmin()) return alert("只有 Owner / Admin 可以鎖定旅程。");
+  if (!isAdmin()) return alert("只有 Owner / Admin 可以鎖定支出。");
   if (isTripLocked()) return;
 
   const confirmed = confirm("鎖定後不可再新增、修改、刪除支出，亦不可修改成員及匯率。仍可記錄找數及匯出 Excel。確定鎖定？");
@@ -3926,18 +3972,21 @@ async function lockTrip() {
 
   const displayName = getCurrentUserDisplayName();
 
-  await setDoc(getTripDocRef(), {
-    status: "locked",
-    lockedAt: serverTimestamp(),
-    lockedBy: currentUser.uid,
-    lockedByName: displayName
+  if (!assertGlobalTripOpen()) return;
+  await setDoc(doc(db, "trips", tripId, "settings", "expenses"), {
+    expenseLocked: true,
+    expenseLockedAt: serverTimestamp(),
+    expenseLockedBy: currentUser.uid,
+    expenseLockedByName: displayName,
+    updatedAt: serverTimestamp(),
+    updatedBy: currentUser.uid
   }, { merge: true });
 
-  await logActivity("trip_locked", `${displayName} 鎖定旅程`, "trip", tripId, {});
+  await logActivity("trip_locked", `${displayName} 啟用支出鎖定`, "trip", tripId, {});
 }
 
 async function unlockTrip() {
-  if (!isAdmin()) return alert("只有 Owner / Admin 可以解鎖旅程。");
+  if (!isAdmin()) return alert("只有 Owner / Admin 可以解除支出鎖定。");
   if (!isTripLocked()) return;
 
   const confirmed = confirm("解鎖後大家可以再次修改支出及設定。除非真係要改數，否則不建議解鎖。確定解鎖？");
@@ -3945,14 +3994,20 @@ async function unlockTrip() {
 
   const displayName = getCurrentUserDisplayName();
 
-  await setDoc(getTripDocRef(), {
-    status: "open",
-    unlockedAt: serverTimestamp(),
-    unlockedBy: currentUser.uid,
-    unlockedByName: displayName
+  if (!assertGlobalTripOpen()) return;
+  await setDoc(doc(db, "trips", tripId, "settings", "expenses"), {
+    expenseLocked: false,
+    expenseLockedAt: null,
+    expenseLockedBy: "",
+    expenseLockedByName: "",
+    expenseUnlockedAt: serverTimestamp(),
+    expenseUnlockedBy: currentUser.uid,
+    expenseUnlockedByName: displayName,
+    updatedAt: serverTimestamp(),
+    updatedBy: currentUser.uid
   }, { merge: true });
 
-  await logActivity("trip_unlocked", `${displayName} 解鎖旅程`, "trip", tripId, {});
+  await logActivity("trip_unlocked", `${displayName} 解除支出鎖定`, "trip", tripId, {});
 }
 
 function renderActivityLogs() {
@@ -4458,6 +4513,7 @@ async function startExpenseCloudIfAllowed() {
     renderAllowedEmails();
     renderAdminEmails();
     startTripListener();
+    startExpenseSettingsListener();
     listenToExpenses();
     listenToSettlements();
     listenToActivityLogs();
@@ -4500,6 +4556,7 @@ subscribeAuthState(async (user) => {
     cloudExpenseStarted = false;
     setModuleStatus("Please sign in");
     if (stopTripListener) stopTripListener();
+    if (stopExpenseSettingsListener) stopExpenseSettingsListener();
     if (stopExpensesListener) stopExpensesListener();
     if (stopSettlementsListener) stopSettlementsListener();
     if (stopActivityLogsListener) stopActivityLogsListener();

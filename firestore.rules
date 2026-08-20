@@ -14,6 +14,7 @@ service cloud.firestore {
     function adminPath(uid) { return /databases/$(database)/documents/appAdmins/$(uid); }
     function creatorPath(uid) { return /databases/$(database)/documents/authorizedTripCreators/$(uid); }
     function tripIdPath(tripId) { return /databases/$(database)/documents/tripIds/$(tripId); }
+    function expenseSettingsPath(tripId) { return /databases/$(database)/documents/trips/$(tripId)/settings/expenses; }
     function validInviteRole(role) { return role in ['admin', 'member', 'viewer']; }
     function isAppAdmin() {
       return signedIn()
@@ -62,8 +63,42 @@ service cloud.firestore {
     function isOwner(tripId) {
       return canReadTrip(tripId) && roleFor(tripId) == 'owner';
     }
+    function isGlobalLocked(tripId) {
+      return exists(tripPath(tripId)) && get(tripPath(tripId)).data.get('globalLocked', false) == true;
+    }
+    function isExpenseLocked(tripId) {
+      return exists(expenseSettingsPath(tripId)) && get(expenseSettingsPath(tripId)).data.get('expenseLocked', false) == true;
+    }
+    function canEditTripContent(tripId) {
+      return canManageTrip(tripId) && !isGlobalLocked(tripId);
+    }
     function canUseExpenses(tripId) {
       return canReadTrip(tripId) && roleFor(tripId) in ['owner', 'admin', 'member'];
+    }
+    function canModifyExpenses(tripId) {
+      return canUseExpenses(tripId) && !isGlobalLocked(tripId) && !isExpenseLocked(tripId);
+    }
+    function canModifySettlements(tripId) {
+      return canUseExpenses(tripId) && !isGlobalLocked(tripId);
+    }
+    function isGlobalLockTripUpdate(tripId) {
+      return canManageTrip(tripId)
+        && request.resource.data.createdBy == resource.data.createdBy
+        && request.resource.data.createdAt == resource.data.createdAt
+        && request.resource.data.memberUids == resource.data.memberUids
+        && request.resource.data.memberCount == resource.data.memberCount
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'globalLocked', 'globalLockedAt', 'globalLockedBy', 'globalLockedByName',
+          'globalUnlockedAt', 'globalUnlockedBy', 'globalUnlockedByName',
+          'updatedAt', 'updatedBy'
+        ]);
+    }
+    function isExpenseLockSettingsUpdate() {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+        'expenseLocked', 'expenseLockedAt', 'expenseLockedBy', 'expenseLockedByName',
+        'expenseUnlockedAt', 'expenseUnlockedBy', 'expenseUnlockedByName',
+        'updatedAt', 'updatedBy'
+      ]);
     }
     function canAssignInviteRole(tripId, role) {
       return (isOwner(tripId) && validInviteRole(role))
@@ -146,6 +181,27 @@ service cloud.firestore {
         && request.resource.data.email is string
         && request.resource.data.email == authEmail();
       allow delete: if false;
+    }
+
+
+    match /users/{uid}/preferences/{preferenceId} {
+      allow read, create, update: if signedIn() && request.auth.uid == uid;
+      allow delete: if signedIn() && request.auth.uid == uid;
+    }
+
+    // Phase 2G.2 Personal Archive is a per-user preference, not Trip state.
+    match /users/{uid}/tripPreferences/{tripId} {
+      allow read, list: if signedIn() && request.auth.uid == uid;
+      allow create, update: if signedIn()
+        && request.auth.uid == uid
+        && canReadTrip(tripId)
+        && request.resource.data.keys().hasAll(['tripId', 'archived', 'archivedAt', 'updatedAt'])
+        && request.resource.data.keys().hasOnly(['tripId', 'archived', 'archivedAt', 'updatedAt'])
+        && request.resource.data.tripId == tripId
+        && request.resource.data.archived is bool
+        && (request.resource.data.archivedAt == null || request.resource.data.archivedAt is timestamp)
+        && request.resource.data.updatedAt is timestamp;
+      allow delete: if signedIn() && request.auth.uid == uid;
     }
 
     // Phase 2G.1 completion · global App Admin bootstrap. App Admin records are
@@ -251,7 +307,8 @@ service cloud.firestore {
       allow update: if request.resource.data.createdBy == resource.data.createdBy
         && request.resource.data.createdAt == resource.data.createdAt
         && (
-          (canManageTrip(tripId)
+          isGlobalLockTripUpdate(tripId)
+          || (canEditTripContent(tripId)
             && request.resource.data.memberUids == resource.data.memberUids
             && request.resource.data.memberCount == resource.data.memberCount)
           || isManagerMemberRemoval(tripId)
@@ -296,21 +353,30 @@ service cloud.firestore {
 
       match /days/{dayId} {
         allow read: if canReadTrip(tripId);
-        allow create, update, delete: if canManageTrip(tripId);
+        allow create, update, delete: if canEditTripContent(tripId);
         match /items/{itemId} {
           allow read: if canReadTrip(tripId);
-          allow create, update, delete: if canManageTrip(tripId);
+          allow create, update, delete: if canEditTripContent(tripId);
         }
       }
 
       match /savedPlaces/{placeId} {
         allow read: if canReadTrip(tripId);
-        allow create, update, delete: if canManageTrip(tripId);
+        allow create, update, delete: if canEditTripContent(tripId);
       }
 
       match /settings/{settingId} {
         allow read: if canReadTrip(tripId);
-        allow create, update, delete: if canManageTrip(tripId);
+        allow create: if
+          (settingId == 'expenses' && canManageTrip(tripId) && !isGlobalLocked(tripId))
+          || (settingId != 'expenses' && canEditTripContent(tripId));
+        allow update: if
+          (settingId == 'expenses'
+            && canManageTrip(tripId)
+            && !isGlobalLocked(tripId)
+            && (!isExpenseLocked(tripId) || isExpenseLockSettingsUpdate()))
+          || (settingId != 'expenses' && canEditTripContent(tripId));
+        allow delete: if canEditTripContent(tripId);
       }
 
       match /snapshots/{snapshotId} {
@@ -326,7 +392,7 @@ service cloud.firestore {
       // lock transaction. The document carries coordination metadata only.
       match /operations/{operationId} {
         allow read: if canManageTrip(tripId) && operationId == 'current';
-        allow create, update: if canManageTrip(tripId)
+        allow create, update: if canEditTripContent(tripId)
           && operationId == 'current'
           && request.resource.data.keys().hasAll(['operationId', 'type', 'actorUid', 'startedAtMs', 'startedAt'])
           && request.resource.data.keys().hasOnly(['operationId', 'type', 'actorUid', 'startedAtMs', 'startedAt'])
@@ -353,10 +419,10 @@ service cloud.firestore {
 
       match /expenses/{expenseId} {
         allow read: if canReadTrip(tripId);
-        allow create: if canUseExpenses(tripId)
+        allow create: if canModifyExpenses(tripId)
           && request.resource.data.createdBy == request.auth.uid
           && request.resource.data.updatedBy == request.auth.uid;
-        allow update: if canUseExpenses(tripId)
+        allow update: if canModifyExpenses(tripId)
           && request.resource.data.updatedBy == request.auth.uid;
         // Expenses use soft delete for auditability.
         allow delete: if false;
@@ -364,10 +430,10 @@ service cloud.firestore {
 
       match /settlements/{settlementId} {
         allow read: if canReadTrip(tripId);
-        allow create: if canUseExpenses(tripId)
+        allow create: if canModifySettlements(tripId)
           && request.resource.data.createdBy == request.auth.uid;
-        allow update: if canUseExpenses(tripId);
-        allow delete: if canUseExpenses(tripId);
+        allow update: if canModifySettlements(tripId);
+        allow delete: if canModifySettlements(tripId);
       }
     }
   }

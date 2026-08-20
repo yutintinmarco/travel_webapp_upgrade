@@ -1,3 +1,46 @@
+# v7.8.1.0 · Phase 2G.2 Access Continuity & Trip Lifecycle
+
+## Personal Archive
+
+* Personal Archive now lives at `users/{uid}/tripPreferences/{tripId}` and affects only the signed-in user's Trip list.
+* Archive / restore no longer mutates the Trip root or produces a global Trip activity log.
+* Existing root-level `archived` fields remain a legacy fallback until each user establishes a personal preference, preventing old archived Trips from unexpectedly reappearing.
+* Archiving the active Trip switches to another active accessible Trip when possible. If no active Trip remains, the App enters Access Lobby and exposes the user's Archived Trips for immediate restore.
+
+## Access Continuity & Revoke
+
+* Added a user-and-Trip-bound Last Known Access record containing the last server-confirmed role.
+* Offline startup can continue using a previously verified cached Trip without waiting for Firebase.
+* Reconnect still reconciles membership. A server-confirmed missing membership or `permission-denied` clears the remembered access and exits the Trip; transient network errors do not eject a usable local Trip.
+* Quick Switcher and Entry state now exclude personally archived Trips once the catalog is authoritative.
+
+## Global Trip Lock
+
+* Added a distinct Owner / Admin Global Trip Lock on the Trip root. It is independent from date-derived Trip status and the Expense Lock.
+* Global Lock keeps the Trip viewable but blocks normal Trip content changes, Import Replace, Restore, expense writes, settlements and Trip-scoped settings changes.
+* Member / invite security administration, viewing, Full Backup export and Snapshot creation remain available while globally locked.
+* The new UI reuses the existing `我的 → 旅程設定` Apple Settings pattern and existing profile management page components.
+
+## Expense Lock Separation
+
+* Expense Lock operational state now lives under `trips/{tripId}/settings/expenses` as `expenseLocked` metadata.
+* Legacy root `status: "locked"` remains a compatibility fallback until a modern Expense Lock value exists.
+* Expense Lock continues to block expense modification while settlement / reporting behavior remains available as before.
+* User-facing wording is now `支出鎖定` so it cannot be confused with the new Global Trip Lock.
+
+## Security & Compatibility
+
+* Firestore Rules enforce Personal Archive ownership, Global Trip Lock write restrictions and the separated Expense Lock contract.
+* Full Backup remains Local First and can still be created while a Trip is locked. Restore and Import Replace refuse to mutate a globally locked Trip.
+* Access rights, Personal Archive preferences and lifecycle lock metadata are not restored from backup payloads.
+* Phase 2G.1 Zero Flash returning boot, single-tab persistent cache, existing permissions, Data Management and the protected v7.3.13 Profile Navigation compositor remain unchanged.
+
+## Deployment
+
+* Deploy `firestore.rules`.
+* No Firestore index deployment is required.
+* No Cloud Function deployment is required.
+
 # v7.8.0.5 · Phase 2G.1 Zero Flash Returning Boot
 
 ## UX

@@ -41,7 +41,7 @@ export function clearInviteFromLocation({ keepTrip = true } = {}) {
 export function accessIsVerified(access, { online = navigator.onLine !== false } = {}) {
   if (!access?.role) return false;
   if (access.serverConfirmed === true) return true;
-  return online === false && access.fromCache === true;
+  return online === false && (access.fromCache === true || access.source === "last-known-access");
 }
 
 export function catalogIsAuthoritative(catalog, { online = navigator.onLine !== false } = {}) {
@@ -60,13 +60,14 @@ export function deriveAppEntryState({
   if (!authResolved) return APP_ENTRY_STATES.PENDING;
   if (!user?.uid) return APP_ENTRY_STATES.LOGIN;
 
-  if (accessIsVerified(access, { online })) return APP_ENTRY_STATES.WORKSPACE;
-
   if (catalogIsAuthoritative(catalog, { online })) {
-    return Array.isArray(catalog?.trips) && catalog.trips.length
-      ? APP_ENTRY_STATES.WORKSPACE
-      : APP_ENTRY_STATES.LOBBY;
+    const activeTrips = Array.isArray(catalog?.trips)
+      ? catalog.trips.filter(trip => trip?.archived !== true)
+      : [];
+    return activeTrips.length ? APP_ENTRY_STATES.WORKSPACE : APP_ENTRY_STATES.LOBBY;
   }
+
+  if (accessIsVerified(access, { online })) return APP_ENTRY_STATES.WORKSPACE;
 
   if (["rules-pending", "index-required", "error"].includes(clean(catalog?.status))) {
     return APP_ENTRY_STATES.ERROR;

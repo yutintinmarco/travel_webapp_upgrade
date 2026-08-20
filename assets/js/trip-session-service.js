@@ -45,6 +45,13 @@ export function setActiveTripId(tripId) {
   return activeTripId;
 }
 
+export function clearActiveTripId() {
+  activeTripId = "";
+  try { localStorage.removeItem(STORAGE_KEY); } catch (error) {}
+  publish();
+  return "";
+}
+
 export function getActiveTripId() { return activeTripId || fromQuery() || fromLocalStorage(); }
 
 export function subscribeActiveTrip(callback, { immediate = true } = {}) {

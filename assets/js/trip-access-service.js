@@ -22,6 +22,34 @@ let memberResolved = false;
 let memberFromCache = false;
 let memberServerConfirmed = false;
 const subscribers = new Set();
+const LAST_KNOWN_ACCESS_KEY = "travel_last_known_trip_access_v1";
+
+function readLastKnownAccess(){
+  try{
+    const parsed=JSON.parse(localStorage.getItem(LAST_KNOWN_ACCESS_KEY)||"{}");
+    return parsed&&typeof parsed==="object"?parsed:{};
+  }catch(error){ return {}; }
+}
+function lastKnownKey(uid,tripId){ return `${String(uid||"").trim()}::${String(tripId||"").trim()}`; }
+function getLastKnownRole(uid,tripId){
+  const row=readLastKnownAccess()[lastKnownKey(uid,tripId)]||null;
+  return validRole(row?.role)||null;
+}
+function saveLastKnownRole(uid,tripId,role){
+  const valid=validRole(role);if(!uid||!tripId||!valid)return;
+  try{
+    const all=readLastKnownAccess();
+    all[lastKnownKey(uid,tripId)]={role:valid,verifiedAt:Date.now()};
+    localStorage.setItem(LAST_KNOWN_ACCESS_KEY,JSON.stringify(all));
+  }catch(error){}
+}
+function clearLastKnownRole(uid,tripId){
+  if(!uid||!tripId)return;
+  try{
+    const all=readLastKnownAccess();delete all[lastKnownKey(uid,tripId)];
+    localStorage.setItem(LAST_KNOWN_ACCESS_KEY,JSON.stringify(all));
+  }catch(error){}
+}
 
 function validRole(value) {
   return Object.values(TRIP_ROLES).includes(value) ? value : null;
@@ -29,15 +57,19 @@ function validRole(value) {
 
 function computeAccess() {
   const memberRole = validRole(latestMemberData?.role);
-  const role = latestUser ? memberRole : null;
+  const lastKnownRole = latestUser?.uid && activeTripId ? getLastKnownRole(latestUser.uid, activeTripId) : null;
+  // Offline travel continuity: if Firestore cannot surface the cached member
+  // document, the last server-confirmed role for this exact UID + Trip may keep
+  // the cached workspace usable until reconnect. Online server denial always wins.
+  const role = latestUser ? (memberRole || (navigator.onLine === false ? lastKnownRole : null)) : null;
   currentAccess = {
     tripId: activeTripId,
     role,
     roleLabel: role ? ROLE_LABELS[role] : "",
     signedIn: !!latestUser,
-    source: memberRole ? "member-doc" : (latestUser ? "no-membership" : "signed-out"),
+    source: memberRole ? "member-doc" : (role ? "last-known-access" : (latestUser ? "no-membership" : "signed-out")),
     ready: !activeTripId || !latestUser || memberResolved,
-    fromCache: memberFromCache,
+    fromCache: memberRole ? memberFromCache : (role ? true : memberFromCache),
     serverConfirmed: memberServerConfirmed
   };
   const snapshot = { ...currentAccess };
@@ -70,6 +102,11 @@ function attachMemberListener({ preserveState = false } = {}) {
     memberFromCache = snapshot.metadata?.fromCache === true;
     if (!memberFromCache) memberServerConfirmed = true;
     latestMemberData = snapshot.exists() ? snapshot.data() : null;
+    const resolvedRole=validRole(latestMemberData?.role);
+    if(memberServerConfirmed && latestUser?.uid && activeTripId){
+      if(resolvedRole) saveLastKnownRole(latestUser.uid,activeTripId,resolvedRole);
+      else clearLastKnownRole(latestUser.uid,activeTripId);
+    }
     computeAccess();
   }, error => {
     memberResolved = true;
@@ -79,8 +116,10 @@ function attachMemberListener({ preserveState = false } = {}) {
     // local Trip just because the device happens to be connected to Wi-Fi.
     const denied = error?.code === "permission-denied";
     memberServerConfirmed = denied;
-    if (denied) latestMemberData = null;
-    else console.warn("Trip member access listener", error);
+    if (denied) {
+      latestMemberData = null;
+      if(latestUser?.uid&&activeTripId) clearLastKnownRole(latestUser.uid,activeTripId);
+    } else console.warn("Trip member access listener", error);
     computeAccess();
   });
 }
@@ -112,7 +151,7 @@ export function subscribeTripAccess(callback, { immediate = true } = {}) {
 export function isTripAccessVerified({ allowCachedOffline = true } = {}) {
   if (!currentAccess.role) return false;
   if (currentAccess.serverConfirmed) return true;
-  return allowCachedOffline && navigator.onLine === false && currentAccess.fromCache;
+  return allowCachedOffline && navigator.onLine === false && (currentAccess.fromCache || currentAccess.source === "last-known-access");
 }
 
 export function hasTripRole(minimumRole = TRIP_ROLES.VIEWER) {

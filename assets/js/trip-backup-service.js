@@ -91,7 +91,10 @@ function stripTripOperational(data = {}) {
   const output = { ...clone(data) };
   [
     "revision", "memberUids", "memberCount", "createdBy", "createdAt", "updatedBy", "updatedAt",
-    "archived", "archivedAt", "archivedBy", "contentHash", "contentHashVersion", "importState",
+    "archived", "archivedAt", "archivedBy",
+    "globalLocked", "globalLockedAt", "globalLockedBy", "globalLockedByName",
+    "globalUnlockedAt", "globalUnlockedBy", "globalUnlockedByName",
+    "contentHash", "contentHashVersion", "importState",
     "lastImportMode", "lastSnapshotId", "importedBy", "importedAt", "restoredBy", "restoredAt",
     "restoredFromSnapshotId", "restoreState",
     "activeOperationId", "activeOperationType", "activeOperationBy",
@@ -613,6 +616,10 @@ export async function restoreTripSnapshot(tripIdInput, snapshotIdInput, { user: 
   let mutationStarted = false;
   try {
   const role = await requireManageRole(tripId, user);
+  const currentRoot = await getDoc(doc(db, "trips", tripId));
+  if (currentRoot.exists() && currentRoot.data()?.globalLocked === true) {
+    const error = new Error("Trip is globally locked"); error.code = "trip-global-locked"; throw error;
+  }
   serverOperation = await acquireTripOperation(tripId,"restore",user);
   const snapshot = await getTripSnapshot(tripId, snapshotId, { user });
   const target = snapshot.payload;
@@ -649,6 +656,13 @@ export async function restoreTripSnapshot(tripIdInput, snapshotIdInput, { user: 
     archived: currentTrip.archived === true,
     archivedAt: currentTrip.archivedAt || null,
     archivedBy: clean(currentTrip.archivedBy),
+    globalLocked: currentTrip.globalLocked === true,
+    globalLockedAt: currentTrip.globalLockedAt || null,
+    globalLockedBy: clean(currentTrip.globalLockedBy),
+    globalLockedByName: clean(currentTrip.globalLockedByName),
+    globalUnlockedAt: currentTrip.globalUnlockedAt || null,
+    globalUnlockedBy: clean(currentTrip.globalUnlockedBy),
+    globalUnlockedByName: clean(currentTrip.globalUnlockedByName),
     contentHash: "",
     contentHashVersion: 1,
     importState: "ready",
@@ -999,6 +1013,13 @@ async function restoreTripScopeFromBackup(target, current, tripId, user, { onPro
     archived: currentTrip.archived === true,
     archivedAt: currentTrip.archivedAt || null,
     archivedBy: clean(currentTrip.archivedBy),
+    globalLocked: currentTrip.globalLocked === true,
+    globalLockedAt: currentTrip.globalLockedAt || null,
+    globalLockedBy: clean(currentTrip.globalLockedBy),
+    globalLockedByName: clean(currentTrip.globalLockedByName),
+    globalUnlockedAt: currentTrip.globalUnlockedAt || null,
+    globalUnlockedBy: clean(currentTrip.globalUnlockedBy),
+    globalUnlockedByName: clean(currentTrip.globalUnlockedByName),
     contentHash: "",
     contentHashVersion: 1,
     importState: "ready",
@@ -1097,6 +1118,9 @@ export async function restoreFullBackup(rawInput, {
   const tripId = backup.tripId;
   const currentTrip = await readTripStructure(tripId);
   await requireManageRole(tripId, user);
+  if (currentTrip?.tripDoc?.globalLocked === true) {
+    const error = new Error("Trip is globally locked"); error.code = "trip-global-locked"; throw error;
+  }
   if (clean(currentTrip?.tripId) !== tripId) {
     const error = new Error("Backup Trip ID does not match current Trip");
     error.code = "backup-trip-mismatch";

@@ -32,6 +32,8 @@ const IGNORED_CONTENT_KEYS = new Set([
   "archived",
   "archivedAt",
   "archivedBy",
+  "globalLocked", "globalLockedAt", "globalLockedBy", "globalLockedByName",
+  "globalUnlockedAt", "globalUnlockedBy", "globalUnlockedByName",
   "contentHash",
   "contentHashVersion",
   "activeOperationId","activeOperationType","activeOperationBy","activeOperationStartedAtMs","activeOperationStartedAt"
@@ -503,6 +505,11 @@ export async function importTrip(rawInput, {
 
     if (mode === "replace") {
       const parentData = tripSnap.data() || {};
+      if (parentData.globalLocked === true) {
+        const error = new Error("Trip is globally locked");
+        error.code = "trip-global-locked";
+        throw error;
+      }
       if (!Array.isArray(parentData.memberUids) || !parentData.memberUids.includes(user.uid)) {
         const error = new Error("Current user is not a member of this trip");
         error.code = "insufficient-role";
@@ -697,45 +704,5 @@ export async function importTrip(rawInput, {
     if (localOperationToken) {
       endCloudOperation(localOperationToken);
     }
-  }
-}
-export async function setTripArchived(tripIdInput, archived, { user: userInput = null } = {}) {
-  const user = await requireUser(userInput);
-  assertCloudOperationAvailable("封存旅程");
-  const localOperationToken = beginCloudOperation({type:"archive",tripId:String(tripIdInput||""),label:"封存旅程"});
-  try {
-  const tripId = clean(tripIdInput);
-  if (!tripId) throw new Error("Missing tripId");
-  const memberSnap = await getDoc(doc(db, "trips", tripId, "members", user.uid));
-  const role = memberSnap.exists() ? clean(memberSnap.data()?.role) : null;
-  if (!VALID_REPLACE_ROLES.has(role)) {
-    const error = new Error("Owner or Admin role required");
-    error.code = "insufficient-role";
-    throw error;
-  }
-  const shouldArchive = archived === true;
-  const batch = writeBatch(db);
-  batch.set(doc(db, "trips", tripId), {
-    archived: shouldArchive,
-    archivedAt: shouldArchive ? serverTimestamp() : null,
-    archivedBy: shouldArchive ? user.uid : "",
-    updatedAt: serverTimestamp(),
-    updatedBy: user.uid
-  }, { merge: true });
-  const archiveType = shouldArchive ? "trip.archive" : "trip.restore";
-  batch.set(doc(collection(db, "trips", tripId, "activityLogs")), {
-    type: archiveType,
-    actionType: archiveType,
-    category: "itinerary",
-    title: shouldArchive ? "封存旅程" : "還原已封存旅程",
-    summary: shouldArchive ? "旅程保留於 Firebase 並從 Active Trips 收起。" : "旅程重新加入 Active Trips。",
-    actorUid: user.uid,
-    actorName: clean(user.displayName),
-    createdAt: serverTimestamp()
-  });
-  await batch.commit();
-  return { tripId, archived: shouldArchive };
-  } finally {
-    endCloudOperation(localOperationToken);
   }
 }

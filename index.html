@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
   <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
   <link rel="dns-prefetch" href="https://api.open-meteo.com">
-  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?v=7.8.0.5">
+  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?v=7.8.1.0">
   <title id="page-title">行程</title>
   <script>
   // v7.7.5.0 · Performance Lite. Memory only: no Firebase reads/writes, no
@@ -3314,7 +3314,7 @@ body.expenses-view-active #app-version-note{
 #snacks-view::after,
 #info-view::after,
 #profile-view::after{
-  content:"v7.8.0.5" !important;
+  content:"v7.8.1.0" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3335,7 +3335,7 @@ body.expenses-view-active #app-version-note{
   display:none !important;
 }
 body.expenses-view-active .expenses-module .expenses-app::after{
-  content:"v7.8.0.5" !important;
+  content:"v7.8.1.0" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3563,7 +3563,7 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
 </style>
             <link rel="apple-touch-icon" href="assets/icon/trip_icon.png">
   <link rel="icon" type="image/png" href="assets/icon/trip_icon.png">
-  <link rel="manifest" href="manifest.json?v=7.8.0.5">
+  <link rel="manifest" href="manifest.json?v=7.8.1.0">
   <meta name="apple-mobile-web-app-title" content="關嘉露西生日之旅">
   <!-- v7.7.1.2: expenses.css is 144KB and every rule is scoped under
        .expenses-module, yet it used to block the very first paint of the
@@ -3571,8 +3571,8 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
        priority without blocking paint; ensureExpensesStylesheet() flips it to
        media="all" before the 支出 view is ever mounted, so the styling is
        byte-for-byte identical by the time anything expenses-related renders. -->
-  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?v=7.8.0.5" media="print">
-  <noscript><link rel="stylesheet" href="assets/css/expenses.css?v=7.8.0.5"></noscript>
+  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?v=7.8.1.0" media="print">
+  <noscript><link rel="stylesheet" href="assets/css/expenses.css?v=7.8.1.0"></noscript>
 </head>
 <body class="app-entry-gated app-entry-pending">
 <div class="bg-fixed"></div>
@@ -3632,6 +3632,12 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
       <div class="trip-invite-inbox-list" id="entry-invite-list"></div>
       <div class="trip-library-status" id="entry-invite-status">收到嘅旅程邀請會顯示喺呢度。</div>
       <div class="app-entry-target-note" id="entry-invite-target-note" hidden></div>
+    </section>
+
+    <section class="profile-card" id="entry-archive-card" aria-label="已封存旅程" hidden>
+      <div class="profile-inline-section-heading"><strong>已封存旅程</strong><span class="trip-library-count" id="entry-archive-count">0</span></div>
+      <div class="trip-library-list" id="entry-archive-list"></div>
+      <div class="trip-library-status" id="entry-archive-status">個人封存嘅旅程會保留存取權，需要時可以還原。</div>
     </section>
 
     <section class="profile-card profile-menu-card" id="entry-creator-card" aria-label="建立旅程" hidden>
@@ -3829,7 +3835,7 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
         </button>
         <button class="profile-row" id="trip-archive-toggle" type="button" aria-expanded="false">
           <span class="profile-row-icon profile-icon-grey">🗄️</span>
-          <span class="profile-row-copy"><strong>已封存旅程</strong><small>平日不載入，需要時先讀取</small></span>
+          <span class="profile-row-copy"><strong>已封存旅程</strong><small>只影響你自己，需要時可以還原</small></span>
           <span class="trip-archive-toggle-side"><span id="trip-archive-count">—</span><span class="profile-chevron">›</span></span>
         </button>
       </section>
@@ -3926,10 +3932,11 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
           <span class="profile-row-copy"><strong>旅程權限</strong><small>邀請成員、角色及存取權限</small></span>
           <span class="profile-chevron">›</span>
         </button>
-        <button class="profile-row profile-row-disabled" type="button" disabled>
+        <button class="profile-row" id="trip-global-lock-open-btn" type="button" data-profile-open="trip-global-lock">
           <span class="profile-row-icon profile-icon-red">🔒</span>
-          <span class="profile-row-copy"><strong>旅程鎖定</strong><small>獨立於支出鎖定，於正式權限階段啟用</small></span>
-          <span class="profile-status-pill">2F</span>
+          <span class="profile-row-copy"><strong>旅程鎖定</strong><small id="trip-global-lock-menu-subtitle">全域唯讀，獨立於支出鎖定</small></span>
+          <span class="profile-status-pill" id="trip-global-lock-menu-status">可修改</span>
+          <span class="profile-chevron">›</span>
         </button>
         <button class="profile-row" type="button" data-profile-open="expense-settings">
           <span class="profile-row-icon profile-icon-orange">💳</span>
@@ -3944,6 +3951,29 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
       </section>
     </div>
 
+
+    <div class="profile-nav-page" id="profile-page-trip-global-lock" data-profile-page="trip-global-lock" hidden>
+      <div class="profile-detail-bar">
+        <button class="profile-detail-back" type="button" data-profile-back aria-label="返回旅程設定"><span class="profile-back-glyph">‹</span><span class="profile-detail-back-label">旅程設定</span></button>
+        <h2>旅程鎖定</h2>
+        <span class="profile-detail-spacer"></span>
+      </div>
+      <section class="profile-card trip-member-summary-card">
+        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前旅程</span><strong id="trip-global-lock-trip">—</strong></div>
+        <div class="profile-meta-row"><span>狀態</span><strong id="trip-global-lock-state">—</strong></div>
+        <div class="profile-meta-row"><span>你的角色</span><strong id="trip-global-lock-role">—</strong></div>
+        <div class="trip-member-role-help" id="trip-global-lock-help">鎖定後旅程內容會保持可查看，但一般修改、匯入、還原及支出寫入會停止；旅程權限管理仍然保留。</div>
+      </section>
+      <section class="profile-card trip-member-invite-card">
+        <div class="trip-member-card-title">
+          <strong id="trip-global-lock-action-title">鎖定旅程</strong>
+          <small id="trip-global-lock-action-copy">適合旅程完成後凍結內容，避免之後誤改。</small>
+        </div>
+        <button class="trip-member-primary-action" id="trip-global-lock-action" type="button">鎖定旅程</button>
+        <div class="trip-member-inline-status" id="trip-global-lock-status">只有 Owner / Admin 可以鎖定或解鎖。</div>
+      </section>
+      <div class="profile-backup-note">旅程鎖定係全域狀態，會影響所有成員；「支出鎖定」只控制支出範圍，兩者互相獨立。</div>
+    </div>
 
     <div class="profile-nav-page" id="profile-page-destination-settings" data-profile-page="destination-settings" hidden>
       <div class="profile-detail-bar">
@@ -4174,7 +4204,7 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
         <span class="profile-detail-spacer"></span>
       </div>
       <section class="profile-card" aria-label="App 資訊">
-        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.8.0.5</strong></div>
+        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.8.1.0</strong></div>
         <div class="profile-meta-row"><span>資料架構</span><strong>Phase 2G.1</strong></div>
         <div class="profile-meta-row"><span>主要資料來源</span><strong id="app-data-source-label">Firebase / 本機快取</strong></div>
       </section>
@@ -4376,7 +4406,7 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
 </div>
 
 <script>
-const APP_VERSION = "7.8.0.5";
+const APP_VERSION = "7.8.1.0";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 function perfLiteMark(name){try{return window.__perfLite?.mark(name);}catch(error){return null;}}
@@ -6354,8 +6384,11 @@ function entryWorkspaceVisualReady(service){
   const access=window.__appTripAccess||currentProfileAccess||null;
   const online=navigator.onLine!==false;
   const catalog=tripLibraryCloudState||{};
-  const allowed=new Set((catalog.trips||[]).map(trip=>String(trip.tripId||"").trim()).filter(Boolean));
-  if(service.accessIsVerified?.(access,{online})&&access?.tripId)allowed.add(String(access.tripId));
+  const allowed=new Set((catalog.trips||[]).filter(trip=>trip?.archived!==true).map(trip=>String(trip.tripId||"").trim()).filter(Boolean));
+  const catalogReady=service.catalogIsAuthoritative?.(catalog,{online})===true;
+  const accessTripId=String(access?.tripId||"").trim();
+  const accessTripActive=!catalogReady||(catalog.trips||[]).some(trip=>String(trip?.tripId||"")===accessTripId&&trip?.archived!==true);
+  if(service.accessIsVerified?.(access,{online})&&accessTripId&&accessTripActive)allowed.add(accessTripId);
   const visibleId=dataTripId(window.tripData),forced=String(appEntryForcedTripId||"").trim();
   if(forced&&visibleId!==forced)return false;
   const optimistic=!!visibleId
@@ -6380,15 +6413,17 @@ function applyAppEntryState(nextState){
   else if(appEntryState==="resolving"){if(title)title.textContent="正在確認旅程存取權";if(subtitle)subtitle.textContent="安全確認完成後會直接進入你上次使用嘅旅程。";if(pill)pill.textContent=navigator.onLine===false?"離線確認":"確認中";}
   else if(appEntryState==="lobby"){
     const targeted=!!appEntryTargetInviteId&&tripMyPendingInvites.some(invite=>invite.inviteId===appEntryTargetInviteId);
-    if(title)title.textContent=targeted?"收到旅程邀請":"暫時未有旅程";
-    if(subtitle)subtitle.textContent=targeted?"確認邀請後會直接進入指定旅程。":"收到旅程邀請後可以喺呢度加入；未獲授權前唔會顯示 Trip workspace。";
-    if(pill)pill.textContent=targeted?"待確認":"等待邀請";
+    const archivedCount=(tripLibraryCloudState.trips||[]).filter(trip=>trip?.archived===true).length;
+    if(title)title.textContent=targeted?"收到旅程邀請":(archivedCount?"旅程已封存":"暫時未有旅程");
+    if(subtitle)subtitle.textContent=targeted?"確認邀請後會直接進入指定旅程。":(archivedCount?"你仍然保留旅程存取權；由下方還原後可以重新進入 Workspace。":"收到旅程邀請後可以喺呢度加入；未獲授權前唔會顯示 Trip workspace。");
+    if(pill)pill.textContent=targeted?"待確認":(archivedCount?"個人封存":"等待邀請");
   }
   else if(appEntryState==="error"){if(title)title.textContent="暫時未能確認旅程";if(subtitle)subtitle.textContent=tripLibraryCloudState.status==="index-required"?"Firestore index 尚未完成，請先部署今版所需設定。":"Firebase 存取檢查未完成；現有資料冇被修改。";if(pill)pill.textContent="需處理";}
   if(icon){icon.innerHTML=["pending","resolving"].includes(appEntryState)?'<span class="trip-boot-spinner" aria-hidden="true"></span>':(appEntryState==="lobby"?"🧳":appEntryState==="error"?"!":"✓");}
   if(creator)creator.hidden=!(appEntryState==="lobby"&&!appEntryTargetInviteId&&!!window.__appAuthUser?.uid&&appEntryCreatorState.status==="ready"&&appEntryCreatorState.enabled===true);
   renderAppAdminControls();
   renderEntryInvites();
+  renderEntryArchivedTrips();
 }
 async function refreshAppEntryState(){
   let service=appEntryService;
@@ -6452,14 +6487,12 @@ async function backfillOwnerTripRegistries(state=tripLibraryCloudState){
 
 
 let tripLibraryStopCatalog=null;
-let tripLibraryStopArchivedCatalog=null;
 let tripLibraryAuthUnsubscribe=null;
 let tripLibrarySummary=null;
 let tripLibraryCatalogService=null;
 let tripLibrarySchemaService=null;
 let tripLibraryCurrentUser=null;
 let tripLibraryCloudState={status:"signed-out",trips:[],error:null,fromCache:false,serverConfirmed:false};
-let tripLibraryArchiveState={status:"idle",trips:[],error:null,fromCache:false,serverConfirmed:false};
 
 // Phase 2E · Firebase is the live trip source once an authenticated member trip
 // is available. Bundled trip.json remains the safe bootstrap / signed-out fallback.
@@ -6516,14 +6549,16 @@ function currentTripLibraryRow(){
   const currentRole=tripLibraryRoleLabel(currentCloud?.role);
   const statusLabel=tripLibraryStatusLabel(currentCloud?.status);
   const importPill=currentCloud?.importState==="importing"?'<span class="trip-library-pill">匯入中</span>':"";
+  const lockPill=currentCloud?.globalLocked===true?'<span class="trip-library-pill is-archived">已鎖定</span>':"";
+  const archiveAction=currentCloud?`<button class="trip-library-mini-action${currentCloud.archived===true?" is-restore":""}" type="button" ${currentCloud.archived===true?`data-trip-restore-id="${tripLibraryEsc(currentId)}"`:`data-trip-archive-id="${tripLibraryEsc(currentId)}"`}>${currentCloud.archived===true?"還原":"封存"}</button>`:"";
   return `<div class="trip-library-item is-current">
     <span class="trip-library-icon">${tripIconMarkup({...tripLibrarySummary,...(currentCloud||{})})}</span>
     <span class="trip-library-copy">
       <strong>${tripLibraryEsc(tripLibrarySummary.title||currentId)}</strong>
       <small>${tripLibraryEsc(tripLibrarySummary.dateRange||[tripLibrarySummary.startDate,tripLibrarySummary.endDate].filter(Boolean).join(" → ")||currentId)}</small>
-      <span class="trip-library-meta"><span class="trip-library-pill is-current">目前</span><span class="trip-library-pill">${tripLoaderState.status==="ready"&&tripLoaderState.tripId===currentId?(tripLoaderState.source==="instant-cache"?"即時快取":(tripLoaderState.source==="cache"?"Firebase 快取":"Firebase")):"本機 JSON"}</span>${statusLabel?`<span class="trip-library-pill">${statusLabel}</span>`:""}${importPill}${currentRole?`<span class="trip-library-pill is-role">${currentRole}</span>`:""}</span>
+      <span class="trip-library-meta"><span class="trip-library-pill is-current">目前</span><span class="trip-library-pill">${tripLoaderState.status==="ready"&&tripLoaderState.tripId===currentId?(tripLoaderState.source==="instant-cache"?"即時快取":(tripLoaderState.source==="cache"?"Firebase 快取":"Firebase")):"本機 JSON"}</span>${statusLabel?`<span class="trip-library-pill">${statusLabel}</span>`:""}${lockPill}${importPill}${currentRole?`<span class="trip-library-pill is-role">${currentRole}</span>`:""}</span>
     </span>
-    <span class="trip-library-side"><strong>${tripLibrarySummary.dayCount} 日</strong><small>${tripLibrarySummary.itemCount} 項</small></span>
+    <span class="trip-library-side"><strong>${tripLibrarySummary.dayCount} 日</strong><small>${tripLibrarySummary.itemCount} 項</small>${archiveAction}</span>
   </div>`;
 }
 
@@ -6531,21 +6566,18 @@ function cloudTripLibraryRow(trip,{archived=false}={}){
   const role=tripLibraryRoleLabel(trip.role);
   const statusLabel=tripLibraryStatusLabel(trip.status);
   const importPill=trip.importState==="importing"?'<span class="trip-library-pill">匯入中</span>':"";
-  const canManage=trip.role==="owner"||trip.role==="admin";
-  const isCurrent=tripLibrarySummary?.tripId===trip.tripId;
-  const action=canManage
-    ? (archived
-      ? `<button class="trip-library-mini-action is-restore" type="button" data-trip-restore-id="${tripLibraryEsc(trip.tripId)}">還原</button>`
-      : (!isCurrent?`<button class="trip-library-mini-action" type="button" data-trip-archive-id="${tripLibraryEsc(trip.tripId)}">封存</button>`:""))
-    : "";
+  const lockPill=trip.globalLocked===true?'<span class="trip-library-pill is-archived">已鎖定</span>':"";
+  const action=archived
+    ? `<button class="trip-library-mini-action is-restore" type="button" data-trip-restore-id="${tripLibraryEsc(trip.tripId)}">還原</button>`
+    : `<button class="trip-library-mini-action" type="button" data-trip-archive-id="${tripLibraryEsc(trip.tripId)}">封存</button>`;
   return `<div class="trip-library-item${archived?" is-archived":""}" aria-disabled="true">
     <span class="trip-library-icon">${archived?"🗄️":tripIconMarkup(trip)}</span>
     <span class="trip-library-copy">
       <strong>${tripLibraryEsc(trip.title||trip.tripId)}</strong>
       <small>${tripLibraryEsc(tripLibraryDateText(trip))}</small>
-      <span class="trip-library-meta">${archived?'<span class="trip-library-pill is-archived">已封存</span>':'<span class="trip-library-pill">Firebase</span>'}${statusLabel?`<span class="trip-library-pill">${statusLabel}</span>`:""}${importPill}${role?`<span class="trip-library-pill is-role">${role}</span>`:""}</span>
+      <span class="trip-library-meta">${archived?'<span class="trip-library-pill is-archived">已封存</span>':'<span class="trip-library-pill">Firebase</span>'}${statusLabel?`<span class="trip-library-pill">${statusLabel}</span>`:""}${lockPill}${importPill}${role?`<span class="trip-library-pill is-role">${role}</span>`:""}</span>
     </span>
-    <span class="trip-library-side"><strong>${archived?"保留":"已加入"}</strong><small>${archived?"Firebase":"2E 切換"}</small>${action}</span>
+    <span class="trip-library-side"><strong>${archived?"個人封存":"已加入"}</strong><small>${archived?"只影響你":"2G 切換"}</small>${action}</span>
   </div>`;
 }
 
@@ -6567,43 +6599,32 @@ function renderTripSwitcher(){
   list.innerHTML=rows.join("");
 }
 
+function renderEntryArchivedTrips(){
+  const card=document.getElementById("entry-archive-card"),list=document.getElementById("entry-archive-list"),count=document.getElementById("entry-archive-count"),status=document.getElementById("entry-archive-status");
+  if(!card||!list||!count||!status)return;
+  const trips=(Array.isArray(tripLibraryCloudState.trips)?tripLibraryCloudState.trips:[]).filter(trip=>trip?.archived===true);
+  const show=appEntryState==="lobby"&&!!tripLibraryCurrentUser&&trips.length>0;
+  card.hidden=!show;
+  if(!show){list.innerHTML="";count.textContent=String(trips.length||0);return;}
+  count.textContent=String(trips.length);
+  list.innerHTML=trips.map(trip=>cloudTripLibraryRow(trip,{archived:true})).join("");
+  status.textContent="個人封存只會整理你自己嘅旅程清單；其他成員完全不受影響。";
+}
+
 function renderArchivedTrips(){
   const panel=document.getElementById("trip-archive-panel");
   const list=document.getElementById("trip-archive-list");
   const status=document.getElementById("trip-archive-status");
   const count=document.getElementById("trip-archive-count");
   if(!panel||!list||!status||!count)return;
-  const state=tripLibraryArchiveState.status;
-  const trips=Array.isArray(tripLibraryArchiveState.trips)?tripLibraryArchiveState.trips:[];
-  if(state==="idle"){
-    count.textContent="—";
-    list.innerHTML="";
-    status.textContent="尚未載入已封存旅程。";
-  }else if(state==="signed-out"){
-    count.textContent="—";
-    list.innerHTML="";
-    status.textContent="登入 Google 後先可以查看已封存旅程。";
-  }else if(state==="loading"){
-    count.textContent="…";
-    list.innerHTML="";
-    status.textContent="正在載入已封存旅程…";
-  }else if(state==="rules-pending"){
-    count.textContent="—";
-    list.innerHTML="";
-    status.textContent="Firestore Rules 尚未套用 Phase 2C 權限；請先 publish zip 內 firestore.rules。";
-  }else if(state==="index-required"){
-    count.textContent="—";
-    list.innerHTML="";
-    status.textContent="Firestore 仲欠 Active / Archived Trip index；請按 Console error 提供嘅連結建立 index。";
-  }else if(state==="ready"){
-    count.textContent=String(trips.length);
-    list.innerHTML=trips.length?trips.map(trip=>cloudTripLibraryRow(trip,{archived:true})).join(""):"";
-    status.textContent=trips.length?"封存只會喺你主動打開呢一區時讀取，平日唔會加入 Active Trip 查詢。":"暫時未有已封存旅程。";
-  }else{
-    count.textContent="—";
-    list.innerHTML="";
-    status.textContent="暫時未能讀取已封存旅程。";
-  }
+  const state=tripLibraryCloudState.status;
+  const trips=(Array.isArray(tripLibraryCloudState.trips)?tripLibraryCloudState.trips:[]).filter(trip=>trip.archived===true);
+  if(state==="signed-out"){count.textContent="—";list.innerHTML="";status.textContent="登入 Google 後先可以查看已封存旅程。";}
+  else if(state==="loading"){count.textContent="…";list.innerHTML="";status.textContent="正在同步個人旅程偏好…";}
+  else if(state==="rules-pending"){count.textContent="—";list.innerHTML="";status.textContent="請先部署今版 firestore.rules，個人封存先可以同步。";}
+  else if(state==="ready"){count.textContent=String(trips.length);list.innerHTML=trips.length?trips.map(trip=>cloudTripLibraryRow(trip,{archived:true})).join(""):"";status.textContent=trips.length?"封存只影響你自己；其他成員嘅旅程清單唔會改變。":"暫時未有已封存旅程。";}
+  else{count.textContent="—";list.innerHTML="";status.textContent="暫時未能讀取已封存旅程。";}
+  renderEntryArchivedTrips();
 }
 
 function renderTripLibrary(){
@@ -6613,11 +6634,14 @@ function renderTripLibrary(){
   if(!list||!tripLibrarySummary)return;
 
   const currentId=tripLibrarySummary.tripId;
-  const cloudTrips=(Array.isArray(tripLibraryCloudState.trips)?tripLibraryCloudState.trips:[]).filter(trip=>trip.archived!==true);
+  const allCloudTrips=Array.isArray(tripLibraryCloudState.trips)?tripLibraryCloudState.trips:[];
+  const cloudTrips=allCloudTrips.filter(trip=>trip.archived!==true);
+  const currentAny=allCloudTrips.find(trip=>trip.tripId===currentId)||null;
   const currentCloud=cloudTrips.find(trip=>trip.tripId===currentId)||null;
   const others=cloudTrips.filter(trip=>trip.tripId!==currentId);
-  list.innerHTML=currentTripLibraryRow()+others.map(trip=>cloudTripLibraryRow(trip)).join("");
-  if(count) count.textContent=String(Math.max(1,cloudTrips.length+(currentCloud?0:1)));
+  const showLocalCurrent=tripLibraryCloudState.status!=="ready"||!currentAny||currentAny.archived!==true;
+  list.innerHTML=(showLocalCurrent?currentTripLibraryRow():"")+others.map(trip=>cloudTripLibraryRow(trip)).join("");
+  if(count) count.textContent=String(tripLibraryCloudState.status==="ready"?cloudTrips.length:Math.max(1,cloudTrips.length+(currentCloud?0:1)));
 
   if(status){
     const state=tripLibraryCloudState.status;
@@ -6631,11 +6655,10 @@ function renderTripLibrary(){
   }
   renderTripSwitcher();
   renderArchivedTrips();
+  renderTripGlobalLockState();
 }
 
-function stopArchivedTripSubscription(){
-  if(tripLibraryStopArchivedCatalog){tripLibraryStopArchivedCatalog();tripLibraryStopArchivedCatalog=null;}
-}
+function stopArchivedTripSubscription(){}
 function restartActiveTripCatalog(){
   if(tripLibraryStopCatalog){tripLibraryStopCatalog();tripLibraryStopCatalog=null;}
   if(!tripLibraryCurrentUser||!tripLibraryCatalogService)return;
@@ -6643,24 +6666,16 @@ function restartActiveTripCatalog(){
   tripLibraryStopCatalog=tripLibraryCatalogService.subscribeUserTrips(tripLibraryCurrentUser,state=>{
     tripLibraryCloudState=state;
     if(state?.status==="ready"&&state?.serverConfirmed===true&&appEntryResumeLatch.tripId){
-      const stillAllowed=(state.trips||[]).some(trip=>String(trip?.tripId||"")===String(appEntryResumeLatch.tripId||""));
-      if(!stillAllowed){appEntryOptimisticTripId="";appEntryOptimisticUid="";clearAppEntryResumeLatch();endWarmRefreshGate();}
+      const latchedId=String(appEntryResumeLatch.tripId||"");
+      const stillActive=(state.trips||[]).some(trip=>String(trip?.tripId||"")===latchedId&&trip?.archived!==true);
+      if(!stillActive){appEntryOptimisticTripId="";appEntryOptimisticUid="";clearAppEntryResumeLatch();endWarmRefreshGate();}
     }
     renderTripLibrary();refreshAppEntryState();
     if(state?.status==="ready"&&state?.serverConfirmed===true)backfillOwnerTripRegistries(state).catch(()=>{});
     reconcileFirebaseTripLoader().catch(error=>console.error("Firebase loader reconcile",error));
-  },{archived:false});
+  });
 }
-function loadArchivedTrips(){
-  if(!tripLibraryCurrentUser){tripLibraryArchiveState={status:"signed-out",trips:[],error:null};renderArchivedTrips();return;}
-  if(!tripLibraryCatalogService){tripLibraryArchiveState={status:"error",trips:[],error:new Error("catalog unavailable")};renderArchivedTrips();return;}
-  stopArchivedTripSubscription();
-  tripLibraryArchiveState={status:"loading",trips:[],error:null};renderArchivedTrips();
-  tripLibraryStopArchivedCatalog=tripLibraryCatalogService.subscribeUserTrips(tripLibraryCurrentUser,state=>{
-    tripLibraryArchiveState=state;
-    renderArchivedTrips();
-  },{archived:true});
-}
+function loadArchivedTrips(){ renderArchivedTrips(); }
 
 function initTripLibrarySafe(data){
   bundledTripData=data;
@@ -6681,7 +6696,6 @@ function initTripLibrarySafe(data){
       tripLibrarySummaryDataSignature=tripLibraryDataSignature(summarySource);
       window.__portableTripSchema=result;
       tripLibraryCloudState={status:window.__appAuthUser?"loading":"signed-out",trips:[],error:null,fromCache:false,serverConfirmed:false};
-      tripLibraryArchiveState={status:"idle",trips:[],error:null,fromCache:false,serverConfirmed:false};
       renderTripLibrary();
 
       Promise.all([
@@ -6695,7 +6709,6 @@ function initTripLibrarySafe(data){
           rememberCacheUid(user?.uid||"");
           if(tripLibraryStopCatalog){tripLibraryStopCatalog();tripLibraryStopCatalog=null;}
           stopArchivedTripSubscription();
-          tripLibraryArchiveState={status:user?"idle":"signed-out",trips:[],error:null,fromCache:false,serverConfirmed:false};
           const archivePanel=document.getElementById("trip-archive-panel");
           const archiveToggle=document.getElementById("trip-archive-toggle");
           if(archivePanel) archivePanel.hidden=true;
@@ -6970,8 +6983,10 @@ function refreshAppDataDiagnostics(){
   else if(loader.status==="recovery-needed") syncLabel="更新未完成 · 需重新匯入／還原";
   else if(loader.status==="error") syncLabel="同步錯誤";
 
-  const lifecycleStatus=meta.status||data.status||"";
-  const writeStatus=String(lifecycleStatus).toLowerCase()==="locked"?"Locked":"Open";
+  const rawLifecycleStatus=String(meta.status||data.status||"").toLowerCase();
+  const catalogRecord=(tripLibraryCloudState.trips||[]).find(trip=>String(trip?.tripId||"")===activeId)||null;
+  const lifecycleStatus=catalogRecord?.status||(["locked","open"].includes(rawLifecycleStatus)?"":rawLifecycleStatus);
+  const writeStatus=currentTripGlobalLocked()?"Locked":"Open";
   const account=user
     ? (user.displayName ? `${user.displayName}${user.email?` · ${user.email}`:""}` : (user.email||"Google 已登入"))
     : "未登入";
@@ -7383,6 +7398,60 @@ async function switchActiveCloudTrip(tripId){
   await startFirebaseTripLoader(id);
 }
 
+let tripGlobalLockBusy=false;
+function currentTripCloudRecord(){
+  const tripId=String(tripLoaderActiveId||tripLibrarySummary?.tripId||dataTripId(window.tripData)||"").trim();
+  return (tripLibraryCloudState.trips||[]).find(trip=>String(trip?.tripId||"")===tripId)||null;
+}
+function currentTripGlobalLocked(){return currentTripCloudRecord()?.globalLocked===true||window.tripData?.meta?.globalLocked===true;}
+function renderTripGlobalLockState(){
+  const record=currentTripCloudRecord(),tripId=String(record?.tripId||tripLoaderActiveId||tripLibrarySummary?.tripId||"").trim();
+  const locked=currentTripGlobalLocked();
+  const role=String(record?.role||window.__appTripAccess?.role||"").trim();
+  const manager=role==="owner"||role==="admin";
+  const tripName=record?.title||tripLibrarySummary?.title||tripId||"—";
+  const menuStatus=document.getElementById("trip-global-lock-menu-status"),menuSubtitle=document.getElementById("trip-global-lock-menu-subtitle");
+  const tripEl=document.getElementById("trip-global-lock-trip"),stateEl=document.getElementById("trip-global-lock-state"),roleEl=document.getElementById("trip-global-lock-role"),help=document.getElementById("trip-global-lock-help"),title=document.getElementById("trip-global-lock-action-title"),copy=document.getElementById("trip-global-lock-action-copy"),button=document.getElementById("trip-global-lock-action"),status=document.getElementById("trip-global-lock-status");
+  if(menuStatus)menuStatus.textContent=locked?"已鎖定":"可修改";
+  if(menuSubtitle)menuSubtitle.textContent=locked?"全域唯讀，所有成員仍可查看":"全域唯讀，獨立於支出鎖定";
+  if(tripEl)tripEl.textContent=tripName;
+  if(stateEl)stateEl.textContent=locked?"已鎖定 · 全域唯讀":"可正常修改";
+  if(roleEl)roleEl.textContent=tripLibraryRoleLabel(role)||"—";
+  if(help)help.textContent=locked?"目前旅程已全域鎖定。一般內容、匯入、還原及支出寫入會停止，但查看、備份同旅程權限管理仍然保留。":"鎖定後旅程內容會保持可查看，但一般修改、匯入、還原及支出寫入會停止；旅程權限管理仍然保留。";
+  if(title)title.textContent=locked?"解除旅程鎖定":"鎖定旅程";
+  if(copy)copy.textContent=locked?"解除後所有成員會恢復按角色進行一般修改。":"適合旅程完成後凍結內容，避免之後誤改。";
+  if(button){button.textContent=locked?"解除旅程鎖定":"鎖定旅程";button.disabled=tripGlobalLockBusy||!tripId||!manager;button.dataset.locked=locked?"true":"false";}
+  if(status){
+    status.classList.remove("is-error");
+    status.textContent=!tripId?"暫時未有可管理旅程。":(!manager?"只有 Owner / Admin 可以鎖定或解鎖。":(locked?"全域鎖定已生效；安全權限管理仍然可以使用。":"鎖定係全 Trip 狀態，會同時影響所有成員。"));
+  }
+}
+async function handleTripGlobalLockAction(){
+  if(tripGlobalLockBusy||tripCloudOffline()){if(tripCloudOffline())alert("目前離線，旅程鎖定狀態需要重新連線後先可以修改。");return;}
+  const record=currentTripCloudRecord(),tripId=String(record?.tripId||tripLoaderActiveId||tripLibrarySummary?.tripId||"").trim();
+  if(!tripId)return;
+  const locked=record?.globalLocked===true;
+  const message=locked
+    ? `解除「${record?.title||tripId}」嘅旅程鎖定？\n\n解除後所有成員會重新按原有角色獲得一般修改權限。`
+    : `鎖定「${record?.title||tripId}」？\n\n所有成員仍然可以查看旅程，但一般內容修改、匯入、還原同支出寫入會停止。旅程權限管理同備份仍然保留。`;
+  if(!window.confirm(message))return;
+  tripGlobalLockBusy=true;renderTripGlobalLockState();
+  const status=document.getElementById("trip-global-lock-status");if(status)status.textContent=locked?"正在解除旅程鎖定…":"正在鎖定旅程…";
+  try{
+    const service=await import(`./assets/js/trip-lifecycle-service.js?v=${APP_VERSION}`);
+    const result=await service.setGlobalTripLocked(tripId,!locked,{user:window.__appAuthUser});
+    tripLibraryCloudState={...tripLibraryCloudState,trips:(tripLibraryCloudState.trips||[]).map(item=>String(item?.tripId||"")===tripId?{...item,globalLocked:result.globalLocked===true}:item)};
+    if(window.tripData&&dataTripId(window.tripData)===tripId){window.tripData.meta={...(window.tripData.meta||{}),globalLocked:result.globalLocked===true};}
+    renderTripLibrary();
+    if(status)status.textContent=result.globalLocked?"旅程已設為全域唯讀。":"旅程已解除全域唯讀。";
+  }catch(error){
+    console.error("Global Trip Lock",error);
+    if(status){status.classList.add("is-error");status.textContent=tripImportPermissionMessage(error);}
+  }finally{tripGlobalLockBusy=false;renderTripGlobalLockState();}
+}
+document.getElementById("trip-global-lock-open-btn")?.addEventListener("click",()=>renderTripGlobalLockState());
+document.getElementById("trip-global-lock-action")?.addEventListener("click",handleTripGlobalLockAction);
+
 const tripArchiveToggle=document.getElementById("trip-archive-toggle");
 tripArchiveToggle?.addEventListener("click",()=>{
   const panel=document.getElementById("trip-archive-panel");
@@ -7390,7 +7459,7 @@ tripArchiveToggle?.addEventListener("click",()=>{
   const willOpen=panel.hidden;
   panel.hidden=!willOpen;
   tripArchiveToggle.setAttribute("aria-expanded",willOpen?"true":"false");
-  if(willOpen && ["idle","signed-out","error","index-required"].includes(tripLibraryArchiveState.status)) loadArchivedTrips();
+  if(willOpen) loadArchivedTrips();
 });
 
 
@@ -7535,6 +7604,7 @@ function tripImportPermissionMessage(error){
   if(error?.code==="permission-denied") return "目前帳戶冇權限進行呢個 Firebase 操作。";
   if(error?.code==="creator-required") return "目前 Google 帳戶未獲授權建立新 Trip。你仍然可以接受旅程邀請，或者使用已有權限嘅 Trip。";
   if(error?.code==="trip-id-unavailable"||error?.code==="trip-exists") return "呢個 Trip ID 已被使用。為保護其他旅程私隱，系統唔會顯示該 Trip 嘅名稱、Owner 或其他資料。";
+  if(error?.code==="trip-global-locked") return "旅程已全域鎖定，目前只可查看或匯出；請先到「我的 → 旅程設定 → 旅程鎖定」解除鎖定。";
   if(error?.code==="offline") return "目前離線，無法連接 Firebase。請重新連線後再試。";
   if(error?.code==="operation-busy"||error?.code==="trip-operation-busy") return cloudSafetyFriendlyError(error);
   if(error?.code==="snapshot-too-large") return "現有 Trip 太大，未能安全建立單一 pre-import snapshot。今次唔會覆蓋任何資料。";
@@ -7806,22 +7876,60 @@ tripImportConfirm?.addEventListener("click",async()=>{
 });
 
 async function handleTripArchiveAction(button,archived){
-  const tripId=button?.dataset?.tripArchiveId||button?.dataset?.tripRestoreId;
+  const tripId=String(button?.dataset?.tripArchiveId||button?.dataset?.tripRestoreId||"").trim();
   if(!tripId||button.disabled)return;
   const verb=archived?"封存":"還原";
   if(tripCloudOffline()){
-    alert(`目前離線，無法${verb}旅程。請重新連線後再試。`);
+    alert(`目前離線，無法${verb}旅程。重新連線後再試；已快取旅程仍然可以照常查看。`);
     return;
   }
-  if(!window.confirm(`${verb}「${tripId}」？${archived?"資料會繼續留喺 Firebase。":"旅程會重新出現喺 Active Trips。"}`))return;
+  const trip=tripLibraryCloudState.trips?.find?.(item=>String(item?.tripId||"")===tripId)||null;
+  const title=trip?.title||tripId;
+  const confirmText=archived
+    ? `封存「${title}」？\n\n呢個只係你自己嘅旅程清單偏好，其他成員完全不受影響，Firebase 旅程資料同權限亦唔會改變。`
+    : `還原「${title}」？\n\n旅程會重新出現喺你嘅 Active Trips。`;
+  if(!window.confirm(confirmText))return;
   button.disabled=true;
-  try{const service=await getTripImportService();const user=await getImportFirebaseUser();await service.setTripArchived(tripId,archived,{user});}
-  catch(error){console.error("Trip archive action",error);alert(tripImportPermissionMessage(error));button.disabled=false;}
+  try{
+    const service=await import(`./assets/js/trip-preferences-service.js?v=${APP_VERSION}`);
+    const user=window.__appAuthUser||await getImportFirebaseUser();
+    await service.setPersonalTripArchived(tripId,archived,{user});
+
+    tripLibraryCloudState={...tripLibraryCloudState,trips:(tripLibraryCloudState.trips||[]).map(item=>String(item?.tripId||"")===tripId?{...item,archived:archived===true,archiveSource:"personal"}:item)};
+    renderTripLibrary();
+
+    const visibleId=String(tripLoaderActiveId||dataTripId(window.tripData)||"").trim();
+    if(archived&&visibleId===tripId){
+      const next=(tripLibraryCloudState.trips||[]).find(item=>item?.archived!==true&&String(item?.tripId||"")!==tripId);
+      if(next){
+        await switchActiveCloudTrip(next.tripId);
+      }else{
+        const {session}=await getTripLoaderServices();
+        session.clearActiveTripId?.();updateTripUrl("");
+        appEntryOptimisticTripId="";appEntryOptimisticUid="";appEntryForcedTripId="";clearAppEntryResumeLatch();endWarmRefreshGate();
+        stopFirebaseTripLoader({fallback:false});
+        applyAppEntryState("lobby");renderTripLibrary();refreshAppEntryState();
+      }
+    }else if(!archived&&document.body.classList.contains("app-entry-gated")){
+      const {session}=await getTripLoaderServices();
+      session.setActiveTripId(tripId);updateTripUrl(tripId);appEntryForcedTripId=tripId;
+      bootstrapRememberedFirebaseTrip(user).catch(error=>console.warn("Restored Trip bootstrap",error));
+      refreshAppEntryState();
+    }
+  }catch(error){
+    console.error("Personal Trip archive action",error);
+    alert(tripImportPermissionMessage(error));
+    button.disabled=false;
+  }
 }
 document.getElementById("trip-library-list")?.addEventListener("click",event=>{
-  const button=event.target.closest?.("[data-trip-archive-id]");if(button)handleTripArchiveAction(button,true);
+  const archive=event.target.closest?.("[data-trip-archive-id]"),restore=event.target.closest?.("[data-trip-restore-id]");
+  if(archive)handleTripArchiveAction(archive,true);else if(restore)handleTripArchiveAction(restore,false);
 });
 document.getElementById("trip-archive-list")?.addEventListener("click",event=>{
+  const button=event.target.closest?.("[data-trip-restore-id]");if(button)handleTripArchiveAction(button,false);
+});
+document.getElementById("entry-archive-list")?.addEventListener("click",event=>{
   const button=event.target.closest?.("[data-trip-restore-id]");if(button)handleTripArchiveAction(button,false);
 });
 
@@ -7950,6 +8058,7 @@ function backupFriendlyError(error){
   if(error?.code==="backup-invalid-json")return "呢個檔案唔係有效 JSON。";
   if(error?.code==="backup-invalid"||error?.code==="backup-unsupported")return "呢個檔案唔係支援嘅 Full Backup JSON。";
   if(error?.code==="backup-trip-mismatch")return "Backup Trip ID 同目前旅程唔一致。Data Only v1 暫時只支援原 Trip 內還原。";
+  if(error?.code==="trip-global-locked")return "旅程已全域鎖定。Backup 仍然可以匯出，但 Restore 要先到「我的 → 旅程設定 → 旅程鎖定」解除鎖定。";
   if(error?.code==="permission-denied"||error?.code==="firestore/permission-denied")return "Firebase 權限不足，請確認旅程角色。";
   if(error?.code==="local-export-incomplete")return error?.message||"本機資料尚未完整同步，暫未能匯出。";
   if(error?.code==="data-operation-timeout")return `${error?.stage||"資料操作"}逾時。今次操作已停止，唔需要 Quit App；可以直接再試。`;
@@ -8672,7 +8781,7 @@ function getTripAppearanceService(){
   return tripAppearanceServicePromise;
 }
 function appearanceSettingsTripId(){return String(tripLoaderActiveId||dataTripId(window.tripData)||"").trim();}
-function appearanceSettingsCanEdit(){const role=String(window.__appTripAccess?.role||"");return role==="owner"||role==="admin";}
+function appearanceSettingsCanEdit(){const role=String(window.__appTripAccess?.role||"");return !currentTripGlobalLocked()&&(role==="owner"||role==="admin");}
 function appearanceFriendlyError(error){
   const code=String(error?.code||"");
   if(code==="offline")return"目前離線，重新連線後先可以更新顏色。";
@@ -8692,7 +8801,7 @@ function renderTripColourSettings(data=window.tripData){
     <div class="destination-color-palette">${colourSwatches({selected:current,kind:"trip",disabled:!canEdit||!!appearanceColourSavingKey})}</div>
     <div class="destination-color-actions"><label class="destination-color-custom${canEdit&&!appearanceColourSavingKey?"":" is-disabled"}">自訂顏色<input type="color" data-appearance-custom="trip" value="${escapeHtmlText(current)}"${canEdit&&!appearanceColourSavingKey?"":" disabled"}></label></div>
   </div>`;
-  if(status){status.classList.remove("is-error");status.textContent=canEdit?"主色會即時套用至 App 主要 Accent；收藏及支出如設定為跟隨亦會同步。":"目前為唯讀。只有 Owner 或 Admin 可以修改旅程主色。";}
+  if(status){status.classList.remove("is-error");status.textContent=canEdit?"主色會即時套用至 App 主要 Accent；收藏及支出如設定為跟隨亦會同步。":(currentTripGlobalLocked()?"旅程已全域鎖定，目前只可查看顏色設定。":"目前為唯讀。只有 Owner 或 Admin 可以修改旅程主色。");}
 }
 function renderFeatureColourSettings(data=window.tripData){
   const list=document.getElementById("feature-color-list"),status=document.getElementById("feature-color-status");if(!list)return;
@@ -8707,7 +8816,7 @@ function renderFeatureColourSettings(data=window.tripData){
       <div class="destination-color-actions"><label class="destination-color-custom${canEdit&&!appearanceColourSavingKey?"":" is-disabled"}">自訂顏色<input type="color" data-appearance-custom="${def.key}" value="${escapeHtmlText(current)}"${canEdit&&!appearanceColourSavingKey?"":" disabled"}></label><button class="destination-color-reset" type="button" data-appearance-follow="${def.key}"${canEdit&&explicit&&!appearanceColourSavingKey?"":" disabled"}>跟隨旅程主色</button></div>
     </div>`;
   }).join("");
-  if(status){status.classList.remove("is-error");status.textContent=canEdit?"預設跟隨旅程主色；只在你想刻意分開功能識別時先自訂。":"目前為唯讀。只有 Owner 或 Admin 可以修改功能顏色。";}
+  if(status){status.classList.remove("is-error");status.textContent=canEdit?"預設跟隨旅程主色；只在你想刻意分開功能識別時先自訂。":(currentTripGlobalLocked()?"旅程已全域鎖定，目前只可查看功能顏色。":"目前為唯讀。只有 Owner 或 Admin 可以修改功能顏色。");}
 }
 function applyAppearanceColourLocal(key,color,{feature=false,follow=false}={}){
   if(follow){
@@ -8787,7 +8896,7 @@ function getTripDestinationService(){
   return tripDestinationServicePromise;
 }
 function destinationSettingsTripId(){return String(tripLoaderActiveId||dataTripId(window.tripData)||"").trim();}
-function destinationSettingsCanEdit(){const role=String(window.__appTripAccess?.role||"");return role==="owner"||role==="admin";}
+function destinationSettingsCanEdit(){const role=String(window.__appTripAccess?.role||"");return !currentTripGlobalLocked()&&(role==="owner"||role==="admin");}
 function destinationSettingsFriendlyError(error){
   const code=String(error?.code||"");
   if(code==="offline")return"目前離線，重新連線後先可以更新目的地顏色。";
@@ -8817,7 +8926,7 @@ function renderDestinationSettingsPage(data=window.tripData){
       </div>
     </div>`;
   }).join("");
-  if(status){status.classList.remove("is-error");status.textContent=canEdit?"改色後會直接儲存到 Firebase，並同步更新 Day、跨城市漸變、天氣同城市標籤。":"目前為唯讀。只有 Owner 或 Admin 可以修改目的地顏色。";}
+  if(status){status.classList.remove("is-error");status.textContent=canEdit?"改色後會直接儲存到 Firebase，並同步更新 Day、跨城市漸變、天氣同城市標籤。":(currentTripGlobalLocked()?"旅程已全域鎖定，目前只可查看目的地顏色。":"目前為唯讀。只有 Owner 或 Admin 可以修改目的地顏色。");}
 }
 function applyDestinationCustomColourLocalUI(cityKey,color){
   if(!parseHexColour(color))return;
@@ -8920,7 +9029,7 @@ function getTripTeamService(){
   return tripTeamServicePromise;
 }
 function teamSettingsTripId(){return String(tripLoaderActiveId||dataTripId(window.tripData)||"").trim();}
-function teamSettingsCanEdit(){const role=String(window.__appTripAccess?.role||"");return role==="owner"||role==="admin";}
+function teamSettingsCanEdit(){const role=String(window.__appTripAccess?.role||"");return !currentTripGlobalLocked()&&(role==="owner"||role==="admin");}
 function teamSettingsFriendlyError(error){
   const code=String(error?.code||"");
   if(code==="offline")return"目前離線，重新連線後先可以更新 Team 顏色。";
@@ -8966,7 +9075,7 @@ function renderTeamSettingsPage(data=window.tripData){
       </div>
     </div>`;
   }).join("");
-  if(status){status.classList.remove("is-error");status.textContent=canEdit?"改色後會直接儲存到 Firebase，並同步更新 Team selector、航班、行程標籤及資料卡。":"目前為唯讀。只有 Owner 或 Admin 可以修改 Team 顏色。";}
+  if(status){status.classList.remove("is-error");status.textContent=canEdit?"改色後會直接儲存到 Firebase，並同步更新 Team selector、航班、行程標籤及資料卡。":(currentTripGlobalLocked()?"旅程已全域鎖定，目前只可查看 Team 顏色。":"目前為唯讀。只有 Owner 或 Admin 可以修改 Team 顏色。");}
 }
 function applyTeamCustomColourLocalUI(teamKey,color){
   if(!parseHexColour(color))return;
@@ -9171,6 +9280,8 @@ function describeTripActivity(item={}){
   if(type==="trip.import.replace")return {...base,icon:"↥",title:"匯入 trip.json",summary:`${activityChangeText(item.changeSummary)||"更新旅程內容"}${item.revision?` · Revision ${item.revision}`:""}`};
   if(type==="trip.archive")return {...base,icon:"🗄️",title:"封存旅程",summary:"旅程保留喺 Firebase，但由 Active Trips 收起。"};
   if(type==="trip.restore")return {...base,icon:"↩",title:"還原已封存旅程",summary:"旅程重新加入 Active Trips。"};
+  if(type==="trip.global.lock")return {...base,icon:"🔒",title:"鎖定旅程",summary:message||"旅程已設為全域唯讀。"};
+  if(type==="trip.global.unlock")return {...base,icon:"🔓",title:"解除旅程鎖定",summary:message||"旅程已解除全域唯讀。"};
   if(type==="trip.snapshot.manual")return {...base,category:"backup",categoryLabel:"備份",icon:"▣",title:"建立手動備份",summary:`Snapshot${item.revision?` · Revision ${item.revision}`:""}`};
   if(type==="trip.snapshot.restore")return {...base,category:"backup",categoryLabel:"備份",icon:"↶",title:"還原旅程版本",summary:`${item.sourceRevision?`由 Revision ${item.sourceRevision} 還原`:"已還原 Snapshot"}${item.revision?` · 新 Revision ${item.revision}`:""}`};
   if(type==="trip.destination.color_updated")return {...base,icon:"🎨",title:"更新目的地顏色",summary:message||"目的地識別色已更新"};
@@ -9704,7 +9815,7 @@ refreshCollapseMetrics();
 // Android / Chrome PWA support. Versioned app-shell Service Worker; normal launches are cache-first while explicit reloads stay network-first.
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("./sw.js?v=7.8.0.5").catch(() => {});
+    navigator.serviceWorker.register("./sw.js?v=7.8.1.0").catch(() => {});
   });
 }
 

@@ -97,6 +97,7 @@ function assemblePortableTrip(tripId, state) {
       tripStartIso: clean(tripDoc.startDate),
       tripEndIso: clean(tripDoc.endDate),
       status: clean(tripDoc.status),
+      globalLocked: tripDoc.globalLocked === true,
       coverImage: clean(tripDoc.coverImage),
       tripIcon: clean(tripDoc.tripIcon || general.tripIcon),
       backgroundImage: clean(tripDoc.backgroundImage || general.backgroundImage),
@@ -124,7 +125,11 @@ function assemblePortableTrip(tripId, state) {
       hasPendingWrites: state.hasPendingWrites(),
       updatedAt: normalizeTimestamp(tripDoc.updatedAt),
       importState: clean(tripDoc.importState || "ready"),
-      restoreState: clean(tripDoc.restoreState || "ready")
+      restoreState: clean(tripDoc.restoreState || "ready"),
+      globalLocked: tripDoc.globalLocked === true,
+      globalLockedAt: normalizeTimestamp(tripDoc.globalLockedAt),
+      globalLockedBy: clean(tripDoc.globalLockedBy),
+      globalLockedByName: clean(tripDoc.globalLockedByName)
     }
   };
 }
