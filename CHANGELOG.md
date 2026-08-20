@@ -1,3 +1,25 @@
+# v7.8.2.1 · Permanent Delete Runtime & iOS Keyboard Hotfix
+
+## Permanent Delete Runtime
+
+* Fixed a strict-mode server runtime bug in the final Trip-root verification path. After deleting the Trip root, the function now verifies the root with an explicitly scoped snapshot instead of assigning to an undeclared variable.
+* Added explicit server deletion-stage tracking across Trip child cleanup, Storage cleanup, cross-reference cleanup, member cleanup, pre-root verification, root delete and post-root verification. If a future cleanup step fails, the client can report the actual stage instead of only showing a generic percentage.
+* Existing resumable deletion markers, deletion lease, server-only root delete and root-last invariant remain unchanged. A partially deleting v7.8.2.0 Trip can be resumed after this Function is deployed.
+
+## iOS Keyboard Harmony
+
+* Permanent Delete confirmation keeps the existing Profile page and existing form components, but the focused DELETE field now uses iOS-safe 16px text sizing to avoid WebKit focus zoom behaviour.
+* While a Profile form keyboard is open, the existing bottom navigation hides immediately, the existing Profile detail bar stays anchored with the app's existing navigation material, and only the scroll-shell content is repositioned to expose the focused field.
+* The layout scroll position is restored after the DELETE field closes so the App does not look like a webpage whose whole canvas has been pushed upward.
+
+## Compatibility
+
+* No Firestore Rules or index changes.
+* No image, icon, background, Expenses CSS or other asset changes.
+* v7.3.13 Profile Navigation compositor remains protected and unmodified.
+
+---
+
 # v7.8.2.0 · Phase 2G.3 Backup, Restore & Permanent Delete
 
 ## Archival Full Backup

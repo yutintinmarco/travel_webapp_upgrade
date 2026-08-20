@@ -311,6 +311,7 @@ exports.permanentDeleteTrip = onCall({
     if (!verified) {
       throw new HttpsError("failed-precondition", "Trip root is gone but cleanup verification found remaining references.", {
         code: "delete-verification-failed",
+        stage: "post-root-verification",
         remainingChildren,
         verification,
         storage
@@ -323,6 +324,7 @@ exports.permanentDeleteTrip = onCall({
   const ownership = { resumed: claim.resumed };
   logger.info("Permanent Trip deletion started", { tripId, uid, runId, resumed: ownership.resumed });
 
+  let deletionStage = "trip-child-cleanup";
   try {
     // Keep the membership collection until the final child-cleanup stage. This
     // preserves the Owner's normal catalogue/access path for as much of an
@@ -332,12 +334,16 @@ exports.permanentDeleteTrip = onCall({
     const childCleanup = await deleteTripChildrenPreservingMembers(tripRef);
     const deletedChildCollections = [...childCleanup.deleted];
 
+    deletionStage = "storage-cleanup";
     const storageCleanup = await cleanupTripStorage(tripId);
+    deletionStage = "cross-reference-cleanup";
     const crossReferenceCleanup = await deleteKnownCrossReferences(tripId);
 
+    deletionStage = "member-cleanup";
     const membersDeleted = await deleteMembersLast(tripRef, childCleanup.membersRef);
     if (membersDeleted) deletedChildCollections.push("members");
 
+    deletionStage = "pre-root-verification";
     const verification = await verifyCleanupBeforeRootDelete(tripId, tripRef);
 
     if (!verification.clean) {
@@ -354,12 +360,15 @@ exports.permanentDeleteTrip = onCall({
 
     // Critical invariant: the Trip root is deleted LAST, only after every known
     // Firestore cross-reference and Storage prefix verifies empty.
+    deletionStage = "root-delete";
     await tripRef.delete();
-    tripSnap = await tripRef.get();
-    if (tripSnap.exists) {
+    deletionStage = "root-verification";
+    const rootAfterDelete = await tripRef.get();
+    if (rootAfterDelete.exists) {
       throw new HttpsError("internal", "Trip root still exists after final delete.", { code: "root-delete-verification-failed" });
     }
 
+    deletionStage = "post-root-verification";
     const postChildren = await verifyNoTripChildren(tripRef);
     if (postChildren.length) {
       throw new HttpsError("failed-precondition", "Nested Trip data remains after root delete.", {
@@ -384,13 +393,21 @@ exports.permanentDeleteTrip = onCall({
       tripId,
       uid,
       runId,
+      stage: deletionStage,
       code: error?.code,
       message: error?.message
     });
     await expireDeletionLease(tripRef, runId, error?.code || error?.message || "unknown");
-    if (error instanceof HttpsError) throw error;
-    throw new HttpsError("internal", "Permanent deletion was interrupted. The Trip root was preserved and cleanup can be resumed.", {
-      code: "delete-interrupted"
+    if (error instanceof HttpsError) {
+      throw new HttpsError(error.code, error.message, {
+        ...(error.details && typeof error.details === "object" ? error.details : {}),
+        stage: deletionStage
+      });
+    }
+    throw new HttpsError("internal", "Permanent deletion was interrupted. The Trip root was preserved when still present and cleanup can be resumed.", {
+      code: "delete-interrupted",
+      stage: deletionStage,
+      causeCode: clean(error?.code || "")
     });
   }
 });
