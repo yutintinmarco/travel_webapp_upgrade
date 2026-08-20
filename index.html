@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
   <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
   <link rel="dns-prefetch" href="https://api.open-meteo.com">
-  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?v=7.8.1.3">
+  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?v=7.8.2.0">
   <title id="page-title">行程</title>
   <script>
   // v7.7.5.0 · Performance Lite. Memory only: no Firebase reads/writes, no
@@ -2244,6 +2244,7 @@ html.theme-dark .profile-menu-card .profile-row,html:not(.theme-light):not(.them
 .profile-signout-card[hidden]{display:none!important;}
 .profile-signout-btn{width:100%;min-height:52px;padding:12px 15px;border:0;background:transparent;color:#ff3b30;font:inherit;font-size:calc(13px * var(--font-scale));font-weight:760;text-align:center;-webkit-appearance:none;appearance:none;}
 .profile-signout-btn:active{background:rgba(255,59,48,.08);}
+.profile-signout-btn:disabled{opacity:.34;pointer-events:none;}
 .profile-inline-section-heading{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 2px 10px;}
 .profile-inline-section-heading strong{font-size:calc(12px * var(--font-scale));color:var(--label-secondary);font-weight:760;}
 .profile-trips-card .trip-library-status{margin:8px 2px 0;padding:0;background:transparent;border-radius:0;}
@@ -3332,7 +3333,7 @@ body.expenses-view-active #app-version-note{
 #snacks-view::after,
 #info-view::after,
 #profile-view::after{
-  content:"v7.8.1.3" !important;
+  content:"v7.8.2.0" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3353,7 +3354,7 @@ body.expenses-view-active #app-version-note{
   display:none !important;
 }
 body.expenses-view-active .expenses-module .expenses-app::after{
-  content:"v7.8.1.3" !important;
+  content:"v7.8.2.0" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3581,7 +3582,7 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
 </style>
             <link rel="apple-touch-icon" href="assets/icon/trip_icon.png">
   <link rel="icon" type="image/png" href="assets/icon/trip_icon.png">
-  <link rel="manifest" href="manifest.json?v=7.8.1.3">
+  <link rel="manifest" href="manifest.json?v=7.8.2.0">
   <meta name="apple-mobile-web-app-title" content="關嘉露西生日之旅">
   <!-- v7.7.1.2: expenses.css is 144KB and every rule is scoped under
        .expenses-module, yet it used to block the very first paint of the
@@ -3589,8 +3590,8 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
        priority without blocking paint; ensureExpensesStylesheet() flips it to
        media="all" before the 支出 view is ever mounted, so the styling is
        byte-for-byte identical by the time anything expenses-related renders. -->
-  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?v=7.8.1.3" media="print">
-  <noscript><link rel="stylesheet" href="assets/css/expenses.css?v=7.8.1.3"></noscript>
+  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?v=7.8.2.0" media="print">
+  <noscript><link rel="stylesheet" href="assets/css/expenses.css?v=7.8.2.0"></noscript>
 </head>
 <body class="app-entry-gated app-entry-pending">
 <div class="bg-fixed"></div>
@@ -3662,6 +3663,11 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
       <button class="profile-row" id="entry-import-btn" type="button">
         <span class="profile-row-icon profile-icon-blue">⇧</span>
         <span class="profile-row-copy"><strong>匯入 trip.json 建立旅程</strong><small>你已獲授權建立新 Firebase Trip</small></span>
+        <span class="profile-chevron">›</span>
+      </button>
+      <button class="profile-row" id="entry-full-backup-restore-btn" type="button">
+        <span class="profile-row-icon profile-icon-orange">↶</span>
+        <span class="profile-row-copy"><strong>還原完整 Backup 建立旅程</strong><small>重建已刪除旅程；目前帳戶會成為新 Owner</small></span>
         <span class="profile-chevron">›</span>
       </button>
     </section>
@@ -3967,6 +3973,16 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
           <span class="profile-chevron">›</span>
         </button>
       </section>
+      <div id="trip-permanent-delete-section" hidden>
+        <div class="profile-section-label">旅程生命週期</div>
+        <section class="profile-card profile-menu-card" aria-label="旅程生命週期">
+          <button class="profile-row" id="trip-permanent-delete-open-btn" type="button" data-profile-open="trip-delete">
+            <span class="profile-row-icon profile-icon-red">🗑️</span>
+            <span class="profile-row-copy"><strong>永久刪除旅程</strong><small>Owner Only · 完整清除 Firebase 旅程資料</small></span>
+            <span class="profile-chevron">›</span>
+          </button>
+        </section>
+      </div>
     </div>
 
 
@@ -4063,6 +4079,46 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
         <div class="profile-inline-section-heading"><strong>待接受邀請</strong><span class="trip-library-count" id="trip-member-pending-count">0</span></div>
         <div class="trip-member-pending-list" id="trip-member-pending-list"></div>
       </section>
+    </div>
+
+    <div class="profile-nav-page" id="profile-page-trip-delete" data-profile-page="trip-delete" hidden>
+      <div class="profile-detail-bar">
+        <button class="profile-detail-back" type="button" data-profile-back aria-label="返回旅程設定"><span class="profile-back-glyph">‹</span><span class="profile-detail-back-label">旅程設定</span></button>
+        <h2>永久刪除</h2>
+        <span class="profile-detail-spacer"></span>
+      </div>
+
+      <section class="profile-card trip-member-summary-card">
+        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前旅程</span><strong id="trip-delete-trip-name">—</strong></div>
+        <div class="profile-meta-row"><span>Trip ID</span><strong id="trip-delete-trip-id">—</strong></div>
+        <div class="profile-meta-row"><span>你的角色</span><strong id="trip-delete-role">—</strong></div>
+      </section>
+
+      <div class="profile-section-label">刪除前備份</div>
+      <section class="profile-card profile-menu-card" aria-label="刪除前備份">
+        <button class="profile-row" id="trip-delete-backup-btn" type="button">
+          <span class="profile-row-icon profile-icon-green">⬇</span>
+          <span class="profile-row-copy"><strong>下載完整 Backup</strong><small>先確認 Firebase Server 最新資料，再建立本機 Backup</small></span>
+          <span class="profile-chevron">›</span>
+        </button>
+      </section>
+      <div class="trip-library-status" id="trip-delete-backup-status">建議先保存 Full Backup；測試或即棄 Trip 亦可以選擇不備份繼續。</div>
+
+      <div class="profile-section-label">永久刪除</div>
+      <section class="profile-card trip-member-invite-card" aria-label="永久刪除確認">
+        <div class="trip-member-card-title">
+          <strong>確認永久刪除</strong>
+          <small>輸入 DELETE 後先可以執行。刪除會清除 Trip 子資料、成員、設定、Snapshot、記錄、邀請、Registry、個人偏好及未來 Storage 媒體。</small>
+        </div>
+        <label class="trip-member-field">
+          <span>輸入 DELETE</span>
+          <input id="trip-delete-confirm-input" type="text" inputmode="text" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="DELETE">
+        </label>
+      </section>
+      <section class="profile-card profile-signout-card">
+        <button class="profile-signout-btn" id="trip-delete-confirm-btn" type="button" disabled>永久刪除旅程</button>
+      </section>
+      <div class="profile-backup-note" id="trip-delete-note">Trip root 只會喺 Firestore、跨 Trip references 同 Storage cleanup verification 全部通過後最後刪除；中途失敗可以再次執行繼續清理。</div>
     </div>
 
     <div class="profile-nav-page" id="profile-page-expense-settings" data-profile-page="expense-settings" hidden>
@@ -4251,7 +4307,7 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
         <span class="profile-detail-spacer"></span>
       </div>
       <section class="profile-card" aria-label="App 資訊">
-        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.8.1.3</strong></div>
+        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.8.2.0</strong></div>
         <div class="profile-meta-row"><span>資料架構</span><strong>Phase 2G.2</strong></div>
         <div class="profile-meta-row"><span>主要資料來源</span><strong id="app-data-source-label">Firebase / 本機快取</strong></div>
       </section>
@@ -4428,7 +4484,7 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
 </div>
 
 <script>
-const APP_VERSION = "7.8.1.3";
+const APP_VERSION = "7.8.2.0";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 function perfLiteMark(name){try{return window.__perfLite?.mark(name);}catch(error){return null;}}
@@ -6265,6 +6321,7 @@ function initGlobalAuthSafe(){
         renderEntryAuthState(displayUser);
         renderProfileAccessState(window.__appTripAccess||currentProfileAccess);
         refreshAppEntryState();
+        schedulePendingPermanentDeleteResume(displayUser);
       });
     })
     .catch(error=>console.error("Global auth service load error",error));
@@ -6278,6 +6335,7 @@ window.addEventListener("app-auth-state",event=>{
   renderProfileAccessState(window.__appTripAccess||currentProfileAccess);
   refreshAppAdminEntitlement(window.__appAuthUser).catch(()=>{});
   refreshAppEntryState();
+  schedulePendingPermanentDeleteResume(window.__appAuthUser);
   refreshAppDataDiagnostics();
 });
 window.addEventListener("app-trip-access",event=>{
@@ -6559,7 +6617,7 @@ let tripSessionService=null;
 let tripAccessService=null;
 let tripLoaderStop=null;
 let tripLoaderActiveId="";
-let tripLoaderState={status:"local",source:"local",tripId:"",updatedAt:"",error:null};
+let tripLoaderState={status:"local",source:"local",tripId:"",updatedAt:"",serverConfirmed:false,hasPendingWrites:false,error:null};
 function setTripRealtimeDay(dayIdInput){
   const dayId=String(dayIdInput||"").trim();
   if(!dayId)return;
@@ -7276,7 +7334,7 @@ function applyFirebaseTripData(data,{source="server",tripId="",dirtySections=[]}
   const oldScroll=sameTrip&&needsItinerary?Math.max(0,Number(scrollShell?.scrollTop||0)):0;
 
   const previousLoaderSource=tripLoaderState?.source||"";
-  tripLoaderState={status:"ready",source,tripId:nextId,updatedAt:data?.cloudMeta?.updatedAt||"",error:null};
+  tripLoaderState={status:"ready",source,tripId:nextId,updatedAt:data?.cloudMeta?.updatedAt||"",serverConfirmed:data?.cloudMeta?.serverConfirmed===true,hasPendingWrites:data?.cloudMeta?.hasPendingWrites===true,error:null};
   window.tripData=data;
   setDataSourceLabel(source==="instant-cache"?"即時旅程快取":(source==="cache"?"Firebase 快取":"Firebase"));
   if(String(appEntryTripSwitchHandoff.toTripId||"")===nextId){
@@ -7364,7 +7422,7 @@ function applyBundledTripFallback(){
   tripExpensesSignature=expensesRenderSignature(bundledTripData);
   tripDestinationThemeSignature=destinationThemeRenderSignature(bundledTripData);
   tripTeamThemeSignature=teamThemeRenderSignature(bundledTripData);
-  tripLoaderState={status:"local",source:"local",tripId:dataTripId(bundledTripData),updatedAt:"",error:null};
+  tripLoaderState={status:"local",source:"local",tripId:dataTripId(bundledTripData),updatedAt:"",serverConfirmed:false,hasPendingWrites:false,error:null};
   setDataSourceLabel("本機 trip.json");updateTripLibrarySummaryFromData(bundledTripData);
   try{refreshAppearanceColourMenuState(bundledTripData);}catch(error){}
   try{window.__teamSettingsRefresh?.(bundledTripData);}catch(error){}
@@ -7448,7 +7506,7 @@ async function startFirebaseTripLoader(tripIdInput){
   const seedData=priorLoaderSource==="instant-cache"?priorTripData:null;
   const activeDayId=preferredRealtimeDayId(seedData||priorTripData);
   stopFirebaseTripLoader();
-  tripLoaderActiveId=tripId;tripLoaderState={status:"loading",source:"unknown",tripId,updatedAt:"",error:null};setDataSourceLabel("Firebase 同步中…");
+  tripLoaderActiveId=tripId;tripLoaderState={status:"loading",source:"unknown",tripId,updatedAt:"",serverConfirmed:false,hasPendingWrites:false,error:null};setDataSourceLabel("Firebase 同步中…");
   access.initTripAccess?.(tripId);
   tripLoaderStop=loader.subscribeTripData(tripId,event=>{
     if(tripLoaderActiveId!==tripId)return;
@@ -7461,7 +7519,7 @@ async function startFirebaseTripLoader(tripIdInput){
     }
     if(event.status==="metadata"){
       const metaSource=event.fromCache?"cache":"server";
-      tripLoaderState={...tripLoaderState,status:"ready",source:metaSource};
+      tripLoaderState={...tripLoaderState,status:"ready",source:metaSource,serverConfirmed:event.serverConfirmed===true,hasPendingWrites:event.hasPendingWrites===true};
       setDataSourceLabel(metaSource==="cache"?"Firebase 快取":"Firebase");
       if(metaSource==="server")perfLiteMark("firebaseServerReady");
       renderTripLibrary();refreshAppEntryState();
@@ -7565,6 +7623,7 @@ function renderTripGlobalLockState(){
     status.textContent=!tripId?"暫時未有可管理旅程。":(!manager?"只有 Owner / Admin 可以鎖定或解鎖。":(locked?"全域鎖定已生效；安全權限管理仍然可以使用。":"鎖定係全 Trip 狀態，會同時影響所有成員。"));
   }
   renderDataManagementLockState();
+  renderTripPermanentDeleteState();
 }
 async function handleTripGlobalLockAction(){
   if(tripGlobalLockBusy||tripCloudOffline()){if(tripCloudOffline())alert("目前離線，旅程鎖定狀態需要重新連線後先可以修改。");return;}
@@ -7591,6 +7650,131 @@ async function handleTripGlobalLockAction(){
 }
 document.getElementById("trip-global-lock-open-btn")?.addEventListener("click",()=>renderTripGlobalLockState());
 document.getElementById("trip-global-lock-action")?.addEventListener("click",handleTripGlobalLockAction);
+
+function currentTripOwnerRecord(){
+  const record=currentTripCloudRecord();
+  const role=String(record?.role||window.__appTripAccess?.role||"").trim();
+  return {record,role,isOwner:role==="owner"};
+}
+function renderTripPermanentDeleteState(){
+  const {record,role,isOwner}=currentTripOwnerRecord();
+  const tripId=String(record?.tripId||tripLoaderActiveId||tripLibrarySummary?.tripId||"").trim();
+  const section=document.getElementById("trip-permanent-delete-section");
+  if(section)section.hidden=!isOwner||!tripId;
+  const name=record?.title||tripLibrarySummary?.title||tripId||"—";
+  const nameEl=document.getElementById("trip-delete-trip-name"),idEl=document.getElementById("trip-delete-trip-id"),roleEl=document.getElementById("trip-delete-role");
+  if(nameEl)nameEl.textContent=name;if(idEl)idEl.textContent=tripId||"—";if(roleEl)roleEl.textContent=tripLibraryRoleLabel(role)||"—";
+  if(tripDeleteBackupState.tripId&&tripDeleteBackupState.tripId!==tripId)tripDeleteBackupState={tripId:"",archiveGrade:false,preparedAt:0,filename:""};
+  const status=document.getElementById("trip-delete-backup-status");
+  if(status){
+    if(tripDeleteBackupState.tripId===tripId&&tripDeleteBackupState.archiveGrade){
+      status.textContent=`已建立 Server Confirmed Backup · ${backupFormatDate(tripDeleteBackupState.preparedAt)} · ${tripDeleteBackupState.filename||"Full Backup"}`;
+    }else status.textContent="建議先保存 Full Backup；測試或即棄 Trip 亦可以選擇不備份繼續。";
+  }
+  const input=document.getElementById("trip-delete-confirm-input"),button=document.getElementById("trip-delete-confirm-btn"),backupBtn=document.getElementById("trip-delete-backup-btn");
+  if(button)button.disabled=!isOwner||!tripId||String(input?.value||"").trim()!=="DELETE";
+  if(backupBtn)backupBtn.disabled=!isOwner||!tripId;
+}
+function getTripDeleteService(){
+  if(!tripDeleteServicePromise)tripDeleteServicePromise=import(`./assets/js/trip-delete-service.js?v=${APP_VERSION}`).catch(error=>{tripDeleteServicePromise=null;throw error;});
+  return tripDeleteServicePromise;
+}
+function resetLocalExportPreparationForTrip(tripId){
+  if(!tripId||dataManagementLocalPreparedTripId===tripId){dataManagementLocalPreparePromise=null;dataManagementLocalPreparedTripId="";}
+  if(dataManagementSnapshotCacheTripId===tripId){dataManagementSnapshotCacheTripId="";dataManagementSnapshotCacheReady=false;tripBackupSnapshots=[];tripBackupSelectedSnapshot=null;}
+}
+function openDeleteBackupExportOperation(){
+  const {record,isOwner}=currentTripOwnerRecord(),tripId=String(record?.tripId||tripLoaderActiveId||"").trim();
+  if(!isOwner||!tripId)return;
+  const summary=dataOperationCurrentSummary();
+  dataOperationOpen({kind:"delete-backup",title:"刪除前完整 Backup",subtitle:"先確認 Firebase Server 最新資料，再建立可供日後重建嘅 Full Backup。",name:record?.title||summary.title,id:`tripId · ${tripId}`,stats:[{value:summary.dayCount,label:"Days"},{value:summary.itemCount,label:"Items"},{value:summary.savedPlaceCount,label:"Saved"},{value:"Full",label:"Type"}],mode:"呢次會要求 Server Confirmed freshness；普通離線 Last Synced 狀態唔會冒充刪除前最新 Backup。",warnings:["Full Backup v1 暫時係 Data Only，不包含 Phase 3A 之後先加入嘅媒體。","成員權限唔屬於 Backup；日後重建時目前還原帳戶會成為新 Owner。"],confirmLabel:"下載完整 Backup",handler:async()=>{
+    const service=await dataOperationAwait(getTripBackupService(),{stage:"載入備份引擎",detail:"正在準備 Full Backup。",percent:10,timeoutMs:8000});
+    const frozen=await dataOperationAwait(waitForArchivalLocalExportPack(18000),{stage:"確認 Firebase 最新資料",detail:"正在用現有 realtime listeners 確認 Trip、各日行程、支出及找數已收到 Server confirmation。",percent:30,timeoutMs:22000});
+    const result=await service.exportLocalFullBackup(frozen.trip,frozen.expenseSnapshot,{user:frozen.user,role:frozen.role,tripFreshness:frozen.tripFreshness,requireArchiveGrade:true});
+    dataOperationSetStage("建立完整 Backup","正在加入 freshness metadata 同 SHA-256 完整性資料。",76);
+    const prepared=backupPrepareJsonDownload(result.json,result.filename);
+    tripDeleteBackupState={tripId,archiveGrade:true,preparedAt:Date.now(),filename:result.filename};
+    renderTripPermanentDeleteState();
+    dataOperationSetStage("準備下載","Server Confirmed Backup 已建立，準備交畀 iOS。",94);
+    return {title:"刪除前 Backup 已建立",detail:`Server Confirmed · SHA-256 · ${result.counts.dayCount||0} Days · ${result.counts.expenseCount||0} Expenses`,download:()=>backupDownloadBlob(prepared.blob,prepared.filename)};
+  }});
+}
+async function routeAfterPermanentDelete(tripId,user){
+  const activeBefore=String(tripLoaderActiveId||tripLibrarySummary?.tripId||dataTripId(window.tripData)||appEntryOptimisticTripId||"").trim();
+  const wasActive=activeBefore===String(tripId||"").trim();
+  try{await invalidateInstantTripCache(tripId,user);}catch(error){}
+  try{const {access}=await getTripLoaderServices();access.clearLastKnownTripAccess?.(user?.uid,tripId);}catch(error){}
+  resetLocalExportPreparationForTrip(tripId);
+  tripLibraryCloudState={...tripLibraryCloudState,trips:(tripLibraryCloudState.trips||[]).filter(item=>String(item?.tripId||"")!==tripId)};
+  if(String(tripLibraryLastReadyCatalog.uid||"")===String(user?.uid||""))tripLibraryLastReadyCatalog={...tripLibraryLastReadyCatalog,trips:(tripLibraryLastReadyCatalog.trips||[]).filter(item=>String(item?.tripId||"")!==tripId)};
+  renderTripLibrary();
+  if(wasActive)return routeAwayFromRevokedTrip(tripId);
+  refreshAppEntryState();
+  return true;
+}
+
+function schedulePendingPermanentDeleteResume(userInput){
+  const user=userInput||window.__appAuthUser||null,uid=String(user?.uid||"").trim();
+  if(!uid)return;
+  clearTimeout(tripDeleteResumeTimer);
+  tripDeleteResumeTimer=setTimeout(()=>resumePendingPermanentDeleteIfNeeded(user).catch(error=>console.warn("Pending permanent delete resume",error)),420);
+}
+async function resumePendingPermanentDeleteIfNeeded(userInput){
+  const user=userInput||window.__appAuthUser||null,uid=String(user?.uid||"").trim();
+  if(!uid||tripDeleteResumeInFlight)return false;
+  const service=await getTripDeleteService();
+  const pending=service.listPendingTripDeletions?.(uid)||[];
+  const marker=pending[0];
+  if(!marker?.tripId)return false;
+  const key=`${uid}:${marker.tripId}:${Number(marker.startedAt)||0}`;
+  if(tripDeleteResumeAttemptKey===key)return false;
+  tripDeleteResumeAttemptKey=key;tripDeleteResumeInFlight=true;
+  appProgressOpen({kicker:"PERMANENT DELETE",title:"繼續永久刪除",subtitle:"上次清理未完成，Firebase 會由目前 deleting 狀態繼續，確認全部清空後先完成。",percent:18,stageTitle:"重新連接刪除流程",stageDetail:`正在繼續清理 ${marker.title||marker.tripId}。`,icon:"🗑️"});
+  try{
+    appProgressUpdate({percent:38,stageTitle:"繼續 Firebase Cleanup",stageDetail:"正在清除剩餘 Trip 子資料、references 同 Storage prefix。",icon:"🗑️"});
+    const result=await service.permanentDeleteTrip(marker.tripId,{user,title:marker.title||""});
+    appProgressUpdate({percent:94,stageTitle:"Cleanup verification",stageDetail:"Server 已再次驗證所有 Trip 專屬資料為零。",icon:"✓"});
+    await routeAfterPermanentDelete(marker.tripId,user);
+    appProgressFinish({title:"旅程已永久刪除",detail:result?.status==="already-deleted"?"Server 已確認上次其實已完成刪除，亦無殘留資料。":"中斷嘅刪除流程已完成，cleanup verification 已通過。"});
+    tripDeleteResumeAttemptKey="";
+    setTimeout(()=>schedulePendingPermanentDeleteResume(user),220);
+    return true;
+  }catch(error){
+    tripDeleteResumeAttemptKey="";
+    appProgressFail(backupFriendlyError(error));
+    if(error?.code==="delete-already-running"){
+      const retryAfter=Math.max(2500,Math.min(11*60*1000,Number(error?.details?.retryAfterMs||error?.customData?.details?.retryAfterMs)||15000));
+      clearTimeout(tripDeleteResumeTimer);
+      tripDeleteResumeTimer=setTimeout(()=>schedulePendingPermanentDeleteResume(user),retryAfter+500);
+    }
+    return false;
+  }finally{tripDeleteResumeInFlight=false;}
+}
+function openPermanentDeleteOperation(){
+  const {record,isOwner}=currentTripOwnerRecord(),tripId=String(record?.tripId||tripLoaderActiveId||"").trim();
+  if(!isOwner||!tripId)return;
+  if(String(document.getElementById("trip-delete-confirm-input")?.value||"").trim()!=="DELETE")return;
+  const backedUp=tripDeleteBackupState.tripId===tripId&&tripDeleteBackupState.archiveGrade===true;
+  const summary=dataOperationCurrentSummary();
+  dataOperationOpen({kind:"permanent-delete",title:"永久刪除旅程",subtitle:"呢個操作會由 Firebase Server 執行可重試 cleanup，確認全部清空後先最後刪 Trip root。",name:record?.title||summary.title,id:`tripId · ${tripId}`,stats:[{value:summary.dayCount,label:"Days"},{value:summary.itemCount,label:"Items"},{value:(record?.memberCount??"—"),label:"Members"},{value:"永久",label:"Delete"}],mode:backedUp?"已建立 Server Confirmed 刪除前 Backup。":"你選擇繼續永久刪除，但今次尚未建立刪除前 Backup。",warnings:[...(backedUp?[]:["尚未下載刪除前 Full Backup。刪除完成後 Firebase 端無法復原呢個 Trip。"]),"會清除 Trip 所有子資料、members、settings、snapshots、logs、operation locks、invites、Trip ID Registry、所有 user Trip preferences，以及 Phase 3A 後 Storage media。","清理中途失敗時 Trip root 會保留 deleting 狀態，可以再次執行繼續清理。"],confirmLabel:"永久刪除",handler:async()=>{
+    const user=await getImportFirebaseUser();if(!user?.uid){const error=new Error("Google sign-in required");error.code="auth-required";throw error;}
+    const service=await getTripDeleteService();
+    appProgressOpen({kicker:"PERMANENT DELETE",title:"永久刪除旅程",subtitle:"Firebase 正在清理所有 Trip 專屬資料。完成前請保持 App 開啟。",percent:8,stageTitle:"鎖定刪除狀態",stageDetail:"正在驗證 Owner 同目前操作狀態。",icon:"🗑️"});
+    try{
+      appProgressUpdate({percent:24,stageTitle:"清理 Firebase 資料",stageDetail:"正在遞迴刪除 Trip 子資料、跨 Trip references 同 Storage prefix。",icon:"🗑️"});
+      const result=await service.permanentDeleteTrip(tripId,{user,title:record?.title||summary.title||tripId});
+      appProgressUpdate({percent:94,stageTitle:"Cleanup verification",stageDetail:"Server 已確認所有 Trip 專屬資料為零，Trip root 已最後刪除。",icon:"✓"});
+      await routeAfterPermanentDelete(tripId,user);
+      tripDeleteBackupState={tripId:"",archiveGrade:false,preparedAt:0,filename:""};
+      appProgressFinish({title:"旅程已永久刪除",detail:"Firebase cleanup verification 已完成；如果之前保存咗 Full Backup，日後可用 Backup 重建旅程。"});
+      return {title:"旅程已永久刪除",detail:result?.status==="already-deleted"?"Server 已確認旅程早前已完成刪除，亦無殘留資料。":"Trip root 已最後刪除，cleanup verification 已通過。"};
+    }catch(error){appProgressFail(backupFriendlyError(error));throw error;}
+  }});
+}
+document.getElementById("trip-permanent-delete-open-btn")?.addEventListener("click",()=>{const input=document.getElementById("trip-delete-confirm-input");if(input)input.value="";renderTripPermanentDeleteState();});
+document.getElementById("trip-delete-backup-btn")?.addEventListener("click",openDeleteBackupExportOperation);
+document.getElementById("trip-delete-confirm-input")?.addEventListener("input",renderTripPermanentDeleteState);
+document.getElementById("trip-delete-confirm-btn")?.addEventListener("click",openPermanentDeleteOperation);
 
 const tripArchiveToggle=document.getElementById("trip-archive-toggle");
 tripArchiveToggle?.addEventListener("click",()=>{
@@ -7950,8 +8134,7 @@ tripImportConfirm?.addEventListener("click",async()=>{
     closeTripImportModal();
     try{
       const service=await getTripBackupService(),inspection=service.inspectFullBackup(raw);
-      if(String(inspection.tripId)!==currentBackupTripId()){const e=new Error("Backup Trip ID does not match current Trip");e.code="backup-trip-mismatch";throw e;}
-      openFullBackupRestoreOperation({raw,inspection});
+      await routeFullBackupSelection(raw,inspection);
     }catch(error){
       console.error("Route Full Backup from trip import",error);
       dataOperationOpen(dataOperationBaseConfig({kind:"restore-full-error",title:"還原完整 Backup",subtitle:"呢份檔案已識別為 Full Backup，但未能進入目前旅程嘅還原流程。",typeLabel:"Error",mode:"請確認 Backup Trip ID 同目前旅程一致。",confirmLabel:"完成"}));
@@ -8089,6 +8272,11 @@ let tripBackupSnapshots=[];
 let tripBackupSelectedSnapshot=null;
 let tripBackupBusy=false;
 let dataOperationState={kind:"",busy:false,done:false,payload:null,scope:"all",handler:null};
+let tripDeleteBackupState={tripId:"",archiveGrade:false,preparedAt:0,filename:""};
+let tripDeleteServicePromise=null;
+let tripDeleteResumeTimer=0;
+let tripDeleteResumeInFlight=false;
+let tripDeleteResumeAttemptKey="";
 // v7.7.7.4 · Local First Export Engine
 // iOS file handoff can leave explicit Firestore reads unusable until the PWA is
 // restarted. Prepare every read-only export source before the first download,
@@ -8126,7 +8314,21 @@ function waitForLocalExpenseExportSnapshot(timeoutMs=15000){
   const tripId=currentBackupTripId();
   const enabled=window.tripData?.meta?.expenses?.enabled===true;
   if(!enabled){
-    return Promise.resolve({tripId,ready:true,settings:localExportClone(window.tripData?.meta?.expenses||{}),expenses:[],settlements:[],activityLogs:[],capturedAt:new Date().toISOString()});
+    const tripFresh=currentTripFreshnessSnapshot();
+    return Promise.resolve({
+      tripId,
+      ready:true,
+      settings:localExportClone(window.tripData?.meta?.expenses||{}),
+      expenses:[],
+      settlements:[],
+      activityLogs:[],
+      capturedAt:new Date().toISOString(),
+      freshness:{
+        serverConfirmed:tripFresh.serverConfirmed===true,
+        hasPendingWrites:tripFresh.hasPendingWrites===true,
+        sources:{disabled:{serverConfirmed:tripFresh.serverConfirmed===true,hasPendingWrites:tripFresh.hasPendingWrites===true}}
+      }
+    });
   }
   initExpensesViewSafe();
   return new Promise((resolve,reject)=>{
@@ -8191,6 +8393,43 @@ function refreshLocalExportCapture(prepared){
   }
   return {...prepared,trip,expenseSnapshot,capturedAt:Date.now()};
 }
+function currentTripFreshnessSnapshot(){
+  const tripId=currentBackupTripId();
+  return {
+    tripId,
+    source:String(tripLoaderState?.source||"local"),
+    serverConfirmed:tripLoaderState?.status==="ready"&&tripLoaderState?.tripId===tripId&&tripLoaderState?.serverConfirmed===true,
+    hasPendingWrites:tripLoaderState?.hasPendingWrites===true,
+    updatedAt:String(tripLoaderState?.updatedAt||"")
+  };
+}
+function requestCurrentTripServerConfirmation(){
+  try{return tripLoaderStop?.requestFullServerConfirmation?.()===true;}catch(error){console.warn("Full Backup server confirmation",error);return false;}
+}
+async function waitForArchivalLocalExportPack(timeoutMs=18000){
+  requestCurrentTripServerConfirmation();
+  const prepared=await prepareDataManagementLocalExports();
+  const service=await getTripBackupService();
+  const started=Date.now();
+  return await new Promise((resolve,reject)=>{
+    const poll=()=>{
+      try{
+        const frozen=refreshLocalExportCapture(prepared);
+        const tripFreshness=currentTripFreshnessSnapshot();
+        const freshness=service.evaluateLocalBackupFreshness(frozen.trip,frozen.expenseSnapshot,tripFreshness);
+        if(freshness.archiveGrade){resolve({...frozen,tripFreshness,freshness});return;}
+        if(Date.now()-started>=timeoutMs){
+          const error=new Error(freshness.online?"Backup 尚未取得完整 Firebase Server confirmation。":"目前離線，只能建立 Last Synced Backup。");
+          error.code=freshness.online?"backup-freshness-unconfirmed":"backup-freshness-offline";
+          error.freshness=freshness;
+          reject(error);return;
+        }
+      }catch(error){reject(error);return;}
+      setTimeout(poll,180);
+    };
+    poll();
+  });
+}
 function getTripBackupService(){
   if(!tripBackupServicePromise){
     tripBackupServicePromise=import(`./assets/js/trip-backup-service.js?v=${APP_VERSION}`)
@@ -8208,7 +8447,7 @@ function backupFriendlyError(error){
   if(error?.code==="snapshot-too-large")return "目前旅程太大，未能建立單一 Snapshot。";
   if(error?.code==="backup-invalid-json")return "呢個檔案唔係有效 JSON。";
   if(error?.code==="backup-invalid"||error?.code==="backup-unsupported")return "呢個檔案唔係支援嘅 Full Backup JSON。";
-  if(error?.code==="backup-trip-mismatch")return "Backup Trip ID 同目前旅程唔一致。Data Only v1 暫時只支援原 Trip 內還原。";
+  if(error?.code==="backup-trip-mismatch")return "Backup Trip ID 同目前旅程唔一致。請切換到 Backup 所屬旅程；如果原 Trip 已刪除，可以由 Access Lobby 用 Full Backup 重建。";
   if(error?.code==="trip-global-locked")return "旅程已全域鎖定。Backup 仍然可以匯出，但 Restore 要先到「我的 → 旅程設定 → 旅程鎖定」解除鎖定。";
   if(error?.code==="permission-denied"||error?.code==="firestore/permission-denied")return "Firebase 權限不足，請確認旅程角色。";
   if(error?.code==="local-export-incomplete")return error?.message||"本機資料尚未完整同步，暫未能匯出。";
@@ -8216,6 +8455,19 @@ function backupFriendlyError(error){
   if(error?.code==="restore-operation-timeout")return "取得旅程操作鎖逾時。旅程內容尚未開始還原；系統會自動清理任何遲到嘅操作鎖。請關閉後再試一次。";
   if(error?.code==="data-operation-timeout")return `${error?.stage||"資料操作"}逾時。今次操作已停止，唔需要 Quit App；可以直接再試。`;
   if(error?.code==="offline"||error?.code==="operation-busy"||error?.code==="trip-operation-busy")return cloudSafetyFriendlyError(error);
+  if(error?.code==="backup-integrity-mismatch")return "Backup 完整性驗證失敗。檔案內容同建立時嘅 SHA-256 不一致，已停止還原。";
+  if(error?.code==="backup-integrity-unavailable")return "目前瀏覽器未能執行 Backup SHA-256 驗證。請更新或重新開啟 App 後再試。";
+  if(error?.code==="backup-freshness-offline")return "目前離線，只能建立 Last Synced Backup。永久刪除前請重新連線，等 Firebase Server confirmation 完成後再下載。";
+  if(error?.code==="backup-freshness-unconfirmed")return "Firebase 最新狀態尚未完整確認。請保持 App 開啟幾秒後再試；系統唔會用未確認資料當刪除前 Backup。";
+  if(error?.code==="creator-required")return "目前帳戶未獲授權建立新旅程，無法用 Backup 重建已刪除 Trip。";
+  if(error?.code==="backup-trip-id-used"||error?.code==="trip-id-unavailable")return "呢個 Trip ID 已被使用。請輸入另一個未使用嘅 canonical Trip ID 再重建。";
+  if(error?.code==="backup-trip-id-invalid"||error?.code==="invalid-trip-id")return "請輸入有效嘅新 Trip ID；唔可以留空、包含 /，長度亦唔可以超過 160 個字元。";
+  if(error?.code==="backup-accessible-other-trip")return "呢份 Backup 屬於你另一個現有旅程。請先切換到該 Trip，再使用『還原完整 Backup』。";
+  if(error?.code==="delete-already-running")return "Firebase Server 仍然執行緊上一個永久刪除流程。App 會保留重試標記並稍後自動再確認，唔需要重新按刪除。";
+  if(error?.code==="delete-verification-failed")return "永久刪除未通過 cleanup verification。Trip root 會保留／操作可重試，唔會假裝已刪除完成。";
+  if(error?.code==="delete-interrupted"||error?.code==="functions/internal")return "永久刪除中途受阻。清理流程設計為可重試；請保持連線後再次執行永久刪除。";
+  if(error?.code==="functions/permission-denied")return "只有 Trip Owner 可以永久刪除旅程。";
+  if(error?.code==="functions/unauthenticated")return "請先登入 Google 帳戶。";
   const rawMessage=String(error?.message||"");
   if(tripCloudOffline())return "目前離線，無法完成呢個資料操作。請重新連線後再試。";
   if(/module script failed|failed to fetch dynamically imported module/i.test(rawMessage))return "資料管理模組未能載入。請重新整理 App 後再試。";
@@ -8407,11 +8659,12 @@ function openFullBackupExportOperation(){
     const service=await dataOperationAwait(getTripBackupService(),{stage:"載入備份引擎",detail:"正在準備資料管理模組。",percent:12,timeoutMs:8000});
     const localPack=await dataOperationAwait(prepareDataManagementLocalExports(),{stage:"準備本機資料",detail:"正在確認行程、支出及版本資料已完整同步。",percent:32,timeoutMs:22000});
     const frozen=refreshLocalExportCapture(localPack);
-    const result=service.exportLocalFullBackup(frozen.trip,frozen.expenseSnapshot,{user:frozen.user,role:frozen.role});
+    const result=await service.exportLocalFullBackup(frozen.trip,frozen.expenseSnapshot,{user:frozen.user,role:frozen.role,tripFreshness:currentTripFreshnessSnapshot()});
     dataOperationSetStage("建立 Backup", "正在整理 Full Backup JSON。",78);
     const prepared=backupPrepareJsonDownload(result.json,result.filename);
     dataOperationSetStage("準備下載","檔案已建立，準備交畀 iOS。",94);
-    return {title:"Backup 已匯出",detail:`${result.counts.dayCount||0} Days · ${result.counts.expenseCount||0} Expenses · ${result.counts.settlementCount||0} Settlements`,download:()=>backupDownloadBlob(prepared.blob,prepared.filename)};
+    const freshnessLabel=result.freshness?.archiveGrade?"Server Confirmed":"Last Synced";
+    return {title:"Backup 已匯出",detail:`${freshnessLabel} · ${result.counts.dayCount||0} Days · ${result.counts.expenseCount||0} Expenses · ${result.counts.settlementCount||0} Settlements`,download:()=>backupDownloadBlob(prepared.blob,prepared.filename)};
   }}));
 }
 function openTripJsonExportOperation(){
@@ -8494,6 +8747,84 @@ function openFullBackupRestoreOperation(selected){
   }});
 }
 
+async function openFullBackupRestoreAsNewOperation(selected,{alternateIdRequired=false}={}){
+  const inspection=selected.inspection||{},c=inspection.counts||{},originalTripId=String(inspection.tripId||"").trim();
+  const alternateHtml=alternateIdRequired?`<label class="trip-member-field" style="width:100%;"><span>新 Trip ID</span><input id="full-backup-restore-new-trip-id" type="text" inputmode="text" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="例如 ${escapeHtmlText(originalTripId)}-restored"></label>`:"";
+  dataOperationOpen({
+    kind:"restore-full-create",
+    title:alternateIdRequired?"用新 Trip ID 重建":"重建完整 Backup",
+    subtitle:alternateIdRequired?"Backup 原本嘅 Trip ID 已被使用；輸入另一個 canonical Trip ID，再重建同還原資料。":"Backup 原本嘅 Trip 已不存在；建立同一個 canonical Trip ID，再還原行程及支出資料。",
+    name:selected.raw?.data?.portableTrip?.meta?.title||originalTripId||"Full Backup",
+    id:`原 Trip ID · ${originalTripId||"—"}`,
+    stats:[{value:c.dayCount||0,label:"Days"},{value:c.itemCount||0,label:"Items"},{value:c.savedPlaceCount||0,label:"Saved"},{value:c.expenseCount||0,label:"Expenses"}],
+    mode:`Backup v${inspection.backupVersion||1} · ${inspection.integrity?.present?"SHA-256":"Legacy Backup"} · ${inspection.mediaIncluded?"包含媒體":"Data Only"}`,
+    secondaryHtml:alternateHtml,
+    warnings:[
+      ...(alternateIdRequired?["原 Trip ID 已被其他旅程使用；系統唔會覆蓋或透露該旅程資料。新 ID 只會成為今次重建 Trip 嘅唯一 canonical Trip ID。"]:[]),
+      "目前登入帳戶會成為重建 Trip 嘅新 Owner；原本 members / roles 唔會由 Backup 還原。",
+      "原本 Activity Logs 會保留喺 Backup 內作 archival record；新 Trip 會重新建立今次重建／還原嘅操作記錄。",
+      ...(inspection.mediaIncluded?[]:["Data Only v1 不包含媒體；Phase 3A 會升級同一流程處理 Media Backup Package。"])
+    ],
+    confirmLabel:"建立並還原",
+    payload:selected,
+    handler:async()=>{
+      const backupService=await getTripBackupService(),importService=await getTripImportService(),user=await getImportFirebaseUser();
+      if(!user?.uid){const error=new Error("Google sign-in required");error.code="auth-required";throw error;}
+      await backupService.verifyFullBackupIntegrity(selected.raw);
+      let restoreRaw=selected.raw,targetTripId=originalTripId;
+      if(alternateIdRequired){
+        targetTripId=String(document.getElementById("full-backup-restore-new-trip-id")?.value||"").trim();
+        if(!targetTripId||targetTripId.includes("/")||targetTripId.length>160){const error=new Error("Invalid target Trip ID");error.code="backup-trip-id-invalid";throw error;}
+        const creator=await import(`./assets/js/trip-creator-service.js?v=${APP_VERSION}`);
+        const targetRegistry=await creator.inspectTripIdRegistry(targetTripId,{user});
+        if(targetRegistry.reserved){const error=new Error("Target Trip ID is already reserved");error.code="backup-trip-id-used";throw error;}
+        restoreRaw=await backupService.retargetFullBackupTripId(selected.raw,targetTripId);
+      }
+      const portable=backupService.fullBackupPortableTrip(restoreRaw);
+      // Rebuild starts operationally open so the expense restore can complete.
+      // The Backup's expense lock setting is restored by the expense phase below.
+      if(portable?.meta?.expenses&&typeof portable.meta.expenses==="object")portable.meta.expenses={...portable.meta.expenses,expenseLocked:false};
+      appProgressOpen({kicker:"FULL BACKUP",title:"重建旅程",subtitle:"正在用 Full Backup 重建已刪除 Trip。完成前請保持 App 開啟。",percent:4,stageTitle:"建立 Trip 同 Owner",stageDetail:`正在建立 ${targetTripId}、Trip root 同 Owner membership。`,icon:"↶"});
+      let created=null;
+      try{
+        created=await importService.importTrip(portable,{mode:"create",user,onProgress:progress=>{const view=importProgressPresentation(progress,"create");appProgressUpdate({...view,percent:Math.max(5,Math.min(48,5+(Number(view.percent)||0)*.43))});}});
+        restartActiveTripCatalog();
+        try{
+          const {session}=await getTripLoaderServices();
+          appEntryForcedTripId=String(created.tripId||"");session.setActiveTripId(created.tripId);updateTripUrl(created.tripId);setAppEntryResumeLatch(created.tripId,user.uid);
+          startFirebaseTripLoader(created.tripId).catch(error=>console.warn("Restored Trip loader",error));
+        }catch(error){console.warn("Restored Trip route",error);}
+        appProgressUpdate({percent:52,stageTitle:"還原支出資料",stageDetail:"Trip 已重建，正在還原支出、找數同支出設定。",icon:"↶"});
+        const restored=await backupService.restoreFullBackup(restoreRaw,{scope:"expenses",user,onProgress:progress=>{const view=restoreProgressPresentation(progress);appProgressUpdate({...view,percent:Math.max(52,Math.min(96,52+(Number(view.percent)||0)*.44))});}});
+        restartActiveTripCatalog();
+        appProgressFinish({title:"旅程已重建",detail:`${created.tripId} 已重新建立；行程、支出同找數資料已還原。目前帳戶係新 Owner。`});
+        return {title:"旅程已重建",detail:`${created.tripId} · Revision ${created.revision} · ${restored.counts?.expenseCount||0} Expenses`};
+      }catch(error){
+        const detail=created?.tripId?`${backupFriendlyError(error)}\n\nTrip ${created.tripId} 已建立；如果支出階段中斷，可以切換到該 Trip 再用「還原完整 Backup」繼續。`:backupFriendlyError(error);
+        appProgressFail(detail);throw error;
+      }
+    }
+  });
+}
+
+async function routeFullBackupSelection(raw,inspection){
+  const service=await getTripBackupService();
+  await service.verifyFullBackupIntegrity(raw);
+  const backupTripId=String(inspection?.tripId||"").trim();
+  const activeRecord=currentTripCloudRecord();
+  if(activeRecord&&String(activeRecord.tripId||"")===backupTripId&&String(activeRecord.role||window.__appTripAccess?.role||"")){
+    openFullBackupRestoreOperation({raw,inspection});return "in-place";
+  }
+  const accessible=(tripLibraryCloudState.trips||[]).find(item=>String(item?.tripId||"")===backupTripId);
+  if(accessible){const error=new Error("Backup belongs to another accessible Trip");error.code="backup-accessible-other-trip";throw error;}
+  if(tripCloudOffline()){const error=new Error("Offline");error.code="offline";throw error;}
+  const user=await getImportFirebaseUser();
+  const creator=await import(`./assets/js/trip-creator-service.js?v=${APP_VERSION}`);
+  const registry=await creator.inspectTripIdRegistry(backupTripId,{user});
+  openFullBackupRestoreAsNewOperation({raw,inspection},{alternateIdRequired:registry.reserved===true});
+  return registry.reserved?"create-alternate":"create";
+}
+
 document.getElementById("data-operation-options")?.addEventListener("click",event=>{
   const button=event.target.closest?.("[data-data-operation-scope]");if(!button||dataOperationState.busy)return;
   dataOperationState.scope=button.dataset.dataOperationScope||"all";
@@ -8523,6 +8854,7 @@ document.getElementById("data-operation-confirm")?.addEventListener("click",asyn
   }
 });
 
+document.getElementById("entry-full-backup-restore-btn")?.addEventListener("click",()=>{const input=document.getElementById("trip-full-backup-file");if(input){input.value="";input.click();}});
 document.getElementById("trip-full-backup-export")?.addEventListener("click",openFullBackupExportOperation);
 document.getElementById("trip-backup-export-current")?.addEventListener("click",openTripJsonExportOperation);
 document.getElementById("trip-backup-create-manual")?.addEventListener("click",openManualSnapshotOperation);
@@ -8538,8 +8870,7 @@ document.getElementById("trip-full-backup-file")?.addEventListener("change",asyn
       return;
     }
     const service=await getTripBackupService(),inspection=service.inspectFullBackup(raw);
-    if(String(inspection.tripId)!==currentBackupTripId()){const e=new Error("Backup Trip ID does not match current Trip");e.code="backup-trip-mismatch";throw e;}
-    openFullBackupRestoreOperation({raw,inspection});
+    await routeFullBackupSelection(raw,inspection);
   }catch(error){console.error("Inspect full backup",error);dataOperationOpen(dataOperationBaseConfig({kind:"restore-full-error",title:"還原完整 Backup",subtitle:"未能驗證所選 Backup。",typeLabel:"Error",mode:"檔案未能進入還原流程。",confirmLabel:"完成"}));dataOperationState.done=true;dataOperationSetError(backupFriendlyError(error));}
 });
 document.getElementById("snapshot-detail-export")?.addEventListener("click",()=>{if(tripBackupSelectedSnapshot)openSnapshotExportOperation(tripBackupSelectedSnapshot);});
@@ -9952,7 +10283,7 @@ document.getElementById("profile-signout-btn")?.addEventListener("click",signOut
 document.getElementById("entry-signout-btn")?.addEventListener("click",signOutTravelUser);
 document.getElementById("entry-import-btn")?.addEventListener("pointerdown",()=>warmTripImportDependencies(),{passive:true});
 document.getElementById("entry-import-btn")?.addEventListener("click",()=>{warmTripImportDependencies();tripImportFile?.click();});
-window.addEventListener("online",()=>refreshAppEntryState(),{passive:true});
+window.addEventListener("online",()=>{refreshAppEntryState();schedulePendingPermanentDeleteResume(window.__appAuthUser);},{passive:true});
 window.addEventListener("offline",()=>refreshAppEntryState(),{passive:true});
 
 document.querySelectorAll("[data-global-setting]").forEach(button=>{
@@ -9983,7 +10314,7 @@ refreshCollapseMetrics();
 // Android / Chrome PWA support. Versioned app-shell Service Worker; normal launches are cache-first while explicit reloads stay network-first.
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("./sw.js?v=7.8.1.3").catch(() => {});
+    navigator.serviceWorker.register("./sw.js?v=7.8.2.0").catch(() => {});
   });
 }
 

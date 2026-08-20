@@ -598,6 +598,31 @@ let recentExpenseCacheHydrationStarted = false;
 let recentExpensesLiveReady = false;
 let settlementsLiveReady = false;
 let activityLogsLiveReady = false;
+let expenseSettingsLiveReady = false;
+const backupSyncMeta = {
+  settings: { seen:false, fromCache:true, hasPendingWrites:false },
+  expenses: { seen:false, fromCache:true, hasPendingWrites:false },
+  settlements: { seen:false, fromCache:true, hasPendingWrites:false },
+  activityLogs: { seen:false, fromCache:true, hasPendingWrites:false }
+};
+function resetBackupSyncMeta(){
+  Object.keys(backupSyncMeta).forEach(key=>{backupSyncMeta[key]={seen:false,fromCache:true,hasPendingWrites:false};});
+  expenseSettingsLiveReady=false;
+}
+function updateBackupSyncMeta(key,snapshot){
+  backupSyncMeta[key]={
+    seen:true,
+    fromCache:snapshot?.metadata?.fromCache===true,
+    hasPendingWrites:snapshot?.metadata?.hasPendingWrites===true
+  };
+}
+function currentExpenseBackupFreshness(){
+  const sources=Object.fromEntries(Object.entries(backupSyncMeta).map(([key,value])=>[key,{...value}]));
+  const values=Object.values(sources);
+  const serverConfirmed=values.every(meta=>meta.seen===true&&meta.fromCache===false);
+  const hasPendingWrites=values.some(meta=>meta.hasPendingWrites===true);
+  return {serverConfirmed:serverConfirmed&&!hasPendingWrites,hasPendingWrites,sources};
+}
 let pendingExcelExportRequested = false;
 let pendingExcelExportTimer = null;
 let pendingExcelExportStartedAt = 0;
@@ -1243,12 +1268,13 @@ function localBackupEntries(rows = []) {
 
 window.__getExpenseLocalExportSnapshot = () => ({
   tripId,
-  ready: Boolean(cloudExpenseStarted && recentExpensesLiveReady && settlementsLiveReady && activityLogsLiveReady),
+  ready: Boolean(cloudExpenseStarted && expenseSettingsLiveReady && recentExpensesLiveReady && settlementsLiveReady && activityLogsLiveReady),
   role: phase2TripRole || null,
   settings: toFullBackupValue(tripSettings),
   expenses: localBackupEntries(allExpenses),
   settlements: localBackupEntries(settlements),
   activityLogs: localBackupEntries(activityLogs),
+  freshness: currentExpenseBackupFreshness(),
   capturedAt: new Date().toISOString()
 });
 
@@ -2220,7 +2246,9 @@ async function ensureTripMembersAndSettings() {
 function startExpenseSettingsListener() {
   if (stopExpenseSettingsListener) stopExpenseSettingsListener();
   const ref = doc(db, "trips", tripId, "settings", "expenses");
-  stopExpenseSettingsListener = onSnapshot(ref, snap => {
+  stopExpenseSettingsListener = onSnapshot(ref, { includeMetadataChanges:true }, snap => {
+    expenseSettingsLiveReady = true;
+    updateBackupSyncMeta("settings", snap);
     const data = snap.exists() ? (snap.data() || {}) : {};
     if (typeof data.expenseLocked === "boolean") applyExpenseLockState(data, { explicit:true });
     else applyExpenseLockState({}, { explicit:false });
@@ -2341,8 +2369,9 @@ async function hydrateRecentExpensesFromLocalFirestoreCache() {
 function listenToExpenses() {
   if (stopExpensesListener) stopExpensesListener();
   const q = query(getExpensesCollection(), orderBy("date", "desc"));
-  stopExpensesListener = onSnapshot(q, snap => {
+  stopExpensesListener = onSnapshot(q, { includeMetadataChanges:true }, snap => {
     recentExpensesLiveReady = true;
+    updateBackupSyncMeta("expenses", snap);
     if (recentExpenseList) recentExpenseList.classList.remove("is-warm-cache");
     setRecentExpensesPending(false);
     allExpenses = sortExpensesForDisplay(snap.docs.map(d => ({ id: d.id, ...d.data() })));
@@ -2362,8 +2391,9 @@ function listenToExpenses() {
 function listenToSettlements() {
   if (stopSettlementsListener) stopSettlementsListener();
   const q = query(getSettlementsCollection(), orderBy("paidAt", "desc"));
-  stopSettlementsListener = onSnapshot(q, snap => {
+  stopSettlementsListener = onSnapshot(q, { includeMetadataChanges:true }, snap => {
     settlementsLiveReady = true;
+    updateBackupSyncMeta("settlements", snap);
     settlements = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     renderSummary();
     renderAnalytics();
@@ -2377,8 +2407,9 @@ function listenToSettlements() {
 function listenToActivityLogs() {
   if (stopActivityLogsListener) stopActivityLogsListener();
   const q = query(getActivityLogsCollection(), orderBy("createdAt", "desc"));
-  stopActivityLogsListener = onSnapshot(q, snap => {
+  stopActivityLogsListener = onSnapshot(q, { includeMetadataChanges:true }, snap => {
     activityLogsLiveReady = true;
+    updateBackupSyncMeta("activityLogs", snap);
     activityLogs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     renderActivityLogs();
     tryRunPendingExcelExport();
@@ -4568,6 +4599,7 @@ subscribeAuthState(async (user) => {
     recentExpensesLiveReady = false;
     settlementsLiveReady = false;
     activityLogsLiveReady = false;
+    resetBackupSyncMeta();
     pendingExcelExportRequested = false;
     pendingExcelExportStartedAt = 0;
     clearPendingExcelExportTimer();
@@ -4610,6 +4642,10 @@ window.__suspendExpensesForTripSwitch = function suspendExpensesModuleForTripSwi
   stopExpensesListener = null;
   stopSettlementsListener = null;
   stopActivityLogsListener = null;
+  recentExpensesLiveReady = false;
+  settlementsLiveReady = false;
+  activityLogsLiveReady = false;
+  resetBackupSyncMeta();
   window.__expensesModuleSuspended = true;
   return true;
 };

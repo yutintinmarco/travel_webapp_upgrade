@@ -819,6 +819,102 @@ const FULL_BACKUP_FORMAT = "travel-full-backup";
 const FULL_BACKUP_VERSION = 1;
 const FULL_BACKUP_SCOPES = new Set(["all", "trip", "expenses"]);
 
+const FULL_BACKUP_INTEGRITY_ALGORITHM = "SHA-256";
+
+function stableBackupValue(value) {
+  if (Array.isArray(value)) return value.map(stableBackupValue);
+  if (value && typeof value === "object") {
+    return Object.fromEntries(Object.keys(value).sort().map(key => [key, stableBackupValue(value[key])]));
+  }
+  return value;
+}
+
+function stableBackupStringify(value) {
+  return JSON.stringify(stableBackupValue(value));
+}
+
+async function sha256Hex(text) {
+  if (!globalThis.crypto?.subtle) {
+    const error = new Error("SHA-256 is unavailable in this browser");
+    error.code = "backup-integrity-unavailable";
+    throw error;
+  }
+  const bytes = new TextEncoder().encode(String(text ?? ""));
+  const digest = await globalThis.crypto.subtle.digest("SHA-256", bytes);
+  return [...new Uint8Array(digest)].map(byte => byte.toString(16).padStart(2, "0")).join("");
+}
+
+async function attachFullBackupIntegrity(jsonInput) {
+  const payload = clone(jsonInput) || {};
+  delete payload.integrity;
+  const payloadHash = await sha256Hex(stableBackupStringify(payload));
+  return {
+    ...payload,
+    integrity: {
+      algorithm: FULL_BACKUP_INTEGRITY_ALGORITHM,
+      scope: "backup-without-integrity",
+      payloadHash
+    }
+  };
+}
+
+export async function verifyFullBackupIntegrity(rawInput) {
+  const backup = normalizeFullBackupInput(rawInput);
+  const integrity = backup.integrity && typeof backup.integrity === "object" ? backup.integrity : null;
+  if (!integrity?.payloadHash) return { verified:false, legacy:true, algorithm:"" };
+  if (clean(integrity.algorithm).toUpperCase() !== FULL_BACKUP_INTEGRITY_ALGORITHM) {
+    const error = new Error("Unsupported Full Backup integrity algorithm");
+    error.code = "backup-integrity-unsupported";
+    throw error;
+  }
+  const payload = clone(backup) || {};
+  delete payload.integrity;
+  const actual = await sha256Hex(stableBackupStringify(payload));
+  const expected = clean(integrity.payloadHash).toLowerCase();
+  if (!expected || actual !== expected) {
+    const error = new Error("Full Backup integrity verification failed");
+    error.code = "backup-integrity-mismatch";
+    error.expectedHash = expected;
+    error.actualHash = actual;
+    throw error;
+  }
+  return { verified:true, legacy:false, algorithm:FULL_BACKUP_INTEGRITY_ALGORITHM, payloadHash:actual };
+}
+
+export function evaluateLocalBackupFreshness(localTripInput, expenseSnapshotInput, tripFreshnessInput = {}) {
+  const localTrip = localTripInput || {};
+  const expenseSnapshot = expenseSnapshotInput || {};
+  const tripMeta = localTrip?.cloudMeta || {};
+  const tripFreshness = tripFreshnessInput || {};
+  const tripServerConfirmed = tripFreshness.serverConfirmed === true || tripMeta.serverConfirmed === true;
+  const tripPendingWrites = tripFreshness.hasPendingWrites === true || tripMeta.hasPendingWrites === true;
+  const expenseFreshness = expenseSnapshot?.freshness || {};
+  const expenseServerConfirmed = expenseFreshness.serverConfirmed === true;
+  const expensePendingWrites = expenseFreshness.hasPendingWrites === true;
+  const online = typeof navigator === "undefined" ? true : navigator.onLine !== false;
+  const serverConfirmed = tripServerConfirmed && expenseServerConfirmed && !tripPendingWrites && !expensePendingWrites;
+  const archiveGrade = online && serverConfirmed;
+  return {
+    status: archiveGrade ? "server-confirmed" : "last-synced",
+    archiveGrade,
+    online,
+    evaluatedAt: new Date().toISOString(),
+    trip: {
+      serverConfirmed: tripServerConfirmed && !tripPendingWrites,
+      hasPendingWrites: tripPendingWrites,
+      source: clean(tripFreshness.source || tripMeta.source || "local"),
+      updatedAt: clean(tripFreshness.updatedAt || tripMeta.updatedAt),
+      revision: Math.max(1, Number(localTrip?.revision) || 1)
+    },
+    expenses: {
+      serverConfirmed: expenseServerConfirmed && !expensePendingWrites,
+      hasPendingWrites: expensePendingWrites,
+      capturedAt: clean(expenseSnapshot?.capturedAt),
+      sources: clone(expenseFreshness.sources || {}) || {}
+    }
+  };
+}
+
 function fullBackupSerialize(value) {
   if (value == null) return value;
   try {
@@ -920,12 +1016,19 @@ export function inspectFullBackup(rawInput) {
     exportedAt: clean(backup.exportedAt),
     mediaIncluded: backup.mediaIncluded,
     counts: backup.counts,
+    integrity: backup.integrity?.payloadHash ? { algorithm: clean(backup.integrity.algorithm), present: true } : { algorithm: "", present: false },
+    freshness: clone(backup.freshness || {}) || {},
     auditPolicy: "append-only"
   };
 }
 
 
-export function exportLocalFullBackup(localTripInput, expenseSnapshotInput, { user = null, role = "" } = {}) {
+export async function exportLocalFullBackup(localTripInput, expenseSnapshotInput, {
+  user = null,
+  role = "",
+  tripFreshness = null,
+  requireArchiveGrade = false
+} = {}) {
   const normalizedRole = clean(role);
   if (!MANAGE_ROLES.has(normalizedRole)) {
     const error = new Error("Owner or Admin role required");
@@ -938,6 +1041,13 @@ export function exportLocalFullBackup(localTripInput, expenseSnapshotInput, { us
   if (!tripId || clean(expenseSnapshot.tripId) !== tripId || expenseSnapshot.ready !== true) {
     const error = new Error("Local expense data is not fully synchronized");
     error.code = "local-export-incomplete";
+    throw error;
+  }
+  const freshness = evaluateLocalBackupFreshness(localTripInput, expenseSnapshot, tripFreshness || {});
+  if (requireArchiveGrade && !freshness.archiveGrade) {
+    const error = new Error(freshness.online ? "Backup state is not yet server confirmed" : "Device is offline");
+    error.code = freshness.online ? "backup-freshness-unconfirmed" : "backup-freshness-offline";
+    error.freshness = freshness;
     throw error;
   }
   const portableTrip = canonicalPortableExport(localTripInput, {
@@ -954,7 +1064,7 @@ export function exportLocalFullBackup(localTripInput, expenseSnapshotInput, { us
   };
   const counts = fullBackupCountsFromData(data);
   const revision = Math.max(1, Number(portableTrip.revision) || 1);
-  const json = {
+  const baseJson = {
     backupFormat: FULL_BACKUP_FORMAT,
     backupVersion: FULL_BACKUP_VERSION,
     appName: "travel-webapp",
@@ -975,15 +1085,19 @@ export function exportLocalFullBackup(localTripInput, expenseSnapshotInput, { us
       source: "local-live-state",
       capturedAt: clean(expenseSnapshot.capturedAt) || new Date().toISOString()
     },
+    freshness,
     counts,
     data
   };
+  const json = await attachFullBackupIntegrity(baseJson);
   return {
     tripId,
     role: normalizedRole,
     roleLabel: roleLabel(normalizedRole),
     revision,
     counts,
+    freshness,
+    integrity: json.integrity,
     json,
     filename: `${tripId}-full-backup-data-v1-r${revision}.json`,
     source: "local-live-state"
@@ -1010,7 +1124,7 @@ export async function exportFullBackup(tripIdInput, { user: userInput = null } =
   };
   const counts = fullBackupCountsFromData(data);
   const revision = Math.max(1, Number(structure?.tripDoc?.revision) || 1);
-  const json = {
+  const baseJson = {
     backupFormat: FULL_BACKUP_FORMAT,
     backupVersion: FULL_BACKUP_VERSION,
     appName: "travel-webapp",
@@ -1027,15 +1141,26 @@ export async function exportFullBackup(tripIdInput, { user: userInput = null } =
     mediaNote: "Data-only Full Backup v1. Phase 3A will add media files through a versioned backup package.",
     accessPolicy: "Trip membership / roles are not restored from this backup.",
     activityLogPolicy: "Activity logs are backed up for archival integrity. Existing audit logs remain append-only during in-place restore.",
+    freshness: {
+      status: "server-confirmed",
+      archiveGrade: true,
+      online: true,
+      evaluatedAt: new Date().toISOString(),
+      trip: { serverConfirmed:true, hasPendingWrites:false, source:"server", revision },
+      expenses: { serverConfirmed:true, hasPendingWrites:false, sources:{} }
+    },
     counts,
     data
   };
+  const json = await attachFullBackupIntegrity(baseJson);
   return {
     tripId,
     role,
     roleLabel: roleLabel(role),
     revision,
     counts,
+    freshness: json.freshness,
+    integrity: json.integrity,
     json,
     filename: `${tripId}-full-backup-data-v1-r${revision}.json`
   };
@@ -1171,6 +1296,47 @@ function restoreExpenseWriteOps(backup, current, tripId, user) {
   return ops;
 }
 
+export function fullBackupPortableTrip(rawInput) {
+  const backup = normalizeFullBackupInput(rawInput);
+  const portable = backup?.data?.portableTrip;
+  if (portable && typeof portable === "object" && !Array.isArray(portable)) return clone(portable);
+  const structure = fullBackupDeserialize(backup?.data?.tripStructure || {});
+  return canonicalPortableExport(structure, { tripId: backup.tripId });
+}
+
+export async function retargetFullBackupTripId(rawInput, newTripIdInput) {
+  const backup = normalizeFullBackupInput(rawInput);
+  await verifyFullBackupIntegrity(backup);
+  const newTripId = clean(newTripIdInput);
+  if (!newTripId || newTripId.includes("/") || newTripId.length > 160) {
+    const error = new Error("Invalid target Trip ID");
+    error.code = "backup-trip-id-invalid";
+    throw error;
+  }
+  if (newTripId === backup.tripId) return clone(backup);
+
+  const retargeted = clone(backup) || {};
+  retargeted.tripId = newTripId;
+  retargeted.restoredFromTripId = backup.tripId;
+
+  const structure = fullBackupDeserialize(retargeted?.data?.tripStructure || {});
+  if (!structure?.tripDoc) {
+    const error = new Error("Backup Trip payload is missing");
+    error.code = "backup-invalid";
+    throw error;
+  }
+  structure.tripId = newTripId;
+  structure.tripDoc = { ...(structure.tripDoc || {}), tripId: newTripId };
+  retargeted.data = { ...(retargeted.data || {}), tripStructure: fullBackupSerialize(structure) };
+
+  const portable = fullBackupPortableTrip(backup);
+  portable.tripId = newTripId;
+  portable.meta = { ...(portable.meta || {}), tripId: newTripId };
+  retargeted.data.portableTrip = portable;
+  delete retargeted.integrity;
+  return attachFullBackupIntegrity(retargeted);
+}
+
 export async function restoreFullBackup(rawInput, {
   scope = "all",
   user: userInput = null,
@@ -1178,6 +1344,7 @@ export async function restoreFullBackup(rawInput, {
 } = {}) {
   const user = await requireUser(userInput);
   const backup = normalizeFullBackupInput(rawInput);
+  await verifyFullBackupIntegrity(backup);
   const selectedScope = clean(scope).toLowerCase();
   if (!FULL_BACKUP_SCOPES.has(selectedScope)) {
     const error = new Error("Invalid restore scope");

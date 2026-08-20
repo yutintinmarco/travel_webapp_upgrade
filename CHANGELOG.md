@@ -1,3 +1,36 @@
+# v7.8.2.0 · Phase 2G.3 Backup, Restore & Permanent Delete
+
+## Archival Full Backup
+
+* Delete-before-backup now keeps the existing Local First export engine but requires realtime datasets to be server-confirmed with no pending writes before it can be labelled archival-grade. Offline or uncertain state remains a clearly labelled Last Synced Backup instead of being treated as current.
+* Full Backup v1 now carries SHA-256 payload integrity metadata. Restore verifies the hash before Firebase writes begin while legacy v1 backups without integrity metadata remain supported.
+* The current Data Only v1 boundary remains explicit. Phase 3A will extend the same lifecycle into a media-aware backup package without putting base64 media into portable trip.json.
+
+## Restore After Permanent Delete
+
+* Access Lobby Full Backup selection can rebuild a deleted Trip when the signed-in user has Authorized Trip Creator entitlement. The current user becomes the new Owner; historical members and roles are never restored from backup.
+* If the original canonical Trip ID has since been reserved, the existing Data Operation form asks for one replacement canonical ID and retargets the backup deterministically before creation. No hidden sourceTripId/newTripId identity pair is introduced.
+* In-place Full Restore, Trip Only Restore and Expenses Only Restore keep their existing semantics and append-only audit behaviour.
+
+## Permanent Delete
+
+* Added an authenticated callable Cloud Function in asia-east2. It verifies the initiating Owner, refuses an active Import / Restore operation, marks the Trip root as deleting, recursively removes Trip child data, clears Storage under trips/{tripId}/, deletes invites, Personal Archive preferences, Trip ID registry and registered cross references, verifies zero remaining data, and deletes the Trip root last.
+* Client Firestore Rules no longer allow direct Trip-root deletion and block ordinary Trip writes once deletionState is deleting.
+* Membership documents are deliberately preserved until the final child-cleanup stage so the Owner retains normal catalogue access for as much of an interrupted cleanup as possible.
+* Permanent Delete is idempotent and resumable. A user-bound local pending-delete marker is written before the callable starts and is cleared only after server verification. If the PWA is closed or loses the response, the same Owner automatically resumes the existing deleting Trip on the next authenticated launch; if the server had already finished, the idempotent verification path clears the stale marker.
+* The server claims a per-Trip deletion lease before cleanup so two devices cannot run destructive recursion concurrently. A live request reports already-running and the PWA keeps its pending marker for a later verification/resume; interrupted server runs release the lease for immediate retry.
+* Only a verified cleanup result may display 「旅程已永久刪除」. Network failure, timeout or verification failure preserves a retry path instead of pretending success.
+
+## Firebase / Deployment
+
+* Added functions/ with Node.js 22 and the permanentDeleteTrip callable. Firebase Functions requires Blaze.
+* firebase.json now includes the Functions source directory.
+* firestore.rules changed for deleting-state enforcement and server-only Trip-root deletion.
+* firestore.indexes.json adds the tripPreferences.tripId collection-group index used to remove every user's Personal Archive reference during deletion.
+* No existing image, icon, background, Expenses CSS or v7.3.13 Profile Navigation compositor design is changed.
+
+---
+
 # v7.8.1.3 · Phase 2G.2 Revoke Handoff & UI Alignment
 
 ## UI Harmony

@@ -122,6 +122,7 @@ function assemblePortableTrip(tripId, state) {
     },
     cloudMeta: {
       source: state.allFromCache() ? "cache" : "server",
+      serverConfirmed: state.allRequiredServerConfirmed(),
       hasPendingWrites: state.hasPendingWrites(),
       updatedAt: normalizeTimestamp(tripDoc.updatedAt),
       importState: clean(tripDoc.importState || "ready"),
@@ -176,6 +177,12 @@ export function subscribeTripData(tripIdInput, callback, options = {}) {
     },
     hasPendingWrites() {
       return [...sourceMeta.values()].some(meta => meta.hasPendingWrites === true);
+    },
+    allRequiredServerConfirmed() {
+      const baseKeys = ["trip", "days", "saved", "settings:general", "settings:expenses"];
+      if (!baseKeys.every(key => sourceMeta.get(key)?.fromCache === false)) return false;
+      const dayIds = [...state.days.keys()];
+      return dayIds.length === 0 || dayIds.every(dayId => itemServerReady.has(dayId));
     }
   };
 
@@ -230,7 +237,7 @@ export function subscribeTripData(tripIdInput, callback, options = {}) {
   }
 
   function currentMetadataState() {
-    return `${state.allFromCache() ? "cache" : "server"}|${state.hasPendingWrites() ? "pending" : "clean"}`;
+    return `${state.allFromCache() ? "cache" : "server"}|${state.allRequiredServerConfirmed() ? "confirmed" : "partial"}|${state.hasPendingWrites() ? "pending" : "clean"}`;
   }
 
   function scheduleEmit(reason = "change", sections = []) {
@@ -268,6 +275,7 @@ export function subscribeTripData(tripIdInput, callback, options = {}) {
           emitStatus("metadata", {
             source: state.allFromCache() ? "cache" : "server",
             fromCache: state.allFromCache(),
+            serverConfirmed: state.allRequiredServerConfirmed(),
             hasPendingWrites: state.hasPendingWrites(),
             reason
           });
@@ -284,6 +292,7 @@ export function subscribeTripData(tripIdInput, callback, options = {}) {
         reason,
         source: data.cloudMeta?.source || "server",
         fromCache: data.cloudMeta?.source === "cache",
+        serverConfirmed: data.cloudMeta?.serverConfirmed === true,
         hasPendingWrites: data.cloudMeta?.hasPendingWrites === true,
         updatedAt: data.cloudMeta?.updatedAt || "",
         realtimeDayId: desiredRealtimeDayId,
@@ -522,6 +531,13 @@ export function subscribeTripData(tripIdInput, callback, options = {}) {
   };
   stopAll.getActiveDayId = () => desiredRealtimeDayId;
   stopAll.getRealtimeMode = () => fullHydrationNeeded ? "full-hydration" : "active-day";
+  stopAll.requestFullServerConfirmation = () => {
+    if (stopped) return false;
+    fullHydrationNeeded = true;
+    reconcileItemListeners();
+    return true;
+  };
+  stopAll.isServerConfirmed = () => state.allRequiredServerConfirmed() && !state.hasPendingWrites();
 
   return stopAll;
 }

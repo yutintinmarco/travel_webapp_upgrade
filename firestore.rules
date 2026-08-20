@@ -63,6 +63,9 @@ service cloud.firestore {
     function isOwner(tripId) {
       return canReadTrip(tripId) && roleFor(tripId) == 'owner';
     }
+    function isTripDeleting(tripId) {
+      return exists(tripPath(tripId)) && get(tripPath(tripId)).data.get('deletionState', '') == 'deleting';
+    }
     function isGlobalLocked(tripId) {
       return exists(tripPath(tripId)) && get(tripPath(tripId)).data.get('globalLocked', false) == true;
     }
@@ -70,19 +73,20 @@ service cloud.firestore {
       return exists(expenseSettingsPath(tripId)) && get(expenseSettingsPath(tripId)).data.get('expenseLocked', false) == true;
     }
     function canEditTripContent(tripId) {
-      return canManageTrip(tripId) && !isGlobalLocked(tripId);
+      return canManageTrip(tripId) && !isTripDeleting(tripId) && !isGlobalLocked(tripId);
     }
     function canUseExpenses(tripId) {
       return canReadTrip(tripId) && roleFor(tripId) in ['owner', 'admin', 'member'];
     }
     function canModifyExpenses(tripId) {
-      return canUseExpenses(tripId) && !isGlobalLocked(tripId) && !isExpenseLocked(tripId);
+      return canUseExpenses(tripId) && !isTripDeleting(tripId) && !isGlobalLocked(tripId) && !isExpenseLocked(tripId);
     }
     function canModifySettlements(tripId) {
-      return canUseExpenses(tripId) && !isGlobalLocked(tripId);
+      return canUseExpenses(tripId) && !isTripDeleting(tripId) && !isGlobalLocked(tripId);
     }
     function isGlobalLockTripUpdate(tripId) {
       return canManageTrip(tripId)
+        && !isTripDeleting(tripId)
         && request.resource.data.createdBy == resource.data.createdBy
         && request.resource.data.createdAt == resource.data.createdAt
         && request.resource.data.memberUids == resource.data.memberUids
@@ -101,8 +105,9 @@ service cloud.firestore {
       ]);
     }
     function canAssignInviteRole(tripId, role) {
-      return (isOwner(tripId) && validInviteRole(role))
-        || (canReadTrip(tripId) && roleFor(tripId) == 'admin' && role in ['member', 'viewer']);
+      return !isTripDeleting(tripId)
+        && ((isOwner(tripId) && validInviteRole(role))
+          || (canReadTrip(tripId) && roleFor(tripId) == 'admin' && role in ['member', 'viewer']));
     }
     function memberListValid(data) {
       return data.memberUids is list
@@ -121,6 +126,7 @@ service cloud.firestore {
       let added = request.resource.data.memberUids.removeAll(resource.data.memberUids);
       let removed = resource.data.memberUids.removeAll(request.resource.data.memberUids);
       return signedIn()
+        && !isTripDeleting(tripId)
         && request.resource.data.createdBy == resource.data.createdBy
         && request.resource.data.createdAt == resource.data.createdAt
         && request.resource.data.diff(resource.data).affectedKeys()
@@ -144,6 +150,7 @@ service cloud.firestore {
       let added = request.resource.data.memberUids.removeAll(resource.data.memberUids);
       let removed = resource.data.memberUids.removeAll(request.resource.data.memberUids);
       return canManageTrip(tripId)
+        && !isTripDeleting(tripId)
         && request.resource.data.createdBy == resource.data.createdBy
         && request.resource.data.createdAt == resource.data.createdAt
         && request.resource.data.diff(resource.data).affectedKeys()
@@ -156,13 +163,15 @@ service cloud.firestore {
         && memberListValid(request.resource.data);
     }
     function managerCanModifyMember(tripId, currentRole, nextRole) {
-      return (isOwner(tripId) && currentRole != 'owner' && nextRole in ['admin', 'member', 'viewer'])
+      return !isTripDeleting(tripId)
+        && ((isOwner(tripId) && currentRole != 'owner' && nextRole in ['admin', 'member', 'viewer'])
         || (canReadTrip(tripId) && roleFor(tripId) == 'admin'
-          && currentRole in ['member', 'viewer'] && nextRole in ['member', 'viewer']);
+          && currentRole in ['member', 'viewer'] && nextRole in ['member', 'viewer']));
     }
     function managerCanDeleteMember(tripId, targetRole) {
-      return (isOwner(tripId) && targetRole != 'owner')
-        || (canReadTrip(tripId) && roleFor(tripId) == 'admin' && targetRole in ['member', 'viewer']);
+      return !isTripDeleting(tripId)
+        && ((isOwner(tripId) && targetRole != 'owner')
+          || (canReadTrip(tripId) && roleFor(tripId) == 'admin' && targetRole in ['member', 'viewer']));
     }
     function allowedMemberActivity(actionType) {
       return actionType in [
@@ -194,6 +203,7 @@ service cloud.firestore {
       allow read, list: if signedIn() && request.auth.uid == uid;
       allow create, update: if signedIn()
         && request.auth.uid == uid
+        && !isTripDeleting(tripId)
         && canReadTrip(tripId)
         && request.resource.data.keys().hasAll(['tripId', 'archived', 'archivedAt', 'updatedAt'])
         && request.resource.data.keys().hasOnly(['tripId', 'archived', 'archivedAt', 'updatedAt'])
@@ -201,7 +211,7 @@ service cloud.firestore {
         && request.resource.data.archived is bool
         && (request.resource.data.archivedAt == null || request.resource.data.archivedAt is timestamp)
         && request.resource.data.updatedAt is timestamp;
-      allow delete: if signedIn() && request.auth.uid == uid;
+      allow delete: if signedIn() && request.auth.uid == uid && !isTripDeleting(tripId);
     }
 
     // Phase 2G.1 completion · global App Admin bootstrap. App Admin records are
@@ -271,6 +281,7 @@ service cloud.firestore {
         && canAssignInviteRole(request.resource.data.tripId, request.resource.data.role);
 
       allow update: if signedIn()
+        && !isTripDeleting(resource.data.tripId)
         && resource.data.status == 'pending'
         && resource.data.emailLower == authEmail()
         && request.resource.data.tripId == resource.data.tripId
@@ -284,7 +295,7 @@ service cloud.firestore {
           || (request.resource.data.status == 'declined' && request.resource.data.declinedBy == request.auth.uid)
         );
 
-      allow delete: if signedIn() && canManageTrip(resource.data.tripId);
+      allow delete: if signedIn() && canManageTrip(resource.data.tripId) && !isTripDeleting(resource.data.tripId);
     }
 
     match /trips/{tripId} {
@@ -315,7 +326,8 @@ service cloud.firestore {
           || isSelfJoinTripUpdate(tripId)
         );
 
-      allow delete: if isOwner(tripId);
+      // Phase 2G.3: Trip root deletion is server-orchestrated only.
+      allow delete: if false;
 
       match /members/{uid} {
         allow read: if canReadTrip(tripId);
@@ -330,6 +342,7 @@ service cloud.firestore {
           ||
           // Invite acceptance.
           (uid == request.auth.uid
+            && !isTripDeleting(tripId)
             && request.resource.data.uid == request.auth.uid
             && request.resource.data.status == 'active'
             && request.resource.data.email == authEmail()
@@ -368,11 +381,12 @@ service cloud.firestore {
       match /settings/{settingId} {
         allow read: if canReadTrip(tripId);
         allow create: if
-          (settingId == 'expenses' && canManageTrip(tripId) && !isGlobalLocked(tripId))
+          (settingId == 'expenses' && canManageTrip(tripId) && !isTripDeleting(tripId) && !isGlobalLocked(tripId))
           || (settingId != 'expenses' && canEditTripContent(tripId));
         allow update: if
           (settingId == 'expenses'
             && canManageTrip(tripId)
+            && !isTripDeleting(tripId)
             && !isGlobalLocked(tripId)
             && (!isExpenseLocked(tripId) || isExpenseLockSettingsUpdate()))
           || (settingId != 'expenses' && canEditTripContent(tripId));
@@ -382,9 +396,12 @@ service cloud.firestore {
       match /snapshots/{snapshotId} {
         allow read: if canManageTrip(tripId);
         allow create: if canManageTrip(tripId)
+          && !isTripDeleting(tripId)
           && request.resource.data.createdBy == request.auth.uid;
         allow update: if false;
-        allow delete: if isOwner(tripId);
+        // Snapshots remain append-only from the client. Permanent Trip cleanup
+        // is performed by the trusted server deletion orchestrator.
+        allow delete: if false;
       }
 
       // v7.7.4.5: high-risk import / restore coordination lives outside the
@@ -402,12 +419,14 @@ service cloud.firestore {
           && request.resource.data.startedAtMs is int;
         allow delete: if signedIn()
           && operationId == 'current'
+          && !isTripDeleting(tripId)
           && (resource.data.actorUid == request.auth.uid || canManageTrip(tripId));
       }
 
       match /activityLogs/{logId} {
         allow read: if canReadTrip(tripId);
         allow create: if signedIn()
+          && !isTripDeleting(tripId)
           && request.resource.data.actorUid == request.auth.uid
           && (
             canManageTrip(tripId)

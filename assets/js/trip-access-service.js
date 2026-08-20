@@ -160,6 +160,10 @@ export function hasTripRole(minimumRole = TRIP_ROLES.VIEWER) {
   return currentRank >= requiredRank;
 }
 
+export function clearLastKnownTripAccess(uid, tripId) {
+  clearLastKnownRole(String(uid || "").trim(), String(tripId || "").trim());
+}
+
 export function isOwner() { return currentAccess.role === TRIP_ROLES.OWNER; }
 export function isAdminOrOwner() { return hasTripRole(TRIP_ROLES.ADMIN); }
 export function isMemberOrAbove() { return hasTripRole(TRIP_ROLES.MEMBER); }
