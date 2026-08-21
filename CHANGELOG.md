@@ -1,3 +1,27 @@
+# v7.9.2.1 · iOS Backup Export / Restore Hotfix
+
+## Scope
+
+Targeted regression hotfix for v7.9.2.0. No Firebase schema, Rules, Indexes, Storage contract, Permanent Delete logic, media paths, or visible navigation design changes.
+
+## Repeated Full Backup Export
+
+• Reduced iOS peak memory while building media-aware ZIP packages.
+• ZIP entries now retain one byte representation instead of reading a Blob for CRC / SHA and then retaining the Blob again.
+• Media collected for Backup reuses the bytes already read for SHA-256 instead of reading each media Blob a second time during ZIP creation.
+• Full Backup integrity normalization removes redundant deep clones of the whole Trip / expenses payload.
+• A previous Backup Object URL is explicitly revoked before the next Backup build starts, with a short iOS handoff settle turn.
+• ZIP restore parsing uses byte views instead of copying every entry out of the whole ZIP buffer.
+
+## Full Backup Restore Picker
+
+• Replaced the reused hidden Full Backup file input with a fresh one-shot picker for every selection.
+• Picker accepts `.zip,.json` by extension for more reliable iOS Files behaviour.
+• Added focus / visibility return fallback so a selected file is still processed if iOS fails to dispatch the normal `change` event.
+• Existing ZIP / legacy JSON validation and Restore routing remain unchanged after file selection.
+
+---
+
 # v7.9.2.0 · Phase 3A.3 Media-aware Full Backup / Restore
 
 ## Scope

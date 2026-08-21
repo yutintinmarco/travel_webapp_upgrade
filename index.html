@@ -3335,7 +3335,7 @@ body.expenses-view-active #app-version-note{
 #snacks-view::after,
 #info-view::after,
 #profile-view::after{
-  content:"v7.9.2.0" !important;
+  content:"v7.9.2.1" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3356,7 +3356,7 @@ body.expenses-view-active #app-version-note{
   display:none !important;
 }
 body.expenses-view-active .expenses-module .expenses-app::after{
-  content:"v7.9.2.0" !important;
+  content:"v7.9.2.1" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -4172,7 +4172,7 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
           <span class="profile-row-copy"><strong>還原完整 Backup</strong><small id="trip-restore-menu-subtitle">接受 Full Backup ZIP／舊版 JSON；可選完整、行程或支出還原</small></span>
           <span class="profile-chevron">›</span>
         </button>
-        <input id="trip-full-backup-file" type="file" accept="application/json,application/zip,.json,.zip" hidden>
+        <input id="trip-full-backup-file" type="file" accept=".zip,.json" hidden>
       </section>
 
       <div class="profile-section-label">備份與匯出</div>
@@ -4309,7 +4309,7 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
         <span class="profile-detail-spacer"></span>
       </div>
       <section class="profile-card" aria-label="App 資訊">
-        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.9.2.0</strong></div>
+        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.9.2.1</strong></div>
         <div class="profile-meta-row"><span>資料架構</span><strong>Phase 2G.2</strong></div>
         <div class="profile-meta-row"><span>主要資料來源</span><strong id="app-data-source-label">Firebase / 本機快取</strong></div>
       </section>
@@ -4486,7 +4486,7 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
 </div>
 
 <script>
-const APP_VERSION = "7.9.2.0";
+const APP_VERSION = "7.9.2.1";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 function perfLiteMark(name){try{return window.__perfLite?.mark(name);}catch(error){return null;}}
@@ -8599,17 +8599,41 @@ async function prepareMediaAwareFullBackupPackage(result,{stagePrefix="Backup",o
   const packaged=await packageService.buildFullBackupPackage(finalJson,collected,{filename});
   return {...packaged,tripId,revision,mediaCount:collected.mediaCount||0,mediaBytes:collected.totalBytes||0,json:finalJson};
 }
+let activeBackupDownloadObjectUrl="";
+let activeBackupDownloadReleaseTimer=null;
+function releaseBackupDownloadObjectUrl(){
+  if(activeBackupDownloadReleaseTimer){clearTimeout(activeBackupDownloadReleaseTimer);activeBackupDownloadReleaseTimer=null;}
+  const url=activeBackupDownloadObjectUrl;activeBackupDownloadObjectUrl="";
+  if(url){try{URL.revokeObjectURL(url);}catch(error){}}
+}
+async function prepareForNextBackupExport(){
+  // If the user immediately exports again, stop retaining the previous ZIP
+  // Object URL before building another package. Give iOS one short idle turn
+  // after the download handoff so WebKit can release its previous buffers.
+  releaseBackupDownloadObjectUrl();
+  const last=Number(window.__lastDataOperationDownloadHandoffAt)||0;
+  const wait=Math.max(0,Math.min(700,900-(Date.now()-last)));
+  if(wait>0)await new Promise(resolve=>setTimeout(resolve,wait));
+  await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+}
 function backupDownloadBlob(blob,filename){
   if(!(blob instanceof Blob))throw new Error("Download payload is unavailable.");
+  releaseBackupDownloadObjectUrl();
   const url=URL.createObjectURL(blob);
+  activeBackupDownloadObjectUrl=url;
   const a=document.createElement("a");
   a.href=url;a.download=filename||"download";a.style.display="none";
   document.body.appendChild(a);
   try{a.click();}finally{
     a.remove();
-    setTimeout(()=>URL.revokeObjectURL(url),4000);
+    // Keep the current URL alive long enough for the iOS handoff, but never
+    // allow an old export URL to overlap indefinitely with the next export.
+    activeBackupDownloadReleaseTimer=setTimeout(()=>{
+      if(activeBackupDownloadObjectUrl===url)releaseBackupDownloadObjectUrl();
+    },4000);
   }
 }
+window.addEventListener("pagehide",releaseBackupDownloadObjectUrl);
 function dataOperationHandoffDownload(download){
   if(typeof download!=="function")return;
   // v7.7.7.4: read-only export data has already been frozen locally before
@@ -8770,6 +8794,8 @@ function dataOperationBaseConfig({kind,title,subtitle,mode,confirmLabel,typeLabe
 }
 function openFullBackupExportOperation(){
   dataOperationOpen(dataOperationBaseConfig({kind:"export-full",title:"匯出完整 Backup",subtitle:"建立可供完整還原嘅 Data + Media Backup Package。",typeLabel:"Full",mode:"包含行程、收藏、一般設定、支出、找數、操作記錄及 Firebase Storage media。",warnings:["在線時會建立 Media-aware ZIP；如果目前離線，仍可建立 Last Synced Data Only JSON，但不包含媒體 bytes。"],confirmLabel:"匯出 Backup",handler:async()=>{
+    dataOperationSetStage("準備匯出","正在釋放上一份 Backup 嘅下載資源。",8);
+    await prepareForNextBackupExport();
     const service=await dataOperationAwait(getTripBackupService(),{stage:"載入備份引擎",detail:"正在準備資料管理模組。",percent:12,timeoutMs:8000});
     const localPack=await dataOperationAwait(prepareDataManagementLocalExports(),{stage:"準備本機資料",detail:"正在確認行程、支出及版本資料已完整同步。",percent:30,timeoutMs:22000});
     const frozen=refreshLocalExportCapture(localPack);
@@ -8994,14 +9020,9 @@ document.getElementById("data-operation-confirm")?.addEventListener("click",asyn
   }
 });
 
-document.getElementById("entry-full-backup-restore-btn")?.addEventListener("click",()=>{const input=document.getElementById("trip-full-backup-file");if(input){input.value="";input.click();}});
-document.getElementById("trip-full-backup-export")?.addEventListener("click",openFullBackupExportOperation);
-document.getElementById("trip-backup-export-current")?.addEventListener("click",openTripJsonExportOperation);
-document.getElementById("trip-backup-create-manual")?.addEventListener("click",openManualSnapshotOperation);
-document.getElementById("data-management-expenses-excel")?.addEventListener("click",openExpenseExcelOperation);
-document.getElementById("trip-full-backup-restore-open")?.addEventListener("click",()=>{if(currentTripGlobalLocked())return;const input=document.getElementById("trip-full-backup-file");if(input){input.value="";input.click();}});
-document.getElementById("trip-full-backup-file")?.addEventListener("change",async event=>{
-  const file=event.target.files?.[0];if(!file)return;
+let fullBackupPickerActive=false;
+async function handleSelectedFullBackupFile(file){
+  if(!(file instanceof Blob))return;
   try{
     const packageService=await getTripBackupPackageService();
     const parsed=await packageService.parseFullBackupFile(file);
@@ -9013,8 +9034,58 @@ document.getElementById("trip-full-backup-file")?.addEventListener("change",asyn
     }
     const service=await getTripBackupService(),inspection=service.inspectFullBackup(raw);
     await routeFullBackupSelection(raw,inspection,parsed.package);
-  }catch(error){console.error("Inspect full backup",error);dataOperationOpen(dataOperationBaseConfig({kind:"restore-full-error",title:"還原完整 Backup",subtitle:"未能驗證所選 Backup。",typeLabel:"Error",mode:"檔案未能進入還原流程。",confirmLabel:"完成"}));dataOperationState.done=true;dataOperationSetError(backupFriendlyError(error));}
-});
+  }catch(error){
+    console.error("Inspect full backup",error);
+    dataOperationOpen(dataOperationBaseConfig({kind:"restore-full-error",title:"還原完整 Backup",subtitle:"未能驗證所選 Backup。",typeLabel:"Error",mode:"檔案未能進入還原流程。",confirmLabel:"完成"}));
+    dataOperationState.done=true;dataOperationSetError(backupFriendlyError(error));
+  }
+}
+function openFullBackupFilePicker(){
+  if(fullBackupPickerActive)return;
+  fullBackupPickerActive=true;
+  // iOS PWA guard: create a brand-new picker for every selection. Reusing the
+  // same hidden input became unreliable once ZIP and JSON were both accepted.
+  const input=document.createElement("input");
+  input.type="file";input.accept=".zip,.json";input.setAttribute("aria-hidden","true");
+  input.style.position="fixed";input.style.left="-9999px";input.style.width="1px";input.style.height="1px";input.style.opacity="0";input.style.pointerEvents="none";
+  document.body.appendChild(input);
+  let processed=false,cleaned=false,focusListenerInstalled=false;
+  let returnTimer=null,focusInstallTimer=null;
+  const checkAfterReturn=()=>{
+    if(returnTimer)clearTimeout(returnTimer);
+    returnTimer=setTimeout(()=>{if(processSelection())return;if(!processed)cleanup();},500);
+  };
+  const onWindowFocus=()=>checkAfterReturn();
+  const onVisibilityChange=()=>{if(document.hidden)return;checkAfterReturn();};
+  const cleanup=()=>{
+    if(cleaned)return;cleaned=true;fullBackupPickerActive=false;
+    if(returnTimer)clearTimeout(returnTimer);if(focusInstallTimer)clearTimeout(focusInstallTimer);
+    document.removeEventListener("visibilitychange",onVisibilityChange);
+    if(focusListenerInstalled)window.removeEventListener("focus",onWindowFocus);
+    try{input.remove();}catch(error){}
+  };
+  const processSelection=()=>{
+    if(processed)return true;
+    const file=input.files?.[0];if(!file)return false;
+    processed=true;cleanup();
+    void handleSelectedFullBackupFile(file);
+    return true;
+  };
+  input.addEventListener("change",()=>{if(!processSelection())cleanup();},{once:true});
+  input.addEventListener("cancel",cleanup,{once:true});
+  document.addEventListener("visibilitychange",onVisibilityChange);
+  // Install focus fallback after the native picker has had time to open, so an
+  // immediate focus event caused by input.click() cannot prematurely remove it.
+  focusInstallTimer=setTimeout(()=>{if(cleaned)return;focusListenerInstalled=true;window.addEventListener("focus",onWindowFocus,{once:true});},450);
+  try{input.click();}catch(error){cleanup();console.error("Open Full Backup picker",error);}
+}
+
+document.getElementById("entry-full-backup-restore-btn")?.addEventListener("click",openFullBackupFilePicker);
+document.getElementById("trip-full-backup-export")?.addEventListener("click",openFullBackupExportOperation);
+document.getElementById("trip-backup-export-current")?.addEventListener("click",openTripJsonExportOperation);
+document.getElementById("trip-backup-create-manual")?.addEventListener("click",openManualSnapshotOperation);
+document.getElementById("data-management-expenses-excel")?.addEventListener("click",openExpenseExcelOperation);
+document.getElementById("trip-full-backup-restore-open")?.addEventListener("click",()=>{if(currentTripGlobalLocked())return;openFullBackupFilePicker();});
 document.getElementById("snapshot-detail-export")?.addEventListener("click",()=>{if(tripBackupSelectedSnapshot)openSnapshotExportOperation(tripBackupSelectedSnapshot);});
 document.getElementById("snapshot-detail-restore")?.addEventListener("click",()=>{if(currentTripGlobalLocked())return;if(tripBackupSelectedSnapshot)openSnapshotRestoreOperation(tripBackupSelectedSnapshot);});
 
