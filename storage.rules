@@ -1,0 +1,45 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    function signedIn() {
+      return request.auth != null;
+    }
+    function tripPath(tripId) {
+      return /databases/(default)/documents/trips/$(tripId);
+    }
+    function memberPath(tripId, uid) {
+      return /databases/(default)/documents/trips/$(tripId)/members/$(uid);
+    }
+    function canReadTripMedia(tripId) {
+      let trip = firestore.get(tripPath(tripId));
+      return signedIn()
+        && request.auth.uid in trip.data.memberUids;
+    }
+    function canWriteTripMedia(tripId) {
+      let trip = firestore.get(tripPath(tripId));
+      let member = firestore.get(memberPath(tripId, request.auth.uid));
+      return signedIn()
+        && request.auth.uid in trip.data.memberUids
+        && member.data.role in ['owner', 'admin']
+        && trip.data.get('deletionState', '') != 'deleting'
+        && trip.data.get('globalLocked', false) != true;
+    }
+    function validImageUpload() {
+      return request.resource != null
+        && request.resource.size > 0
+        && request.resource.size <= 6 * 1024 * 1024
+        && request.resource.contentType is string
+        && request.resource.contentType.matches('image/.*');
+    }
+
+    match /trips/{tripId}/media/{mediaPath=**} {
+      allow get: if canReadTripMedia(tripId);
+      allow create, update: if canWriteTripMedia(tripId) && validImageUpload();
+      allow delete: if canWriteTripMedia(tripId);
+    }
+
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

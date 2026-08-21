@@ -125,14 +125,36 @@ function normalizeImages(item) {
         };
       }
       const src = clean(image?.src || image?.url || image?.path);
-      return {
-        imageId: clean(image?.imageId || image?.id) || `img_${fnv1a(src || index)}`,
-        source: clean(image?.source) || (src.startsWith("assets/") ? "static" : "remote"),
+      const storagePath = clean(image?.storagePath);
+      const thumbnailStoragePath = clean(image?.thumbnailStoragePath);
+      const normalized = {
+        imageId: clean(image?.imageId || image?.mediaId || image?.id) || `img_${fnv1a(storagePath || src || index)}`,
+        source: clean(image?.source) || (storagePath ? "storage" : (src.startsWith("assets/") ? "static" : "remote")),
         src,
-        storagePath: clean(image?.storagePath),
+        storagePath,
         caption: clean(image?.caption),
         sortOrder: Number.isFinite(Number(image?.sortOrder)) ? Number(image.sortOrder) : index
       };
+      const mediaId = clean(image?.mediaId);
+      const mediaSchemaVersion = Number(image?.mediaSchemaVersion);
+      const contentType = clean(image?.contentType);
+      const generation = clean(image?.generation);
+      const thumbnailContentType = clean(image?.thumbnailContentType);
+      const thumbnailGeneration = clean(image?.thumbnailGeneration);
+      if (mediaId) normalized.mediaId = mediaId;
+      if (thumbnailStoragePath) normalized.thumbnailStoragePath = thumbnailStoragePath;
+      if (Number.isFinite(mediaSchemaVersion)) normalized.mediaSchemaVersion = mediaSchemaVersion;
+      if (contentType) normalized.contentType = contentType;
+      if (Number.isFinite(Number(image?.byteSize))) normalized.byteSize = Number(image.byteSize);
+      if (Number.isFinite(Number(image?.width))) normalized.width = Number(image.width);
+      if (Number.isFinite(Number(image?.height))) normalized.height = Number(image.height);
+      if (generation) normalized.generation = generation;
+      if (thumbnailContentType) normalized.thumbnailContentType = thumbnailContentType;
+      if (Number.isFinite(Number(image?.thumbnailByteSize))) normalized.thumbnailByteSize = Number(image.thumbnailByteSize);
+      if (Number.isFinite(Number(image?.thumbnailWidth))) normalized.thumbnailWidth = Number(image.thumbnailWidth);
+      if (Number.isFinite(Number(image?.thumbnailHeight))) normalized.thumbnailHeight = Number(image.thumbnailHeight);
+      if (thumbnailGeneration) normalized.thumbnailGeneration = thumbnailGeneration;
+      return normalized;
     }).filter(image => image.src || image.storagePath);
   }
 

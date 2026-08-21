@@ -1,3 +1,32 @@
+# v7.9.0.0 · Phase 3A.1 Firebase Storage / Media Foundation
+
+## Foundation only
+
+- Adds the first Firebase Storage media layer without changing any existing screen, control, navigation flow or image UI. Normal app behaviour remains on the frozen v7.8.2.4 UI.
+- Adds one canonical Trip media namespace under `trips/{tripId}/media/` and a lightweight Firestore registry at `trips/{tripId}/media/{mediaId}`.
+- Adds client-side image preparation for a display variant up to 2048px and a thumbnail variant up to 640px before upload. Originals are not uploaded by this foundation service.
+- Adds resumable Firebase Storage upload plumbing, Storage metadata and a two-phase media registry: `uploading` is written before bytes move, then promoted to `ready` only after both variants succeed. Partial failures attempt to remove Storage bytes and the pending registry; interrupted stale `uploading` records remain discoverable for later repair.
+- Adds direct authenticated blob download plumbing and a separate IndexedDB media cache with generation-aware invalidation, Trip-scoped clearing and conservative LRU/age pruning. No existing rendering path uses it yet.
+- Extends Portable Trip image normalization so future Storage-backed image descriptors retain mediaId, thumbnail path, dimensions, byte size, content type and Storage generation while existing static/remote image behaviour remains compatible.
+
+## Security and lifecycle
+
+- Adds `storage.rules`. Trip members may read Trip media; only Owner/Admin may create, update or delete media, and writes are denied while the Trip is globally locked or deleting. Uploaded objects must be images and no larger than 6 MiB each.
+- Adds Firestore rules for the media registry using the existing `canReadTrip` / `canEditTripContent` permission model.
+- `firebase.json` now declares the Storage rules source. `storage.cors.json` is included for the future direct SDK blob-download path.
+- Permanent Delete Function is unchanged: its existing server cleanup of `trips/{tripId}/` already covers the new canonical Storage namespace and still verifies Storage empty before deleting the Trip root.
+- Full Backup remains Data Only v1 in this batch. Media-aware Backup / Restore is intentionally deferred to Phase 3A.3 so no half-integrated user workflow is exposed.
+
+## Deployment
+
+- Frontend: GitHub update required for the new version and modules.
+- Firestore Rules: deploy required because the media registry rules are new.
+- Storage Rules: first deployment required after the Firebase Storage bucket is provisioned.
+- Storage CORS: apply `storage.cors.json` before Phase 3A.2 begins using direct browser blob downloads.
+- Cloud Function and Firestore indexes: unchanged.
+
+---
+
 # v7.8.2.4 · Proven Native Keyboard Handoff
 
 - Keyboard interaction only. No app feature, page layout, Profile navigation, Permanent Delete backend, Firebase Rules, indexes, assets, or data flow changed.

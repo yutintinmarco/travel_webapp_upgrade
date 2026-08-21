@@ -1,0 +1,568 @@
+/*
+ * v7.9.0.0 · Phase 3A.1 Firebase Storage / Media Foundation
+ *
+ * This module deliberately has no UI dependency. It provides one canonical
+ * Trip media namespace, client-side image compression, Storage upload/download,
+ * a lightweight Firestore media registry and a best-effort IndexedDB blob cache.
+ */
+
+import { firebaseApp, db } from "./firebase-service.js";
+import { getCurrentUser, waitForInitialAuth } from "./auth-service.js";
+import { assertCloudOperationAvailable } from "./cloud-safety-service.js";
+import {
+  collection,
+  deleteDoc,
+  doc,
+  getDoc,
+  getDocs,
+  serverTimestamp,
+  setDoc
+} from "./firestore-observed-service.js";
+import {
+  clearTripMediaCache,
+  getTripMediaCache,
+  putTripMediaCache,
+  removeTripMediaCache
+} from "./trip-media-cache-service.js";
+import {
+  deleteObject,
+  getBlob,
+  getMetadata,
+  getStorage,
+  ref,
+  uploadBytesResumable
+} from "https://www.gstatic.com/firebasejs/11.8.0/firebase-storage.js";
+
+export const TRIP_MEDIA_SCHEMA_VERSION = 1;
+export const TRIP_MEDIA_OWNER_TYPES = Object.freeze({
+  TRIP: "trip",
+  ITEM: "item",
+  SAVED_PLACE: "savedPlace"
+});
+export const TRIP_MEDIA_LIMITS = Object.freeze({
+  sourceMaxBytes: 30 * 1024 * 1024,
+  displayMaxDimension: 2048,
+  thumbnailMaxDimension: 640,
+  storageObjectMaxBytes: 6 * 1024 * 1024,
+  downloadMaxBytes: 8 * 1024 * 1024,
+  displayQuality: 0.82,
+  thumbnailQuality: 0.76
+});
+
+const storage = getStorage(firebaseApp);
+const OWNER_TYPES = new Set(Object.values(TRIP_MEDIA_OWNER_TYPES));
+
+function clean(value) { return String(value ?? "").trim(); }
+function finiteNumber(value, fallback = 0) {
+  const number = Number(value);
+  return Number.isFinite(number) ? number : fallback;
+}
+function safeSegment(value, fallback = "media") {
+  const text = clean(value)
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^A-Za-z0-9._-]+/g, "_")
+    .replace(/^_+|_+$/g, "")
+    .slice(0, 96);
+  return text || fallback;
+}
+function nowMediaId() {
+  try {
+    if (globalThis.crypto?.randomUUID) return `med_${crypto.randomUUID().replace(/-/g, "")}`;
+  } catch (error) {}
+  const random = Math.random().toString(36).slice(2, 12);
+  return `med_${Date.now().toString(36)}${random}`;
+}
+function errorWithCode(message, code, details = {}) {
+  const error = new Error(message);
+  error.code = code;
+  Object.assign(error, details);
+  return error;
+}
+function storageNotFound(error) {
+  return clean(error?.code) === "storage/object-not-found";
+}
+
+async function requireUser(input = null) {
+  const user = input || getCurrentUser() || await waitForInitialAuth();
+  if (!user?.uid) throw errorWithCode("Google sign-in required", "auth-required");
+  return user;
+}
+
+function normalizeOwner(ownerTypeInput, ownerIdInput, slotInput = "") {
+  const ownerType = clean(ownerTypeInput);
+  const ownerId = clean(ownerIdInput);
+  const slot = clean(slotInput);
+  if (!OWNER_TYPES.has(ownerType)) throw errorWithCode("Unsupported media owner type", "invalid-media-owner");
+  if (ownerType !== TRIP_MEDIA_OWNER_TYPES.TRIP && !ownerId) {
+    throw errorWithCode("Media owner id is required", "invalid-media-owner");
+  }
+  return { ownerType, ownerId, slot };
+}
+
+function folderForOwner({ ownerType, ownerId, slot }, mediaId) {
+  if (ownerType === TRIP_MEDIA_OWNER_TYPES.TRIP) {
+    return `trip/${safeSegment(slot || ownerId || "general", "general")}/${safeSegment(mediaId)}`;
+  }
+  if (ownerType === TRIP_MEDIA_OWNER_TYPES.ITEM) {
+    return `items/${safeSegment(ownerId, "item")}/${safeSegment(mediaId)}`;
+  }
+  return `savedPlaces/${safeSegment(ownerId, "place")}/${safeSegment(mediaId)}`;
+}
+
+function extensionForMime(type) {
+  if (type === "image/jpeg") return "jpg";
+  if (type === "image/png") return "png";
+  return "webp";
+}
+
+function outputMimePreference(sourceType) {
+  const type = clean(sourceType).toLowerCase();
+  if (type === "image/png") return "image/webp";
+  return "image/webp";
+}
+
+function canvasToBlob(canvas, type, quality) {
+  return new Promise(resolve => canvas.toBlob(resolve, type, quality));
+}
+
+async function decodeImage(blob) {
+  if (typeof createImageBitmap === "function") {
+    try {
+      const bitmap = await createImageBitmap(blob, { imageOrientation: "from-image" });
+      return {
+        width: bitmap.width,
+        height: bitmap.height,
+        draw(context, width, height) { context.drawImage(bitmap, 0, 0, width, height); },
+        close() { try { bitmap.close(); } catch (error) {} }
+      };
+    } catch (error) {
+      try {
+        const bitmap = await createImageBitmap(blob);
+        return {
+          width: bitmap.width,
+          height: bitmap.height,
+          draw(context, width, height) { context.drawImage(bitmap, 0, 0, width, height); },
+          close() { try { bitmap.close(); } catch (closeError) {} }
+        };
+      } catch (fallbackError) {}
+    }
+  }
+
+  const objectUrl = URL.createObjectURL(blob);
+  try {
+    const image = await new Promise((resolve, reject) => {
+      const node = new Image();
+      node.onload = () => resolve(node);
+      node.onerror = () => reject(errorWithCode("Unable to decode image", "media-decode-failed"));
+      node.src = objectUrl;
+    });
+    return {
+      width: image.naturalWidth,
+      height: image.naturalHeight,
+      draw(context, width, height) { context.drawImage(image, 0, 0, width, height); },
+      close() { URL.revokeObjectURL(objectUrl); }
+    };
+  } catch (error) {
+    URL.revokeObjectURL(objectUrl);
+    throw error;
+  }
+}
+
+function targetSize(width, height, maxDimension) {
+  const longest = Math.max(width, height);
+  if (!longest || longest <= maxDimension) return { width, height };
+  const ratio = maxDimension / longest;
+  return {
+    width: Math.max(1, Math.round(width * ratio)),
+    height: Math.max(1, Math.round(height * ratio))
+  };
+}
+
+async function renderVariant(decoded, { maxDimension, quality, preferredType }) {
+  const dimensions = targetSize(decoded.width, decoded.height, maxDimension);
+  const canvas = document.createElement("canvas");
+  canvas.width = dimensions.width;
+  canvas.height = dimensions.height;
+  const context = canvas.getContext("2d", { alpha: true });
+  if (!context) throw errorWithCode("Canvas unavailable", "media-compression-unavailable");
+  context.imageSmoothingEnabled = true;
+  context.imageSmoothingQuality = "high";
+  decoded.draw(context, dimensions.width, dimensions.height);
+
+  let contentType = preferredType || "image/webp";
+  let blob = await canvasToBlob(canvas, contentType, quality);
+  if (!blob && contentType !== "image/jpeg") {
+    contentType = "image/jpeg";
+    blob = await canvasToBlob(canvas, contentType, quality);
+  }
+  if (!blob) throw errorWithCode("Unable to encode image", "media-compression-failed");
+  return {
+    blob,
+    width: dimensions.width,
+    height: dimensions.height,
+    contentType: clean(blob.type || contentType)
+  };
+}
+
+export async function prepareTripImageVariants(sourceBlob, options = {}) {
+  if (!(sourceBlob instanceof Blob)) throw errorWithCode("Image file is required", "invalid-media-file");
+  const sourceBytes = finiteNumber(sourceBlob.size);
+  if (sourceBytes <= 0 || sourceBytes > TRIP_MEDIA_LIMITS.sourceMaxBytes) {
+    throw errorWithCode("Image file is too large", "media-source-too-large", { sourceBytes });
+  }
+  const sourceType = clean(sourceBlob.type).toLowerCase();
+  if (!sourceType.startsWith("image/")) {
+    throw errorWithCode("Only image files are supported", "unsupported-media-type", { contentType: sourceType });
+  }
+
+  const decoded = await decodeImage(sourceBlob);
+  try {
+    if (!decoded.width || !decoded.height) throw errorWithCode("Image dimensions are invalid", "media-decode-failed");
+    const preferredType = outputMimePreference(sourceType);
+    const [display, thumbnail] = await Promise.all([
+      renderVariant(decoded, {
+        maxDimension: finiteNumber(options.displayMaxDimension, TRIP_MEDIA_LIMITS.displayMaxDimension),
+        quality: finiteNumber(options.displayQuality, TRIP_MEDIA_LIMITS.displayQuality),
+        preferredType
+      }),
+      renderVariant(decoded, {
+        maxDimension: finiteNumber(options.thumbnailMaxDimension, TRIP_MEDIA_LIMITS.thumbnailMaxDimension),
+        quality: finiteNumber(options.thumbnailQuality, TRIP_MEDIA_LIMITS.thumbnailQuality),
+        preferredType
+      })
+    ]);
+    if (display.blob.size > TRIP_MEDIA_LIMITS.storageObjectMaxBytes || thumbnail.blob.size > TRIP_MEDIA_LIMITS.storageObjectMaxBytes) {
+      throw errorWithCode("Compressed image still exceeds Storage limit", "media-compressed-too-large", {
+        displayBytes: display.blob.size,
+        thumbnailBytes: thumbnail.blob.size
+      });
+    }
+    return {
+      source: {
+        contentType: sourceType,
+        byteSize: sourceBytes,
+        width: decoded.width,
+        height: decoded.height
+      },
+      display,
+      thumbnail
+    };
+  } finally {
+    decoded.close();
+  }
+}
+
+function uploadBlob(storagePath, blob, metadata, onProgress, rangeStart, rangeEnd) {
+  return new Promise((resolve, reject) => {
+    const objectRef = ref(storage, storagePath);
+    const task = uploadBytesResumable(objectRef, blob, metadata);
+    task.on("state_changed", snapshot => {
+      if (typeof onProgress !== "function") return;
+      const fraction = snapshot.totalBytes > 0 ? snapshot.bytesTransferred / snapshot.totalBytes : 0;
+      onProgress({
+        stage: "upload",
+        storagePath,
+        progress: rangeStart + (rangeEnd - rangeStart) * fraction,
+        bytesTransferred: snapshot.bytesTransferred,
+        totalBytes: snapshot.totalBytes
+      });
+    }, reject, async () => {
+      try {
+        resolve(await getMetadata(task.snapshot.ref));
+      } catch (error) {
+        reject(error);
+      }
+    });
+  });
+}
+
+async function bestEffortDelete(storagePath) {
+  const path = clean(storagePath);
+  if (!path) return;
+  try {
+    await deleteObject(ref(storage, path));
+  } catch (error) {
+    if (!storageNotFound(error)) console.warn("Unable to clean partial Trip media upload", path, error);
+  }
+}
+
+function registryRecordFromSnapshot(snapshot) {
+  const data = snapshot?.data?.() || {};
+  return {
+    ...data,
+    mediaId: clean(data.mediaId || snapshot?.id),
+    tripId: clean(data.tripId),
+    ownerType: clean(data.ownerType),
+    ownerId: clean(data.ownerId),
+    slot: clean(data.slot),
+    storagePath: clean(data.storagePath),
+    thumbnailStoragePath: clean(data.thumbnailStoragePath),
+    generation: clean(data.generation),
+    thumbnailGeneration: clean(data.thumbnailGeneration)
+  };
+}
+
+export async function uploadTripImage({
+  tripId: tripIdInput,
+  ownerType: ownerTypeInput,
+  ownerId: ownerIdInput = "",
+  slot: slotInput = "",
+  file,
+  mediaId: mediaIdInput = "",
+  caption = "",
+  sortOrder = 0,
+  user: userInput = null,
+  onProgress = null
+} = {}) {
+  assertCloudOperationAvailable("旅程相片上載");
+  const tripId = clean(tripIdInput);
+  if (!tripId) throw errorWithCode("Missing tripId", "invalid-trip-id");
+  const owner = normalizeOwner(ownerTypeInput, ownerIdInput, slotInput);
+  const user = await requireUser(userInput);
+  const mediaId = safeSegment(mediaIdInput || nowMediaId(), nowMediaId());
+  const variants = await prepareTripImageVariants(file);
+  const folder = folderForOwner(owner, mediaId);
+  const displayPath = `trips/${tripId}/media/${folder}/display.${extensionForMime(variants.display.contentType)}`;
+  const thumbnailPath = `trips/${tripId}/media/${folder}/thumb.${extensionForMime(variants.thumbnail.contentType)}`;
+  const uploadedPaths = [displayPath, thumbnailPath];
+  const registryRef = doc(db, "trips", tripId, "media", mediaId);
+  let registryCreated = false;
+
+  const commonMetadata = {
+    cacheControl: "private,max-age=31536000,immutable",
+    customMetadata: {
+      tripId,
+      mediaId,
+      ownerType: owner.ownerType,
+      ownerId: owner.ownerId,
+      slot: owner.slot,
+      uploadedBy: user.uid,
+      mediaSchemaVersion: String(TRIP_MEDIA_SCHEMA_VERSION)
+    }
+  };
+
+  const pendingRecord = {
+    mediaSchemaVersion: TRIP_MEDIA_SCHEMA_VERSION,
+    mediaId,
+    tripId,
+    ownerType: owner.ownerType,
+    ownerId: owner.ownerId,
+    slot: owner.slot,
+    status: "uploading",
+    caption: clean(caption),
+    sortOrder: finiteNumber(sortOrder),
+    storagePath: displayPath,
+    thumbnailStoragePath: thumbnailPath,
+    contentType: variants.display.contentType,
+    byteSize: variants.display.blob.size,
+    width: variants.display.width,
+    height: variants.display.height,
+    thumbnailContentType: variants.thumbnail.contentType,
+    thumbnailByteSize: variants.thumbnail.blob.size,
+    thumbnailWidth: variants.thumbnail.width,
+    thumbnailHeight: variants.thumbnail.height,
+    sourceContentType: variants.source.contentType,
+    sourceByteSize: variants.source.byteSize,
+    sourceWidth: variants.source.width,
+    sourceHeight: variants.source.height,
+    createdBy: user.uid,
+    createdAt: serverTimestamp(),
+    updatedBy: user.uid,
+    updatedAt: serverTimestamp()
+  };
+
+  try {
+    if (typeof onProgress === "function") onProgress({ stage: "registry-pending", progress: 0.08, mediaId });
+    await setDoc(registryRef, pendingRecord);
+    registryCreated = true;
+
+    const displayMetadata = await uploadBlob(displayPath, variants.display.blob, {
+      ...commonMetadata,
+      contentType: variants.display.contentType,
+      customMetadata: { ...commonMetadata.customMetadata, variant: "display" }
+    }, onProgress, 0.10, 0.62);
+    const thumbnailMetadata = await uploadBlob(thumbnailPath, variants.thumbnail.blob, {
+      ...commonMetadata,
+      contentType: variants.thumbnail.contentType,
+      customMetadata: { ...commonMetadata.customMetadata, variant: "thumbnail" }
+    }, onProgress, 0.62, 0.86);
+
+    const readyFields = {
+      status: "ready",
+      generation: clean(displayMetadata.generation),
+      md5Hash: clean(displayMetadata.md5Hash),
+      thumbnailGeneration: clean(thumbnailMetadata.generation),
+      thumbnailMd5Hash: clean(thumbnailMetadata.md5Hash),
+      updatedBy: user.uid,
+      updatedAt: serverTimestamp()
+    };
+
+    if (typeof onProgress === "function") onProgress({ stage: "registry-ready", progress: 0.90, mediaId });
+    await setDoc(registryRef, readyFields, { merge: true });
+    const record = { ...pendingRecord, ...readyFields, status: "ready" };
+    await Promise.all([
+      putTripMediaCache(displayPath, variants.display.blob, {
+        generation: readyFields.generation,
+        contentType: pendingRecord.contentType,
+        tripId,
+        mediaId,
+        variant: "display"
+      }),
+      putTripMediaCache(thumbnailPath, variants.thumbnail.blob, {
+        generation: readyFields.thumbnailGeneration,
+        contentType: pendingRecord.thumbnailContentType,
+        tripId,
+        mediaId,
+        variant: "thumbnail"
+      })
+    ]);
+    if (typeof onProgress === "function") onProgress({ stage: "ready", progress: 1, mediaId });
+    return record;
+  } catch (error) {
+    await Promise.allSettled(uploadedPaths.map(bestEffortDelete));
+    if (registryCreated) {
+      try { await deleteDoc(registryRef); } catch (registryError) {
+        console.warn("Stale uploading media registry retained for later repair", mediaId, registryError);
+      }
+    }
+    throw error;
+  }
+}
+
+export async function getTripMediaRecord(tripIdInput, mediaIdInput) {
+  const tripId = clean(tripIdInput);
+  const mediaId = clean(mediaIdInput);
+  if (!tripId || !mediaId) return null;
+  const snapshot = await getDoc(doc(db, "trips", tripId, "media", mediaId));
+  return snapshot.exists() ? registryRecordFromSnapshot(snapshot) : null;
+}
+
+export async function listTripMediaRecords(tripIdInput) {
+  const tripId = clean(tripIdInput);
+  if (!tripId) return [];
+  const snapshot = await getDocs(collection(db, "trips", tripId, "media"));
+  return snapshot.docs.map(registryRecordFromSnapshot).sort((a, b) => {
+    const order = finiteNumber(a.sortOrder) - finiteNumber(b.sortOrder);
+    return order || a.mediaId.localeCompare(b.mediaId);
+  });
+}
+
+function mediaVariant(record, variantInput) {
+  const variant = clean(variantInput) === "thumbnail" ? "thumbnail" : "display";
+  if (variant === "thumbnail") {
+    return {
+      variant,
+      storagePath: clean(record?.thumbnailStoragePath || record?.storagePath),
+      generation: clean(record?.thumbnailGeneration || record?.generation),
+      contentType: clean(record?.thumbnailContentType || record?.contentType),
+      byteSize: finiteNumber(record?.thumbnailByteSize || record?.byteSize)
+    };
+  }
+  return {
+    variant,
+    storagePath: clean(record?.storagePath),
+    generation: clean(record?.generation),
+    contentType: clean(record?.contentType),
+    byteSize: finiteNumber(record?.byteSize)
+  };
+}
+
+export async function getTripMediaBlob(record, { variant = "display", useCache = true } = {}) {
+  const selected = mediaVariant(record || {}, variant);
+  if (!selected.storagePath) throw errorWithCode("Missing media storage path", "invalid-media-record");
+  if (useCache) {
+    const cached = await getTripMediaCache(selected.storagePath, { generation: selected.generation });
+    if (cached?.blob) return { ...selected, blob: cached.blob, fromCache: true };
+  }
+  const blob = await getBlob(ref(storage, selected.storagePath), TRIP_MEDIA_LIMITS.downloadMaxBytes);
+  if (useCache) {
+    await putTripMediaCache(selected.storagePath, blob, {
+      generation: selected.generation,
+      contentType: selected.contentType || blob.type,
+      tripId: clean(record?.tripId),
+      mediaId: clean(record?.mediaId),
+      variant: selected.variant
+    });
+  }
+  return { ...selected, blob, fromCache: false };
+}
+
+export async function verifyTripMediaRecord(record) {
+  const displayPath = clean(record?.storagePath);
+  const thumbnailPath = clean(record?.thumbnailStoragePath);
+  if (!displayPath) return { verified: false, display: null, thumbnail: null, reason: "missing-storage-path" };
+  const [display, thumbnail] = await Promise.all([
+    getMetadata(ref(storage, displayPath)).catch(error => storageNotFound(error) ? null : Promise.reject(error)),
+    thumbnailPath
+      ? getMetadata(ref(storage, thumbnailPath)).catch(error => storageNotFound(error) ? null : Promise.reject(error))
+      : Promise.resolve(null)
+  ]);
+  return {
+    verified: Boolean(display && (!thumbnailPath || thumbnail)),
+    display,
+    thumbnail,
+    reason: display ? (thumbnailPath && !thumbnail ? "thumbnail-missing" : "") : "display-missing"
+  };
+}
+
+export async function deleteTripMedia(record, { user: userInput = null } = {}) {
+  assertCloudOperationAvailable("旅程相片刪除");
+  const tripId = clean(record?.tripId);
+  const mediaId = clean(record?.mediaId);
+  if (!tripId || !mediaId) throw errorWithCode("Invalid media record", "invalid-media-record");
+  await requireUser(userInput);
+  const paths = [...new Set([
+    clean(record?.storagePath),
+    clean(record?.thumbnailStoragePath)
+  ].filter(Boolean))];
+
+  for (const path of paths) {
+    try {
+      await deleteObject(ref(storage, path));
+    } catch (error) {
+      if (!storageNotFound(error)) throw error;
+    }
+    await removeTripMediaCache(path);
+  }
+  await deleteDoc(doc(db, "trips", tripId, "media", mediaId));
+  return { tripId, mediaId, deleted: true };
+}
+
+export async function cleanupStaleTripMediaUploads(tripIdInput, {
+  user: userInput = null,
+  olderThanMs = 30 * 60 * 1000
+} = {}) {
+  const tripId = clean(tripIdInput);
+  if (!tripId) return { tripId: "", inspected: 0, cleaned: 0, failed: [] };
+  const user = await requireUser(userInput);
+  const records = await listTripMediaRecords(tripId);
+  const threshold = Date.now() - Math.max(5 * 60 * 1000, finiteNumber(olderThanMs, 30 * 60 * 1000));
+  const stale = records.filter(record => {
+    if (clean(record?.status) !== "uploading") return false;
+    const createdAt = typeof record?.createdAt?.toMillis === "function"
+      ? record.createdAt.toMillis()
+      : finiteNumber(record?.createdAt?.seconds) * 1000;
+    return createdAt > 0 && createdAt <= threshold;
+  });
+  let cleaned = 0;
+  const failed = [];
+  for (const record of stale) {
+    try {
+      await deleteTripMedia(record, { user });
+      cleaned += 1;
+    } catch (error) {
+      failed.push({ mediaId: clean(record?.mediaId), code: clean(error?.code), message: clean(error?.message) });
+    }
+  }
+  return { tripId, inspected: stale.length, cleaned, failed };
+}
+
+export async function clearCachedTripMedia(tripIdInput) {
+  return clearTripMediaCache({ tripId: clean(tripIdInput) });
+}
+
+export function tripMediaStoragePrefix(tripIdInput) {
+  const tripId = clean(tripIdInput);
+  return tripId ? `trips/${tripId}/media/` : "";
+}

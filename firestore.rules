@@ -378,6 +378,28 @@ service cloud.firestore {
         allow create, update, delete: if canEditTripContent(tripId);
       }
 
+      // Phase 3A.1 lightweight media registry. Storage bytes remain in
+      // Cloud Storage; this document keeps lifecycle metadata and stable paths.
+      match /media/{mediaId} {
+        allow read: if canReadTrip(tripId);
+        allow create: if canEditTripContent(tripId)
+          && request.resource.data.tripId == tripId
+          && request.resource.data.mediaId == mediaId
+          && request.resource.data.ownerType in ['trip', 'item', 'savedPlace']
+          && request.resource.data.status in ['uploading', 'ready']
+          && request.resource.data.storagePath is string
+          && request.resource.data.createdBy == request.auth.uid;
+        allow update: if canEditTripContent(tripId)
+          && request.resource.data.tripId == resource.data.tripId
+          && request.resource.data.mediaId == resource.data.mediaId
+          && request.resource.data.createdBy == resource.data.createdBy
+          && request.resource.data.createdAt == resource.data.createdAt
+          && request.resource.data.ownerType in ['trip', 'item', 'savedPlace']
+          && request.resource.data.status in ['uploading', 'ready']
+          && request.resource.data.storagePath is string;
+        allow delete: if canEditTripContent(tripId);
+      }
+
       match /settings/{settingId} {
         allow read: if canReadTrip(tripId);
         allow create: if
