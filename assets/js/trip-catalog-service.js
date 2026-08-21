@@ -9,6 +9,16 @@ import {
 } from "./firestore-observed-service.js";
 
 function clean(value) { return String(value ?? "").trim(); }
+function clonePlain(value) {
+  if (Array.isArray(value)) return value.map(clonePlain);
+  if (!value || typeof value !== "object") return value;
+  const out = {};
+  Object.entries(value).forEach(([key, next]) => {
+    if (next == null || ["string", "number", "boolean"].includes(typeof next)) out[key] = next;
+    else if (Array.isArray(next) || typeof next === "object") out[key] = clonePlain(next);
+  });
+  return out;
+}
 
 function localIsoDate() {
   const now = new Date();
@@ -59,6 +69,9 @@ function normalizeTripDoc(snapshot) {
     coverImage: clean(data.coverImage),
     tripIcon: clean(data.tripIcon),
     backgroundImage: clean(data.backgroundImage),
+    tripIconMedia: clonePlain(data.tripIconMedia || null) || null,
+    backgroundImageMedia: clonePlain(data.backgroundImageMedia || null) || null,
+    coverImageMedia: clonePlain(data.coverImageMedia || null) || null,
     updatedAt: data.updatedAt || null,
     createdBy: clean(data.createdBy),
     memberCount: Number(data.memberCount) || 0,

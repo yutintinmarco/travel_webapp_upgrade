@@ -261,6 +261,9 @@ function structureToPortableTrip(structure, { snapshotId = "" } = {}) {
       coverImage: clean(tripDoc.coverImage),
       tripIcon: clean(tripDoc.tripIcon || general.tripIcon),
       backgroundImage: clean(tripDoc.backgroundImage || general.backgroundImage),
+      tripIconMedia: clone(tripDoc.tripIconMedia || general.tripIconMedia || null),
+      backgroundImageMedia: clone(tripDoc.backgroundImageMedia || general.backgroundImageMedia || null),
+      coverImageMedia: clone(tripDoc.coverImageMedia || general.coverImageMedia || null),
       travellers: normalizeTravellers(clone(general.travellers || {})),
       cities: clone(general.cities || {}),
       flights: clone(general.flights || []),
@@ -354,11 +357,17 @@ function portableTripToStructure(portableInput, { expenseSettings = null } = {})
     status: clean(meta.status),
     coverImage: clean(meta.coverImage),
     tripIcon: clean(meta.tripIcon),
-    backgroundImage: clean(meta.backgroundImage)
+    backgroundImage: clean(meta.backgroundImage),
+    ...(meta.coverImageMedia ? { coverImageMedia: clone(meta.coverImageMedia) } : {}),
+    ...(meta.tripIconMedia ? { tripIconMedia: clone(meta.tripIconMedia) } : {}),
+    ...(meta.backgroundImageMedia ? { backgroundImageMedia: clone(meta.backgroundImageMedia) } : {})
   };
   const general = {
     tripIcon: clean(meta.tripIcon),
     backgroundImage: clean(meta.backgroundImage),
+    ...(meta.tripIconMedia ? { tripIconMedia: clone(meta.tripIconMedia) } : {}),
+    ...(meta.backgroundImageMedia ? { backgroundImageMedia: clone(meta.backgroundImageMedia) } : {}),
+    ...(meta.coverImageMedia ? { coverImageMedia: clone(meta.coverImageMedia) } : {}),
     travellers: clone(meta.travellers || {}),
     cities: clone(meta.cities || {}),
     flights: clone(meta.flights || []),

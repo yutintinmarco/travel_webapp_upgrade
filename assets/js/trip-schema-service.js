@@ -166,6 +166,12 @@ function normalizeImages(item) {
   }));
 }
 
+function normalizeMediaDescriptor(value) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+  const normalized = normalizeImages({ images: [value] });
+  return normalized[0] || null;
+}
+
 function normalizeSavedPlace(place, index) {
   const title = clean(place?.title || place?.name || `Saved place ${index + 1}`);
   const placeId = clean(place?.placeId || place?.id) || `place_${fnv1a([title, place?.maps, index].join("|"))}`;
@@ -223,6 +229,9 @@ export function normalizePortableTrip(rawInput = {}) {
       travellers: normalizeTravellers(meta.travellers || {}),
       tripIcon: clean(meta.tripIcon || meta.icon || raw.tripIcon || raw.icon),
       backgroundImage: clean(meta.backgroundImage || meta.bgImage || meta.background || meta.coverImage || raw.backgroundImage || raw.bgImage || raw.background),
+      tripIconMedia: normalizeMediaDescriptor(meta.tripIconMedia || raw.tripIconMedia),
+      backgroundImageMedia: normalizeMediaDescriptor(meta.backgroundImageMedia || raw.backgroundImageMedia),
+      coverImageMedia: normalizeMediaDescriptor(meta.coverImageMedia || raw.coverImageMedia),
       featureColors: clone(meta.featureColors || {})
     },
     days,
@@ -306,6 +315,9 @@ export function buildFirestoreTripPlan(rawInput = {}, ownerUser = null) {
     coverImage: clean(meta.coverImage),
     tripIcon: clean(meta.tripIcon),
     backgroundImage: clean(meta.backgroundImage),
+    ...(meta.coverImageMedia ? { coverImageMedia: clone(meta.coverImageMedia) } : {}),
+    ...(meta.tripIconMedia ? { tripIconMedia: clone(meta.tripIconMedia) } : {}),
+    ...(meta.backgroundImageMedia ? { backgroundImageMedia: clone(meta.backgroundImageMedia) } : {}),
     memberUids,
     memberCount: memberUids.length,
     createdBy: ownerUid,
@@ -361,6 +373,9 @@ export function buildFirestoreTripPlan(rawInput = {}, ownerUser = null) {
       weather: clone(meta.weather || {}),
       tripIcon: clean(meta.tripIcon),
       backgroundImage: clean(meta.backgroundImage),
+      ...(meta.tripIconMedia ? { tripIconMedia: clone(meta.tripIconMedia) } : {}),
+      ...(meta.backgroundImageMedia ? { backgroundImageMedia: clone(meta.backgroundImageMedia) } : {}),
+      ...(meta.coverImageMedia ? { coverImageMedia: clone(meta.coverImageMedia) } : {}),
       hotels: clone(meta.hotels || {}),
       infoCard: clone(meta.infoCard || {}),
       galleryDefaults: clone(meta.galleryDefaults || {}),
@@ -417,6 +432,9 @@ export function getTripSummary(rawInput = {}) {
     tripIcon: clean(meta.tripIcon),
     backgroundImage: clean(meta.backgroundImage),
     coverImage: clean(meta.coverImage),
+    tripIconMedia: clone(meta.tripIconMedia || null),
+    backgroundImageMedia: clone(meta.backgroundImageMedia || null),
+    coverImageMedia: clone(meta.coverImageMedia || null),
     dayCount: trip.days.length,
     itemCount: trip.days.reduce((sum, day) => sum + safeArray(day.items).length, 0),
     savedPlaceCount: Array.isArray(trip.snacks) ? trip.snacks.length : safeArray(trip.snacks?.items).length,
