@@ -1,3 +1,15 @@
+# v7.9.2.3 · Post Export Trip Switch Continuity Hotfix
+
+## Phase 3A.3 hotfix
+
+* Manual Trip switching now reuses the proven Phase 2G Workspace handoff instead of allowing a transient new-Trip access state to expose the root Entry loading gateway.
+* The selected target Trip now hydrates from the existing user-bound IndexedDB instant render cache in parallel with Firebase realtime listeners.
+* The current Workspace remains visible during the handoff; once target cache or realtime data paints, the handoff releases normally.
+* After an iOS native download / Files handoff, a target Trip that has not regained a server-confirmed realtime state will re-arm the existing Trip and access listeners once after a short watchdog delay.
+* The watchdog issues no explicit Firestore get/getDocs request, creates no new sync feature, and never blocks the UI on a network promise.
+* If the target still cannot paint after the one listener re-arm, the switch safely rolls the session back to the original Trip instead of leaving Trip A visuals paired with Trip B session state.
+* Existing Firebase autosync, access Rules, Backup ZIP format, Restore, Storage Rules, Firestore Rules, Functions and media lifecycle are unchanged.
+
 # v7.9.2.2 · Backup Export Escape Hatch / Firestore Resume Hardening
 
 ## Phase 3A.3 hotfix

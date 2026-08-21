@@ -3335,7 +3335,7 @@ body.expenses-view-active #app-version-note{
 #snacks-view::after,
 #info-view::after,
 #profile-view::after{
-  content:"v7.9.2.2" !important;
+  content:"v7.9.2.3" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3356,7 +3356,7 @@ body.expenses-view-active #app-version-note{
   display:none !important;
 }
 body.expenses-view-active .expenses-module .expenses-app::after{
-  content:"v7.9.2.2" !important;
+  content:"v7.9.2.3" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -4309,7 +4309,7 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
         <span class="profile-detail-spacer"></span>
       </div>
       <section class="profile-card" aria-label="App 資訊">
-        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.9.2.2</strong></div>
+        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.9.2.3</strong></div>
         <div class="profile-meta-row"><span>資料架構</span><strong>Phase 2G.2</strong></div>
         <div class="profile-meta-row"><span>主要資料來源</span><strong id="app-data-source-label">Firebase / 本機快取</strong></div>
       </section>
@@ -4486,7 +4486,7 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
 </div>
 
 <script>
-const APP_VERSION = "7.9.2.2";
+const APP_VERSION = "7.9.2.3";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 function perfLiteMark(name){try{return window.__perfLite?.mark(name);}catch(error){return null;}}
@@ -7636,21 +7636,95 @@ async function reconcileFirebaseTripLoader(){
   if(!target){stopFirebaseTripLoader({fallback:true});return;}
   session.setActiveTripId(target.tripId);updateTripUrl(target.tripId);await startFirebaseTripLoader(target.tripId);
 }
+let manualTripSwitchRecoveryToken=0;
+function scheduleManualTripSwitchRecovery(tripIdInput,user,fromTripIdInput){
+  const tripId=String(tripIdInput||"").trim(),fromTripId=String(fromTripIdInput||"").trim();if(!tripId)return;
+  const uid=String(user?.uid||"").trim();
+  const token=++manualTripSwitchRecoveryToken;
+  const recentDownload=Date.now()-Number(window.__lastDataOperationDownloadHandoffAt||0)<120000;
+  setTimeout(async()=>{
+    if(token!==manualTripSwitchRecoveryToken||tripLoaderActiveId!==tripId)return;
+    const visible=dataTripId(window.tripData)===tripId;
+    const ready=visible&&tripLoaderState.status==="ready";
+    const serverReady=ready&&tripLoaderState.serverConfirmed===true;
+    if(serverReady||(!recentDownload&&ready))return;
+    try{
+      if(!visible)await applyInstantTripCache(tripId,user);
+      if(token!==manualTripSwitchRecoveryToken||tripLoaderActiveId!==tripId)return;
+      // iOS may briefly suspend the Firestore transport while the native Files /
+      // share handoff owns the foreground. Re-arm the existing realtime
+      // listeners once; this does not add an explicit Firestore read or block
+      // the Workspace on a network promise.
+      stopFirebaseTripLoader({fallback:false});
+      await startFirebaseTripLoader(tripId);
+      try{const {access}=await getTripLoaderServices();access.refreshTripAccess?.();}catch(error){console.warn("Trip switch access re-arm",error);}
+      refreshAppEntryState();
+    }catch(error){
+      console.warn("Trip switch listener re-arm",error);
+      refreshAppEntryState();
+    }
+
+    // Never leave the App indefinitely showing Trip A while the session points
+    // at Trip B. If neither target cache nor realtime data can paint after the
+    // one listener re-arm, safely route the session back to the original Trip.
+    setTimeout(async()=>{
+      if(token!==manualTripSwitchRecoveryToken||tripLoaderActiveId!==tripId)return;
+      const targetReady=dataTripId(window.tripData)===tripId&&tripLoaderState.status==="ready";
+      if(targetReady||!fromTripId)return;
+      try{
+        const {session,access}=await getTripLoaderServices();
+        if(uid)setAppEntryTripSwitchHandoff(tripId,fromTripId,uid);
+        appEntryOptimisticTripId=fromTripId;appEntryOptimisticUid=uid;
+        if(uid)setAppEntryResumeLatch(fromTripId,uid);
+        session.setActiveTripId(fromTripId);updateTripUrl(fromTripId);tripBootPreferredId=fromTripId;
+        stopFirebaseTripLoader({fallback:false});
+        const cacheTask=applyInstantTripCache(fromTripId,user);
+        const loaderTask=startFirebaseTripLoader(fromTripId);
+        try{access.initTripAccess?.(fromTripId);access.refreshTripAccess?.();}catch(error){console.warn("Trip switch rollback access",error);}
+        await Promise.race([Promise.resolve(cacheTask),new Promise(resolve=>setTimeout(resolve,160))]);
+        setDataSourceLabel("旅程切換未完成 · 已返回原旅程");
+        refreshAppEntryState();
+        Promise.allSettled([cacheTask,loaderTask]).then(()=>refreshAppEntryState()).catch(()=>{});
+      }catch(error){
+        console.warn("Trip switch safe rollback",error);
+        clearAppEntryTripSwitchHandoff();refreshAppEntryState();
+      }
+    },6500);
+  },recentDownload?3200:6500);
+}
 async function switchActiveCloudTrip(tripId){
   const id=String(tripId||"").trim();if(!id||id===tripLoaderActiveId)return;
   if(document.body.classList.contains("app-progress-active")||cloudSafetyState.operation)return;
   const allowed=(tripLibraryCloudState.trips||[]).some(t=>t.tripId===id&&t.archived!==true);if(!allowed)return;
-  const {session}=await getTripLoaderServices();
-  // Expense module currently owns long-lived listeners. If it has already been
-  // mounted for another Trip, reload once after changing the session id so it
-  // cannot keep writing to the old Trip.
+  const user=window.__appAuthUser||tripLibraryCurrentUser||null;
+  const uid=String(user?.uid||"").trim();
+  const fromId=String(tripLoaderActiveId||dataTripId(window.tripData)||"").trim();
+  const {session,access}=await getTripLoaderServices();
+
+  // Manual switching now uses the same proven Workspace handoff as revoke
+  // routing. The old Trip stays visually latched only until the target cache or
+  // target realtime data is ready, so a transient access/loading frame can no
+  // longer hand control to the root Entry Gateway.
+  if(fromId&&uid)setAppEntryTripSwitchHandoff(fromId,id,uid);
+  appEntryOptimisticTripId=id;appEntryOptimisticUid=uid;
+  if(uid)setAppEntryResumeLatch(id,uid);
+  try{localStorage.setItem("travel_active_trip_id",id);}catch(error){}
+  session.setActiveTripId(id);updateTripUrl(id);tripBootPreferredId=id;closeTripSwitcher();
+
   const mountedExpenseTrip=String(window.__expensesModuleTripId||"");
-  session.setActiveTripId(id);updateTripUrl(id);closeTripSwitcher();
   if(mountedExpenseTrip&&mountedExpenseTrip!==id){
     if(currentAppView==="expenses")setView("itinerary",{restoreScroll:false});
     try{window.__suspendExpensesForTripSwitch?.();}catch(error){console.warn("Suspend Expenses for Trip switch",error);}
   }
-  await startFirebaseTripLoader(id);
+  refreshAppEntryState();
+
+  const cacheTask=applyInstantTripCache(id,user);
+  const loaderTask=startFirebaseTripLoader(id);
+  try{access.initTripAccess?.(id);access.refreshTripAccess?.();}catch(error){console.warn("Manual Trip access refresh",error);}
+  await Promise.race([Promise.resolve(cacheTask),new Promise(resolve=>setTimeout(resolve,160))]);
+  refreshAppEntryState();
+  Promise.allSettled([cacheTask,loaderTask]).then(()=>refreshAppEntryState()).catch(()=>{});
+  scheduleManualTripSwitchRecovery(id,user,fromId);
 }
 
 let tripGlobalLockBusy=false;
