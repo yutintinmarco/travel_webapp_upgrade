@@ -1,3 +1,45 @@
+# v7.9.1.0 · Phase 3A.2 Existing Media Read Integration
+
+## Scope
+
+This build connects the existing Travel WebApp render path to the Phase 3A Storage foundation without introducing any new upload UI or changing the existing visual grammar. Static and remote media remain fully compatible. Storage backed media descriptors are resolved only when present.
+
+## Existing Media Integration
+
+• Added `assets/js/trip-media-integration-service.js` as the canonical read bridge between existing `<img>` / background renderers and Firebase Storage.
+• Storage backed media resolves through `getBlob()` and the existing IndexedDB Trip media cache, then renders through short lived Blob URLs.
+• Existing itinerary item `images[]` descriptors now take precedence over legacy `gallery` strings when present. Legacy `gallery`, `booking.gallery` and `galleryDefaults` remain unchanged fallbacks.
+• Existing Saved Place `images[]` descriptors now render through the same path while legacy Saved Place galleries remain compatible.
+• Trip background can now use optional `backgroundImageMedia` while preserving the current atomic background swap and no flash behaviour.
+• Trip library and Quick Switcher icons can now use optional `tripIconMedia`. Existing static icon, emoji and monogram fallbacks are unchanged.
+• Added optional `coverImageMedia` to the portable / Firestore / backup data contract for the next media lifecycle stage.
+
+## Lifecycle Guard
+
+• This build intentionally does not expose a new upload button yet. Data Only Full Backup v1 cannot carry image bytes, so user visible media upload stays disabled until Phase 3A.3 adds Data + Media Backup / Restore.
+• Permanent Delete remains unchanged and already removes the entire `trips/{tripId}/` Storage prefix.
+• Storage Rules, Firestore Rules, indexes and Cloud Function are unchanged from v7.9.0.0.
+
+## UI / UX
+
+• No new screen, card, row, button, sheet, spacing system or navigation behaviour was introduced.
+• Existing static / remote images render exactly as before. Storage resolution is additive and asynchronous.
+• The current background stays visible until a Storage backed replacement has been resolved and decoded.
+
+## Files Changed from v7.9.0.0
+
+• `index.html`
+• `manifest.json`
+• `sw.js`
+• `CHANGELOG.md`
+• `assets/js/trip-media-integration-service.js` new
+• `assets/js/trip-schema-service.js`
+• `assets/js/trip-loader-service.js`
+• `assets/js/trip-catalog-service.js`
+• `assets/js/trip-backup-service.js`
+
+---
+
 # v7.9.0.0 · Phase 3A.1 Firebase Storage / Media Foundation
 
 ## Foundation only

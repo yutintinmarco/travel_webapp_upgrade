@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
   <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
   <link rel="dns-prefetch" href="https://api.open-meteo.com">
-  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?v=7.9.0.0">
+  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?v=7.9.1.0">
   <title id="page-title">行程</title>
   <script>
   // v7.7.5.0 · Performance Lite. Memory only: no Firebase reads/writes, no
@@ -3335,7 +3335,7 @@ body.expenses-view-active #app-version-note{
 #snacks-view::after,
 #info-view::after,
 #profile-view::after{
-  content:"v7.9.0.0" !important;
+  content:"v7.9.1.0" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3356,7 +3356,7 @@ body.expenses-view-active #app-version-note{
   display:none !important;
 }
 body.expenses-view-active .expenses-module .expenses-app::after{
-  content:"v7.9.0.0" !important;
+  content:"v7.9.1.0" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3584,7 +3584,7 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
 </style>
             <link rel="apple-touch-icon" href="assets/icon/trip_icon.png">
   <link rel="icon" type="image/png" href="assets/icon/trip_icon.png">
-  <link rel="manifest" href="manifest.json?v=7.9.0.0">
+  <link rel="manifest" href="manifest.json?v=7.9.1.0">
   <meta name="apple-mobile-web-app-title" content="關嘉露西生日之旅">
   <!-- v7.7.1.2: expenses.css is 144KB and every rule is scoped under
        .expenses-module, yet it used to block the very first paint of the
@@ -3592,8 +3592,8 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
        priority without blocking paint; ensureExpensesStylesheet() flips it to
        media="all" before the 支出 view is ever mounted, so the styling is
        byte-for-byte identical by the time anything expenses-related renders. -->
-  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?v=7.9.0.0" media="print">
-  <noscript><link rel="stylesheet" href="assets/css/expenses.css?v=7.9.0.0"></noscript>
+  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?v=7.9.1.0" media="print">
+  <noscript><link rel="stylesheet" href="assets/css/expenses.css?v=7.9.1.0"></noscript>
 </head>
 <body class="app-entry-gated app-entry-pending">
 <div class="bg-fixed"></div>
@@ -4309,7 +4309,7 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
         <span class="profile-detail-spacer"></span>
       </div>
       <section class="profile-card" aria-label="App 資訊">
-        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.9.0.0</strong></div>
+        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.9.1.0</strong></div>
         <div class="profile-meta-row"><span>資料架構</span><strong>Phase 2G.2</strong></div>
         <div class="profile-meta-row"><span>主要資料來源</span><strong id="app-data-source-label">Firebase / 本機快取</strong></div>
       </section>
@@ -4486,7 +4486,7 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
 </div>
 
 <script>
-const APP_VERSION = "7.9.0.0";
+const APP_VERSION = "7.9.1.0";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 function perfLiteMark(name){try{return window.__perfLite?.mark(name);}catch(error){return null;}}
@@ -4500,7 +4500,32 @@ function escapeHtmlText(value){return String(value??"").replaceAll("&","&amp;").
 function fmtMMDD(iso){return iso.slice(5).replace("-","/");}
 function dateInTZ(tz){try{return new Intl.DateTimeFormat("en-CA",{timeZone:tz||"UTC",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date());}catch(e){return new Date().toISOString().slice(0,10);}}
 function normGallery(v){if(!v)return[];if(Array.isArray(v))return v;return[v];}
+let tripMediaIntegrationPromise=null;
+function getTripMediaIntegration(){
+  if(!tripMediaIntegrationPromise)tripMediaIntegrationPromise=import(`./assets/js/trip-media-integration-service.js?v=${APP_VERSION}`);
+  return tripMediaIntegrationPromise;
+}
+function tripMediaDescriptorFallback(input){
+  if(typeof input==="string")return String(input||"").trim();
+  if(!input||typeof input!=="object")return"";
+  return String(input.src||input.url||input.path||"").trim();
+}
+function tripMediaHasStorage(input){return Boolean(input&&typeof input==="object"&&String(input.storagePath||"").trim());}
+function bindTripMediaImageElement(img,input,{variant="display",tripId="",fallbackSrc=""}={}){
+  if(!(img instanceof HTMLImageElement))return;
+  const fallback=String(fallbackSrc||tripMediaDescriptorFallback(input)||"").trim();
+  if(fallback)img.src=fallback;
+  else if(tripMediaHasStorage(input))img.removeAttribute("src");
+  if(!tripMediaHasStorage(input)){if(!fallback)img.removeAttribute("src");return;}
+  getTripMediaIntegration().then(service=>service.bindTripMediaImage(img,input,{tripId:tripId||dataTripId(window.tripData),variant,fallbackSrc:fallback})).catch(error=>console.warn("Trip media bind",error));
+}
+function storageGalleryForItem(item){
+  const images=Array.isArray(item?.images)?item.images.filter(Boolean):[];
+  return images.length?[...images].sort((a,b)=>(Number(a?.sortOrder)||0)-(Number(b?.sortOrder)||0)):[];
+}
 function getGalleryForItem(item, day, cityKey, matchedCities, meta){
+  const mediaImages=storageGalleryForItem(item);
+  if(mediaImages.length)return mediaImages;
   const explicit=[...normGallery(item.gallery),...normGallery(item.booking?.gallery)];
   if(explicit.length)return explicit;
   const defs=meta?.galleryDefaults||{};
@@ -4914,7 +4939,7 @@ let curMaps="",curDP="",curBook="",curGal=[],curGalIdx=0,scrollY=0;
 function lockScroll(){scrollY=ss.scrollTop;ss.style.overflowY="hidden";}
 function unlockScroll(){ss.style.overflowY="auto";ss.scrollTop=scrollY;}
 function renderDots(){const el=document.getElementById("detail-dots");el.innerHTML="";curGal.forEach((_,i)=>{const d=document.createElement("div");d.className="modal-dot"+(i===curGalIdx?" active":"");d.addEventListener("click",()=>{curGalIdx=i;updateImg();});el.appendChild(d);});}
-function updateImg(){const img=document.getElementById("detail-img");img.classList.add("fade-out");setTimeout(()=>{img.src=curGal[curGalIdx];renderDots();img.classList.remove("fade-out");img.classList.add("fade-in");setTimeout(()=>img.classList.remove("fade-in"),220);},120);}
+function updateImg(){const img=document.getElementById("detail-img");img.classList.add("fade-out");setTimeout(()=>{bindTripMediaImageElement(img,curGal[curGalIdx],{variant:"display"});renderDots();img.classList.remove("fade-out");img.classList.add("fade-in");setTimeout(()=>img.classList.remove("fade-in"),220);},120);}
 
 function appendInlineDetails(itemEl,item,gallery){
   const shell=document.createElement("div");shell.className="inline-detail-shell";
@@ -4930,7 +4955,7 @@ function appendInlineDetails(itemEl,item,gallery){
     const images=[];
     gallery.forEach((src,index)=>{
       const img=document.createElement("img");
-      img.src=src;
+      bindTripMediaImageElement(img,src,{variant:"thumbnail"});
       img.alt=`${item.title||"行程"} ${index+1} / ${gallery.length}`;
       img.loading="lazy";
       track.appendChild(img);
@@ -5446,7 +5471,7 @@ function renderSnacks(data){
       if(metaRows.length)detailBlocks.push(`<div class="snack-detail-meta">${metaRows.join("")}</div>`);
       if(detailBlocks.length)el.setAttribute("data-detail-html",`<div class="snack-detail-wrap">${detailBlocks.join("")}</div>`);
       else el.setAttribute("data-detail-lines",JSON.stringify(["點擊地圖前往"]));
-      const snackGallery=[...normGallery(s.gallery)];
+      const snackGallery=storageGalleryForItem(s).length?storageGalleryForItem(s):[...normGallery(s.gallery)];
       if(!snackGallery.length){
         const gd=data.meta?.galleryDefaults||{};
         snackGallery.push(...normGallery(gd.byIcon?.[s.icon||"🍡"]||gd.byIcon?.["🍽️"]||gd.fallback));
@@ -5681,7 +5706,9 @@ function applyTripVisualTheme(data){
   let candidate=legacyTripVisualMeta(data).background;
   const bundledId=dataTripId(bundledTripData);
   if(!candidate&&bundledId&&id===bundledId)candidate="assets/bg/bg_trip_mobile.webp";
-  const wantedSource=candidate||fallback;
+  const media=meta.backgroundImageMedia&&typeof meta.backgroundImageMedia==="object"&&String(meta.backgroundImageMedia.storagePath||"").trim()?meta.backgroundImageMedia:null;
+  const mediaKey=media?`storage:${String(media.storagePath||"").trim()}:${String(media.generation||"").trim()}`:"";
+  const wantedSource=mediaKey||candidate||fallback;
 
   // Same Trip + same background is the common Firebase live-update path.
   // Do not reset the image to the generated fallback and reload it: that was
@@ -5689,40 +5716,54 @@ function applyTripVisualTheme(data){
   if(tripBackgroundAppliedId===id&&tripBackgroundAppliedSource===wantedSource)return;
 
   const token=++tripBackgroundApplyToken;
-  if(!candidate){
+  const applyFallback=()=>{
+    if(token!==tripBackgroundApplyToken)return;
+    if(candidate){
+      loadAndCommit(candidate,candidate);
+      return;
+    }
     document.documentElement.style.setProperty("--trip-bg-source",fallback);
-    tripBackgroundAppliedId=id;tripBackgroundAppliedSource=wantedSource;
+    tripBackgroundAppliedId=id;tripBackgroundAppliedSource=fallback;
+  };
+  const loadAndCommit=(source,appliedSource=wantedSource)=>{
+    if(token!==tripBackgroundApplyToken||!source)return;
+    const commit=()=>{
+      if(token!==tripBackgroundApplyToken)return;
+      document.documentElement.style.setProperty("--trip-bg-source",safeCssUrl(source));
+      tripBackgroundAppliedId=id;tripBackgroundAppliedSource=appliedSource;
+    };
+    if(tripBackgroundLoadedSources.has(source)){commit();return;}
+    const img=new Image();
+    img.onload=()=>{
+      tripBackgroundLoadedSources.add(source);
+      try{
+        const decoded=img.decode?.();
+        if(decoded&&typeof decoded.then==="function"){decoded.catch(()=>{}).finally(commit);return;}
+      }catch(error){}
+      commit();
+    };
+    img.onerror=applyFallback;
+    img.src=source;
+  };
+
+  if(media){
+    getTripMediaIntegration()
+      .then(service=>service.resolveTripMediaUrl(media,{tripId:id,variant:"display",useCache:true}))
+      .then(url=>{if(url)loadAndCommit(url,wantedSource);else applyFallback();})
+      .catch(error=>{console.warn("Trip background media resolve",error);applyFallback();});
     return;
   }
-
-  const commit=()=>{
-    if(token!==tripBackgroundApplyToken)return;
-    document.documentElement.style.setProperty("--trip-bg-source",safeCssUrl(candidate));
-    tripBackgroundAppliedId=id;tripBackgroundAppliedSource=wantedSource;
-  };
-
+  if(!candidate){applyFallback();return;}
   // When switching Trips, keep the previous image on screen until the next one
   // is decoded. This makes the swap atomic rather than fallback → image.
-  if(tripBackgroundLoadedSources.has(candidate)){commit();return;}
-  const img=new Image();
-  img.onload=()=>{
-    tripBackgroundLoadedSources.add(candidate);
-    try{
-      const decoded=img.decode?.();
-      if(decoded&&typeof decoded.then==="function"){decoded.catch(()=>{}).finally(commit);return;}
-    }catch(error){}
-    commit();
-  };
-  img.onerror=()=>{
-    if(token!==tripBackgroundApplyToken)return;
-    document.documentElement.style.setProperty("--trip-bg-source",fallback);
-    tripBackgroundAppliedId=id;tripBackgroundAppliedSource=wantedSource;
-  };
-  img.src=candidate;
+  loadAndCommit(candidate,wantedSource);
 }
+
 function tripIconDescriptor(trip){
   const id=String(trip?.tripId||"");
   const explicit=String(trip?.tripIcon||trip?.icon||"").trim();
+  const media=trip?.tripIconMedia&&typeof trip.tripIconMedia==="object"?trip.tripIconMedia:null;
+  if(media&&String(media.storagePath||"").trim())return{type:"media",value:media,fallback:explicit,tripId:id};
   if(explicit)return{type:"image",value:explicit};
   const bundledId=dataTripId(bundledTripData);
   if(bundledId&&id===bundledId)return{type:"image",value:"assets/icon/trip_icon.png"};
@@ -5734,9 +5775,35 @@ function tripIconDescriptor(trip){
 }
 function tripIconMarkup(trip){
   const icon=tripIconDescriptor(trip);
+  if(icon.type==="media"){
+    const media=icon.value||{};
+    const attrs=[
+      `data-trip-media-icon="true"`,
+      `data-trip-media-trip="${tripLibraryEsc(icon.tripId||media.tripId||"")}"`,
+      `data-trip-media-storage="${tripLibraryEsc(media.storagePath||"")}"`,
+      `data-trip-media-thumbnail="${tripLibraryEsc(media.thumbnailStoragePath||"")}"`,
+      `data-trip-media-generation="${tripLibraryEsc(media.generation||"")}"`,
+      `data-trip-media-thumbnail-generation="${tripLibraryEsc(media.thumbnailGeneration||"")}"`,
+      `data-trip-media-id="${tripLibraryEsc(media.mediaId||media.imageId||"")}"`
+    ];
+    if(icon.fallback)attrs.push(`src="${tripLibraryEsc(icon.fallback)}"`);
+    return `<img ${attrs.join(" ")} alt="">`;
+  }
   if(icon.type==="image")return `<img src="${tripLibraryEsc(icon.value)}" alt="">`;
   if(icon.type==="emoji")return `<span class="trip-icon-emoji" aria-hidden="true">${tripLibraryEsc(icon.value)}</span>`;
   return `<span class="trip-icon-monogram" aria-hidden="true">${tripLibraryEsc(icon.value)}</span>`;
+}
+function hydrateTripLibraryMediaImages(root=document){
+  root.querySelectorAll?.('img[data-trip-media-icon="true"]').forEach(img=>{
+    if(img.dataset.tripMediaHydrated==="true")return;
+    img.dataset.tripMediaHydrated="true";
+    const descriptor={
+      tripId:img.dataset.tripMediaTrip||"",mediaId:img.dataset.tripMediaId||"",source:"storage",
+      storagePath:img.dataset.tripMediaStorage||"",thumbnailStoragePath:img.dataset.tripMediaThumbnail||"",
+      generation:img.dataset.tripMediaGeneration||"",thumbnailGeneration:img.dataset.tripMediaThumbnailGeneration||""
+    };
+    bindTripMediaImageElement(img,descriptor,{variant:"thumbnail",tripId:descriptor.tripId,fallbackSrc:img.getAttribute("src")||""});
+  });
 }
 function resetTripScopedUi(data){
   activeTeam="all";
@@ -6773,6 +6840,7 @@ function renderTripLibrary(){
   renderTripSwitcher();
   renderArchivedTrips();
   renderTripGlobalLockState();
+  hydrateTripLibraryMediaImages();
 }
 
 function stopArchivedTripSubscription(){}
@@ -7032,14 +7100,14 @@ function weatherRenderSignature(data){
 }
 function tripVisualRenderSignature(data){
   const meta=data?.meta||{};
-  return renderSignature({tripId:dataTripId(data),accentColor:meta.accentColor||"",featureColors:meta.featureColors||{},backgroundImage:meta.backgroundImage||"",coverImage:meta.coverImage||""},"");
+  return renderSignature({tripId:dataTripId(data),accentColor:meta.accentColor||"",featureColors:meta.featureColors||{},backgroundImage:meta.backgroundImage||"",coverImage:meta.coverImage||"",backgroundImageMedia:meta.backgroundImageMedia||null,coverImageMedia:meta.coverImageMedia||null},"");
 }
 function expensesRenderSignature(data){return renderSignature(data?.meta?.expenses||{},"");}
 function tripLibraryDataSignature(data){
   const meta=data?.meta||{};const days=Array.isArray(data?.days)?data.days:[];const snacks=Array.isArray(data?.snacks?.items)?data.snacks.items:[];
   return renderSignature({
     tripId:dataTripId(data),titleMain:meta.titleMain||"",titleSmall:meta.titleSmall||"",dateRange:meta.dateRange||"",
-    start:meta.tripStartIso||"",end:meta.tripEndIso||"",tripIcon:meta.tripIcon||"",backgroundImage:meta.backgroundImage||"",coverImage:meta.coverImage||"",
+    start:meta.tripStartIso||"",end:meta.tripEndIso||"",tripIcon:meta.tripIcon||"",backgroundImage:meta.backgroundImage||"",coverImage:meta.coverImage||"",tripIconMedia:meta.tripIconMedia||null,backgroundImageMedia:meta.backgroundImageMedia||null,coverImageMedia:meta.coverImageMedia||null,
     dayCount:days.length,itemCount:days.reduce((sum,day)=>sum+(Array.isArray(day?.items)?day.items.length:0),0),savedPlaceCount:snacks.length
   },"");
 }
@@ -7304,7 +7372,7 @@ function applyFirebaseTripData(data,{source="server",tripId="",dirtySections=[]}
   const snacksTouched=!sameTrip||dirtyUnknown||dirty.has("snacks")||["savedPlacesMeta","galleryDefaults"].some(generalField);
   const infoTouched=!sameTrip||["startDate","endDate"].some(tripField)||["travellers","cities","hotels","flights","outbound","inbound","infoCard"].some(generalField);
   const weatherTouched=!sameTrip||["startDate","endDate"].some(tripField)||["cities","weather"].some(generalField);
-  const visualTouched=!sameTrip||["accentColor","backgroundImage","coverImage"].some(tripField)||generalField("backgroundImage")||generalField("featureColors");
+  const visualTouched=!sameTrip||["accentColor","backgroundImage","coverImage","backgroundImageMedia","coverImageMedia"].some(tripField)||generalField("backgroundImage")||generalField("backgroundImageMedia")||generalField("coverImageMedia")||generalField("featureColors");
   const expensesTouched=!sameTrip||dirtyUnknown||dirty.has("expenses");
   const destinationThemeTouched=!sameTrip||generalField("cities");
   const teamThemeTouched=!sameTrip||generalField("travellers");
@@ -10393,7 +10461,7 @@ refreshCollapseMetrics();
 // Android / Chrome PWA support. Versioned app-shell Service Worker; normal launches are cache-first while explicit reloads stay network-first.
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("./sw.js?v=7.9.0.0").catch(() => {});
+    navigator.serviceWorker.register("./sw.js?v=7.9.1.0").catch(() => {});
   });
 }
 
