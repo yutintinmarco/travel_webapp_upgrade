@@ -1,3 +1,20 @@
+# v7.9.2.2 · Backup Export Escape Hatch / Firestore Resume Hardening
+
+## Phase 3A.3 hotfix
+
+* Replaced the unbounded Full Backup media-registry `getDocs()` dependency with a cancellable server-confirmed snapshot read that has a 12 second timeout.
+* Reuses a recent server-confirmed media-registry snapshot for immediate repeated exports and invalidates that snapshot on media upload, restore or delete.
+* If a refresh times out after a previously confirmed snapshot exists, the export can fall back to that last confirmed registry instead of deadlocking the PWA.
+* Full Backup export is now cancellable while busy. Cancel aborts the media-registry listener / package pipeline and closes the operation sheet; destructive Restore behaviour is unchanged.
+* Added a 90 second outer Full Backup package timeout so the operation always has an escape hatch even if an SDK promise never settles.
+* Media cache IndexedDB transaction completion handlers are attached before request awaits, removing the Safari transaction-event race.
+* Cache hits no longer rewrite the entire cached Blob just to touch LRU metadata; hot-session access time is tracked in memory instead.
+* Firebase Storage media reads now have bounded cache/download waits and no longer wait on best-effort IndexedDB writes after Storage bytes arrive.
+* ZIP CRC work is chunked with main-thread yields so large media packages keep the UI repainting and cancellation responsive.
+* Removed the double `requestAnimationFrame` prerequisite before repeat export; background-throttled rAF can no longer block the next export.
+* Backup progress now distinguishes media-registry confirmation, media collection and ZIP construction.
+* Restore picker / ZIP parser are unchanged from v7.9.2.1 because Restore passed real-device testing.
+
 # v7.9.2.1 · iOS Backup Export / Restore Hotfix
 
 ## Scope

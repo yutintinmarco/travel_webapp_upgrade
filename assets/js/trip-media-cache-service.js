@@ -1,5 +1,5 @@
 /*
- * v7.9.0.0 · Phase 3A.1 Media Cache Foundation
+ * v7.9.2.2 · Phase 3A Media Cache Safari Transaction Hardening
  *
  * Trip media blobs are cached separately from Firestore's own persistence.
  * This cache is best-effort only: Firebase Storage remains authoritative.
@@ -12,6 +12,7 @@ const DEFAULT_MAX_BYTES = 64 * 1024 * 1024;
 const DEFAULT_MAX_AGE_MS = 45 * 24 * 60 * 60 * 1000;
 
 let databasePromise = null;
+const memoryLastAccessedAt = new Map();
 
 function clean(value) { return String(value ?? "").trim(); }
 function finiteNumber(value, fallback = 0) {
@@ -66,8 +67,9 @@ export async function getTripMediaCache(storagePathInput, { generation = "" } = 
   if (!database) return null;
   try {
     const readTransaction = database.transaction(MEDIA_CACHE_STORE, "readonly");
+    const readDone = transactionDone(readTransaction);
     const record = await requestPromise(readTransaction.objectStore(MEDIA_CACHE_STORE).get(storagePath));
-    await transactionDone(readTransaction);
+    await readDone;
     if (!record?.blob) return null;
     const expectedGeneration = clean(generation);
     if (expectedGeneration && clean(record.generation) && clean(record.generation) !== expectedGeneration) {
@@ -75,15 +77,13 @@ export async function getTripMediaCache(storagePathInput, { generation = "" } = 
       return null;
     }
 
-    // Safari can close IndexedDB transactions aggressively after an awaited
-    // request. Touch LRU metadata in a fresh best-effort transaction instead
-    // of keeping the original read transaction open across a Promise turn.
-    try {
-      record.lastAccessedAt = Date.now();
-      const touchTransaction = database.transaction(MEDIA_CACHE_STORE, "readwrite");
-      touchTransaction.objectStore(MEDIA_CACHE_STORE).put(record);
-      await transactionDone(touchTransaction);
-    } catch (touchError) {}
+    // Do not rewrite the whole cached Blob merely to touch LRU metadata.
+    // Safari/iOS can duplicate large Blob IO here, which is especially costly
+    // during a second Full Backup when every media item is already cached.
+    // Keep the hot-session access time in memory and leave the persisted Blob
+    // untouched. Persistent pruning can still fall back to cachedAt.
+    const accessedAt = Date.now();
+    memoryLastAccessedAt.set(storagePath, accessedAt);
 
     return {
       blob: record.blob,
@@ -95,7 +95,7 @@ export async function getTripMediaCache(storagePathInput, { generation = "" } = 
       mediaId: clean(record.mediaId),
       variant: clean(record.variant || "display"),
       cachedAt: finiteNumber(record.cachedAt),
-      lastAccessedAt: finiteNumber(record.lastAccessedAt)
+      lastAccessedAt: Math.max(finiteNumber(record.lastAccessedAt), finiteNumber(memoryLastAccessedAt.get(storagePath)))
     };
   } catch (error) {
     console.warn("Unable to read Trip media cache", error);
@@ -117,6 +117,7 @@ export async function putTripMediaCache(storagePathInput, blob, {
   try {
     const now = Date.now();
     const transaction = database.transaction(MEDIA_CACHE_STORE, "readwrite");
+    const done = transactionDone(transaction);
     transaction.objectStore(MEDIA_CACHE_STORE).put({
       storagePath,
       blob,
@@ -129,7 +130,8 @@ export async function putTripMediaCache(storagePathInput, blob, {
       cachedAt: now,
       lastAccessedAt: now
     });
-    await transactionDone(transaction);
+    await done;
+    memoryLastAccessedAt.set(storagePath, now);
     return true;
   } catch (error) {
     console.warn("Unable to write Trip media cache", error);
@@ -144,8 +146,10 @@ export async function removeTripMediaCache(storagePathInput) {
   if (!database) return false;
   try {
     const transaction = database.transaction(MEDIA_CACHE_STORE, "readwrite");
+    const done = transactionDone(transaction);
     transaction.objectStore(MEDIA_CACHE_STORE).delete(storagePath);
-    await transactionDone(transaction);
+    await done;
+    memoryLastAccessedAt.delete(storagePath);
     return true;
   } catch (error) {
     console.warn("Unable to remove Trip media cache entry", error);
@@ -160,26 +164,32 @@ export async function clearTripMediaCache({ tripId = "" } = {}) {
   try {
     if (!safeTripId) {
       const countTransaction = database.transaction(MEDIA_CACHE_STORE, "readonly");
+      const countDone = transactionDone(countTransaction);
       const count = await requestPromise(countTransaction.objectStore(MEDIA_CACHE_STORE).count());
-      await transactionDone(countTransaction);
+      await countDone;
       const clearTransaction = database.transaction(MEDIA_CACHE_STORE, "readwrite");
+      const clearDone = transactionDone(clearTransaction);
       clearTransaction.objectStore(MEDIA_CACHE_STORE).clear();
-      await transactionDone(clearTransaction);
+      await clearDone;
+      memoryLastAccessedAt.clear();
       return finiteNumber(count);
     }
 
     const readTransaction = database.transaction(MEDIA_CACHE_STORE, "readonly");
+    const readTransactionDone = transactionDone(readTransaction);
     const records = await requestPromise(readTransaction.objectStore(MEDIA_CACHE_STORE).getAll());
-    await transactionDone(readTransaction);
+    await readTransactionDone;
     const paths = records
       .filter(record => clean(record?.tripId) === safeTripId)
       .map(record => clean(record?.storagePath))
       .filter(Boolean);
     if (!paths.length) return 0;
     const deleteTransaction = database.transaction(MEDIA_CACHE_STORE, "readwrite");
+    const deleteDone = transactionDone(deleteTransaction);
     const store = deleteTransaction.objectStore(MEDIA_CACHE_STORE);
     paths.forEach(path => store.delete(path));
-    await transactionDone(deleteTransaction);
+    await deleteDone;
+    paths.forEach(path => memoryLastAccessedAt.delete(path));
     return paths.length;
   } catch (error) {
     console.warn("Unable to clear Trip media cache", error);
@@ -197,8 +207,9 @@ export async function pruneTripMediaCache({
   const ageLimit = Math.max(24 * 60 * 60 * 1000, finiteNumber(maxAgeMs, DEFAULT_MAX_AGE_MS));
   try {
     const readTransaction = database.transaction(MEDIA_CACHE_STORE, "readonly");
+    const readTransactionDone = transactionDone(readTransaction);
     const records = await requestPromise(readTransaction.objectStore(MEDIA_CACHE_STORE).getAll());
-    await transactionDone(readTransaction);
+    await readTransactionDone;
 
     const now = Date.now();
     let totalBytes = records.reduce((sum, record) => sum + finiteNumber(record?.byteSize || record?.blob?.size), 0);
@@ -214,13 +225,13 @@ export async function pruneTripMediaCache({
     };
 
     records
-      .filter(record => now - finiteNumber(record?.lastAccessedAt || record?.cachedAt) > ageLimit)
+      .filter(record => now - Math.max(finiteNumber(record?.lastAccessedAt || record?.cachedAt), finiteNumber(memoryLastAccessedAt.get(clean(record?.storagePath)))) > ageLimit)
       .forEach(markForDelete);
 
     if (totalBytes > budget) {
       const candidates = records
         .filter(record => !paths.has(clean(record?.storagePath)))
-        .sort((a, b) => finiteNumber(a?.lastAccessedAt || a?.cachedAt) - finiteNumber(b?.lastAccessedAt || b?.cachedAt));
+        .sort((a, b) => Math.max(finiteNumber(a?.lastAccessedAt || a?.cachedAt), finiteNumber(memoryLastAccessedAt.get(clean(a?.storagePath)))) - Math.max(finiteNumber(b?.lastAccessedAt || b?.cachedAt), finiteNumber(memoryLastAccessedAt.get(clean(b?.storagePath)))));
       for (const record of candidates) {
         if (totalBytes <= budget) break;
         markForDelete(record);
@@ -229,9 +240,11 @@ export async function pruneTripMediaCache({
 
     if (paths.size) {
       const deleteTransaction = database.transaction(MEDIA_CACHE_STORE, "readwrite");
+      const deleteDone = transactionDone(deleteTransaction);
       const store = deleteTransaction.objectStore(MEDIA_CACHE_STORE);
       paths.forEach(path => store.delete(path));
-      await transactionDone(deleteTransaction);
+      await deleteDone;
+      paths.forEach(path => memoryLastAccessedAt.delete(path));
     }
     return { deleted: paths.size, bytesFreed, remainingBytes: totalBytes };
   } catch (error) {
@@ -245,8 +258,9 @@ export async function getTripMediaCacheStats() {
   if (!database) return { entries: 0, bytes: 0, available: false };
   try {
     const transaction = database.transaction(MEDIA_CACHE_STORE, "readonly");
+    const done = transactionDone(transaction);
     const records = await requestPromise(transaction.objectStore(MEDIA_CACHE_STORE).getAll());
-    await transactionDone(transaction);
+    await done;
     return {
       entries: records.length,
       bytes: records.reduce((sum, record) => sum + finiteNumber(record?.byteSize || record?.blob?.size), 0),

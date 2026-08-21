@@ -1,5 +1,5 @@
 /*
- * v7.9.2.0 · Phase 3A Media Foundation + Backup Restore Bridge
+ * v7.9.2.2 · Phase 3A Media Foundation + Backup Export Resilience
  *
  * This module deliberately has no UI dependency. It provides one canonical
  * Trip media namespace, client-side image compression, Storage upload/download,
@@ -15,6 +15,7 @@ import {
   doc,
   getDoc,
   getDocs,
+  onSnapshot,
   serverTimestamp,
   setDoc
 } from "./firestore-observed-service.js";
@@ -51,6 +52,72 @@ export const TRIP_MEDIA_LIMITS = Object.freeze({
 
 const storage = getStorage(firebaseApp);
 const OWNER_TYPES = new Set(Object.values(TRIP_MEDIA_OWNER_TYPES));
+
+
+const BACKUP_REGISTRY_SNAPSHOT_MAX_AGE_MS = 90 * 1000;
+const backupRegistrySnapshots = new Map();
+
+function abortError(stage = "media-operation") {
+  const error = new Error(`${stage} cancelled`);
+  error.code = "operation-aborted";
+  error.stage = stage;
+  return error;
+}
+function timeoutError(stage = "media-operation", timeoutMs = 0) {
+  const error = new Error(`${stage} timed out`);
+  error.code = "media-operation-timeout";
+  error.stage = stage;
+  error.timeoutMs = timeoutMs;
+  return error;
+}
+function throwIfAborted(signal, stage = "media-operation") {
+  if (signal?.aborted) throw abortError(stage);
+}
+async function awaitWithTimeout(promise, { timeoutMs = 0, signal = null, stage = "media-operation", fallbackOnTimeout = undefined } = {}) {
+  throwIfAborted(signal, stage);
+  const timeout = Math.max(0, finiteNumber(timeoutMs));
+  let timer = null;
+  let abortHandler = null;
+  try {
+    const races = [Promise.resolve(promise)];
+    if (timeout > 0) races.push(new Promise((resolve, reject) => {
+      timer = setTimeout(() => {
+        if (fallbackOnTimeout !== undefined) resolve(fallbackOnTimeout);
+        else reject(timeoutError(stage, timeout));
+      }, timeout);
+    }));
+    if (signal) races.push(new Promise((_, reject) => {
+      abortHandler = () => reject(abortError(stage));
+      signal.addEventListener("abort", abortHandler, { once: true });
+    }));
+    return await Promise.race(races);
+  } finally {
+    if (timer) clearTimeout(timer);
+    if (signal && abortHandler) signal.removeEventListener("abort", abortHandler);
+  }
+}
+function sortedRegistryRecords(snapshot) {
+  return snapshot.docs.map(registryRecordFromSnapshot).sort((a, b) => {
+    const order = finiteNumber(a.sortOrder) - finiteNumber(b.sortOrder);
+    return order || a.mediaId.localeCompare(b.mediaId);
+  });
+}
+function invalidateBackupRegistrySnapshot(tripIdInput) {
+  const tripId = clean(tripIdInput);
+  if (tripId) backupRegistrySnapshots.delete(tripId);
+}
+function rememberBackupRegistrySnapshot(tripId, records) {
+  backupRegistrySnapshots.set(tripId, {
+    records: records.map(record => ({ ...record })),
+    serverConfirmedAt: Date.now()
+  });
+}
+function readFreshBackupRegistrySnapshot(tripId, maxAgeMs = BACKUP_REGISTRY_SNAPSHOT_MAX_AGE_MS) {
+  const cached = backupRegistrySnapshots.get(tripId);
+  if (!cached) return null;
+  if (Date.now() - finiteNumber(cached.serverConfirmedAt) > Math.max(1000, finiteNumber(maxAgeMs, BACKUP_REGISTRY_SNAPSHOT_MAX_AGE_MS))) return null;
+  return { records: cached.records.map(record => ({ ...record })), serverConfirmedAt: cached.serverConfirmedAt };
+}
 
 function clean(value) { return String(value ?? "").trim(); }
 function finiteNumber(value, fallback = 0) {
@@ -326,6 +393,7 @@ export async function uploadTripImage({
   const displayPath = `trips/${tripId}/media/${folder}/display.${extensionForMime(variants.display.contentType)}`;
   const thumbnailPath = `trips/${tripId}/media/${folder}/thumb.${extensionForMime(variants.thumbnail.contentType)}`;
   const uploadedPaths = [displayPath, thumbnailPath];
+  invalidateBackupRegistrySnapshot(tripId);
   const registryRef = doc(db, "trips", tripId, "media", mediaId);
   let registryCreated = false;
 
@@ -461,6 +529,7 @@ export async function restoreTripMediaRecord(recordInput, {
   }
 
   const user = await requireUser(userInput);
+  invalidateBackupRegistrySnapshot(tripId);
   const registryRef = doc(db, "trips", tripId, "media", mediaId);
   const existingSnap = await getDoc(registryRef);
   const existing = existingSnap.exists() ? existingSnap.data() || {} : null;
@@ -567,9 +636,72 @@ export async function listTripMediaRecords(tripIdInput) {
   const tripId = clean(tripIdInput);
   if (!tripId) return [];
   const snapshot = await getDocs(collection(db, "trips", tripId, "media"));
-  return snapshot.docs.map(registryRecordFromSnapshot).sort((a, b) => {
-    const order = finiteNumber(a.sortOrder) - finiteNumber(b.sortOrder);
-    return order || a.mediaId.localeCompare(b.mediaId);
+  const records = sortedRegistryRecords(snapshot);
+  if (snapshot?.metadata?.fromCache !== true) rememberBackupRegistrySnapshot(tripId, records);
+  return records;
+}
+
+export async function listTripMediaRecordsForBackup(tripIdInput, {
+  timeoutMs = 12000,
+  signal = null,
+  maxCachedAgeMs = BACKUP_REGISTRY_SNAPSHOT_MAX_AGE_MS,
+  allowLastConfirmedFallback = true,
+  maxFallbackAgeMs = 5 * 60 * 1000
+} = {}) {
+  const tripId = clean(tripIdInput);
+  if (!tripId) return { records: [], source: "empty", serverConfirmedAt: 0, stale: false };
+  throwIfAborted(signal, "media-registry");
+
+  const fresh = readFreshBackupRegistrySnapshot(tripId, maxCachedAgeMs);
+  if (fresh) {
+    return { records: fresh.records, source: "session-server-confirmed", serverConfirmedAt: fresh.serverConfirmedAt, stale: false };
+  }
+  const prior = backupRegistrySnapshots.get(tripId) || null;
+  const reference = collection(db, "trips", tripId, "media");
+
+  return await new Promise((resolve, reject) => {
+    let settled = false;
+    let unsubscribe = () => {};
+    let timer = null;
+    let abortHandler = null;
+    const finish = (callback, value) => {
+      if (settled) return;
+      settled = true;
+      if (timer) clearTimeout(timer);
+      if (signal && abortHandler) signal.removeEventListener("abort", abortHandler);
+      try { unsubscribe(); } catch (error) {}
+      callback(value);
+    };
+    const fallbackOrReject = error => {
+      const priorAge = prior ? Date.now() - finiteNumber(prior.serverConfirmedAt) : Number.POSITIVE_INFINITY;
+      if (allowLastConfirmedFallback && prior?.records && priorAge <= Math.max(1000, finiteNumber(maxFallbackAgeMs, 5 * 60 * 1000))) {
+        finish(resolve, {
+          records: prior.records.map(record => ({ ...record })),
+          source: "last-server-confirmed",
+          serverConfirmedAt: finiteNumber(prior.serverConfirmedAt),
+          stale: true,
+          fallbackReason: clean(error?.code || error?.message)
+        });
+        return;
+      }
+      finish(reject, error);
+    };
+
+    timer = setTimeout(() => fallbackOrReject(timeoutError("media-registry", timeoutMs)), Math.max(1000, finiteNumber(timeoutMs, 12000)));
+    if (signal) {
+      abortHandler = () => finish(reject, abortError("media-registry"));
+      signal.addEventListener("abort", abortHandler, { once: true });
+    }
+    try {
+      unsubscribe = onSnapshot(reference, { includeMetadataChanges: true }, snapshot => {
+        if (snapshot?.metadata?.fromCache === true || snapshot?.metadata?.hasPendingWrites === true) return;
+        const records = sortedRegistryRecords(snapshot);
+        rememberBackupRegistrySnapshot(tripId, records);
+        finish(resolve, { records, source: "server", serverConfirmedAt: Date.now(), stale: false });
+      }, error => fallbackOrReject(error));
+    } catch (error) {
+      fallbackOrReject(error);
+    }
   });
 }
 
@@ -593,22 +725,42 @@ function mediaVariant(record, variantInput) {
   };
 }
 
-export async function getTripMediaBlob(record, { variant = "display", useCache = true } = {}) {
+export async function getTripMediaBlob(record, {
+  variant = "display",
+  useCache = true,
+  signal = null,
+  cacheTimeoutMs = 1800,
+  downloadTimeoutMs = 20000
+} = {}) {
   const selected = mediaVariant(record || {}, variant);
   if (!selected.storagePath) throw errorWithCode("Missing media storage path", "invalid-media-record");
+  throwIfAborted(signal, "media-download");
   if (useCache) {
-    const cached = await getTripMediaCache(selected.storagePath, { generation: selected.generation });
+    const cached = await awaitWithTimeout(
+      getTripMediaCache(selected.storagePath, { generation: selected.generation }),
+      { timeoutMs: cacheTimeoutMs, signal, stage: "media-cache", fallbackOnTimeout: null }
+    ).catch(error => {
+      if (error?.code === "operation-aborted") throw error;
+      console.warn("Trip media cache read skipped", selected.storagePath, error);
+      return null;
+    });
     if (cached?.blob) return { ...selected, blob: cached.blob, fromCache: true };
   }
-  const blob = await getBlob(ref(storage, selected.storagePath), TRIP_MEDIA_LIMITS.downloadMaxBytes);
+  const blob = await awaitWithTimeout(
+    getBlob(ref(storage, selected.storagePath), TRIP_MEDIA_LIMITS.downloadMaxBytes),
+    { timeoutMs: downloadTimeoutMs, signal, stage: "media-download" }
+  );
+  throwIfAborted(signal, "media-download");
   if (useCache) {
-    await putTripMediaCache(selected.storagePath, blob, {
+    // Cache writes are best-effort. Never keep a user-facing media read waiting
+    // on IndexedDB after the authoritative Storage bytes have arrived.
+    void putTripMediaCache(selected.storagePath, blob, {
       generation: selected.generation,
       contentType: selected.contentType || blob.type,
       tripId: clean(record?.tripId),
       mediaId: clean(record?.mediaId),
       variant: selected.variant
-    });
+    }).catch(() => {});
   }
   return { ...selected, blob, fromCache: false };
 }
@@ -651,6 +803,7 @@ export async function deleteTripMedia(record, { user: userInput = null } = {}) {
     await removeTripMediaCache(path);
   }
   await deleteDoc(doc(db, "trips", tripId, "media", mediaId));
+  invalidateBackupRegistrySnapshot(tripId);
   return { tripId, mediaId, deleted: true };
 }
 

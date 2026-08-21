@@ -3335,7 +3335,7 @@ body.expenses-view-active #app-version-note{
 #snacks-view::after,
 #info-view::after,
 #profile-view::after{
-  content:"v7.9.2.1" !important;
+  content:"v7.9.2.2" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3356,7 +3356,7 @@ body.expenses-view-active #app-version-note{
   display:none !important;
 }
 body.expenses-view-active .expenses-module .expenses-app::after{
-  content:"v7.9.2.1" !important;
+  content:"v7.9.2.2" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -4309,7 +4309,7 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
         <span class="profile-detail-spacer"></span>
       </div>
       <section class="profile-card" aria-label="App 資訊">
-        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.9.2.1</strong></div>
+        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.9.2.2</strong></div>
         <div class="profile-meta-row"><span>資料架構</span><strong>Phase 2G.2</strong></div>
         <div class="profile-meta-row"><span>主要資料來源</span><strong id="app-data-source-label">Firebase / 本機快取</strong></div>
       </section>
@@ -4486,7 +4486,7 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
 </div>
 
 <script>
-const APP_VERSION = "7.9.2.1";
+const APP_VERSION = "7.9.2.2";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 function perfLiteMark(name){try{return window.__perfLite?.mark(name);}catch(error){return null;}}
@@ -8346,7 +8346,8 @@ let tripBackupPackageServicePromise=null;
 let tripBackupSnapshots=[];
 let tripBackupSelectedSnapshot=null;
 let tripBackupBusy=false;
-let dataOperationState={kind:"",busy:false,done:false,payload:null,scope:"all",handler:null};
+let dataOperationState={kind:"",busy:false,done:false,payload:null,scope:"all",handler:null,cancellable:false,abortController:null,runToken:0};
+let dataOperationRunToken=0;
 let tripDeleteBackupState={tripId:"",archiveGrade:false,preparedAt:0,filename:""};
 let tripDeleteServicePromise=null;
 let tripDeleteResumeTimer=0;
@@ -8568,6 +8569,8 @@ function backupFriendlyError(error){
   if(error?.code==="delete-interrupted"||error?.code==="functions/internal")return `永久刪除喺「${permanentDeleteStageLabel(error?.details?.stage||error?.customData?.details?.stage)}」受阻。清理流程可以重試；請保持連線後再次執行永久刪除。`;
   if(error?.code==="functions/permission-denied")return "只有 Trip Owner 可以永久刪除旅程。";
   if(error?.code==="functions/unauthenticated")return "請先登入 Google 帳戶。";
+  if(error?.code==="operation-aborted")return "操作已取消。";
+  if(error?.code==="media-operation-timeout")return "Firebase 媒體讀取逾時，請保持網絡連線後再試。";
   const rawMessage=String(error?.message||"");
   if(tripCloudOffline())return "目前離線，無法完成呢個資料操作。請重新連線後再試。";
   if(/module script failed|failed to fetch dynamically imported module/i.test(rawMessage))return "資料管理模組未能載入。請重新整理 App 後再試。";
@@ -8585,19 +8588,19 @@ function backupPrepareJsonDownload(json,filename){
     filename:filename||"trip.json"
   };
 }
-async function prepareMediaAwareFullBackupPackage(result,{stagePrefix="Backup",onProgress=null}={}){
+async function prepareMediaAwareFullBackupPackage(result,{stagePrefix="Backup",onProgress=null,signal=null}={}){
   const backupService=await getTripBackupService();
   const packageService=await getTripBackupPackageService();
   const tripId=String(result?.tripId||result?.json?.tripId||"").trim();
-  const collected=await packageService.collectTripMediaForBackup(tripId,{onProgress:progress=>{
+  const collected=await packageService.collectTripMediaForBackup(tripId,{signal,onProgress:progress=>{
     if(typeof onProgress==="function")onProgress(progress);
   }});
   const manifest=packageService.mediaManifestFromCollected(collected);
   const finalJson=await backupService.withFullBackupMediaManifest(result.json,manifest);
   const revision=Math.max(1,Number(result?.revision||finalJson?.sourceRevision)||1);
   const filename=`${tripId}-full-backup-v1-r${revision}.zip`;
-  const packaged=await packageService.buildFullBackupPackage(finalJson,collected,{filename});
-  return {...packaged,tripId,revision,mediaCount:collected.mediaCount||0,mediaBytes:collected.totalBytes||0,json:finalJson};
+  const packaged=await packageService.buildFullBackupPackage(finalJson,collected,{filename,signal,onProgress:progress=>{if(typeof onProgress==="function")onProgress(progress);}});
+  return {...packaged,tripId,revision,mediaCount:collected.mediaCount||0,mediaBytes:collected.totalBytes||0,registrySource:collected.registrySource||"",registryStale:collected.registryStale===true,json:finalJson};
 }
 let activeBackupDownloadObjectUrl="";
 let activeBackupDownloadReleaseTimer=null;
@@ -8606,15 +8609,19 @@ function releaseBackupDownloadObjectUrl(){
   const url=activeBackupDownloadObjectUrl;activeBackupDownloadObjectUrl="";
   if(url){try{URL.revokeObjectURL(url);}catch(error){}}
 }
-async function prepareForNextBackupExport(){
-  // If the user immediately exports again, stop retaining the previous ZIP
-  // Object URL before building another package. Give iOS one short idle turn
-  // after the download handoff so WebKit can release its previous buffers.
+async function prepareForNextBackupExport(signal=null){
+  // Never wait on requestAnimationFrame here. iOS can suspend rAF while the
+  // previous file/share handoff is covering the PWA, which turns a harmless
+  // cleanup pause into an unbounded wait on the next export.
   releaseBackupDownloadObjectUrl();
   const last=Number(window.__lastDataOperationDownloadHandoffAt)||0;
-  const wait=Math.max(0,Math.min(700,900-(Date.now()-last)));
-  if(wait>0)await new Promise(resolve=>setTimeout(resolve,wait));
-  await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+  const wait=Math.max(0,Math.min(500,650-(Date.now()-last)));
+  if(signal?.aborted){const error=new Error("Backup export cancelled");error.code="operation-aborted";throw error;}
+  if(wait>0)await new Promise((resolve,reject)=>{
+    const timer=setTimeout(resolve,wait);
+    if(signal)signal.addEventListener("abort",()=>{clearTimeout(timer);const error=new Error("Backup export cancelled");error.code="operation-aborted";reject(error);},{once:true});
+  });
+  await Promise.resolve();
 }
 function backupDownloadBlob(blob,filename){
   if(!(blob instanceof Blob))throw new Error("Download payload is unavailable.");
@@ -8731,7 +8738,7 @@ function dataOperationSetError(message=""){
 }
 function dataOperationOpen(config={}){
   const el=dataOperationElements();
-  dataOperationState={kind:config.kind||"",busy:false,done:false,payload:config.payload||null,scope:config.scope||"all",handler:config.handler||null};
+  dataOperationState={kind:config.kind||"",busy:false,done:false,payload:config.payload||null,scope:config.scope||"all",handler:config.handler||null,cancellable:config.cancellable===true,abortController:null,runToken:0};
   el.title.textContent=config.title||"資料管理";el.subtitle.textContent=config.subtitle||"確認內容後再繼續。";
   el.name.textContent=config.name||"目前旅程";el.id.textContent=config.id||`tripId · ${currentBackupTripId()||"—"}`;
   dataOperationSetStats(config.stats||[]);
@@ -8748,9 +8755,13 @@ function dataOperationOpen(config={}){
   el.backdrop.classList.add("active");el.backdrop.setAttribute("aria-hidden","false");document.body.classList.add("modal-open");
 }
 function dataOperationClose(){
-  if(dataOperationState.busy)return;
+  if(dataOperationState.busy){
+    if(!dataOperationState.cancellable)return;
+    try{dataOperationState.abortController?.abort();}catch(error){}
+    dataOperationRunToken+=1;
+  }
   const el=dataOperationElements();el.backdrop?.classList.remove("active");el.backdrop?.setAttribute("aria-hidden","true");document.body.classList.remove("modal-open");
-  dataOperationState={kind:"",busy:false,done:false,payload:null,scope:"all",handler:null};
+  dataOperationState={kind:"",busy:false,done:false,payload:null,scope:"all",handler:null,cancellable:false,abortController:null,runToken:0};
 }
 function dataOperationMarkDone({title="完成",detail="操作已完成。"}={}){
   const el=dataOperationElements();dataOperationState.done=true;dataOperationState.busy=false;
@@ -8759,7 +8770,7 @@ function dataOperationMarkDone({title="完成",detail="操作已完成。"}={}){
   if(el.progress){el.progress.hidden=true;}
 }
 function dataOperationSetBusy(busy,detail=""){
-  const el=dataOperationElements();dataOperationState.busy=busy;el.cancel.disabled=busy;el.confirm.disabled=busy;
+  const el=dataOperationElements();dataOperationState.busy=busy;el.cancel.disabled=busy&&!dataOperationState.cancellable;el.confirm.disabled=busy;
   if(busy&&detail)el.mode.innerHTML=`<strong>處理中</strong><br>${escapeHtmlText(detail)}`;
   if(el.progress){el.progress.hidden=!busy;const bar=el.progress.querySelector("span");if(bar)bar.style.width=busy?"8%":"0%";}
 }
@@ -8778,24 +8789,25 @@ function dataOperationStageTimeout(stage,timeoutMs){
   error.timeoutMs=timeoutMs;
   return error;
 }
-async function dataOperationAwait(promise,{stage="處理中",detail="",percent=18,timeoutMs=12000}={}){
+async function dataOperationAwait(promise,{stage="處理中",detail="",percent=18,timeoutMs=12000,abortController=null}={}){
   dataOperationSetStage(stage,detail,percent);
   let timer=null;
   try{
     return await Promise.race([
       Promise.resolve(promise),
-      new Promise((_,reject)=>{timer=setTimeout(()=>reject(dataOperationStageTimeout(stage,timeoutMs)),Math.max(1000,timeoutMs));})
+      new Promise((_,reject)=>{timer=setTimeout(()=>{try{abortController?.abort();}catch(error){}reject(dataOperationStageTimeout(stage,timeoutMs));},Math.max(1000,timeoutMs));})
     ]);
   }finally{if(timer)clearTimeout(timer);}
 }
-function dataOperationBaseConfig({kind,title,subtitle,mode,confirmLabel,typeLabel="Data",warnings=[],handler}={}){
+function dataOperationBaseConfig({kind,title,subtitle,mode,confirmLabel,typeLabel="Data",warnings=[],cancellable=false,handler}={}){
   const summary=dataOperationCurrentSummary();
-  return {kind,title,subtitle,name:summary.title,id:`tripId · ${summary.tripId||"—"}`,stats:[{value:summary.dayCount,label:"Days"},{value:summary.itemCount,label:"Items"},{value:summary.savedPlaceCount,label:"Saved"},{value:typeLabel,label:"Type"}],mode,warnings,confirmLabel,handler};
+  return {kind,title,subtitle,name:summary.title,id:`tripId · ${summary.tripId||"—"}`,stats:[{value:summary.dayCount,label:"Days"},{value:summary.itemCount,label:"Items"},{value:summary.savedPlaceCount,label:"Saved"},{value:typeLabel,label:"Type"}],mode,warnings,confirmLabel,cancellable,handler};
 }
 function openFullBackupExportOperation(){
-  dataOperationOpen(dataOperationBaseConfig({kind:"export-full",title:"匯出完整 Backup",subtitle:"建立可供完整還原嘅 Data + Media Backup Package。",typeLabel:"Full",mode:"包含行程、收藏、一般設定、支出、找數、操作記錄及 Firebase Storage media。",warnings:["在線時會建立 Media-aware ZIP；如果目前離線，仍可建立 Last Synced Data Only JSON，但不包含媒體 bytes。"],confirmLabel:"匯出 Backup",handler:async()=>{
+  dataOperationOpen(dataOperationBaseConfig({kind:"export-full",title:"匯出完整 Backup",subtitle:"建立可供完整還原嘅 Data + Media Backup Package。",typeLabel:"Full",mode:"包含行程、收藏、一般設定、支出、找數、操作記錄及 Firebase Storage media。",warnings:["在線時會建立 Media-aware ZIP；如果目前離線，仍可建立 Last Synced Data Only JSON，但不包含媒體 bytes。"],confirmLabel:"匯出 Backup",cancellable:true,handler:async()=>{
     dataOperationSetStage("準備匯出","正在釋放上一份 Backup 嘅下載資源。",8);
-    await prepareForNextBackupExport();
+    const operationSignal=dataOperationState.abortController?.signal||null;
+    await prepareForNextBackupExport(operationSignal);
     const service=await dataOperationAwait(getTripBackupService(),{stage:"載入備份引擎",detail:"正在準備資料管理模組。",percent:12,timeoutMs:8000});
     const localPack=await dataOperationAwait(prepareDataManagementLocalExports(),{stage:"準備本機資料",detail:"正在確認行程、支出及版本資料已完整同步。",percent:30,timeoutMs:22000});
     const frozen=refreshLocalExportCapture(localPack);
@@ -8807,14 +8819,23 @@ function openFullBackupExportOperation(){
       dataOperationSetStage("準備下載","Data Only 檔案已建立，準備交畀 iOS。",94);
       return {title:"Backup 已匯出",detail:`${freshnessLabel} · Data Only · ${result.counts.dayCount||0} Days · ${result.counts.expenseCount||0} Expenses`,download:()=>backupDownloadBlob(prepared.blob,prepared.filename)};
     }
-    dataOperationSetStage("收集媒體","正在讀取 Firebase Storage media。",48);
-    const packaged=await prepareMediaAwareFullBackupPackage(result,{onProgress:progress=>{
-      const total=Math.max(1,Number(progress?.total)||1),completed=Math.max(0,Number(progress?.completed)||0);
-      dataOperationSetStage("收集媒體",`正在封裝媒體 ${Math.min(total,completed+1)} / ${total}。`,48+Math.min(24,(completed/total)*24));
-    }});
-    dataOperationSetStage("建立 Backup Package","正在建立 ZIP 同完整性 manifest。",80);
+    const packaged=await dataOperationAwait(prepareMediaAwareFullBackupPackage(result,{signal:operationSignal,onProgress:progress=>{
+      const stage=String(progress?.stage||"");
+      const total=Math.max(0,Number(progress?.total)||0),completed=Math.max(0,Number(progress?.completed)||0);
+      if(stage==="registry-read"){dataOperationSetStage("確認媒體清單","正在確認 Firebase media registry。",48);return;}
+      if(stage==="registry-ready"){dataOperationSetStage("媒體清單已確認",total?`準備封裝 ${total} 個媒體項目。`:`目前旅程未有 Firebase Storage media。`,52);return;}
+      if(stage==="media-download"){
+        const ratio=total?Math.min(1,completed/total):1;
+        dataOperationSetStage("收集媒體",total?`正在封裝媒體 ${Math.min(total,completed+1)} / ${total}。`:`媒體收集完成。`,54+ratio*20);return;
+      }
+      if(stage==="zip-start"){dataOperationSetStage("建立 Backup Package","正在建立 ZIP 同完整性 manifest。",78);return;}
+      if(stage==="zip-entry"||stage==="zip-build"){
+        const ratio=total?Math.min(1,completed/total):0;
+        dataOperationSetStage("建立 Backup Package",`正在封裝 ZIP ${Math.round(ratio*100)}%。`,80+ratio*12);
+      }
+    }}),{stage:"建立完整 Backup",detail:"正在收集媒體並建立 ZIP。",percent:48,timeoutMs:90000,abortController:dataOperationState.abortController});
     dataOperationSetStage("準備下載","Media Backup Package 已建立，準備交畀 iOS。",94);
-    return {title:"Backup 已匯出",detail:`${freshnessLabel} · ${packaged.mediaCount||0} Media · ${result.counts.expenseCount||0} Expenses · ${result.counts.settlementCount||0} Settlements`,download:()=>backupDownloadBlob(packaged.blob,packaged.filename)};
+    return {title:"Backup 已匯出",detail:`${freshnessLabel}${packaged.registryStale?" · Media Last Confirmed":""} · ${packaged.mediaCount||0} Media · ${result.counts.expenseCount||0} Expenses · ${result.counts.settlementCount||0} Settlements`,download:()=>backupDownloadBlob(packaged.blob,packaged.filename)};
   }}));
 }
 function openTripJsonExportOperation(){
@@ -9004,15 +9025,21 @@ document.getElementById("data-operation-confirm")?.addEventListener("click",asyn
   const el=dataOperationElements();
   if(dataOperationState.done){dataOperationClose();return;}
   if(dataOperationState.busy||typeof dataOperationState.handler!=="function")return;
-  dataOperationSetError("");dataOperationSetBusy(true,"請保持 App 開啟，完成前請勿重複操作。");
+  dataOperationSetError("");
+  const runToken=++dataOperationRunToken;
+  dataOperationState.runToken=runToken;
+  dataOperationState.abortController=dataOperationState.cancellable?new AbortController():null;
+  dataOperationSetBusy(true,dataOperationState.cancellable?"處理期間可以按取消；App 唔會再鎖死喺無限等待。":"請保持 App 開啟，完成前請勿重複操作。");
   try{
     const result=await dataOperationState.handler();
+    if(dataOperationState.runToken!==runToken||dataOperationRunToken!==runToken)return;
     const download=typeof result?.download==="function"?result.download:null;
     dataOperationMarkDone(result||{});
     if(download)dataOperationHandoffDownload(download);
   }catch(error){
+    if(dataOperationState.runToken!==runToken||dataOperationRunToken!==runToken)return;
     console.error("Data management operation",dataOperationState.kind,error);
-    dataOperationState.busy=false;el.cancel.disabled=false;el.confirm.disabled=false;
+    dataOperationState.busy=false;dataOperationState.abortController=null;el.cancel.disabled=false;el.confirm.disabled=false;
     if(el.progress)el.progress.hidden=true;
     const message=backupFriendlyError(error);
     el.mode.innerHTML=`<strong>未完成</strong><br>${escapeHtmlText(message)}`;

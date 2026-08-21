@@ -1,5 +1,5 @@
 /*
- * v7.9.2.1 · Phase 3A.3 iOS Backup Memory / Restore Picker Hotfix
+ * v7.9.2.2 · Phase 3A.3 Backup Export Escape Hatch / Main-thread Hardening
  *
  * Standard ZIP container using STORE entries (media is already compressed).
  * Package contract:
@@ -16,6 +16,7 @@ import {
   deleteTripMedia,
   getTripMediaBlob,
   listTripMediaRecords,
+  listTripMediaRecordsForBackup,
   restoreTripMediaRecord
 } from "./trip-media-service.js";
 
@@ -43,6 +44,17 @@ function errorWithCode(message, code, details = {}) {
   error.code = code;
   Object.assign(error, details);
   return error;
+}
+function abortError(stage = "backup-package") {
+  return errorWithCode(`${stage} cancelled`, "operation-aborted", { stage });
+}
+function throwIfAborted(signal, stage = "backup-package") {
+  if (signal?.aborted) throw abortError(stage);
+}
+async function yieldToMainThread(signal, stage = "backup-package") {
+  throwIfAborted(signal, stage);
+  await new Promise(resolve => setTimeout(resolve, 0));
+  throwIfAborted(signal, stage);
 }
 function extensionForMime(typeInput) {
   const type = clean(typeInput).toLowerCase();
@@ -83,6 +95,17 @@ function crc32(bytes) {
   for (let i = 0; i < bytes.length; i += 1) crc = CRC_TABLE[(crc ^ bytes[i]) & 0xff] ^ (crc >>> 8);
   return (crc ^ 0xffffffff) >>> 0;
 }
+async function crc32Async(bytes, { signal = null, chunkBytes = 1024 * 1024 } = {}) {
+  let crc = 0xffffffff;
+  const chunk = Math.max(128 * 1024, finiteNumber(chunkBytes, 1024 * 1024));
+  for (let start = 0; start < bytes.length; start += chunk) {
+    throwIfAborted(signal, "zip-crc");
+    const end = Math.min(bytes.length, start + chunk);
+    for (let i = start; i < end; i += 1) crc = CRC_TABLE[(crc ^ bytes[i]) & 0xff] ^ (crc >>> 8);
+    if (end < bytes.length) await yieldToMainThread(signal, "zip-crc");
+  }
+  return (crc ^ 0xffffffff) >>> 0;
+}
 async function sha256HexBytes(bytesInput) {
   if (!globalThis.crypto?.subtle) throw errorWithCode("SHA-256 is unavailable in this browser", "backup-integrity-unavailable");
   const bytes = bytesInput instanceof Uint8Array ? bytesInput : new Uint8Array(bytesInput);
@@ -96,7 +119,7 @@ async function blobBytes(blob) {
 function writeUint16(view, offset, value) { view.setUint16(offset, value, true); }
 function writeUint32(view, offset, value) { view.setUint32(offset, value >>> 0, true); }
 
-async function normalizeZipEntry(entry) {
+async function normalizeZipEntry(entry, { signal = null } = {}) {
   const name = clean(entry?.name).replace(/^\/+/, "");
   if (!name || name.includes("../") || name.startsWith("../")) throw errorWithCode("Unsafe backup package path", "backup-package-path-invalid", { path: name });
   const nameBytes = encoder.encode(name);
@@ -124,21 +147,28 @@ async function normalizeZipEntry(entry) {
   } else {
     bytes = encoder.encode(String(entry?.data ?? ""));
   }
+  throwIfAborted(signal, "zip-entry");
   const hash = clean(entry?.sha256) || await sha256HexBytes(bytes);
   return {
     name,
     nameBytes,
     bytes,
     size: bytes.byteLength,
-    crc: crc32(bytes),
+    crc: await crc32Async(bytes, { signal }),
     sha256: hash,
     contentType: contentType || "application/octet-stream"
   };
 }
 
-async function createStoreZip(entriesInput) {
+async function createStoreZip(entriesInput, { signal = null, onProgress = null } = {}) {
   const entries = [];
-  for (const input of safeArray(entriesInput)) entries.push(await normalizeZipEntry(input));
+  const rawEntries = safeArray(entriesInput);
+  for (let index = 0; index < rawEntries.length; index += 1) {
+    throwIfAborted(signal, "zip-entry");
+    if (typeof onProgress === "function") onProgress({ stage: "zip-entry", completed: index, total: rawEntries.length });
+    entries.push(await normalizeZipEntry(rawEntries[index], { signal }));
+    await yieldToMainThread(signal, "zip-entry");
+  }
   if (!entries.length || entries.length > MAX_PACKAGE_ENTRIES) throw errorWithCode("Backup package entry count is invalid", "backup-package-invalid");
   let totalBytes = 0;
   entries.forEach(entry => { totalBytes += entry.size; });
@@ -148,7 +178,10 @@ async function createStoreZip(entriesInput) {
   const parts = [];
   const central = [];
   let offset = 0;
-  for (const entry of entries) {
+  for (let index = 0; index < entries.length; index += 1) {
+    const entry = entries[index];
+    throwIfAborted(signal, "zip-build");
+    if (typeof onProgress === "function") onProgress({ stage: "zip-build", completed: index, total: entries.length });
     const local = new Uint8Array(30 + entry.nameBytes.length);
     const view = new DataView(local.buffer);
     writeUint32(view, 0, ZIP_LOCAL_SIGNATURE);
@@ -187,6 +220,7 @@ async function createStoreZip(entriesInput) {
     centralHeader.set(entry.nameBytes, 46);
     central.push(centralHeader);
     offset += local.byteLength + entry.size;
+    await yieldToMainThread(signal, "zip-build");
   }
 
   const centralOffset = offset;
@@ -203,6 +237,8 @@ async function createStoreZip(entriesInput) {
   writeUint32(endView, 16, centralOffset);
   writeUint16(endView, 20, 0);
   parts.push(end);
+  if (typeof onProgress === "function") onProgress({ stage: "zip-build", completed: entries.length, total: entries.length });
+  throwIfAborted(signal, "zip-build");
   return new Blob(parts, { type: "application/zip" });
 }
 
@@ -271,10 +307,14 @@ function portableMediaRecord(record = {}) {
   };
 }
 
-export async function collectTripMediaForBackup(tripIdInput, { onProgress = null } = {}) {
+export async function collectTripMediaForBackup(tripIdInput, { onProgress = null, signal = null, registryTimeoutMs = 12000, mediaTimeoutMs = 20000 } = {}) {
   const tripId = clean(tripIdInput);
   if (!tripId) throw errorWithCode("Missing tripId", "invalid-trip-id");
-  const records = (await listTripMediaRecords(tripId)).filter(record => clean(record.status) === "ready");
+  throwIfAborted(signal, "media-registry");
+  if (typeof onProgress === "function") onProgress({ stage: "registry-read", completed: 0, total: 0 });
+  const registry = await listTripMediaRecordsForBackup(tripId, { timeoutMs: registryTimeoutMs, signal, allowLastConfirmedFallback: true });
+  const records = safeArray(registry.records).filter(record => clean(record.status) === "ready");
+  if (typeof onProgress === "function") onProgress({ stage: "registry-ready", completed: 0, total: records.length, source: clean(registry.source), stale: registry.stale === true });
   const collected = [];
   let totalBytes = 0;
   for (let index = 0; index < records.length; index += 1) {
@@ -283,10 +323,12 @@ export async function collectTripMediaForBackup(tripIdInput, { onProgress = null
       throw errorWithCode("Media registry contains an invalid Storage path", "backup-media-invalid", { mediaId: record.mediaId });
     }
     if (typeof onProgress === "function") onProgress({ stage: "media-download", completed: index, total: records.length, mediaId: record.mediaId });
-    const display = await getTripMediaBlob(record, { variant: "display", useCache: true });
+    throwIfAborted(signal, "media-download");
+    const display = await getTripMediaBlob(record, { variant: "display", useCache: true, signal, downloadTimeoutMs: mediaTimeoutMs });
     const thumbnail = record.thumbnailStoragePath
-      ? await getTripMediaBlob(record, { variant: "thumbnail", useCache: true })
+      ? await getTripMediaBlob(record, { variant: "thumbnail", useCache: true, signal, downloadTimeoutMs: mediaTimeoutMs })
       : null;
+    throwIfAborted(signal, "media-package");
     const displayBytes = await blobBytes(display.blob);
     const thumbnailBytes = thumbnail ? await blobBytes(thumbnail.blob) : null;
     const base = `media/${safeFileSegment(record.mediaId)}`;
@@ -304,9 +346,11 @@ export async function collectTripMediaForBackup(tripIdInput, { onProgress = null
       display: { bytes: displayBytes, packagePath: displayPackagePath, sha256: displaySha256, byteSize: displayBytes.byteLength, contentType: clean(record.contentType || display.blob.type) },
       thumbnail: thumbnailBytes ? { bytes: thumbnailBytes, packagePath: thumbnailPackagePath, sha256: thumbnailSha256, byteSize: thumbnailBytes.byteLength, contentType: clean(record.thumbnailContentType || thumbnail.blob.type) } : null
     });
+    if (typeof onProgress === "function") onProgress({ stage: "media-download", completed: index + 1, total: records.length, mediaId: record.mediaId });
+    await yieldToMainThread(signal, "media-package");
   }
   if (typeof onProgress === "function") onProgress({ stage: "media-download", completed: records.length, total: records.length });
-  return { tripId, records: collected, mediaCount: collected.length, totalBytes };
+  return { tripId, records: collected, mediaCount: collected.length, totalBytes, registrySource: clean(registry.source), registryStale: registry.stale === true };
 }
 
 export function mediaManifestFromCollected(collectedInput) {
@@ -331,9 +375,10 @@ export function mediaManifestFromCollected(collectedInput) {
   }));
 }
 
-export async function buildFullBackupPackage(backupJsonInput, collectedInput, { filename = "travel-full-backup.zip" } = {}) {
+export async function buildFullBackupPackage(backupJsonInput, collectedInput, { filename = "travel-full-backup.zip", onProgress = null, signal = null } = {}) {
   // Read-only during packaging; avoid cloning a potentially large Full Backup
   // object just before JSON.stringify, which doubled peak memory on iOS.
+  throwIfAborted(signal, "backup-json");
   const backupJson = backupJsonInput || {};
   const backupText = JSON.stringify(backupJson, null, 2);
   const backupBytes = encoder.encode(backupText);
@@ -367,11 +412,12 @@ export async function buildFullBackupPackage(backupJsonInput, collectedInput, { 
     mediaFiles
   };
   const manifestText = JSON.stringify(manifest, null, 2);
+  if (typeof onProgress === "function") onProgress({ stage: "zip-start", completed: 0, total: entries.length + 2 });
   const zip = await createStoreZip([
     { name: "manifest.json", data: manifestText, contentType: "application/json" },
     { name: "trip-data.json", data: backupText, sha256: backupSha256, contentType: "application/json" },
     ...entries
-  ]);
+  ], { signal, onProgress });
   return { blob: zip, filename, manifest, backupJson };
 }
 
