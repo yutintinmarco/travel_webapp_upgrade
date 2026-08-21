@@ -854,7 +854,9 @@ async function sha256Hex(text) {
 }
 
 async function attachFullBackupIntegrity(jsonInput) {
-  const payload = clone(jsonInput) || {};
+  // Integrity calculation is read-only. A shallow shell is enough to omit the
+  // integrity field without duplicating the entire Trip / expense payload.
+  const payload = jsonInput && typeof jsonInput === "object" ? { ...jsonInput } : {};
   delete payload.integrity;
   const payloadHash = await sha256Hex(stableBackupStringify(payload));
   return {
@@ -876,7 +878,7 @@ export async function verifyFullBackupIntegrity(rawInput) {
     error.code = "backup-integrity-unsupported";
     throw error;
   }
-  const payload = clone(backup) || {};
+  const payload = { ...backup };
   delete payload.integrity;
   const actual = await sha256Hex(stableBackupStringify(payload));
   const expected = clean(integrity.payloadHash).toLowerCase();
@@ -1000,18 +1002,19 @@ function normalizeFullBackupInput(rawInput) {
     invalid.backupVersion = version;
     throw invalid;
   }
-  const data = clone(raw.data) || {};
-  const counts = raw.counts && typeof raw.counts === "object" ? clone(raw.counts) : fullBackupCountsFromData(data);
-  return {
-    ...clone(raw),
-    backupFormat: format,
-    backupVersion: version,
-    tripId,
-    mediaIncluded: raw.mediaIncluded === true,
-    mediaManifest: safeArray(raw.mediaManifest),
-    counts,
-    data
-  };
+  // One normalized deep copy is enough. v7.9.2.0 separately cloned raw,
+  // raw.data and counts, multiplying peak memory during repeated exports.
+  const normalized = clone(raw) || {};
+  normalized.backupFormat = format;
+  normalized.backupVersion = version;
+  normalized.tripId = tripId;
+  normalized.mediaIncluded = raw.mediaIncluded === true;
+  normalized.mediaManifest = safeArray(normalized.mediaManifest);
+  normalized.data = normalized.data && typeof normalized.data === "object" ? normalized.data : {};
+  normalized.counts = normalized.counts && typeof normalized.counts === "object"
+    ? normalized.counts
+    : fullBackupCountsFromData(normalized.data);
+  return normalized;
 }
 
 export function inspectFullBackup(rawInput) {
@@ -1047,10 +1050,12 @@ function stripMediaGenerations(value) {
 }
 
 export async function withFullBackupMediaManifest(rawInput, mediaManifestInput = []) {
-  const backup = normalizeFullBackupInput(rawInput);
-  await verifyFullBackupIntegrity(backup);
+  // Validate the freshly-created Data Backup, then build one transformed copy.
+  // Avoid normalize -> verify(normalize again) -> clone -> strip, which was the
+  // main non-media memory amplification path on iOS.
+  await verifyFullBackupIntegrity(rawInput);
   const mediaManifest = safeArray(mediaManifestInput).map(item => clone(item)).filter(item => clean(item?.mediaId) && clean(item?.storagePath));
-  const next = stripMediaGenerations(clone(backup) || {});
+  const next = stripMediaGenerations(rawInput || {});
   next.mediaIncluded = true;
   next.mediaManifest = mediaManifest;
   next.mediaNote = mediaManifest.length

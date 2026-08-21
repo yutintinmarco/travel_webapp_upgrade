@@ -1,5 +1,5 @@
 /*
- * v7.9.2.0 · Phase 3A.3 Media-aware Full Backup Package
+ * v7.9.2.1 · Phase 3A.3 iOS Backup Memory / Restore Picker Hotfix
  *
  * Standard ZIP container using STORE entries (media is already compressed).
  * Package contract:
@@ -101,17 +101,38 @@ async function normalizeZipEntry(entry) {
   if (!name || name.includes("../") || name.startsWith("../")) throw errorWithCode("Unsafe backup package path", "backup-package-path-invalid", { path: name });
   const nameBytes = encoder.encode(name);
   if (nameBytes.length > 65535) throw errorWithCode("Backup package path is too long", "backup-package-path-invalid", { path: name });
-  const blob = entry?.blob instanceof Blob ? entry.blob : new Blob([entry?.data ?? ""]);
-  const bytes = await blobBytes(blob);
+
+  // iOS PWA memory guard: keep exactly one byte representation per ZIP entry.
+  // v7.9.2.0 converted Blob -> ArrayBuffer for CRC/SHA and then retained the
+  // original Blob as well, so a second immediate export could overlap with the
+  // first download handoff and push WebKit over its process memory budget.
+  let bytes;
+  let contentType = clean(entry?.contentType);
+  if (entry?.bytes instanceof Uint8Array) {
+    bytes = entry.bytes;
+  } else if (entry?.bytes instanceof ArrayBuffer) {
+    bytes = new Uint8Array(entry.bytes);
+  } else if (entry?.blob instanceof Blob) {
+    bytes = await blobBytes(entry.blob);
+    if (!contentType) contentType = clean(entry.blob.type);
+  } else if (typeof entry?.data === "string") {
+    bytes = encoder.encode(entry.data);
+  } else if (entry?.data instanceof Uint8Array) {
+    bytes = entry.data;
+  } else if (entry?.data instanceof ArrayBuffer) {
+    bytes = new Uint8Array(entry.data);
+  } else {
+    bytes = encoder.encode(String(entry?.data ?? ""));
+  }
   const hash = clean(entry?.sha256) || await sha256HexBytes(bytes);
   return {
     name,
     nameBytes,
-    blob,
+    bytes,
     size: bytes.byteLength,
     crc: crc32(bytes),
     sha256: hash,
-    contentType: clean(entry?.contentType || blob.type || "application/octet-stream")
+    contentType: contentType || "application/octet-stream"
   };
 }
 
@@ -142,7 +163,7 @@ async function createStoreZip(entriesInput) {
     writeUint16(view, 26, entry.nameBytes.length);
     writeUint16(view, 28, 0);
     local.set(entry.nameBytes, 30);
-    parts.push(local, entry.blob);
+    parts.push(local, entry.bytes);
 
     const centralHeader = new Uint8Array(46 + entry.nameBytes.length);
     const centralView = new DataView(centralHeader.buffer);
@@ -212,7 +233,7 @@ async function parseStoreZip(file) {
     if (dataEnd > bytes.byteLength) throw errorWithCode("Backup ZIP entry is truncated", "backup-package-invalid");
     const name = decoder.decode(bytes.subarray(nameStart, nameStart + nameLength));
     if (!name || name.includes("../") || name.startsWith("/")) throw errorWithCode("Unsafe Backup ZIP path", "backup-package-path-invalid", { path: name });
-    const content = bytes.slice(dataStart, dataEnd);
+    const content = bytes.subarray(dataStart, dataEnd);
     if (crc32(content) !== expectedCrc) throw errorWithCode("Backup ZIP CRC verification failed", "backup-package-integrity-mismatch", { path: name });
     files.set(name, content);
     count += 1;
@@ -275,11 +296,13 @@ export async function collectTripMediaForBackup(tripIdInput, { onProgress = null
       : "";
     const displaySha256 = await sha256HexBytes(displayBytes);
     const thumbnailSha256 = thumbnailBytes ? await sha256HexBytes(thumbnailBytes) : "";
-    totalBytes += display.blob.size + (thumbnail?.blob?.size || 0);
+    totalBytes += displayBytes.byteLength + (thumbnailBytes?.byteLength || 0);
     collected.push({
       record,
-      display: { blob: display.blob, packagePath: displayPackagePath, sha256: displaySha256, byteSize: display.blob.size, contentType: clean(record.contentType || display.blob.type) },
-      thumbnail: thumbnail ? { blob: thumbnail.blob, packagePath: thumbnailPackagePath, sha256: thumbnailSha256, byteSize: thumbnail.blob.size, contentType: clean(record.thumbnailContentType || thumbnail.blob.type) } : null
+      // Retain the bytes already read for SHA instead of keeping the Blob and
+      // reading the same media a second time while ZIP headers are built.
+      display: { bytes: displayBytes, packagePath: displayPackagePath, sha256: displaySha256, byteSize: displayBytes.byteLength, contentType: clean(record.contentType || display.blob.type) },
+      thumbnail: thumbnailBytes ? { bytes: thumbnailBytes, packagePath: thumbnailPackagePath, sha256: thumbnailSha256, byteSize: thumbnailBytes.byteLength, contentType: clean(record.thumbnailContentType || thumbnail.blob.type) } : null
     });
   }
   if (typeof onProgress === "function") onProgress({ stage: "media-download", completed: records.length, total: records.length });
@@ -309,7 +332,9 @@ export function mediaManifestFromCollected(collectedInput) {
 }
 
 export async function buildFullBackupPackage(backupJsonInput, collectedInput, { filename = "travel-full-backup.zip" } = {}) {
-  const backupJson = clone(backupJsonInput) || {};
+  // Read-only during packaging; avoid cloning a potentially large Full Backup
+  // object just before JSON.stringify, which doubled peak memory on iOS.
+  const backupJson = backupJsonInput || {};
   const backupText = JSON.stringify(backupJson, null, 2);
   const backupBytes = encoder.encode(backupText);
   const backupSha256 = await sha256HexBytes(backupBytes);
@@ -326,7 +351,7 @@ export async function buildFullBackupPackage(backupJsonInput, collectedInput, { 
         byteSize: finiteNumber(variant.byteSize),
         contentType: clean(variant.contentType)
       });
-      entries.push({ name: variant.packagePath, blob: variant.blob, sha256: variant.sha256, contentType: variant.contentType });
+      entries.push({ name: variant.packagePath, bytes: variant.bytes, sha256: variant.sha256, contentType: variant.contentType });
     }
   }
   const manifest = {
