@@ -3335,7 +3335,7 @@ body.expenses-view-active #app-version-note{
 #snacks-view::after,
 #info-view::after,
 #profile-view::after{
-  content:"v7.9.2.3" !important;
+  content:"v7.9.2.4" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3356,7 +3356,7 @@ body.expenses-view-active #app-version-note{
   display:none !important;
 }
 body.expenses-view-active .expenses-module .expenses-app::after{
-  content:"v7.9.2.3" !important;
+  content:"v7.9.2.4" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -4309,7 +4309,7 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
         <span class="profile-detail-spacer"></span>
       </div>
       <section class="profile-card" aria-label="App 資訊">
-        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.9.2.3</strong></div>
+        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.9.2.4</strong></div>
         <div class="profile-meta-row"><span>資料架構</span><strong>Phase 2G.2</strong></div>
         <div class="profile-meta-row"><span>主要資料來源</span><strong id="app-data-source-label">Firebase / 本機快取</strong></div>
       </section>
@@ -4486,7 +4486,7 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
 </div>
 
 <script>
-const APP_VERSION = "7.9.2.3";
+const APP_VERSION = "7.9.2.4";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 function perfLiteMark(name){try{return window.__perfLite?.mark(name);}catch(error){return null;}}
@@ -7565,18 +7565,30 @@ async function routeAwayFromRevokedTrip(revokedTripIdInput){
   })().finally(()=>{accessRevokeRoutePromise=null;accessRevokeRouteSourceId="";});
   return accessRevokeRoutePromise;
 }
-async function startFirebaseTripLoader(tripIdInput){
+async function startFirebaseTripLoader(tripIdInput,{preserveVisibleReady=false}={}){
   const tripId=String(tripIdInput||"").trim();if(!tripId)return;
   const {loader,access}=await getTripLoaderServices();
   if(tripLoaderActiveId===tripId&&tripLoaderStop)return;
   const priorLoaderSource=tripLoaderState.source;
   const priorTripData=dataTripId(window.tripData)===tripId?window.tripData:null;
+  // A same-Trip listener re-arm after an iOS file handoff must never demote an
+  // already usable Workspace back to the Root Entry loading screen. Keep the
+  // visible cached/server state ready while only the transport is replaced.
+  const keepVisibleReady=preserveVisibleReady===true&&!!priorTripData&&tripLoaderState.status==="ready";
+  const preservedState=keepVisibleReady?{...tripLoaderState,tripId,error:null}:null;
   // Only the trusted IndexedDB render cache is used as the inactive-Day seed.
   // Bundled trip.json is deliberately excluded because Firebase may be newer.
   const seedData=priorLoaderSource==="instant-cache"?priorTripData:null;
   const activeDayId=preferredRealtimeDayId(seedData||priorTripData);
   stopFirebaseTripLoader();
-  tripLoaderActiveId=tripId;tripLoaderState={status:"loading",source:"unknown",tripId,updatedAt:"",serverConfirmed:false,hasPendingWrites:false,error:null};setDataSourceLabel("Firebase 同步中…");
+  tripLoaderActiveId=tripId;
+  if(keepVisibleReady){
+    tripLoaderState=preservedState;
+    setDataSourceLabel(priorLoaderSource==="server"?"Firebase · 背景重新連線":(priorLoaderSource==="cache"?"Firebase 快取 · 背景重新連線":"即時旅程快取 · 背景重新連線"));
+  }else{
+    tripLoaderState={status:"loading",source:"unknown",tripId,updatedAt:"",serverConfirmed:false,hasPendingWrites:false,error:null};
+    setDataSourceLabel("Firebase 同步中…");
+  }
   access.initTripAccess?.(tripId);
   tripLoaderStop=loader.subscribeTripData(tripId,event=>{
     if(tripLoaderActiveId!==tripId)return;
@@ -7656,7 +7668,7 @@ function scheduleManualTripSwitchRecovery(tripIdInput,user,fromTripIdInput){
       // listeners once; this does not add an explicit Firestore read or block
       // the Workspace on a network promise.
       stopFirebaseTripLoader({fallback:false});
-      await startFirebaseTripLoader(tripId);
+      await startFirebaseTripLoader(tripId,{preserveVisibleReady:true});
       try{const {access}=await getTripLoaderServices();access.refreshTripAccess?.();}catch(error){console.warn("Trip switch access re-arm",error);}
       refreshAppEntryState();
     }catch(error){
