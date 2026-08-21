@@ -822,7 +822,7 @@ export async function restoreTripSnapshot(tripIdInput, snapshotIdInput, { user: 
   }
 }
 // =========================================================================
-// v7.7.5.0 · Full Backup Foundation v1 (data-only; media plugs in at Phase 3A)
+// v7.9.2.0 · Full Backup v1 data contract + Phase 3A media package bridge
 // =========================================================================
 const FULL_BACKUP_FORMAT = "travel-full-backup";
 const FULL_BACKUP_VERSION = 1;
@@ -1024,11 +1024,41 @@ export function inspectFullBackup(rawInput) {
     sourceRevision: Number(backup.sourceRevision) || Number(fullBackupDeserialize(backup.data.tripStructure)?.tripDoc?.revision) || 0,
     exportedAt: clean(backup.exportedAt),
     mediaIncluded: backup.mediaIncluded,
-    counts: backup.counts,
+    counts: { ...(backup.counts || {}), mediaCount: safeArray(backup.mediaManifest).length },
     integrity: backup.integrity?.payloadHash ? { algorithm: clean(backup.integrity.algorithm), present: true } : { algorithm: "", present: false },
     freshness: clone(backup.freshness || {}) || {},
     auditPolicy: "append-only"
   };
+}
+
+function stripMediaGenerations(value) {
+  if (Array.isArray(value)) return value.map(stripMediaGenerations);
+  if (!value || typeof value !== "object") return value;
+  const mediaDescriptor = Boolean(clean(value.storagePath) || clean(value.thumbnailStoragePath) || clean(value.source) === "storage");
+  const output = {};
+  Object.entries(value).forEach(([key, item]) => {
+    if (mediaDescriptor && (key === "generation" || key === "thumbnailGeneration")) {
+      output[key] = "";
+      return;
+    }
+    output[key] = stripMediaGenerations(item);
+  });
+  return output;
+}
+
+export async function withFullBackupMediaManifest(rawInput, mediaManifestInput = []) {
+  const backup = normalizeFullBackupInput(rawInput);
+  await verifyFullBackupIntegrity(backup);
+  const mediaManifest = safeArray(mediaManifestInput).map(item => clone(item)).filter(item => clean(item?.mediaId) && clean(item?.storagePath));
+  const next = stripMediaGenerations(clone(backup) || {});
+  next.mediaIncluded = true;
+  next.mediaManifest = mediaManifest;
+  next.mediaNote = mediaManifest.length
+    ? "Media-aware Full Backup package. Media bytes are stored beside trip-data.json inside the ZIP package."
+    : "Media-aware Full Backup package. This Trip currently has no Storage media files.";
+  next.counts = { ...(next.counts || {}), mediaCount: mediaManifest.length };
+  delete next.integrity;
+  return attachFullBackupIntegrity(next);
 }
 
 
@@ -1313,6 +1343,21 @@ export function fullBackupPortableTrip(rawInput) {
   return canonicalPortableExport(structure, { tripId: backup.tripId });
 }
 
+function retargetMediaReferences(value, oldTripId, newTripId) {
+  if (Array.isArray(value)) return value.map(item => retargetMediaReferences(item, oldTripId, newTripId));
+  if (!value || typeof value !== "object") {
+    if (typeof value !== "string") return value;
+    const oldPrefix = `trips/${oldTripId}/media/`;
+    return value.startsWith(oldPrefix) ? `trips/${newTripId}/media/${value.slice(oldPrefix.length)}` : value;
+  }
+  const output = {};
+  Object.entries(value).forEach(([key, item]) => {
+    if (key === "tripId" && clean(item) === oldTripId) output[key] = newTripId;
+    else output[key] = retargetMediaReferences(item, oldTripId, newTripId);
+  });
+  return output;
+}
+
 export async function retargetFullBackupTripId(rawInput, newTripIdInput) {
   const backup = normalizeFullBackupInput(rawInput);
   await verifyFullBackupIntegrity(backup);
@@ -1324,7 +1369,7 @@ export async function retargetFullBackupTripId(rawInput, newTripIdInput) {
   }
   if (newTripId === backup.tripId) return clone(backup);
 
-  const retargeted = clone(backup) || {};
+  const retargeted = retargetMediaReferences(clone(backup) || {}, backup.tripId, newTripId);
   retargeted.tripId = newTripId;
   retargeted.restoredFromTripId = backup.tripId;
 

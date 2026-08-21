@@ -1,5 +1,5 @@
 /*
- * v7.9.0.0 · Phase 3A.1 Firebase Storage / Media Foundation
+ * v7.9.2.0 · Phase 3A Media Foundation + Backup Restore Bridge
  *
  * This module deliberately has no UI dependency. It provides one canonical
  * Trip media namespace, client-side image compression, Storage upload/download,
@@ -425,6 +425,131 @@ export async function uploadTripImage({
       try { await deleteDoc(registryRef); } catch (registryError) {
         console.warn("Stale uploading media registry retained for later repair", mediaId, registryError);
       }
+    }
+    throw error;
+  }
+}
+
+
+export async function restoreTripMediaRecord(recordInput, {
+  displayBlob,
+  thumbnailBlob = null,
+  user: userInput = null,
+  onProgress = null
+} = {}) {
+  assertCloudOperationAvailable("旅程相片還原");
+  const record = { ...(recordInput || {}) };
+  const tripId = clean(record.tripId);
+  const mediaId = clean(record.mediaId);
+  const owner = normalizeOwner(record.ownerType, record.ownerId, record.slot);
+  const displayPath = clean(record.storagePath);
+  const thumbnailPath = clean(record.thumbnailStoragePath);
+  if (!tripId || !mediaId || !displayPath || !displayPath.startsWith(`trips/${tripId}/media/`)) {
+    throw errorWithCode("Invalid media restore record", "invalid-media-record");
+  }
+  if (!(displayBlob instanceof Blob) || displayBlob.size <= 0 || displayBlob.size > TRIP_MEDIA_LIMITS.storageObjectMaxBytes || !clean(displayBlob.type).startsWith("image/")) {
+    throw errorWithCode("Invalid display media blob", "invalid-media-file");
+  }
+  if (thumbnailPath && (!(thumbnailBlob instanceof Blob) || thumbnailBlob.size <= 0 || thumbnailBlob.size > TRIP_MEDIA_LIMITS.storageObjectMaxBytes || !clean(thumbnailBlob.type).startsWith("image/"))) {
+    throw errorWithCode("Invalid thumbnail media blob", "invalid-media-file");
+  }
+  if (thumbnailBlob && !thumbnailPath) {
+    throw errorWithCode("Thumbnail Storage path is missing", "invalid-media-record");
+  }
+  if (thumbnailPath && !thumbnailPath.startsWith(`trips/${tripId}/media/`)) {
+    throw errorWithCode("Invalid thumbnail Storage path", "invalid-media-record");
+  }
+
+  const user = await requireUser(userInput);
+  const registryRef = doc(db, "trips", tripId, "media", mediaId);
+  const existingSnap = await getDoc(registryRef);
+  const existing = existingSnap.exists() ? existingSnap.data() || {} : null;
+  const commonMetadata = {
+    cacheControl: "private,max-age=31536000,immutable",
+    customMetadata: {
+      tripId,
+      mediaId,
+      ownerType: owner.ownerType,
+      ownerId: owner.ownerId,
+      slot: owner.slot,
+      uploadedBy: user.uid,
+      restoredFromBackup: "true",
+      mediaSchemaVersion: String(TRIP_MEDIA_SCHEMA_VERSION)
+    }
+  };
+
+  const pending = {
+    mediaSchemaVersion: Math.max(1, finiteNumber(record.mediaSchemaVersion, TRIP_MEDIA_SCHEMA_VERSION)),
+    mediaId,
+    tripId,
+    ownerType: owner.ownerType,
+    ownerId: owner.ownerId,
+    slot: owner.slot,
+    status: "uploading",
+    caption: clean(record.caption),
+    sortOrder: finiteNumber(record.sortOrder),
+    storagePath: displayPath,
+    thumbnailStoragePath: thumbnailPath,
+    contentType: clean(record.contentType || displayBlob.type),
+    byteSize: finiteNumber(record.byteSize || displayBlob.size),
+    width: finiteNumber(record.width),
+    height: finiteNumber(record.height),
+    thumbnailContentType: clean(record.thumbnailContentType || thumbnailBlob?.type),
+    thumbnailByteSize: finiteNumber(record.thumbnailByteSize || thumbnailBlob?.size),
+    thumbnailWidth: finiteNumber(record.thumbnailWidth),
+    thumbnailHeight: finiteNumber(record.thumbnailHeight),
+    sourceContentType: clean(record.sourceContentType),
+    sourceByteSize: finiteNumber(record.sourceByteSize),
+    sourceWidth: finiteNumber(record.sourceWidth),
+    sourceHeight: finiteNumber(record.sourceHeight),
+    createdBy: existing ? clean(existing.createdBy || user.uid) : user.uid,
+    createdAt: existing?.createdAt || serverTimestamp(),
+    updatedBy: user.uid,
+    updatedAt: serverTimestamp()
+  };
+  await setDoc(registryRef, pending, { merge: false });
+  try {
+    if (typeof onProgress === "function") onProgress({ stage: "media-restore-display", progress: 0.12, mediaId });
+    const displayMetadata = await uploadBlob(displayPath, displayBlob, {
+      ...commonMetadata,
+      contentType: clean(record.contentType || displayBlob.type),
+      customMetadata: { ...commonMetadata.customMetadata, variant: "display" }
+    }, onProgress, 0.12, thumbnailBlob ? 0.58 : 0.84);
+    let thumbnailMetadata = null;
+    if (thumbnailBlob && thumbnailPath) {
+      thumbnailMetadata = await uploadBlob(thumbnailPath, thumbnailBlob, {
+        ...commonMetadata,
+        contentType: clean(record.thumbnailContentType || thumbnailBlob.type),
+        customMetadata: { ...commonMetadata.customMetadata, variant: "thumbnail" }
+      }, onProgress, 0.58, 0.84);
+    }
+    const ready = {
+      status: "ready",
+      generation: clean(displayMetadata.generation),
+      md5Hash: clean(displayMetadata.md5Hash),
+      thumbnailGeneration: clean(thumbnailMetadata?.generation),
+      thumbnailMd5Hash: clean(thumbnailMetadata?.md5Hash),
+      restoredBy: user.uid,
+      restoredAt: serverTimestamp(),
+      updatedBy: user.uid,
+      updatedAt: serverTimestamp()
+    };
+    await setDoc(registryRef, ready, { merge: true });
+    const output = { ...pending, ...ready, status: "ready" };
+    await Promise.all([
+      putTripMediaCache(displayPath, displayBlob, { generation: ready.generation, contentType: pending.contentType, tripId, mediaId, variant: "display" }),
+      thumbnailBlob && thumbnailPath
+        ? putTripMediaCache(thumbnailPath, thumbnailBlob, { generation: ready.thumbnailGeneration, contentType: pending.thumbnailContentType, tripId, mediaId, variant: "thumbnail" })
+        : Promise.resolve(false)
+    ]);
+    if (typeof onProgress === "function") onProgress({ stage: "media-restore-ready", progress: 1, mediaId });
+    return output;
+  } catch (error) {
+    if (!existing) {
+      await Promise.allSettled([bestEffortDelete(displayPath), thumbnailPath ? bestEffortDelete(thumbnailPath) : Promise.resolve()]);
+      try { await deleteDoc(registryRef); } catch (registryError) {}
+    } else {
+      try { await setDoc(registryRef, existing, { merge: false }); } catch (registryError) {}
     }
     throw error;
   }
