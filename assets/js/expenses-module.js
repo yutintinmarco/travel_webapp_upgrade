@@ -505,15 +505,20 @@ export function initExpensesModule(tripData) {
   expensesModuleStarted = true;
 
 
-const expensesConfig = tripData?.meta?.expenses || {};
-const tripId = resolveTripId(tripData);
+let expensesConfig = tripData?.meta?.expenses || {};
+let tripId = resolveTripId(tripData);
 window.__expensesModuleTripId = tripId;
+const defaultExpenseRates = { HKD: 1, JPY: 0.055, CNY: 1.08, TWD: 0.24, KRW: 0.0058, USD: 7.8 };
+function settingsFromExpensesConfig(config = {}) {
+  const rates = config.defaultExchangeRates || defaultExpenseRates;
+  return {
+    baseCurrency: config.baseCurrency || "HKD",
+    exchangeRates: { ...rates },
+    activeCurrencies: Array.isArray(config.currencies) && config.currencies.length ? [...config.currencies] : Object.keys(rates)
+  };
+}
 let members = [];
-let tripSettings = {
-  baseCurrency: expensesConfig.baseCurrency || "HKD",
-  exchangeRates: expensesConfig.defaultExchangeRates || { HKD: 1, JPY: 0.055, CNY: 1.08, TWD: 0.24, KRW: 0.0058, USD: 7.8 },
-  activeCurrencies: expensesConfig.currencies || Object.keys(expensesConfig.defaultExchangeRates || { HKD: 1, JPY: 0.055, CNY: 1.08, TWD: 0.24, KRW: 0.0058, USD: 7.8 })
-};
+let tripSettings = settingsFromExpensesConfig(expensesConfig);
 
 const form = document.getElementById("expenseForm");
 const dateInput = document.getElementById("date");
@@ -695,6 +700,7 @@ let phase2TripAccessTripId = String(window.__appTripAccess?.tripId || "");
 let expenseAccessRecoveryTimer = null;
 let expenseAccessRecoveryAttempt = 0;
 let cloudExpenseStarted = false;
+let expenseBindingEpoch = 0;
 let allExpenses = [];
 let expenses = [];
 let settlements = [];
@@ -2126,8 +2132,12 @@ async function saveTripSettings() {
 }
 
 async function ensureTripMembersAndSettings() {
-  const tripRef = getTripDocRef();
+  const bindingTripId = tripId;
+  const bindingEpoch = expenseBindingEpoch;
+  const stillCurrent = () => bindingEpoch === expenseBindingEpoch && bindingTripId === tripId && !expensesModuleSuspendedForTripSwitch;
+  const tripRef = doc(db, "trips", bindingTripId);
   const tripDoc = await getDoc(tripRef);
+  if (!stillCurrent()) return false;
 
   if (!tripDoc.exists()) {
     members = Array.isArray(expensesConfig.defaultMembers) && expensesConfig.defaultMembers.length ? expensesConfig.defaultMembers : [currentUser.displayName || "Me"];
@@ -2136,6 +2146,7 @@ async function ensureTripMembersAndSettings() {
     const myEmail = normalizeEmail(currentUser.email);
     allowedEmailsCache = myEmail ? [myEmail] : [];
 
+    if (!stillCurrent()) return false;
     await setDoc(tripRef, {
       members,
       allowedUids: tripAllowedUids,
@@ -2147,7 +2158,7 @@ async function ensureTripMembersAndSettings() {
       createdBy: currentUser.uid,
       status: "open"
     }, { merge: true });
-    return;
+    return stillCurrent();
   }
 
   const data = tripDoc.data();
@@ -2164,7 +2175,8 @@ async function ensureTripMembersAndSettings() {
       ? expensesConfig.defaultMembers
       : [currentUser.displayName || "Me"];
     try {
-      const settingsSnap = await getDoc(doc(db, "trips", tripId, "settings", "expenses"));
+      const settingsSnap = await getDoc(doc(db, "trips", bindingTripId, "settings", "expenses"));
+      if (!stillCurrent()) return false;
       if (settingsSnap.exists()) {
         const cloudSettings = settingsSnap.data() || {};
         if (Array.isArray(cloudSettings.defaultMembers) && cloudSettings.defaultMembers.length) members = cloudSettings.defaultMembers;
@@ -2178,9 +2190,10 @@ async function ensureTripMembersAndSettings() {
     } catch (error) {
       if (error?.code !== "permission-denied") console.warn("Expense settings read failed", error);
     }
-    return;
+    return stillCurrent();
   }
 
+  if (!stillCurrent()) return false;
   tripAllowedUids = Array.isArray(data.allowedUids) ? uniqueStrings(data.allowedUids) : [];
   tripCreatorUid = data.createdBy || null;
   tripAdminUids = Array.isArray(data.adminUids) ? uniqueStrings(data.adminUids) : [];
@@ -2207,7 +2220,11 @@ async function ensureTripMembersAndSettings() {
       migrate.adminEmails = myEmail ? uniqueStrings([myEmail, ...adminEmailsCache]) : adminEmailsCache;
       adminEmailsCache = migrate.adminEmails || [];
     }
-    if (Object.keys(migrate).length) await setDoc(tripRef, migrate, { merge: true });
+    if (Object.keys(migrate).length) {
+      if (!stillCurrent()) return false;
+      await setDoc(tripRef, migrate, { merge: true });
+      if (!stillCurrent()) return false;
+    }
   }
 
   // 自動 claim：email 已白名單 or 係 trip 創建者 -> 自動加 uid
@@ -2217,7 +2234,9 @@ async function ensureTripMembersAndSettings() {
     if (adminEmailAllowed || isCreator) {
       updateData.adminUids = uniqueStrings([...tripAdminUids, currentUser.uid]);
     }
+    if (!stillCurrent()) return false;
     await setDoc(tripRef, updateData, { merge: true });
+    if (!stillCurrent()) return false;
     tripAllowedUids = nextUids;
     if (updateData.adminUids) tripAdminUids = updateData.adminUids;
   }
@@ -2229,7 +2248,9 @@ async function ensureTripMembersAndSettings() {
 
   members = Array.isArray(data.members) && data.members.length > 0 ? data.members : [currentUser.displayName || "Me"];
   if (!Array.isArray(data.members) || data.members.length === 0) {
+    if (!stillCurrent()) return false;
     await setDoc(tripRef, { members }, { merge: true });
+    if (!stillCurrent()) return false;
   }
 
   if (data.settings) {
@@ -2239,14 +2260,19 @@ async function ensureTripMembersAndSettings() {
       exchangeRates: { ...tripSettings.exchangeRates, ...(data.settings.exchangeRates || {}) }
     };
   } else {
+    if (!stillCurrent()) return false;
     await setDoc(tripRef, { settings: tripSettings }, { merge: true });
+    if (!stillCurrent()) return false;
   }
+  return stillCurrent();
 }
 
 function startExpenseSettingsListener() {
   if (stopExpenseSettingsListener) stopExpenseSettingsListener();
+  const bindingEpoch = expenseBindingEpoch;
   const ref = doc(db, "trips", tripId, "settings", "expenses");
   stopExpenseSettingsListener = onSnapshot(ref, { includeMetadataChanges:true }, snap => {
+    if (bindingEpoch !== expenseBindingEpoch) return;
     expenseSettingsLiveReady = true;
     updateBackupSyncMeta("settings", snap);
     const data = snap.exists() ? (snap.data() || {}) : {};
@@ -2260,13 +2286,15 @@ function startExpenseSettingsListener() {
       };
       updateCurrencySelectOptions(); renderRateEditor(); renderSummary(); renderAnalytics(); renderExpenses();
     }
-  }, error => { if (error?.code !== "permission-denied") console.warn("Expense settings listener", error); });
+  }, error => { if (bindingEpoch !== expenseBindingEpoch) return; if (error?.code !== "permission-denied") console.warn("Expense settings listener", error); });
 }
 
 function startTripListener() {
   if (stopTripListener) stopTripListener();
+  const bindingEpoch = expenseBindingEpoch;
 
   stopTripListener = onSnapshot(getTripDocRef(), snap => {
+    if (bindingEpoch !== expenseBindingEpoch) return;
     if (!snap.exists()) return;
     const data = snap.data();
 
@@ -2310,6 +2338,7 @@ function startTripListener() {
       updateCurrencySelectOptions(); renderRateEditor(); updateTripStatusUi(); renderSummary(); renderAnalytics(); renderExpenses();
     }
   }, err => {
+    if (bindingEpoch !== expenseBindingEpoch) return;
     console.error(err);
     if (err?.code === "permission-denied") {
       tripStatus = "unknown";
@@ -2368,8 +2397,10 @@ async function hydrateRecentExpensesFromLocalFirestoreCache() {
 
 function listenToExpenses() {
   if (stopExpensesListener) stopExpensesListener();
+  const bindingEpoch = expenseBindingEpoch;
   const q = query(getExpensesCollection(), orderBy("date", "desc"));
   stopExpensesListener = onSnapshot(q, { includeMetadataChanges:true }, snap => {
+    if (bindingEpoch !== expenseBindingEpoch) return;
     recentExpensesLiveReady = true;
     updateBackupSyncMeta("expenses", snap);
     if (recentExpenseList) recentExpenseList.classList.remove("is-warm-cache");
@@ -2383,6 +2414,7 @@ function listenToExpenses() {
     setModuleStatus(`Synced (${tripId})`);
     tryRunPendingExcelExport();
   }, err => {
+    if (bindingEpoch !== expenseBindingEpoch) return;
     console.error(err);
     setModuleStatus(err?.code === "permission-denied" ? "No access to expenses" : "Sync error");
   });
@@ -2390,8 +2422,10 @@ function listenToExpenses() {
 
 function listenToSettlements() {
   if (stopSettlementsListener) stopSettlementsListener();
+  const bindingEpoch = expenseBindingEpoch;
   const q = query(getSettlementsCollection(), orderBy("paidAt", "desc"));
   stopSettlementsListener = onSnapshot(q, { includeMetadataChanges:true }, snap => {
+    if (bindingEpoch !== expenseBindingEpoch) return;
     settlementsLiveReady = true;
     updateBackupSyncMeta("settlements", snap);
     settlements = snap.docs.map(d => ({ id: d.id, ...d.data() }));
@@ -2399,6 +2433,7 @@ function listenToSettlements() {
     renderAnalytics();
     tryRunPendingExcelExport();
   }, err => {
+    if (bindingEpoch !== expenseBindingEpoch) return;
     console.error(err);
     setModuleStatus(err?.code === "permission-denied" ? "No access to settlements" : "Settlement sync error");
   });
@@ -2406,14 +2441,17 @@ function listenToSettlements() {
 
 function listenToActivityLogs() {
   if (stopActivityLogsListener) stopActivityLogsListener();
+  const bindingEpoch = expenseBindingEpoch;
   const q = query(getActivityLogsCollection(), orderBy("createdAt", "desc"));
   stopActivityLogsListener = onSnapshot(q, { includeMetadataChanges:true }, snap => {
+    if (bindingEpoch !== expenseBindingEpoch) return;
     activityLogsLiveReady = true;
     updateBackupSyncMeta("activityLogs", snap);
     activityLogs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     renderActivityLogs();
     tryRunPendingExcelExport();
   }, err => {
+    if (bindingEpoch !== expenseBindingEpoch) return;
     console.error(err);
     setModuleStatus(err?.code === "permission-denied" ? "No access to activity logs" : "Activity log sync error");
   });
@@ -4534,6 +4572,8 @@ async function startExpenseCloudIfAllowed() {
     return;
   }
   cloudExpenseStarted = true;
+  const bindingEpoch = expenseBindingEpoch;
+  const bindingTripId = tripId;
   setModuleStatus(`Connected · ${phase2TripRole}`);
   // v7.7.3.3 · Read only from Firestore's existing persistent local cache so
   // 最近支出 can paint immediately without creating any extra server read.
@@ -4541,6 +4581,7 @@ async function startExpenseCloudIfAllowed() {
   void hydrateRecentExpensesFromLocalFirestoreCache();
   try {
     await ensureTripMembersAndSettings();
+    if (bindingEpoch !== expenseBindingEpoch || bindingTripId !== tripId || expensesModuleSuspendedForTripSwitch) { cloudExpenseStarted = false; return; }
     initMembers();
     renderRateEditor();
     renderAllowedEmails();
@@ -4552,6 +4593,7 @@ async function startExpenseCloudIfAllowed() {
     listenToActivityLogs();
     updateTripStatusUi();
   } catch (error) {
+    if (bindingEpoch !== expenseBindingEpoch || bindingTripId !== tripId) return;
     cloudExpenseStarted = false;
     console.error(error);
     tripStatus = "unknown";
@@ -4629,7 +4671,89 @@ subscribeAuthState(async (user) => {
   await startExpenseCloudIfAllowed();
 });
 
+window.__rebindExpensesForTrip = async function rebindExpensesModuleForTrip(nextTripData){
+  const nextTripId = resolveTripId(nextTripData);
+  if (!nextTripId) return false;
+  if (nextTripId === tripId) {
+    expensesModuleSuspendedForTripSwitch = false;
+    window.__expensesModuleSuspended = false;
+    if (currentUser) await startExpenseCloudIfAllowed();
+    return true;
+  }
+
+  // Phase 3A.3.1: Trip switches intentionally suspend the old Expense listeners
+  // before the new Trip is painted. Rebind that already-loaded module in place so
+  // Data Management can continue observing the same canonical autosync sources
+  // without a page reload or Backup-only Firestore reads.
+  expenseBindingEpoch += 1;
+  expensesModuleSuspendedForTripSwitch = true;
+  cloudExpenseStarted = false;
+  clearExpenseAccessRecoveryTimer();
+  expenseAccessRecoveryAttempt = 0;
+  for (const stop of [stopTripListener, stopExpenseSettingsListener, stopExpensesListener, stopSettlementsListener, stopActivityLogsListener]) {
+    try { stop?.(); } catch (error) {}
+  }
+  stopTripListener = null;
+  stopExpenseSettingsListener = null;
+  stopExpensesListener = null;
+  stopSettlementsListener = null;
+  stopActivityLogsListener = null;
+
+  tripId = nextTripId;
+  expensesConfig = nextTripData?.meta?.expenses || {};
+  tripSettings = settingsFromExpensesConfig(expensesConfig);
+  window.__expensesModuleTripId = tripId;
+  if (aboutTripIdText) aboutTripIdText.textContent = tripId;
+
+  members = [];
+  allExpenses = [];
+  expenses = [];
+  settlements = [];
+  activityLogs = [];
+  recentExpenseCacheHydrationStarted = false;
+  recentExpensesLiveReady = false;
+  settlementsLiveReady = false;
+  activityLogsLiveReady = false;
+  resetBackupSyncMeta();
+  pendingExcelExportRequested = false;
+  pendingExcelExportStartedAt = 0;
+  clearPendingExcelExportTimer();
+  tripStatus = "open";
+  tripLockedAt = null;
+  tripLockedBy = null;
+  tripLockedByName = "";
+  expenseLockExplicit = false;
+  legacyExpenseLock = { locked:false, lockedAt:null, lockedBy:null, lockedByName:"" };
+  globalTripLocked = nextTripData?.meta?.globalLocked === true;
+  editingExpenseId = null;
+  tripAllowedUids = [];
+  tripCreatorUid = null;
+  tripAdminUids = [];
+  adminEmailsCache = [];
+  allowedEmailsCache = [];
+  analyticsSelectedCategories = null;
+
+  phase2TripAccessReady = window.__appTripAccess?.ready === true;
+  phase2TripAccessTripId = String(window.__appTripAccess?.tripId || "");
+  phase2TripRole = window.__appTripAccess?.role || null;
+  expensesModuleSuspendedForTripSwitch = false;
+  window.__expensesModuleSuspended = false;
+
+  renderExpenses();
+  renderDeletedExpenses();
+  renderAllowedEmails();
+  renderAdminEmails();
+  renderActivityLogs();
+  renderSummary();
+  renderAnalytics();
+  updateTripStatusUi();
+
+  if (currentUser) await startExpenseCloudIfAllowed();
+  return true;
+};
+
 window.__suspendExpensesForTripSwitch = function suspendExpensesModuleForTripSwitch(){
+  expenseBindingEpoch += 1;
   expensesModuleSuspendedForTripSwitch = true;
   cloudExpenseStarted = false;
   clearExpenseAccessRecoveryTimer();
