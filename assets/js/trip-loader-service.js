@@ -158,6 +158,15 @@ export function subscribeTripData(tripIdInput, callback, options = {}) {
   const seedRevision = seedData ? Math.max(1, numberOr(seedData.revision, 1)) : 0;
   const seedDays = Array.isArray(seedData?.days) ? seedData.days : [];
   const seedComplete = seedDays.length > 0 && seedDays.every(day => Array.isArray(day?.items));
+  // Phase 3A.3 passive Backup gate: a render-cache seed may stand in for
+  // inactive-Day item listeners only when that exact cached snapshot was
+  // previously fully server-confirmed with no pending writes. The live Trip
+  // root must then confirm the same revision from the server. Import / Restore
+  // already bump Trip revision whenever Day / Item content changes; Phase 3E
+  // itinerary editing must preserve that invariant. This lets Backup observe
+  // normal autosync without opening Backup-only listeners or issuing getDocs().
+  const seedWasServerConfirmed = seedData?.cloudMeta?.serverConfirmed === true
+    && seedData?.cloudMeta?.hasPendingWrites !== true;
 
   const unsubs = [];
   const itemUnsubs = new Map();
@@ -185,7 +194,9 @@ export function subscribeTripData(tripIdInput, callback, options = {}) {
       const baseKeys = ["trip", "days", "saved", "settings:general", "settings:expenses"];
       if (!baseKeys.every(key => sourceMeta.get(key)?.fromCache === false)) return false;
       const dayIds = [...state.days.keys()];
-      return dayIds.length === 0 || dayIds.every(dayId => itemServerReady.has(dayId));
+      if (dayIds.length === 0 || dayIds.every(dayId => itemServerReady.has(dayId))) return true;
+      const serverRevision = Math.max(1, numberOr(state.tripDoc?.revision, 1));
+      return seedComplete && seedWasServerConfirmed && seedRevision > 0 && serverRevision === seedRevision;
     }
   };
 
