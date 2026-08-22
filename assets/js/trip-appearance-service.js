@@ -368,3 +368,118 @@ export async function removeTripIconImage(tripIdInput, { user: userInput = null 
   const cleanup = await cleanupPreviousTripIcon(previous, tripId, user);
   return { tripId, removed: true, cleanup };
 }
+
+
+export async function updateTripBackgroundImage(tripIdInput, file, {
+  user: userInput = null,
+  onProgress = null
+} = {}) {
+  const tripId = clean(tripIdInput);
+  const user = await requireUser(userInput);
+  assertCloudOperationAvailable("旅程背景上載");
+  if (!tripId) {
+    const error = new Error("Missing trip");
+    error.code = "invalid-trip";
+    throw error;
+  }
+  if (!(file instanceof Blob)) {
+    const error = new Error("Image file is required");
+    error.code = "invalid-media-file";
+    throw error;
+  }
+
+  const { tripRef, trip } = await requireEditableTrip(tripId, user);
+  const generalRef = doc(db, "trips", tripId, "settings", "general");
+  const generalSnap = await getDoc(generalRef);
+  const general = generalSnap.exists() ? (generalSnap.data() || {}) : {};
+  const previous = clone(trip.backgroundImageMedia || general.backgroundImageMedia || null);
+
+  let uploadedRecord = null;
+  try {
+    uploadedRecord = await uploadTripImage({
+      tripId,
+      ownerType: TRIP_MEDIA_OWNER_TYPES.TRIP,
+      ownerId: "",
+      slot: "background",
+      file,
+      user,
+      onProgress
+    });
+    const descriptor = mediaDescriptorFromUploadRecord(uploadedRecord);
+    const logRef = doc(collection(db, "trips", tripId, "activityLogs"));
+    const batch = writeBatch(db);
+    batch.update(tripRef, {
+      backgroundImageMedia: descriptor,
+      updatedBy: user.uid,
+      updatedAt: serverTimestamp()
+    });
+    batch.set(generalRef, {
+      backgroundImageMedia: descriptor,
+      updatedBy: user.uid,
+      updatedAt: serverTimestamp()
+    }, { merge: true });
+    batch.set(logRef, activityPayload({
+      user,
+      type: "trip.media.background_updated",
+      title: "更新旅程背景",
+      summary: "旅程背景已更新至 Firebase Storage"
+    }));
+    await batch.commit();
+
+    const previousMediaId = clean(previous?.mediaId || previous?.imageId);
+    const nextMediaId = clean(descriptor.mediaId || descriptor.imageId);
+    const cleanup = previousMediaId && previousMediaId !== nextMediaId
+      ? await cleanupPreviousTripIcon(previous, tripId, user)
+      : { attempted: false, cleaned: true };
+    return { tripId, descriptor, cleanup };
+  } catch (error) {
+    if (uploadedRecord) {
+      try { await deleteTripMedia(uploadedRecord, { user }); }
+      catch (cleanupError) { console.warn("Unable to roll back unattached Trip background media", cleanupError); }
+    }
+    throw error;
+  }
+}
+
+export async function removeTripBackgroundImage(tripIdInput, { user: userInput = null } = {}) {
+  const tripId = clean(tripIdInput);
+  const user = await requireUser(userInput);
+  assertCloudOperationAvailable("旅程背景移除");
+  if (!tripId) {
+    const error = new Error("Missing trip");
+    error.code = "invalid-trip";
+    throw error;
+  }
+
+  const { tripRef, trip } = await requireEditableTrip(tripId, user);
+  const generalRef = doc(db, "trips", tripId, "settings", "general");
+  const generalSnap = await getDoc(generalRef);
+  const general = generalSnap.exists() ? (generalSnap.data() || {}) : {};
+  const previous = clone(trip.backgroundImageMedia || general.backgroundImageMedia || null);
+  if (!mediaRecordForDelete(previous, tripId)) {
+    return { tripId, removed: false, cleanup: { attempted: false, cleaned: true } };
+  }
+
+  const logRef = doc(collection(db, "trips", tripId, "activityLogs"));
+  const batch = writeBatch(db);
+  batch.update(tripRef, {
+    backgroundImageMedia: null,
+    updatedBy: user.uid,
+    updatedAt: serverTimestamp()
+  });
+  batch.set(generalRef, {
+    backgroundImageMedia: null,
+    updatedBy: user.uid,
+    updatedAt: serverTimestamp()
+  }, { merge: true });
+  batch.set(logRef, activityPayload({
+    user,
+    type: "trip.media.background_removed",
+    title: "移除旅程背景",
+    summary: "已恢復旅程原有背景"
+  }));
+  await batch.commit();
+
+  const cleanup = await cleanupPreviousTripIcon(previous, tripId, user);
+  return { tripId, removed: true, cleanup };
+}
