@@ -1,3 +1,18 @@
+# v7.9.2.7 — Passive Backup Gate Watcher Lifecycle Hotfix
+
+## Fixed
+• Fixed a Profile compositor timing race where Data Management starts the Backup sync watcher while the 430 ms snapshot transition still keeps the live destination page hidden. The old 350 ms visibility check could therefore stop the watcher before the page became live, leaving the Backup row permanently frozen at 「同步中」 even after Firebase freshness changed.
+• Added a short transition grace period entirely inside the Backup gate lifecycle. The protected Profile navigation compositor itself is unchanged.
+• Existing Expense realtime freshness changes now dispatch a local UI event so the Backup gate repaints immediately when server confirmation arrives. No Firestore read is added.
+• Sync copy now distinguishes 「行程同步中」 from 「支出同步中」, making any remaining blocker explicit.
+
+## Firebase
+• No Firestore Rules change.
+• No Storage Rules change.
+• No indexes change.
+• No Cloud Functions change.
+• No Firebase config or CORS change.
+
 # v7.9.2.6 — Passive Backup Sync Handoff Hotfix
 
 • Fixed the Phase 3A.3 passive Backup gate getting stuck on `同步中` after a Trip switch when the already-loaded Expenses module was still bound to the previous Trip and intentionally suspended for write isolation.

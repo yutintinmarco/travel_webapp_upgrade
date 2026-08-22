@@ -3335,7 +3335,7 @@ body.expenses-view-active #app-version-note{
 #snacks-view::after,
 #info-view::after,
 #profile-view::after{
-  content:"v7.9.2.6" !important;
+  content:"v7.9.2.7" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3356,7 +3356,7 @@ body.expenses-view-active #app-version-note{
   display:none !important;
 }
 body.expenses-view-active .expenses-module .expenses-app::after{
-  content:"v7.9.2.6" !important;
+  content:"v7.9.2.7" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -4309,7 +4309,7 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
         <span class="profile-detail-spacer"></span>
       </div>
       <section class="profile-card" aria-label="App 資訊">
-        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.9.2.6</strong></div>
+        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.9.2.7</strong></div>
         <div class="profile-meta-row"><span>資料架構</span><strong>Phase 2G.2</strong></div>
         <div class="profile-meta-row"><span>主要資料來源</span><strong id="app-data-source-label">Firebase / 本機快取</strong></div>
       </section>
@@ -4486,7 +4486,7 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
 </div>
 
 <script>
-const APP_VERSION = "7.9.2.6";
+const APP_VERSION = "7.9.2.7";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 function perfLiteMark(name){try{return window.__perfLite?.mark(name);}catch(error){return null;}}
@@ -8609,9 +8609,11 @@ function currentTripFreshnessSnapshot(){
   };
 }
 let fullBackupSyncGateWatchTimer=0;
+let fullBackupSyncGateWatchStartedAt=0;
 let fullBackupSyncGatePendingSince=0;
 let fullBackupSyncGatePendingTripId="";
 const FULL_BACKUP_SYNC_STATUS_TIMEOUT_MS=12000;
+const FULL_BACKUP_SYNC_GATE_VISIBILITY_GRACE_MS=900;
 function currentFullBackupSyncGate(){
   const tripId=currentBackupTripId();
   const loader=tripLoaderState||{};
@@ -8643,7 +8645,8 @@ function currentFullBackupSyncGate(){
 function fullBackupSyncGateCopy(gate,{deleteFlow=false}={}){
   if(gate.status==="synced")return deleteFlow?"Firebase：已同步 · 可建立刪除前 Data + Media ZIP":"Firebase：已同步 · Data + Media ZIP 可建立";
   if(gate.status==="unconfirmed")return "Firebase：未能確認同步 · Backup 暫時未開放";
-  if(gate.tripConfirmed&&!gate.expenseConfirmed)return "Firebase：支出同步中 · Backup 暫時未開放";
+  if(!gate.tripConfirmed)return "Firebase：行程同步中 · Backup 暫時未開放";
+  if(!gate.expenseConfirmed)return "Firebase：支出同步中 · Backup 暫時未開放";
   return "Firebase：同步中 · Backup 暫時未開放";
 }
 function applyFullBackupGateToButton(button,subtitle,gate,{deleteFlow=false,ownerAllowed=true}={}){
@@ -8668,10 +8671,16 @@ function stopFullBackupSyncGateWatch(){
 function fullBackupGatePageVisible(){
   const dataPage=document.querySelector('[data-profile-page="data-management"]');
   const deletePage=document.querySelector('[data-profile-page="trip-delete"]');
-  return Boolean((dataPage&&!dataPage.hidden)||(deletePage&&!deletePage.hidden));
+  if((dataPage&&!dataPage.hidden)||(deletePage&&!deletePage.hidden))return true;
+  // Profile navigation uses a protected 430 ms snapshot compositor. The live
+  // destination page remains hidden during that handoff, so the Backup watcher
+  // must not mistake the transition frame for a real page exit.
+  if(profileNavigationTransitioning&&Date.now()-fullBackupSyncGateWatchStartedAt<FULL_BACKUP_SYNC_GATE_VISIBILITY_GRACE_MS)return true;
+  return false;
 }
 function startFullBackupSyncGateWatch(){
   stopFullBackupSyncGateWatch();
+  fullBackupSyncGateWatchStartedAt=Date.now();
   if(window.tripData?.meta?.expenses?.enabled===true)try{initExpensesViewSafe();}catch(error){}
   refreshFullBackupSyncGate();
   fullBackupSyncGateWatchTimer=setInterval(()=>{
@@ -8695,6 +8704,7 @@ async function prepareFullBackupLocalExportPack(){
 }
 window.addEventListener("online",refreshFullBackupSyncGate);
 window.addEventListener("offline",refreshFullBackupSyncGate);
+window.addEventListener("expense-backup-freshness-change",refreshFullBackupSyncGate);
 function getTripBackupService(){
   if(!tripBackupServicePromise){
     tripBackupServicePromise=import(`./assets/js/trip-backup-service.js?v=${APP_VERSION}`)
