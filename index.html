@@ -3335,7 +3335,7 @@ body.expenses-view-active #app-version-note{
 #snacks-view::after,
 #info-view::after,
 #profile-view::after{
-  content:"v7.9.2.4" !important;
+  content:"v7.9.2.5" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3356,7 +3356,7 @@ body.expenses-view-active #app-version-note{
   display:none !important;
 }
 body.expenses-view-active .expenses-module .expenses-app::after{
-  content:"v7.9.2.4" !important;
+  content:"v7.9.2.5" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -4098,9 +4098,9 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
 
       <div class="profile-section-label">刪除前備份</div>
       <section class="profile-card profile-menu-card" aria-label="刪除前備份">
-        <button class="profile-row" id="trip-delete-backup-btn" type="button">
+        <button class="profile-row profile-row-disabled" id="trip-delete-backup-btn" type="button" disabled aria-disabled="true">
           <span class="profile-row-icon profile-icon-green">⬇</span>
-          <span class="profile-row-copy"><strong>下載完整 Backup</strong><small>先確認 Firebase Server 最新資料，再建立本機 Backup</small></span>
+          <span class="profile-row-copy"><strong>下載完整 Backup</strong><small id="trip-delete-backup-subtitle">Firebase：同步中 · 完成後可建立刪除前 Backup</small></span>
           <span class="profile-chevron">›</span>
         </button>
       </section>
@@ -4177,9 +4177,9 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
 
       <div class="profile-section-label">備份與匯出</div>
       <section class="profile-card profile-menu-card" aria-label="備份與匯出">
-        <button class="profile-row" id="trip-full-backup-export" type="button">
+        <button class="profile-row profile-row-disabled" id="trip-full-backup-export" type="button" disabled aria-disabled="true">
           <span class="profile-row-icon profile-icon-green">⬇</span>
-          <span class="profile-row-copy"><strong>匯出完整 Backup JSON</strong><small>Data Only v1 · 行程、收藏、設定、支出及找數</small></span>
+          <span class="profile-row-copy"><strong>匯出完整 Backup</strong><small id="trip-full-backup-export-subtitle">Firebase：同步中 · 完成後可建立 Data + Media ZIP</small></span>
           <span class="profile-chevron">›</span>
         </button>
         <button class="profile-row" id="trip-backup-export-current" type="button">
@@ -4207,7 +4207,7 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
           <span class="profile-chevron">›</span>
         </button>
       </section>
-      <div class="data-management-note">完整 Backup v1 暫時係 Data Only，不包含相片／媒體；Phase 3A 會沿用同一資料管理流程升級成 Media-aware Backup Package。</div>
+      <div class="data-management-note">Full Backup 只會喺目前 Trip 已取得 Firebase Server confirmation，而且冇 pending writes 時開放。狀態只旁觀現有 autosync，唔會額外執行同步或 Firebase freshness query。</div>
     </div>
 
     <div class="profile-nav-page" id="profile-page-trip-backup" data-profile-page="trip-backup" hidden>
@@ -4309,7 +4309,7 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
         <span class="profile-detail-spacer"></span>
       </div>
       <section class="profile-card" aria-label="App 資訊">
-        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.9.2.4</strong></div>
+        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.9.2.5</strong></div>
         <div class="profile-meta-row"><span>資料架構</span><strong>Phase 2G.2</strong></div>
         <div class="profile-meta-row"><span>主要資料來源</span><strong id="app-data-source-label">Firebase / 本機快取</strong></div>
       </section>
@@ -4486,7 +4486,7 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
 </div>
 
 <script>
-const APP_VERSION = "7.9.2.4";
+const APP_VERSION = "7.9.2.5";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 function perfLiteMark(name){try{return window.__perfLite?.mark(name);}catch(error){return null;}}
@@ -7162,7 +7162,11 @@ function refreshAppDataDiagnostics(){
   const revision=Number(data.revision||0);
 
   let syncLabel="未連接";
-  if(loader.status==="ready") syncLabel=loader.source==="instant-cache"?"即時旅程快取已載入":(loader.source==="cache"?"Firebase 快取已載入":"已同步");
+  if(loader.status==="ready"){
+    if(loader.serverConfirmed===true&&loader.hasPendingWrites!==true)syncLabel="已同步";
+    else if(loader.hasPendingWrites===true)syncLabel="同步中 · 尚有待寫入資料";
+    else syncLabel=loader.source==="instant-cache"?"同步中 · 即時旅程快取已載入":(loader.source==="cache"?"同步中 · Firebase 快取已載入":"同步中 · 等待完整 Server confirmation");
+  }
   else if(loader.status==="loading") syncLabel="正在連接 Firebase…";
   else if(loader.status==="syncing") syncLabel="正在同步…";
   else if(loader.status==="local") syncLabel="使用本機資料";
@@ -7414,6 +7418,7 @@ function applyFirebaseTripData(data,{source="server",tripId="",dirtySections=[]}
   if(source!=="instant-cache")maybeReleaseAppEntryResumeLatch();
   refreshAppEntryState();
   refreshAppDataDiagnostics();
+  refreshFullBackupSyncGate();
 
   if(needsItinerary){
     render(data,{includeSnacks:needsSnacks});
@@ -7601,14 +7606,24 @@ async function startFirebaseTripLoader(tripIdInput,{preserveVisibleReady=false}=
     }
     if(event.status==="metadata"){
       const metaSource=event.fromCache?"cache":"server";
+      const wasServerConfirmed=tripLoaderState.serverConfirmed===true&&tripLoaderState.hasPendingWrites!==true;
       tripLoaderState={...tripLoaderState,status:"ready",source:metaSource,serverConfirmed:event.serverConfirmed===true,hasPendingWrites:event.hasPendingWrites===true};
+      // Seal the render cache once a pending/local transition receives full
+      // server confirmation. This is metadata only, so no UI rerender is
+      // needed; one coalesced IndexedDB write preserves a trusted seed for the
+      // next Local First boot and lets the passive Backup gate stay read-free.
+      const nowServerConfirmed=tripLoaderState.serverConfirmed===true&&tripLoaderState.hasPendingWrites!==true&&metaSource==="server";
+      if(dataTripId(window.tripData)===tripId&&window.tripData){
+        window.tripData.cloudMeta={...(window.tripData.cloudMeta||{}),source:metaSource,serverConfirmed:tripLoaderState.serverConfirmed===true,hasPendingWrites:tripLoaderState.hasPendingWrites===true};
+        if(nowServerConfirmed&&!wasServerConfirmed)persistInstantTripCache(window.tripData).catch(()=>{});
+      }
       setDataSourceLabel(metaSource==="cache"?"Firebase 快取":"Firebase");
       if(metaSource==="server")perfLiteMark("firebaseServerReady");
-      renderTripLibrary();refreshAppEntryState();
+      renderTripLibrary();refreshAppEntryState();refreshFullBackupSyncGate();
       return;
     }
-    if(event.status==="syncing"){tripLoaderState={...tripLoaderState,status:"syncing",source:event.source||tripLoaderState.source};setDataSourceLabel(event.reason==="restore"?"Firebase 還原中…":"Firebase 更新中…");return;}
-    if(event.status==="recovery-needed"){tripLoaderState={...tripLoaderState,status:"recovery-needed",source:event.source||tripLoaderState.source};setDataSourceLabel("Firebase 更新未完成");renderCloudSafetyStrip();return;}
+    if(event.status==="syncing"){tripLoaderState={...tripLoaderState,status:"syncing",source:event.source||tripLoaderState.source};setDataSourceLabel(event.reason==="restore"?"Firebase 還原中…":"Firebase 更新中…");refreshFullBackupSyncGate();return;}
+    if(event.status==="recovery-needed"){tripLoaderState={...tripLoaderState,status:"recovery-needed",source:event.source||tripLoaderState.source};setDataSourceLabel("Firebase 更新未完成");renderCloudSafetyStrip();refreshFullBackupSyncGate();return;}
     if(event.status==="permission-denied"||event.status==="error"||event.status==="not-found"){
       const optimisticVisible=String(appEntryOptimisticTripId||"")===tripId&&dataTripId(window.tripData)===tripId;
       console.warn("Firebase Trip Loader",event.status,event.error||tripId);
@@ -7631,6 +7646,7 @@ async function startFirebaseTripLoader(tripIdInput,{preserveVisibleReady=false}=
         tripLoaderState={status:event.status,source:"firebase",tripId,error:event.error||null};
         if(tripBootDeferred)stopFirebaseTripLoader({fallback:true});
       }
+      refreshFullBackupSyncGate();
     }
   },{seedData,activeDayId});
 }
@@ -7804,6 +7820,7 @@ async function handleTripGlobalLockAction(){
     if(status){status.classList.add("is-error");status.textContent=tripImportPermissionMessage(error);}
   }finally{tripGlobalLockBusy=false;renderTripGlobalLockState();}
 }
+document.getElementById("trip-permanent-delete-open-btn")?.addEventListener("click",()=>setTimeout(startFullBackupSyncGateWatch,0));
 document.getElementById("trip-global-lock-open-btn")?.addEventListener("click",()=>renderTripGlobalLockState());
 document.getElementById("trip-global-lock-action")?.addEventListener("click",handleTripGlobalLockAction);
 
@@ -7829,7 +7846,10 @@ function renderTripPermanentDeleteState(){
   }
   const input=document.getElementById("trip-delete-confirm-input"),button=document.getElementById("trip-delete-confirm-btn"),backupBtn=document.getElementById("trip-delete-backup-btn");
   if(button)button.disabled=!isOwner||!tripId||String(input?.value||"").trim()!=="DELETE";
-  if(backupBtn)backupBtn.disabled=!isOwner||!tripId;
+  if(backupBtn){
+    const gate=currentFullBackupSyncGate();
+    applyFullBackupGateToButton(backupBtn,document.getElementById("trip-delete-backup-subtitle"),gate,{deleteFlow:true,ownerAllowed:Boolean(isOwner&&tripId)});
+  }
 }
 function getTripDeleteService(){
   if(!tripDeleteServicePromise)tripDeleteServicePromise=import(`./assets/js/trip-delete-service.js?v=${APP_VERSION}`).catch(error=>{tripDeleteServicePromise=null;throw error;});
@@ -7843,9 +7863,10 @@ function openDeleteBackupExportOperation(){
   const {record,isOwner}=currentTripOwnerRecord(),tripId=String(record?.tripId||tripLoaderActiveId||"").trim();
   if(!isOwner||!tripId)return;
   const summary=dataOperationCurrentSummary();
-  dataOperationOpen({kind:"delete-backup",title:"刪除前完整 Backup",subtitle:"先確認 Firebase Server 最新資料，再建立可供日後完整重建嘅 Backup Package。",name:record?.title||summary.title,id:`tripId · ${tripId}`,stats:[{value:summary.dayCount,label:"Days"},{value:summary.itemCount,label:"Items"},{value:summary.savedPlaceCount,label:"Saved"},{value:"Full",label:"Type"}],mode:"呢次會要求 Server Confirmed freshness，並將目前 Storage media 一併封裝入 ZIP；普通離線 Last Synced 狀態唔會冒充刪除前最新 Backup。",warnings:["Full Backup ZIP 包含 Data + Storage media，建立期間請保持連線同 App 開啟。","成員權限唔屬於 Backup；日後重建時目前還原帳戶會成為新 Owner。"],confirmLabel:"下載完整 Backup",handler:async()=>{
+  const gate=refreshFullBackupSyncGate();if(!gate.canBackup)return;
+  dataOperationOpen({kind:"delete-backup",title:"刪除前完整 Backup",subtitle:"使用目前已同步並取得 Server confirmation 嘅資料，建立可供日後完整重建嘅 Backup Package。",name:record?.title||summary.title,id:`tripId · ${tripId}`,stats:[{value:summary.dayCount,label:"Days"},{value:summary.itemCount,label:"Items"},{value:summary.savedPlaceCount,label:"Saved"},{value:"Full",label:"Type"}],mode:"Backup 唔會另外觸發 Firebase 同步；只有現有 autosync 已確認最新狀態，而且冇 pending writes 時先可以開始。",warnings:["Full Backup ZIP 包含 Data + Storage media，建立期間請保持連線同 App 開啟。","成員權限唔屬於 Backup；日後重建時目前還原帳戶會成為新 Owner。"],confirmLabel:"下載完整 Backup",handler:async()=>{
     const service=await dataOperationAwait(getTripBackupService(),{stage:"載入備份引擎",detail:"正在準備 Full Backup。",percent:10,timeoutMs:8000});
-    const frozen=await dataOperationAwait(waitForArchivalLocalExportPack(18000),{stage:"確認 Firebase 最新資料",detail:"正在用現有 realtime listeners 確認 Trip、各日行程、支出及找數已收到 Server confirmation。",percent:28,timeoutMs:22000});
+    const frozen=await dataOperationAwait(prepareFullBackupLocalExportPack(),{stage:"準備已同步資料",detail:"使用現有 Firebase listeners 已確認嘅 canonical data。",percent:28,timeoutMs:8000});
     const result=await service.exportLocalFullBackup(frozen.trip,frozen.expenseSnapshot,{user:frozen.user,role:frozen.role,tripFreshness:frozen.tripFreshness,requireArchiveGrade:true});
     dataOperationSetStage("收集媒體","正在讀取 Storage media 並建立逐檔 SHA-256。",52);
     const packaged=await prepareMediaAwareFullBackupPackage(result,{onProgress:progress=>{
@@ -8472,6 +8493,22 @@ function localExportAccess(){
   }
   return {role:String(access.role||""),tripId};
 }
+function captureCurrentExpenseExportSnapshot(){
+  const tripId=currentBackupTripId();
+  const enabled=window.tripData?.meta?.expenses?.enabled===true;
+  if(!enabled){
+    const tripFresh=currentTripFreshnessSnapshot();
+    return {
+      tripId,ready:true,settings:localExportClone(window.tripData?.meta?.expenses||{}),expenses:[],settlements:[],activityLogs:[],capturedAt:new Date().toISOString(),
+      freshness:{serverConfirmed:tripFresh.serverConfirmed===true&&!tripFresh.hasPendingWrites,hasPendingWrites:tripFresh.hasPendingWrites===true,sources:{disabled:{seen:true,fromCache:tripFresh.serverConfirmed!==true,serverConfirmed:tripFresh.serverConfirmed===true&&!tripFresh.hasPendingWrites,hasPendingWrites:tripFresh.hasPendingWrites===true}}}
+    };
+  }
+  const snap=typeof window.__getExpenseLocalExportSnapshot==="function"?window.__getExpenseLocalExportSnapshot():null;
+  if(snap&&String(snap.tripId||"")===tripId&&snap.ready===true)return snap;
+  const error=new Error("支出資料仍在用現有 Firebase listeners 同步，暫未能建立完整 Backup。");
+  error.code="local-export-incomplete";
+  throw error;
+}
 function waitForLocalExpenseExportSnapshot(timeoutMs=15000){
   const tripId=currentBackupTripId();
   const enabled=window.tripData?.meta?.expenses?.enabled===true;
@@ -8565,33 +8602,85 @@ function currentTripFreshnessSnapshot(){
     updatedAt:String(tripLoaderState?.updatedAt||"")
   };
 }
-function requestCurrentTripServerConfirmation(){
-  try{return tripLoaderStop?.requestFullServerConfirmation?.()===true;}catch(error){console.warn("Full Backup server confirmation",error);return false;}
+let fullBackupSyncGateWatchTimer=0;
+function currentFullBackupSyncGate(){
+  const tripId=currentBackupTripId();
+  const loader=tripLoaderState||{};
+  const sameTrip=!!tripId&&String(loader.tripId||"")===tripId;
+  const online=(typeof navigator==="undefined"||navigator.onLine!==false)&&(typeof cloudSafetyState==="undefined"||cloudSafetyState?.online!==false);
+  const tripPending=sameTrip&&loader.hasPendingWrites===true;
+  const tripConfirmed=sameTrip&&loader.status==="ready"&&loader.serverConfirmed===true&&!tripPending;
+  const expensesEnabled=window.tripData?.meta?.expenses?.enabled===true;
+  let expenseReady=!expensesEnabled,expenseConfirmed=!expensesEnabled&&tripConfirmed,expensePending=false;
+  if(expensesEnabled&&typeof window.__getExpenseLocalExportSnapshot==="function"){
+    try{
+      const snap=window.__getExpenseLocalExportSnapshot();
+      if(snap&&String(snap.tripId||"")===tripId){
+        expenseReady=snap.ready===true;
+        expensePending=snap?.freshness?.hasPendingWrites===true;
+        expenseConfirmed=expenseReady&&snap?.freshness?.serverConfirmed===true&&!expensePending;
+      }
+    }catch(error){}
+  }
+  const canBackup=online&&tripConfirmed&&expenseConfirmed;
+  const transportUnavailable=!online||!tripId||["error","recovery-needed","permission-denied","not-found","local"].includes(String(loader.status||""))||Boolean(loader.error&&!loader.serverConfirmed);
+  const status=canBackup?"synced":(transportUnavailable?"unconfirmed":"syncing");
+  return {status,canBackup,tripId,online,tripConfirmed,tripPending,expenseReady,expenseConfirmed,expensePending};
 }
-async function waitForArchivalLocalExportPack(timeoutMs=18000){
-  requestCurrentTripServerConfirmation();
-  const prepared=await prepareDataManagementLocalExports();
-  const service=await getTripBackupService();
-  const started=Date.now();
-  return await new Promise((resolve,reject)=>{
-    const poll=()=>{
-      try{
-        const frozen=refreshLocalExportCapture(prepared);
-        const tripFreshness=currentTripFreshnessSnapshot();
-        const freshness=service.evaluateLocalBackupFreshness(frozen.trip,frozen.expenseSnapshot,tripFreshness);
-        if(freshness.archiveGrade){resolve({...frozen,tripFreshness,freshness});return;}
-        if(Date.now()-started>=timeoutMs){
-          const error=new Error(freshness.online?"Backup 尚未取得完整 Firebase Server confirmation。":"目前離線，只能建立 Last Synced Backup。");
-          error.code=freshness.online?"backup-freshness-unconfirmed":"backup-freshness-offline";
-          error.freshness=freshness;
-          reject(error);return;
-        }
-      }catch(error){reject(error);return;}
-      setTimeout(poll,180);
-    };
-    poll();
-  });
+function fullBackupSyncGateCopy(gate,{deleteFlow=false}={}){
+  if(gate.status==="synced")return deleteFlow?"Firebase：已同步 · 可建立刪除前 Data + Media ZIP":"Firebase：已同步 · Data + Media ZIP 可建立";
+  if(gate.status==="unconfirmed")return "Firebase：未能確認同步 · Backup 暫時未開放";
+  return "Firebase：同步中 · Backup 暫時未開放";
 }
+function applyFullBackupGateToButton(button,subtitle,gate,{deleteFlow=false,ownerAllowed=true}={}){
+  if(!button)return;
+  const enabled=ownerAllowed&&gate.canBackup;
+  button.disabled=!enabled;
+  button.setAttribute("aria-disabled",enabled?"false":"true");
+  button.classList.toggle("profile-row-disabled",!enabled);
+  if(subtitle)subtitle.textContent=fullBackupSyncGateCopy(gate,{deleteFlow});
+}
+function refreshFullBackupSyncGate(){
+  const gate=currentFullBackupSyncGate();
+  applyFullBackupGateToButton(document.getElementById("trip-full-backup-export"),document.getElementById("trip-full-backup-export-subtitle"),gate);
+  const owner=currentTripOwnerRecord?.();
+  applyFullBackupGateToButton(document.getElementById("trip-delete-backup-btn"),document.getElementById("trip-delete-backup-subtitle"),gate,{deleteFlow:true,ownerAllowed:Boolean(owner?.isOwner&&gate.tripId)});
+  window.__fullBackupSyncGate={...gate,evaluatedAt:Date.now()};
+  return gate;
+}
+function stopFullBackupSyncGateWatch(){
+  if(fullBackupSyncGateWatchTimer){clearInterval(fullBackupSyncGateWatchTimer);fullBackupSyncGateWatchTimer=0;}
+}
+function fullBackupGatePageVisible(){
+  const dataPage=document.querySelector('[data-profile-page="data-management"]');
+  const deletePage=document.querySelector('[data-profile-page="trip-delete"]');
+  return Boolean((dataPage&&!dataPage.hidden)||(deletePage&&!deletePage.hidden));
+}
+function startFullBackupSyncGateWatch(){
+  stopFullBackupSyncGateWatch();
+  if(window.tripData?.meta?.expenses?.enabled===true)try{initExpensesViewSafe();}catch(error){}
+  refreshFullBackupSyncGate();
+  fullBackupSyncGateWatchTimer=setInterval(()=>{
+    if(!fullBackupGatePageVisible()){stopFullBackupSyncGateWatch();return;}
+    refreshFullBackupSyncGate();
+  },350);
+}
+async function prepareFullBackupLocalExportPack(){
+  const gate=refreshFullBackupSyncGate();
+  if(!gate.canBackup){
+    const error=new Error(gate.online?"Backup state is not yet server confirmed":"Device is offline");
+    error.code=gate.online?"backup-freshness-unconfirmed":"backup-freshness-offline";
+    throw error;
+  }
+  const user=await getImportFirebaseUser();
+  if(!user?.uid){const error=new Error("請先登入 Google 帳戶。");error.code="auth-required";throw error;}
+  const access=localExportAccess();
+  const trip=localExportCurrentTrip();
+  const expenseSnapshot=captureCurrentExpenseExportSnapshot();
+  return {tripId:gate.tripId,user,role:access.role,trip,expenseSnapshot,tripFreshness:currentTripFreshnessSnapshot(),capturedAt:Date.now()};
+}
+window.addEventListener("online",refreshFullBackupSyncGate);
+window.addEventListener("offline",refreshFullBackupSyncGate);
 function getTripBackupService(){
   if(!tripBackupServicePromise){
     tripBackupServicePromise=import(`./assets/js/trip-backup-service.js?v=${APP_VERSION}`)
@@ -8890,25 +8979,21 @@ function dataOperationBaseConfig({kind,title,subtitle,mode,confirmLabel,typeLabe
   return {kind,title,subtitle,name:summary.title,id:`tripId · ${summary.tripId||"—"}`,stats:[{value:summary.dayCount,label:"Days"},{value:summary.itemCount,label:"Items"},{value:summary.savedPlaceCount,label:"Saved"},{value:typeLabel,label:"Type"}],mode,warnings,confirmLabel,cancellable,handler};
 }
 function openFullBackupExportOperation(){
-  dataOperationOpen(dataOperationBaseConfig({kind:"export-full",title:"匯出完整 Backup",subtitle:"建立可供完整還原嘅 Data + Media Backup Package。",typeLabel:"Full",mode:"包含行程、收藏、一般設定、支出、找數、操作記錄及 Firebase Storage media。",warnings:["在線時會建立 Media-aware ZIP；如果目前離線，仍可建立 Last Synced Data Only JSON，但不包含媒體 bytes。"],confirmLabel:"匯出 Backup",cancellable:true,handler:async()=>{
+  const gate=refreshFullBackupSyncGate();if(!gate.canBackup)return;
+  dataOperationOpen(dataOperationBaseConfig({kind:"export-full",title:"匯出完整 Backup",subtitle:"使用目前已同步嘅 Data + Media 建立完整 Backup Package。",typeLabel:"Full",mode:"只封裝現有 autosync 已經 Server Confirmed 嘅 canonical data；按 Backup 唔會另外觸發 Firebase 同步。",warnings:["同步中、離線或未能取得 Server confirmation 時，Backup 會保持停用。"],confirmLabel:"匯出 Backup",cancellable:true,handler:async()=>{
+    const liveGate=refreshFullBackupSyncGate();
+    if(!liveGate.canBackup){const error=new Error(liveGate.online?"Backup state is not yet server confirmed":"Device is offline");error.code=liveGate.online?"backup-freshness-unconfirmed":"backup-freshness-offline";throw error;}
     dataOperationSetStage("準備匯出","正在釋放上一份 Backup 嘅下載資源。",8);
     const operationSignal=dataOperationState.abortController?.signal||null;
     await prepareForNextBackupExport(operationSignal);
     const service=await dataOperationAwait(getTripBackupService(),{stage:"載入備份引擎",detail:"正在準備資料管理模組。",percent:12,timeoutMs:8000});
-    const localPack=await dataOperationAwait(prepareDataManagementLocalExports(),{stage:"準備本機資料",detail:"正在確認行程、支出及版本資料已完整同步。",percent:30,timeoutMs:22000});
+    const localPack=await dataOperationAwait(prepareFullBackupLocalExportPack(),{stage:"準備已同步資料",detail:"使用現有 Firebase listeners 已確認嘅 canonical data。",percent:30,timeoutMs:8000});
     const frozen=refreshLocalExportCapture(localPack);
-    const result=await service.exportLocalFullBackup(frozen.trip,frozen.expenseSnapshot,{user:frozen.user,role:frozen.role,tripFreshness:currentTripFreshnessSnapshot()});
-    const freshnessLabel=result.freshness?.archiveGrade?"Server Confirmed":"Last Synced";
-    if(typeof navigator!=="undefined"&&navigator.onLine===false){
-      dataOperationSetStage("建立 Data Only Backup","目前離線，正在整理 Last Synced Full Backup JSON。",78);
-      const prepared=backupPrepareJsonDownload(result.json,result.filename);
-      dataOperationSetStage("準備下載","Data Only 檔案已建立，準備交畀 iOS。",94);
-      return {title:"Backup 已匯出",detail:`${freshnessLabel} · Data Only · ${result.counts.dayCount||0} Days · ${result.counts.expenseCount||0} Expenses`,download:()=>backupDownloadBlob(prepared.blob,prepared.filename)};
-    }
+    const result=await service.exportLocalFullBackup(frozen.trip,frozen.expenseSnapshot,{user:frozen.user,role:frozen.role,tripFreshness:currentTripFreshnessSnapshot(),requireArchiveGrade:true});
     const packaged=await dataOperationAwait(prepareMediaAwareFullBackupPackage(result,{signal:operationSignal,onProgress:progress=>{
       const stage=String(progress?.stage||"");
       const total=Math.max(0,Number(progress?.total)||0),completed=Math.max(0,Number(progress?.completed)||0);
-      if(stage==="registry-read"){dataOperationSetStage("確認媒體清單","正在確認 Firebase media registry。",48);return;}
+      if(stage==="registry-read"){dataOperationSetStage("確認媒體清單","正在讀取 Backup 所需 media registry。",48);return;}
       if(stage==="registry-ready"){dataOperationSetStage("媒體清單已確認",total?`準備封裝 ${total} 個媒體項目。`:`目前旅程未有 Firebase Storage media。`,52);return;}
       if(stage==="media-download"){
         const ratio=total?Math.min(1,completed/total):1;
@@ -8920,8 +9005,8 @@ function openFullBackupExportOperation(){
         dataOperationSetStage("建立 Backup Package",`正在封裝 ZIP ${Math.round(ratio*100)}%。`,80+ratio*12);
       }
     }}),{stage:"建立完整 Backup",detail:"正在收集媒體並建立 ZIP。",percent:48,timeoutMs:90000,abortController:dataOperationState.abortController});
-    dataOperationSetStage("準備下載","Media Backup Package 已建立，準備交畀 iOS。",94);
-    return {title:"Backup 已匯出",detail:`${freshnessLabel}${packaged.registryStale?" · Media Last Confirmed":""} · ${packaged.mediaCount||0} Media · ${result.counts.expenseCount||0} Expenses · ${result.counts.settlementCount||0} Settlements`,download:()=>backupDownloadBlob(packaged.blob,packaged.filename)};
+    dataOperationSetStage("準備下載","Server Confirmed Media Backup Package 已建立，準備交畀 iOS。",94);
+    return {title:"Backup 已匯出",detail:`Server Confirmed${packaged.registryStale?" · Media Last Confirmed":""} · ${packaged.mediaCount||0} Media · ${result.counts.expenseCount||0} Expenses · ${result.counts.settlementCount||0} Settlements`,download:()=>backupDownloadBlob(packaged.blob,packaged.filename)};
   }}));
 }
 function openTripJsonExportOperation(){
@@ -10558,6 +10643,7 @@ document.querySelector('[data-profile-open="app-data"]')?.addEventListener("clic
 });
 document.querySelector('[data-profile-open="data-management"]')?.addEventListener("click",()=>{
   renderDataManagementLockState();
+  startFullBackupSyncGateWatch();
   getTripBackupService().catch(()=>{});
   warmTripImportDependencies();
   // Prepare all read-only export sources before iOS gets a chance to suspend
