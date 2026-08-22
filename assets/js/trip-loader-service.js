@@ -552,6 +552,35 @@ export function subscribeTripData(tripIdInput, callback, options = {}) {
     return true;
   };
   stopAll.isServerConfirmed = () => state.allRequiredServerConfirmed() && !state.hasPendingWrites();
+  // v7.9.2.8 diagnostic only: expose the existing in-memory freshness graph.
+  // This performs no reads, writes, listener changes, or hydration requests.
+  stopAll.getFreshnessDebug = () => {
+    const dayIds = [...state.days.keys()];
+    const baseKeys = ["trip", "days", "saved", "settings:general", "settings:expenses"];
+    return {
+      tripId,
+      serverRevision: numberOr(state.tripDoc?.revision, 0),
+      seed: {
+        present: !!seedData,
+        complete: seedComplete,
+        revision: seedRevision,
+        wasServerConfirmed: seedWasServerConfirmed
+      },
+      realtimeMode: fullHydrationNeeded ? "full-hydration" : "active-day",
+      activeDayId: desiredRealtimeDayId,
+      initial: { ...initial },
+      baseSources: baseKeys.map(key => ({ key, meta: sourceMeta.get(key) ? { ...sourceMeta.get(key) } : null })),
+      dayCount: dayIds.length,
+      dayItemListeners: [...itemUnsubs.keys()],
+      dayItemServerReady: [...itemServerReady],
+      dayItemMissingServer: dayIds.filter(dayId => !itemServerReady.has(dayId)),
+      pendingWriteSources: [...sourceMeta.entries()]
+        .filter(([, meta]) => meta?.hasPendingWrites === true)
+        .map(([key]) => key),
+      allRequiredServerConfirmed: state.allRequiredServerConfirmed(),
+      hasPendingWrites: state.hasPendingWrites()
+    };
+  };
 
   return stopAll;
 }

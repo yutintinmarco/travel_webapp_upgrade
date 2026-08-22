@@ -604,6 +604,21 @@ let recentExpensesLiveReady = false;
 let settlementsLiveReady = false;
 let activityLogsLiveReady = false;
 let expenseSettingsLiveReady = false;
+// v7.9.2.8 diagnostic only. These fields observe existing lifecycle state and
+// listener errors; they do not retry, reattach, read, write, or change gating.
+const expenseListenerErrors = { settings:null, expenses:null, settlements:null, activityLogs:null };
+let expenseEnsureState = "idle";
+function noteExpenseListenerError(key,error){
+  expenseListenerErrors[key]={
+    code:String(error?.code||""),
+    message:String(error?.message||error||""),
+    at:new Date().toISOString()
+  };
+}
+function resetExpenseDiagnostics(){
+  Object.keys(expenseListenerErrors).forEach(key=>{expenseListenerErrors[key]=null;});
+  expenseEnsureState="idle";
+}
 const backupSyncMeta = {
   settings: { seen:false, fromCache:true, hasPendingWrites:false },
   expenses: { seen:false, fromCache:true, hasPendingWrites:false },
@@ -1285,6 +1300,34 @@ window.__getExpenseLocalExportSnapshot = () => ({
   activityLogs: localBackupEntries(activityLogs),
   freshness: currentExpenseBackupFreshness(),
   capturedAt: new Date().toISOString()
+});
+window.__expenseSyncDebug = () => ({
+  tripId,
+  mountedTripId:String(window.__expensesModuleTripId||""),
+  suspended:expensesModuleSuspendedForTripSwitch,
+  bindingEpoch:expenseBindingEpoch,
+  signedIn:!!currentUser,
+  access:expenseAccessState(),
+  phase2TripAccessReady,
+  phase2TripRole,
+  cloudExpenseStarted,
+  ensureState:expenseEnsureState,
+  live:{
+    settings:expenseSettingsLiveReady,
+    expenses:recentExpensesLiveReady,
+    settlements:settlementsLiveReady,
+    activityLogs:activityLogsLiveReady
+  },
+  listenersAttached:{
+    trip:!!stopTripListener,
+    settings:!!stopExpenseSettingsListener,
+    expenses:!!stopExpensesListener,
+    settlements:!!stopSettlementsListener,
+    activityLogs:!!stopActivityLogsListener
+  },
+  listenerErrors:{...expenseListenerErrors},
+  freshness:currentExpenseBackupFreshness(),
+  moduleStatus:lastModuleStatus
 });
 
 function downloadBlobFile(filename, blob) {
@@ -2289,7 +2332,7 @@ function startExpenseSettingsListener() {
       };
       updateCurrencySelectOptions(); renderRateEditor(); renderSummary(); renderAnalytics(); renderExpenses();
     }
-  }, error => { if (bindingEpoch !== expenseBindingEpoch) return; if (error?.code !== "permission-denied") console.warn("Expense settings listener", error); });
+  }, error => { if (bindingEpoch !== expenseBindingEpoch) return; noteExpenseListenerError("settings",error); if (error?.code !== "permission-denied") console.warn("Expense settings listener", error); });
 }
 
 function startTripListener() {
@@ -2418,6 +2461,7 @@ function listenToExpenses() {
     tryRunPendingExcelExport();
   }, err => {
     if (bindingEpoch !== expenseBindingEpoch) return;
+    noteExpenseListenerError("expenses",err);
     console.error(err);
     setModuleStatus(err?.code === "permission-denied" ? "No access to expenses" : "Sync error");
   });
@@ -2437,6 +2481,7 @@ function listenToSettlements() {
     tryRunPendingExcelExport();
   }, err => {
     if (bindingEpoch !== expenseBindingEpoch) return;
+    noteExpenseListenerError("settlements",err);
     console.error(err);
     setModuleStatus(err?.code === "permission-denied" ? "No access to settlements" : "Settlement sync error");
   });
@@ -2455,6 +2500,7 @@ function listenToActivityLogs() {
     tryRunPendingExcelExport();
   }, err => {
     if (bindingEpoch !== expenseBindingEpoch) return;
+    noteExpenseListenerError("activityLogs",err);
     console.error(err);
     setModuleStatus(err?.code === "permission-denied" ? "No access to activity logs" : "Activity log sync error");
   });
@@ -4583,8 +4629,10 @@ async function startExpenseCloudIfAllowed() {
   // The realtime listener remains authoritative and replaces this warm preview.
   void hydrateRecentExpensesFromLocalFirestoreCache();
   try {
+    expenseEnsureState = "running";
     await ensureTripMembersAndSettings();
-    if (bindingEpoch !== expenseBindingEpoch || bindingTripId !== tripId || expensesModuleSuspendedForTripSwitch) { cloudExpenseStarted = false; return; }
+    if (bindingEpoch !== expenseBindingEpoch || bindingTripId !== tripId || expensesModuleSuspendedForTripSwitch) { expenseEnsureState = "stale"; cloudExpenseStarted = false; return; }
+    expenseEnsureState = "done";
     initMembers();
     renderRateEditor();
     renderAllowedEmails();
@@ -4596,6 +4644,7 @@ async function startExpenseCloudIfAllowed() {
     listenToActivityLogs();
     updateTripStatusUi();
   } catch (error) {
+    expenseEnsureState = "error";
     if (bindingEpoch !== expenseBindingEpoch || bindingTripId !== tripId) return;
     cloudExpenseStarted = false;
     console.error(error);
@@ -4632,6 +4681,7 @@ subscribeAuthState(async (user) => {
     clearExpenseAccessRecoveryTimer();
     expenseAccessRecoveryAttempt = 0;
     cloudExpenseStarted = false;
+    resetExpenseDiagnostics();
     setModuleStatus("Please sign in");
     if (stopTripListener) stopTripListener();
     if (stopExpenseSettingsListener) stopExpenseSettingsListener();
@@ -4691,6 +4741,7 @@ window.__rebindExpensesForTrip = async function rebindExpensesModuleForTrip(next
   expenseBindingEpoch += 1;
   expensesModuleSuspendedForTripSwitch = true;
   cloudExpenseStarted = false;
+  resetExpenseDiagnostics();
   clearExpenseAccessRecoveryTimer();
   expenseAccessRecoveryAttempt = 0;
   for (const stop of [stopTripListener, stopExpenseSettingsListener, stopExpensesListener, stopSettlementsListener, stopActivityLogsListener]) {
