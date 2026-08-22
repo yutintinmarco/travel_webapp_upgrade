@@ -1,5 +1,5 @@
 /*
- * v7.9.2.2 · Phase 3A Media Foundation + Backup Export Resilience
+ * v7.9.3.4 · Phase 3A Local-First Media Performance Pass
  *
  * This module deliberately has no UI dependency. It provides one canonical
  * Trip media namespace, client-side image compression, Storage upload/download,
@@ -48,6 +48,40 @@ export const TRIP_MEDIA_LIMITS = Object.freeze({
   downloadMaxBytes: 8 * 1024 * 1024,
   displayQuality: 0.82,
   thumbnailQuality: 0.76
+});
+export const TRIP_MEDIA_UPLOAD_PROFILES = Object.freeze({
+  icon: Object.freeze({
+    displayMaxDimension: 768,
+    thumbnailMaxDimension: 256,
+    displayQuality: 0.78,
+    thumbnailQuality: 0.72,
+    displayTargetBytes: 420 * 1024,
+    thumbnailTargetBytes: 120 * 1024
+  }),
+  background: Object.freeze({
+    displayMaxDimension: 2048,
+    thumbnailMaxDimension: 640,
+    displayQuality: 0.78,
+    thumbnailQuality: 0.72,
+    displayTargetBytes: 950 * 1024,
+    thumbnailTargetBytes: 220 * 1024
+  }),
+  itinerary: Object.freeze({
+    displayMaxDimension: 1600,
+    thumbnailMaxDimension: 480,
+    displayQuality: 0.78,
+    thumbnailQuality: 0.72,
+    displayTargetBytes: 800 * 1024,
+    thumbnailTargetBytes: 180 * 1024
+  }),
+  savedPlace: Object.freeze({
+    displayMaxDimension: 1600,
+    thumbnailMaxDimension: 480,
+    displayQuality: 0.78,
+    thumbnailQuality: 0.72,
+    displayTargetBytes: 800 * 1024,
+    thumbnailTargetBytes: 180 * 1024
+  })
 });
 
 const storage = getStorage(firebaseApp);
@@ -246,22 +280,31 @@ function targetSize(width, height, maxDimension) {
   };
 }
 
-async function renderVariant(decoded, { maxDimension, quality, preferredType }) {
+async function renderVariant(decoded, { maxDimension, quality, preferredType, targetBytes = 0 }) {
   const dimensions = targetSize(decoded.width, decoded.height, maxDimension);
   const canvas = document.createElement("canvas");
   canvas.width = dimensions.width;
   canvas.height = dimensions.height;
-  const context = canvas.getContext("2d", { alpha: true });
+  const context = canvas.getContext("2d", { alpha: false });
   if (!context) throw errorWithCode("Canvas unavailable", "media-compression-unavailable");
   context.imageSmoothingEnabled = true;
   context.imageSmoothingQuality = "high";
+  context.fillStyle = "#ffffff";
+  context.fillRect(0, 0, dimensions.width, dimensions.height);
   decoded.draw(context, dimensions.width, dimensions.height);
 
   let contentType = preferredType || "image/webp";
-  let blob = await canvasToBlob(canvas, contentType, quality);
-  if (!blob && contentType !== "image/jpeg") {
-    contentType = "image/jpeg";
-    blob = await canvasToBlob(canvas, contentType, quality);
+  const initialQuality = Math.max(0.55, Math.min(0.92, finiteNumber(quality, 0.78)));
+  const qualitySteps = [...new Set([initialQuality, Math.max(0.62, initialQuality - 0.08), 0.60].map(value => Number(value.toFixed(2))))];
+  let blob = null;
+  for (const attemptQuality of qualitySteps) {
+    blob = await canvasToBlob(canvas, contentType, attemptQuality);
+    if (!blob && contentType !== "image/jpeg") {
+      contentType = "image/jpeg";
+      blob = await canvasToBlob(canvas, contentType, Math.min(0.82, attemptQuality + 0.02));
+    }
+    if (!blob) continue;
+    if (!targetBytes || blob.size <= targetBytes) break;
   }
   if (!blob) throw errorWithCode("Unable to encode image", "media-compression-failed");
   return {
@@ -271,7 +314,6 @@ async function renderVariant(decoded, { maxDimension, quality, preferredType }) 
     contentType: clean(blob.type || contentType)
   };
 }
-
 export async function prepareTripImageVariants(sourceBlob, options = {}) {
   if (!(sourceBlob instanceof Blob)) throw errorWithCode("Image file is required", "invalid-media-file");
   const sourceBytes = finiteNumber(sourceBlob.size);
@@ -291,11 +333,13 @@ export async function prepareTripImageVariants(sourceBlob, options = {}) {
       renderVariant(decoded, {
         maxDimension: finiteNumber(options.displayMaxDimension, TRIP_MEDIA_LIMITS.displayMaxDimension),
         quality: finiteNumber(options.displayQuality, TRIP_MEDIA_LIMITS.displayQuality),
+        targetBytes: finiteNumber(options.displayTargetBytes),
         preferredType
       }),
       renderVariant(decoded, {
         maxDimension: finiteNumber(options.thumbnailMaxDimension, TRIP_MEDIA_LIMITS.thumbnailMaxDimension),
         quality: finiteNumber(options.thumbnailQuality, TRIP_MEDIA_LIMITS.thumbnailQuality),
+        targetBytes: finiteNumber(options.thumbnailTargetBytes),
         preferredType
       })
     ]);
@@ -320,7 +364,7 @@ export async function prepareTripImageVariants(sourceBlob, options = {}) {
   }
 }
 
-function uploadBlob(storagePath, blob, metadata, onProgress, rangeStart, rangeEnd) {
+function uploadBlob(storagePath, blob, metadata, onProgress = null) {
   return new Promise((resolve, reject) => {
     const objectRef = ref(storage, storagePath);
     const task = uploadBytesResumable(objectRef, blob, metadata);
@@ -328,22 +372,18 @@ function uploadBlob(storagePath, blob, metadata, onProgress, rangeStart, rangeEn
       if (typeof onProgress !== "function") return;
       const fraction = snapshot.totalBytes > 0 ? snapshot.bytesTransferred / snapshot.totalBytes : 0;
       onProgress({
-        stage: "upload",
         storagePath,
-        progress: rangeStart + (rangeEnd - rangeStart) * fraction,
+        fraction,
         bytesTransferred: snapshot.bytesTransferred,
         totalBytes: snapshot.totalBytes
       });
-    }, reject, async () => {
-      try {
-        resolve(await getMetadata(task.snapshot.ref));
-      } catch (error) {
-        reject(error);
-      }
+    }, reject, () => {
+      // UploadTaskSnapshot already carries FullMetadata. Avoid an additional
+      // getMetadata() round trip for every object after a successful upload.
+      resolve(task.snapshot.metadata || {});
     });
   });
 }
-
 async function bestEffortDelete(storagePath) {
   const path = clean(storagePath);
   if (!path) return;
@@ -370,6 +410,215 @@ function registryRecordFromSnapshot(snapshot) {
   };
 }
 
+function mediaUploadProfile(owner, slotInput = "") {
+  const slot = clean(slotInput || owner?.slot).toLowerCase();
+  if (owner?.ownerType === TRIP_MEDIA_OWNER_TYPES.TRIP && slot === "icon") return TRIP_MEDIA_UPLOAD_PROFILES.icon;
+  if (owner?.ownerType === TRIP_MEDIA_OWNER_TYPES.TRIP && slot === "background") return TRIP_MEDIA_UPLOAD_PROFILES.background;
+  if (owner?.ownerType === TRIP_MEDIA_OWNER_TYPES.SAVED_PLACE) return TRIP_MEDIA_UPLOAD_PROFILES.savedPlace;
+  return TRIP_MEDIA_UPLOAD_PROFILES.itinerary;
+}
+
+function plainMediaRecordForLocal({ tripId, owner, mediaId, variants, displayPath, thumbnailPath }) {
+  return {
+    mediaSchemaVersion: TRIP_MEDIA_SCHEMA_VERSION,
+    mediaId,
+    imageId: mediaId,
+    tripId,
+    ownerType: owner.ownerType,
+    ownerId: owner.ownerId,
+    slot: owner.slot,
+    status: "local-pending",
+    storagePath: displayPath,
+    thumbnailStoragePath: thumbnailPath,
+    contentType: variants.display.contentType,
+    byteSize: variants.display.blob.size,
+    width: variants.display.width,
+    height: variants.display.height,
+    thumbnailContentType: variants.thumbnail.contentType,
+    thumbnailByteSize: variants.thumbnail.blob.size,
+    thumbnailWidth: variants.thumbnail.width,
+    thumbnailHeight: variants.thumbnail.height,
+    sourceContentType: variants.source.contentType,
+    sourceByteSize: variants.source.byteSize,
+    sourceWidth: variants.source.width,
+    sourceHeight: variants.source.height
+  };
+}
+
+export async function prepareTripImageLocalAsset({
+  tripId: tripIdInput,
+  ownerType: ownerTypeInput,
+  ownerId: ownerIdInput = "",
+  slot: slotInput = "",
+  file,
+  mediaId: mediaIdInput = ""
+} = {}) {
+  const tripId = clean(tripIdInput);
+  if (!tripId) throw errorWithCode("Missing tripId", "invalid-trip-id");
+  const owner = normalizeOwner(ownerTypeInput, ownerIdInput, slotInput);
+  const mediaId = safeSegment(mediaIdInput || nowMediaId(), nowMediaId());
+  const profile = mediaUploadProfile(owner, slotInput);
+  const variants = await prepareTripImageVariants(file, profile);
+  const folder = folderForOwner(owner, mediaId);
+  const displayPath = `trips/${tripId}/media/${folder}/display.${extensionForMime(variants.display.contentType)}`;
+  const thumbnailPath = `trips/${tripId}/media/${folder}/thumb.${extensionForMime(variants.thumbnail.contentType)}`;
+  const record = plainMediaRecordForLocal({ tripId, owner, mediaId, variants, displayPath, thumbnailPath });
+  const cached = await Promise.all([
+    putTripMediaCache(displayPath, variants.display.blob, { contentType: record.contentType, tripId, mediaId, variant: "display" }),
+    putTripMediaCache(thumbnailPath, variants.thumbnail.blob, { contentType: record.thumbnailContentType, tripId, mediaId, variant: "thumbnail" })
+  ]);
+  if (!cached.every(Boolean)) {
+    await Promise.allSettled([removeTripMediaCache(displayPath), removeTripMediaCache(thumbnailPath)]);
+    throw errorWithCode("Unable to save image locally", "media-local-cache-unavailable");
+  }
+  return { record, profile };
+}
+
+function combinedUploadProgress(onProgress, { start = 0.12, end = 0.82, displayBytes = 0, thumbnailBytes = 0 } = {}) {
+  if (typeof onProgress !== "function") return () => {};
+  const totals = { display: Math.max(1, finiteNumber(displayBytes)), thumbnail: Math.max(1, finiteNumber(thumbnailBytes)) };
+  const fractions = { display: 0, thumbnail: 0 };
+  return (variant, info = {}) => {
+    fractions[variant] = Math.max(0, Math.min(1, finiteNumber(info.fraction)));
+    const total = totals.display + totals.thumbnail;
+    const done = fractions.display * totals.display + fractions.thumbnail * totals.thumbnail;
+    onProgress({
+      stage: "upload",
+      variant,
+      storagePath: clean(info.storagePath),
+      progress: start + (end - start) * (done / total),
+      bytesTransferred: finiteNumber(info.bytesTransferred),
+      totalBytes: finiteNumber(info.totalBytes)
+    });
+  };
+}
+
+function cloudPendingRecordFromLocal(record, user) {
+  return {
+    mediaSchemaVersion: Math.max(1, finiteNumber(record.mediaSchemaVersion, TRIP_MEDIA_SCHEMA_VERSION)),
+    mediaId: clean(record.mediaId),
+    tripId: clean(record.tripId),
+    ownerType: clean(record.ownerType),
+    ownerId: clean(record.ownerId),
+    slot: clean(record.slot),
+    status: "uploading",
+    caption: clean(record.caption),
+    sortOrder: finiteNumber(record.sortOrder),
+    storagePath: clean(record.storagePath),
+    thumbnailStoragePath: clean(record.thumbnailStoragePath),
+    contentType: clean(record.contentType),
+    byteSize: finiteNumber(record.byteSize),
+    width: finiteNumber(record.width),
+    height: finiteNumber(record.height),
+    thumbnailContentType: clean(record.thumbnailContentType),
+    thumbnailByteSize: finiteNumber(record.thumbnailByteSize),
+    thumbnailWidth: finiteNumber(record.thumbnailWidth),
+    thumbnailHeight: finiteNumber(record.thumbnailHeight),
+    sourceContentType: clean(record.sourceContentType),
+    sourceByteSize: finiteNumber(record.sourceByteSize),
+    sourceWidth: finiteNumber(record.sourceWidth),
+    sourceHeight: finiteNumber(record.sourceHeight),
+    createdBy: user.uid,
+    createdAt: serverTimestamp(),
+    updatedBy: user.uid,
+    updatedAt: serverTimestamp()
+  };
+}
+
+export async function uploadPreparedTripImage(recordInput, {
+  user: userInput = null,
+  onProgress = null,
+  resume = false
+} = {}) {
+  assertCloudOperationAvailable("旅程相片背景同步");
+  const record = { ...(recordInput || {}) };
+  const tripId = clean(record.tripId);
+  const mediaId = clean(record.mediaId || record.imageId);
+  if (!tripId || !mediaId) throw errorWithCode("Invalid local media record", "invalid-media-record");
+  const owner = normalizeOwner(record.ownerType, record.ownerId, record.slot);
+  const user = await requireUser(userInput);
+  const displayPath = clean(record.storagePath);
+  const thumbnailPath = clean(record.thumbnailStoragePath);
+  if (!displayPath || !thumbnailPath || !displayPath.startsWith(`trips/${tripId}/media/`) || !thumbnailPath.startsWith(`trips/${tripId}/media/`)) {
+    throw errorWithCode("Invalid local media paths", "invalid-media-record");
+  }
+  const [displayCache, thumbnailCache] = await Promise.all([
+    getTripMediaCache(displayPath),
+    getTripMediaCache(thumbnailPath)
+  ]);
+  if (!(displayCache?.blob instanceof Blob) || !(thumbnailCache?.blob instanceof Blob)) {
+    throw errorWithCode("Pending media bytes are no longer available on this device", "media-local-cache-missing");
+  }
+
+  invalidateBackupRegistrySnapshot(tripId);
+  const registryRef = doc(db, "trips", tripId, "media", mediaId);
+  let existing = null;
+  if (resume) {
+    try {
+      const snapshot = await getDoc(registryRef);
+      if (snapshot.exists()) existing = registryRecordFromSnapshot(snapshot);
+    } catch (error) {}
+  }
+  if (existing?.status === "ready" && clean(existing.storagePath) === displayPath && clean(existing.thumbnailStoragePath) === thumbnailPath) {
+    return { ...record, ...existing, status: "ready" };
+  }
+
+  const pendingRecord = cloudPendingRecordFromLocal(record, user);
+  if (existing) {
+    const { createdAt, createdBy, ...resumeFields } = pendingRecord;
+    await setDoc(registryRef, resumeFields, { merge: true });
+  } else {
+    await setDoc(registryRef, pendingRecord);
+  }
+
+  const commonMetadata = {
+    cacheControl: "private,max-age=31536000,immutable",
+    customMetadata: {
+      tripId,
+      mediaId,
+      ownerType: owner.ownerType,
+      ownerId: owner.ownerId,
+      slot: owner.slot,
+      uploadedBy: user.uid,
+      mediaSchemaVersion: String(TRIP_MEDIA_SCHEMA_VERSION)
+    }
+  };
+  const progress = combinedUploadProgress(onProgress, {
+    displayBytes: displayCache.blob.size,
+    thumbnailBytes: thumbnailCache.blob.size
+  });
+  const [displayMetadata, thumbnailMetadata] = await Promise.all([
+    uploadBlob(displayPath, displayCache.blob, {
+      ...commonMetadata,
+      contentType: clean(record.contentType || displayCache.blob.type),
+      customMetadata: { ...commonMetadata.customMetadata, variant: "display" }
+    }, info => progress("display", info)),
+    uploadBlob(thumbnailPath, thumbnailCache.blob, {
+      ...commonMetadata,
+      contentType: clean(record.thumbnailContentType || thumbnailCache.blob.type),
+      customMetadata: { ...commonMetadata.customMetadata, variant: "thumbnail" }
+    }, info => progress("thumbnail", info))
+  ]);
+
+  const readyFields = {
+    status: "ready",
+    generation: clean(displayMetadata.generation),
+    md5Hash: clean(displayMetadata.md5Hash),
+    thumbnailGeneration: clean(thumbnailMetadata.generation),
+    thumbnailMd5Hash: clean(thumbnailMetadata.md5Hash),
+    updatedBy: user.uid,
+    updatedAt: serverTimestamp()
+  };
+  if (typeof onProgress === "function") onProgress({ stage: "registry-ready", progress: 0.90, mediaId });
+  await setDoc(registryRef, readyFields, { merge: true });
+  await Promise.all([
+    putTripMediaCache(displayPath, displayCache.blob, { generation: readyFields.generation, contentType: record.contentType, tripId, mediaId, variant: "display" }),
+    putTripMediaCache(thumbnailPath, thumbnailCache.blob, { generation: readyFields.thumbnailGeneration, contentType: record.thumbnailContentType, tripId, mediaId, variant: "thumbnail" })
+  ]);
+  if (typeof onProgress === "function") onProgress({ stage: "ready", progress: 1, mediaId });
+  return { ...record, ...readyFields, status: "ready" };
+}
+
 export async function uploadTripImage({
   tripId: tripIdInput,
   ownerType: ownerTypeInput,
@@ -388,7 +637,7 @@ export async function uploadTripImage({
   const owner = normalizeOwner(ownerTypeInput, ownerIdInput, slotInput);
   const user = await requireUser(userInput);
   const mediaId = safeSegment(mediaIdInput || nowMediaId(), nowMediaId());
-  const variants = await prepareTripImageVariants(file);
+  const variants = await prepareTripImageVariants(file, mediaUploadProfile(owner, slotInput));
   const folder = folderForOwner(owner, mediaId);
   const displayPath = `trips/${tripId}/media/${folder}/display.${extensionForMime(variants.display.contentType)}`;
   const thumbnailPath = `trips/${tripId}/media/${folder}/thumb.${extensionForMime(variants.thumbnail.contentType)}`;
@@ -445,16 +694,24 @@ export async function uploadTripImage({
     await setDoc(registryRef, pendingRecord);
     registryCreated = true;
 
-    const displayMetadata = await uploadBlob(displayPath, variants.display.blob, {
-      ...commonMetadata,
-      contentType: variants.display.contentType,
-      customMetadata: { ...commonMetadata.customMetadata, variant: "display" }
-    }, onProgress, 0.10, 0.62);
-    const thumbnailMetadata = await uploadBlob(thumbnailPath, variants.thumbnail.blob, {
-      ...commonMetadata,
-      contentType: variants.thumbnail.contentType,
-      customMetadata: { ...commonMetadata.customMetadata, variant: "thumbnail" }
-    }, onProgress, 0.62, 0.86);
+    const uploadProgress = combinedUploadProgress(onProgress, {
+      start: 0.10,
+      end: 0.86,
+      displayBytes: variants.display.blob.size,
+      thumbnailBytes: variants.thumbnail.blob.size
+    });
+    const [displayMetadata, thumbnailMetadata] = await Promise.all([
+      uploadBlob(displayPath, variants.display.blob, {
+        ...commonMetadata,
+        contentType: variants.display.contentType,
+        customMetadata: { ...commonMetadata.customMetadata, variant: "display" }
+      }, info => uploadProgress("display", info)),
+      uploadBlob(thumbnailPath, variants.thumbnail.blob, {
+        ...commonMetadata,
+        contentType: variants.thumbnail.contentType,
+        customMetadata: { ...commonMetadata.customMetadata, variant: "thumbnail" }
+      }, info => uploadProgress("thumbnail", info))
+    ]);
 
     const readyFields = {
       status: "ready",
@@ -579,19 +836,25 @@ export async function restoreTripMediaRecord(recordInput, {
   await setDoc(registryRef, pending, { merge: false });
   try {
     if (typeof onProgress === "function") onProgress({ stage: "media-restore-display", progress: 0.12, mediaId });
-    const displayMetadata = await uploadBlob(displayPath, displayBlob, {
+    const restoreProgress = combinedUploadProgress(onProgress, {
+      start: 0.12,
+      end: 0.84,
+      displayBytes: displayBlob.size,
+      thumbnailBytes: thumbnailBlob?.size || 0
+    });
+    const displayPromise = uploadBlob(displayPath, displayBlob, {
       ...commonMetadata,
       contentType: clean(record.contentType || displayBlob.type),
       customMetadata: { ...commonMetadata.customMetadata, variant: "display" }
-    }, onProgress, 0.12, thumbnailBlob ? 0.58 : 0.84);
-    let thumbnailMetadata = null;
-    if (thumbnailBlob && thumbnailPath) {
-      thumbnailMetadata = await uploadBlob(thumbnailPath, thumbnailBlob, {
-        ...commonMetadata,
-        contentType: clean(record.thumbnailContentType || thumbnailBlob.type),
-        customMetadata: { ...commonMetadata.customMetadata, variant: "thumbnail" }
-      }, onProgress, 0.58, 0.84);
-    }
+    }, info => restoreProgress("display", info));
+    const thumbnailPromise = thumbnailBlob && thumbnailPath
+      ? uploadBlob(thumbnailPath, thumbnailBlob, {
+          ...commonMetadata,
+          contentType: clean(record.thumbnailContentType || thumbnailBlob.type),
+          customMetadata: { ...commonMetadata.customMetadata, variant: "thumbnail" }
+        }, info => restoreProgress("thumbnail", info))
+      : Promise.resolve(null);
+    const [displayMetadata, thumbnailMetadata] = await Promise.all([displayPromise, thumbnailPromise]);
     const ready = {
       status: "ready",
       generation: clean(displayMetadata.generation),
