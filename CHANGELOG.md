@@ -1,3 +1,27 @@
+# v7.9.2.9 — Backup Trust Chain Repair
+
+## Fixed
+• Repaired the persistent Trip freshness deadlock proven by the v7.9.2.8 real-device diagnostic build. A complete but untrusted render-cache seed now triggers one temporary all-Day server hydration, then automatically returns to Active-Day Realtime after trust is rebuilt.
+• A previously server-confirmed same-revision render cache can no longer be downgraded merely because an ordinary Firestore cache-sourced `ready` event arrives before all current-session metadata confirmations. Revision changes and pending writes still invalidate trust normally.
+• Instant Cache is no longer treated as current-session Firebase confirmation. Full Backup cannot become eligible from IndexedDB evidence alone; the live loader must receive server confirmation in the current session.
+• Removed the temporary v7.9.2.8 diagnostic UI and debug exports after the root cause was proven on-device.
+• Expense canonical realtime listeners now attach immediately after verified Trip access instead of waiting behind `ensureTripMembersAndSettings()`. The legacy preparation reads run afterwards and can no longer permanently block Expense Backup freshness or leave `cloudExpenseStarted` stuck before listeners exist.
+• Expense listener failures now mark that freshness source unavailable and reattach the existing realtime set with bounded backoff; transient WebChannel errors no longer leave one source permanently dead.
+• Preserved the v7.9.2.6 Expense binding-epoch isolation and Trip-switch suspension/rebind protections.
+• The passive status timeout is now 25 seconds and preserves whether the unresolved blocker is Trip or Expense instead of collapsing both into one generic message.
+
+## Behaviour
+• Healthy trusted Trips remain on Active-Day Realtime and do not fan out inactive-Day listeners.
+• A poisoned or previously interrupted Trip seed self-repairs once by server-hydrating all Days, seals the cache, and returns to the low-read steady state automatically.
+• Full Backup remains passive at button press: no manual Sync button, no Backup-time `getDocs()` freshness query, no blocking modal network operation, and no weakening of server-confirmation requirements.
+
+## Firebase
+• No Firestore Rules change.
+• No Storage Rules change.
+• No indexes change.
+• No Cloud Functions change.
+• No Firebase config or CORS change.
+
 # v7.9.2.8 — Backup Sync Gate Diagnostic Only
 
 ## Diagnostic scope

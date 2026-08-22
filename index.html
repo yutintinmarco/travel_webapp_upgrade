@@ -3335,7 +3335,7 @@ body.expenses-view-active #app-version-note{
 #snacks-view::after,
 #info-view::after,
 #profile-view::after{
-  content:"v7.9.2.8" !important;
+  content:"v7.9.2.9" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3356,7 +3356,7 @@ body.expenses-view-active #app-version-note{
   display:none !important;
 }
 body.expenses-view-active .expenses-module .expenses-app::after{
-  content:"v7.9.2.8" !important;
+  content:"v7.9.2.9" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -4208,7 +4208,6 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
         </button>
       </section>
       <div class="data-management-note">Full Backup 只會喺目前 Trip 已取得 Firebase Server confirmation，而且冇 pending writes 時開放。狀態只旁觀現有 autosync，唔會額外執行同步或 Firebase freshness query。</div>
-      <div class="data-management-note" id="backup-sync-diagnostic" style="margin-top:6px;white-space:pre-line;overflow-wrap:anywhere;">診斷：等待現有同步狀態…</div>
     </div>
 
     <div class="profile-nav-page" id="profile-page-trip-backup" data-profile-page="trip-backup" hidden>
@@ -4310,7 +4309,7 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
         <span class="profile-detail-spacer"></span>
       </div>
       <section class="profile-card" aria-label="App 資訊">
-        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.9.2.8</strong></div>
+        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.9.2.9</strong></div>
         <div class="profile-meta-row"><span>資料架構</span><strong>Phase 2G.2</strong></div>
         <div class="profile-meta-row"><span>主要資料來源</span><strong id="app-data-source-label">Firebase / 本機快取</strong></div>
       </section>
@@ -4487,7 +4486,7 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
 </div>
 
 <script>
-const APP_VERSION = "7.9.2.8";
+const APP_VERSION = "7.9.2.9";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 function perfLiteMark(name){try{return window.__perfLite?.mark(name);}catch(error){return null;}}
@@ -6715,6 +6714,12 @@ function preferredRealtimeDayId(data){
 }
 let tripRenderCacheServicePromise=null;
 let tripRenderCacheService=null;
+// v7.9.2.9 · Keep the last archive-grade confirmation monotonic for the
+// currently cached Trip. Ordinary cache-sourced loader emissions must never
+// erase a previously trusted same-revision seed. Runtime gate confirmation is
+// still reset on every Instant Cache paint until this session contacts server.
+let tripRenderCacheLastConfirmedTripId="";
+let tripRenderCacheLastConfirmedRevision=0;
 let tripInstantBootToken=0;
 let tripRenderSignature="";
 let tripSnacksSignature="";
@@ -7237,11 +7242,29 @@ async function persistInstantTripCache(data,{immediate=false}={}){
   const tripId=dataTripId(data),uid=currentCacheUid();
   if(!tripId||!uid)return false;
   rememberCacheUid(uid);
+  const revision=Math.max(0,Number(data?.revision)||0);
+  const incomingConfirmed=data?.cloudMeta?.serverConfirmed===true&&data?.cloudMeta?.hasPendingWrites!==true;
+  if(incomingConfirmed){
+    tripRenderCacheLastConfirmedTripId=tripId;
+    tripRenderCacheLastConfirmedRevision=revision;
+  }
+  // Preserve a trusted same-revision seed across ordinary Firestore cache →
+  // server metadata transitions. A revision change or pending write is allowed
+  // to invalidate trust; an unconfirmed cache snapshot alone is not.
+  const preserveConfirmed=
+    !incomingConfirmed&&data?.cloudMeta?.hasPendingWrites!==true&&
+    tripRenderCacheLastConfirmedTripId===tripId&&
+    tripRenderCacheLastConfirmedRevision>0&&
+    tripRenderCacheLastConfirmedRevision===revision;
+  const payload=preserveConfirmed
+    ? {...data,cloudMeta:{...(data.cloudMeta||{}),serverConfirmed:true,hasPendingWrites:false}}
+    : data;
+  rememberCacheUid(uid);
   perfLiteInc("cacheSchedules");
   try{
     const service=await getTripRenderCacheService();
-    if(immediate||typeof service.queueTripRenderCacheWrite!=="function")return await service.writeTripRenderCache(uid,tripId,data);
-    return await service.queueTripRenderCacheWrite(uid,tripId,data);
+    if(immediate||typeof service.queueTripRenderCacheWrite!=="function")return await service.writeTripRenderCache(uid,tripId,payload);
+    return await service.queueTripRenderCacheWrite(uid,tripId,payload);
   }catch(error){console.warn("Trip render cache persist",error);return false;}
 }
 function flushInstantTripCacheWrites(){
@@ -7253,7 +7276,12 @@ window.addEventListener("pagehide",flushInstantTripCacheWrites,{passive:true});
 async function invalidateInstantTripCache(tripIdInput,user=tripLibraryCurrentUser||window.__appAuthUser){
   const tripId=String(tripIdInput||"").trim(),uid=currentCacheUid(user);
   if(!tripId||!uid)return false;
-  try{const service=await getTripRenderCacheService();return await service.deleteTripRenderCache(uid,tripId);}catch(error){return false;}
+  try{
+    const service=await getTripRenderCacheService();
+    const removed=await service.deleteTripRenderCache(uid,tripId);
+    if(removed&&tripRenderCacheLastConfirmedTripId===tripId){tripRenderCacheLastConfirmedTripId="";tripRenderCacheLastConfirmedRevision=0;}
+    return removed;
+  }catch(error){return false;}
 }
 async function applyInstantTripCache(tripIdInput,user){
   const tripId=String(tripIdInput||"").trim(),uid=currentCacheUid(user);
@@ -7262,6 +7290,13 @@ async function applyInstantTripCache(tripIdInput,user){
     const service=await getTripRenderCacheService();
     const cached=await service.readTripRenderCache(uid,tripId);
     if(!cached?.data||dataTripId(cached.data)!==tripId)return false;
+    if(cached.data?.cloudMeta?.serverConfirmed===true&&cached.data?.cloudMeta?.hasPendingWrites!==true){
+      tripRenderCacheLastConfirmedTripId=tripId;
+      tripRenderCacheLastConfirmedRevision=Math.max(0,Number(cached.data?.revision)||0);
+    }else{
+      tripRenderCacheLastConfirmedTripId=tripId;
+      tripRenderCacheLastConfirmedRevision=0;
+    }
     // A Firestore result that arrived while IndexedDB was opening always wins.
     if(tripLoaderActiveId===tripId&&tripLoaderState.status==="ready"&&tripLoaderState.source!=="instant-cache")return false;
     const liveRevision=dataTripId(window.tripData)===tripId?Number(window.tripData?.revision)||0:0;
@@ -7415,7 +7450,11 @@ function applyFirebaseTripData(data,{source="server",tripId="",dirtySections=[]}
   const oldScroll=sameTrip&&needsItinerary?Math.max(0,Number(scrollShell?.scrollTop||0)):0;
 
   const previousLoaderSource=tripLoaderState?.source||"";
-  tripLoaderState={status:"ready",source,tripId:nextId,updatedAt:data?.cloudMeta?.updatedAt||"",serverConfirmed:data?.cloudMeta?.serverConfirmed===true,hasPendingWrites:data?.cloudMeta?.hasPendingWrites===true,error:null};
+  // A persisted seed is evidence for inactive-Day continuity only. It is never
+  // current-session server confirmation by itself; the live loader must contact
+  // Firebase before Full Backup can become eligible.
+  const currentSessionServerConfirmed=source!=="instant-cache"&&data?.cloudMeta?.serverConfirmed===true;
+  tripLoaderState={status:"ready",source,tripId:nextId,updatedAt:data?.cloudMeta?.updatedAt||"",serverConfirmed:currentSessionServerConfirmed,hasPendingWrites:data?.cloudMeta?.hasPendingWrites===true,error:null};
   window.tripData=data;
   setDataSourceLabel(source==="instant-cache"?"即時旅程快取":(source==="cache"?"Firebase 快取":"Firebase"));
   if(String(appEntryTripSwitchHandoff.toTripId||"")===nextId){
@@ -7622,6 +7661,10 @@ async function startFirebaseTripLoader(tripIdInput,{preserveVisibleReady=false}=
       const nowServerConfirmed=tripLoaderState.serverConfirmed===true&&tripLoaderState.hasPendingWrites!==true&&metaSource==="server";
       if(dataTripId(window.tripData)===tripId&&window.tripData){
         window.tripData.cloudMeta={...(window.tripData.cloudMeta||{}),source:metaSource,serverConfirmed:tripLoaderState.serverConfirmed===true,hasPendingWrites:tripLoaderState.hasPendingWrites===true};
+        if(nowServerConfirmed){
+          tripRenderCacheLastConfirmedTripId=tripId;
+          tripRenderCacheLastConfirmedRevision=Math.max(0,Number(window.tripData?.revision)||0);
+        }
         if(nowServerConfirmed&&!wasServerConfirmed)persistInstantTripCache(window.tripData).catch(()=>{});
       }
       setDataSourceLabel(metaSource==="cache"?"Firebase 快取":"Firebase");
@@ -7656,7 +7699,6 @@ async function startFirebaseTripLoader(tripIdInput,{preserveVisibleReady=false}=
       refreshFullBackupSyncGate();
     }
   },{seedData,activeDayId});
-  window.__tripFreshnessDebug=()=>{try{return tripLoaderStop?.getFreshnessDebug?.()||null;}catch(error){return {debugError:String(error?.message||error||"")};}};
 }
 async function reconcileFirebaseTripLoader(){
   const token=++tripLoaderReconcileToken;
@@ -8614,13 +8656,14 @@ let fullBackupSyncGateWatchTimer=0;
 let fullBackupSyncGateWatchStartedAt=0;
 let fullBackupSyncGatePendingSince=0;
 let fullBackupSyncGatePendingTripId="";
-const FULL_BACKUP_SYNC_STATUS_TIMEOUT_MS=12000;
+const FULL_BACKUP_SYNC_STATUS_TIMEOUT_MS=25000;
 const FULL_BACKUP_SYNC_GATE_VISIBILITY_GRACE_MS=900;
 function currentFullBackupSyncGate(){
   const tripId=currentBackupTripId();
   const loader=tripLoaderState||{};
   const sameTrip=!!tripId&&String(loader.tripId||"")===tripId;
-  const online=(typeof navigator==="undefined"||navigator.onLine!==false)&&(typeof cloudSafetyState==="undefined"||cloudSafetyState?.online!==false);
+  const observedOnline=globalThis?.window?.__cloudSafetyState?.online;
+  const online=(typeof navigator==="undefined"||navigator.onLine!==false)&&observedOnline!==false;
   const tripPending=sameTrip&&loader.hasPendingWrites===true;
   const tripConfirmed=sameTrip&&loader.status==="ready"&&loader.serverConfirmed===true&&!tripPending;
   const expensesEnabled=window.tripData?.meta?.expenses?.enabled===true;
@@ -8646,7 +8689,11 @@ function currentFullBackupSyncGate(){
 }
 function fullBackupSyncGateCopy(gate,{deleteFlow=false}={}){
   if(gate.status==="synced")return deleteFlow?"Firebase：已同步 · 可建立刪除前 Data + Media ZIP":"Firebase：已同步 · Data + Media ZIP 可建立";
-  if(gate.status==="unconfirmed")return "Firebase：未能確認同步 · Backup 暫時未開放";
+  if(gate.status==="unconfirmed"){
+    if(!gate.online)return "Firebase：離線 · Backup 暫時未開放";
+    if(!gate.tripConfirmed)return "Firebase：行程未能確認同步 · Backup 暫時未開放";
+    return "Firebase：支出未能確認同步 · Backup 暫時未開放";
+  }
   if(!gate.tripConfirmed)return "Firebase：行程同步中 · Backup 暫時未開放";
   if(!gate.expenseConfirmed)return "Firebase：支出同步中 · Backup 暫時未開放";
   return "Firebase：同步中 · Backup 暫時未開放";
@@ -8659,65 +8706,12 @@ function applyFullBackupGateToButton(button,subtitle,gate,{deleteFlow=false,owne
   button.classList.toggle("profile-row-disabled",!enabled);
   if(subtitle)subtitle.textContent=fullBackupSyncGateCopy(gate,{deleteFlow});
 }
-function fullBackupGateBlockers(gate){
-  const out=[];
-  const loader=tripLoaderState||{};
-  if(!gate.online)out.push("offline");
-  if(!gate.tripId)out.push("no-trip-id");
-  if(gate.tripId&&String(loader.tripId||"")!==gate.tripId)out.push(`trip-id-mismatch:${loader.tripId||"none"}`);
-  if(loader.status!=="ready")out.push(`loader-status:${loader.status||"none"}`);
-  if(gate.tripPending)out.push("trip-pending-writes");
-  if(!gate.tripConfirmed)out.push("trip-not-server-confirmed");
-  if(!gate.expenseReady)out.push("expense-not-ready");
-  if(gate.expensePending)out.push("expense-pending-writes");
-  if(gate.expenseReady&&!gate.expenseConfirmed)out.push("expense-not-server-confirmed");
-  return out;
-}
-function buildBackupSyncDiagnostic(gate,tripDebug,expenseDebug,blockers){
-  const bool=value=>value===true?"✓":(value===false?"✕":"?");
-  const seed=tripDebug?.seed||{};
-  const dayCount=Number(tripDebug?.dayCount||0);
-  const readyDays=Array.isArray(tripDebug?.dayItemServerReady)?tripDebug.dayItemServerReady.length:0;
-  const missingDays=Array.isArray(tripDebug?.dayItemMissingServer)?tripDebug.dayItemMissingServer.length:null;
-  const seedText=seed.present?`${bool(seed.wasServerConfirmed)} r${seed.revision||0}`:"none";
-  const dayText=dayCount?`${readyDays}/${dayCount}${missingDays!==null?` · missing ${missingDays}`:""}`:"?";
-  const live=expenseDebug?.live||{};
-  const liveKeys=["settings","expenses","settlements","activityLogs"];
-  const liveCount=expenseDebug?liveKeys.filter(key=>live[key]===true).length:0;
-  const errorCount=expenseDebug?.listenerErrors?Object.values(expenseDebug.listenerErrors).filter(Boolean).length:0;
-  const expenseFresh=expenseDebug?.freshness||{};
-  const sameTrip=String(tripLoaderState?.tripId||"")===String(gate.tripId||"");
-  const baseShort={"trip":"trip","days":"days","saved":"saved","settings:general":"general","settings:expenses":"expCfg"};
-  const baseText=Array.isArray(tripDebug?.baseSources)?tripDebug.baseSources.map(entry=>{
-    const meta=entry?.meta;
-    const state=!meta?"?":(meta.hasPendingWrites?"P":(meta.fromCache?"C":"S"));
-    return `${baseShort[entry?.key]||entry?.key}:${state}`;
-  }).join(" "):"?";
-  const expenseSources=expenseFresh?.sources||{};
-  const expenseSourceText=[["settings","set"],["expenses","exp"],["settlements","settle"],["activityLogs","log"]].map(([key,label])=>{
-    const meta=expenseSources[key];
-    const state=!meta?.seen?"?":(meta.hasPendingWrites?"P":(meta.fromCache?"C":"S"));
-    return `${label}:${state}`;
-  }).join(" ");
-  const line1=`Trip：gate ${bool(gate.tripConfirmed)} · same ${bool(sameTrip)} · seed ${seedText} · days ${dayText} · mode ${tripDebug?.realtimeMode||"?"}`;
-  const line2=`Trip base：${baseText}`;
-  const line3=`Expense：ready ${bool(gate.expenseReady)} · server ${bool(expenseFresh.serverConfirmed)} · live ${expenseDebug?`${liveCount}/4`:"not loaded"} · ensure ${expenseDebug?.ensureState||"?"} · errors ${errorCount}`;
-  const line4=`Expense src：${expenseSourceText}`;
-  const line5=`Blockers：${blockers.length?blockers.join(", "):"none"}`;
-  return `${line1}\n${line2}\n${line3}\n${line4}\n${line5}`;
-}
 function refreshFullBackupSyncGate(){
   const gate=currentFullBackupSyncGate();
   applyFullBackupGateToButton(document.getElementById("trip-full-backup-export"),document.getElementById("trip-full-backup-export-subtitle"),gate);
   const owner=currentTripOwnerRecord?.();
   applyFullBackupGateToButton(document.getElementById("trip-delete-backup-btn"),document.getElementById("trip-delete-backup-subtitle"),gate,{deleteFlow:true,ownerAllowed:Boolean(owner?.isOwner&&gate.tripId)});
-  const blockers=fullBackupGateBlockers(gate);
-  let tripDebug=null,expenseDebug=null;
-  try{tripDebug=window.__tripFreshnessDebug?.()||null;}catch(error){}
-  try{expenseDebug=window.__expenseSyncDebug?.()||null;}catch(error){}
-  window.__fullBackupSyncGate={...gate,blockers,trip:tripDebug,expense:expenseDebug,evaluatedAt:Date.now()};
-  const diagnostic=document.getElementById("backup-sync-diagnostic");
-  if(diagnostic)diagnostic.textContent=buildBackupSyncDiagnostic(gate,tripDebug,expenseDebug,blockers);
+  window.__fullBackupSyncGate={...gate,evaluatedAt:Date.now()};
   return gate;
 }
 function stopFullBackupSyncGateWatch(){
