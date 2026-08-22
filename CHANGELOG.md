@@ -1,3 +1,12 @@
+# v7.9.3.1 — Trip Icon Module Cache Coherency Hotfix
+
+• Fixed the user-visible version label that was accidentally left at v7.9.2.9 in v7.9.3.0.
+• Fixed Trip icon upload failing with `service.updateTripIconImage is not a function` when a newly deployed `index.html` was paired with the previous cached `trip-appearance-service.js`.
+• Dynamic imports now use a `build` cache-buster that the previous Service Worker does not strip, forcing the first request for a newly deployed module to reach the network even during Service Worker handoff.
+• Service Worker registration and static shell cache-busters now follow the current App version instead of the stale v7.9.1.0 token.
+• The new Service Worker canonicalises both legacy `v` and current `build` cache-busters after the handoff, preserving bounded cache storage.
+• No Firebase Rules, indexes, Functions, config, CORS or media schema changes.
+
 # v7.9.3.0 — Phase 3A Media Upload Integration · Trip Icon
 
 ## Scope

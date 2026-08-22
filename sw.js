@@ -1,5 +1,5 @@
 /* Travel WebApp Service Worker
- * v7.9.3.0 · Phase 3A Media Upload Integration · Trip Icon; Layer 0–3 retained
+ * v7.9.3.1 · Trip Icon Module Cache Coherency Hotfix; Layer 0–3 retained
  *
  * Keeps the v7.7.0.14 cold-start behaviour, while hardening installation:
  *  1. Critical shell assets are transactional. If any critical file cannot be
@@ -7,13 +7,14 @@
  *     cache remain in control.
  *  2. Optional assets are best-effort. One missing optional file cannot abort
  *     the whole precache.
- *  3. Cache canonicalisation removes only the app's "v" cache-buster. Other
- *     query parameters are preserved so future semantic URLs cannot collide.
+ *  3. Cache canonicalisation removes the app's legacy "v" and current "build"
+ *     cache-busters. Other query parameters are preserved so future semantic
+ *     URLs cannot collide.
  *  4. Normal navigation stays cache-first with background revalidation; an
  *     explicit reload stays network-first.
  */
 
-const SW_VERSION = "travel-shell-v7.9.3.0";
+const SW_VERSION = "travel-shell-v7.9.3.1";
 const CORE_CACHE = SW_VERSION;
 
 // Required for a useful offline launch and remembered-Trip boot.
@@ -72,13 +73,15 @@ const OPTIONAL_ASSETS = [
 
 const SHELL_KEY = new URL("./index.html", self.location).href;
 
-/* Dynamic imports use ?v=<APP_VERSION> to force a real network check after a
- * deployment. Cache storage removes only that version key. Any other query
- * parameter remains part of the cache identity. */
+/* Dynamic imports use ?build=<APP_VERSION>. This deliberately differs from the
+ * legacy ?v= key so a page controlled by the previous worker cannot satisfy a
+ * newly deployed module import from its old canonical cache. The active worker
+ * removes both legacy v and current build keys when storing the asset. */
 function cacheKeyFor(request) {
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return request;
   url.searchParams.delete("v");
+  url.searchParams.delete("build");
   url.hash = "";
   return url.href;
 }
