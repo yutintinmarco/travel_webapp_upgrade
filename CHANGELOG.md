@@ -1,3 +1,24 @@
+# v7.9.2.8 — Backup Sync Gate Diagnostic Only
+
+## Diagnostic scope
+• Temporary read-only instrumentation for the persistent Full Backup sync failure seen on iPhone.
+• Exposes the Trip loader seed trust state, active-Day realtime mode, server-confirmed Day count, missing Day confirmations, pending-write sources and current gate blockers.
+• Exposes Expense module startup state, listener readiness, listener attachment state, listener errors and existing backup freshness metadata.
+• Data Management shows three compact diagnostic lines directly on-device so Safari Web Inspector is not required.
+• No sync algorithm, Backup eligibility rule, Firebase listener topology, hydration request, retry behaviour, permission logic, cache persistence behaviour or export behaviour is changed.
+• No new Firestore read, getDoc, getDocs, listener, write or Backup-time network operation is added.
+
+## Purpose
+• Prove or reject the v7.9.2.7 root-cause review hypothesis that a poisoned render-cache seed can leave serverConfirmed false while Active Day Realtime confirms only one of multiple Days.
+• Separately reveal whether Expense lazy startup, a hung settings preparation step, or a silently failed Expense listener is also blocking the gate.
+
+## Firebase
+• No Firestore Rules change.
+• No Storage Rules change.
+• No indexes change.
+• No Cloud Functions change.
+• No Firebase config or CORS change.
+
 # v7.9.2.7 — Passive Backup Gate Watcher Lifecycle Hotfix
 
 ## Fixed
