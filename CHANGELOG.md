@@ -1,3 +1,37 @@
+# v7.9.3.0 — Phase 3A Media Upload Integration · Trip Icon
+
+## Scope
+• Opens the first real user-facing Firebase Storage upload path on top of the v7.9.2.9 stable Backup Sync Gate checkpoint.
+• This vertical slice covers Trip icon upload, replace and remove only. Trip background, itinerary images and Saved Place images remain read-only until the next media slices.
+
+## Trip Icon Upload
+• Added a new `我的 → 外觀與顯示 → 旅程圖示` page using the existing Profile navigation compositor and card grammar.
+• Owner / Admin can choose an image from iPhone Photos / Files. Viewer / Member and globally locked Trips remain read-only.
+• Images use the existing Phase 3A media engine: client-side decode and compression, ~2048 px display image, ~640 px thumbnail, Firebase Storage upload, Firestore Media Registry lifecycle and IndexedDB media cache.
+• Storage remains under `trips/{tripId}/media/trip/icon/{mediaId}/...`.
+• The Trip root and `settings/general` store the same portable `tripIconMedia` descriptor after the media registry reaches ready state.
+• Trip switcher / Trip library uses the existing Storage-backed thumbnail read path automatically after the descriptor arrives through the normal Trip realtime listener.
+
+## Replace / Remove Safety
+• Replacement uploads the new media first, then atomically attaches the new descriptor to Trip metadata and writes an activity log. If attachment fails, the newly uploaded media is rolled back where possible.
+• Only after the new descriptor is attached does the App clean the previous icon Storage objects, IndexedDB cache entries and media registry record. Cleanup retries once on a transient failure.
+• Removing a custom icon first detaches the descriptor and restores the existing Trip icon fallback, then cleans the previous Storage media.
+• A cleanup failure does not roll back a successfully attached replacement or restored fallback; the UI reports the cleanup warning instead of pretending the full lifecycle succeeded.
+
+## UI / UX
+• Upload progress is inline on the Trip Icon page; no new blocking modal or navigation system is introduced.
+• While a media mutation is in flight, the existing Full Backup row is locally gated as `媒體更新中`; Backup cannot package a half-attached upload. No new Firebase freshness read is added.
+• The page reuses the current Trip icon renderer, including Firebase Storage thumbnail resolution and existing emoji / bundled icon fallback.
+• Existing Profile transition compositor code is unchanged.
+
+## Firebase
+• Firestore Rules: unchanged. Existing `canEditTripContent` and `/media/{mediaId}` rules already cover this write path.
+• Storage Rules: unchanged. Existing `trips/{tripId}/media/**` Owner / Admin write policy already covers this upload path.
+• Firestore Indexes: unchanged.
+• Cloud Functions: unchanged.
+• Firebase config: unchanged.
+• CORS: unchanged.
+
 # v7.9.2.9 — Backup Trust Chain Repair
 
 ## Fixed

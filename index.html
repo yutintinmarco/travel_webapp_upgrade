@@ -2787,6 +2787,23 @@ body.expenses-view-active #expenses-root{
   box-shadow:0 7px 18px color-mix(in srgb,var(--accent-color,#0a84ff) 28%,transparent);
 }
 .trip-member-primary-action:disabled{opacity:.54;}
+.trip-media-icon-preview-card{padding:16px;display:grid;grid-template-columns:72px minmax(0,1fr);gap:14px;align-items:center;}
+.trip-media-icon-preview{
+  width:72px;height:72px;border-radius:21px;display:grid;place-items:center;overflow:hidden;
+  background:linear-gradient(145deg,rgba(0,122,255,.16),rgba(175,82,222,.10));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.52),0 6px 18px rgba(15,23,42,.06);
+}
+.trip-media-icon-preview img{width:100%;height:100%;display:block;object-fit:cover;}
+.trip-media-icon-preview .trip-icon-emoji{font-size:31px;line-height:1;}
+.trip-media-icon-preview .trip-icon-monogram{font-size:20px;font-weight:820;letter-spacing:-.4px;}
+.trip-media-icon-preview-copy{min-width:0;display:grid;gap:4px;}
+.trip-media-icon-preview-copy strong{font-size:calc(14px * var(--font-scale));color:var(--label-primary);}
+.trip-media-icon-preview-copy small{font-size:calc(9.5px * var(--font-scale));line-height:1.45;color:var(--label-secondary);}
+.trip-media-upload-status{margin:10px 3px 0;text-align:left;}
+.trip-media-upload-status.is-error{color:#c8352d;}
+.trip-media-upload-progress{height:4px;margin:10px 2px 0;border-radius:999px;background:rgba(118,118,128,.13);overflow:hidden;}
+.trip-media-upload-progress>span{display:block;width:0;height:100%;border-radius:inherit;background:var(--accent-color,#0a84ff);transition:width .16s ease;}
+.profile-row.trip-media-remove-row .profile-row-copy strong{color:#c8352d;}
 .trip-member-inline-status{margin-top:8px;text-align:center;}
 .trip-member-inline-status.is-error{color:#c8352d;}
 .trip-invite-actions{display:flex;gap:6px;align-items:center;}
@@ -3898,6 +3915,11 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
           </div>
           <button class="theme-btn profile-theme-compat" id="theme-btn" type="button" title="切換主題" data-theme="auto" aria-hidden="true" tabindex="-1"></button>
         </div>
+        <button class="profile-row" id="trip-icon-settings-open-btn" type="button" data-profile-open="trip-icon-settings">
+          <span class="profile-row-icon profile-icon-blue">▣</span>
+          <span class="profile-row-copy"><strong>旅程圖示</strong><small>上載相片作旅程選單及切換圖示</small></span>
+          <span class="profile-chevron">›</span>
+        </button>
         <button class="profile-row" id="trip-color-settings-open-btn" type="button" data-profile-open="trip-color-settings">
           <span class="profile-row-icon profile-icon-purple">●</span>
           <span class="profile-row-copy"><strong>旅程主色</strong><small>整個旅程嘅主要 Accent Color</small></span>
@@ -3920,6 +3942,36 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
           <span class="profile-status-pill" id="team-settings-open-status" hidden>無</span>
         </button>
       </section>
+    </div>
+
+    <div class="profile-nav-page" id="profile-page-trip-icon-settings" data-profile-page="trip-icon-settings" hidden>
+      <div class="profile-detail-bar">
+        <button class="profile-detail-back" type="button" data-profile-back aria-label="返回外觀與顯示"><span class="profile-back-glyph">‹</span><span class="profile-detail-back-label">外觀與顯示</span></button>
+        <h2>旅程圖示</h2>
+        <span class="profile-detail-spacer"></span>
+      </div>
+      <section class="profile-card trip-media-icon-preview-card" aria-label="目前旅程圖示">
+        <div class="trip-media-icon-preview trip-library-icon" id="trip-icon-media-preview"></div>
+        <div class="trip-media-icon-preview-copy">
+          <strong id="trip-icon-media-title">目前圖示</strong>
+          <small id="trip-icon-media-copy">相片會先喺裝置壓縮，再上載 Firebase Storage。</small>
+        </div>
+      </section>
+      <div class="profile-section-label">圖示管理</div>
+      <section class="profile-card profile-menu-card" aria-label="旅程圖示管理">
+        <button class="profile-row" id="trip-icon-media-upload" type="button">
+          <span class="profile-row-icon profile-icon-blue">⇧</span>
+          <span class="profile-row-copy"><strong>選擇新圖示</strong><small>支援相片及圖片，建議使用接近正方形嘅圖片</small></span>
+          <span class="profile-chevron">›</span>
+        </button>
+        <button class="profile-row trip-media-remove-row" id="trip-icon-media-remove" type="button" hidden>
+          <span class="profile-row-icon profile-icon-red">−</span>
+          <span class="profile-row-copy"><strong>移除自訂圖示</strong><small>恢復旅程原有圖示</small></span>
+          <span class="profile-chevron">›</span>
+        </button>
+      </section>
+      <div class="trip-media-upload-progress" id="trip-icon-media-progress" hidden><span></span></div>
+      <div class="trip-member-inline-status trip-media-upload-status" id="trip-icon-media-status">Owner / Admin 可以更新；旅程鎖定時保持唯讀。</div>
     </div>
 
     <div class="profile-nav-page" id="profile-page-trip-color-settings" data-profile-page="trip-color-settings" hidden>
@@ -4486,9 +4538,10 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
 </div>
 
 <script>
-const APP_VERSION = "7.9.2.9";
+const APP_VERSION = "7.9.3.0";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
+window.__tripMediaMutationBusy = false;
 function perfLiteMark(name){try{return window.__perfLite?.mark(name);}catch(error){return null;}}
 function perfLiteInc(name,amount=1){try{return window.__perfLite?.inc(name,amount);}catch(error){return 0;}}
 perfLiteMark("appShellReady");
@@ -7112,7 +7165,7 @@ function weatherRenderSignature(data){
 }
 function tripVisualRenderSignature(data){
   const meta=data?.meta||{};
-  return renderSignature({tripId:dataTripId(data),accentColor:meta.accentColor||"",featureColors:meta.featureColors||{},backgroundImage:meta.backgroundImage||"",coverImage:meta.coverImage||"",backgroundImageMedia:meta.backgroundImageMedia||null,coverImageMedia:meta.coverImageMedia||null},"");
+  return renderSignature({tripId:dataTripId(data),accentColor:meta.accentColor||"",featureColors:meta.featureColors||{},tripIconMedia:meta.tripIconMedia||null,backgroundImage:meta.backgroundImage||"",coverImage:meta.coverImage||"",backgroundImageMedia:meta.backgroundImageMedia||null,coverImageMedia:meta.coverImageMedia||null},"");
 }
 function expensesRenderSignature(data){return renderSignature(data?.meta?.expenses||{},"");}
 function tripLibraryDataSignature(data){
@@ -7418,7 +7471,7 @@ function applyFirebaseTripData(data,{source="server",tripId="",dirtySections=[]}
   const snacksTouched=!sameTrip||dirtyUnknown||dirty.has("snacks")||["savedPlacesMeta","galleryDefaults"].some(generalField);
   const infoTouched=!sameTrip||["startDate","endDate"].some(tripField)||["travellers","cities","hotels","flights","outbound","inbound","infoCard"].some(generalField);
   const weatherTouched=!sameTrip||["startDate","endDate"].some(tripField)||["cities","weather"].some(generalField);
-  const visualTouched=!sameTrip||["accentColor","backgroundImage","coverImage","backgroundImageMedia","coverImageMedia"].some(tripField)||generalField("backgroundImage")||generalField("backgroundImageMedia")||generalField("coverImageMedia")||generalField("featureColors");
+  const visualTouched=!sameTrip||["accentColor","tripIconMedia","backgroundImage","coverImage","backgroundImageMedia","coverImageMedia"].some(tripField)||generalField("tripIconMedia")||generalField("backgroundImage")||generalField("backgroundImageMedia")||generalField("coverImageMedia")||generalField("featureColors");
   const expensesTouched=!sameTrip||dirtyUnknown||dirty.has("expenses");
   const destinationThemeTouched=!sameTrip||generalField("cities");
   const teamThemeTouched=!sameTrip||generalField("travellers");
@@ -7512,6 +7565,7 @@ function applyFirebaseTripData(data,{source="server",tripId="",dirtySections=[]}
   if(generalDirty||needsDestinationTheme){try{window.__destinationSettingsRefresh?.(data);}catch(error){}}
   if(generalDirty||needsTeamTheme){try{window.__teamSettingsRefresh?.(data);}catch(error){}}
   if(tripDirty||generalDirty){try{window.__appearanceColorSettingsRefresh?.(data);}catch(error){}}
+  if(tripDirty||generalDirty){try{window.__tripIconSettingsRefresh?.(data);}catch(error){}}
   if(generalDirty||needsDestinationTheme||needsTeamTheme){try{refreshAppearanceColourMenuState(data);}catch(error){}}
 
   resolveTripLoaderWaiters(data);
@@ -8666,6 +8720,7 @@ function currentFullBackupSyncGate(){
   const online=(typeof navigator==="undefined"||navigator.onLine!==false)&&observedOnline!==false;
   const tripPending=sameTrip&&loader.hasPendingWrites===true;
   const tripConfirmed=sameTrip&&loader.status==="ready"&&loader.serverConfirmed===true&&!tripPending;
+  const mediaMutationBusy=window.__tripMediaMutationBusy===true;
   const expensesEnabled=window.tripData?.meta?.expenses?.enabled===true;
   let expenseReady=!expensesEnabled,expenseConfirmed=!expensesEnabled&&tripConfirmed,expensePending=false;
   if(expensesEnabled&&typeof window.__getExpenseLocalExportSnapshot==="function"){
@@ -8678,16 +8733,17 @@ function currentFullBackupSyncGate(){
       }
     }catch(error){}
   }
-  const canBackup=online&&tripConfirmed&&expenseConfirmed;
+  const canBackup=online&&tripConfirmed&&expenseConfirmed&&!mediaMutationBusy;
   const transportUnavailable=!online||!tripId||["error","recovery-needed","permission-denied","not-found","local"].includes(String(loader.status||""))||Boolean(loader.error&&!loader.serverConfirmed);
   if(fullBackupSyncGatePendingTripId!==tripId){fullBackupSyncGatePendingTripId=tripId;fullBackupSyncGatePendingSince=0;}
-  if(canBackup||transportUnavailable){fullBackupSyncGatePendingSince=0;}
+  if(canBackup||transportUnavailable||mediaMutationBusy){fullBackupSyncGatePendingSince=0;}
   else if(!fullBackupSyncGatePendingSince){fullBackupSyncGatePendingSince=Date.now();}
   const timedOut=!canBackup&&!transportUnavailable&&fullBackupSyncGatePendingSince>0&&(Date.now()-fullBackupSyncGatePendingSince>=FULL_BACKUP_SYNC_STATUS_TIMEOUT_MS);
   const status=canBackup?"synced":((transportUnavailable||timedOut)?"unconfirmed":"syncing");
-  return {status,canBackup,tripId,online,tripConfirmed,tripPending,expenseReady,expenseConfirmed,expensePending,timedOut};
+  return {status,canBackup,tripId,online,tripConfirmed,tripPending,expenseReady,expenseConfirmed,expensePending,mediaMutationBusy,timedOut};
 }
 function fullBackupSyncGateCopy(gate,{deleteFlow=false}={}){
+  if(gate.mediaMutationBusy)return "Firebase：媒體更新中 · Backup 暫時未開放";
   if(gate.status==="synced")return deleteFlow?"Firebase：已同步 · 可建立刪除前 Data + Media ZIP":"Firebase：已同步 · Data + Media ZIP 可建立";
   if(gate.status==="unconfirmed"){
     if(!gate.online)return "Firebase：離線 · Backup 暫時未開放";
@@ -9770,6 +9826,142 @@ function appearanceFriendlyError(error){
   if(code==="invalid-colour")return"顏色格式無效。";
   return error?.message||"未能更新顏色。";
 }
+
+let tripIconMediaBusy=false;
+let tripIconMediaStatusText="";
+let tripIconMediaStatusError=false;
+let tripIconMediaRenderedTripId="";
+function tripIconMediaFriendlyError(error){
+  const code=String(error?.code||"");
+  if(code==="offline")return"目前離線，重新連線後先可以上載旅程圖示。";
+  if(code==="operation-busy"||code==="trip-operation-busy")return"另一個雲端操作仍在進行，完成後再試。";
+  if(code==="trip-global-locked")return"旅程已全域鎖定，目前只可查看圖示。";
+  if(code==="trip-deleting")return"旅程正在永久刪除，已停止媒體修改。";
+  if(code==="insufficient-role"||code==="permission-denied"||code==="firestore/permission-denied"||code==="storage/unauthorized")return"只有 Owner 或 Admin 可以修改旅程圖示。";
+  if(code==="media-source-too-large")return"原相片太大，請選擇 30 MB 以下圖片。";
+  if(code==="unsupported-media-type"||code==="invalid-media-file")return"請選擇有效嘅相片或圖片。";
+  if(code==="media-decode-failed")return"未能讀取呢張圖片，請改用另一張相片。";
+  if(code==="media-compressed-too-large")return"壓縮後圖片仍然太大，請選擇較細圖片。";
+  return error?.message||"未能更新旅程圖示。";
+}
+function setTripIconMediaStatus(text,{error=false}={}){
+  tripIconMediaStatusText=String(text||"");
+  tripIconMediaStatusError=!!error;
+  const status=document.getElementById("trip-icon-media-status");
+  if(status){status.textContent=tripIconMediaStatusText;status.classList.toggle("is-error",tripIconMediaStatusError);}
+}
+function setTripIconMediaProgress(progress,{show=true}={}){
+  const root=document.getElementById("trip-icon-media-progress"),bar=root?.querySelector("span");
+  if(!root||!bar)return;
+  root.hidden=!show;
+  bar.style.width=`${Math.round(clamp(Number(progress)||0,0,1)*100)}%`;
+}
+function tripIconProgressCopy(progress={}){
+  const stage=String(progress?.stage||"");
+  if(stage==="registry-pending")return"正在建立 Firebase Media Registry…";
+  if(stage==="upload")return`正在上載旅程圖示… ${Math.round(clamp(Number(progress?.progress)||0,0,1)*100)}%`;
+  if(stage==="registry-ready")return"Storage 已完成，正在確認媒體資料…";
+  if(stage==="ready")return"旅程圖示已上載。";
+  return"正在準備及壓縮圖片…";
+}
+function renderTripIconSettings(data=window.tripData,{preserveStatus=false}={}){
+  const preview=document.getElementById("trip-icon-media-preview"),title=document.getElementById("trip-icon-media-title"),copy=document.getElementById("trip-icon-media-copy");
+  const upload=document.getElementById("trip-icon-media-upload"),remove=document.getElementById("trip-icon-media-remove");
+  if(!preview||!upload||!remove)return;
+  const tripId=dataTripId(data),meta=data?.meta||{},media=meta.tripIconMedia&&typeof meta.tripIconMedia==="object"?meta.tripIconMedia:null;
+  if(tripIconMediaRenderedTripId&&tripIconMediaRenderedTripId!==tripId&&!tripIconMediaBusy){tripIconMediaStatusText="";tripIconMediaStatusError=false;}
+  tripIconMediaRenderedTripId=tripId;
+  const hasCustom=tripMediaHasStorage(media),canEdit=appearanceSettingsCanEdit();
+  const tripForIcon={tripId,titleSmall:meta.titleSmall||"",titleMain:meta.titleMain||"",tripIcon:meta.tripIcon||"",tripIconMedia:media};
+  preview.innerHTML=tripIconMarkup(tripForIcon);
+  hydrateTripLibraryMediaImages(preview);
+  if(title)title.textContent=hasCustom?"自訂 Firebase 圖示":"旅程原有圖示";
+  if(copy)copy.textContent=hasCustom?"目前圖示已存放喺 Firebase Storage，其他裝置會同步顯示。":"選擇圖片後會先喺裝置壓縮，再上載 Firebase Storage。";
+  upload.disabled=tripIconMediaBusy||!canEdit||!tripId;
+  upload.querySelector("strong").textContent=hasCustom?"更換旅程圖示":"選擇新圖示";
+  remove.hidden=!hasCustom;
+  remove.disabled=tripIconMediaBusy||!canEdit||!tripId;
+  if(!tripIconMediaBusy)setTripIconMediaProgress(0,{show:false});
+  if(!preserveStatus&&!tripIconMediaBusy){
+    if(currentTripGlobalLocked())setTripIconMediaStatus("旅程已全域鎖定，目前只可查看圖示。");
+    else if(!canEdit)setTripIconMediaStatus("目前為唯讀。只有 Owner 或 Admin 可以修改旅程圖示。");
+    else setTripIconMediaStatus(hasCustom?"可以更換或移除自訂圖示。":"Owner / Admin 可以上載自訂旅程圖示。");
+  }else if(preserveStatus&&tripIconMediaStatusText){setTripIconMediaStatus(tripIconMediaStatusText,{error:tripIconMediaStatusError});}
+}
+function setTripMediaMutationBusy(active){
+  window.__tripMediaMutationBusy=active===true;
+  try{refreshFullBackupSyncGate();}catch(error){}
+}
+async function uploadTripIconMediaFile(file){
+  const tripId=appearanceSettingsTripId();if(!tripId||!file||tripIconMediaBusy)return;
+  if(!appearanceSettingsCanEdit()){renderTripIconSettings();return;}
+  tripIconMediaBusy=true;
+  setTripMediaMutationBusy(true);
+  setTripIconMediaProgress(.02,{show:true});
+  setTripIconMediaStatus("正在準備及壓縮圖片…");
+  renderTripIconSettings(window.tripData,{preserveStatus:true});
+  try{
+    const service=await getTripAppearanceService(),user=window.__appAuthUser||tripLibraryCurrentUser||null;
+    const result=await service.updateTripIconImage(tripId,file,{user,onProgress:progress=>{
+      setTripIconMediaProgress(progress?.progress??.05,{show:true});
+      setTripIconMediaStatus(tripIconProgressCopy(progress));
+    }});
+    setTripIconMediaProgress(1,{show:true});
+    setTripIconMediaStatus(result?.cleanup?.cleaned===false?"新圖示已生效，但舊媒體未能即時清理；請暫時保留 App 連線。":"旅程圖示已更新，其他裝置會自動同步。",{error:result?.cleanup?.cleaned===false});
+    setTimeout(()=>setTripIconMediaProgress(0,{show:false}),700);
+  }catch(error){
+    console.error("Trip icon upload",error);
+    setTripIconMediaProgress(0,{show:false});
+    setTripIconMediaStatus(tripIconMediaFriendlyError(error),{error:true});
+  }finally{
+    tripIconMediaBusy=false;
+    setTripMediaMutationBusy(false);
+    renderTripIconSettings(window.tripData,{preserveStatus:true});
+  }
+}
+function openTripIconMediaPicker(){
+  if(tripIconMediaBusy||!appearanceSettingsCanEdit())return;
+  const input=document.createElement("input");
+  input.type="file";input.accept="image/*";input.hidden=true;input.setAttribute("aria-hidden","true");
+  let handled=false;
+  const cleanup=()=>{try{input.remove();}catch(error){}};
+  input.addEventListener("change",()=>{
+    handled=true;const file=input.files?.[0]||null;cleanup();if(file)uploadTripIconMediaFile(file);
+  },{once:true});
+  const onReturn=()=>setTimeout(()=>{if(!handled)cleanup();window.removeEventListener("focus",onReturn);},900);
+  window.addEventListener("focus",onReturn,{once:true});
+  document.body.appendChild(input);input.click();
+}
+async function removeTripIconMedia(){
+  const tripId=appearanceSettingsTripId();if(!tripId||tripIconMediaBusy||!appearanceSettingsCanEdit())return;
+  const media=window.tripData?.meta?.tripIconMedia;
+  if(!tripMediaHasStorage(media))return;
+  if(!window.confirm("移除自訂旅程圖示並恢復原有圖示？"))return;
+  tripIconMediaBusy=true;
+  setTripMediaMutationBusy(true);
+  setTripIconMediaProgress(.12,{show:true});
+  setTripIconMediaStatus("正在移除自訂圖示…");
+  renderTripIconSettings(window.tripData,{preserveStatus:true});
+  try{
+    const service=await getTripAppearanceService(),user=window.__appAuthUser||tripLibraryCurrentUser||null;
+    const result=await service.removeTripIconImage(tripId,{user});
+    setTripIconMediaProgress(1,{show:true});
+    setTripIconMediaStatus(result?.cleanup?.cleaned===false?"圖示已恢復，但舊 Storage 媒體未能即時清理。":"已移除自訂圖示，旅程已恢復原有圖示。",{error:result?.cleanup?.cleaned===false});
+    setTimeout(()=>setTripIconMediaProgress(0,{show:false}),700);
+  }catch(error){
+    console.error("Trip icon remove",error);
+    setTripIconMediaProgress(0,{show:false});
+    setTripIconMediaStatus(tripIconMediaFriendlyError(error),{error:true});
+  }finally{
+    tripIconMediaBusy=false;
+    setTripMediaMutationBusy(false);
+    renderTripIconSettings(window.tripData,{preserveStatus:true});
+  }
+}
+document.getElementById("trip-icon-settings-open-btn")?.addEventListener("click",()=>renderTripIconSettings());
+document.getElementById("trip-icon-media-upload")?.addEventListener("click",openTripIconMediaPicker);
+document.getElementById("trip-icon-media-remove")?.addEventListener("click",removeTripIconMedia);
+window.__tripIconSettingsRefresh=data=>{if(profileCurrentPage==="trip-icon-settings")renderTripIconSettings(data,{preserveStatus:tripIconMediaBusy||!!tripIconMediaStatusText});};
 function colourSwatches({selected="",key="",kind="trip",disabled=false}={}){
   return APPEARANCE_COLOUR_PRESETS.map(hex=>`<button class="destination-color-swatch${String(selected).toUpperCase()===hex?" is-selected":""}" type="button" data-appearance-kind="${kind}" data-appearance-key="${escapeHtmlText(key)}" data-appearance-color="${hex}" style="--swatch:${hex}" aria-label="選擇 ${hex}"${disabled?" disabled":""}></button>`).join("");
 }
@@ -10268,6 +10460,8 @@ function describeTripActivity(item={}){
   if(type==="trip.snapshot.restore")return {...base,category:"backup",categoryLabel:"備份",icon:"↶",title:"還原旅程版本",summary:`${item.sourceRevision?`由 Revision ${item.sourceRevision} 還原`:"已還原 Snapshot"}${item.revision?` · 新 Revision ${item.revision}`:""}`};
   if(type==="trip.destination.color_updated")return {...base,icon:"🎨",title:"更新目的地顏色",summary:message||"目的地識別色已更新"};
   if(type==="trip.team.color_updated")return {...base,icon:"●",title:"更新 Team 顏色",summary:message||"Team 識別色已更新"};
+  if(type==="trip.media.icon_updated")return {...base,icon:"▣",title:"更新旅程圖示",summary:message||"旅程圖示已更新"};
+  if(type==="trip.media.icon_removed")return {...base,icon:"−",title:"移除旅程圖示",summary:message||"已恢復旅程原有圖示"};
   if(type==="expense_created")return {...base,category:"expense",categoryLabel:"支出",icon:"＋",title:"新增支出",summary:message||"新增一筆支出"};
   if(type==="expense_updated")return {...base,category:"expense",categoryLabel:"支出",icon:"✎",title:"修改支出",summary:message||"修改一筆支出"};
   if(type==="expense_deleted")return {...base,category:"expense",categoryLabel:"支出",icon:"−",title:"刪除支出",summary:message||"刪除一筆支出"};
