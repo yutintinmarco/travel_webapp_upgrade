@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
   <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
   <link rel="dns-prefetch" href="https://api.open-meteo.com">
-  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?build=7.9.3.1">
+  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?build=7.9.3.2">
   <title id="page-title">行程</title>
   <script>
   // v7.7.5.0 · Performance Lite. Memory only: no Firebase reads/writes, no
@@ -2178,7 +2178,7 @@ html:not(.theme-light):not(.theme-dark) .trip-switch-sheet {
 .trip-quick-popover .trip-switch-row:active{background:rgba(118,118,128,.12);}
 .trip-quick-popover .trip-switch-row:disabled{opacity:.46;}
 .trip-quick-popover .trip-switch-row-icon{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;background:rgba(0,122,255,.08);overflow:hidden;}
-.trip-quick-popover .trip-switch-row-icon img{width:22px;height:22px;object-fit:contain;}
+.trip-quick-popover .trip-switch-row-icon img{width:100%;height:100%;display:block;object-fit:cover;border-radius:inherit;}
 .trip-quick-popover .trip-switch-row-copy{min-width:0;display:block;}
 .trip-quick-popover .trip-switch-row-copy strong{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:calc(12.5px * var(--font-scale));font-weight:760;letter-spacing:-.1px;}
 .trip-quick-popover .trip-switch-check{justify-self:end;color:#178b43;font-size:14px;font-weight:800;}
@@ -3352,7 +3352,7 @@ body.expenses-view-active #app-version-note{
 #snacks-view::after,
 #info-view::after,
 #profile-view::after{
-  content:"v7.9.3.1" !important;
+  content:"v7.9.3.2" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3373,7 +3373,7 @@ body.expenses-view-active #app-version-note{
   display:none !important;
 }
 body.expenses-view-active .expenses-module .expenses-app::after{
-  content:"v7.9.3.1" !important;
+  content:"v7.9.3.2" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3601,7 +3601,7 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
 </style>
             <link rel="apple-touch-icon" href="assets/icon/trip_icon.png">
   <link rel="icon" type="image/png" href="assets/icon/trip_icon.png">
-  <link rel="manifest" href="manifest.json?build=7.9.3.1">
+  <link rel="manifest" href="manifest.json?build=7.9.3.2">
   <meta name="apple-mobile-web-app-title" content="關嘉露西生日之旅">
   <!-- v7.7.1.2: expenses.css is 144KB and every rule is scoped under
        .expenses-module, yet it used to block the very first paint of the
@@ -3609,8 +3609,8 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
        priority without blocking paint; ensureExpensesStylesheet() flips it to
        media="all" before the 支出 view is ever mounted, so the styling is
        byte-for-byte identical by the time anything expenses-related renders. -->
-  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?build=7.9.3.1" media="print">
-  <noscript><link rel="stylesheet" href="assets/css/expenses.css?build=7.9.3.1"></noscript>
+  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?build=7.9.3.2" media="print">
+  <noscript><link rel="stylesheet" href="assets/css/expenses.css?build=7.9.3.2"></noscript>
 </head>
 <body class="app-entry-gated app-entry-pending">
 <div class="bg-fixed"></div>
@@ -4361,7 +4361,7 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
         <span class="profile-detail-spacer"></span>
       </div>
       <section class="profile-card" aria-label="App 資訊">
-        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.9.3.1</strong></div>
+        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.9.3.2</strong></div>
         <div class="profile-meta-row"><span>資料架構</span><strong>Phase 2G.2</strong></div>
         <div class="profile-meta-row"><span>主要資料來源</span><strong id="app-data-source-label">Firebase / 本機快取</strong></div>
       </section>
@@ -4538,7 +4538,7 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
 </div>
 
 <script>
-const APP_VERSION = "7.9.3.1";
+const APP_VERSION = "7.9.3.2";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 window.__tripMediaMutationBusy = false;
@@ -6846,6 +6846,11 @@ function renderTripSwitcher(){
     <span class="trip-switch-row-copy"><strong>${tripLibraryEsc(trip.title||trip.tripId)}</strong></span>
   </button>`));
   list.innerHTML=rows.join("");
+  // Storage-backed Trip icons are descriptor-only markup until hydrated.
+  // The quick switcher re-renders its innerHTML every time it opens, so the
+  // newly created <img> nodes must be rebound immediately instead of relying
+  // on the separate My Trips page render path.
+  hydrateTripLibraryMediaImages(list);
 }
 
 function renderEntryArchivedTrips(){

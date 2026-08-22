@@ -1,3 +1,10 @@
+# v7.9.3.2 — Trip Switcher Media Display Hotfix
+
+• Fixed Firebase Storage Trip icons disappearing from the top-left quick Trip switcher even though the same icon was already visible in My Trips / Trip Icon settings. The quick switcher rebuilds its `innerHTML` every time it opens; it now immediately hydrates the newly-created media descriptor images through the existing IndexedDB / Storage thumbnail resolver.
+• Fixed custom Trip photos rendering undersized in the quick switcher. The previous popover-only CSS forced every image to 22×22 inside a 30×30 frame with `object-fit: contain`; Storage-backed and legacy image icons now fill the full rounded 30×30 frame using `object-fit: cover`, matching the established My Trips visual treatment.
+• No media upload, registry, Firebase listener, Backup Sync Gate, Trip switch logic or Profile compositor behaviour changed.
+• No Firebase Rules, indexes, Functions, config or CORS changes.
+
 # v7.9.3.1 — Trip Icon Module Cache Coherency Hotfix
 
 • Fixed the user-visible version label that was accidentally left at v7.9.2.9 in v7.9.3.0.
