@@ -1,3 +1,40 @@
+# v7.9.3.4 — Phase 3A Media Upload Performance Pass · Local First Queue
+
+## Local First Commit
+• Trip icon and Trip background selection now complete in two stages. The selected image is decoded, compressed and durably saved to IndexedDB first; the user no longer waits for the full Firebase transaction before continuing to use the App.
+• A persistent metadata-only media job queue is stored in its own IndexedDB database. Display and thumbnail Blobs remain in the existing Trip media cache under their final Storage paths.
+• Pending appearance media is rendered from the local cache immediately across the Trip Icon / Background settings, Trip Library, top-left Trip Switcher and active Trip background before the cloud descriptor exists.
+• A tiny localStorage overlay index preserves the pending descriptor across a PWA relaunch so Local First continuity is not lost while a background job is unfinished.
+
+## Background Firebase Sync
+• Added `assets/js/trip-media-sync-service.js` as the resumable foreground sync engine. It automatically flushes after local commit, reconnect, foreground, focus and relaunch.
+• Display and thumbnail variants now upload to Firebase Storage in parallel instead of sequentially.
+• Successful `uploadBytesResumable()` snapshots now supply the object metadata directly; the upload path no longer performs a redundant `getMetadata()` round trip per uploaded object.
+• After Storage and the Media Registry reach ready state, one server Trip read validates current lifecycle state and determines the actual cloud descriptor being replaced. The new descriptor is then attached to the Trip root and `settings/general` in one batch with the activity log.
+• Old media cleanup runs after the new canonical descriptor is attached. Cleanup is non-blocking to normal App use and retries with bounded backoff if necessary.
+• Interrupted jobs are resumable. A job that already reached Registry ready can resume from descriptor attachment without intentionally recompressing the image.
+• Fatal permission, deletion or lock failures remove the provisional local appearance. Best-effort orphan cleanup is retained separately where server permissions allow it later.
+
+## Compression Profiles
+• Trip icon no longer uses the same 2048 px profile as a full-screen background. Icon display is capped around 768 px with a 256 px thumbnail.
+• Trip background keeps a 2048 px display target and 640 px thumbnail, with adaptive WebP / JPEG quality steps and a practical output-byte target to reduce mobile upload time without sacrificing the full-screen use case.
+• Prepared future profiles are included for itinerary and Saved Place media so later image surfaces can reuse the same tuned engine.
+
+## Backup / Multi Trip Safety
+• Full Backup remains disabled only for the Trip that currently has an unfinished blocking media job. A background job for Trip A does not unnecessarily block Backup for Trip B.
+• Once the new media is cloud committed, the existing Trip / Expense server-confirmation gate remains authoritative before Backup can run.
+• Local pending jobs are isolated by Trip and media slot. A second replacement of the same icon or background is temporarily disabled until the current job cloud commits, avoiding overlapping replacement races.
+• No manual Sync button, Backup-time freshness read or blocking modal has been added.
+
+## Firebase / Cost
+• Firestore Rules: unchanged.
+• Storage Rules: unchanged.
+• Firestore Indexes: unchanged.
+• Cloud Functions: unchanged.
+• Firebase config: unchanged.
+• CORS: unchanged.
+• Normal media cloud cost remains two Storage objects per image. The performance pass reduces redundant metadata requests and pre-upload reads rather than increasing them.
+
 # v7.9.3.3 — Phase 3A Media Upload Integration · Trip Background
 
 ## Scope

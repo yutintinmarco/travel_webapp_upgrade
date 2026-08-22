@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
   <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
   <link rel="dns-prefetch" href="https://api.open-meteo.com">
-  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?build=7.9.3.3">
+  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?build=7.9.3.4">
   <title id="page-title">行程</title>
   <script>
   // v7.7.5.0 · Performance Lite. Memory only: no Firebase reads/writes, no
@@ -3362,7 +3362,7 @@ body.expenses-view-active #app-version-note{
 #snacks-view::after,
 #info-view::after,
 #profile-view::after{
-  content:"v7.9.3.3" !important;
+  content:"v7.9.3.4" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3383,7 +3383,7 @@ body.expenses-view-active #app-version-note{
   display:none !important;
 }
 body.expenses-view-active .expenses-module .expenses-app::after{
-  content:"v7.9.3.3" !important;
+  content:"v7.9.3.4" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3611,7 +3611,7 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
 </style>
             <link rel="apple-touch-icon" href="assets/icon/trip_icon.png">
   <link rel="icon" type="image/png" href="assets/icon/trip_icon.png">
-  <link rel="manifest" href="manifest.json?build=7.9.3.3">
+  <link rel="manifest" href="manifest.json?build=7.9.3.4">
   <meta name="apple-mobile-web-app-title" content="關嘉露西生日之旅">
   <!-- v7.7.1.2: expenses.css is 144KB and every rule is scoped under
        .expenses-module, yet it used to block the very first paint of the
@@ -3619,8 +3619,8 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
        priority without blocking paint; ensureExpensesStylesheet() flips it to
        media="all" before the 支出 view is ever mounted, so the styling is
        byte-for-byte identical by the time anything expenses-related renders. -->
-  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?build=7.9.3.3" media="print">
-  <noscript><link rel="stylesheet" href="assets/css/expenses.css?build=7.9.3.3"></noscript>
+  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?build=7.9.3.4" media="print">
+  <noscript><link rel="stylesheet" href="assets/css/expenses.css?build=7.9.3.4"></noscript>
 </head>
 <body class="app-entry-gated app-entry-pending">
 <div class="bg-fixed"></div>
@@ -4406,7 +4406,7 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
         <span class="profile-detail-spacer"></span>
       </div>
       <section class="profile-card" aria-label="App 資訊">
-        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.9.3.3</strong></div>
+        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.9.3.4</strong></div>
         <div class="profile-meta-row"><span>資料架構</span><strong>Phase 2G.2</strong></div>
         <div class="profile-meta-row"><span>主要資料來源</span><strong id="app-data-source-label">Firebase / 本機快取</strong></div>
       </section>
@@ -4583,10 +4583,28 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
 </div>
 
 <script>
-const APP_VERSION = "7.9.3.3";
+const APP_VERSION = "7.9.3.4";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 window.__tripMediaMutationBusy = false;
+window.__tripMediaPendingByTrip = {};
+const TRIP_PENDING_MEDIA_OVERLAY_KEY="travel_pending_media_overlays_v1";
+const tripPendingMediaOverlays = new Map();
+let tripMediaQueueSnapshot = { jobs: [], pendingByTrip: {}, overlays: {}, updatedAt: 0 };
+try{
+  const cached=JSON.parse(localStorage.getItem(TRIP_PENDING_MEDIA_OVERLAY_KEY)||"null");
+  if(cached&&typeof cached==="object"){
+    window.__tripMediaPendingByTrip={...(cached.pendingByTrip||{})};
+    Object.entries(cached.overlays||{}).forEach(([tripId,slots])=>Object.entries(slots||{}).forEach(([slot,overlay])=>{
+      if(overlay?.descriptor&&String(overlay.descriptor.storagePath||"").trim())tripPendingMediaOverlays.set(`${tripId}|${slot}`,overlay);
+    }));
+  }
+}catch(error){}
+function pendingTripMediaOverlay(tripIdInput,slotInput){
+  const tripId=String(tripIdInput||"").trim(),slot=String(slotInput||"").trim();
+  if(!tripId||!slot)return null;
+  return tripPendingMediaOverlays.get(`${tripId}|${slot}`)||null;
+}
 function perfLiteMark(name){try{return window.__perfLite?.mark(name);}catch(error){return null;}}
 function perfLiteInc(name,amount=1){try{return window.__perfLite?.inc(name,amount);}catch(error){return 0;}}
 perfLiteMark("appShellReady");
@@ -5763,7 +5781,8 @@ function safeCssUrl(value){return `url(${JSON.stringify(String(value||""))})`;}
 const TRIP_BOOT_VISUAL_KEY="travel_boot_visual_v1";
 const TRIP_BOOT_BACKGROUND_PREVIEW_KEY="travel_boot_background_preview_v1";
 function tripBackgroundMediaMeta(data){
-  const media=data?.meta?.backgroundImageMedia;
+  const tripId=dataTripId(data),pending=pendingTripMediaOverlay(tripId,"background");
+  const media=pending?.descriptor||data?.meta?.backgroundImageMedia;
   return media&&typeof media==="object"&&String(media.storagePath||"").trim()?media:null;
 }
 function tripBackgroundMediaKey(media){
@@ -5901,7 +5920,8 @@ function applyTripVisualTheme(data){
 function tripIconDescriptor(trip){
   const id=String(trip?.tripId||"");
   const explicit=String(trip?.tripIcon||trip?.icon||"").trim();
-  const media=trip?.tripIconMedia&&typeof trip.tripIconMedia==="object"?trip.tripIconMedia:null;
+  const pending=pendingTripMediaOverlay(id,"icon");
+  const media=pending?.descriptor||(trip?.tripIconMedia&&typeof trip.tripIconMedia==="object"?trip.tripIconMedia:null);
   if(media&&String(media.storagePath||"").trim())return{type:"media",value:media,fallback:explicit,tripId:id};
   if(explicit)return{type:"image",value:explicit};
   const bundledId=dataTripId(bundledTripData);
@@ -8812,7 +8832,7 @@ function currentFullBackupSyncGate(){
   const online=(typeof navigator==="undefined"||navigator.onLine!==false)&&observedOnline!==false;
   const tripPending=sameTrip&&loader.hasPendingWrites===true;
   const tripConfirmed=sameTrip&&loader.status==="ready"&&loader.serverConfirmed===true&&!tripPending;
-  const mediaMutationBusy=window.__tripMediaMutationBusy===true;
+  const mediaMutationBusy=window.__tripMediaMutationBusy===true||Number(window.__tripMediaPendingByTrip?.[tripId]||0)>0;
   const expensesEnabled=window.tripData?.meta?.expenses?.enabled===true;
   let expenseReady=!expensesEnabled,expenseConfirmed=!expensesEnabled&&tripConfirmed,expensePending=false;
   if(expensesEnabled&&typeof window.__getExpenseLocalExportSnapshot==="function"){
@@ -9908,6 +9928,60 @@ function getTripAppearanceService(){
   if(!tripAppearanceServicePromise)tripAppearanceServicePromise=import(`./assets/js/trip-appearance-service.js?build=${APP_VERSION}`).catch(error=>{tripAppearanceServicePromise=null;throw error;});
   return tripAppearanceServicePromise;
 }
+let tripMediaSyncServicePromise=null;
+function getTripMediaSyncService(){
+  if(!tripMediaSyncServicePromise)tripMediaSyncServicePromise=import(`./assets/js/trip-media-sync-service.js?release=${APP_VERSION}`).catch(error=>{tripMediaSyncServicePromise=null;throw error;});
+  return tripMediaSyncServicePromise;
+}
+function mediaQueueOverlayForCurrent(slot){return pendingTripMediaOverlay(appearanceSettingsTripId(),slot);}
+function mediaQueueStateCopy(overlay,kind="媒體"){
+  if(!overlay)return"";
+  const state=String(overlay.state||"");
+  if(state==="queued")return navigator.onLine===false?`${kind}已保存到本機，等待網絡恢復後同步。`:`${kind}已保存到本機，正在排隊背景同步…`;
+  if(state==="uploading")return`${kind}已保存到本機，正在背景上載 Firebase Storage…`;
+  if(state==="uploaded"||state==="attaching")return`Storage 已完成，正在同步${kind}資料…`;
+  if(state==="cleanup")return`${kind}已同步，正在背景清理舊媒體…`;
+  if(state==="settled")return`${kind}已同步到 Firebase。`;
+  if(state==="failed")return`${kind}已保存在本機，雲端同步稍後會自動重試。`;
+  return`${kind}已保存到本機，正在背景同步…`;
+}
+function applyTripMediaSyncSnapshot(snapshot={}){
+  tripMediaQueueSnapshot=snapshot||{jobs:[],pendingByTrip:{},overlays:{},updatedAt:Date.now()};
+  window.__tripMediaPendingByTrip={...(tripMediaQueueSnapshot.pendingByTrip||{})};
+  tripPendingMediaOverlays.clear();
+  Object.entries(tripMediaQueueSnapshot.overlays||{}).forEach(([tripId,slots])=>{
+    Object.entries(slots||{}).forEach(([slot,overlay])=>{
+      if(overlay?.descriptor&&tripMediaHasStorage(overlay.descriptor))tripPendingMediaOverlays.set(`${tripId}|${slot}`,overlay);
+    });
+  });
+  try{localStorage.setItem(TRIP_PENDING_MEDIA_OVERLAY_KEY,JSON.stringify({version:1,pendingByTrip:window.__tripMediaPendingByTrip,overlays:tripMediaQueueSnapshot.overlays||{},savedAt:Date.now()}));}catch(error){}
+  try{refreshFullBackupSyncGate();}catch(error){}
+  try{if(window.tripData)applyTripVisualTheme(window.tripData);}catch(error){}
+  try{renderTripLibrary();}catch(error){}
+  try{if(profileCurrentPage==="trip-icon-settings")renderTripIconSettings(window.tripData,{preserveStatus:false});}catch(error){}
+  try{if(profileCurrentPage==="trip-background-settings")renderTripBackgroundSettings(window.tripData,{preserveStatus:false});}catch(error){}
+}
+window.addEventListener("trip-media-sync-state",event=>{
+  const detail=event?.detail||{};applyTripMediaSyncSnapshot(detail);
+  const fatal=detail?.fatalJob;
+  if(fatal&&String(fatal.tripId||"")===appearanceSettingsTripId()){
+    if(fatal.slot==="icon")setTripIconMediaStatus(tripIconMediaFriendlyError({code:fatal.code,message:fatal.message}),{error:true});
+    if(fatal.slot==="background")setTripBackgroundMediaStatus(tripBackgroundMediaFriendlyError({code:fatal.code,message:fatal.message}),{error:true});
+  }
+});
+window.addEventListener("trip-media-sync-progress",event=>{
+  const detail=event?.detail||{};if(String(detail.tripId||"")!==appearanceSettingsTripId())return;
+  const progress=detail.progress||{},fraction=clamp(Number(progress.progress)||0,0,1);
+  if(detail.slot==="icon"&&profileCurrentPage==="trip-icon-settings"){
+    setTripIconMediaProgress(fraction,{show:true});setTripIconMediaStatus(`已保存到本機 · 背景同步 ${Math.round(fraction*100)}%`);
+  }
+  if(detail.slot==="background"&&profileCurrentPage==="trip-background-settings"){
+    setTripBackgroundMediaProgress(fraction,{show:true});setTripBackgroundMediaStatus(`已保存到本機 · 背景同步 ${Math.round(fraction*100)}%`);
+  }
+});
+setTimeout(()=>{
+  getTripMediaSyncService().then(service=>service.startTripMediaSyncRuntime?.()).then(snapshot=>{if(snapshot)applyTripMediaSyncSnapshot(snapshot);}).catch(error=>console.warn("Trip media sync runtime",error));
+},650);
 function appearanceSettingsTripId(){return String(tripLoaderActiveId||dataTripId(window.tripData)||"").trim();}
 function appearanceSettingsCanEdit(){const role=String(window.__appTripAccess?.role||"");return !currentTripGlobalLocked()&&(role==="owner"||role==="admin");}
 function appearanceFriendlyError(error){
@@ -9934,6 +10008,8 @@ function tripIconMediaFriendlyError(error){
   if(code==="unsupported-media-type"||code==="invalid-media-file")return"請選擇有效嘅相片或圖片。";
   if(code==="media-decode-failed")return"未能讀取呢張圖片，請改用另一張相片。";
   if(code==="media-compressed-too-large")return"壓縮後圖片仍然太大，請選擇較細圖片。";
+  if(code==="media-sync-pending")return"呢個旅程圖示仍在背景同步，完成後先再更換。";
+  if(code==="media-local-cache-unavailable"||code==="media-local-cache-missing")return"未能將圖片安全保存到本機，請稍後再試。";
   return error?.message||"未能更新旅程圖示。";
 }
 function setTripIconMediaStatus(text,{error=false}={}){
@@ -9960,22 +10036,24 @@ function renderTripIconSettings(data=window.tripData,{preserveStatus=false}={}){
   const preview=document.getElementById("trip-icon-media-preview"),title=document.getElementById("trip-icon-media-title"),copy=document.getElementById("trip-icon-media-copy");
   const upload=document.getElementById("trip-icon-media-upload"),remove=document.getElementById("trip-icon-media-remove");
   if(!preview||!upload||!remove)return;
-  const tripId=dataTripId(data),meta=data?.meta||{},media=meta.tripIconMedia&&typeof meta.tripIconMedia==="object"?meta.tripIconMedia:null;
+  const tripId=dataTripId(data),meta=data?.meta||{},pending=pendingTripMediaOverlay(tripId,"icon");
+  const media=pending?.descriptor||(meta.tripIconMedia&&typeof meta.tripIconMedia==="object"?meta.tripIconMedia:null);
   if(tripIconMediaRenderedTripId&&tripIconMediaRenderedTripId!==tripId&&!tripIconMediaBusy){tripIconMediaStatusText="";tripIconMediaStatusError=false;}
   tripIconMediaRenderedTripId=tripId;
-  const hasCustom=tripMediaHasStorage(media),canEdit=appearanceSettingsCanEdit();
+  const hasCustom=tripMediaHasStorage(media),canEdit=appearanceSettingsCanEdit(),pendingAny=!!pending,pendingBlocking=pending?.blocking===true;
   const tripForIcon={tripId,titleSmall:meta.titleSmall||"",titleMain:meta.titleMain||"",tripIcon:meta.tripIcon||"",tripIconMedia:media};
   preview.innerHTML=tripIconMarkup(tripForIcon);
   hydrateTripLibraryMediaImages(preview);
-  if(title)title.textContent=hasCustom?"自訂 Firebase 圖示":"旅程原有圖示";
-  if(copy)copy.textContent=hasCustom?"目前圖示已存放喺 Firebase Storage，其他裝置會同步顯示。":"選擇圖片後會先喺裝置壓縮，再上載 Firebase Storage。";
-  upload.disabled=tripIconMediaBusy||!canEdit||!tripId;
+  if(title)title.textContent=pendingBlocking?"本機新圖示":(hasCustom?"自訂 Firebase 圖示":"旅程原有圖示");
+  if(copy)copy.textContent=pendingAny?mediaQueueStateCopy(pending,"圖示"):(hasCustom?"目前圖示已存放喺 Firebase Storage，其他裝置會同步顯示。":"選擇圖片後會先保存本機，再由 Firebase 背景同步。");
+  upload.disabled=tripIconMediaBusy||pendingBlocking||!canEdit||!tripId;
   upload.querySelector("strong").textContent=hasCustom?"更換旅程圖示":"選擇新圖示";
   remove.hidden=!hasCustom;
-  remove.disabled=tripIconMediaBusy||!canEdit||!tripId;
+  remove.disabled=tripIconMediaBusy||pendingBlocking||!canEdit||!tripId;
   if(!tripIconMediaBusy)setTripIconMediaProgress(0,{show:false});
   if(!preserveStatus&&!tripIconMediaBusy){
-    if(currentTripGlobalLocked())setTripIconMediaStatus("旅程已全域鎖定，目前只可查看圖示。");
+    if(pendingAny)setTripIconMediaStatus(mediaQueueStateCopy(pending,"圖示"),{error:false});
+    else if(currentTripGlobalLocked())setTripIconMediaStatus("旅程已全域鎖定，目前只可查看圖示。");
     else if(!canEdit)setTripIconMediaStatus("目前為唯讀。只有 Owner 或 Admin 可以修改旅程圖示。");
     else setTripIconMediaStatus(hasCustom?"可以更換或移除自訂圖示。":"Owner / Admin 可以上載自訂旅程圖示。");
   }else if(preserveStatus&&tripIconMediaStatusText){setTripIconMediaStatus(tripIconMediaStatusText,{error:tripIconMediaStatusError});}
@@ -9987,22 +10065,19 @@ function setTripMediaMutationBusy(active){
 async function uploadTripIconMediaFile(file){
   const tripId=appearanceSettingsTripId();if(!tripId||!file||tripIconMediaBusy)return;
   if(!appearanceSettingsCanEdit()){renderTripIconSettings();return;}
+  if(pendingTripMediaOverlay(tripId,"icon")?.blocking===true){setTripIconMediaStatus("旅程圖示仍在背景同步，完成後先再更換。",{error:true});return;}
   tripIconMediaBusy=true;
   setTripMediaMutationBusy(true);
-  setTripIconMediaProgress(.02,{show:true});
-  setTripIconMediaStatus("正在準備及壓縮圖片…");
+  setTripIconMediaProgress(.04,{show:true});
+  setTripIconMediaStatus("正在本機解碼及壓縮圖片…");
   renderTripIconSettings(window.tripData,{preserveStatus:true});
   try{
-    const service=await getTripAppearanceService(),user=window.__appAuthUser||tripLibraryCurrentUser||null;
-    const result=await service.updateTripIconImage(tripId,file,{user,onProgress:progress=>{
-      setTripIconMediaProgress(progress?.progress??.05,{show:true});
-      setTripIconMediaStatus(tripIconProgressCopy(progress));
-    }});
-    setTripIconMediaProgress(1,{show:true});
-    setTripIconMediaStatus(result?.cleanup?.cleaned===false?"新圖示已生效，但舊媒體未能即時清理；請暫時保留 App 連線。":"旅程圖示已更新，其他裝置會自動同步。",{error:result?.cleanup?.cleaned===false});
-    setTimeout(()=>setTripIconMediaProgress(0,{show:false}),700);
+    const service=await getTripMediaSyncService(),user=window.__appAuthUser||tripLibraryCurrentUser||null;
+    await service.queueTripAppearanceMedia({tripId,slot:"icon",file,user});
+    setTripIconMediaProgress(0,{show:false});
+    setTripIconMediaStatus("圖示已保存到本機，可以繼續使用 App；Firebase 正在背景同步。");
   }catch(error){
-    console.error("Trip icon upload",error);
+    console.error("Trip icon local queue",error);
     setTripIconMediaProgress(0,{show:false});
     setTripIconMediaStatus(tripIconMediaFriendlyError(error),{error:true});
   }finally{
@@ -10025,8 +10100,8 @@ function openTripIconMediaPicker(){
   document.body.appendChild(input);input.click();
 }
 async function removeTripIconMedia(){
-  const tripId=appearanceSettingsTripId();if(!tripId||tripIconMediaBusy||!appearanceSettingsCanEdit())return;
-  const media=window.tripData?.meta?.tripIconMedia;
+  const tripId=appearanceSettingsTripId();if(!tripId||tripIconMediaBusy||!appearanceSettingsCanEdit()||pendingTripMediaOverlay(tripId,"icon")?.blocking===true)return;
+  const media=pendingTripMediaOverlay(tripId,"icon")?.descriptor||window.tripData?.meta?.tripIconMedia;
   if(!tripMediaHasStorage(media))return;
   if(!window.confirm("移除自訂旅程圖示並恢復原有圖示？"))return;
   tripIconMediaBusy=true;
@@ -10070,6 +10145,8 @@ function tripBackgroundMediaFriendlyError(error){
   if(code==="unsupported-media-type"||code==="invalid-media-file")return"請選擇有效嘅相片或圖片。";
   if(code==="media-decode-failed")return"未能讀取呢張圖片，請改用另一張相片。";
   if(code==="media-compressed-too-large")return"壓縮後圖片仍然太大，請選擇較細圖片。";
+  if(code==="media-sync-pending")return"呢個旅程背景仍在背景同步，完成後先再更換。";
+  if(code==="media-local-cache-unavailable"||code==="media-local-cache-missing")return"未能將圖片安全保存到本機，請稍後再試。";
   return error?.message||"未能更新旅程背景。";
 }
 function setTripBackgroundMediaStatus(text,{error=false}={}){
@@ -10093,10 +10170,10 @@ function renderTripBackgroundSettings(data=window.tripData,{preserveStatus=false
   const preview=document.getElementById("trip-background-media-preview"),title=document.getElementById("trip-background-media-title"),copy=document.getElementById("trip-background-media-copy");
   const upload=document.getElementById("trip-background-media-upload"),remove=document.getElementById("trip-background-media-remove");
   if(!preview||!upload||!remove)return;
-  const tripId=dataTripId(data),meta=data?.meta||{},media=tripBackgroundMediaMeta(data);
+  const tripId=dataTripId(data),meta=data?.meta||{},pending=pendingTripMediaOverlay(tripId,"background"),media=tripBackgroundMediaMeta(data);
   if(tripBackgroundMediaRenderedTripId&&tripBackgroundMediaRenderedTripId!==tripId&&!tripBackgroundMediaBusy){tripBackgroundMediaStatusText="";tripBackgroundMediaStatusError=false;}
   tripBackgroundMediaRenderedTripId=tripId;
-  const hasCustom=tripMediaHasStorage(media),canEdit=appearanceSettingsCanEdit();
+  const hasCustom=tripMediaHasStorage(media),canEdit=appearanceSettingsCanEdit(),pendingAny=!!pending,pendingBlocking=pending?.blocking===true;
   preview.innerHTML="";
   const legacy=legacyTripVisualMeta(data).background||((dataTripId(bundledTripData)===tripId)?"assets/bg/bg_trip_mobile.webp":"");
   if(hasCustom){
@@ -10106,14 +10183,15 @@ function renderTripBackgroundSettings(data=window.tripData,{preserveStatus=false
     const img=document.createElement("img");img.alt="";img.src=legacy;preview.appendChild(img);
   }else{preview.style.background=bootVisualBackgroundCss(data);}
   if(hasCustom||legacy)preview.style.removeProperty("background");
-  if(title)title.textContent=hasCustom?"自訂 Firebase 背景":"旅程原有背景";
-  if(copy)copy.textContent=hasCustom?"目前背景已存放喺 Firebase Storage；切換旅程時會先保留舊畫面，等新背景完成解碼先原子切換。":"選擇圖片後會先喺裝置壓縮，再上載 Firebase Storage。";
-  upload.disabled=tripBackgroundMediaBusy||!canEdit||!tripId;
+  if(title)title.textContent=pendingBlocking?"本機新背景":(hasCustom?"自訂 Firebase 背景":"旅程原有背景");
+  if(copy)copy.textContent=pendingAny?mediaQueueStateCopy(pending,"背景"):(hasCustom?"目前背景已存放喺 Firebase Storage；切換旅程時會先保留舊畫面，等新背景完成解碼先原子切換。":"選擇圖片後會先保存本機，再由 Firebase 背景同步。");
+  upload.disabled=tripBackgroundMediaBusy||pendingBlocking||!canEdit||!tripId;
   upload.querySelector("strong").textContent=hasCustom?"更換旅程背景":"選擇新背景";
-  remove.hidden=!hasCustom;remove.disabled=tripBackgroundMediaBusy||!canEdit||!tripId;
+  remove.hidden=!hasCustom;remove.disabled=tripBackgroundMediaBusy||pendingBlocking||!canEdit||!tripId;
   if(!tripBackgroundMediaBusy)setTripBackgroundMediaProgress(0,{show:false});
   if(!preserveStatus&&!tripBackgroundMediaBusy){
-    if(currentTripGlobalLocked())setTripBackgroundMediaStatus("旅程已全域鎖定，目前只可查看背景。");
+    if(pendingAny)setTripBackgroundMediaStatus(mediaQueueStateCopy(pending,"背景"),{error:false});
+    else if(currentTripGlobalLocked())setTripBackgroundMediaStatus("旅程已全域鎖定，目前只可查看背景。");
     else if(!canEdit)setTripBackgroundMediaStatus("目前為唯讀。只有 Owner 或 Admin 可以修改旅程背景。");
     else setTripBackgroundMediaStatus(hasCustom?"可以更換或移除自訂背景。":"Owner / Admin 可以上載自訂旅程背景。");
   }else if(preserveStatus&&tripBackgroundMediaStatusText)setTripBackgroundMediaStatus(tripBackgroundMediaStatusText,{error:tripBackgroundMediaStatusError});
@@ -10121,15 +10199,15 @@ function renderTripBackgroundSettings(data=window.tripData,{preserveStatus=false
 async function uploadTripBackgroundMediaFile(file){
   const tripId=appearanceSettingsTripId();if(!tripId||!file||tripBackgroundMediaBusy)return;
   if(!appearanceSettingsCanEdit()){renderTripBackgroundSettings();return;}
-  tripBackgroundMediaBusy=true;setTripMediaMutationBusy(true);setTripBackgroundMediaProgress(.02,{show:true});setTripBackgroundMediaStatus("正在準備及壓縮圖片…");renderTripBackgroundSettings(window.tripData,{preserveStatus:true});
+  if(pendingTripMediaOverlay(tripId,"background")?.blocking===true){setTripBackgroundMediaStatus("旅程背景仍在背景同步，完成後先再更換。",{error:true});return;}
+  tripBackgroundMediaBusy=true;setTripMediaMutationBusy(true);setTripBackgroundMediaProgress(.04,{show:true});setTripBackgroundMediaStatus("正在本機解碼及壓縮圖片…");renderTripBackgroundSettings(window.tripData,{preserveStatus:true});
   try{
-    const service=await getTripAppearanceService(),user=window.__appAuthUser||tripLibraryCurrentUser||null;
-    const result=await service.updateTripBackgroundImage(tripId,file,{user,onProgress:progress=>{setTripBackgroundMediaProgress(progress?.progress??.05,{show:true});setTripBackgroundMediaStatus(tripBackgroundProgressCopy(progress));}});
-    setTripBackgroundMediaProgress(1,{show:true});
-    setTripBackgroundMediaStatus(result?.cleanup?.cleaned===false?"新背景已生效，但舊媒體未能即時清理；請暫時保留 App 連線。":"旅程背景已更新，其他裝置會自動同步。",{error:result?.cleanup?.cleaned===false});
-    setTimeout(()=>setTripBackgroundMediaProgress(0,{show:false}),700);
+    const service=await getTripMediaSyncService(),user=window.__appAuthUser||tripLibraryCurrentUser||null;
+    await service.queueTripAppearanceMedia({tripId,slot:"background",file,user});
+    setTripBackgroundMediaProgress(0,{show:false});
+    setTripBackgroundMediaStatus("背景已保存到本機，可以繼續使用 App；Firebase 正在背景同步。");
   }catch(error){
-    console.error("Trip background upload",error);setTripBackgroundMediaProgress(0,{show:false});setTripBackgroundMediaStatus(tripBackgroundMediaFriendlyError(error),{error:true});
+    console.error("Trip background local queue",error);setTripBackgroundMediaProgress(0,{show:false});setTripBackgroundMediaStatus(tripBackgroundMediaFriendlyError(error),{error:true});
   }finally{
     tripBackgroundMediaBusy=false;setTripMediaMutationBusy(false);renderTripBackgroundSettings(window.tripData,{preserveStatus:true});
   }
@@ -10143,7 +10221,7 @@ function openTripBackgroundMediaPicker(){
   window.addEventListener("focus",onReturn,{once:true});document.body.appendChild(input);input.click();
 }
 async function removeTripBackgroundMedia(){
-  const tripId=appearanceSettingsTripId();if(!tripId||tripBackgroundMediaBusy||!appearanceSettingsCanEdit())return;
+  const tripId=appearanceSettingsTripId();if(!tripId||tripBackgroundMediaBusy||!appearanceSettingsCanEdit()||pendingTripMediaOverlay(tripId,"background")?.blocking===true)return;
   const media=tripBackgroundMediaMeta(window.tripData);if(!tripMediaHasStorage(media))return;
   if(!window.confirm("移除自訂旅程背景並恢復原有背景？"))return;
   tripBackgroundMediaBusy=true;setTripMediaMutationBusy(true);setTripBackgroundMediaProgress(.12,{show:true});setTripBackgroundMediaStatus("正在移除自訂背景…");renderTripBackgroundSettings(window.tripData,{preserveStatus:true});
