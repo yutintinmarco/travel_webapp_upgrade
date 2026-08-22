@@ -3335,7 +3335,7 @@ body.expenses-view-active #app-version-note{
 #snacks-view::after,
 #info-view::after,
 #profile-view::after{
-  content:"v7.9.2.5" !important;
+  content:"v7.9.2.6" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3356,7 +3356,7 @@ body.expenses-view-active #app-version-note{
   display:none !important;
 }
 body.expenses-view-active .expenses-module .expenses-app::after{
-  content:"v7.9.2.5" !important;
+  content:"v7.9.2.6" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -4309,7 +4309,7 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
         <span class="profile-detail-spacer"></span>
       </div>
       <section class="profile-card" aria-label="App 資訊">
-        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.9.2.5</strong></div>
+        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.9.2.6</strong></div>
         <div class="profile-meta-row"><span>資料架構</span><strong>Phase 2G.2</strong></div>
         <div class="profile-meta-row"><span>主要資料來源</span><strong id="app-data-source-label">Firebase / 本機快取</strong></div>
       </section>
@@ -4486,7 +4486,7 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
 </div>
 
 <script>
-const APP_VERSION = "7.9.2.5";
+const APP_VERSION = "7.9.2.6";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 function perfLiteMark(name){try{return window.__perfLite?.mark(name);}catch(error){return null;}}
@@ -6047,7 +6047,13 @@ function mountExpensesModuleNow(mod){
   if(window.tripData?.meta?.expenses?.enabled && typeof initFn === "function"){
     const root=document.getElementById("expenses-root");
     if(root) root.dataset.loading = "false";
-    initFn(window.tripData);
+    const visibleTripId=dataTripId(window.tripData);
+    const mountedTripId=String(window.__expensesModuleTripId||"");
+    if(mountedTripId&&visibleTripId&&mountedTripId!==visibleTripId&&typeof window.__rebindExpensesForTrip==="function"){
+      Promise.resolve(window.__rebindExpensesForTrip(window.tripData)).catch(error=>console.warn("Expense Trip rebind",error));
+    }else{
+      initFn(window.tripData);
+    }
     requestAnimationFrame(()=>placeAppVersionNote("expenses"));
     return true;
   }
@@ -8603,6 +8609,9 @@ function currentTripFreshnessSnapshot(){
   };
 }
 let fullBackupSyncGateWatchTimer=0;
+let fullBackupSyncGatePendingSince=0;
+let fullBackupSyncGatePendingTripId="";
+const FULL_BACKUP_SYNC_STATUS_TIMEOUT_MS=12000;
 function currentFullBackupSyncGate(){
   const tripId=currentBackupTripId();
   const loader=tripLoaderState||{};
@@ -8624,12 +8633,17 @@ function currentFullBackupSyncGate(){
   }
   const canBackup=online&&tripConfirmed&&expenseConfirmed;
   const transportUnavailable=!online||!tripId||["error","recovery-needed","permission-denied","not-found","local"].includes(String(loader.status||""))||Boolean(loader.error&&!loader.serverConfirmed);
-  const status=canBackup?"synced":(transportUnavailable?"unconfirmed":"syncing");
-  return {status,canBackup,tripId,online,tripConfirmed,tripPending,expenseReady,expenseConfirmed,expensePending};
+  if(fullBackupSyncGatePendingTripId!==tripId){fullBackupSyncGatePendingTripId=tripId;fullBackupSyncGatePendingSince=0;}
+  if(canBackup||transportUnavailable){fullBackupSyncGatePendingSince=0;}
+  else if(!fullBackupSyncGatePendingSince){fullBackupSyncGatePendingSince=Date.now();}
+  const timedOut=!canBackup&&!transportUnavailable&&fullBackupSyncGatePendingSince>0&&(Date.now()-fullBackupSyncGatePendingSince>=FULL_BACKUP_SYNC_STATUS_TIMEOUT_MS);
+  const status=canBackup?"synced":((transportUnavailable||timedOut)?"unconfirmed":"syncing");
+  return {status,canBackup,tripId,online,tripConfirmed,tripPending,expenseReady,expenseConfirmed,expensePending,timedOut};
 }
 function fullBackupSyncGateCopy(gate,{deleteFlow=false}={}){
   if(gate.status==="synced")return deleteFlow?"Firebase：已同步 · 可建立刪除前 Data + Media ZIP":"Firebase：已同步 · Data + Media ZIP 可建立";
   if(gate.status==="unconfirmed")return "Firebase：未能確認同步 · Backup 暫時未開放";
+  if(gate.tripConfirmed&&!gate.expenseConfirmed)return "Firebase：支出同步中 · Backup 暫時未開放";
   return "Firebase：同步中 · Backup 暫時未開放";
 }
 function applyFullBackupGateToButton(button,subtitle,gate,{deleteFlow=false,ownerAllowed=true}={}){
