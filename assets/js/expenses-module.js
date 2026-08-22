@@ -620,6 +620,9 @@ function updateBackupSyncMeta(key,snapshot){
     fromCache:snapshot?.metadata?.fromCache===true,
     hasPendingWrites:snapshot?.metadata?.hasPendingWrites===true
   };
+  // Let the passive Full Backup gate repaint immediately when an existing
+  // Expense realtime listener changes freshness. This does not create a read.
+  try{window.dispatchEvent(new Event("expense-backup-freshness-change"));}catch(error){}
 }
 function currentExpenseBackupFreshness(){
   const sources=Object.fromEntries(Object.entries(backupSyncMeta).map(([key,value])=>[key,{...value}]));
