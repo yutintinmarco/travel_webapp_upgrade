@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
   <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
   <link rel="dns-prefetch" href="https://api.open-meteo.com">
-  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?build=7.9.3.2">
+  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?build=7.9.3.3">
   <title id="page-title">行程</title>
   <script>
   // v7.7.5.0 · Performance Lite. Memory only: no Firebase reads/writes, no
@@ -2796,6 +2796,16 @@ body.expenses-view-active #expenses-root{
 .trip-media-icon-preview img{width:100%;height:100%;display:block;object-fit:cover;}
 .trip-media-icon-preview .trip-icon-emoji{font-size:31px;line-height:1;}
 .trip-media-icon-preview .trip-icon-monogram{font-size:20px;font-weight:820;letter-spacing:-.4px;}
+.trip-media-background-preview-card{padding:14px;display:grid;gap:11px;}
+.trip-media-background-preview{
+  width:100%;aspect-ratio:16/9;border-radius:17px;overflow:hidden;position:relative;
+  background:linear-gradient(145deg,rgba(0,122,255,.13),rgba(175,82,222,.09));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.48),0 6px 18px rgba(15,23,42,.06);
+}
+.trip-media-background-preview img{width:100%;height:100%;display:block;object-fit:cover;}
+.trip-media-background-preview-copy{min-width:0;display:grid;gap:3px;padding:0 2px 1px;}
+.trip-media-background-preview-copy strong{font-size:calc(13.5px * var(--font-scale));color:var(--label-primary);}
+.trip-media-background-preview-copy small{font-size:calc(9.5px * var(--font-scale));line-height:1.45;color:var(--label-secondary);}
 .trip-media-icon-preview-copy{min-width:0;display:grid;gap:4px;}
 .trip-media-icon-preview-copy strong{font-size:calc(14px * var(--font-scale));color:var(--label-primary);}
 .trip-media-icon-preview-copy small{font-size:calc(9.5px * var(--font-scale));line-height:1.45;color:var(--label-secondary);}
@@ -3352,7 +3362,7 @@ body.expenses-view-active #app-version-note{
 #snacks-view::after,
 #info-view::after,
 #profile-view::after{
-  content:"v7.9.3.2" !important;
+  content:"v7.9.3.3" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3373,7 +3383,7 @@ body.expenses-view-active #app-version-note{
   display:none !important;
 }
 body.expenses-view-active .expenses-module .expenses-app::after{
-  content:"v7.9.3.2" !important;
+  content:"v7.9.3.3" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3601,7 +3611,7 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
 </style>
             <link rel="apple-touch-icon" href="assets/icon/trip_icon.png">
   <link rel="icon" type="image/png" href="assets/icon/trip_icon.png">
-  <link rel="manifest" href="manifest.json?build=7.9.3.2">
+  <link rel="manifest" href="manifest.json?build=7.9.3.3">
   <meta name="apple-mobile-web-app-title" content="關嘉露西生日之旅">
   <!-- v7.7.1.2: expenses.css is 144KB and every rule is scoped under
        .expenses-module, yet it used to block the very first paint of the
@@ -3609,8 +3619,8 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
        priority without blocking paint; ensureExpensesStylesheet() flips it to
        media="all" before the 支出 view is ever mounted, so the styling is
        byte-for-byte identical by the time anything expenses-related renders. -->
-  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?build=7.9.3.2" media="print">
-  <noscript><link rel="stylesheet" href="assets/css/expenses.css?build=7.9.3.2"></noscript>
+  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?build=7.9.3.3" media="print">
+  <noscript><link rel="stylesheet" href="assets/css/expenses.css?build=7.9.3.3"></noscript>
 </head>
 <body class="app-entry-gated app-entry-pending">
 <div class="bg-fixed"></div>
@@ -3920,6 +3930,11 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
           <span class="profile-row-copy"><strong>旅程圖示</strong><small>上載相片作旅程選單及切換圖示</small></span>
           <span class="profile-chevron">›</span>
         </button>
+        <button class="profile-row" id="trip-background-settings-open-btn" type="button" data-profile-open="trip-background-settings">
+          <span class="profile-row-icon profile-icon-green">▤</span>
+          <span class="profile-row-copy"><strong>旅程背景</strong><small>上載相片作目前旅程背景</small></span>
+          <span class="profile-chevron">›</span>
+        </button>
         <button class="profile-row" id="trip-color-settings-open-btn" type="button" data-profile-open="trip-color-settings">
           <span class="profile-row-icon profile-icon-purple">●</span>
           <span class="profile-row-copy"><strong>旅程主色</strong><small>整個旅程嘅主要 Accent Color</small></span>
@@ -3972,6 +3987,36 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
       </section>
       <div class="trip-media-upload-progress" id="trip-icon-media-progress" hidden><span></span></div>
       <div class="trip-member-inline-status trip-media-upload-status" id="trip-icon-media-status">Owner / Admin 可以更新；旅程鎖定時保持唯讀。</div>
+    </div>
+
+    <div class="profile-nav-page" id="profile-page-trip-background-settings" data-profile-page="trip-background-settings" hidden>
+      <div class="profile-detail-bar">
+        <button class="profile-detail-back" type="button" data-profile-back aria-label="返回外觀與顯示"><span class="profile-back-glyph">‹</span><span class="profile-detail-back-label">外觀與顯示</span></button>
+        <h2>旅程背景</h2>
+        <span class="profile-detail-spacer"></span>
+      </div>
+      <section class="profile-card trip-media-background-preview-card" aria-label="目前旅程背景">
+        <div class="trip-media-background-preview" id="trip-background-media-preview"></div>
+        <div class="trip-media-background-preview-copy">
+          <strong id="trip-background-media-title">目前背景</strong>
+          <small id="trip-background-media-copy">相片會先喺裝置壓縮，再上載 Firebase Storage。</small>
+        </div>
+      </section>
+      <div class="profile-section-label">背景管理</div>
+      <section class="profile-card profile-menu-card" aria-label="旅程背景管理">
+        <button class="profile-row" id="trip-background-media-upload" type="button">
+          <span class="profile-row-icon profile-icon-blue">⇧</span>
+          <span class="profile-row-copy"><strong>選擇新背景</strong><small>支援相片及圖片，建議使用橫向或高解像度圖片</small></span>
+          <span class="profile-chevron">›</span>
+        </button>
+        <button class="profile-row trip-media-remove-row" id="trip-background-media-remove" type="button" hidden>
+          <span class="profile-row-icon profile-icon-red">−</span>
+          <span class="profile-row-copy"><strong>移除自訂背景</strong><small>恢復旅程原有背景</small></span>
+          <span class="profile-chevron">›</span>
+        </button>
+      </section>
+      <div class="trip-media-upload-progress" id="trip-background-media-progress" hidden><span></span></div>
+      <div class="trip-member-inline-status trip-media-upload-status" id="trip-background-media-status">Owner / Admin 可以更新；旅程鎖定時保持唯讀。</div>
     </div>
 
     <div class="profile-nav-page" id="profile-page-trip-color-settings" data-profile-page="trip-color-settings" hidden>
@@ -4361,7 +4406,7 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
         <span class="profile-detail-spacer"></span>
       </div>
       <section class="profile-card" aria-label="App 資訊">
-        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.9.3.2</strong></div>
+        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.9.3.3</strong></div>
         <div class="profile-meta-row"><span>資料架構</span><strong>Phase 2G.2</strong></div>
         <div class="profile-meta-row"><span>主要資料來源</span><strong id="app-data-source-label">Firebase / 本機快取</strong></div>
       </section>
@@ -4538,7 +4583,7 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
 </div>
 
 <script>
-const APP_VERSION = "7.9.3.2";
+const APP_VERSION = "7.9.3.3";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 window.__tripMediaMutationBusy = false;
@@ -5716,13 +5761,53 @@ function legacyTripVisualMeta(data){
 }
 function safeCssUrl(value){return `url(${JSON.stringify(String(value||""))})`;}
 const TRIP_BOOT_VISUAL_KEY="travel_boot_visual_v1";
+const TRIP_BOOT_BACKGROUND_PREVIEW_KEY="travel_boot_background_preview_v1";
+function tripBackgroundMediaMeta(data){
+  const media=data?.meta?.backgroundImageMedia;
+  return media&&typeof media==="object"&&String(media.storagePath||"").trim()?media:null;
+}
+function tripBackgroundMediaKey(media){
+  if(!media)return"";
+  return `${String(media.storagePath||"").trim()}|${String(media.generation||"").trim()}|${String(media.mediaId||media.imageId||"").trim()}`;
+}
+function tripBackgroundWarmPreview(data,media=tripBackgroundMediaMeta(data)){
+  const id=dataTripId(data),key=tripBackgroundMediaKey(media);if(!id||!key)return"";
+  try{
+    const cached=JSON.parse(localStorage.getItem(TRIP_BOOT_BACKGROUND_PREVIEW_KEY)||"null");
+    if(cached&&String(cached.tripId||"")===id&&String(cached.mediaKey||"")===key&&String(cached.dataUrl||"").startsWith("data:image/"))return String(cached.dataUrl);
+  }catch(error){}
+  return"";
+}
 function bootVisualBackgroundCss(data){
   const id=dataTripId(data)||"trip",hue=tripHashHue(id);
   const fallback=`linear-gradient(145deg,hsl(${hue} 48% 76%),hsl(${(hue+42)%360} 42% 88%))`;
+  const media=tripBackgroundMediaMeta(data),warmPreview=tripBackgroundWarmPreview(data,media);
+  if(warmPreview)return safeCssUrl(warmPreview);
   let candidate=legacyTripVisualMeta(data).background;
   const bundledId=dataTripId(bundledTripData);
   if(!candidate&&bundledId&&id===bundledId)candidate="assets/bg/bg_trip_mobile.webp";
   return candidate?safeCssUrl(candidate):fallback;
+}
+function rememberTripBackgroundWarmPreview(data,media,image){
+  const tripId=dataTripId(data),mediaKey=tripBackgroundMediaKey(media);
+  if(!tripId||!mediaKey||!image?.naturalWidth||!image?.naturalHeight)return;
+  try{
+    const current=JSON.parse(localStorage.getItem(TRIP_BOOT_BACKGROUND_PREVIEW_KEY)||"null");
+    if(current&&String(current.tripId||"")===tripId&&String(current.mediaKey||"")===mediaKey&&String(current.dataUrl||"").startsWith("data:image/"))return;
+  }catch(error){}
+  try{
+    const maxDimension=360,ratio=Math.min(1,maxDimension/Math.max(image.naturalWidth,image.naturalHeight));
+    const canvas=document.createElement("canvas");
+    canvas.width=Math.max(1,Math.round(image.naturalWidth*ratio));canvas.height=Math.max(1,Math.round(image.naturalHeight*ratio));
+    const context=canvas.getContext("2d",{alpha:false});if(!context)return;
+    context.imageSmoothingEnabled=true;context.imageSmoothingQuality="high";context.drawImage(image,0,0,canvas.width,canvas.height);
+    let dataUrl="";
+    try{dataUrl=canvas.toDataURL("image/webp",.54);}catch(error){}
+    if(!String(dataUrl).startsWith("data:image/")){try{dataUrl=canvas.toDataURL("image/jpeg",.50);}catch(error){}}
+    if(!String(dataUrl).startsWith("data:image/")||dataUrl.length>850000)return;
+    localStorage.setItem(TRIP_BOOT_BACKGROUND_PREVIEW_KEY,JSON.stringify({version:1,tripId,mediaKey,dataUrl,savedAt:Date.now()}));
+    if(dataTripId(window.tripData)===tripId)persistBootVisualSnapshot(data);
+  }catch(error){console.warn("Trip background warm preview",error);}
 }
 function persistBootVisualSnapshot(data){
   if(!data)return false;
@@ -5759,7 +5844,7 @@ function applyTripVisualTheme(data){
   let candidate=legacyTripVisualMeta(data).background;
   const bundledId=dataTripId(bundledTripData);
   if(!candidate&&bundledId&&id===bundledId)candidate="assets/bg/bg_trip_mobile.webp";
-  const media=meta.backgroundImageMedia&&typeof meta.backgroundImageMedia==="object"&&String(meta.backgroundImageMedia.storagePath||"").trim()?meta.backgroundImageMedia:null;
+  const media=tripBackgroundMediaMeta(data);
   const mediaKey=media?`storage:${String(media.storagePath||"").trim()}:${String(media.generation||"").trim()}`:"";
   const wantedSource=mediaKey||candidate||fallback;
 
@@ -5789,6 +5874,7 @@ function applyTripVisualTheme(data){
     const img=new Image();
     img.onload=()=>{
       tripBackgroundLoadedSources.add(source);
+      if(media)rememberTripBackgroundWarmPreview(data,media,img);
       try{
         const decoded=img.decode?.();
         if(decoded&&typeof decoded.then==="function"){decoded.catch(()=>{}).finally(commit);return;}
@@ -7571,6 +7657,7 @@ function applyFirebaseTripData(data,{source="server",tripId="",dirtySections=[]}
   if(generalDirty||needsTeamTheme){try{window.__teamSettingsRefresh?.(data);}catch(error){}}
   if(tripDirty||generalDirty){try{window.__appearanceColorSettingsRefresh?.(data);}catch(error){}}
   if(tripDirty||generalDirty){try{window.__tripIconSettingsRefresh?.(data);}catch(error){}}
+  if(tripDirty||generalDirty){try{window.__tripBackgroundSettingsRefresh?.(data);}catch(error){}}
   if(generalDirty||needsDestinationTheme||needsTeamTheme){try{refreshAppearanceColourMenuState(data);}catch(error){}}
 
   resolveTripLoaderWaiters(data);
@@ -9967,6 +10054,116 @@ document.getElementById("trip-icon-settings-open-btn")?.addEventListener("click"
 document.getElementById("trip-icon-media-upload")?.addEventListener("click",openTripIconMediaPicker);
 document.getElementById("trip-icon-media-remove")?.addEventListener("click",removeTripIconMedia);
 window.__tripIconSettingsRefresh=data=>{if(profileCurrentPage==="trip-icon-settings")renderTripIconSettings(data,{preserveStatus:tripIconMediaBusy||!!tripIconMediaStatusText});};
+
+let tripBackgroundMediaBusy=false;
+let tripBackgroundMediaStatusText="";
+let tripBackgroundMediaStatusError=false;
+let tripBackgroundMediaRenderedTripId="";
+function tripBackgroundMediaFriendlyError(error){
+  const code=String(error?.code||"");
+  if(code==="offline")return"目前離線，重新連線後先可以上載旅程背景。";
+  if(code==="operation-busy"||code==="trip-operation-busy")return"另一個雲端操作仍在進行，完成後再試。";
+  if(code==="trip-global-locked")return"旅程已全域鎖定，目前只可查看背景。";
+  if(code==="trip-deleting")return"旅程正在永久刪除，已停止媒體修改。";
+  if(code==="insufficient-role"||code==="permission-denied"||code==="firestore/permission-denied"||code==="storage/unauthorized")return"只有 Owner 或 Admin 可以修改旅程背景。";
+  if(code==="media-source-too-large")return"原相片太大，請選擇 30 MB 以下圖片。";
+  if(code==="unsupported-media-type"||code==="invalid-media-file")return"請選擇有效嘅相片或圖片。";
+  if(code==="media-decode-failed")return"未能讀取呢張圖片，請改用另一張相片。";
+  if(code==="media-compressed-too-large")return"壓縮後圖片仍然太大，請選擇較細圖片。";
+  return error?.message||"未能更新旅程背景。";
+}
+function setTripBackgroundMediaStatus(text,{error=false}={}){
+  tripBackgroundMediaStatusText=String(text||"");tripBackgroundMediaStatusError=!!error;
+  const status=document.getElementById("trip-background-media-status");
+  if(status){status.textContent=tripBackgroundMediaStatusText;status.classList.toggle("is-error",tripBackgroundMediaStatusError);}
+}
+function setTripBackgroundMediaProgress(progress,{show=true}={}){
+  const root=document.getElementById("trip-background-media-progress"),bar=root?.querySelector("span");if(!root||!bar)return;
+  root.hidden=!show;bar.style.width=`${Math.round(clamp(Number(progress)||0,0,1)*100)}%`;
+}
+function tripBackgroundProgressCopy(progress={}){
+  const stage=String(progress?.stage||"");
+  if(stage==="registry-pending")return"正在建立 Firebase Media Registry…";
+  if(stage==="upload")return`正在上載旅程背景… ${Math.round(clamp(Number(progress?.progress)||0,0,1)*100)}%`;
+  if(stage==="registry-ready")return"Storage 已完成，正在確認媒體資料…";
+  if(stage==="ready")return"旅程背景已上載。";
+  return"正在準備及壓縮圖片…";
+}
+function renderTripBackgroundSettings(data=window.tripData,{preserveStatus=false}={}){
+  const preview=document.getElementById("trip-background-media-preview"),title=document.getElementById("trip-background-media-title"),copy=document.getElementById("trip-background-media-copy");
+  const upload=document.getElementById("trip-background-media-upload"),remove=document.getElementById("trip-background-media-remove");
+  if(!preview||!upload||!remove)return;
+  const tripId=dataTripId(data),meta=data?.meta||{},media=tripBackgroundMediaMeta(data);
+  if(tripBackgroundMediaRenderedTripId&&tripBackgroundMediaRenderedTripId!==tripId&&!tripBackgroundMediaBusy){tripBackgroundMediaStatusText="";tripBackgroundMediaStatusError=false;}
+  tripBackgroundMediaRenderedTripId=tripId;
+  const hasCustom=tripMediaHasStorage(media),canEdit=appearanceSettingsCanEdit();
+  preview.innerHTML="";
+  const legacy=legacyTripVisualMeta(data).background||((dataTripId(bundledTripData)===tripId)?"assets/bg/bg_trip_mobile.webp":"");
+  if(hasCustom){
+    const img=document.createElement("img");img.alt="";preview.appendChild(img);
+    bindTripMediaImageElement(img,media,{variant:"thumbnail",tripId,fallbackSrc:legacy});
+  }else if(legacy){
+    const img=document.createElement("img");img.alt="";img.src=legacy;preview.appendChild(img);
+  }else{preview.style.background=bootVisualBackgroundCss(data);}
+  if(hasCustom||legacy)preview.style.removeProperty("background");
+  if(title)title.textContent=hasCustom?"自訂 Firebase 背景":"旅程原有背景";
+  if(copy)copy.textContent=hasCustom?"目前背景已存放喺 Firebase Storage；切換旅程時會先保留舊畫面，等新背景完成解碼先原子切換。":"選擇圖片後會先喺裝置壓縮，再上載 Firebase Storage。";
+  upload.disabled=tripBackgroundMediaBusy||!canEdit||!tripId;
+  upload.querySelector("strong").textContent=hasCustom?"更換旅程背景":"選擇新背景";
+  remove.hidden=!hasCustom;remove.disabled=tripBackgroundMediaBusy||!canEdit||!tripId;
+  if(!tripBackgroundMediaBusy)setTripBackgroundMediaProgress(0,{show:false});
+  if(!preserveStatus&&!tripBackgroundMediaBusy){
+    if(currentTripGlobalLocked())setTripBackgroundMediaStatus("旅程已全域鎖定，目前只可查看背景。");
+    else if(!canEdit)setTripBackgroundMediaStatus("目前為唯讀。只有 Owner 或 Admin 可以修改旅程背景。");
+    else setTripBackgroundMediaStatus(hasCustom?"可以更換或移除自訂背景。":"Owner / Admin 可以上載自訂旅程背景。");
+  }else if(preserveStatus&&tripBackgroundMediaStatusText)setTripBackgroundMediaStatus(tripBackgroundMediaStatusText,{error:tripBackgroundMediaStatusError});
+}
+async function uploadTripBackgroundMediaFile(file){
+  const tripId=appearanceSettingsTripId();if(!tripId||!file||tripBackgroundMediaBusy)return;
+  if(!appearanceSettingsCanEdit()){renderTripBackgroundSettings();return;}
+  tripBackgroundMediaBusy=true;setTripMediaMutationBusy(true);setTripBackgroundMediaProgress(.02,{show:true});setTripBackgroundMediaStatus("正在準備及壓縮圖片…");renderTripBackgroundSettings(window.tripData,{preserveStatus:true});
+  try{
+    const service=await getTripAppearanceService(),user=window.__appAuthUser||tripLibraryCurrentUser||null;
+    const result=await service.updateTripBackgroundImage(tripId,file,{user,onProgress:progress=>{setTripBackgroundMediaProgress(progress?.progress??.05,{show:true});setTripBackgroundMediaStatus(tripBackgroundProgressCopy(progress));}});
+    setTripBackgroundMediaProgress(1,{show:true});
+    setTripBackgroundMediaStatus(result?.cleanup?.cleaned===false?"新背景已生效，但舊媒體未能即時清理；請暫時保留 App 連線。":"旅程背景已更新，其他裝置會自動同步。",{error:result?.cleanup?.cleaned===false});
+    setTimeout(()=>setTripBackgroundMediaProgress(0,{show:false}),700);
+  }catch(error){
+    console.error("Trip background upload",error);setTripBackgroundMediaProgress(0,{show:false});setTripBackgroundMediaStatus(tripBackgroundMediaFriendlyError(error),{error:true});
+  }finally{
+    tripBackgroundMediaBusy=false;setTripMediaMutationBusy(false);renderTripBackgroundSettings(window.tripData,{preserveStatus:true});
+  }
+}
+function openTripBackgroundMediaPicker(){
+  if(tripBackgroundMediaBusy||!appearanceSettingsCanEdit())return;
+  const input=document.createElement("input");input.type="file";input.accept="image/*";input.hidden=true;input.setAttribute("aria-hidden","true");
+  let handled=false;const cleanup=()=>{try{input.remove();}catch(error){}};
+  input.addEventListener("change",()=>{handled=true;const file=input.files?.[0]||null;cleanup();if(file)uploadTripBackgroundMediaFile(file);},{once:true});
+  const onReturn=()=>setTimeout(()=>{if(!handled)cleanup();window.removeEventListener("focus",onReturn);},900);
+  window.addEventListener("focus",onReturn,{once:true});document.body.appendChild(input);input.click();
+}
+async function removeTripBackgroundMedia(){
+  const tripId=appearanceSettingsTripId();if(!tripId||tripBackgroundMediaBusy||!appearanceSettingsCanEdit())return;
+  const media=tripBackgroundMediaMeta(window.tripData);if(!tripMediaHasStorage(media))return;
+  if(!window.confirm("移除自訂旅程背景並恢復原有背景？"))return;
+  tripBackgroundMediaBusy=true;setTripMediaMutationBusy(true);setTripBackgroundMediaProgress(.12,{show:true});setTripBackgroundMediaStatus("正在移除自訂背景…");renderTripBackgroundSettings(window.tripData,{preserveStatus:true});
+  try{
+    const service=await getTripAppearanceService(),user=window.__appAuthUser||tripLibraryCurrentUser||null;
+    const result=await service.removeTripBackgroundImage(tripId,{user});
+    setTripBackgroundMediaProgress(1,{show:true});
+    setTripBackgroundMediaStatus(result?.cleanup?.cleaned===false?"背景已恢復，但舊 Storage 媒體未能即時清理。":"已移除自訂背景，旅程已恢復原有背景。",{error:result?.cleanup?.cleaned===false});
+    setTimeout(()=>setTripBackgroundMediaProgress(0,{show:false}),700);
+  }catch(error){
+    console.error("Trip background remove",error);setTripBackgroundMediaProgress(0,{show:false});setTripBackgroundMediaStatus(tripBackgroundMediaFriendlyError(error),{error:true});
+  }finally{
+    tripBackgroundMediaBusy=false;setTripMediaMutationBusy(false);renderTripBackgroundSettings(window.tripData,{preserveStatus:true});
+  }
+}
+document.getElementById("trip-background-settings-open-btn")?.addEventListener("click",()=>renderTripBackgroundSettings());
+document.getElementById("trip-background-media-upload")?.addEventListener("click",openTripBackgroundMediaPicker);
+document.getElementById("trip-background-media-remove")?.addEventListener("click",removeTripBackgroundMedia);
+window.__tripBackgroundSettingsRefresh=data=>{if(profileCurrentPage==="trip-background-settings")renderTripBackgroundSettings(data,{preserveStatus:tripBackgroundMediaBusy||!!tripBackgroundMediaStatusText});};
+
 function colourSwatches({selected="",key="",kind="trip",disabled=false}={}){
   return APPEARANCE_COLOUR_PRESETS.map(hex=>`<button class="destination-color-swatch${String(selected).toUpperCase()===hex?" is-selected":""}" type="button" data-appearance-kind="${kind}" data-appearance-key="${escapeHtmlText(key)}" data-appearance-color="${hex}" style="--swatch:${hex}" aria-label="選擇 ${hex}"${disabled?" disabled":""}></button>`).join("");
 }
@@ -10467,6 +10664,8 @@ function describeTripActivity(item={}){
   if(type==="trip.team.color_updated")return {...base,icon:"●",title:"更新 Team 顏色",summary:message||"Team 識別色已更新"};
   if(type==="trip.media.icon_updated")return {...base,icon:"▣",title:"更新旅程圖示",summary:message||"旅程圖示已更新"};
   if(type==="trip.media.icon_removed")return {...base,icon:"−",title:"移除旅程圖示",summary:message||"已恢復旅程原有圖示"};
+  if(type==="trip.media.background_updated")return {...base,icon:"▤",title:"更新旅程背景",summary:message||"旅程背景已更新"};
+  if(type==="trip.media.background_removed")return {...base,icon:"−",title:"移除旅程背景",summary:message||"已恢復旅程原有背景"};
   if(type==="expense_created")return {...base,category:"expense",categoryLabel:"支出",icon:"＋",title:"新增支出",summary:message||"新增一筆支出"};
   if(type==="expense_updated")return {...base,category:"expense",categoryLabel:"支出",icon:"✎",title:"修改支出",summary:message||"修改一筆支出"};
   if(type==="expense_deleted")return {...base,category:"expense",categoryLabel:"支出",icon:"−",title:"刪除支出",summary:message||"刪除一筆支出"};

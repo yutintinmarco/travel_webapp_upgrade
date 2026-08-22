@@ -1,3 +1,32 @@
+# v7.9.3.3 — Phase 3A Media Upload Integration · Trip Background
+
+## Scope
+• Extends the proven v7.9.3.2 Trip icon media lifecycle to the active Trip background.
+• Adds `我的 → 外觀與顯示 → 旅程背景` using the existing Profile card and navigation grammar.
+• Cover media remains a prepared data contract only in this build because no current user-facing surface consumes `coverImageMedia`; this build does not create duplicate Storage media merely to populate an unused field.
+
+## Trip Background Upload
+• Owner / Admin can upload, replace and remove a custom Trip background. Viewer / Member and globally locked Trips remain read-only.
+• Images use the existing Phase 3A client compression, ~2048 px display variant, ~640 px thumbnail, Firebase Storage upload, Firestore Media Registry and IndexedDB media cache.
+• Storage path is `trips/{tripId}/media/trip/background/{mediaId}/...`.
+• The Trip root and `settings/general` receive the same portable `backgroundImageMedia` descriptor only after the registry reaches ready state.
+• Replacement uploads and attaches the new descriptor before old Storage media is cleaned. Failed attachment rolls the unattached upload back where possible.
+• Remove first restores the existing legacy / generated background path, then cleans the detached Storage media.
+
+## Background Continuity
+• Existing background rendering remains atomic: when switching Trips or replacing a background, the previous visible background stays on screen until the next image has loaded and decoded. No fallback flash is inserted between them.
+• Added one tiny active-Trip warm preview in localStorage after a Storage background first resolves. On the next PWA launch the first frame uses that same-image preview instead of a default / legacy background while IndexedDB resolves the full display image.
+• The warm preview is visual cache only. It is not Firebase canonical data, is not written to Firestore / Storage and is not included as an independent Backup record.
+• Full Backup remains disabled while a background upload / replace / remove mutation is in flight through the existing local media-mutation gate. No new Firebase freshness read is introduced.
+
+## Firebase
+• Firestore Rules: unchanged.
+• Storage Rules: unchanged.
+• Firestore Indexes: unchanged.
+• Cloud Functions: unchanged.
+• Firebase config: unchanged.
+• CORS: unchanged.
+
 # v7.9.3.2 — Trip Switcher Media Display Hotfix
 
 • Fixed Firebase Storage Trip icons disappearing from the top-left quick Trip switcher even though the same icon was already visible in My Trips / Trip Icon settings. The quick switcher rebuilds its `innerHTML` every time it opens; it now immediately hydrates the newly-created media descriptor images through the existing IndexedDB / Storage thumbnail resolver.
