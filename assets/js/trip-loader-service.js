@@ -216,7 +216,11 @@ export function subscribeTripData(tripIdInput, callback, options = {}) {
 
   let desiredRealtimeDayId = clean(options?.activeDayId);
   if (!desiredRealtimeDayId && seedDays.length) desiredRealtimeDayId = clean(seedDays[0]?.dayId);
-  let fullHydrationNeeded = !seedComplete;
+  // v7.9.2.9 · Trust-chain self repair. A complete render-cache payload is not
+  // automatically a trusted server witness. If a previous launch left the seed
+  // unconfirmed, temporarily hydrate every Day once so this session can rebuild
+  // archive-grade trust and then fall back to Active-Day Realtime normally.
+  let fullHydrationNeeded = !seedComplete || !seedWasServerConfirmed;
   let stopped = false;
   let emitTimer = 0;
   let firstReadyEmitted = false;
@@ -544,43 +548,6 @@ export function subscribeTripData(tripIdInput, callback, options = {}) {
     reconcileItemListeners();
   };
   stopAll.getActiveDayId = () => desiredRealtimeDayId;
-  stopAll.getRealtimeMode = () => fullHydrationNeeded ? "full-hydration" : "active-day";
-  stopAll.requestFullServerConfirmation = () => {
-    if (stopped) return false;
-    fullHydrationNeeded = true;
-    reconcileItemListeners();
-    return true;
-  };
-  stopAll.isServerConfirmed = () => state.allRequiredServerConfirmed() && !state.hasPendingWrites();
-  // v7.9.2.8 diagnostic only: expose the existing in-memory freshness graph.
-  // This performs no reads, writes, listener changes, or hydration requests.
-  stopAll.getFreshnessDebug = () => {
-    const dayIds = [...state.days.keys()];
-    const baseKeys = ["trip", "days", "saved", "settings:general", "settings:expenses"];
-    return {
-      tripId,
-      serverRevision: numberOr(state.tripDoc?.revision, 0),
-      seed: {
-        present: !!seedData,
-        complete: seedComplete,
-        revision: seedRevision,
-        wasServerConfirmed: seedWasServerConfirmed
-      },
-      realtimeMode: fullHydrationNeeded ? "full-hydration" : "active-day",
-      activeDayId: desiredRealtimeDayId,
-      initial: { ...initial },
-      baseSources: baseKeys.map(key => ({ key, meta: sourceMeta.get(key) ? { ...sourceMeta.get(key) } : null })),
-      dayCount: dayIds.length,
-      dayItemListeners: [...itemUnsubs.keys()],
-      dayItemServerReady: [...itemServerReady],
-      dayItemMissingServer: dayIds.filter(dayId => !itemServerReady.has(dayId)),
-      pendingWriteSources: [...sourceMeta.entries()]
-        .filter(([, meta]) => meta?.hasPendingWrites === true)
-        .map(([key]) => key),
-      allRequiredServerConfirmed: state.allRequiredServerConfirmed(),
-      hasPendingWrites: state.hasPendingWrites()
-    };
-  };
 
   return stopAll;
 }

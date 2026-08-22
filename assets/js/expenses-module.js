@@ -604,21 +604,6 @@ let recentExpensesLiveReady = false;
 let settlementsLiveReady = false;
 let activityLogsLiveReady = false;
 let expenseSettingsLiveReady = false;
-// v7.9.2.8 diagnostic only. These fields observe existing lifecycle state and
-// listener errors; they do not retry, reattach, read, write, or change gating.
-const expenseListenerErrors = { settings:null, expenses:null, settlements:null, activityLogs:null };
-let expenseEnsureState = "idle";
-function noteExpenseListenerError(key,error){
-  expenseListenerErrors[key]={
-    code:String(error?.code||""),
-    message:String(error?.message||error||""),
-    at:new Date().toISOString()
-  };
-}
-function resetExpenseDiagnostics(){
-  Object.keys(expenseListenerErrors).forEach(key=>{expenseListenerErrors[key]=null;});
-  expenseEnsureState="idle";
-}
 const backupSyncMeta = {
   settings: { seen:false, fromCache:true, hasPendingWrites:false },
   expenses: { seen:false, fromCache:true, hasPendingWrites:false },
@@ -638,6 +623,11 @@ function updateBackupSyncMeta(key,snapshot){
   // Let the passive Full Backup gate repaint immediately when an existing
   // Expense realtime listener changes freshness. This does not create a read.
   try{window.dispatchEvent(new Event("expense-backup-freshness-change"));}catch(error){}
+  const values=Object.values(backupSyncMeta);
+  if(values.every(meta=>meta.seen===true&&meta.fromCache===false&&meta.hasPendingWrites!==true)){
+    expenseRealtimeRetryAttempt=0;
+    clearExpenseRealtimeRetry();
+  }
 }
 function currentExpenseBackupFreshness(){
   const sources=Object.fromEntries(Object.entries(backupSyncMeta).map(([key,value])=>[key,{...value}]));
@@ -719,6 +709,8 @@ let expenseAccessRecoveryTimer = null;
 let expenseAccessRecoveryAttempt = 0;
 let cloudExpenseStarted = false;
 let expenseBindingEpoch = 0;
+let expenseRealtimeRetryTimer = null;
+let expenseRealtimeRetryAttempt = 0;
 let allExpenses = [];
 let expenses = [];
 let settlements = [];
@@ -736,6 +728,37 @@ let stopExpenseSettingsListener = null;
 let stopExpensesListener = null;
 let stopSettlementsListener = null;
 let stopActivityLogsListener = null;
+function clearExpenseRealtimeRetry(){
+  if(expenseRealtimeRetryTimer) clearTimeout(expenseRealtimeRetryTimer);
+  expenseRealtimeRetryTimer = null;
+}
+function markExpenseFreshnessUnavailable(key){
+  if(backupSyncMeta[key]) backupSyncMeta[key]={seen:false,fromCache:true,hasPendingWrites:false};
+  if(key==="settings") expenseSettingsLiveReady=false;
+  if(key==="expenses") recentExpensesLiveReady=false;
+  if(key==="settlements") settlementsLiveReady=false;
+  if(key==="activityLogs") activityLogsLiveReady=false;
+  try{window.dispatchEvent(new Event("expense-backup-freshness-change"));}catch(error){}
+}
+function scheduleExpenseRealtimeRetry(bindingEpochAtError){
+  if(expensesModuleSuspendedForTripSwitch||!currentUser||bindingEpochAtError!==expenseBindingEpoch)return;
+  if(expenseRealtimeRetryTimer)return;
+  const delay=Math.min(5000,700*Math.pow(2,Math.min(3,expenseRealtimeRetryAttempt++)));
+  const retryTripId=tripId;
+  expenseRealtimeRetryTimer=setTimeout(()=>{
+    expenseRealtimeRetryTimer=null;
+    if(expensesModuleSuspendedForTripSwitch||!currentUser||bindingEpochAtError!==expenseBindingEpoch||retryTripId!==tripId)return;
+    // New generation: any callback already queued by the failed listener set is
+    // stale from this point onward and cannot mutate the replacement binding.
+    expenseBindingEpoch += 1;
+    cloudExpenseStarted=false;
+    recentExpensesLiveReady=false;
+    settlementsLiveReady=false;
+    activityLogsLiveReady=false;
+    resetBackupSyncMeta();
+    startExpenseCloudIfAllowed();
+  },delay);
+}
 let tripAllowedUids = [];
 let tripCreatorUid = null;
 let tripAdminUids = [];
@@ -1301,35 +1324,6 @@ window.__getExpenseLocalExportSnapshot = () => ({
   freshness: currentExpenseBackupFreshness(),
   capturedAt: new Date().toISOString()
 });
-window.__expenseSyncDebug = () => ({
-  tripId,
-  mountedTripId:String(window.__expensesModuleTripId||""),
-  suspended:expensesModuleSuspendedForTripSwitch,
-  bindingEpoch:expenseBindingEpoch,
-  signedIn:!!currentUser,
-  access:expenseAccessState(),
-  phase2TripAccessReady,
-  phase2TripRole,
-  cloudExpenseStarted,
-  ensureState:expenseEnsureState,
-  live:{
-    settings:expenseSettingsLiveReady,
-    expenses:recentExpensesLiveReady,
-    settlements:settlementsLiveReady,
-    activityLogs:activityLogsLiveReady
-  },
-  listenersAttached:{
-    trip:!!stopTripListener,
-    settings:!!stopExpenseSettingsListener,
-    expenses:!!stopExpensesListener,
-    settlements:!!stopSettlementsListener,
-    activityLogs:!!stopActivityLogsListener
-  },
-  listenerErrors:{...expenseListenerErrors},
-  freshness:currentExpenseBackupFreshness(),
-  moduleStatus:lastModuleStatus
-});
-
 function downloadBlobFile(filename, blob) {
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
@@ -2332,7 +2326,14 @@ function startExpenseSettingsListener() {
       };
       updateCurrencySelectOptions(); renderRateEditor(); renderSummary(); renderAnalytics(); renderExpenses();
     }
-  }, error => { if (bindingEpoch !== expenseBindingEpoch) return; noteExpenseListenerError("settings",error); if (error?.code !== "permission-denied") console.warn("Expense settings listener", error); });
+  }, error => {
+    if (bindingEpoch !== expenseBindingEpoch) return;
+    markExpenseFreshnessUnavailable("settings");
+    if (error?.code !== "permission-denied") {
+      scheduleExpenseRealtimeRetry(bindingEpoch);
+      console.warn("Expense settings listener", error);
+    }
+  });
 }
 
 function startTripListener() {
@@ -2461,7 +2462,8 @@ function listenToExpenses() {
     tryRunPendingExcelExport();
   }, err => {
     if (bindingEpoch !== expenseBindingEpoch) return;
-    noteExpenseListenerError("expenses",err);
+    markExpenseFreshnessUnavailable("expenses");
+    if (err?.code !== "permission-denied") scheduleExpenseRealtimeRetry(bindingEpoch);
     console.error(err);
     setModuleStatus(err?.code === "permission-denied" ? "No access to expenses" : "Sync error");
   });
@@ -2481,7 +2483,8 @@ function listenToSettlements() {
     tryRunPendingExcelExport();
   }, err => {
     if (bindingEpoch !== expenseBindingEpoch) return;
-    noteExpenseListenerError("settlements",err);
+    markExpenseFreshnessUnavailable("settlements");
+    if (err?.code !== "permission-denied") scheduleExpenseRealtimeRetry(bindingEpoch);
     console.error(err);
     setModuleStatus(err?.code === "permission-denied" ? "No access to settlements" : "Settlement sync error");
   });
@@ -2500,7 +2503,8 @@ function listenToActivityLogs() {
     tryRunPendingExcelExport();
   }, err => {
     if (bindingEpoch !== expenseBindingEpoch) return;
-    noteExpenseListenerError("activityLogs",err);
+    markExpenseFreshnessUnavailable("activityLogs");
+    if (err?.code !== "permission-denied") scheduleExpenseRealtimeRetry(bindingEpoch);
     console.error(err);
     setModuleStatus(err?.code === "permission-denied" ? "No access to activity logs" : "Activity log sync error");
   });
@@ -4620,39 +4624,47 @@ async function startExpenseCloudIfAllowed() {
     updateTripStatusUi();
     return;
   }
-  cloudExpenseStarted = true;
+
+  // v7.9.2.9 · Attach the canonical realtime listeners immediately after
+  // verified Trip access. The legacy members/settings preparation may involve
+  // one or two getDoc() calls and must never sit in front of Backup freshness.
+  // This also removes the old permanent-hang state where cloudExpenseStarted
+  // was set before an await and every later retry silently returned.
   const bindingEpoch = expenseBindingEpoch;
   const bindingTripId = tripId;
   setModuleStatus(`Connected · ${phase2TripRole}`);
-  // v7.7.3.3 · Read only from Firestore's existing persistent local cache so
-  // 最近支出 can paint immediately without creating any extra server read.
-  // The realtime listener remains authoritative and replaces this warm preview.
   void hydrateRecentExpensesFromLocalFirestoreCache();
+  initMembers();
+  renderRateEditor();
+  renderAllowedEmails();
+  renderAdminEmails();
+  startTripListener();
+  startExpenseSettingsListener();
+  listenToExpenses();
+  listenToSettlements();
+  listenToActivityLogs();
+  cloudExpenseStarted = true;
+  updateTripStatusUi();
+
   try {
-    expenseEnsureState = "running";
     await ensureTripMembersAndSettings();
-    if (bindingEpoch !== expenseBindingEpoch || bindingTripId !== tripId || expensesModuleSuspendedForTripSwitch) { expenseEnsureState = "stale"; cloudExpenseStarted = false; return; }
-    expenseEnsureState = "done";
+    if (bindingEpoch !== expenseBindingEpoch || bindingTripId !== tripId || expensesModuleSuspendedForTripSwitch) return;
     initMembers();
     renderRateEditor();
     renderAllowedEmails();
     renderAdminEmails();
-    startTripListener();
-    startExpenseSettingsListener();
-    listenToExpenses();
-    listenToSettlements();
-    listenToActivityLogs();
     updateTripStatusUi();
   } catch (error) {
-    expenseEnsureState = "error";
     if (bindingEpoch !== expenseBindingEpoch || bindingTripId !== tripId) return;
-    cloudExpenseStarted = false;
     console.error(error);
-    tripStatus = "unknown";
+    // Realtime listeners remain authoritative and retryable even if this legacy
+    // preparation step fails. Access enforcement continues to come from the
+    // canonical Trip access service and Firestore Rules.
     setModuleStatus(error?.code === "permission-denied" ? "Waiting for Firestore Rules" : "Init error");
     updateTripStatusUi();
   }
 }
+
 
 window.addEventListener("app-trip-access", event => {
   const detail = event.detail || {};
@@ -4680,8 +4692,9 @@ subscribeAuthState(async (user) => {
     phase2TripAccessTripId = String(window.__appTripAccess?.tripId || "");
     clearExpenseAccessRecoveryTimer();
     expenseAccessRecoveryAttempt = 0;
+    clearExpenseRealtimeRetry();
+    expenseRealtimeRetryAttempt = 0;
     cloudExpenseStarted = false;
-    resetExpenseDiagnostics();
     setModuleStatus("Please sign in");
     if (stopTripListener) stopTripListener();
     if (stopExpenseSettingsListener) stopExpenseSettingsListener();
@@ -4741,9 +4754,10 @@ window.__rebindExpensesForTrip = async function rebindExpensesModuleForTrip(next
   expenseBindingEpoch += 1;
   expensesModuleSuspendedForTripSwitch = true;
   cloudExpenseStarted = false;
-  resetExpenseDiagnostics();
   clearExpenseAccessRecoveryTimer();
   expenseAccessRecoveryAttempt = 0;
+  clearExpenseRealtimeRetry();
+  expenseRealtimeRetryAttempt = 0;
   for (const stop of [stopTripListener, stopExpenseSettingsListener, stopExpensesListener, stopSettlementsListener, stopActivityLogsListener]) {
     try { stop?.(); } catch (error) {}
   }
@@ -4812,6 +4826,8 @@ window.__suspendExpensesForTripSwitch = function suspendExpensesModuleForTripSwi
   cloudExpenseStarted = false;
   clearExpenseAccessRecoveryTimer();
   expenseAccessRecoveryAttempt = 0;
+  clearExpenseRealtimeRetry();
+  expenseRealtimeRetryAttempt = 0;
   for (const stop of [stopTripListener, stopExpenseSettingsListener, stopExpensesListener, stopSettlementsListener, stopActivityLogsListener]) {
     try { stop?.(); } catch (error) {}
   }
