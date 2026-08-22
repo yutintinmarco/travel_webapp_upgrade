@@ -1,3 +1,11 @@
+# v7.9.3.5 · Local → Cloud Media Handoff Fix
+
+- Fixed the Local First media handoff where an already-visible Trip Icon or Background could briefly disappear after Firebase Storage upload completed.
+- Treats pending → canonical generation promotion for the same immutable `mediaId + storagePath` as the same visual asset and reuses the existing Object URL.
+- Background and Icon settings now preserve the currently visible local preview while queue state rerenders occur.
+- A transient canonical media resolve failure no longer replaces an already-visible same-Trip background with the fallback background.
+- No Firebase Rules, Indexes, Functions, config or CORS changes.
+
 # v7.9.3.4 — Phase 3A Media Upload Performance Pass · Local First Queue
 
 ## Local First Commit
