@@ -82,6 +82,27 @@ function objectUrlKey(descriptor, variantInput) {
   return `${selected.variant}|${selected.storagePath}|${selected.generation}`;
 }
 
+// Local-first uploads deliberately use the final immutable Storage path before
+// Firebase assigns an object generation. When the same media later becomes
+// canonical, generation changes from empty -> server value but the bytes and
+// Storage path are identical. Reuse the already-visible Object URL instead of
+// treating that metadata promotion as a new image load. This keeps the local
+// preview on screen through queued -> uploaded -> attached handoff.
+function compatibleObjectUrl(descriptor, variantInput) {
+  const selected = selectedVariant(descriptor, variantInput);
+  const mediaId = clean(descriptor?.mediaId);
+  const tripId = clean(descriptor?.tripId);
+  if (!selected.storagePath || !mediaId) return null;
+  for (const record of objectUrls.values()) {
+    if (clean(record.variant) !== selected.variant) continue;
+    if (clean(record.storagePath) !== selected.storagePath) continue;
+    if (clean(record.mediaId) !== mediaId) continue;
+    if (tripId && clean(record.tripId) && clean(record.tripId) !== tripId) continue;
+    return record;
+  }
+  return null;
+}
+
 export async function resolveTripMediaUrl(input, {
   tripId = "",
   variant = "display",
@@ -93,6 +114,11 @@ export async function resolveTripMediaUrl(input, {
 
   const key = objectUrlKey(descriptor, variant);
   if (objectUrls.has(key)) return objectUrls.get(key).url;
+  const compatible = compatibleObjectUrl(descriptor, variant);
+  if (compatible?.url) {
+    objectUrls.set(key, compatible);
+    return compatible.url;
+  }
   if (inflight.has(key)) return inflight.get(key);
 
   const task = (async () => {
@@ -102,7 +128,8 @@ export async function resolveTripMediaUrl(input, {
       url,
       tripId: clean(descriptor.tripId || tripId),
       mediaId: clean(descriptor.mediaId),
-      storagePath: clean(result.storagePath)
+      storagePath: clean(result.storagePath),
+      variant: clean(result.variant || selectedVariant(descriptor, variant).variant)
     });
     return url;
   })();
