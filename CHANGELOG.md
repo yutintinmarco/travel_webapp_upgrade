@@ -1,3 +1,33 @@
+# v7.9.3.7 · Phase 3A Itinerary Image Upload
+
+## First itinerary-media vertical slice
+
+• Owner / Admin can add one managed Firebase photo to an itinerary item from its existing expanded detail area, replace that managed photo, or remove it. Existing static / remote gallery entries are preserved; this slice manages only the new `slot: primary` Storage photo.
+• Trip Lock keeps itinerary photo controls read-only. A pending upload disables replace / remove to avoid overlapping queue races, matching the established media safety rule.
+• Selected photos use the existing Local First media engine: mobile decode + adaptive itinerary compression, IndexedDB local commit, immediate gallery preview, persistent background queue, parallel display / thumbnail Storage upload and resumable cloud sync.
+• Pending itinerary media is isolated by `Trip + Day + Item` and blocks Full Backup only for its own Trip until cloud commit finishes.
+
+## Canonical Firestore attach
+
+• New item media uses Storage paths under `trips/{tripId}/media/items/{itemId}/{mediaId}/...` and the existing Firestore Media Registry owner type `item`.
+• Cloud attach reads the latest item document, replaces only the managed `slot: primary` descriptor, preserves unrelated item images, writes the item update and activity log, and increments the Trip revision in the same batch.
+• The Trip revision bump is mandatory for Day / Item mutations so the Passive Backup Sync Gate never trusts an inactive-Day seed across an itinerary content change.
+• The Trip loader now adopts a newly server-confirmed revision after one full hydration, preventing a live revision change from repeatedly retriggering full-Day hydration against the launch-time seed revision.
+
+## Local First UI continuity
+
+• The expanded itinerary item stays expanded when media queue state causes a scoped itinerary rerender.
+• Pending local media overlays the item gallery immediately and remains the same visual asset when Firebase generation metadata is promoted.
+• Remove updates Firestore first, increments Trip revision and then performs best-effort old Storage / Registry cleanup.
+
+## Firebase
+
+• Firestore Rules: unchanged. Existing `days/{dayId}/items/{itemId}` edit rules and `media/{mediaId}` owner type `item` already cover this slice.
+• Storage Rules: unchanged. Existing `trips/{tripId}/media/**` write rules already cover item media.
+• Firestore Indexes: unchanged.
+• Cloud Functions: unchanged.
+• Firebase config / CORS: unchanged.
+
 # v7.9.3.6 · Media Disabled-State Harmony
 
 ## UI harmony
