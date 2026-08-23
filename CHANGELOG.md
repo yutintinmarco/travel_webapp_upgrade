@@ -1,3 +1,19 @@
+# v7.9.3.8 · Itinerary Media Entry Compatibility
+
+## Item capability decoupled from legacy popup metadata
+
+• Itinerary photo management is no longer gated by the legacy `item.popup` flag. A normal item with stable `dayId + itemId` can now expose the media capability even when it has no expandable detail arrow.
+• Existing popup items keep their current arrow, expand-in-place detail layout, gallery and media controls unchanged. No existing item is made expandable merely because media is supported.
+• Non-popup items use a compact photo accessory at the right edge of the existing itinerary row. Tapping it opens a lightweight media-only panel beneath that same row.
+• When a managed photo exists, the accessory becomes a small rounded thumbnail; Owner / Admin can replace or remove it from the media panel, while read-only users can still view the photo.
+• Pending Local First uploads remain disabled for replace / remove and continue to use the shared background queue, IndexedDB cache, Backup gate and Trip + Day + Item isolation from v7.9.3.7.
+• The lightweight media panel stays open across media queue rerenders, so local preview and sync status do not collapse while Firebase finishes in the background.
+
+## Compatibility / Firebase
+
+• No JSON re-import or Trip migration is required solely to obtain the photo entry. Existing Trips only need stable Firebase Day and Item IDs already used by the current schema.
+• Firestore Rules, Storage Rules, Indexes, Cloud Functions, Firebase config and CORS are unchanged.
+
 # v7.9.3.7 · Phase 3A Itinerary Image Upload
 
 ## First itinerary-media vertical slice
