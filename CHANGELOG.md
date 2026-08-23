@@ -1,3 +1,13 @@
+# v7.9.3.9 · Itinerary Media Access Refresh Fix
+
+## Fixed
+
+- Fixed itinerary photo controls failing to appear when Local First itinerary data rendered before the current Trip membership role had resolved.
+- Owner / Admin capability changes now trigger one targeted itinerary re-render for the active Trip, so both legacy popup items and ordinary non-popup items receive their photo controls once access is confirmed.
+- Hardened itinerary media role checks so an Owner / Admin role from the previous Trip cannot leak into a Trip-switch handoff.
+- Kept the v7.9.3.8 UI contract unchanged: popup items manage photos in expanded details; non-popup items use the lightweight photo accessory.
+- No Firebase data migration, JSON re-import, new reads, new listeners or backend changes are required.
+
 # v7.9.3.8 · Itinerary Media Entry Compatibility
 
 ## Item capability decoupled from legacy popup metadata
