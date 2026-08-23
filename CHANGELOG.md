@@ -1,3 +1,12 @@
+# v7.9.3.6 · Media Disabled-State Harmony
+
+## UI harmony
+
+• Trip Icon upload / remove rows now reuse the established `profile-row-disabled` visual treatment whenever the action is disabled.
+• Trip Background upload / remove rows now use the same disabled treatment during local processing, background media sync, read-only access, or Trip Lock.
+• Disabled state now greys the icon, title, subtitle and chevron consistently with Full Backup and other proven Profile rows.
+• Upload queue, Firebase Storage, Media Registry, Local First behaviour and Backup gating are unchanged.
+
 # v7.9.3.5 · Local → Cloud Media Handoff Fix
 
 - Fixed the Local First media handoff where an already-visible Trip Icon or Background could briefly disappear after Firebase Storage upload completed.
