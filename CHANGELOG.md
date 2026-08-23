@@ -1,3 +1,22 @@
+# v7.9.4.0 · Itinerary Gallery Viewer
+
+## Gallery quality and continuity
+
+• Expanded itinerary galleries now resolve the existing Display media variant instead of stretching the 480 px thumbnail across the large gallery surface. Storage object count and Firebase usage are unchanged.
+• The currently selected gallery asset is remembered by immutable media identity (`mediaId` / Storage path), not array index. Local First → Firebase canonical promotion and scoped rerenders therefore keep the same photo selected instead of jumping back to photo 1.
+• The same selection continuity also survives gallery dot navigation and background media queue updates.
+
+## iOS-style full-screen photo viewer
+
+• Tapping an itinerary gallery image now opens a dedicated full-screen black photo viewer using the existing Display variant.
+• The viewer follows iOS-native interaction grammar: safe-area top controls, a compact blurred close button, photo counter, horizontal swipe between images, pinch zoom, drag while zoomed and double-tap zoom.
+• The lightweight media-only panel for non-popup items opens the same viewer when its preview is tapped.
+• No original 12 MP source file is added to Firebase; the viewer deliberately uses the existing compressed Display asset, so Storage, Backup ZIP and Restore costs remain bounded.
+
+## Compatibility / Firebase
+
+• Itinerary media data model, Media Registry, Local First queue, Backup gate, Trip revision contract, Firestore Rules, Storage Rules, Indexes, Cloud Functions, Firebase config and CORS are unchanged.
+
 # v7.9.3.9 · Itinerary Media Access Refresh Fix
 
 ## Fixed
