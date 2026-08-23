@@ -156,6 +156,7 @@ export function subscribeTripData(tripIdInput, callback, options = {}) {
     ? options.seedData
     : null;
   const seedRevision = seedData ? Math.max(1, numberOr(seedData.revision, 1)) : 0;
+  let hydratedRevision = seedRevision;
   const seedDays = Array.isArray(seedData?.days) ? seedData.days : [];
   const seedComplete = seedDays.length > 0 && seedDays.every(day => Array.isArray(day?.items));
   // Phase 3A.3 passive Backup gate: a render-cache seed may stand in for
@@ -216,7 +217,7 @@ export function subscribeTripData(tripIdInput, callback, options = {}) {
 
   let desiredRealtimeDayId = clean(options?.activeDayId);
   if (!desiredRealtimeDayId && seedDays.length) desiredRealtimeDayId = clean(seedDays[0]?.dayId);
-  // v7.9.2.9 · Trust-chain self repair. A complete render-cache payload is not
+  // v7.9.3.7 · Trust-chain self repair / live revision baseline. A complete render-cache payload is not
   // automatically a trusted server witness. If a previous launch left the seed
   // unconfirmed, temporarily hydrate every Day once so this session can rebuild
   // archive-grade trust and then fall back to Active-Day Realtime normally.
@@ -375,6 +376,9 @@ export function subscribeTripData(tripIdInput, callback, options = {}) {
     if (!fullHydrationNeeded || !allDaysServerHydrated()) return false;
     fullHydrationNeeded = false;
     state.days.forEach((_, dayId) => seededItemDays.add(dayId));
+    if (sourceMeta.get("trip")?.fromCache === false) {
+      hydratedRevision = Math.max(1, numberOr(state.tripDoc?.revision, hydratedRevision || 1));
+    }
     return true;
   }
 
@@ -453,7 +457,7 @@ export function subscribeTripData(tripIdInput, callback, options = {}) {
       state.tripDoc = next;
 
       const serverRevision = Math.max(1, numberOr(next.revision, 1));
-      if (seedRevision && serverRevision !== seedRevision) {
+      if (hydratedRevision && serverRevision !== hydratedRevision) {
         fullHydrationNeeded = true;
         reconcileItemListeners();
       }

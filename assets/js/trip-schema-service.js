@@ -141,7 +141,13 @@ function normalizeImages(item) {
       const generation = clean(image?.generation);
       const thumbnailContentType = clean(image?.thumbnailContentType);
       const thumbnailGeneration = clean(image?.thumbnailGeneration);
+      const ownerType = clean(image?.ownerType);
+      const ownerId = clean(image?.ownerId);
+      const slot = clean(image?.slot);
       if (mediaId) normalized.mediaId = mediaId;
+      if (ownerType) normalized.ownerType = ownerType;
+      if (ownerId) normalized.ownerId = ownerId;
+      if (slot) normalized.slot = slot;
       if (thumbnailStoragePath) normalized.thumbnailStoragePath = thumbnailStoragePath;
       if (Number.isFinite(mediaSchemaVersion)) normalized.mediaSchemaVersion = mediaSchemaVersion;
       if (contentType) normalized.contentType = contentType;
