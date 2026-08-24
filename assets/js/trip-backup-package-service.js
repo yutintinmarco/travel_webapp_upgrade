@@ -279,6 +279,76 @@ async function parseStoreZip(file) {
   return files;
 }
 
+
+function collectCanonicalMediaReferences(backupJsonInput, tripIdInput) {
+  const tripId = clean(tripIdInput);
+  const portable = backupJsonInput?.data?.portableTrip;
+  const references = new Map();
+  if (!tripId || !portable || typeof portable !== "object") return references;
+  const prefix = `trips/${tripId}/media/`;
+
+  const visit = value => {
+    if (Array.isArray(value)) {
+      value.forEach(visit);
+      return;
+    }
+    if (!value || typeof value !== "object") return;
+
+    const storagePath = clean(value.storagePath);
+    const thumbnailStoragePath = clean(value.thumbnailStoragePath);
+    const mediaId = clean(value.mediaId || value.imageId);
+    const looksLikeStorageMedia = storagePath.startsWith(prefix) || thumbnailStoragePath.startsWith(prefix) || clean(value.source) === "storage";
+    if (looksLikeStorageMedia) {
+      if (!mediaId || !storagePath || !storagePath.startsWith(prefix)) {
+        throw errorWithCode("Canonical Trip data contains an invalid media reference", "backup-media-reference-invalid", { mediaId, storagePath });
+      }
+      const existing = references.get(mediaId);
+      if (existing && clean(existing.storagePath) !== storagePath) {
+        throw errorWithCode("Canonical Trip data contains conflicting media references", "backup-media-reference-conflict", { mediaId, storagePath, existingStoragePath: clean(existing.storagePath) });
+      }
+      references.set(mediaId, {
+        mediaId,
+        storagePath,
+        thumbnailStoragePath,
+        ownerType: clean(value.ownerType),
+        ownerId: clean(value.ownerId),
+        slot: clean(value.slot)
+      });
+      return;
+    }
+
+    Object.values(value).forEach(visit);
+  };
+
+  visit(portable);
+  return references;
+}
+
+function canonicalBackupRegistryRecords(recordsInput, references, tripId) {
+  const allRecords = safeArray(recordsInput);
+  if (!(references instanceof Map) || references.size === 0) {
+    return { records: [], referencedCount: 0, orphanReadyCount: allRecords.filter(record => clean(record?.status) === "ready").length };
+  }
+  const registryById = new Map(allRecords.map(record => [clean(record?.mediaId), record]));
+  const selected = [];
+  for (const reference of references.values()) {
+    const record = registryById.get(reference.mediaId);
+    if (!record || clean(record.status) !== "ready") {
+      throw errorWithCode("Canonical Trip media is not ready in the Media Registry", "backup-media-reference-missing", { mediaId: reference.mediaId, storagePath: reference.storagePath });
+    }
+    if (clean(record.storagePath) !== reference.storagePath) {
+      throw errorWithCode("Canonical Trip media path does not match the Media Registry", "backup-media-reference-mismatch", { mediaId: reference.mediaId, storagePath: reference.storagePath, registryStoragePath: clean(record.storagePath) });
+    }
+    if (reference.thumbnailStoragePath && clean(record.thumbnailStoragePath) !== reference.thumbnailStoragePath) {
+      throw errorWithCode("Canonical Trip thumbnail path does not match the Media Registry", "backup-media-reference-mismatch", { mediaId: reference.mediaId, thumbnailStoragePath: reference.thumbnailStoragePath, registryThumbnailStoragePath: clean(record.thumbnailStoragePath) });
+    }
+    selected.push(record);
+  }
+  const referencedIds = new Set(references.keys());
+  const orphanReadyCount = allRecords.filter(record => clean(record?.status) === "ready" && !referencedIds.has(clean(record?.mediaId))).length;
+  return { records: selected, referencedCount: selected.length, orphanReadyCount };
+}
+
 function portableMediaRecord(record = {}) {
   return {
     mediaSchemaVersion: Math.max(1, finiteNumber(record.mediaSchemaVersion, 1)),
@@ -307,14 +377,18 @@ function portableMediaRecord(record = {}) {
   };
 }
 
-export async function collectTripMediaForBackup(tripIdInput, { onProgress = null, signal = null, registryTimeoutMs = 12000, mediaTimeoutMs = 20000 } = {}) {
+export async function collectTripMediaForBackup(tripIdInput, { backupJson = null, onProgress = null, signal = null, registryTimeoutMs = 12000, mediaTimeoutMs = 20000 } = {}) {
   const tripId = clean(tripIdInput);
   if (!tripId) throw errorWithCode("Missing tripId", "invalid-trip-id");
   throwIfAborted(signal, "media-registry");
   if (typeof onProgress === "function") onProgress({ stage: "registry-read", completed: 0, total: 0 });
   const registry = await listTripMediaRecordsForBackup(tripId, { timeoutMs: registryTimeoutMs, signal, allowLastConfirmedFallback: true });
-  const records = safeArray(registry.records).filter(record => clean(record.status) === "ready");
-  if (typeof onProgress === "function") onProgress({ stage: "registry-ready", completed: 0, total: records.length, source: clean(registry.source), stale: registry.stale === true });
+  const references = backupJson ? collectCanonicalMediaReferences(backupJson, tripId) : null;
+  const selection = references
+    ? canonicalBackupRegistryRecords(registry.records, references, tripId)
+    : { records: safeArray(registry.records).filter(record => clean(record.status) === "ready"), referencedCount: 0, orphanReadyCount: 0 };
+  const records = selection.records;
+  if (typeof onProgress === "function") onProgress({ stage: "registry-ready", completed: 0, total: records.length, source: clean(registry.source), stale: registry.stale === true, referencedCount: selection.referencedCount, orphanReadyCount: selection.orphanReadyCount });
   const collected = [];
   let totalBytes = 0;
   for (let index = 0; index < records.length; index += 1) {
@@ -350,7 +424,16 @@ export async function collectTripMediaForBackup(tripIdInput, { onProgress = null
     await yieldToMainThread(signal, "media-package");
   }
   if (typeof onProgress === "function") onProgress({ stage: "media-download", completed: records.length, total: records.length });
-  return { tripId, records: collected, mediaCount: collected.length, totalBytes, registrySource: clean(registry.source), registryStale: registry.stale === true };
+  return {
+    tripId,
+    records: collected,
+    mediaCount: collected.length,
+    totalBytes,
+    registrySource: clean(registry.source),
+    registryStale: registry.stale === true,
+    referencedMediaCount: selection.referencedCount || collected.length,
+    orphanReadyCount: selection.orphanReadyCount || 0
+  };
 }
 
 export function mediaManifestFromCollected(collectedInput) {
@@ -409,6 +492,7 @@ export async function buildFullBackupPackage(backupJsonInput, collectedInput, { 
     mediaCount: collected.length,
     mediaFileCount: mediaFiles.length,
     mediaBytes: mediaFiles.reduce((sum, item) => sum + finiteNumber(item.byteSize), 0),
+    orphanReadySkipped: Math.max(0, finiteNumber(collectedInput?.orphanReadyCount)),
     mediaFiles
   };
   const manifestText = JSON.stringify(manifest, null, 2);
