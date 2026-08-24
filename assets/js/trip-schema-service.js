@@ -160,6 +160,21 @@ function normalizeImages(item) {
       if (Number.isFinite(Number(image?.thumbnailWidth))) normalized.thumbnailWidth = Number(image.thumbnailWidth);
       if (Number.isFinite(Number(image?.thumbnailHeight))) normalized.thumbnailHeight = Number(image.thumbnailHeight);
       if (thumbnailGeneration) normalized.thumbnailGeneration = thumbnailGeneration;
+      // v7.9.4.4 · Crop positioning is canonical itinerary media metadata.
+      // Preserve it through every schema-normalization path so the Local First
+      // pending descriptor and the Firestore-ready descriptor render identically.
+      if (image?.crop && typeof image.crop === "object") {
+        const focusX = Number(image.crop.focusX);
+        const focusY = Number(image.crop.focusY);
+        const zoom = Number(image.crop.zoom);
+        const aspect = Number(image.crop.aspect);
+        normalized.crop = {
+          focusX: Number.isFinite(focusX) ? Math.max(0, Math.min(1, focusX)) : 0.5,
+          focusY: Number.isFinite(focusY) ? Math.max(0, Math.min(1, focusY)) : 0.5,
+          zoom: Number.isFinite(zoom) ? Math.max(1, Math.min(4, zoom)) : 1,
+          aspect: Number.isFinite(aspect) ? Math.max(0.5, Math.min(3, aspect)) : (16 / 9)
+        };
+      }
       return normalized;
     }).filter(image => image.src || image.storagePath);
   }
