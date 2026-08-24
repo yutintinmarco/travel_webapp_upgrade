@@ -1,3 +1,13 @@
+# v7.9.5.1 · Saved Place Gallery Presentation Fix
+
+## Fixed
+
+• Saved Place cropped gallery images now clip through the same 14 px rounded container used by the established bottom sheet image grammar.
+• Reset Saved Place swipe coordinates at every touch start so a normal tap can no longer inherit the previous swipe end point and silently change the selected photo.
+• A Saved Place swipe now requires an actual touch move before changing the current gallery index.
+• Full screen viewer entry resolves the currently rendered photo by immutable media identity before opening, so tapping the visible photo always opens that exact photo.
+• Media data, Crop metadata, ordering, Firebase writes, Storage objects and the shared Media Engine are unchanged.
+
 # v7.9.5.0 · Saved Place Multi Image Media Integration
 
 ## Added
