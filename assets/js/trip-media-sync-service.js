@@ -1,5 +1,5 @@
 /*
- * v7.9.3.7 · Phase 3A Local-First Media Sync Queue + Itinerary Image
+ * v7.9.4.2 · Phase 3A Local-First Media Sync Queue + Itinerary Crop Metadata
  *
  * Local commit happens first: compressed display / thumbnail Blobs are stored
  * in IndexedDB under their final Storage paths and a durable metadata-only job
@@ -140,6 +140,15 @@ function errorWithCode(message, code, details = {}) {
   Object.assign(error, details);
   return error;
 }
+function normalizeItineraryCrop(input = null) {
+  if (!input || typeof input !== "object") return null;
+  const focusX = Math.max(0, Math.min(1, finiteNumber(input.focusX, 0.5)));
+  const focusY = Math.max(0, Math.min(1, finiteNumber(input.focusY, 0.5)));
+  const zoom = Math.max(1, Math.min(4, finiteNumber(input.zoom, 1)));
+  const aspect = Math.max(0.5, Math.min(3, finiteNumber(input.aspect, 16 / 9)));
+  return { focusX, focusY, zoom, aspect };
+}
+
 function plainDescriptor(record = {}) {
   const mediaId = clean(record.mediaId || record.imageId);
   const descriptor = {
@@ -163,7 +172,8 @@ function plainDescriptor(record = {}) {
     thumbnailWidth: finiteNumber(record.thumbnailWidth),
     thumbnailHeight: finiteNumber(record.thumbnailHeight),
     thumbnailGeneration: clean(record.thumbnailGeneration),
-    sortOrder: finiteNumber(record.sortOrder)
+    sortOrder: finiteNumber(record.sortOrder),
+    crop: normalizeItineraryCrop(record.crop)
   };
   return Object.fromEntries(Object.entries(descriptor).filter(([, value]) => value !== "" && value !== 0 && value != null));
 }
@@ -628,7 +638,8 @@ export async function queueTripItemMedia({
   dayId: dayIdInput,
   itemId: itemIdInput,
   file,
-  user: userInput = null
+  user: userInput = null,
+  crop: cropInput = null
 } = {}) {
   const tripId = clean(tripIdInput), dayId = clean(dayIdInput), itemId = clean(itemIdInput);
   const slot = itemImageSlot(dayId, itemId);
@@ -649,6 +660,7 @@ export async function queueTripItemMedia({
   prepared.record.ownerType = "item";
   prepared.record.ownerId = itemId;
   prepared.record.slot = "primary";
+  prepared.record.crop = normalizeItineraryCrop(cropInput);
   const job = {
     jobId: nowJobId("item"),
     kind: "item-image",

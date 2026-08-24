@@ -1,5 +1,5 @@
 /*
- * v7.9.3.4 · Phase 3A Local-First Media Performance Pass
+ * v7.9.4.2 · Phase 3A Local-First Media Performance + Crop Metadata
  *
  * This module deliberately has no UI dependency. It provides one canonical
  * Trip media namespace, client-side image compression, Storage upload/download,
@@ -518,6 +518,7 @@ function cloudPendingRecordFromLocal(record, user) {
     sourceByteSize: finiteNumber(record.sourceByteSize),
     sourceWidth: finiteNumber(record.sourceWidth),
     sourceHeight: finiteNumber(record.sourceHeight),
+    ...(record.crop && typeof record.crop === "object" ? { crop: { ...record.crop } } : {}),
     createdBy: user.uid,
     createdAt: serverTimestamp(),
     updatedBy: user.uid,

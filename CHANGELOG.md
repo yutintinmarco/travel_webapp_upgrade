@@ -1,3 +1,20 @@
+# v7.9.4.2 · Itinerary Crop Positioning
+
+## iOS-style crop positioning
+
+- Added a dedicated full-screen itinerary crop editor after image selection, following the existing full-screen media visual grammar rather than introducing a generic web cropper.
+- The crop editor uses a fixed 16:9 itinerary framing guide with rule-of-thirds grid, drag positioning, pinch zoom, double-tap zoom/reset, iOS safe-area controls, Cancel and Use Photo actions.
+- Crop is non-destructive: the complete Display image is still uploaded and remains available in the full-screen Photo Viewer. Only itinerary-card presentation stores focal crop metadata (`focusX`, `focusY`, `zoom`, `aspect`).
+- Expanded itinerary galleries and lightweight non-popup media previews apply the saved crop consistently while the full-screen viewer deliberately ignores it and shows the complete Display asset.
+
+## Data / Firebase
+
+- Crop metadata travels with the existing Local First pending media descriptor, Media Registry record and canonical item `images[]` descriptor. No third Storage object is created and no extra Storage read or upload is required.
+- Existing static / remote itinerary images remain unchanged; crop metadata is used only when present.
+- Firestore Rules, Storage Rules, indexes, Cloud Functions, Firebase config and CORS are unchanged.
+
+---
+
 # v7.9.4.1 · Gallery Continuity & Viewer Safe Area
 
 - Fixed the itinerary full-screen Photo Viewer stacking order so it now sits above the compact header and bottom navigation.
