@@ -1,3 +1,25 @@
+# v7.9.4.3 · Crop Workspace & Stable Pinch
+
+## iOS Photos-inspired crop workspace
+
+- Rebuilt the itinerary crop interaction instead of patching the v7.9.4.2 gesture offsets.
+- The image now lives in the full crop workspace rather than being clipped inside the 16:9 frame, so source content outside the crop window remains visible beneath a dim mask.
+- The fixed 16:9 crop window retains the existing itinerary-card aspect ratio and rule-of-thirds guide.
+- Added a Reset control while preserving the existing Cancel / Use Photo top-bar grammar.
+
+## Gesture stability
+
+- Pinch zoom now freezes its baseline at gesture start and anchors the image point beneath the two-finger midpoint, preventing recursive clamp / midpoint feedback jumps.
+- Moving the pinch midpoint naturally pans while zooming; lifting one finger cleanly hands off to one-finger drag without a position jump.
+- Single-finger drag, double-tap zoom/reset and resize reflow use the same clamped transform model and requestAnimationFrame rendering.
+- Crop remains non-destructive: Firebase still stores the complete Display image and only focal crop metadata is attached to itinerary presentation.
+
+## Firebase / backend
+
+- No Firestore Rules, Storage Rules, indexes, Cloud Functions, Firebase config, CORS, Storage object count or media schema changes.
+
+---
+
 # v7.9.4.2 · Itinerary Crop Positioning
 
 ## iOS-style crop positioning

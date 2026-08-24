@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
   <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
   <link rel="dns-prefetch" href="https://api.open-meteo.com">
-  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?build=7.9.4.2">
+  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?build=7.9.4.3">
   <title id="page-title">行程</title>
   <script>
   // v7.7.5.0 · Performance Lite. Memory only: no Firebase reads/writes, no
@@ -1285,7 +1285,7 @@ html.theme-dark .inline-gallery-dot,
 html:not(.theme-light):not(.theme-dark) .inline-gallery-dot { background: rgba(235,235,245,0.30); }
 html.theme-dark .inline-gallery-dot.active,
 html:not(.theme-light):not(.theme-dark) .inline-gallery-dot.active { background: rgba(255,255,255,0.92); }
-/* v7.9.4.2 · iOS-style itinerary photo viewer. No parallel card grammar: this is
+/* v7.9.4.3 · iOS-style itinerary photo viewer. No parallel card grammar: this is
    intentionally a full-screen media surface, matching native Photos behaviour. */
 .itinerary-photo-viewer {
   position: fixed;
@@ -1377,9 +1377,10 @@ html:not(.theme-light):not(.theme-dark) .inline-gallery-dot.active { background:
   text-align: center;
 }
 
-/* v7.9.4.2 · iOS-style crop positioning. This does not destructively crop the
-   stored Display image: it records a focal crop for itinerary-card presentation,
-   while the full-screen viewer continues to show the complete Display asset. */
+/* v7.9.4.3 · iOS Photos-inspired non-destructive crop positioning.
+   The full Display image remains intact for the Photo Viewer. The editor keeps
+   source context visible outside the fixed 16:9 crop window and stores only
+   focal metadata for itinerary-card presentation. */
 .itinerary-crop-editor {
   position: fixed;
   inset: 0;
@@ -1402,14 +1403,14 @@ html:not(.theme-light):not(.theme-dark) .inline-gallery-dot.active { background:
 }
 .itinerary-crop-topbar {
   position: absolute;
-  z-index: 4;
+  z-index: 6;
   inset: 0 0 auto 0;
   min-height: calc(env(safe-area-inset-top) + 62px);
   padding: calc(env(safe-area-inset-top) + 14px) 16px 10px;
   display: grid;
   grid-template-columns: minmax(72px,1fr) auto minmax(72px,1fr);
   align-items: center;
-  background: linear-gradient(to bottom,rgba(0,0,0,.72),rgba(0,0,0,0));
+  background: linear-gradient(to bottom,rgba(0,0,0,.82),rgba(0,0,0,0));
 }
 .itinerary-crop-title {
   grid-column: 2;
@@ -1437,54 +1438,76 @@ html:not(.theme-light):not(.theme-dark) .inline-gallery-dot.active { background:
 #itinerary-crop-confirm { justify-self: end; }
 .itinerary-crop-stage {
   position: absolute;
-  inset: calc(env(safe-area-inset-top) + 72px) 0 calc(env(safe-area-inset-bottom) + 66px);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 18px;
-  padding: 14px;
+  inset: calc(env(safe-area-inset-top) + 72px) 0 calc(env(safe-area-inset-bottom) + 46px);
   overflow: hidden;
+  touch-action: none;
+  background: #000;
 }
-.itinerary-crop-frame {
-  position: relative;
-  width: min(calc(100vw - 28px), 520px);
-  aspect-ratio: 16 / 9;
-  overflow: hidden;
-  background: #111;
-  border-radius: 14px;
-  box-shadow: 0 0 0 .5px rgba(255,255,255,.28), 0 18px 50px rgba(0,0,0,.28);
-}
-.itinerary-crop-frame img {
+.itinerary-crop-image {
   position: absolute;
+  z-index: 1;
   display: block;
   max-width: none;
   max-height: none;
+  transform-origin: 0 0;
+  will-change: transform, width, height;
   -webkit-user-drag: none;
   user-drag: none;
+  pointer-events: none;
 }
-.itinerary-crop-grid { position:absolute; inset:0; pointer-events:none; opacity:.72; }
+.itinerary-crop-frame {
+  position: absolute;
+  z-index: 3;
+  left: 50%;
+  top: 50%;
+  width: min(calc(100vw - 28px), 520px);
+  aspect-ratio: 16 / 9;
+  transform: translate(-50%,-50%);
+  pointer-events: none;
+  border-radius: 14px;
+  border: .5px solid rgba(255,255,255,.72);
+  box-shadow: 0 0 0 9999px rgba(0,0,0,.58), 0 16px 46px rgba(0,0,0,.26);
+}
+.itinerary-crop-grid { position:absolute; inset:0; pointer-events:none; opacity:.74; border-radius:inherit; overflow:hidden; }
 .itinerary-crop-grid::before, .itinerary-crop-grid::after {
   content:""; position:absolute; inset:0;
   background-repeat:no-repeat;
 }
 .itinerary-crop-grid::before {
-  background-image: linear-gradient(to right,transparent 33.333%,rgba(255,255,255,.45) 33.333%,rgba(255,255,255,.45) calc(33.333% + .5px),transparent calc(33.333% + .5px),transparent 66.666%,rgba(255,255,255,.45) 66.666%,rgba(255,255,255,.45) calc(66.666% + .5px),transparent calc(66.666% + .5px));
+  background-image: linear-gradient(to right,transparent 33.333%,rgba(255,255,255,.48) 33.333%,rgba(255,255,255,.48) calc(33.333% + .5px),transparent calc(33.333% + .5px),transparent 66.666%,rgba(255,255,255,.48) 66.666%,rgba(255,255,255,.48) calc(66.666% + .5px),transparent calc(66.666% + .5px));
 }
 .itinerary-crop-grid::after {
-  background-image: linear-gradient(to bottom,transparent 33.333%,rgba(255,255,255,.45) 33.333%,rgba(255,255,255,.45) calc(33.333% + .5px),transparent calc(33.333% + .5px),transparent 66.666%,rgba(255,255,255,.45) 66.666%,rgba(255,255,255,.45) calc(66.666% + .5px),transparent calc(66.666% + .5px));
+  background-image: linear-gradient(to bottom,transparent 33.333%,rgba(255,255,255,.48) 33.333%,rgba(255,255,255,.48) calc(33.333% + .5px),transparent calc(33.333% + .5px),transparent 66.666%,rgba(255,255,255,.48) 66.666%,rgba(255,255,255,.48) calc(66.666% + .5px),transparent calc(66.666% + .5px));
 }
-.itinerary-crop-hint {
-  padding: 7px 12px;
+.itinerary-crop-toolbar {
+  position: absolute;
+  z-index: 5;
+  left: 50%;
+  bottom: 10px;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+.itinerary-crop-hint,
+.itinerary-crop-reset {
+  min-height: 34px;
+  padding: 0 12px;
+  border: 0;
   border-radius: 999px;
-  background: rgba(44,44,46,.58);
+  background: rgba(44,44,46,.66);
   -webkit-backdrop-filter: blur(14px) saturate(140%);
   backdrop-filter: blur(14px) saturate(140%);
-  color: rgba(255,255,255,.80);
+  color: rgba(255,255,255,.84);
+  font: inherit;
   font-size: 12px;
-  font-weight: 550;
+  font-weight: 600;
   letter-spacing: .01em;
 }
+.itinerary-crop-hint { display:flex; align-items:center; pointer-events:none; }
+.itinerary-crop-reset { color:#0a84ff; -webkit-appearance:none; appearance:none; }
+.itinerary-crop-reset:active { opacity:.62; }
 .inline-gallery-slide {
   position: relative;
   flex: 0 0 100%;
@@ -1562,7 +1585,7 @@ html:not(.theme-light):not(.theme-dark) .inline-gallery-dot.active { background:
 .inline-media-status { margin-top: 8px; color: var(--label-secondary); font-size: calc(11px * var(--font-scale)); line-height: 1.45; }
 .inline-media-status.is-error { color: #d63a36; }
 
-/* v7.9.4.2 · Itinerary media is an item capability, independent of legacy popup metadata.
+/* v7.9.4.3 · Itinerary media is an item capability, independent of legacy popup metadata.
    Non-popup items get a compact photo accessory and a lightweight media-only panel;
    existing popup / detail arrows and interaction remain unchanged. */
 .itinerary-media-accessory {
@@ -3669,7 +3692,7 @@ body.expenses-view-active #app-version-note{
 #snacks-view::after,
 #info-view::after,
 #profile-view::after{
-  content:"v7.9.4.2" !important;
+  content:"v7.9.4.3" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3690,7 +3713,7 @@ body.expenses-view-active #app-version-note{
   display:none !important;
 }
 body.expenses-view-active .expenses-module .expenses-app::after{
-  content:"v7.9.4.2" !important;
+  content:"v7.9.4.3" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3918,7 +3941,7 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
 </style>
             <link rel="apple-touch-icon" href="assets/icon/trip_icon.png">
   <link rel="icon" type="image/png" href="assets/icon/trip_icon.png">
-  <link rel="manifest" href="manifest.json?build=7.9.4.2">
+  <link rel="manifest" href="manifest.json?build=7.9.4.3">
   <meta name="apple-mobile-web-app-title" content="關嘉露西生日之旅">
   <!-- v7.7.1.2: expenses.css is 144KB and every rule is scoped under
        .expenses-module, yet it used to block the very first paint of the
@@ -3926,8 +3949,8 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
        priority without blocking paint; ensureExpensesStylesheet() flips it to
        media="all" before the 支出 view is ever mounted, so the styling is
        byte-for-byte identical by the time anything expenses-related renders. -->
-  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?build=7.9.4.2" media="print">
-  <noscript><link rel="stylesheet" href="assets/css/expenses.css?build=7.9.4.2"></noscript>
+  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?build=7.9.4.3" media="print">
+  <noscript><link rel="stylesheet" href="assets/css/expenses.css?build=7.9.4.3"></noscript>
 </head>
 <body class="app-entry-gated app-entry-pending">
 <div class="bg-fixed"></div>
@@ -4713,7 +4736,7 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
         <span class="profile-detail-spacer"></span>
       </div>
       <section class="profile-card" aria-label="App 資訊">
-        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.9.4.2</strong></div>
+        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.9.4.3</strong></div>
         <div class="profile-meta-row"><span>資料架構</span><strong>Phase 2G.2</strong></div>
         <div class="profile-meta-row"><span>主要資料來源</span><strong id="app-data-source-label">Firebase / 本機快取</strong></div>
       </section>
@@ -4908,16 +4931,19 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
     <button class="itinerary-crop-action" id="itinerary-crop-confirm" type="button">使用相片</button>
   </div>
   <div class="itinerary-crop-stage" id="itinerary-crop-stage">
-    <div class="itinerary-crop-frame" id="itinerary-crop-frame">
-      <img id="itinerary-crop-image" alt="調整相片位置">
+    <img class="itinerary-crop-image" id="itinerary-crop-image" alt="調整相片位置">
+    <div class="itinerary-crop-frame" id="itinerary-crop-frame" aria-hidden="true">
       <div class="itinerary-crop-grid" aria-hidden="true"></div>
     </div>
-    <div class="itinerary-crop-hint">拖移以調整 · 雙指縮放</div>
+    <div class="itinerary-crop-toolbar">
+      <div class="itinerary-crop-hint">拖移 · 雙指縮放 · 雙擊放大</div>
+      <button class="itinerary-crop-reset" id="itinerary-crop-reset" type="button">重設</button>
+    </div>
   </div>
 </div>
 
 <script>
-const APP_VERSION = "7.9.4.2";
+const APP_VERSION = "7.9.4.3";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 window.__tripMediaMutationBusy = false;
@@ -4961,7 +4987,7 @@ function tripMediaDescriptorFallback(input){
   return String(input.src||input.url||input.path||"").trim();
 }
 function tripMediaHasStorage(input){return Boolean(input&&typeof input==="object"&&String(input.storagePath||"").trim());}
-// v7.9.4.2 · Keep a last-known-good visual URL for the same immutable media
+// v7.9.4.3 · Keep a last-known-good visual URL for the same immutable media
 // asset. Queue / Firestore rerenders can replace the DOM node while Local First
 // media is being promoted from pending -> canonical. Reuse the already-loaded
 // Blob URL synchronously so Safari never exposes a broken-image gap.
@@ -5459,7 +5485,7 @@ function unlockScroll(){ss.style.overflowY="auto";ss.scrollTop=scrollY;}
 function renderDots(){const el=document.getElementById("detail-dots");el.innerHTML="";curGal.forEach((_,i)=>{const d=document.createElement("div");d.className="modal-dot"+(i===curGalIdx?" active":"");d.addEventListener("click",()=>{curGalIdx=i;updateImg();});el.appendChild(d);});}
 function updateImg(){const img=document.getElementById("detail-img");img.classList.add("fade-out");setTimeout(()=>{bindTripMediaImageElement(img,curGal[curGalIdx],{variant:"display"});renderDots();img.classList.remove("fade-out");img.classList.add("fade-in");setTimeout(()=>img.classList.remove("fade-in"),220);},120);}
 
-// v7.9.4.2 · Keep the selected itinerary photo stable across Local First →
+// v7.9.4.3 · Keep the selected itinerary photo stable across Local First →
 // Firebase rerenders. Identity follows the immutable asset, not its array index,
 // so pending → canonical generation promotion does not jump back to photo 1.
 const itineraryGallerySelectionByItem=new Map();
@@ -5479,7 +5505,7 @@ function rememberItineraryGallerySelection(dayId,itemId,gallery,index){
   const safeIndex=clamp(Number(index)||0,0,Math.max(0,(gallery?.length||1)-1));
   itineraryGallerySelectionByItem.set(key,itineraryGalleryMediaIdentity(gallery?.[safeIndex],safeIndex));
 }
-// v7.9.4.2 · Before any queue / Firebase rerender destroys the old Gallery
+// v7.9.4.3 · Before any queue / Firebase rerender destroys the old Gallery
 // DOM, capture the image that is actually on screen. This avoids a race where
 // the scroll RAF has not yet persisted photo 2 when Cloud sync triggers render.
 function captureItineraryGallerySelectionsFromDom(){
@@ -10661,68 +10687,119 @@ function itineraryMediaFriendlyError(error){
   return error?.message||"未能更新行程相片。";
 }
 
-// v7.9.4.2 · Non-destructive itinerary crop positioning. The full Display asset
-// stays uncropped for the Photo Viewer; only the itinerary-card focal crop is
-// persisted on the media descriptor. This mirrors iOS Photos-style framing
-// without creating a third Storage object or losing source composition.
-const itineraryCropEditorState={file:null,dayId:"",itemId:"",objectUrl:"",naturalWidth:0,naturalHeight:0,baseWidth:0,baseHeight:0,zoom:1,x:0,y:0,startX:0,startY:0,touchX:0,touchY:0,pinchDistance:0,pinchZoom:1,locked:false,active:false,lastTapAt:0,moved:false};
+// v7.9.4.3 · iOS Photos-inspired non-destructive itinerary crop positioning.
+// The image is no longer clipped by the crop frame: source context remains visible
+// beneath a dim mask. Pinch uses a frozen gesture baseline and keeps the image point
+// beneath the finger midpoint anchored throughout the gesture, avoiding feedback jumps.
+const itineraryCropEditorState={
+  file:null,dayId:"",itemId:"",objectUrl:"",naturalWidth:0,naturalHeight:0,
+  baseWidth:0,baseHeight:0,zoom:1,x:0,y:0,
+  stageLeft:0,stageTop:0,stageWidth:0,stageHeight:0,
+  frameWidth:0,frameHeight:0,frameCenterX:0,frameCenterY:0,
+  active:false,locked:false,raf:0,gesture:"",moved:false,lastTapAt:0,
+  dragTouchX:0,dragTouchY:0,dragStartX:0,dragStartY:0,
+  pinchDistance:1,pinchStartZoom:1,pinchAnchorU:.5,pinchAnchorV:.5
+};
 function itineraryCropDistance(a,b){const dx=a.clientX-b.clientX,dy=a.clientY-b.clientY;return Math.hypot(dx,dy);}
-function itineraryCropFrameSize(){const frame=document.getElementById("itinerary-crop-frame");return{frame,width:frame?.clientWidth||0,height:frame?.clientHeight||0};}
+function itineraryCropMidpoint(a,b){return{x:(a.clientX+b.clientX)/2,y:(a.clientY+b.clientY)/2};}
 function itineraryCropClampPan(){
-  const state=itineraryCropEditorState,{width,height}=itineraryCropFrameSize();if(!width||!height||!state.baseWidth||!state.baseHeight)return;
+  const state=itineraryCropEditorState;if(!state.frameWidth||!state.frameHeight||!state.baseWidth||!state.baseHeight)return;
   const displayWidth=state.baseWidth*state.zoom,displayHeight=state.baseHeight*state.zoom;
-  const maxX=Math.max(0,(displayWidth-width)/2),maxY=Math.max(0,(displayHeight-height)/2);
+  const maxX=Math.max(0,(displayWidth-state.frameWidth)/2),maxY=Math.max(0,(displayHeight-state.frameHeight)/2);
   state.x=clamp(state.x,-maxX,maxX);state.y=clamp(state.y,-maxY,maxY);
 }
-function itineraryCropApply(){
-  const state=itineraryCropEditorState,img=document.getElementById("itinerary-crop-image"),{width,height}=itineraryCropFrameSize();
-  if(!img||!width||!height||!state.naturalWidth||!state.naturalHeight)return;
-  const base=Math.max(width/state.naturalWidth,height/state.naturalHeight);state.baseWidth=state.naturalWidth*base;state.baseHeight=state.naturalHeight*base;itineraryCropClampPan();
+function itineraryCropMeasure({reset=false}={}){
+  const state=itineraryCropEditorState,stage=document.getElementById("itinerary-crop-stage"),frame=document.getElementById("itinerary-crop-frame");
+  if(!stage||!frame||!state.naturalWidth||!state.naturalHeight)return false;
+  const sr=stage.getBoundingClientRect(),fr=frame.getBoundingClientRect();
+  state.stageLeft=sr.left;state.stageTop=sr.top;state.stageWidth=sr.width;state.stageHeight=sr.height;
+  state.frameWidth=fr.width;state.frameHeight=fr.height;state.frameCenterX=fr.left-sr.left+fr.width/2;state.frameCenterY=fr.top-sr.top+fr.height/2;
+  const base=Math.max(state.frameWidth/state.naturalWidth,state.frameHeight/state.naturalHeight);
+  state.baseWidth=state.naturalWidth*base;state.baseHeight=state.naturalHeight*base;
+  if(reset){state.zoom=1;state.x=0;state.y=0;}
+  itineraryCropClampPan();return true;
+}
+function itineraryCropApplyNow(){
+  const state=itineraryCropEditorState,img=document.getElementById("itinerary-crop-image");if(!img||!state.active||!state.baseWidth||!state.baseHeight)return;
   const displayWidth=state.baseWidth*state.zoom,displayHeight=state.baseHeight*state.zoom;
-  img.style.width=`${displayWidth}px`;img.style.height=`${displayHeight}px`;img.style.left=`${(width-displayWidth)/2+state.x}px`;img.style.top=`${(height-displayHeight)/2+state.y}px`;
+  const left=state.frameCenterX-displayWidth/2+state.x,top=state.frameCenterY-displayHeight/2+state.y;
+  img.style.width=`${displayWidth}px`;img.style.height=`${displayHeight}px`;img.style.transform=`translate3d(${left}px,${top}px,0)`;
+}
+function itineraryCropScheduleApply(){
+  const state=itineraryCropEditorState;if(state.raf)return;state.raf=requestAnimationFrame(()=>{state.raf=0;itineraryCropApplyNow();});
 }
 function itineraryCropDescriptor(){
   const state=itineraryCropEditorState,displayWidth=Math.max(1,state.baseWidth*state.zoom),displayHeight=Math.max(1,state.baseHeight*state.zoom);
   return {aspect:16/9,focusX:clamp(0.5-state.x/displayWidth,0,1),focusY:clamp(0.5-state.y/displayHeight,0,1),zoom:Number(clamp(state.zoom,1,4).toFixed(4))};
 }
+function itineraryCropLocalPoint(clientX,clientY){const state=itineraryCropEditorState;return{x:clientX-state.stageLeft,y:clientY-state.stageTop};}
+function itineraryCropBeginDrag(touch){
+  const state=itineraryCropEditorState;state.gesture="drag";state.moved=false;state.dragTouchX=touch.clientX;state.dragTouchY=touch.clientY;state.dragStartX=state.x;state.dragStartY=state.y;
+}
+function itineraryCropBeginPinch(a,b){
+  const state=itineraryCropEditorState,mid=itineraryCropMidpoint(a,b),local=itineraryCropLocalPoint(mid.x,mid.y);
+  const w=state.baseWidth*state.zoom,h=state.baseHeight*state.zoom,left=state.frameCenterX-w/2+state.x,top=state.frameCenterY-h/2+state.y;
+  state.gesture="pinch";state.moved=false;state.pinchDistance=Math.max(1,itineraryCropDistance(a,b));state.pinchStartZoom=state.zoom;
+  state.pinchAnchorU=clamp((local.x-left)/Math.max(1,w),0,1);state.pinchAnchorV=clamp((local.y-top)/Math.max(1,h),0,1);
+}
+function itineraryCropZoomAtClient(targetZoom,clientX,clientY){
+  const state=itineraryCropEditorState,local=itineraryCropLocalPoint(clientX,clientY),oldW=state.baseWidth*state.zoom,oldH=state.baseHeight*state.zoom;
+  const oldLeft=state.frameCenterX-oldW/2+state.x,oldTop=state.frameCenterY-oldH/2+state.y;
+  const u=clamp((local.x-oldLeft)/Math.max(1,oldW),0,1),v=clamp((local.y-oldTop)/Math.max(1,oldH),0,1);
+  state.zoom=clamp(targetZoom,1,4);const newW=state.baseWidth*state.zoom,newH=state.baseHeight*state.zoom;
+  state.x=local.x-state.frameCenterX+newW/2-u*newW;state.y=local.y-state.frameCenterY+newH/2-v*newH;itineraryCropClampPan();itineraryCropScheduleApply();
+}
+function itineraryCropReset(){const state=itineraryCropEditorState;state.zoom=1;state.x=0;state.y=0;state.gesture="";itineraryCropClampPan();itineraryCropScheduleApply();}
 function closeItineraryCropEditor(){
   const state=itineraryCropEditorState,editor=document.getElementById("itinerary-crop-editor"),img=document.getElementById("itinerary-crop-image");
-  editor?.classList.remove("active");editor?.setAttribute("aria-hidden","true");if(img){img.removeAttribute("src");img.style.cssText="";}
+  editor?.classList.remove("active");editor?.setAttribute("aria-hidden","true");if(state.raf){cancelAnimationFrame(state.raf);state.raf=0;}if(img){img.removeAttribute("src");img.style.cssText="";}
   if(state.objectUrl){try{URL.revokeObjectURL(state.objectUrl);}catch(error){}}
-  state.file=null;state.dayId="";state.itemId="";state.objectUrl="";state.naturalWidth=0;state.naturalHeight=0;state.baseWidth=0;state.baseHeight=0;state.zoom=1;state.x=0;state.y=0;state.active=false;
+  Object.assign(state,{file:null,dayId:"",itemId:"",objectUrl:"",naturalWidth:0,naturalHeight:0,baseWidth:0,baseHeight:0,zoom:1,x:0,y:0,stageLeft:0,stageTop:0,stageWidth:0,stageHeight:0,frameWidth:0,frameHeight:0,frameCenterX:0,frameCenterY:0,active:false,gesture:"",moved:false,lastTapAt:0});
   if(state.locked){state.locked=false;unlockScroll();}
 }
 function openItineraryCropEditor(file,{dayId="",itemId=""}={}){
   if(!(file instanceof Blob))return;const editor=document.getElementById("itinerary-crop-editor"),img=document.getElementById("itinerary-crop-image"),confirm=document.getElementById("itinerary-crop-confirm");if(!editor||!img||!confirm)return;
   const state=itineraryCropEditorState;if(state.active)closeItineraryCropEditor();
   state.file=file;state.dayId=String(dayId||"").trim();state.itemId=String(itemId||"").trim();state.zoom=1;state.x=0;state.y=0;state.active=true;state.objectUrl=URL.createObjectURL(file);confirm.disabled=true;confirm.textContent="使用相片";
-  img.onload=()=>{state.naturalWidth=img.naturalWidth;state.naturalHeight=img.naturalHeight;requestAnimationFrame(()=>{itineraryCropApply();confirm.disabled=false;});};
+  img.onload=()=>{state.naturalWidth=img.naturalWidth;state.naturalHeight=img.naturalHeight;requestAnimationFrame(()=>{if(itineraryCropMeasure({reset:true})){itineraryCropApplyNow();confirm.disabled=false;}});};
   img.onerror=()=>{closeItineraryCropEditor();window.alert("未能預覽呢張圖片，請改用另一張相片。");};img.src=state.objectUrl;
   editor.classList.add("active");editor.setAttribute("aria-hidden","false");if(!state.locked){state.locked=true;lockScroll();}
 }
 function setupItineraryCropEditor(){
-  const editor=document.getElementById("itinerary-crop-editor"),frame=document.getElementById("itinerary-crop-frame"),cancel=document.getElementById("itinerary-crop-cancel"),confirm=document.getElementById("itinerary-crop-confirm");if(!editor||!frame||!cancel||!confirm)return;
-  cancel.addEventListener("click",()=>closeItineraryCropEditor());
+  const editor=document.getElementById("itinerary-crop-editor"),stage=document.getElementById("itinerary-crop-stage"),cancel=document.getElementById("itinerary-crop-cancel"),confirm=document.getElementById("itinerary-crop-confirm"),reset=document.getElementById("itinerary-crop-reset");if(!editor||!stage||!cancel||!confirm||!reset)return;
+  cancel.addEventListener("click",()=>closeItineraryCropEditor());reset.addEventListener("click",()=>itineraryCropReset());
   confirm.addEventListener("click",()=>{
     const state=itineraryCropEditorState;if(!state.active||!state.file||confirm.disabled)return;const file=state.file,dayId=state.dayId,itemId=state.itemId,crop=itineraryCropDescriptor();confirm.disabled=true;confirm.textContent="處理中…";
     closeItineraryCropEditor();uploadItineraryMediaFile(file,dayId,itemId,crop);
   });
-  frame.addEventListener("touchstart",event=>{
-    const state=itineraryCropEditorState;if(!state.active)return;
-    state.moved=false;
-    if(event.touches.length===2){state.pinchDistance=Math.max(1,itineraryCropDistance(event.touches[0],event.touches[1]));state.pinchZoom=state.zoom;return;}
-    if(event.touches.length===1){const t=event.touches[0];state.touchX=t.clientX;state.touchY=t.clientY;state.startX=state.x;state.startY=state.y;}
-  },{passive:true});
-  frame.addEventListener("touchmove",event=>{
-    const state=itineraryCropEditorState;if(!state.active)return;
-    if(event.touches.length===2){event.preventDefault();state.moved=true;const distance=Math.max(1,itineraryCropDistance(event.touches[0],event.touches[1]));state.zoom=clamp(state.pinchZoom*(distance/state.pinchDistance),1,4);itineraryCropApply();return;}
-    if(event.touches.length===1){event.preventDefault();state.moved=true;const t=event.touches[0];state.x=state.startX+(t.clientX-state.touchX);state.y=state.startY+(t.clientY-state.touchY);itineraryCropApply();}
+  stage.addEventListener("touchstart",event=>{
+    const state=itineraryCropEditorState;if(!state.active||event.target?.closest?.(".itinerary-crop-toolbar"))return;event.preventDefault();
+    if(event.touches.length>=2){itineraryCropBeginPinch(event.touches[0],event.touches[1]);return;}
+    if(event.touches.length===1)itineraryCropBeginDrag(event.touches[0]);
   },{passive:false});
-  frame.addEventListener("touchend",event=>{
-    const state=itineraryCropEditorState;if(!state.active||event.touches.length)return;itineraryCropClampPan();itineraryCropApply();
-    if(state.moved){state.lastTapAt=0;return;}const now=Date.now();if(now-state.lastTapAt<280){state.lastTapAt=0;if(state.zoom>1.01){state.zoom=1;state.x=0;state.y=0;}else state.zoom=2;itineraryCropApply();}else state.lastTapAt=now;
-  },{passive:true});
-  window.addEventListener("resize",()=>{if(itineraryCropEditorState.active)requestAnimationFrame(itineraryCropApply);},{passive:true});
+  stage.addEventListener("touchmove",event=>{
+    const state=itineraryCropEditorState;if(!state.active||event.target?.closest?.(".itinerary-crop-toolbar"))return;event.preventDefault();
+    if(event.touches.length>=2){
+      if(state.gesture!=="pinch")itineraryCropBeginPinch(event.touches[0],event.touches[1]);
+      const distance=Math.max(1,itineraryCropDistance(event.touches[0],event.touches[1])),mid=itineraryCropMidpoint(event.touches[0],event.touches[1]),local=itineraryCropLocalPoint(mid.x,mid.y);
+      const nextZoom=clamp(state.pinchStartZoom*(distance/state.pinchDistance),1,4),w=state.baseWidth*nextZoom,h=state.baseHeight*nextZoom;
+      state.zoom=nextZoom;state.x=local.x-state.frameCenterX+w/2-state.pinchAnchorU*w;state.y=local.y-state.frameCenterY+h/2-state.pinchAnchorV*h;itineraryCropClampPan();state.moved=true;itineraryCropScheduleApply();return;
+    }
+    if(event.touches.length===1){
+      if(state.gesture!=="drag")itineraryCropBeginDrag(event.touches[0]);const t=event.touches[0],dx=t.clientX-state.dragTouchX,dy=t.clientY-state.dragTouchY;
+      state.x=state.dragStartX+dx;state.y=state.dragStartY+dy;if(Math.abs(dx)>3||Math.abs(dy)>3)state.moved=true;itineraryCropClampPan();itineraryCropScheduleApply();
+    }
+  },{passive:false});
+  stage.addEventListener("touchend",event=>{
+    const state=itineraryCropEditorState;if(!state.active||event.target?.closest?.(".itinerary-crop-toolbar"))return;event.preventDefault();
+    if(event.touches.length>=2){itineraryCropBeginPinch(event.touches[0],event.touches[1]);return;}
+    if(event.touches.length===1){itineraryCropBeginDrag(event.touches[0]);state.moved=true;return;}
+    itineraryCropClampPan();itineraryCropScheduleApply();const wasGesture=state.gesture,moved=state.moved;state.gesture="";
+    if(wasGesture!=="drag"||moved){state.lastTapAt=0;return;}
+    const changed=event.changedTouches?.[0],now=Date.now();if(changed&&now-state.lastTapAt<300){state.lastTapAt=0;if(state.zoom>1.01)itineraryCropReset();else itineraryCropZoomAtClient(2,changed.clientX,changed.clientY);}else state.lastTapAt=now;
+  },{passive:false});
+  stage.addEventListener("touchcancel",()=>{const state=itineraryCropEditorState;state.gesture="";state.moved=false;itineraryCropClampPan();itineraryCropScheduleApply();},{passive:true});
+  window.addEventListener("resize",()=>{const state=itineraryCropEditorState;if(!state.active)return;requestAnimationFrame(()=>{if(itineraryCropMeasure())itineraryCropApplyNow();});},{passive:true});
 }
 setupItineraryCropEditor();
 async function uploadItineraryMediaFile(file,dayId,itemId,crop=null){
@@ -10760,7 +10837,7 @@ async function removeItineraryMedia(dayId,itemId){
   finally{itineraryMediaBusyKeys.delete(key);setTripMediaMutationBusy(false);try{render(window.tripData);}catch(error){}}
 }
 
-// v7.9.4.2 · Local First can paint the itinerary before the membership listener
+// v7.9.4.3 · Local First can paint the itinerary before the membership listener
 // has resolved the current Trip role. Media controls are role-dependent, so a
 // later owner/admin confirmation must refresh the itinerary surface once. Keep
 // the refresh keyed to the current Trip + capability only: cache/server metadata
