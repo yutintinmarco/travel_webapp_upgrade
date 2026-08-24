@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
   <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
   <link rel="dns-prefetch" href="https://api.open-meteo.com">
-  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?build=7.9.4.0">
+  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?build=7.9.4.1">
   <title id="page-title">行程</title>
   <script>
   // v7.7.5.0 · Performance Lite. Memory only: no Firebase reads/writes, no
@@ -1290,12 +1290,12 @@ html.theme-dark .inline-gallery-dot,
 html:not(.theme-light):not(.theme-dark) .inline-gallery-dot { background: rgba(235,235,245,0.30); }
 html.theme-dark .inline-gallery-dot.active,
 html:not(.theme-light):not(.theme-dark) .inline-gallery-dot.active { background: rgba(255,255,255,0.92); }
-/* v7.9.4.0 · iOS-style itinerary photo viewer. No parallel card grammar: this is
+/* v7.9.4.1 · iOS-style itinerary photo viewer. No parallel card grammar: this is
    intentionally a full-screen media surface, matching native Photos behaviour. */
 .itinerary-photo-viewer {
   position: fixed;
   inset: 0;
-  z-index: 920;
+  z-index: 3600;
   display: block;
   background: #000;
   color: #fff;
@@ -1340,7 +1340,7 @@ html:not(.theme-light):not(.theme-dark) .inline-gallery-dot.active { background:
   z-index: 2;
   inset: 0 0 auto 0;
   min-height: calc(env(safe-area-inset-top) + 58px);
-  padding: calc(env(safe-area-inset-top) + 10px) 16px 10px;
+  padding: calc(env(safe-area-inset-top) + 16px) 16px 10px;
   display: grid;
   grid-template-columns: 44px 1fr 44px;
   align-items: center;
@@ -1419,7 +1419,7 @@ html:not(.theme-light):not(.theme-dark) .inline-gallery-dot.active { background:
 .inline-media-status { margin-top: 8px; color: var(--label-secondary); font-size: calc(11px * var(--font-scale)); line-height: 1.45; }
 .inline-media-status.is-error { color: #d63a36; }
 
-/* v7.9.4.0 · Itinerary media is an item capability, independent of legacy popup metadata.
+/* v7.9.4.1 · Itinerary media is an item capability, independent of legacy popup metadata.
    Non-popup items get a compact photo accessory and a lightweight media-only panel;
    existing popup / detail arrows and interaction remain unchanged. */
 .itinerary-media-accessory {
@@ -3526,7 +3526,7 @@ body.expenses-view-active #app-version-note{
 #snacks-view::after,
 #info-view::after,
 #profile-view::after{
-  content:"v7.9.4.0" !important;
+  content:"v7.9.4.1" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3547,7 +3547,7 @@ body.expenses-view-active #app-version-note{
   display:none !important;
 }
 body.expenses-view-active .expenses-module .expenses-app::after{
-  content:"v7.9.4.0" !important;
+  content:"v7.9.4.1" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3775,7 +3775,7 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
 </style>
             <link rel="apple-touch-icon" href="assets/icon/trip_icon.png">
   <link rel="icon" type="image/png" href="assets/icon/trip_icon.png">
-  <link rel="manifest" href="manifest.json?build=7.9.4.0">
+  <link rel="manifest" href="manifest.json?build=7.9.4.1">
   <meta name="apple-mobile-web-app-title" content="關嘉露西生日之旅">
   <!-- v7.7.1.2: expenses.css is 144KB and every rule is scoped under
        .expenses-module, yet it used to block the very first paint of the
@@ -3783,8 +3783,8 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
        priority without blocking paint; ensureExpensesStylesheet() flips it to
        media="all" before the 支出 view is ever mounted, so the styling is
        byte-for-byte identical by the time anything expenses-related renders. -->
-  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?build=7.9.4.0" media="print">
-  <noscript><link rel="stylesheet" href="assets/css/expenses.css?build=7.9.4.0"></noscript>
+  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?build=7.9.4.1" media="print">
+  <noscript><link rel="stylesheet" href="assets/css/expenses.css?build=7.9.4.1"></noscript>
 </head>
 <body class="app-entry-gated app-entry-pending">
 <div class="bg-fixed"></div>
@@ -4570,7 +4570,7 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
         <span class="profile-detail-spacer"></span>
       </div>
       <section class="profile-card" aria-label="App 資訊">
-        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.9.4.0</strong></div>
+        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.9.4.1</strong></div>
         <div class="profile-meta-row"><span>資料架構</span><strong>Phase 2G.2</strong></div>
         <div class="profile-meta-row"><span>主要資料來源</span><strong id="app-data-source-label">Firebase / 本機快取</strong></div>
       </section>
@@ -4759,7 +4759,7 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
 </div>
 
 <script>
-const APP_VERSION = "7.9.4.0";
+const APP_VERSION = "7.9.4.1";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 window.__tripMediaMutationBusy = false;
@@ -4803,13 +4803,35 @@ function tripMediaDescriptorFallback(input){
   return String(input.src||input.url||input.path||"").trim();
 }
 function tripMediaHasStorage(input){return Boolean(input&&typeof input==="object"&&String(input.storagePath||"").trim());}
+// v7.9.4.1 · Keep a last-known-good visual URL for the same immutable media
+// asset. Queue / Firestore rerenders can replace the DOM node while Local First
+// media is being promoted from pending -> canonical. Reuse the already-loaded
+// Blob URL synchronously so Safari never exposes a broken-image gap.
+const tripMediaVisualUrlByIdentity=new Map();
+function tripMediaVisualIdentity(input,{variant="display",tripId=""}={}){
+  if(!input||typeof input!=="object")return"";
+  const mediaId=String(input.mediaId||input.imageId||input.id||"").trim();
+  const selectedVariant=String(variant||"")==="thumbnail"?"thumbnail":"display";
+  const storagePath=String(selectedVariant==="thumbnail"?(input.thumbnailStoragePath||input.storagePath||""):(input.storagePath||"")).trim();
+  const resolvedTripId=String(input.tripId||tripId||dataTripId(window.tripData)||"").trim();
+  return mediaId&&storagePath?`${resolvedTripId}|${selectedVariant}|${mediaId}|${storagePath}`:"";
+}
 function bindTripMediaImageElement(img,input,{variant="display",tripId="",fallbackSrc=""}={}){
   if(!(img instanceof HTMLImageElement))return;
-  const fallback=String(fallbackSrc||tripMediaDescriptorFallback(input)||"").trim();
+  const resolvedTripId=tripId||dataTripId(window.tripData);
+  const identity=tripMediaVisualIdentity(input,{variant,tripId:resolvedTripId});
+  const continuitySrc=identity?String(tripMediaVisualUrlByIdentity.get(identity)||"").trim():"";
+  const fallback=String(continuitySrc||fallbackSrc||tripMediaDescriptorFallback(input)||"").trim();
   if(fallback)img.src=fallback;
   else if(tripMediaHasStorage(input))img.removeAttribute("src");
+  if(identity){
+    img.addEventListener("load",()=>{
+      const src=String(img.currentSrc||img.src||"").trim();
+      if(src)tripMediaVisualUrlByIdentity.set(identity,src);
+    },{once:true});
+  }
   if(!tripMediaHasStorage(input)){if(!fallback)img.removeAttribute("src");return;}
-  getTripMediaIntegration().then(service=>service.bindTripMediaImage(img,input,{tripId:tripId||dataTripId(window.tripData),variant,fallbackSrc:fallback})).catch(error=>console.warn("Trip media bind",error));
+  getTripMediaIntegration().then(service=>service.bindTripMediaImage(img,input,{tripId:resolvedTripId,variant,fallbackSrc:fallback})).catch(error=>console.warn("Trip media bind",error));
 }
 function itineraryMediaSlot(dayIdInput,itemIdInput){
   const dayId=String(dayIdInput||"").trim(),itemId=String(itemIdInput||"").trim();
@@ -5260,7 +5282,7 @@ function unlockScroll(){ss.style.overflowY="auto";ss.scrollTop=scrollY;}
 function renderDots(){const el=document.getElementById("detail-dots");el.innerHTML="";curGal.forEach((_,i)=>{const d=document.createElement("div");d.className="modal-dot"+(i===curGalIdx?" active":"");d.addEventListener("click",()=>{curGalIdx=i;updateImg();});el.appendChild(d);});}
 function updateImg(){const img=document.getElementById("detail-img");img.classList.add("fade-out");setTimeout(()=>{bindTripMediaImageElement(img,curGal[curGalIdx],{variant:"display"});renderDots();img.classList.remove("fade-out");img.classList.add("fade-in");setTimeout(()=>img.classList.remove("fade-in"),220);},120);}
 
-// v7.9.4.0 · Keep the selected itinerary photo stable across Local First →
+// v7.9.4.1 · Keep the selected itinerary photo stable across Local First →
 // Firebase rerenders. Identity follows the immutable asset, not its array index,
 // so pending → canonical generation promotion does not jump back to photo 1.
 const itineraryGallerySelectionByItem=new Map();
@@ -5279,6 +5301,20 @@ function rememberItineraryGallerySelection(dayId,itemId,gallery,index){
   const key=itineraryGalleryStateKey(dayId,itemId);if(!key)return;
   const safeIndex=clamp(Number(index)||0,0,Math.max(0,(gallery?.length||1)-1));
   itineraryGallerySelectionByItem.set(key,itineraryGalleryMediaIdentity(gallery?.[safeIndex],safeIndex));
+}
+// v7.9.4.1 · Before any queue / Firebase rerender destroys the old Gallery
+// DOM, capture the image that is actually on screen. This avoids a race where
+// the scroll RAF has not yet persisted photo 2 when Cloud sync triggers render.
+function captureItineraryGallerySelectionsFromDom(){
+  document.querySelectorAll?.('.inline-gallery[data-gallery-day-id][data-gallery-item-id]').forEach(galleryEl=>{
+    const dayId=String(galleryEl.dataset.galleryDayId||"").trim(),itemId=String(galleryEl.dataset.galleryItemId||"").trim();
+    if(!dayId||!itemId)return;
+    const images=[...galleryEl.querySelectorAll('img[data-gallery-media-identity]')];if(!images.length)return;
+    let closest=images[0],distance=Infinity;
+    images.forEach(img=>{const d=Math.abs((img.offsetLeft||0)-(galleryEl.scrollLeft||0));if(d<distance){distance=d;closest=img;}});
+    const identity=String(closest?.dataset?.galleryMediaIdentity||"").trim();
+    if(identity)itineraryGallerySelectionByItem.set(itineraryGalleryStateKey(dayId,itemId),identity);
+  });
 }
 
 const itineraryPhotoViewerState={gallery:[],index:0,scale:1,x:0,y:0,pinchDistance:0,pinchScale:1,dragX:0,dragY:0,startX:0,startY:0,lastTapAt:0,moved:false,locked:false};
@@ -5305,6 +5341,9 @@ function itineraryPhotoViewerShowIndex(index,{direction=0}={}){
 function openItineraryPhotoViewer(galleryInput,index=0,title="行程相片"){
   const gallery=Array.isArray(galleryInput)?galleryInput.filter(Boolean):[];if(!gallery.length)return;
   const viewer=document.getElementById("itinerary-photo-viewer");if(!viewer)return;
+  // Keep the viewer at document-body level so transformed / composited app
+  // surfaces cannot establish a competing stacking context above it.
+  if(viewer.parentElement!==document.body)document.body.appendChild(viewer);
   itineraryPhotoViewerState.gallery=gallery;itineraryPhotoViewerState.index=clamp(Number(index)||0,0,gallery.length-1);
   viewer.setAttribute("aria-label",`${title||"行程"} 相片`);viewer.setAttribute("aria-hidden","false");viewer.classList.add("active");
   itineraryPhotoViewerState.locked=true;lockScroll();
@@ -5319,7 +5358,9 @@ function closeItineraryPhotoViewer(){
 function itineraryPhotoDistance(a,b){const dx=a.clientX-b.clientX,dy=a.clientY-b.clientY;return Math.hypot(dx,dy);}
 function setupItineraryPhotoViewer(){
   const viewer=document.getElementById("itinerary-photo-viewer"),stage=document.getElementById("itinerary-photo-viewer-stage"),close=document.getElementById("itinerary-photo-viewer-close");
-  if(!viewer||!stage||!close||viewer.dataset.bound==="true")return;viewer.dataset.bound="true";close.addEventListener("click",closeItineraryPhotoViewer);
+  if(!viewer||!stage||!close||viewer.dataset.bound==="true")return;
+  if(viewer.parentElement!==document.body)document.body.appendChild(viewer);
+  viewer.dataset.bound="true";close.addEventListener("click",closeItineraryPhotoViewer);
   stage.addEventListener("touchstart",event=>{
     const state=itineraryPhotoViewerState;state.moved=false;
     if(event.touches.length===2){state.pinchDistance=Math.max(1,itineraryPhotoDistance(event.touches[0],event.touches[1]));state.pinchScale=state.scale;return;}
@@ -5355,6 +5396,7 @@ function appendInlineDetails(itemEl,item,gallery,dayId=""){
   if(gallery?.length){
     const galleryBlock=document.createElement("div");galleryBlock.className="inline-gallery-block";
     const galleryEl=document.createElement("div");galleryEl.className="inline-gallery";
+    galleryEl.dataset.galleryDayId=String(dayId||"");galleryEl.dataset.galleryItemId=galleryItemId;
     galleryEl.setAttribute("role","region");
     galleryEl.setAttribute("aria-label",`${item.title||"行程"} 相冊`);
     const track=document.createElement("div");track.className="inline-gallery-track";
@@ -5362,6 +5404,7 @@ function appendInlineDetails(itemEl,item,gallery,dayId=""){
     const images=[];
     gallery.forEach((src,index)=>{
       const img=document.createElement("img");
+      img.dataset.galleryMediaIdentity=itineraryGalleryMediaIdentity(src,index);
       bindTripMediaImageElement(img,src,{variant:"display"});
       img.alt=`${item.title||"行程"} ${index+1} / ${gallery.length}`;
       img.loading="lazy";
@@ -6365,6 +6408,7 @@ function resetTripScopedUi(data){
 // Main render
 function render(data,{includeSnacks=true}={}){
   perfLiteInc("fullRender");
+  captureItineraryGallerySelectionsFromDom();
   itineraryMediaAccessRenderKey=itineraryMediaAccessCapabilityKey();
   // Preserve the selected Day across scoped Firebase item refreshes. Active-Day
   // realtime can update one Day after the user taps it; the UI must not jump
@@ -10474,7 +10518,7 @@ async function removeItineraryMedia(dayId,itemId){
   finally{itineraryMediaBusyKeys.delete(key);setTripMediaMutationBusy(false);try{render(window.tripData);}catch(error){}}
 }
 
-// v7.9.4.0 · Local First can paint the itinerary before the membership listener
+// v7.9.4.1 · Local First can paint the itinerary before the membership listener
 // has resolved the current Trip role. Media controls are role-dependent, so a
 // later owner/admin confirmation must refresh the itinerary surface once. Keep
 // the refresh keyed to the current Trip + capability only: cache/server metadata

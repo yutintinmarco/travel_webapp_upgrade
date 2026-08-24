@@ -1,3 +1,13 @@
+# v7.9.4.1 · Gallery Continuity & Viewer Safe Area
+
+- Fixed the itinerary full-screen Photo Viewer stacking order so it now sits above the compact header and bottom navigation.
+- Moved the Photo Viewer close control and photo counter further below the iOS safe area.
+- Added last-known-good media URL continuity so Local First pending → Firebase canonical promotion does not expose a broken-image gap during itinerary rerenders.
+- Gallery rerenders now capture the image actually visible in the current DOM before Firebase / media queue refreshes, preventing background upload completion from jumping back to photo 1.
+- No Firebase Rules, Storage Rules, indexes, Cloud Functions, CORS, or backend schema changes.
+
+---
+
 # v7.9.4.0 · Itinerary Gallery Viewer
 
 ## Gallery quality and continuity
