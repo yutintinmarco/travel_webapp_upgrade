@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
   <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
   <link rel="dns-prefetch" href="https://api.open-meteo.com">
-  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?build=7.9.4.3">
+  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?build=7.9.4.4">
   <title id="page-title">行程</title>
   <script>
   // v7.7.5.0 · Performance Lite. Memory only: no Firebase reads/writes, no
@@ -1285,7 +1285,7 @@ html.theme-dark .inline-gallery-dot,
 html:not(.theme-light):not(.theme-dark) .inline-gallery-dot { background: rgba(235,235,245,0.30); }
 html.theme-dark .inline-gallery-dot.active,
 html:not(.theme-light):not(.theme-dark) .inline-gallery-dot.active { background: rgba(255,255,255,0.92); }
-/* v7.9.4.3 · iOS-style itinerary photo viewer. No parallel card grammar: this is
+/* v7.9.4.4 · iOS-style itinerary photo viewer. No parallel card grammar: this is
    intentionally a full-screen media surface, matching native Photos behaviour. */
 .itinerary-photo-viewer {
   position: fixed;
@@ -1377,7 +1377,7 @@ html:not(.theme-light):not(.theme-dark) .inline-gallery-dot.active { background:
   text-align: center;
 }
 
-/* v7.9.4.3 · iOS Photos-inspired non-destructive crop positioning.
+/* v7.9.4.4 · iOS Photos-inspired non-destructive crop positioning.
    The full Display image remains intact for the Photo Viewer. The editor keeps
    source context visible outside the fixed 16:9 crop window and stores only
    focal metadata for itinerary-card presentation. */
@@ -1585,7 +1585,7 @@ html:not(.theme-light):not(.theme-dark) .inline-gallery-dot.active { background:
 .inline-media-status { margin-top: 8px; color: var(--label-secondary); font-size: calc(11px * var(--font-scale)); line-height: 1.45; }
 .inline-media-status.is-error { color: #d63a36; }
 
-/* v7.9.4.3 · Itinerary media is an item capability, independent of legacy popup metadata.
+/* v7.9.4.4 · Itinerary media is an item capability, independent of legacy popup metadata.
    Non-popup items get a compact photo accessory and a lightweight media-only panel;
    existing popup / detail arrows and interaction remain unchanged. */
 .itinerary-media-accessory {
@@ -3692,7 +3692,7 @@ body.expenses-view-active #app-version-note{
 #snacks-view::after,
 #info-view::after,
 #profile-view::after{
-  content:"v7.9.4.3" !important;
+  content:"v7.9.4.4" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3713,7 +3713,7 @@ body.expenses-view-active #app-version-note{
   display:none !important;
 }
 body.expenses-view-active .expenses-module .expenses-app::after{
-  content:"v7.9.4.3" !important;
+  content:"v7.9.4.4" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3941,7 +3941,7 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
 </style>
             <link rel="apple-touch-icon" href="assets/icon/trip_icon.png">
   <link rel="icon" type="image/png" href="assets/icon/trip_icon.png">
-  <link rel="manifest" href="manifest.json?build=7.9.4.3">
+  <link rel="manifest" href="manifest.json?build=7.9.4.4">
   <meta name="apple-mobile-web-app-title" content="關嘉露西生日之旅">
   <!-- v7.7.1.2: expenses.css is 144KB and every rule is scoped under
        .expenses-module, yet it used to block the very first paint of the
@@ -3949,8 +3949,8 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
        priority without blocking paint; ensureExpensesStylesheet() flips it to
        media="all" before the 支出 view is ever mounted, so the styling is
        byte-for-byte identical by the time anything expenses-related renders. -->
-  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?build=7.9.4.3" media="print">
-  <noscript><link rel="stylesheet" href="assets/css/expenses.css?build=7.9.4.3"></noscript>
+  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?build=7.9.4.4" media="print">
+  <noscript><link rel="stylesheet" href="assets/css/expenses.css?build=7.9.4.4"></noscript>
 </head>
 <body class="app-entry-gated app-entry-pending">
 <div class="bg-fixed"></div>
@@ -4736,7 +4736,7 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
         <span class="profile-detail-spacer"></span>
       </div>
       <section class="profile-card" aria-label="App 資訊">
-        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.9.4.3</strong></div>
+        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.9.4.4</strong></div>
         <div class="profile-meta-row"><span>資料架構</span><strong>Phase 2G.2</strong></div>
         <div class="profile-meta-row"><span>主要資料來源</span><strong id="app-data-source-label">Firebase / 本機快取</strong></div>
       </section>
@@ -4943,7 +4943,7 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
 </div>
 
 <script>
-const APP_VERSION = "7.9.4.3";
+const APP_VERSION = "7.9.4.4";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 window.__tripMediaMutationBusy = false;
@@ -4987,7 +4987,7 @@ function tripMediaDescriptorFallback(input){
   return String(input.src||input.url||input.path||"").trim();
 }
 function tripMediaHasStorage(input){return Boolean(input&&typeof input==="object"&&String(input.storagePath||"").trim());}
-// v7.9.4.3 · Keep a last-known-good visual URL for the same immutable media
+// v7.9.4.4 · Keep a last-known-good visual URL for the same immutable media
 // asset. Queue / Firestore rerenders can replace the DOM node while Local First
 // media is being promoted from pending -> canonical. Reuse the already-loaded
 // Blob URL synchronously so Safari never exposes a broken-image gap.
@@ -5485,7 +5485,7 @@ function unlockScroll(){ss.style.overflowY="auto";ss.scrollTop=scrollY;}
 function renderDots(){const el=document.getElementById("detail-dots");el.innerHTML="";curGal.forEach((_,i)=>{const d=document.createElement("div");d.className="modal-dot"+(i===curGalIdx?" active":"");d.addEventListener("click",()=>{curGalIdx=i;updateImg();});el.appendChild(d);});}
 function updateImg(){const img=document.getElementById("detail-img");img.classList.add("fade-out");setTimeout(()=>{bindTripMediaImageElement(img,curGal[curGalIdx],{variant:"display"});renderDots();img.classList.remove("fade-out");img.classList.add("fade-in");setTimeout(()=>img.classList.remove("fade-in"),220);},120);}
 
-// v7.9.4.3 · Keep the selected itinerary photo stable across Local First →
+// v7.9.4.4 · Keep the selected itinerary photo stable across Local First →
 // Firebase rerenders. Identity follows the immutable asset, not its array index,
 // so pending → canonical generation promotion does not jump back to photo 1.
 const itineraryGallerySelectionByItem=new Map();
@@ -5505,7 +5505,7 @@ function rememberItineraryGallerySelection(dayId,itemId,gallery,index){
   const safeIndex=clamp(Number(index)||0,0,Math.max(0,(gallery?.length||1)-1));
   itineraryGallerySelectionByItem.set(key,itineraryGalleryMediaIdentity(gallery?.[safeIndex],safeIndex));
 }
-// v7.9.4.3 · Before any queue / Firebase rerender destroys the old Gallery
+// v7.9.4.4 · Before any queue / Firebase rerender destroys the old Gallery
 // DOM, capture the image that is actually on screen. This avoids a race where
 // the scroll RAF has not yet persisted photo 2 when Cloud sync triggers render.
 function captureItineraryGallerySelectionsFromDom(){
@@ -10687,7 +10687,7 @@ function itineraryMediaFriendlyError(error){
   return error?.message||"未能更新行程相片。";
 }
 
-// v7.9.4.3 · iOS Photos-inspired non-destructive itinerary crop positioning.
+// v7.9.4.4 · iOS Photos-inspired non-destructive itinerary crop positioning.
 // The image is no longer clipped by the crop frame: source context remains visible
 // beneath a dim mask. Pinch uses a frozen gesture baseline and keeps the image point
 // beneath the finger midpoint anchored throughout the gesture, avoiding feedback jumps.
@@ -10837,7 +10837,7 @@ async function removeItineraryMedia(dayId,itemId){
   finally{itineraryMediaBusyKeys.delete(key);setTripMediaMutationBusy(false);try{render(window.tripData);}catch(error){}}
 }
 
-// v7.9.4.3 · Local First can paint the itinerary before the membership listener
+// v7.9.4.4 · Local First can paint the itinerary before the membership listener
 // has resolved the current Trip role. Media controls are role-dependent, so a
 // later owner/admin confirmation must refresh the itinerary surface once. Keep
 // the refresh keyed to the current Trip + capability only: cache/server metadata

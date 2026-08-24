@@ -1,3 +1,15 @@
+# v7.9.4.4 · Itinerary Crop Metadata Continuity
+
+## Fixed
+
+- Preserve itinerary image `crop` metadata through `trip-schema-service.js` normalization.
+- Local pending media and Firebase canonical media now use the same `focusX`, `focusY`, `zoom` and `aspect` after realtime item updates.
+- Prevent the itinerary gallery from jumping back to default centered framing when background upload finishes.
+- Crop remains non-destructive: full-screen viewer continues to show the complete display image.
+- No additional Firebase reads, writes, Storage objects or deployment changes.
+
+---
+
 # v7.9.4.3 · Crop Workspace & Stable Pinch
 
 ## iOS Photos-inspired crop workspace
