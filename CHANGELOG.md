@@ -1,3 +1,13 @@
+# v7.9.4.6 · Multi Image Crop Layout Continuity
+
+## Fixed
+
+• Kept canonical itinerary crop metadata unchanged while making Gallery crop placement reactive to the real rendered slide size.
+• Re-applies crop positioning after add, reorder and remove rerenders when iOS Safari finishes settling Gallery geometry, eliminating the temporary wrong crop that previously required a page refresh.
+• Re-applies the same crop when Local First Blob URLs are promoted to canonical Cloud URLs.
+• Correctly preserves exact edge focal values such as `focusX: 0` or `focusY: 0` instead of treating zero as a missing value.
+• No Firebase reads, writes, Storage operations, schema or backend changes.
+
 # v7.9.4.5 · Itinerary Multi Image Gallery
 
 ## Added
