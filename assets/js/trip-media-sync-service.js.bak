@@ -1,5 +1,5 @@
 /*
- * v7.9.5.0 · Phase 3A Saved Place Multi Image Media Integration
+ * v7.9.4.5 · Phase 3A Local-First Media Sync Queue + Multi Image Gallery
  *
  * Local commit happens first: compressed display / thumbnail Blobs are stored
  * in IndexedDB under their final Storage paths and a durable metadata-only job
@@ -24,7 +24,7 @@ import {
   deleteTripMedia,
   prepareTripImageLocalAsset,
   uploadPreparedTripImage
-} from "./trip-media-service.js?release=7.9.5.0";
+} from "./trip-media-service.js?release=7.9.4.5";
 
 const MEDIA_SYNC_DB = "travel-trip-media-sync-v1";
 const MEDIA_SYNC_STORE = "jobs";
@@ -213,19 +213,6 @@ function activityFor(slot, user, job = null) {
       createdAt: serverTimestamp()
     };
   }
-  if (kind === "saved-place-image-add") {
-    return {
-      type: "trip.saved_place.image_updated",
-      actionType: "trip.saved_place.image_updated",
-      category: "savedPlaces",
-      title: "更新收藏相片",
-      summary: "收藏相片已由本機背景同步至 Firebase Storage",
-      actorUid: user.uid,
-      actorName: clean(user.displayName),
-      actorEmail: clean(user.email).toLowerCase(),
-      createdAt: serverTimestamp()
-    };
-  }
   if (slot === "icon") {
     return {
       type: "trip.media.icon_updated",
@@ -321,18 +308,6 @@ function itemImageSlot(dayIdInput, itemIdInput, mediaIdInput = "") {
   if (!dayId || !itemId) return "";
   return mediaId ? `item:${dayId}:${itemId}:${mediaId}` : `item:${dayId}:${itemId}`;
 }
-function savedPlaceImageSlot(placeIdInput, mediaIdInput = "") {
-  const placeId = clean(placeIdInput), mediaId = clean(mediaIdInput);
-  if (!placeId) return "";
-  return mediaId ? `savedPlace:${placeId}:${mediaId}` : `savedPlace:${placeId}`;
-}
-function isManagedSavedPlaceImage(image, placeIdInput = "") {
-  if (!image || typeof image !== "object" || !clean(image.storagePath)) return false;
-  const placeId = clean(placeIdInput), ownerType = clean(image.ownerType), ownerId = clean(image.ownerId), slot = clean(image.slot);
-  if (ownerType && ownerType !== "savedPlace") return false;
-  if (ownerId && placeId && ownerId !== placeId) return false;
-  return slot === "gallery" || slot.startsWith("gallery:");
-}
 function isManagedItemImage(image, itemIdInput = "") {
   if (!image || typeof image !== "object" || !clean(image.storagePath)) return false;
   const itemId = clean(itemIdInput), ownerType = clean(image.ownerType), ownerId = clean(image.ownerId), slot = clean(image.slot);
@@ -353,23 +328,6 @@ function imageIdentity(image, index = 0) {
   const src = clean(image.src || image.url || image.path);
   return src ? `url:${src}` : `index:${index}`;
 }
-function savedPlaceLegacyImageId(srcInput, index = 0) {
-  const text = `${clean(srcInput)}|${finiteNumber(index)}`;
-  let hash = 2166136261;
-  for (let i = 0; i < text.length; i += 1) hash = Math.imul(hash ^ text.charCodeAt(i), 16777619);
-  return `legacy_saved_${(hash >>> 0).toString(16)}`;
-}
-function savedPlaceImagesForMutation(placeInput = {}) {
-  const place = placeInput || {};
-  if (Array.isArray(place.images) && place.images.length) return normalizeItemImageSortOrders(place.images);
-  const legacy = Array.isArray(place.gallery) ? place.gallery : (place.gallery ? [place.gallery] : []);
-  return legacy.map((value, index) => {
-    if (value && typeof value === "object") return { ...clone(value), sortOrder: finiteNumber(value.sortOrder, index) };
-    const src = clean(value);
-    return { imageId: savedPlaceLegacyImageId(src, index), source: src.startsWith("assets/") ? "static" : "remote", src, sortOrder: index };
-  }).filter(image => clean(image?.src) || clean(image?.storagePath));
-}
-
 function normalizeItemImageSortOrders(imagesInput = []) {
   return (Array.isArray(imagesInput) ? imagesInput : [])
     .map((image, index) => ({ image: clone(image), index, order: finiteNumber(image?.sortOrder, index) }))
@@ -391,40 +349,6 @@ function appendItemImage(imagesInput = [], descriptorInput = null, itemIdInput =
   descriptor.sortOrder = images.length;
   images.push(descriptor);
   return normalizeItemImageSortOrders(images);
-}
-function appendSavedPlaceImage(imagesInput = [], descriptorInput = null, placeIdInput = "") {
-  const placeId = clean(placeIdInput);
-  const images = normalizeItemImageSortOrders(imagesInput);
-  if (!descriptorInput) return images;
-  const descriptor = { ...plainDescriptor(descriptorInput), ownerType: "savedPlace", ownerId: placeId, slot: "gallery" };
-  const mediaId = clean(descriptor.mediaId || descriptor.imageId);
-  const existingIndex = images.findIndex(image => clean(image?.mediaId || image?.imageId) === mediaId && mediaId);
-  if (existingIndex >= 0) {
-    descriptor.sortOrder = finiteNumber(images[existingIndex]?.sortOrder, existingIndex);
-    images.splice(existingIndex, 1, descriptor);
-    return normalizeItemImageSortOrders(images);
-  }
-  descriptor.sortOrder = images.length;
-  images.push(descriptor);
-  return normalizeItemImageSortOrders(images);
-}
-
-async function attachSavedPlaceDescriptor(job, descriptor, user) {
-  const tripId = clean(job.tripId), placeId = clean(job.placeId);
-  if (!tripId || !placeId) throw errorWithCode("Invalid saved place media job", "invalid-media-record");
-  const tripRef = doc(db, "trips", tripId);
-  const placeRef = doc(db, "trips", tripId, "savedPlaces", placeId);
-  const placeSnap = await getDoc(placeRef);
-  if (!placeSnap.exists()) throw errorWithCode("Saved place not found", "not-found");
-  const place = placeSnap.data() || {};
-  const images = appendSavedPlaceImage(savedPlaceImagesForMutation(place), descriptor, placeId);
-  const logRef = doc(collection(db, "trips", tripId, "activityLogs"));
-  const batch = writeBatch(db);
-  batch.update(placeRef, { images, updatedBy: user.uid, updatedAt: serverTimestamp() });
-  batch.update(tripRef, { revision: increment(1), updatedBy: user.uid, updatedAt: serverTimestamp() });
-  batch.set(logRef, activityFor(clean(job.slot), user, job));
-  await batch.commit();
-  return null;
 }
 
 async function attachItemDescriptor(job, descriptor, user) {
@@ -633,12 +557,9 @@ async function processJob(job, user) {
 
     current = await persistJob(current, { state: "attaching", blocking: true, readyDescriptor, nextAttemptAt: 0 });
     await publishState({ changedJobId: clean(current.jobId) });
-    const currentKind = clean(current.kind);
-    const previous = (currentKind === "item-image" || currentKind === "item-image-add")
+    const previous = (clean(current.kind) === "item-image" || clean(current.kind) === "item-image-add")
       ? await attachItemDescriptor(current, readyDescriptor, user)
-      : currentKind === "saved-place-image-add"
-        ? await attachSavedPlaceDescriptor(current, readyDescriptor, user)
-        : await attachAppearanceDescriptor(current, readyDescriptor, user);
+      : await attachAppearanceDescriptor(current, readyDescriptor, user);
     current = await persistJob(current, {
       state: "cleanup",
       blocking: false,
@@ -782,110 +703,6 @@ export async function queueTripItemMedia({
   await publishState({ changedJobId: job.jobId, localCommitted: true });
   scheduleFlush(80);
   return { jobId: job.jobId, descriptor: plainDescriptor(prepared.record), queued: true };
-}
-
-export async function queueTripSavedPlaceMedia({
-  tripId: tripIdInput,
-  placeId: placeIdInput,
-  file,
-  user: userInput = null,
-  crop: cropInput = null,
-  sortOrder: sortOrderInput = null
-} = {}) {
-  const tripId = clean(tripIdInput), placeId = clean(placeIdInput);
-  if (!tripId || !placeId) throw errorWithCode("Invalid saved place media job", "invalid-media-record");
-  if (!(file instanceof Blob)) throw errorWithCode("Image file is required", "invalid-media-file");
-  const user = userInput || getCurrentUser() || await waitForInitialAuth();
-  if (!user?.uid) throw errorWithCode("Google sign-in required", "auth-required");
-  const pendingForPlace = (await getTripMediaPendingJobs({ tripId })).find(job =>
-    clean(job.placeId) === placeId && jobBlocksBackup(job));
-  if (pendingForPlace) throw errorWithCode("A saved place image sync job is already pending", "media-sync-pending", { jobId: clean(pendingForPlace.jobId) });
-
-  const prepared = await prepareTripImageLocalAsset({
-    tripId, ownerType: TRIP_MEDIA_OWNER_TYPES.SAVED_PLACE, ownerId: placeId, slot: "gallery", file
-  });
-  prepared.record.ownerType = "savedPlace";
-  prepared.record.ownerId = placeId;
-  prepared.record.slot = "gallery";
-  prepared.record.crop = normalizeItineraryCrop(cropInput);
-  prepared.record.sortOrder = Math.max(0, finiteNumber(sortOrderInput, 0));
-  const slot = savedPlaceImageSlot(placeId, prepared.record.mediaId);
-  const job = {
-    jobId: nowJobId("saved-place"), kind: "saved-place-image-add", tripId, placeId, slot, uid: user.uid,
-    state: "queued", blocking: true, record: prepared.record, readyDescriptor: null, previousDescriptor: null,
-    attempts: 0, nextAttemptAt: 0, createdAt: Date.now(), updatedAt: Date.now(), lastErrorCode: "", lastErrorMessage: ""
-  };
-  const saved = await putTripMediaPendingJob(job);
-  if (!saved) { await cleanLocalJobBytes(job); throw errorWithCode("Unable to save media sync job", "media-local-cache-unavailable"); }
-  await publishState({ changedJobId: job.jobId, localCommitted: true });
-  scheduleFlush(80);
-  return { jobId: job.jobId, descriptor: plainDescriptor(prepared.record), queued: true };
-}
-
-function findSavedPlaceImageIndex(imagesInput, target = {}) {
-  return findItemImageIndex(imagesInput, target);
-}
-
-export async function removeTripSavedPlaceMedia({
-  tripId: tripIdInput, placeId: placeIdInput, mediaId: mediaIdInput = "", imageId: imageIdInput = "", storagePath: storagePathInput = "", user: userInput = null
-} = {}) {
-  const tripId = clean(tripIdInput), placeId = clean(placeIdInput);
-  if (!tripId || !placeId) throw errorWithCode("Invalid saved place media target", "invalid-media-record");
-  const user = userInput || getCurrentUser() || await waitForInitialAuth();
-  if (!user?.uid) throw errorWithCode("Google sign-in required", "auth-required");
-  const pending = (await getTripMediaPendingJobs({ tripId })).find(job => clean(job.placeId) === placeId && jobBlocksBackup(job));
-  if (pending) throw errorWithCode("The saved place image is still syncing", "media-sync-pending", { jobId: clean(pending.jobId) });
-  const placeRef = doc(db, "trips", tripId, "savedPlaces", placeId), tripRef = doc(db, "trips", tripId);
-  const snap = await getDoc(placeRef);
-  if (!snap.exists()) throw errorWithCode("Saved place not found", "not-found");
-  const place = snap.data() || {}, images = savedPlaceImagesForMutation(place);
-  const targetIndex = findSavedPlaceImageIndex(images, { mediaId: mediaIdInput, imageId: imageIdInput, storagePath: storagePathInput });
-  if (targetIndex < 0) return { removed: false, images, cleanup: { cleaned: true } };
-  const previous = clone(images[targetIndex]), nextImages = normalizeItemImageSortOrders(images.filter((_, index) => index !== targetIndex));
-  const logRef = doc(collection(db, "trips", tripId, "activityLogs")), batch = writeBatch(db);
-  batch.update(placeRef, { images: nextImages, updatedBy: user.uid, updatedAt: serverTimestamp() });
-  batch.update(tripRef, { revision: increment(1), updatedBy: user.uid, updatedAt: serverTimestamp() });
-  batch.set(logRef, { type:"trip.saved_place.image_removed", actionType:"trip.saved_place.image_removed", category:"savedPlaces", title:"移除收藏相片", summary:"已移除一張收藏相片", actorUid:user.uid, actorName:clean(user.displayName), actorEmail:clean(user.email).toLowerCase(), createdAt:serverTimestamp() });
-  await batch.commit();
-  let cleanup = { cleaned: true };
-  if (isManagedSavedPlaceImage(previous, placeId)) {
-    try { await deleteTripMedia(previous, { user }); }
-    catch (error) {
-      cleanup = { cleaned:false, errorCode:clean(error?.code), errorMessage:clean(error?.message) };
-      await putTripMediaPendingJob({ jobId:nowJobId("saved-cleanup"), kind:"saved-place-orphan-cleanup", tripId, placeId, slot:savedPlaceImageSlot(placeId, clean(previous.mediaId||previous.imageId)), uid:user.uid, state:"orphan-cleanup", blocking:false, orphanDescriptor:recordForDelete(previous, tripId), attempts:0, nextAttemptAt:Date.now()+5000, createdAt:Date.now(), updatedAt:Date.now() });
-      scheduleFlush(5050);
-    }
-  }
-  await publishState({ changedPlaceId: placeId, cloudCommitted: true });
-  return { removed:true, images:nextImages, cleanup };
-}
-
-export async function moveTripSavedPlaceMedia({
-  tripId: tripIdInput, placeId: placeIdInput, mediaId: mediaIdInput = "", imageId: imageIdInput = "", storagePath: storagePathInput = "", direction = 1, user: userInput = null
-} = {}) {
-  const tripId = clean(tripIdInput), placeId = clean(placeIdInput);
-  if (!tripId || !placeId) throw errorWithCode("Invalid saved place media target", "invalid-media-record");
-  const user = userInput || getCurrentUser() || await waitForInitialAuth();
-  if (!user?.uid) throw errorWithCode("Google sign-in required", "auth-required");
-  const pending = (await getTripMediaPendingJobs({ tripId })).find(job => clean(job.placeId) === placeId && jobBlocksBackup(job));
-  if (pending) throw errorWithCode("The saved place image is still syncing", "media-sync-pending", { jobId: clean(pending.jobId) });
-  const placeRef = doc(db, "trips", tripId, "savedPlaces", placeId), tripRef = doc(db, "trips", tripId);
-  const snap = await getDoc(placeRef);
-  if (!snap.exists()) throw errorWithCode("Saved place not found", "not-found");
-  const place = snap.data() || {}, images = savedPlaceImagesForMutation(place);
-  const currentIndex = findSavedPlaceImageIndex(images, { mediaId: mediaIdInput, imageId: imageIdInput, storagePath: storagePathInput });
-  if (currentIndex < 0) return { moved:false, images, index:-1 };
-  const nextIndex = currentIndex + (Number(direction) < 0 ? -1 : 1);
-  if (nextIndex < 0 || nextIndex >= images.length) return { moved:false, images, index:currentIndex };
-  [images[currentIndex], images[nextIndex]] = [images[nextIndex], images[currentIndex]];
-  const nextImages = normalizeItemImageSortOrders(images);
-  const logRef = doc(collection(db, "trips", tripId, "activityLogs")), batch = writeBatch(db);
-  batch.update(placeRef, { images:nextImages, updatedBy:user.uid, updatedAt:serverTimestamp() });
-  batch.update(tripRef, { revision:increment(1), updatedBy:user.uid, updatedAt:serverTimestamp() });
-  batch.set(logRef, { type:"trip.saved_place.images_reordered", actionType:"trip.saved_place.images_reordered", category:"savedPlaces", title:"調整收藏相片次序", summary:"已調整收藏相片次序", actorUid:user.uid, actorName:clean(user.displayName), actorEmail:clean(user.email).toLowerCase(), createdAt:serverTimestamp() });
-  await batch.commit();
-  await publishState({ changedPlaceId:placeId, cloudCommitted:true });
-  return { moved:true, images:nextImages, index:nextIndex };
 }
 
 function findItemImageIndex(imagesInput, { mediaId = "", imageId = "", storagePath = "" } = {}) {

@@ -1,3 +1,26 @@
+# v7.9.5.0 · Saved Place Multi Image Media Integration
+
+## Added
+
+• Saved Places now reuse the existing Phase 3A Local First media engine instead of introducing a separate image system.
+• Owner and Admin can add multiple Saved Place photos from the existing Saved Place bottom sheet.
+• New Saved Place photos reuse the existing non destructive 16:9 Crop workspace, IndexedDB first local commit, persistent background queue, Display plus Thumbnail Storage pair, Media Registry and Full Backup pending media gate.
+• The existing Saved Place sheet reuses its established action button grammar for 加入相片, 向前移, 向後移 and 移除目前相片.
+• Saved Place photos open in the existing full screen photo viewer with swipe, pinch zoom and double tap zoom.
+• Crop metadata is applied only to managed cropped photos in the Saved Place sheet; legacy Saved Place images keep their existing presentation.
+
+## Data integrity
+
+• Saved Place media uses ownerType savedPlace and Storage namespace trips/{tripId}/media/savedPlaces/{placeId}/{mediaId}/.
+• Every Saved Place photo add, remove and reorder updates trips/{tripId}/savedPlaces/{placeId} and bumps the Trip revision once for Passive Backup freshness.
+• Pending media jobs are isolated by Trip and placeId; the current Trip Full Backup remains disabled only while its canonical media commit is incomplete.
+• Removing Firebase managed Saved Place media detaches the descriptor first and cleans Storage afterwards; failed cleanup is retained as a resumable orphan cleanup job.
+• Existing Firestore Rules and Storage Rules already permit savedPlace media ownership, so no backend deployment change is required.
+
+## Scope
+
+• This release intentionally focuses on Saved Place media functionality and data correctness. Fine animation and transient mutation polish remain deferred because the future Itinerary Edit Session will replace the current immediate Cloud mutation workflow.
+
 # v7.9.4.7 · Gallery Media Hydration Self-Heal
 
 ## Fixed
