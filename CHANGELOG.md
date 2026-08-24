@@ -1,3 +1,13 @@
+# v7.9.5.2 · Canonical Media Backup Integrity
+
+## Phase 3A · Media-aware Full Backup finalization
+
+- Full Backup media selection is now driven by the synchronized canonical Portable Trip references instead of blindly packaging every `ready` Media Registry record.
+- Trip icon, background, itinerary gallery and Saved Place Storage descriptors are deduplicated by `mediaId` and matched against the Media Registry before ZIP creation.
+- A canonical Storage media reference that is missing, not `ready`, or points to a different Registry path now stops Backup instead of producing a superficially successful ZIP with missing media.
+- `ready` Registry records that are no longer referenced by canonical Trip data are treated as orphan candidates and are excluded from the Backup package; Backup itself does not delete them.
+- Media bytes, SHA-256 verification, ZIP CRC, Restore package format and Firebase backend rules are unchanged.
+
 # v7.9.5.1 · Saved Place Gallery Presentation Fix
 
 ## Fixed
