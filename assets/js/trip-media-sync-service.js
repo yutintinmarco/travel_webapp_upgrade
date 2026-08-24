@@ -1,5 +1,5 @@
 /*
- * v7.9.4.2 · Phase 3A Local-First Media Sync Queue + Itinerary Crop Metadata
+ * v7.9.4.5 · Phase 3A Local-First Media Sync Queue + Multi Image Gallery
  *
  * Local commit happens first: compressed display / thumbnail Blobs are stored
  * in IndexedDB under their final Storage paths and a durable metadata-only job
@@ -24,7 +24,7 @@ import {
   deleteTripMedia,
   prepareTripImageLocalAsset,
   uploadPreparedTripImage
-} from "./trip-media-service.js?release=7.9.3.7";
+} from "./trip-media-service.js?release=7.9.4.5";
 
 const MEDIA_SYNC_DB = "travel-trip-media-sync-v1";
 const MEDIA_SYNC_STORE = "jobs";
@@ -200,7 +200,7 @@ function slotField(slot) {
 }
 function activityFor(slot, user, job = null) {
   const kind = clean(job?.kind);
-  if (kind === "item-image") {
+  if (kind === "item-image" || kind === "item-image-add") {
     return {
       type: "trip.itinerary.image_updated",
       actionType: "trip.itinerary.image_updated",
@@ -303,40 +303,52 @@ async function persistJob(job, patch = {}) {
   return next;
 }
 
-function itemImageSlot(dayIdInput, itemIdInput) {
-  const dayId = clean(dayIdInput), itemId = clean(itemIdInput);
-  return dayId && itemId ? `item:${dayId}:${itemId}` : "";
+function itemImageSlot(dayIdInput, itemIdInput, mediaIdInput = "") {
+  const dayId = clean(dayIdInput), itemId = clean(itemIdInput), mediaId = clean(mediaIdInput);
+  if (!dayId || !itemId) return "";
+  return mediaId ? `item:${dayId}:${itemId}:${mediaId}` : `item:${dayId}:${itemId}`;
 }
-function managedItemImage(imagesInput = [], itemIdInput = "") {
-  const itemId = clean(itemIdInput);
+function isManagedItemImage(image, itemIdInput = "") {
+  if (!image || typeof image !== "object" || !clean(image.storagePath)) return false;
+  const itemId = clean(itemIdInput), ownerType = clean(image.ownerType), ownerId = clean(image.ownerId), slot = clean(image.slot);
+  if (ownerType && ownerType !== "item") return false;
+  if (ownerId && itemId && ownerId !== itemId) return false;
+  return slot === "primary" || slot === "gallery" || slot.startsWith("gallery:");
+}
+function managedItemImages(imagesInput = [], itemIdInput = "") {
   const images = Array.isArray(imagesInput) ? imagesInput : [];
-  return images.find(image => image && typeof image === "object"
-    && clean(image.slot) === "primary"
-    && (!clean(image.ownerId) || clean(image.ownerId) === itemId)
-    && clean(image.storagePath)) || null;
+  return images.filter(image => isManagedItemImage(image, itemIdInput));
 }
-function nextItemImages(imagesInput = [], descriptorInput = null, itemIdInput = "") {
+function imageIdentity(image, index = 0) {
+  if (!image || typeof image !== "object") return `index:${index}`;
+  const mediaId = clean(image.mediaId || image.imageId || image.id);
+  if (mediaId) return `media:${mediaId}`;
+  const storagePath = clean(image.storagePath || image.thumbnailStoragePath);
+  if (storagePath) return `storage:${storagePath}`;
+  const src = clean(image.src || image.url || image.path);
+  return src ? `url:${src}` : `index:${index}`;
+}
+function normalizeItemImageSortOrders(imagesInput = []) {
+  return (Array.isArray(imagesInput) ? imagesInput : [])
+    .map((image, index) => ({ image: clone(image), index, order: finiteNumber(image?.sortOrder, index) }))
+    .sort((a, b) => a.order - b.order || a.index - b.index)
+    .map((entry, index) => ({ ...entry.image, sortOrder: index }));
+}
+function appendItemImage(imagesInput = [], descriptorInput = null, itemIdInput = "") {
   const itemId = clean(itemIdInput);
-  const images = (Array.isArray(imagesInput) ? imagesInput : []).map(image => clone(image));
-  const current = managedItemImage(images, itemId);
-  if (!descriptorInput) {
-    return images.filter(image => image !== current && !(image && typeof image === "object"
-      && clean(image.slot) === "primary"
-      && (!clean(image.ownerId) || clean(image.ownerId) === itemId)
-      && clean(image.storagePath)));
+  const images = normalizeItemImageSortOrders(imagesInput);
+  if (!descriptorInput) return images;
+  const descriptor = { ...plainDescriptor(descriptorInput), ownerType: "item", ownerId: itemId, slot: "gallery" };
+  const mediaId = clean(descriptor.mediaId || descriptor.imageId);
+  const existingIndex = images.findIndex(image => clean(image?.mediaId || image?.imageId) === mediaId && mediaId);
+  if (existingIndex >= 0) {
+    descriptor.sortOrder = finiteNumber(images[existingIndex]?.sortOrder, existingIndex);
+    images.splice(existingIndex, 1, descriptor);
+    return normalizeItemImageSortOrders(images);
   }
-  const descriptor = { ...plainDescriptor(descriptorInput), ownerType: "item", ownerId: itemId, slot: "primary" };
-  const currentIndex = images.findIndex(image => image && typeof image === "object"
-    && clean(image.slot) === "primary"
-    && (!clean(image.ownerId) || clean(image.ownerId) === itemId)
-    && clean(image.storagePath));
-  const sortOrder = currentIndex >= 0
-    ? finiteNumber(images[currentIndex]?.sortOrder, currentIndex)
-    : images.reduce((max, image, index) => Math.max(max, finiteNumber(image?.sortOrder, index)), -1) + 1;
-  descriptor.sortOrder = sortOrder;
-  if (currentIndex >= 0) images.splice(currentIndex, 1, descriptor);
-  else images.push(descriptor);
-  return images;
+  descriptor.sortOrder = images.length;
+  images.push(descriptor);
+  return normalizeItemImageSortOrders(images);
 }
 
 async function attachItemDescriptor(job, descriptor, user) {
@@ -347,8 +359,7 @@ async function attachItemDescriptor(job, descriptor, user) {
   const itemSnap = await getDoc(itemRef);
   if (!itemSnap.exists()) throw errorWithCode("Itinerary item not found", "not-found");
   const item = itemSnap.data() || {};
-  const previous = managedItemImage(item.images, itemId);
-  const images = nextItemImages(item.images, descriptor, itemId);
+  const images = appendItemImage(item.images, descriptor, itemId);
   const logRef = doc(collection(db, "trips", tripId, "activityLogs"));
   const batch = writeBatch(db);
   batch.update(itemRef, {
@@ -365,7 +376,7 @@ async function attachItemDescriptor(job, descriptor, user) {
   });
   batch.set(logRef, activityFor(clean(job.slot), user, job));
   await batch.commit();
-  return previous;
+  return null;
 }
 
 async function attachAppearanceDescriptor(job, descriptor, user) {
@@ -546,7 +557,7 @@ async function processJob(job, user) {
 
     current = await persistJob(current, { state: "attaching", blocking: true, readyDescriptor, nextAttemptAt: 0 });
     await publishState({ changedJobId: clean(current.jobId) });
-    const previous = clean(current.kind) === "item-image"
+    const previous = (clean(current.kind) === "item-image" || clean(current.kind) === "item-image-add")
       ? await attachItemDescriptor(current, readyDescriptor, user)
       : await attachAppearanceDescriptor(current, readyDescriptor, user);
     current = await persistJob(current, {
@@ -639,31 +650,34 @@ export async function queueTripItemMedia({
   itemId: itemIdInput,
   file,
   user: userInput = null,
-  crop: cropInput = null
+  crop: cropInput = null,
+  sortOrder: sortOrderInput = null
 } = {}) {
   const tripId = clean(tripIdInput), dayId = clean(dayIdInput), itemId = clean(itemIdInput);
-  const slot = itemImageSlot(dayId, itemId);
-  if (!tripId || !dayId || !itemId || !slot) throw errorWithCode("Invalid itinerary media job", "invalid-media-record");
+  if (!tripId || !dayId || !itemId) throw errorWithCode("Invalid itinerary media job", "invalid-media-record");
   if (!(file instanceof Blob)) throw errorWithCode("Image file is required", "invalid-media-file");
   const user = userInput || getCurrentUser() || await waitForInitialAuth();
   if (!user?.uid) throw errorWithCode("Google sign-in required", "auth-required");
-  const existing = (await getTripMediaPendingJobs({ tripId })).find(job => clean(job.slot) === slot && jobBlocksBackup(job));
-  if (existing) throw errorWithCode("An itinerary image sync job is already pending", "media-sync-pending", { jobId: clean(existing.jobId) });
+  const pendingForItem = (await getTripMediaPendingJobs({ tripId })).find(job =>
+    clean(job.dayId) === dayId && clean(job.itemId) === itemId && jobBlocksBackup(job));
+  if (pendingForItem) throw errorWithCode("An itinerary image sync job is already pending", "media-sync-pending", { jobId: clean(pendingForItem.jobId) });
 
   const prepared = await prepareTripImageLocalAsset({
     tripId,
     ownerType: TRIP_MEDIA_OWNER_TYPES.ITEM,
     ownerId: itemId,
-    slot: "primary",
+    slot: "gallery",
     file
   });
   prepared.record.ownerType = "item";
   prepared.record.ownerId = itemId;
-  prepared.record.slot = "primary";
+  prepared.record.slot = "gallery";
   prepared.record.crop = normalizeItineraryCrop(cropInput);
+  prepared.record.sortOrder = Math.max(0, finiteNumber(sortOrderInput, 0));
+  const slot = itemImageSlot(dayId, itemId, prepared.record.mediaId);
   const job = {
     jobId: nowJobId("item"),
-    kind: "item-image",
+    kind: "item-image-add",
     tripId,
     dayId,
     itemId,
@@ -691,18 +705,33 @@ export async function queueTripItemMedia({
   return { jobId: job.jobId, descriptor: plainDescriptor(prepared.record), queued: true };
 }
 
+function findItemImageIndex(imagesInput, { mediaId = "", imageId = "", storagePath = "" } = {}) {
+  const images = Array.isArray(imagesInput) ? imagesInput : [];
+  const wantedMediaId = clean(mediaId || imageId), wantedPath = clean(storagePath);
+  return images.findIndex(image => {
+    if (!image || typeof image !== "object") return false;
+    const currentMediaId = clean(image.mediaId || image.imageId || image.id);
+    const currentPath = clean(image.storagePath || image.thumbnailStoragePath);
+    if (wantedMediaId && currentMediaId === wantedMediaId) return true;
+    return Boolean(wantedPath && currentPath === wantedPath);
+  });
+}
+
 export async function removeTripItemMedia({
   tripId: tripIdInput,
   dayId: dayIdInput,
   itemId: itemIdInput,
+  mediaId: mediaIdInput = "",
+  imageId: imageIdInput = "",
+  storagePath: storagePathInput = "",
   user: userInput = null
 } = {}) {
   const tripId = clean(tripIdInput), dayId = clean(dayIdInput), itemId = clean(itemIdInput);
-  const slot = itemImageSlot(dayId, itemId);
   if (!tripId || !dayId || !itemId) throw errorWithCode("Invalid itinerary media target", "invalid-media-record");
   const user = userInput || getCurrentUser() || await waitForInitialAuth();
   if (!user?.uid) throw errorWithCode("Google sign-in required", "auth-required");
-  const pending = (await getTripMediaPendingJobs({ tripId })).find(job => clean(job.slot) === slot && jobBlocksBackup(job));
+  const pending = (await getTripMediaPendingJobs({ tripId })).find(job =>
+    clean(job.dayId) === dayId && clean(job.itemId) === itemId && jobBlocksBackup(job));
   if (pending) throw errorWithCode("The itinerary image is still syncing", "media-sync-pending", { jobId: clean(pending.jobId) });
 
   const itemRef = doc(db, "trips", tripId, "days", dayId, "items", itemId);
@@ -710,19 +739,21 @@ export async function removeTripItemMedia({
   const itemSnap = await getDoc(itemRef);
   if (!itemSnap.exists()) throw errorWithCode("Itinerary item not found", "not-found");
   const item = itemSnap.data() || {};
-  const previous = managedItemImage(item.images, itemId);
-  if (!previous) return { removed: false, cleanup: { cleaned: true } };
-  const images = nextItemImages(item.images, null, itemId);
+  const images = normalizeItemImageSortOrders(item.images);
+  const targetIndex = findItemImageIndex(images, { mediaId: mediaIdInput, imageId: imageIdInput, storagePath: storagePathInput });
+  if (targetIndex < 0) return { removed: false, images, cleanup: { cleaned: true } };
+  const previous = clone(images[targetIndex]);
+  const nextImages = normalizeItemImageSortOrders(images.filter((_, index) => index !== targetIndex));
   const logRef = doc(collection(db, "trips", tripId, "activityLogs"));
   const batch = writeBatch(db);
-  batch.update(itemRef, { images, updatedBy: user.uid, updatedAt: serverTimestamp() });
+  batch.update(itemRef, { images: nextImages, updatedBy: user.uid, updatedAt: serverTimestamp() });
   batch.update(tripRef, { revision: increment(1), updatedBy: user.uid, updatedAt: serverTimestamp() });
   batch.set(logRef, {
     type: "trip.itinerary.image_removed",
     actionType: "trip.itinerary.image_removed",
     category: "itinerary",
     title: "移除行程相片",
-    summary: "已移除行程自訂 Firebase 相片",
+    summary: "已移除一張行程相片",
     actorUid: user.uid,
     actorName: clean(user.displayName),
     actorEmail: clean(user.email).toLowerCase(),
@@ -730,26 +761,70 @@ export async function removeTripItemMedia({
   });
   await batch.commit();
   let cleaned = true;
-  try { await deleteTripMedia(recordForDelete(previous, tripId), { user }); }
-  catch (error) {
-    cleaned = false;
-    const orphanDescriptor = recordForDelete(previous, tripId);
-    if (orphanDescriptor) {
-      await putTripMediaPendingJob({
-        jobId: nowJobId("orphan"),
-        kind: "item-image-cleanup",
-        tripId, dayId, itemId, slot, uid: user.uid,
-        state: "orphan-cleanup", blocking: false,
-        orphanDescriptor, readyDescriptor: null, previousDescriptor: null,
-        attempts: 0, nextAttemptAt: Date.now() + 10000,
-        createdAt: Date.now(), updatedAt: Date.now(),
-        lastErrorCode: clean(error?.code), lastErrorMessage: clean(error?.message)
-      });
-      scheduleFlush(10100);
+  if (isManagedItemImage(previous, itemId)) {
+    try { await deleteTripMedia(recordForDelete(previous, tripId), { user }); }
+    catch (error) {
+      cleaned = false;
+      const orphanDescriptor = recordForDelete(previous, tripId);
+      if (orphanDescriptor) {
+        await putTripMediaPendingJob({
+          jobId: nowJobId("orphan"), kind: "item-image-cleanup",
+          tripId, dayId, itemId, slot: itemImageSlot(dayId, itemId, clean(previous.mediaId || previous.imageId)), uid: user.uid,
+          state: "orphan-cleanup", blocking: false,
+          orphanDescriptor, readyDescriptor: null, previousDescriptor: null,
+          attempts: 0, nextAttemptAt: Date.now() + 10000,
+          createdAt: Date.now(), updatedAt: Date.now(),
+          lastErrorCode: clean(error?.code), lastErrorMessage: clean(error?.message)
+        });
+        scheduleFlush(10100);
+      }
     }
   }
-  await publishState({ itineraryMediaRemoved: true, tripId, dayId, itemId });
-  return { removed: true, previous: clone(previous), cleanup: { cleaned } };
+  await publishState({ itineraryMediaRemoved: true, tripId, dayId, itemId, mediaId: clean(previous?.mediaId || previous?.imageId) });
+  return { removed: true, previous, images: nextImages, cleanup: { cleaned } };
+}
+
+export async function moveTripItemMedia({
+  tripId: tripIdInput,
+  dayId: dayIdInput,
+  itemId: itemIdInput,
+  mediaId: mediaIdInput = "",
+  imageId: imageIdInput = "",
+  storagePath: storagePathInput = "",
+  direction: directionInput = 0,
+  user: userInput = null
+} = {}) {
+  const tripId = clean(tripIdInput), dayId = clean(dayIdInput), itemId = clean(itemIdInput);
+  const direction = Number(directionInput) < 0 ? -1 : Number(directionInput) > 0 ? 1 : 0;
+  if (!tripId || !dayId || !itemId || !direction) throw errorWithCode("Invalid itinerary media reorder", "invalid-media-record");
+  const user = userInput || getCurrentUser() || await waitForInitialAuth();
+  if (!user?.uid) throw errorWithCode("Google sign-in required", "auth-required");
+  const pending = (await getTripMediaPendingJobs({ tripId })).find(job =>
+    clean(job.dayId) === dayId && clean(job.itemId) === itemId && jobBlocksBackup(job));
+  if (pending) throw errorWithCode("The itinerary image is still syncing", "media-sync-pending", { jobId: clean(pending.jobId) });
+  const itemRef = doc(db, "trips", tripId, "days", dayId, "items", itemId);
+  const tripRef = doc(db, "trips", tripId);
+  const itemSnap = await getDoc(itemRef);
+  if (!itemSnap.exists()) throw errorWithCode("Itinerary item not found", "not-found");
+  const item = itemSnap.data() || {};
+  const images = normalizeItemImageSortOrders(item.images);
+  const index = findItemImageIndex(images, { mediaId: mediaIdInput, imageId: imageIdInput, storagePath: storagePathInput });
+  const target = index + direction;
+  if (index < 0 || target < 0 || target >= images.length) return { moved: false, images };
+  [images[index], images[target]] = [images[target], images[index]];
+  const nextImages = images.map((image, sortOrder) => ({ ...image, sortOrder }));
+  const logRef = doc(collection(db, "trips", tripId, "activityLogs"));
+  const batch = writeBatch(db);
+  batch.update(itemRef, { images: nextImages, updatedBy: user.uid, updatedAt: serverTimestamp() });
+  batch.update(tripRef, { revision: increment(1), updatedBy: user.uid, updatedAt: serverTimestamp() });
+  batch.set(logRef, {
+    type: "trip.itinerary.image_reordered", actionType: "trip.itinerary.image_reordered", category: "itinerary",
+    title: "調整行程相片次序", summary: "已調整行程相片排列次序",
+    actorUid: user.uid, actorName: clean(user.displayName), actorEmail: clean(user.email).toLowerCase(), createdAt: serverTimestamp()
+  });
+  await batch.commit();
+  await publishState({ itineraryMediaReordered: true, tripId, dayId, itemId });
+  return { moved: true, images: nextImages, index: target };
 }
 
 export async function flushTripMediaSyncQueue() {
