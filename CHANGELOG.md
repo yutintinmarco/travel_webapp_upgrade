@@ -1,3 +1,13 @@
+# v7.9.4.7 · Gallery Media Hydration Self-Heal
+
+## Fixed
+
+• Added a self-healing itinerary media binder for intermittent iOS Safari image hydration failures that previously left a broken-image placeholder until page refresh.
+• A stale or invalid Blob URL is now evicted from both the UI continuity cache and media integration URL cache, then rebuilt from the existing IndexedDB Blob before any Storage fallback is needed.
+• Storage-backed gallery images now keep a valid transparent source while asynchronous hydration is pending, so Safari no longer exposes its native broken-image question-mark placeholder during a transient read race.
+• Media resolution receives bounded automatic retries for transient client-side failures instead of requiring a full App refresh.
+• The fix is read-path only: itinerary gallery data, crop metadata, multi-image ordering, Firebase writes, Storage object count and Backup integrity are unchanged.
+
 # v7.9.4.6 · Multi Image Crop Layout Continuity
 
 ## Fixed
