@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
   <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
   <link rel="dns-prefetch" href="https://api.open-meteo.com">
-  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?build=7.9.4.4">
+  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?build=7.9.4.5">
   <title id="page-title">行程</title>
   <script>
   // v7.7.5.0 · Performance Lite. Memory only: no Firebase reads/writes, no
@@ -1285,7 +1285,7 @@ html.theme-dark .inline-gallery-dot,
 html:not(.theme-light):not(.theme-dark) .inline-gallery-dot { background: rgba(235,235,245,0.30); }
 html.theme-dark .inline-gallery-dot.active,
 html:not(.theme-light):not(.theme-dark) .inline-gallery-dot.active { background: rgba(255,255,255,0.92); }
-/* v7.9.4.4 · iOS-style itinerary photo viewer. No parallel card grammar: this is
+/* v7.9.4.5 · iOS-style itinerary photo viewer. No parallel card grammar: this is
    intentionally a full-screen media surface, matching native Photos behaviour. */
 .itinerary-photo-viewer {
   position: fixed;
@@ -1377,7 +1377,7 @@ html:not(.theme-light):not(.theme-dark) .inline-gallery-dot.active { background:
   text-align: center;
 }
 
-/* v7.9.4.4 · iOS Photos-inspired non-destructive crop positioning.
+/* v7.9.4.5 · iOS Photos-inspired non-destructive crop positioning.
    The full Display image remains intact for the Photo Viewer. The editor keeps
    source context visible outside the fixed 16:9 crop window and stores only
    focal metadata for itinerary-card presentation. */
@@ -1585,7 +1585,7 @@ html:not(.theme-light):not(.theme-dark) .inline-gallery-dot.active { background:
 .inline-media-status { margin-top: 8px; color: var(--label-secondary); font-size: calc(11px * var(--font-scale)); line-height: 1.45; }
 .inline-media-status.is-error { color: #d63a36; }
 
-/* v7.9.4.4 · Itinerary media is an item capability, independent of legacy popup metadata.
+/* v7.9.4.5 · Itinerary media is an item capability, independent of legacy popup metadata.
    Non-popup items get a compact photo accessory and a lightweight media-only panel;
    existing popup / detail arrows and interaction remain unchanged. */
 .itinerary-media-accessory {
@@ -3692,7 +3692,7 @@ body.expenses-view-active #app-version-note{
 #snacks-view::after,
 #info-view::after,
 #profile-view::after{
-  content:"v7.9.4.4" !important;
+  content:"v7.9.4.5" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3713,7 +3713,7 @@ body.expenses-view-active #app-version-note{
   display:none !important;
 }
 body.expenses-view-active .expenses-module .expenses-app::after{
-  content:"v7.9.4.4" !important;
+  content:"v7.9.4.5" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3941,7 +3941,7 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
 </style>
             <link rel="apple-touch-icon" href="assets/icon/trip_icon.png">
   <link rel="icon" type="image/png" href="assets/icon/trip_icon.png">
-  <link rel="manifest" href="manifest.json?build=7.9.4.4">
+  <link rel="manifest" href="manifest.json?build=7.9.4.5">
   <meta name="apple-mobile-web-app-title" content="關嘉露西生日之旅">
   <!-- v7.7.1.2: expenses.css is 144KB and every rule is scoped under
        .expenses-module, yet it used to block the very first paint of the
@@ -3949,8 +3949,8 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
        priority without blocking paint; ensureExpensesStylesheet() flips it to
        media="all" before the 支出 view is ever mounted, so the styling is
        byte-for-byte identical by the time anything expenses-related renders. -->
-  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?build=7.9.4.4" media="print">
-  <noscript><link rel="stylesheet" href="assets/css/expenses.css?build=7.9.4.4"></noscript>
+  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?build=7.9.4.5" media="print">
+  <noscript><link rel="stylesheet" href="assets/css/expenses.css?build=7.9.4.5"></noscript>
 </head>
 <body class="app-entry-gated app-entry-pending">
 <div class="bg-fixed"></div>
@@ -4736,7 +4736,7 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
         <span class="profile-detail-spacer"></span>
       </div>
       <section class="profile-card" aria-label="App 資訊">
-        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.9.4.4</strong></div>
+        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.9.4.5</strong></div>
         <div class="profile-meta-row"><span>資料架構</span><strong>Phase 2G.2</strong></div>
         <div class="profile-meta-row"><span>主要資料來源</span><strong id="app-data-source-label">Firebase / 本機快取</strong></div>
       </section>
@@ -4943,7 +4943,7 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
 </div>
 
 <script>
-const APP_VERSION = "7.9.4.4";
+const APP_VERSION = "7.9.4.5";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 window.__tripMediaMutationBusy = false;
@@ -4987,7 +4987,7 @@ function tripMediaDescriptorFallback(input){
   return String(input.src||input.url||input.path||"").trim();
 }
 function tripMediaHasStorage(input){return Boolean(input&&typeof input==="object"&&String(input.storagePath||"").trim());}
-// v7.9.4.4 · Keep a last-known-good visual URL for the same immutable media
+// v7.9.4.5 · Keep a last-known-good visual URL for the same immutable media
 // asset. Queue / Firestore rerenders can replace the DOM node while Local First
 // media is being promoted from pending -> canonical. Reuse the already-loaded
 // Blob URL synchronously so Safari never exposes a broken-image gap.
@@ -5017,24 +5017,45 @@ function bindTripMediaImageElement(img,input,{variant="display",tripId="",fallba
   if(!tripMediaHasStorage(input)){if(!fallback)img.removeAttribute("src");return;}
   getTripMediaIntegration().then(service=>service.bindTripMediaImage(img,input,{tripId:resolvedTripId,variant,fallbackSrc:fallback})).catch(error=>console.warn("Trip media bind",error));
 }
-function itineraryMediaSlot(dayIdInput,itemIdInput){
-  const dayId=String(dayIdInput||"").trim(),itemId=String(itemIdInput||"").trim();
-  return dayId&&itemId?`item:${dayId}:${itemId}`:"";
+function itineraryMediaSlot(dayIdInput,itemIdInput,mediaIdInput=""){
+  const dayId=String(dayIdInput||"").trim(),itemId=String(itemIdInput||"").trim(),mediaId=String(mediaIdInput||"").trim();
+  if(!dayId||!itemId)return"";
+  return mediaId?`item:${dayId}:${itemId}:${mediaId}`:`item:${dayId}:${itemId}`;
+}
+function pendingItineraryMediaOverlays(tripIdInput,dayIdInput,itemIdInput){
+  const tripId=String(tripIdInput||"").trim(),prefix=`${itineraryMediaSlot(dayIdInput,itemIdInput)}:`;
+  const legacySlot=itineraryMediaSlot(dayIdInput,itemIdInput);if(!tripId||!legacySlot)return[];
+  const matches=[];
+  tripPendingMediaOverlays.forEach((overlay,key)=>{
+    const marker=`${tripId}|`,slot=String(key||"").startsWith(marker)?String(key||"").slice(marker.length):"";
+    if(slot===legacySlot||slot.startsWith(prefix))matches.push(overlay);
+  });
+  return matches.sort((a,b)=>(Number(a?.createdAt)||0)-(Number(b?.createdAt)||0));
 }
 function pendingItineraryMediaOverlay(tripIdInput,dayIdInput,itemIdInput){
-  const slot=itineraryMediaSlot(dayIdInput,itemIdInput);
-  return slot?pendingTripMediaOverlay(tripIdInput,slot):null;
+  const overlays=pendingItineraryMediaOverlays(tripIdInput,dayIdInput,itemIdInput);
+  return overlays.find(overlay=>overlay?.blocking===true)||overlays[overlays.length-1]||null;
 }
 function isManagedItineraryMedia(image,itemIdInput=""){
   if(!image||typeof image!=="object"||!tripMediaHasStorage(image))return false;
-  const itemId=String(itemIdInput||"").trim(),slot=String(image.slot||"").trim(),ownerId=String(image.ownerId||"").trim();
-  return slot==="primary"&&(!ownerId||!itemId||ownerId===itemId);
+  const itemId=String(itemIdInput||"").trim(),ownerType=String(image.ownerType||"").trim(),slot=String(image.slot||"").trim(),ownerId=String(image.ownerId||"").trim();
+  if(ownerType&&ownerType!=="item")return false;
+  if(ownerId&&itemId&&ownerId!==itemId)return false;
+  return slot==="primary"||slot==="gallery"||slot.startsWith("gallery:");
+}
+function managedItineraryMediaList(item,dayId="",tripId=dataTripId(window.tripData)){
+  const itemId=String(item?.itemId||"").trim(),images=Array.isArray(item?.images)?item.images.filter(image=>isManagedItineraryMedia(image,itemId)):[ ];
+  const pending=pendingItineraryMediaOverlays(tripId,dayId,itemId).map(overlay=>overlay?.descriptor).filter(descriptor=>descriptor&&tripMediaHasStorage(descriptor));
+  const merged=[...images.map(image=>({...image}))];
+  pending.forEach(descriptor=>{
+    const mediaId=String(descriptor.mediaId||descriptor.imageId||"").trim(),index=merged.findIndex(image=>mediaId&&String(image?.mediaId||image?.imageId||"").trim()===mediaId);
+    const next={...descriptor,ownerType:"item",ownerId:itemId,slot:String(descriptor.slot||"gallery")};
+    if(index>=0)merged[index]={...merged[index],...next};else merged.push(next);
+  });
+  return merged.sort((a,b)=>(Number(a?.sortOrder)||0)-(Number(b?.sortOrder)||0));
 }
 function managedItineraryMedia(item,dayId="",tripId=dataTripId(window.tripData)){
-  const itemId=String(item?.itemId||"").trim();
-  const pending=pendingItineraryMediaOverlay(tripId,dayId,itemId);
-  if(pending?.descriptor&&tripMediaHasStorage(pending.descriptor))return pending.descriptor;
-  return (Array.isArray(item?.images)?item.images:[]).find(image=>isManagedItineraryMedia(image,itemId))||null;
+  return managedItineraryMediaList(item,dayId,tripId)[0]||null;
 }
 function itineraryMediaCrop(input){
   const raw=input&&typeof input==="object"?input.crop:null;if(!raw||typeof raw!=="object")return null;
@@ -5058,13 +5079,15 @@ function applyItineraryMediaCropVisual(img,input,frame){
 function storageGalleryForItem(item,dayId=""){
   const itemId=String(item?.itemId||"").trim(),tripId=dataTripId(window.tripData);
   const images=Array.isArray(item?.images)?item.images.filter(Boolean).map(image=>image&&typeof image==="object"?{...image}:image):[];
-  const pending=pendingItineraryMediaOverlay(tripId,dayId,itemId);
-  if(pending?.descriptor&&tripMediaHasStorage(pending.descriptor)){
-    const descriptor={...pending.descriptor,ownerType:"item",ownerId:itemId,slot:"primary"};
-    const index=images.findIndex(image=>isManagedItineraryMedia(image,itemId));
-    if(index>=0){descriptor.sortOrder=Number(images[index]?.sortOrder)||index;images[index]=descriptor;}
-    else{descriptor.sortOrder=images.length;images.push(descriptor);}
-  }
+  const pending=pendingItineraryMediaOverlays(tripId,dayId,itemId);
+  pending.forEach((overlay,pendingIndex)=>{
+    const raw=overlay?.descriptor;if(!raw||!tripMediaHasStorage(raw))return;
+    const descriptor={...raw,ownerType:"item",ownerId:itemId,slot:String(raw.slot||"gallery")};
+    const mediaId=String(descriptor.mediaId||descriptor.imageId||"").trim();
+    const index=images.findIndex(image=>mediaId&&String(image?.mediaId||image?.imageId||"").trim()===mediaId);
+    if(index>=0){descriptor.sortOrder=Number.isFinite(Number(images[index]?.sortOrder))?Number(images[index].sortOrder):index;images[index]={...images[index],...descriptor};}
+    else{descriptor.sortOrder=Number.isFinite(Number(descriptor.sortOrder))?Number(descriptor.sortOrder):images.length+pendingIndex;images.push(descriptor);}
+  });
   return images.length?[...images].sort((a,b)=>(Number(a?.sortOrder)||0)-(Number(b?.sortOrder)||0)):[];
 }
 function getGalleryForItem(item, day, cityKey, matchedCities, meta){
@@ -5485,7 +5508,7 @@ function unlockScroll(){ss.style.overflowY="auto";ss.scrollTop=scrollY;}
 function renderDots(){const el=document.getElementById("detail-dots");el.innerHTML="";curGal.forEach((_,i)=>{const d=document.createElement("div");d.className="modal-dot"+(i===curGalIdx?" active":"");d.addEventListener("click",()=>{curGalIdx=i;updateImg();});el.appendChild(d);});}
 function updateImg(){const img=document.getElementById("detail-img");img.classList.add("fade-out");setTimeout(()=>{bindTripMediaImageElement(img,curGal[curGalIdx],{variant:"display"});renderDots();img.classList.remove("fade-out");img.classList.add("fade-in");setTimeout(()=>img.classList.remove("fade-in"),220);},120);}
 
-// v7.9.4.4 · Keep the selected itinerary photo stable across Local First →
+// v7.9.4.5 · Keep the selected itinerary photo stable across Local First →
 // Firebase rerenders. Identity follows the immutable asset, not its array index,
 // so pending → canonical generation promotion does not jump back to photo 1.
 const itineraryGallerySelectionByItem=new Map();
@@ -5505,7 +5528,7 @@ function rememberItineraryGallerySelection(dayId,itemId,gallery,index){
   const safeIndex=clamp(Number(index)||0,0,Math.max(0,(gallery?.length||1)-1));
   itineraryGallerySelectionByItem.set(key,itineraryGalleryMediaIdentity(gallery?.[safeIndex],safeIndex));
 }
-// v7.9.4.4 · Before any queue / Firebase rerender destroys the old Gallery
+// v7.9.4.5 · Before any queue / Firebase rerender destroys the old Gallery
 // DOM, capture the image that is actually on screen. This avoids a race where
 // the scroll RAF has not yet persisted photo 2 when Cloud sync triggers render.
 function captureItineraryGallerySelectionsFromDom(){
@@ -5586,174 +5609,100 @@ function setupItineraryPhotoViewer(){
 }
 setupItineraryPhotoViewer();
 
+function currentRememberedGallerySelection(dayId,itemId,galleryInput=[]){
+  const gallery=Array.isArray(galleryInput)?galleryInput:[],key=itineraryGalleryStateKey(dayId,itemId),remembered=itineraryGallerySelectionByItem.get(key)||"";
+  let index=gallery.findIndex((media,i)=>itineraryGalleryMediaIdentity(media,i)===remembered);if(index<0)index=0;
+  return {gallery,index,media:gallery[index]||null,identity:gallery.length?itineraryGalleryMediaIdentity(gallery[index],index):""};
+}
+function itineraryMediaSelectedIsRemovable(item,media){
+  if(!item||!media||typeof media!=="object")return false;
+  const itemId=String(item.itemId||"").trim();if(isManagedItineraryMedia(media,itemId))return true;
+  const identity=itineraryGalleryMediaIdentity(media,0);
+  return (Array.isArray(item.images)?item.images:[]).some((candidate,index)=>itineraryGalleryMediaIdentity(candidate,index)===identity);
+}
+function refreshItineraryMediaControls(dayId,itemId,galleryInput=null){
+  const found=findItineraryItem(dayId,itemId);if(!found?.item)return;
+  const gallery=Array.isArray(galleryInput)?galleryInput:storageGalleryForItem(found.item,dayId),selection=currentRememberedGallerySelection(dayId,itemId,gallery);
+  const tripId=dataTripId(window.tripData),pending=pendingItineraryMediaOverlay(tripId,dayId,itemId),busy=itineraryMediaBusyKeys.has(itineraryMediaKey(dayId,itemId)),canEdit=itineraryMediaCanEdit(),baseBlocked=busy||pending?.blocking===true||!canEdit;
+  document.querySelectorAll(`[data-itinerary-media-item="${CSS.escape(String(itemId))}"][data-itinerary-media-day="${CSS.escape(String(dayId))}"]`).forEach(button=>{
+    const action=button.dataset.itineraryMediaAction||"";
+    if(action==="add")button.disabled=baseBlocked;
+    if(action==="remove")button.disabled=baseBlocked||!itineraryMediaSelectedIsRemovable(found.item,selection.media);
+    if(action==="previous")button.disabled=baseBlocked||selection.index<=0;
+    if(action==="next")button.disabled=baseBlocked||selection.index<0||selection.index>=gallery.length-1;
+  });
+}
+function markItineraryMediaAction(button,action,dayId,itemId){
+  button.dataset.itineraryMediaAction=action;button.dataset.itineraryMediaDay=String(dayId||"");button.dataset.itineraryMediaItem=String(itemId||"");
+  return button;
+}
+function buildItineraryGalleryBlock(item,gallery,dayId=""){
+  if(!Array.isArray(gallery)||!gallery.length)return null;
+  const galleryItemId=String(item?.itemId||"").trim(),galleryStateKey=itineraryGalleryStateKey(dayId,galleryItemId),galleryIdentities=gallery.map((src,index)=>itineraryGalleryMediaIdentity(src,index));
+  const rememberedGalleryIdentity=itineraryGallerySelectionByItem.get(galleryStateKey)||"",rememberedGalleryIndex=Math.max(0,galleryIdentities.indexOf(rememberedGalleryIdentity));
+  const galleryBlock=document.createElement("div");galleryBlock.className="inline-gallery-block";
+  const galleryEl=document.createElement("div");galleryEl.className="inline-gallery";galleryEl.dataset.galleryDayId=String(dayId||"");galleryEl.dataset.galleryItemId=galleryItemId;galleryEl.setAttribute("role","region");galleryEl.setAttribute("aria-label",`${item.title||"行程"} 相冊`);
+  const track=document.createElement("div");track.className="inline-gallery-track";if(rememberedGalleryIndex>0)galleryEl.style.visibility="hidden";
+  const slides=[];
+  gallery.forEach((src,index)=>{
+    const slide=document.createElement("div");slide.className="inline-gallery-slide";slide.dataset.galleryMediaIdentity=itineraryGalleryMediaIdentity(src,index);slide.setAttribute("role","button");slide.tabIndex=0;slide.setAttribute("aria-label",`放大查看第 ${index+1} 張相片`);
+    const img=document.createElement("img");bindTripMediaImageElement(img,src,{variant:"display"});img.alt=`${item.title||"行程"} ${index+1} / ${gallery.length}`;img.loading="lazy";applyItineraryMediaCropVisual(img,src,slide);
+    const openViewer=event=>{event.stopPropagation();rememberItineraryGallerySelection(dayId,galleryItemId,gallery,index);openItineraryPhotoViewer(gallery,index,item.title||"行程");};
+    slide.addEventListener("click",openViewer);slide.addEventListener("keydown",event=>{if(event.key==="Enter"||event.key===" "){event.preventDefault();openViewer(event);}});slide.appendChild(img);track.appendChild(slide);slides.push(slide);
+  });
+  galleryEl.appendChild(track);galleryBlock.appendChild(galleryEl);
+  if(gallery.length>1){
+    const dots=document.createElement("div");dots.className="inline-gallery-dots";dots.setAttribute("aria-label",`相片 1 / ${gallery.length}`);
+    const dotButtons=gallery.map((_,index)=>{const dot=document.createElement("button");dot.type="button";dot.className=`inline-gallery-dot${index===0?" active":""}`;dot.setAttribute("aria-label",`查看第 ${index+1} 張相片`);dot.setAttribute("aria-current",index===0?"true":"false");dot.addEventListener("click",event=>{event.stopPropagation();rememberItineraryGallerySelection(dayId,galleryItemId,gallery,index);galleryEl.scrollTo({left:slides[index].offsetLeft,behavior:"smooth"});refreshItineraryMediaControls(dayId,galleryItemId,gallery);});dots.appendChild(dot);return dot;});
+    let galleryRaf=0;const setActiveDot=index=>{dotButtons.forEach((dot,i)=>{const active=i===index;dot.classList.toggle("active",active);dot.setAttribute("aria-current",active?"true":"false");});dots.setAttribute("aria-label",`相片 ${index+1} / ${gallery.length}`);rememberItineraryGallerySelection(dayId,galleryItemId,gallery,index);refreshItineraryMediaControls(dayId,galleryItemId,gallery);};
+    galleryEl.addEventListener("scroll",()=>{cancelAnimationFrame(galleryRaf);galleryRaf=requestAnimationFrame(()=>{let closestIndex=0,closestDistance=Infinity;slides.forEach((slide,index)=>{const distance=Math.abs(slide.offsetLeft-galleryEl.scrollLeft);if(distance<closestDistance){closestDistance=distance;closestIndex=index;}});setActiveDot(closestIndex);});},{passive:true});
+    galleryBlock.appendChild(dots);requestAnimationFrame(()=>{const index=clamp(rememberedGalleryIndex,0,gallery.length-1);if(slides[index])galleryEl.scrollLeft=slides[index].offsetLeft;setActiveDot(index);galleryEl.style.visibility="visible";});
+  }else{rememberItineraryGallerySelection(dayId,galleryItemId,gallery,0);requestAnimationFrame(()=>refreshItineraryMediaControls(dayId,galleryItemId,gallery));}
+  return galleryBlock;
+}
+function appendItineraryMediaManagementActions(container,item,gallery,dayId,itemId,{includeStatus=true}={}){
+  const tripId=dataTripId(window.tripData),pending=pendingItineraryMediaOverlay(tripId,dayId,itemId),canManage=itineraryMediaCanManageRole(),canEdit=itineraryMediaCanEdit();
+  if(!canManage||!dayId||!itemId)return;
+  const busy=itineraryMediaBusyKeys.has(itineraryMediaKey(dayId,itemId)),blocked=busy||pending?.blocking===true||!canEdit,selection=currentRememberedGallerySelection(dayId,itemId,gallery);
+  const actions=document.createElement("div");actions.className="inline-detail-actions";
+  const addBtn=markItineraryMediaAction(document.createElement("button"),"add",dayId,itemId);addBtn.type="button";addBtn.className="inline-action-btn secondary";addBtn.disabled=blocked;addBtn.textContent=busy?"正在處理…":(pending?.blocking===true?"相片同步中…":"加入相片");addBtn.addEventListener("click",event=>{event.stopPropagation();if(!addBtn.disabled)openItineraryMediaPicker(dayId,itemId);});actions.appendChild(addBtn);
+  if(gallery.length){
+    const prev=markItineraryMediaAction(document.createElement("button"),"previous",dayId,itemId);prev.type="button";prev.className="inline-action-btn secondary";prev.textContent="向前移";prev.disabled=blocked||selection.index<=0;prev.addEventListener("click",event=>{event.stopPropagation();if(!prev.disabled)moveItineraryMedia(dayId,itemId,-1);});actions.appendChild(prev);
+    const next=markItineraryMediaAction(document.createElement("button"),"next",dayId,itemId);next.type="button";next.className="inline-action-btn secondary";next.textContent="向後移";next.disabled=blocked||selection.index>=gallery.length-1;next.addEventListener("click",event=>{event.stopPropagation();if(!next.disabled)moveItineraryMedia(dayId,itemId,1);});actions.appendChild(next);
+    const remove=markItineraryMediaAction(document.createElement("button"),"remove",dayId,itemId);remove.type="button";remove.className="inline-action-btn secondary";remove.textContent="移除目前相片";remove.disabled=blocked||!itineraryMediaSelectedIsRemovable(item,selection.media);remove.addEventListener("click",event=>{event.stopPropagation();if(!remove.disabled)removeItineraryMedia(dayId,itemId);});actions.appendChild(remove);
+  }
+  container.appendChild(actions);
+  if(includeStatus){const status=document.createElement("div");status.className="inline-media-status";if(busy)status.textContent="正在本機解碼及壓縮相片…";else if(pending)status.textContent=mediaQueueStateCopy(pending,"相片");else if(!canEdit)status.textContent=currentTripGlobalLocked()?"旅程已全域鎖定，目前只可查看相片。":"目前為唯讀。";if(status.textContent)container.appendChild(status);}
+  requestAnimationFrame(()=>refreshItineraryMediaControls(dayId,itemId,gallery));
+}
+
 function appendInlineDetails(itemEl,item,gallery,dayId=""){
   const galleryItemId=String(item?.itemId||"").trim();
-  const galleryStateKey=itineraryGalleryStateKey(dayId,galleryItemId);
-  const galleryIdentities=(gallery||[]).map((src,index)=>itineraryGalleryMediaIdentity(src,index));
-  const rememberedGalleryIdentity=itineraryGallerySelectionByItem.get(galleryStateKey)||"";
-  const rememberedGalleryIndex=Math.max(0,galleryIdentities.indexOf(rememberedGalleryIdentity));
   const shell=document.createElement("div");shell.className="inline-detail-shell";
   const clip=document.createElement("div");clip.className="inline-detail-clip";
   const detail=document.createElement("div");detail.className="inline-detail-content";
-
-  if(gallery?.length){
-    const galleryBlock=document.createElement("div");galleryBlock.className="inline-gallery-block";
-    const galleryEl=document.createElement("div");galleryEl.className="inline-gallery";
-    galleryEl.dataset.galleryDayId=String(dayId||"");galleryEl.dataset.galleryItemId=galleryItemId;
-    galleryEl.setAttribute("role","region");
-    galleryEl.setAttribute("aria-label",`${item.title||"行程"} 相冊`);
-    const track=document.createElement("div");track.className="inline-gallery-track";
-    if(rememberedGalleryIndex>0)galleryEl.style.visibility="hidden";
-    const slides=[];
-    gallery.forEach((src,index)=>{
-      const slide=document.createElement("div");slide.className="inline-gallery-slide";slide.dataset.galleryMediaIdentity=itineraryGalleryMediaIdentity(src,index);
-      slide.setAttribute("role","button");slide.tabIndex=0;slide.setAttribute("aria-label",`放大查看第 ${index+1} 張相片`);
-      const img=document.createElement("img");
-      bindTripMediaImageElement(img,src,{variant:"display"});
-      img.alt=`${item.title||"行程"} ${index+1} / ${gallery.length}`;img.loading="lazy";
-      applyItineraryMediaCropVisual(img,src,slide);
-      const openViewer=event=>{event.stopPropagation();rememberItineraryGallerySelection(dayId,galleryItemId,gallery,index);openItineraryPhotoViewer(gallery,index,item.title||"行程");};
-      slide.addEventListener("click",openViewer);slide.addEventListener("keydown",event=>{if(event.key==="Enter"||event.key===" "){event.preventDefault();openViewer(event);}});
-      slide.appendChild(img);track.appendChild(slide);slides.push(slide);
-    });
-    galleryEl.appendChild(track);
-    galleryBlock.appendChild(galleryEl);
-
-    if(gallery.length>1){
-      const dots=document.createElement("div");dots.className="inline-gallery-dots";
-      dots.setAttribute("aria-label",`相片 1 / ${gallery.length}`);
-      const dotButtons=gallery.map((_,index)=>{
-        const dot=document.createElement("button");
-        dot.type="button";
-        dot.className=`inline-gallery-dot${index===0?" active":""}`;
-        dot.setAttribute("aria-label",`查看第 ${index+1} 張相片`);
-        dot.setAttribute("aria-current",index===0?"true":"false");
-        dot.addEventListener("click",event=>{
-          event.stopPropagation();
-          rememberItineraryGallerySelection(dayId,galleryItemId,gallery,index);
-          galleryEl.scrollTo({left:slides[index].offsetLeft,behavior:"smooth"});
-        });
-        dots.appendChild(dot);
-        return dot;
-      });
-      let galleryRaf=0;
-      const setActiveDot=index=>{
-        dotButtons.forEach((dot,i)=>{
-          const active=i===index;
-          dot.classList.toggle("active",active);
-          dot.setAttribute("aria-current",active?"true":"false");
-        });
-        dots.setAttribute("aria-label",`相片 ${index+1} / ${gallery.length}`);
-        rememberItineraryGallerySelection(dayId,galleryItemId,gallery,index);
-      };
-      galleryEl.addEventListener("scroll",()=>{
-        cancelAnimationFrame(galleryRaf);
-        galleryRaf=requestAnimationFrame(()=>{
-          let closestIndex=0;
-          let closestDistance=Infinity;
-          slides.forEach((slide,index)=>{
-            const distance=Math.abs(slide.offsetLeft-galleryEl.scrollLeft);
-            if(distance<closestDistance){closestDistance=distance;closestIndex=index;}
-          });
-          setActiveDot(closestIndex);
-        });
-      },{passive:true});
-      galleryBlock.appendChild(dots);
-      requestAnimationFrame(()=>{
-        const index=clamp(rememberedGalleryIndex,0,gallery.length-1);
-        if(slides[index])galleryEl.scrollLeft=slides[index].offsetLeft;
-        setActiveDot(index);galleryEl.style.visibility="visible";
-      });
-    }else if(gallery.length===1){
-      rememberItineraryGallerySelection(dayId,galleryItemId,gallery,0);
-    }
-    detail.appendChild(galleryBlock);
-  }
-
+  const galleryBlock=buildItineraryGalleryBlock(item,gallery,dayId);if(galleryBlock)detail.appendChild(galleryBlock);
   const body=document.createElement("div");body.className="inline-detail-body";
-  if(item.detailLines?.length){item.detailLines.forEach(line=>{const row=document.createElement("div");row.textContent=line;body.appendChild(row);});}
-  else if(item.detail){body.textContent=item.detail;}
+  if(item.detailLines?.length){item.detailLines.forEach(line=>{const row=document.createElement("div");row.textContent=line;body.appendChild(row);});}else if(item.detail){body.textContent=item.detail;}
   if(body.textContent.trim())detail.appendChild(body);
-
   const actions=document.createElement("div");actions.className="inline-detail-actions";
   const addAction=(label,url,secondary=false)=>{if(!url)return;const a=document.createElement("a");a.className=`inline-action-btn${secondary?" secondary":""}`;a.href=url;a.target="_blank";a.rel="noopener";a.textContent=label;a.addEventListener("click",e=>e.stopPropagation());actions.appendChild(a);};
-  addAction("Google 地圖",item.maps,false);
-  addAction("官方網頁",item.dianping,true);
-  addAction("查看預訂",item.booking?.pdf||item.bookingPdf,true);
-  const itemId=galleryItemId,tripId=dataTripId(window.tripData),pending=pendingItineraryMediaOverlay(tripId,dayId,itemId);
-  const media=managedItineraryMedia(item,dayId,tripId),canManage=itineraryMediaCanManageRole(),canEdit=itineraryMediaCanEdit();
-  if(canManage&&dayId&&itemId){
-    const busy=itineraryMediaBusyKeys.has(itineraryMediaKey(dayId,itemId)),blocked=busy||pending?.blocking===true||!canEdit;
-    const photoBtn=document.createElement("button");photoBtn.type="button";photoBtn.className="inline-action-btn secondary";photoBtn.disabled=blocked;photoBtn.textContent=busy?"正在處理…":(pending?.blocking===true?"相片同步中…":(media?"更換相片":"加入相片"));
-    photoBtn.addEventListener("click",event=>{event.stopPropagation();if(!photoBtn.disabled)openItineraryMediaPicker(dayId,itemId);});
-    actions.appendChild(photoBtn);
-    if(media){
-      const removeBtn=document.createElement("button");removeBtn.type="button";removeBtn.className="inline-action-btn secondary";removeBtn.disabled=blocked;removeBtn.textContent="移除相片";
-      removeBtn.addEventListener("click",event=>{event.stopPropagation();if(!removeBtn.disabled)removeItineraryMedia(dayId,itemId);});
-      actions.appendChild(removeBtn);
-    }
-    const status=document.createElement("div");status.className="inline-media-status";
-    if(busy)status.textContent="正在本機解碼及壓縮相片…";
-    else if(pending)status.textContent=mediaQueueStateCopy(pending,"相片");
-    else if(!canEdit)status.textContent=currentTripGlobalLocked()?"旅程已全域鎖定，目前只可查看相片。":"目前為唯讀。";
-    if(actions.childElementCount)detail.appendChild(actions);
-    if(status.textContent)detail.appendChild(status);
-  }else if(actions.childElementCount)detail.appendChild(actions);
-
+  addAction("Google 地圖",item.maps,false);addAction("官方網頁",item.dianping,true);addAction("查看預訂",item.booking?.pdf||item.bookingPdf,true);if(actions.childElementCount)detail.appendChild(actions);
+  appendItineraryMediaManagementActions(detail,item,gallery,dayId,galleryItemId);
   clip.appendChild(detail);shell.appendChild(clip);itemEl.appendChild(shell);
 }
 
 function buildStandaloneItineraryMediaSurface(item,dayId=""){
-  const itemId=String(item?.itemId||"").trim(),tripId=dataTripId(window.tripData);
-  if(!tripId||!dayId||!itemId)return null;
-  const pending=pendingItineraryMediaOverlay(tripId,dayId,itemId),media=managedItineraryMedia(item,dayId,tripId);
-  const canManage=itineraryMediaCanManageRole(),canEdit=itineraryMediaCanEdit();
-  if(!media&&!canManage)return null;
-  const key=itineraryMediaKey(dayId,itemId),busy=itineraryMediaBusyKeys.has(key),blocked=busy||pending?.blocking===true||!canEdit;
-
-  const accessory=document.createElement("button");
-  accessory.type="button";accessory.className="itinerary-media-accessory";
-  accessory.setAttribute("aria-expanded","false");
-  accessory.setAttribute("aria-label",media?`${item.title||"行程"} 相片`:`為 ${item.title||"行程"} 加入相片`);
-  if(pending?.blocking===true)accessory.classList.add("is-syncing");
-  if(media){
-    const thumb=document.createElement("img");thumb.alt="";thumb.loading="lazy";bindTripMediaImageElement(thumb,media,{variant:"thumbnail",tripId});accessory.appendChild(thumb);
-  }else{
-    accessory.innerHTML='<svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><rect x="2.75" y="4" width="14.5" height="12" rx="2.5" stroke="currentColor" stroke-width="1.45"/><circle cx="7.1" cy="8.1" r="1.55" stroke="currentColor" stroke-width="1.35"/><path d="M4.7 14l3.1-3.2 2.25 2.15 2.35-2.55 2.9 3.6" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-  }
-
-  const shell=document.createElement("div");shell.className="itinerary-media-shell";
-  const clip=document.createElement("div");clip.className="itinerary-media-clip";
-  const panel=document.createElement("div");panel.className="itinerary-media-panel";
-  if(media){
-    const previewFrame=document.createElement("div");previewFrame.className="itinerary-media-preview-frame";previewFrame.setAttribute("role","button");previewFrame.tabIndex=0;previewFrame.setAttribute("aria-label","放大查看相片");
-    const preview=document.createElement("img");preview.className="itinerary-media-preview";preview.alt=`${item.title||"行程"} 相片`;preview.loading="lazy";bindTripMediaImageElement(preview,media,{variant:"display",tripId});applyItineraryMediaCropVisual(preview,media,previewFrame);
-    const openPreviewViewer=event=>{event.stopPropagation();openItineraryPhotoViewer([media],0,item.title||"行程");};previewFrame.addEventListener("click",openPreviewViewer);previewFrame.addEventListener("keydown",event=>{if(event.key==="Enter"||event.key===" "){event.preventDefault();openPreviewViewer(event);}});previewFrame.appendChild(preview);panel.appendChild(previewFrame);
-  }
-  if(canManage){
-    const actions=document.createElement("div");actions.className="inline-detail-actions";
-    const photoBtn=document.createElement("button");photoBtn.type="button";photoBtn.className="inline-action-btn secondary";photoBtn.disabled=blocked;photoBtn.textContent=busy?"正在處理…":(pending?.blocking===true?"相片同步中…":(media?"更換相片":"加入相片"));
-    photoBtn.addEventListener("click",event=>{event.stopPropagation();if(!photoBtn.disabled)openItineraryMediaPicker(dayId,itemId);});actions.appendChild(photoBtn);
-    if(media){
-      const removeBtn=document.createElement("button");removeBtn.type="button";removeBtn.className="inline-action-btn secondary";removeBtn.disabled=blocked;removeBtn.textContent="移除相片";
-      removeBtn.addEventListener("click",event=>{event.stopPropagation();if(!removeBtn.disabled)removeItineraryMedia(dayId,itemId);});actions.appendChild(removeBtn);
-    }
-    panel.appendChild(actions);
-  }
-  const status=document.createElement("div");status.className="inline-media-status";
-  if(busy)status.textContent="正在本機解碼及壓縮相片…";
-  else if(pending)status.textContent=mediaQueueStateCopy(pending,"相片");
-  else if(canManage&&!canEdit)status.textContent=currentTripGlobalLocked()?"旅程已全域鎖定，目前只可查看相片。":"目前為唯讀。";
-  if(status.textContent)panel.appendChild(status);
+  const itemId=String(item?.itemId||"").trim(),tripId=dataTripId(window.tripData);if(!tripId||!dayId||!itemId)return null;
+  const gallery=storageGalleryForItem(item,dayId),pending=pendingItineraryMediaOverlay(tripId,dayId,itemId),canManage=itineraryMediaCanManageRole();if(!gallery.length&&!canManage)return null;
+  const selection=currentRememberedGallerySelection(dayId,itemId,gallery),thumbMedia=selection.media||gallery[0]||null;
+  const accessory=document.createElement("button");accessory.type="button";accessory.className="itinerary-media-accessory";accessory.setAttribute("aria-expanded","false");accessory.setAttribute("aria-label",gallery.length?`${item.title||"行程"} 相片`:`為 ${item.title||"行程"} 加入相片`);if(pending?.blocking===true)accessory.classList.add("is-syncing");
+  if(thumbMedia){const thumb=document.createElement("img");thumb.alt="";thumb.loading="lazy";bindTripMediaImageElement(thumb,thumbMedia,{variant:"thumbnail",tripId});accessory.appendChild(thumb);}else accessory.innerHTML='<svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><rect x="2.75" y="4" width="14.5" height="12" rx="2.5" stroke="currentColor" stroke-width="1.45"/><circle cx="7.1" cy="8.1" r="1.55" stroke="currentColor" stroke-width="1.35"/><path d="M4.7 14l3.1-3.2 2.25 2.15 2.35-2.55 2.9 3.6" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  const shell=document.createElement("div");shell.className="itinerary-media-shell";const clip=document.createElement("div");clip.className="itinerary-media-clip";const panel=document.createElement("div");panel.className="itinerary-media-panel";
+  const galleryBlock=buildItineraryGalleryBlock(item,gallery,dayId);if(galleryBlock)panel.appendChild(galleryBlock);
+  appendItineraryMediaManagementActions(panel,item,gallery,dayId,itemId);
   clip.appendChild(panel);shell.appendChild(clip);
-
-  accessory.addEventListener("click",event=>{
-    event.stopPropagation();
-    const itemEl=accessory.closest(".itinerary-item");if(!itemEl)return;
-    const opening=!itemEl.classList.contains("media-expanded");
-    document.querySelectorAll(".itinerary-item.media-expanded").forEach(other=>{if(other!==itemEl){other.classList.remove("media-expanded");other.querySelector(".itinerary-media-accessory")?.setAttribute("aria-expanded","false");}});
-    itemEl.classList.toggle("media-expanded",opening);accessory.setAttribute("aria-expanded",opening?"true":"false");
-  });
+  accessory.addEventListener("click",event=>{event.stopPropagation();const itemEl=accessory.closest(".itinerary-item");if(!itemEl)return;const opening=!itemEl.classList.contains("media-expanded");document.querySelectorAll(".itinerary-item.media-expanded").forEach(other=>{if(other!==itemEl){other.classList.remove("media-expanded");other.querySelector(".itinerary-media-accessory")?.setAttribute("aria-expanded","false");}});itemEl.classList.toggle("media-expanded",opening);accessory.setAttribute("aria-expanded",opening?"true":"false");});
   return {accessory,shell};
 }
 
@@ -10687,7 +10636,7 @@ function itineraryMediaFriendlyError(error){
   return error?.message||"未能更新行程相片。";
 }
 
-// v7.9.4.4 · iOS Photos-inspired non-destructive itinerary crop positioning.
+// v7.9.4.5 · iOS Photos-inspired non-destructive itinerary crop positioning.
 // The image is no longer clipped by the crop frame: source context remains visible
 // beneath a dim mask. Pinch uses a frozen gesture baseline and keeps the image point
 // beneath the finger midpoint anchored throughout the gesture, avoiding feedback jumps.
@@ -10808,8 +10757,10 @@ async function uploadItineraryMediaFile(file,dayId,itemId,crop=null){
   if(pendingItineraryMediaOverlay(tripId,dayId,itemId)?.blocking===true)return;
   itineraryMediaBusyKeys.add(key);setTripMediaMutationBusy(true);try{render(window.tripData);}catch(error){}
   try{
-    const service=await getTripMediaSyncService(),user=window.__appAuthUser||tripLibraryCurrentUser||null;
-    await service.queueTripItemMedia({tripId,dayId,itemId,file,user,crop});
+    const service=await getTripMediaSyncService(),user=window.__appAuthUser||tripLibraryCurrentUser||null,found=findItineraryItem(dayId,itemId);
+    const gallery=found?.item?storageGalleryForItem(found.item,dayId):[];
+    const result=await service.queueTripItemMedia({tripId,dayId,itemId,file,user,crop,sortOrder:gallery.length});
+    if(result?.descriptor){itineraryGallerySelectionByItem.set(itineraryGalleryStateKey(dayId,itemId),itineraryGalleryMediaIdentity(result.descriptor,gallery.length));}
   }catch(error){console.error("Itinerary media local queue",error);window.alert(itineraryMediaFriendlyError(error));}
   finally{itineraryMediaBusyKeys.delete(key);setTripMediaMutationBusy(false);try{render(window.tripData);}catch(error){}}
 }
@@ -10822,22 +10773,47 @@ function openItineraryMediaPicker(dayId,itemId){
   const onReturn=()=>setTimeout(()=>{if(!handled)cleanup();window.removeEventListener("focus",onReturn);},900);
   window.addEventListener("focus",onReturn,{once:true});document.body.appendChild(input);input.click();
 }
-async function removeItineraryMedia(dayId,itemId){
+function selectedItineraryGalleryMedia(dayId,itemId,item=null){
+  const found=item?{item}:findItineraryItem(dayId,itemId),gallery=found?.item?storageGalleryForItem(found.item,dayId):[];
+  if(!gallery.length)return {gallery:[],index:-1,media:null,identity:""};
+  captureItineraryGallerySelectionsFromDom();
+  const key=itineraryGalleryStateKey(dayId,itemId),remembered=itineraryGallerySelectionByItem.get(key)||"";
+  let index=gallery.findIndex((media,i)=>itineraryGalleryMediaIdentity(media,i)===remembered);if(index<0)index=0;
+  return {gallery,index,media:gallery[index]||null,identity:itineraryGalleryMediaIdentity(gallery[index],index)};
+}
+async function removeItineraryMedia(dayId,itemId,mediaInput=null){
   const tripId=appearanceSettingsTripId(),key=itineraryMediaKey(dayId,itemId),found=findItineraryItem(dayId,itemId);
-  if(!tripId||itineraryMediaBusyKeys.has(key)||!itineraryMediaCanEdit()||pendingItineraryMediaOverlay(tripId,dayId,itemId)?.blocking===true)return;
-  const media=managedItineraryMedia(found.item,dayId,tripId);if(!tripMediaHasStorage(media))return;
-  if(!window.confirm("移除呢張自訂行程相片？"))return;
-  itineraryMediaBusyKeys.add(key);setTripMediaMutationBusy(true);try{render(window.tripData);}catch(error){}
+  if(!tripId||itineraryMediaBusyKeys.has(key)||!itineraryMediaCanEdit()||pendingItineraryMediaOverlay(tripId,dayId,itemId)?.blocking===true||!found?.item)return;
+  const selection=selectedItineraryGalleryMedia(dayId,itemId,found.item),media=mediaInput||selection.media;
+  if(!itineraryMediaSelectedIsRemovable(found.item,media))return;
+  if(!window.confirm("移除目前呢張行程相片？"))return;
+  const mediaId=String(media.mediaId||media.imageId||"").trim(),storagePath=String(media.storagePath||"").trim();
+  const oldIndex=Math.max(0,selection.gallery.findIndex((candidate,index)=>itineraryGalleryMediaIdentity(candidate,index)===itineraryGalleryMediaIdentity(media,selection.index)));
+  itineraryMediaBusyKeys.add(key);setTripMediaMutationBusy(true);try{captureItineraryGallerySelectionsFromDom();render(window.tripData);}catch(error){}
   try{
     const service=await getTripMediaSyncService(),user=window.__appAuthUser||tripLibraryCurrentUser||null;
-    const result=await service.removeTripItemMedia({tripId,dayId,itemId,user});
-    if(result?.removed&&found.item){found.item.images=(Array.isArray(found.item.images)?found.item.images:[]).filter(image=>!isManagedItineraryMedia(image,itemId));}
+    const result=await service.removeTripItemMedia({tripId,dayId,itemId,mediaId,storagePath,user});
+    if(result?.removed&&found.item){found.item.images=Array.isArray(result.images)?result.images:found.item.images;const nextGallery=storageGalleryForItem(found.item,dayId);if(nextGallery.length){const nextIndex=Math.min(oldIndex,nextGallery.length-1);itineraryGallerySelectionByItem.set(itineraryGalleryStateKey(dayId,itemId),itineraryGalleryMediaIdentity(nextGallery[nextIndex],nextIndex));}else itineraryGallerySelectionByItem.delete(itineraryGalleryStateKey(dayId,itemId));}
     if(result?.cleanup?.cleaned===false)console.warn("Itinerary media detached; old Storage cleanup deferred");
   }catch(error){console.error("Itinerary media remove",error);window.alert(itineraryMediaFriendlyError(error));}
   finally{itineraryMediaBusyKeys.delete(key);setTripMediaMutationBusy(false);try{render(window.tripData);}catch(error){}}
 }
+async function moveItineraryMedia(dayId,itemId,direction){
+  const tripId=appearanceSettingsTripId(),key=itineraryMediaKey(dayId,itemId),found=findItineraryItem(dayId,itemId);
+  if(!tripId||itineraryMediaBusyKeys.has(key)||!itineraryMediaCanEdit()||pendingItineraryMediaOverlay(tripId,dayId,itemId)?.blocking===true||!found?.item)return;
+  const selection=selectedItineraryGalleryMedia(dayId,itemId,found.item),media=selection.media;if(!media||selection.index<0)return;
+  const nextIndex=selection.index+(Number(direction)<0?-1:1);if(nextIndex<0||nextIndex>=selection.gallery.length)return;
+  const mediaId=String(media.mediaId||media.imageId||"").trim(),storagePath=String(media.storagePath||"").trim();if(!mediaId&&!storagePath)return;
+  itineraryMediaBusyKeys.add(key);setTripMediaMutationBusy(true);try{captureItineraryGallerySelectionsFromDom();}catch(error){}
+  try{
+    const service=await getTripMediaSyncService(),user=window.__appAuthUser||tripLibraryCurrentUser||null;
+    const result=await service.moveTripItemMedia({tripId,dayId,itemId,mediaId,storagePath,direction,user});
+    if(result?.moved&&found.item){found.item.images=Array.isArray(result.images)?result.images:found.item.images;itineraryGallerySelectionByItem.set(itineraryGalleryStateKey(dayId,itemId),itineraryGalleryMediaIdentity(media,result.index));}
+  }catch(error){console.error("Itinerary media reorder",error);window.alert(itineraryMediaFriendlyError(error));}
+  finally{itineraryMediaBusyKeys.delete(key);setTripMediaMutationBusy(false);try{render(window.tripData);}catch(error){}}
+}
 
-// v7.9.4.4 · Local First can paint the itinerary before the membership listener
+// v7.9.4.5 · Local First can paint the itinerary before the membership listener
 // has resolved the current Trip role. Media controls are role-dependent, so a
 // later owner/admin confirmation must refresh the itinerary surface once. Keep
 // the refresh keyed to the current Trip + capability only: cache/server metadata

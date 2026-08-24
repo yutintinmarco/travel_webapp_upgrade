@@ -1,3 +1,26 @@
+# v7.9.4.5 · Itinerary Multi Image Gallery
+
+## Added
+
+* Itinerary items can now keep multiple Firebase managed photos instead of a single `primary` photo.
+* `加入相片` now appends a new cropped Local First photo to the existing gallery.
+* Each new item photo receives its own durable mediaId, Storage path, Media Registry record and resumable background sync job.
+* The existing single-photo `slot: primary` contract remains readable as legacy managed media; new photos use `slot: gallery`.
+* Gallery management reuses the existing inline action-button grammar: add photo, move selected photo forward/backward, and remove the currently selected photo.
+* Imported/static gallery images remain compatible and can be reordered or removed from the itinerary reference without attempting Storage cleanup.
+* Standalone non-popup itinerary items now use the same horizontal gallery, dots, full-screen viewer and management actions as expanded detail items.
+
+## Data integrity
+
+* Item media jobs use a unique queue slot per mediaId while still blocking concurrent mutations on the same itinerary item.
+* Firestore item `images[]` remains the canonical ordered gallery; every add, remove and reorder bumps Trip revision for Passive Backup freshness.
+* Removing a Firebase-managed image detaches the descriptor first, then cleans its Storage objects; failed cleanup is persisted as an orphan-cleanup job.
+* Local pending overlays are merged by mediaId so pending → canonical promotion never replaces another gallery photo.
+
+## Scope
+
+* This release intentionally focuses on the multi-image data model and core management behavior. Final gallery animation / micro-transition polish remains deferred until the multi-image structure is stable on device.
+
 # v7.9.4.4 · Itinerary Crop Metadata Continuity
 
 ## Fixed
