@@ -170,7 +170,8 @@ function orderedPreviewImages(record = {}) {
   const bookingGallery = Array.isArray(record?.booking?.gallery) ? record.booking.gallery.filter(Boolean) : (record?.booking?.gallery ? [record.booking.gallery] : []);
   return bookingGallery;
 }
-function previewImageFromRecord(record = {}) { return orderedPreviewImages(record)[0] || null; }
+function previewImagesFromRecord(record = {}) { return orderedPreviewImages(record); }
+function previewImageFromRecord(record = {}) { return previewImagesFromRecord(record)[0] || null; }
 function regionLabelFromSavedPlace(place = {}) {
   const explicit = clean(place?.region || place?.district || place?.city);
   if (explicit) return explicit;
@@ -205,6 +206,7 @@ export function itineraryMapPoints(trip, activeDayId = "") {
       subtitle: [time, note].filter(Boolean).join(" · "),
       meta: time || "行程地點",
       detail: note || detail,
+      previewImages: previewImagesFromRecord(item),
       previewImage: previewImageFromRecord(item),
       mapsUrl: clean(item?.location?.mapsUrl || item?.maps || item?.mapsUrl),
       resolve: spec
@@ -231,6 +233,7 @@ export function savedPlaceMapPoints(trip) {
       meta: [area, category].filter(Boolean).join(" · ") || "收藏地點",
       detail: note,
       region: regionLabelFromSavedPlace(place),
+      previewImages: previewImagesFromRecord(place),
       previewImage: previewImageFromRecord(place),
       mapsUrl: clean(place?.location?.mapsUrl || place?.maps || place?.mapsUrl),
       resolve: spec
@@ -339,12 +342,12 @@ export async function createTripMap(container, { points = [], onSelect = null, o
     const icons = arrowPath ? [{
       icon: {
         path: arrowPath,
-        scale: 3.15,
+        scale: 4.15,
         fillColor: color,
         fillOpacity: 1,
         strokeColor: "#ffffff",
         strokeOpacity: 0.92,
-        strokeWeight: 1.0
+        strokeWeight: 1.15
       },
       offset: "58px",
       repeat: "132px"
@@ -368,7 +371,7 @@ export async function createTripMap(container, { points = [], onSelect = null, o
       zIndex: 100 + Number(point.order || 0)
     });
     advanced.addEventListener("gmp-click", () => { try { onSelect?.(point, advanced, map); } catch (_) {} });
-    markerRows.push({ point, marker: advanced });
+    markerRows.push({ point, marker: advanced, content: advanced.content, baseZIndex: 100 + Number(point.order || 0) });
   });
 
   focusPoints(points, { maxZoom: 15, padding: { top: Math.max(122, Number(focusPaddingTop) || 122), right: 34, bottom: 188, left: 34 } });
@@ -385,10 +388,19 @@ export async function createTripMap(container, { points = [], onSelect = null, o
       markerRows.forEach(row => {
         const show = !wanted || wanted.has(row.point.identity);
         row.marker.map = show ? map : null;
+        if (!show) { try { row.content?.classList?.remove("is-selected"); row.marker.zIndex = row.baseZIndex; } catch (_) {} }
         if (show) visible.push(row.point);
       });
       if (focus && visible.length) focusPoints(visible, { maxZoom: 15, padding: { top: 168, right: 34, bottom: 188, left: 34 } });
       return visible;
+    },
+    setSelectedIdentity(identity = "") {
+      const selected = String(identity || "");
+      markerRows.forEach(row => {
+        const active = Boolean(selected && row.point.identity === selected);
+        try { row.content?.classList?.toggle("is-selected", active); } catch (_) {}
+        try { row.marker.zIndex = active ? 10000 : row.baseZIndex; } catch (_) {}
+      });
     },
     point(identity) { return pointByIdentity.get(identity) || null; },
     destroy() {

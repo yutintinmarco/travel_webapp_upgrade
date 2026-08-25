@@ -1,3 +1,13 @@
+# v7.9.6.4 · Map Preview Album, Selected Place & Saved Media Parity
+
+## Phase 3B map interaction refinement
+
+- Map Preview now renders the full existing itinerary / Saved Place gallery instead of only the first image. The 16:9 hero area supports native horizontal swipe with lightweight page dots and preserves each image crop.
+- Itinerary and Saved Place map previews now share one gallery resolution path, including Local First pending media, canonical Firebase media and legacy/static gallery fallback.
+- Selecting a marker now gives that marker a persistent Apple-style selected state with a larger scale, blue outer ring and elevated z-index until another place or blank map area is tapped.
+- Sequential route arrows are enlarged again while keeping the existing spacing and route-line styling.
+- No Firebase backend, Google API scope, map configuration schema or canonical Trip data changes.
+
 # v7.9.6.3 · Map Filter, Hero Preview & Direction Readability
 
 • Removed the residual iOS Safari grey tap tray under Day, Team and Saved region filter pills by making the filter hosts fully transparent, removing sub-filter shadows, and disabling the WebKit tap highlight while retaining an explicit keyboard focus-visible state.
