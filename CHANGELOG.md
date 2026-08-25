@@ -1,3 +1,26 @@
+# v7.9.7.0 · Itinerary Stop / Transit Semantic Foundation
+
+## Phase 3C pre-route data semantics
+
+• Added an explicit itinerary semantic kind contract: `stop` for places / activities and `transit` for movement between stops. Future Edit Mode should write this choice explicitly when creating an item.
+• Legacy Trips remain compatible through conservative inference. Existing transport icons, explicit transport fields / modes and clear travel wording can classify old rows as Transit without requiring an immediate Firestore migration. The compatibility inference is not the future source of truth.
+• Portable Trip normalization now preserves / emits the semantic `kind`, so future Backup / Restore and Edit Mode data can carry the distinction canonically.
+
+## Map stop numbering
+
+• Map itinerary markers now number only semantic Stops. Transit rows use their transport icon instead of a number.
+• Stop numbers are recalculated after Day / Team filtering, so the visible Map sequence stays contiguous instead of showing gaps caused by hidden Team rows or Transit rows.
+• Transit markers remain selectable when they have a valid map reference, preserving useful flight / station / movement context without pretending they are numbered destination stops.
+
+## Route preparation
+
+• Existing Phase 3B sequence polylines now connect Stop nodes only. Transit rows no longer become fake route waypoints.
+• Team route splitting remains unchanged: Team-specific Stops plus shared `who: all` Stops form each Team's route sequence.
+• Day Map subtitle now distinguishes semantic counts such as `5 行程點 · 4 交通` when both kinds are present.
+• No Routes API, real road routing, Transit API, Firebase backend, Rules, Functions or canonical migration is introduced in this build.
+
+---
+
 # v7.9.6.4 · Map Preview Album, Selected Place & Saved Media Parity
 
 ## Phase 3B map interaction refinement

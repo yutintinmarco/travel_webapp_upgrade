@@ -1,4 +1,5 @@
 import { GOOGLE_MAPS_CONFIG } from "./maps-config.js";
+import { ITINERARY_ITEM_KIND, normalizeItineraryItemKind } from "./trip-schema-service.js";
 
 const MAPS_SCRIPT_ID = "travel-google-maps-js";
 const COORD_CACHE_KEY = "travel-map-coordinate-cache-v1";
@@ -189,22 +190,29 @@ export function itineraryMapPoints(trip, activeDayId = "") {
   const wanted = clean(activeDayId);
   const day = days.find(row => clean(row?.dayId) === wanted) || days[0] || null;
   if (!day) return [];
-  return (Array.isArray(day.items) ? day.items : []).map((item, index) => {
+
+  const candidates = (Array.isArray(day.items) ? day.items : []).map((item, index) => {
     const spec = pointResolveSpec(item);
     const time = clean(item?.time);
     const note = clean(item?.note);
     const detail = clean(item?.detail);
+    const itemKind = normalizeItineraryItemKind(item);
     return {
       kind: "itinerary",
+      itemKind,
+      routeEligible: itemKind === ITINERARY_ITEM_KIND.STOP,
       identity: `item:${clean(day.dayId)}:${clean(item?.itemId) || index}`,
       dayId: clean(day.dayId),
       itemId: clean(item?.itemId),
+      // `order` remains the raw itinerary order for sorting / Team sequence.
+      // `displayOrder` is a separate contiguous Map stop number.
       order: index + 1,
+      displayOrder: null,
       who: clean(item?.who) || "all",
-      icon: clean(item?.icon) || "•",
-      title: clean(item?.title) || `行程 ${index + 1}`,
+      icon: clean(item?.icon) || (itemKind === ITINERARY_ITEM_KIND.TRANSIT ? "↗︎" : "•"),
+      title: clean(item?.title) || (itemKind === ITINERARY_ITEM_KIND.TRANSIT ? "交通" : `行程 ${index + 1}`),
       subtitle: [time, note].filter(Boolean).join(" · "),
-      meta: time || "行程地點",
+      meta: time || (itemKind === ITINERARY_ITEM_KIND.TRANSIT ? "交通" : "行程地點"),
       detail: note || detail,
       previewImages: previewImagesFromRecord(item),
       previewImage: previewImageFromRecord(item),
@@ -212,6 +220,12 @@ export function itineraryMapPoints(trip, activeDayId = "") {
       resolve: spec
     };
   }).filter(point => point.resolve.type !== "none");
+
+  let stopOrder = 0;
+  return candidates.map(point => ({
+    ...point,
+    displayOrder: point.itemKind === ITINERARY_ITEM_KIND.STOP ? ++stopOrder : null
+  }));
 }
 
 export function savedPlaceMapPoints(trip) {
@@ -286,8 +300,10 @@ export async function resolveMapPoints(points, { concurrency = 3, onProgress = n
 
 function markerElement(point) {
   const el = document.createElement("div");
-  el.className = `trip-map-marker ${point.kind === "saved" ? "is-saved" : "is-itinerary"}`;
-  el.textContent = point.kind === "saved" ? "★" : String(point.order || "•");
+  const isSaved = point.kind === "saved";
+  const isTransit = point.kind === "itinerary" && point.itemKind === ITINERARY_ITEM_KIND.TRANSIT;
+  el.className = `trip-map-marker ${isSaved ? "is-saved" : "is-itinerary"}${isTransit ? " is-transit" : ""}`;
+  el.textContent = isSaved ? "★" : (isTransit ? (point.icon || "↗︎") : String(point.displayOrder || "•"));
   el.setAttribute("aria-hidden", "true");
   return el;
 }

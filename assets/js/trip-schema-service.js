@@ -6,6 +6,44 @@ export const TRIP_STATUS = Object.freeze({
   COMPLETED: "completed"
 });
 
+// v7.9.7.0 · Itinerary semantic foundation. A stop is a place/activity node;
+// transit is movement between stop nodes. New Edit Mode writes this field
+// explicitly. Legacy trips remain compatible through conservative inference.
+export const ITINERARY_ITEM_KIND = Object.freeze({
+  STOP: "stop",
+  TRANSIT: "transit"
+});
+
+const LEGACY_TRANSIT_ICONS = new Set([
+  "✈", "✈️", "🛫", "🛬", "🚆", "🚄", "🚅", "🚈", "🚇", "🚊", "🚉", "🚋",
+  "🚌", "🚍", "🚎", "🚐", "🚕", "🚖", "🚗", "🚙", "🚶", "🚶‍♂️", "🚶‍♀️",
+  "🚲", "🛵", "🏍", "🏍️", "⛴", "⛴️", "🚢", "🛥", "🛥️", "🚤"
+]);
+
+export function normalizeItineraryItemKind(item = {}) {
+  const explicit = clean(item?.kind || item?.itemKind || item?.semanticKind || item?.type).toLowerCase();
+  if (["transit", "transport", "transportation", "travel", "transfer", "flight"].includes(explicit)) return ITINERARY_ITEM_KIND.TRANSIT;
+  if (["stop", "activity", "itinerary", "place", "visit"].includes(explicit)) return ITINERARY_ITEM_KIND.STOP;
+
+  const mode = clean(item?.transportMode || item?.travelMode || item?.mode).toLowerCase();
+  if (["transit", "walking", "walk", "driving", "drive", "bicycling", "bicycle", "flight", "train", "rail", "bus", "taxi", "ferry"].includes(mode)) return ITINERARY_ITEM_KIND.TRANSIT;
+  if (item?.transport && typeof item.transport === "object") return ITINERARY_ITEM_KIND.TRANSIT;
+  if (item?.transit && typeof item.transit === "object") return ITINERARY_ITEM_KIND.TRANSIT;
+
+  // Compatibility only: old portable JSON did not carry a semantic kind. The
+  // icon is therefore a strong legacy hint, never the long-term source of truth.
+  const icon = clean(item?.icon).replace(/\uFE0F/g, "");
+  if (LEGACY_TRANSIT_ICONS.has(clean(item?.icon)) || LEGACY_TRANSIT_ICONS.has(icon)) return ITINERARY_ITEM_KIND.TRANSIT;
+
+  const title = clean(item?.title);
+  const note = clean(item?.note);
+  const text = `${title} ${note}`.trim();
+  if (/^(travel|transfer|transit|transport|walking|walk|driving|drive|taxi|bus|train|flight)\b/i.test(text)) return ITINERARY_ITEM_KIND.TRANSIT;
+  if (/^(前往|乘搭|乘坐|搭乘|轉乘|轉車|步行往|步行前往)/.test(text)) return ITINERARY_ITEM_KIND.TRANSIT;
+
+  return ITINERARY_ITEM_KIND.STOP;
+}
+
 function clean(value) { return String(value ?? "").trim(); }
 function clone(value) { return value == null ? value : JSON.parse(JSON.stringify(value)); }
 function safeArray(value) { return Array.isArray(value) ? value : []; }
@@ -214,6 +252,7 @@ export function normalizePortableTrip(rawInput = {}) {
     const items = safeArray(day?.items).map((item, itemIndex) => ({
       ...clone(item),
       itemId: deriveItemId(item, dayId, itemIndex),
+      kind: normalizeItineraryItemKind(item),
       location: normalizeLocation(item),
       sortOrder: Number.isFinite(Number(item?.sortOrder)) ? Number(item.sortOrder) : itemIndex,
       images: normalizeImages(item)
