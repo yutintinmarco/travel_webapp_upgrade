@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
   <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
   <link rel="dns-prefetch" href="https://api.open-meteo.com">
-  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?build=7.9.8.6">
+  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?build=7.9.8.7">
   <title id="page-title">行程</title>
   <script>
   // v7.7.5.0 · Performance Lite. Memory only: no Firebase reads/writes, no
@@ -1039,7 +1039,7 @@ html:not(.theme-light):not(.theme-dark) .modal::before { background: rgba(225,22
   --hairline: rgba(255,255,255,0.62);
   --material-shadow: 0 12px 30px rgba(45,30,38,0.12);
   --nav-material: rgba(248,248,250,0.78);
-  --sticky-material: rgba(247,243,246,0.86);
+  --sticky-material: rgba(247,243,246,0.97);
   color-scheme: light;
 }
 html.theme-dark {
@@ -1058,7 +1058,7 @@ html.theme-dark {
   --hairline: rgba(255,255,255,0.10);
   --material-shadow: 0 16px 36px rgba(0,0,0,0.34);
   --nav-material: rgba(24,24,30,0.82);
-  --sticky-material: rgba(20,20,26,0.90);
+  --sticky-material: rgba(20,20,26,0.96);
   color-scheme: dark;
 }
 @media (prefers-color-scheme: dark) {
@@ -1078,7 +1078,7 @@ html.theme-dark {
     --hairline: rgba(255,255,255,0.10);
     --material-shadow: 0 16px 36px rgba(0,0,0,0.34);
     --nav-material: rgba(24,24,30,0.82);
-    --sticky-material: rgba(20,20,26,0.90);
+    --sticky-material: rgba(20,20,26,0.96);
     color-scheme: dark;
   }
 }
@@ -1298,7 +1298,7 @@ html:not(.theme-light):not(.theme-dark) .itinerary-item.is-transit.is-booked {
   background: linear-gradient(180deg, rgba(39,39,47,0.88), rgba(27,61,39,0.70)) !important;
 }
 
-/* v7.9.8.6 · Transit route summary sits above the route map and restores the
+/* v7.9.8.7 · Transit route summary sits above the route map and restores the
    original tap-to-expand detail hierarchy. The main Trip Map remains unchanged. */
 .transit-route-planner{margin:0 0 10px;}
 .transit-route-planner-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:0 0 8px;padding:0 2px;}
@@ -1316,9 +1316,10 @@ html:not(.theme-light):not(.theme-dark) .itinerary-item.is-transit.is-booked {
 .transit-route-map{position:absolute;inset:0;}
 .transit-route-map-status{position:absolute;inset:0;display:grid;place-items:center;padding:20px;text-align:center;background:rgba(246,246,248,.78);color:var(--label-secondary);font-size:calc(10px * var(--font-scale));font-weight:620;line-height:1.4;z-index:2;transition:opacity .18s ease;}
 .transit-route-map-wrap.is-ready .transit-route-map-status{opacity:0;pointer-events:none;}
-.transit-route-track{display:flex;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;touch-action:pan-x;border-radius:18px;}
-.transit-route-track::-webkit-scrollbar{display:none;}
-.transit-route-slide{flex:0 0 100%;min-width:100%;scroll-snap-align:center;box-sizing:border-box;background:transparent;border-radius:18px;overflow:hidden;}
+.transit-route-scroller{overflow-x:auto;overflow-y:visible;scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;border-radius:18px;}
+.transit-route-scroller::-webkit-scrollbar{display:none;}
+.transit-route-track{display:flex;}
+.transit-route-slide{flex:0 0 100%;min-width:100%;scroll-snap-align:center;scroll-snap-stop:always;box-sizing:border-box;background:transparent;border-radius:18px;overflow:hidden;}
 .transit-route-card{width:100%;box-sizing:border-box;border:1px solid rgba(60,60,67,.12);border-radius:18px;background:rgba(255,255,255,.80);box-shadow:0 5px 18px rgba(15,23,42,.07),inset 0 1px 0 rgba(255,255,255,.72);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);overflow:hidden;color:var(--label-primary);}
 .transit-route-summary{display:block;width:100%;box-sizing:border-box;border:0;background:transparent;padding:12px 13px 10px;text-align:left;color:inherit;font:inherit;-webkit-appearance:none;appearance:none;-webkit-tap-highlight-color:transparent;}
 .transit-route-summary:focus-visible{outline:2px solid rgba(0,122,255,.55);outline-offset:-2px;}
@@ -1347,6 +1348,7 @@ html:not(.theme-light):not(.theme-dark) .itinerary-item.is-transit.is-booked {
 .transit-route-dot.active{background:#007aff;transform:scale(1.22);}
 .transit-route-state{padding:13px;border:1px solid rgba(60,60,67,.10);border-radius:16px;background:rgba(255,255,255,.62);font-size:calc(10.5px * var(--font-scale));font-weight:610;line-height:1.45;color:var(--label-secondary);}
 .transit-route-basis-note{margin:7px 2px 0;font-size:calc(9px * var(--font-scale));line-height:1.35;color:#9a6700;}
+.transit-route-google-link{width:100%;margin-top:10px;box-sizing:border-box;min-height:42px;}
 html.theme-dark .transit-route-visual,html:not(.theme-light):not(.theme-dark) .transit-route-visual{background:rgba(42,42,46,.58);border-color:rgba(235,235,245,.11);box-shadow:0 6px 20px rgba(0,0,0,.16),inset 0 1px 0 rgba(255,255,255,.05);}
 html.theme-dark .transit-route-card,html:not(.theme-light):not(.theme-dark) .transit-route-card{background:rgba(42,42,46,.78);border-color:rgba(235,235,245,.12);box-shadow:0 6px 20px rgba(0,0,0,.20),inset 0 1px 0 rgba(255,255,255,.06);}
 html.theme-dark .transit-route-state,html:not(.theme-light):not(.theme-dark) .transit-route-state{background:rgba(42,42,46,.62);border-color:rgba(235,235,245,.10);}
@@ -3859,7 +3861,7 @@ body.expenses-view-active #app-version-note{
 #snacks-view::after,
 #info-view::after,
 #profile-view::after{
-  content:"v7.9.8.6" !important;
+  content:"v7.9.8.7" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3880,7 +3882,7 @@ body.expenses-view-active #app-version-note{
   display:none !important;
 }
 body.expenses-view-active .expenses-module .expenses-app::after{
-  content:"v7.9.8.6" !important;
+  content:"v7.9.8.7" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -4197,7 +4199,7 @@ html.theme-dark .trip-map-place-copy strong,html:not(.theme-light):not(.theme-da
 </style>
             <link rel="apple-touch-icon" href="assets/icon/trip_icon.png">
   <link rel="icon" type="image/png" href="assets/icon/trip_icon.png">
-  <link rel="manifest" href="manifest.json?build=7.9.8.6">
+  <link rel="manifest" href="manifest.json?build=7.9.8.7">
   <meta name="apple-mobile-web-app-title" content="關嘉露西生日之旅">
   <!-- v7.7.1.2: expenses.css is 144KB and every rule is scoped under
        .expenses-module, yet it used to block the very first paint of the
@@ -4205,8 +4207,8 @@ html.theme-dark .trip-map-place-copy strong,html:not(.theme-light):not(.theme-da
        priority without blocking paint; ensureExpensesStylesheet() flips it to
        media="all" before the 支出 view is ever mounted, so the styling is
        byte-for-byte identical by the time anything expenses-related renders. -->
-  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?build=7.9.8.6" media="print">
-  <noscript><link rel="stylesheet" href="assets/css/expenses.css?build=7.9.8.6"></noscript>
+  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?build=7.9.8.7" media="print">
+  <noscript><link rel="stylesheet" href="assets/css/expenses.css?build=7.9.8.7"></noscript>
 </head>
 <body class="app-entry-gated app-entry-pending">
 <div class="bg-fixed"></div>
@@ -4995,7 +4997,7 @@ html.theme-dark .trip-map-place-copy strong,html:not(.theme-light):not(.theme-da
         <span class="profile-detail-spacer"></span>
       </div>
       <section class="profile-card" aria-label="App 資訊">
-        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.9.8.6</strong></div>
+        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.9.8.7</strong></div>
         <div class="profile-meta-row"><span>資料架構</span><strong>Phase 2G.2</strong></div>
         <div class="profile-meta-row"><span>主要資料來源</span><strong id="app-data-source-label">Firebase / 本機快取</strong></div>
       </section>
@@ -5233,7 +5235,7 @@ html.theme-dark .trip-map-place-copy strong,html:not(.theme-light):not(.theme-da
 </div>
 
 <script>
-const APP_VERSION = "7.9.8.6";
+const APP_VERSION = "7.9.8.7";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 let tripMapServicePromise=null,transitRouteServicePromise=null,tripMapController=null,tripMapScope="day",tripMapRenderEpoch=0,tripMapSelectedPoint=null;
@@ -7214,6 +7216,28 @@ function renderTransitRoutePlannerState(host,text){host.replaceChildren();const 
 function transitRouteEndpointTitle(record={},fallback="地點"){
   return String(record?.title||record?.location?.name||record?.name||record?.location?.address||fallback).trim()||fallback;
 }
+function transitGoogleMapsEndpoint(record={},fallback="地點"){
+  const loc=record?.location&&typeof record.location==="object"?record.location:{};
+  const lat=Number(loc?.latitude??loc?.lat),lng=Number(loc?.longitude??loc?.lng??loc?.lon);
+  const placeId=String(loc?.placeId||record?.placeId||"").trim();
+  if(Number.isFinite(lat)&&Number.isFinite(lng))return {value:`${lat},${lng}`,placeId};
+  const mapsUrl=String(loc?.mapsUrl||record?.maps||record?.mapsUrl||record?.googleMapsUrl||"").trim();
+  if(mapsUrl){try{const parsed=new URL(mapsUrl,location.href),query=String(parsed.searchParams.get("query")||parsed.searchParams.get("q")||"").trim(),queryPlaceId=String(parsed.searchParams.get("query_place_id")||"").trim();if(query)return {value:query,placeId:placeId||queryPlaceId};}catch(_){}}
+  const value=String(loc?.address||record?.address||loc?.name||record?.title||record?.name||fallback).trim()||fallback;
+  return {value,placeId};
+}
+function transitGoogleMapsDirectionsUrl(context={}){
+  const origin=transitGoogleMapsEndpoint(context?.origin,"出發點"),destination=transitGoogleMapsEndpoint(context?.destination,"目的地");
+  if(!origin?.value||!destination?.value)return "";
+  const params=new URLSearchParams({api:"1",origin:origin.value,destination:destination.value,travelmode:"transit"});
+  if(origin.placeId)params.set("origin_place_id",origin.placeId);
+  if(destination.placeId)params.set("destination_place_id",destination.placeId);
+  return `https://www.google.com/maps/dir/?${params.toString()}`;
+}
+function updateTransitGoogleMapsLink(planner,context={}){
+  const link=planner?.querySelector?.(".transit-route-google-link");if(!link)return;
+  const url=transitGoogleMapsDirectionsUrl(context);link.hidden=!url;if(url)link.href=url;else link.removeAttribute("href");
+}
 function renderTransitRoutePlannerOptions(planner,result,context={},service=null){
   const gallery=planner.querySelector(".transit-route-gallery"),status=planner.querySelector(".transit-route-planner-head small"),basis=planner.querySelector(".transit-route-basis-note");if(!gallery)return;const options=Array.isArray(result?.options)?result.options:[],timeZone=context?.timeZone||"";
   if(basis){basis.hidden=result?.basis!=="now-fallback";basis.textContent=result?.basis==="now-fallback"?(result?.provider==="google-routes-transit"?"原行程時間超出 Google 班次查詢範圍，以下按目前時間提供示例方案。":"未能使用原行程時間，以下按目前可查時間提供示例方案。") : "";}
@@ -7226,7 +7250,7 @@ function renderTransitRoutePlannerOptions(planner,result,context={},service=null
   const arrow=document.createElement("div");arrow.className="transit-route-endpoint-arrow";arrow.textContent="→";
   const destination=document.createElement("div");destination.className="transit-route-endpoint";const destinationText=document.createElement("span");destinationText.className="transit-route-endpoint-label";destinationText.textContent=transitRouteEndpointTitle(context?.destination,"目的地");const destinationPin=document.createElement("span");destinationPin.className="transit-route-endpoint-pin";destinationPin.textContent="B";destination.append(destinationText,destinationPin);endpoints.append(origin,arrow,destination);
   const mapWrap=document.createElement("div");mapWrap.className="transit-route-map-wrap";const mapHost=document.createElement("div");mapHost.className="transit-route-map";const mapStatus=document.createElement("div");mapStatus.className="transit-route-map-status";mapStatus.textContent="正在載入路線地圖…";mapWrap.append(mapHost,mapStatus);visual.append(endpoints,mapWrap);
-  const track=document.createElement("div");track.className="transit-route-track";const dots=document.createElement("div");dots.className="transit-route-dots";
+  const scroller=document.createElement("div");scroller.className="transit-route-scroller";const track=document.createElement("div");track.className="transit-route-track";scroller.appendChild(track);const dots=document.createElement("div");dots.className="transit-route-dots";
   const setRouteDetailOpen=(card,open)=>{if(!card)return;card.classList.toggle("is-detail-open",!!open);const control=card.querySelector(".transit-route-summary");if(control)control.setAttribute("aria-expanded",open?"true":"false");};
   const collapseRouteDetails=except=>track.querySelectorAll(".transit-route-card.is-detail-open").forEach(card=>{if(card!==except)setRouteDetailOpen(card,false);});
   options.forEach((route,index)=>{const slide=document.createElement("div");slide.className="transit-route-slide";const card=document.createElement("div");card.className="transit-route-card";
@@ -7235,19 +7259,20 @@ function renderTransitRoutePlannerOptions(planner,result,context={},service=null
     const meta=document.createElement("div");meta.className="transit-route-meta";const dep=transitRouteTimeText(route.departureTime,timeZone),arr=transitRouteTimeText(route.arrivalTime,timeZone),rides=Number(route.rideCount||0),transfers=Number(route.transferCount||0);meta.textContent=[[dep,arr].filter(Boolean).join(" → "),rides?`${rides} 次乘車`:"步行方案",rides?(transfers?`${transfers} 次轉乘`:"無轉乘"):""].filter(Boolean).join(" · ");summary.append(top,chain,meta);card.appendChild(summary);
     if((route.steps||[]).length||route.warnings?.length){const detail=document.createElement("div");detail.className="transit-route-detail";const inner=document.createElement("div");inner.className="transit-route-detail-inner";if((route.steps||[]).length){const detailTitle=document.createElement("div");detailTitle.className="transit-route-detail-title";detailTitle.textContent="點樣去";const list=document.createElement("div");list.className="transit-route-step-list";(route.steps||[]).forEach(step=>{const row=document.createElement("div");row.className="transit-route-step";const icon=document.createElement("span");icon.className="transit-route-step-icon";icon.textContent=step.icon||"•";const copy=document.createElement("div");copy.className="transit-route-step-copy";const strong=document.createElement("strong");strong.textContent=transitRouteStepTitle(step);const small=document.createElement("small");small.textContent=transitRouteStepMeta(step,timeZone);copy.appendChild(strong);if(small.textContent)copy.appendChild(small);row.append(icon,copy);list.appendChild(row);});inner.append(detailTitle,list);}if(route.warnings?.length){const warn=document.createElement("div");warn.className="transit-route-warning";warn.textContent=route.warnings.join(" · ");inner.appendChild(warn);}detail.appendChild(inner);card.appendChild(detail);summary.addEventListener("click",()=>{const open=!card.classList.contains("is-detail-open");collapseRouteDetails(open?card:null);setRouteDetailOpen(card,open);});}
     slide.appendChild(card);track.appendChild(slide);const dot=document.createElement("span");dot.className="transit-route-dot"+(index===0?" active":"");dots.appendChild(dot);});
-  gallery.append(track,dots,visual);
+  gallery.append(scroller,dots,visual);
   let previewController=null,activeIndex=-1,previewToken=0;
   const showRoute=async index=>{const safe=Math.max(0,Math.min(options.length-1,Number(index)||0));if(safe===activeIndex&&previewController)return;collapseRouteDetails(null);activeIndex=safe;dots.querySelectorAll(".transit-route-dot").forEach((dot,i)=>dot.classList.toggle("active",i===safe));const route=options[safe];mapWrap.classList.remove("is-ready");mapStatus.textContent=Array.isArray(route?.path)&&route.path.length>1?"正在載入路線地圖…":"此方案暫時未提供可繪製嘅路線圖。";const token=++previewToken;if(!service?.createTransitRoutePreview||!Array.isArray(route?.path)||route.path.length<2)return;try{if(previewController){previewController.setRoute({route,origin:result?.origin,destination:result?.destination});}else{previewController=await service.createTransitRoutePreview(mapHost,{route,origin:result?.origin,destination:result?.destination});}if(token!==previewToken)return;mapWrap.classList.add("is-ready");}catch(error){console.warn("Transit route preview",error);if(token===previewToken)mapStatus.textContent="路線資料已載入，但地圖預覽暫時未能顯示。";}};
-  if(options.length>1){let raf=0;track.addEventListener("scroll",()=>{if(raf)cancelAnimationFrame(raf);raf=requestAnimationFrame(()=>{raf=0;const width=track.clientWidth||1,idx=Math.max(0,Math.min(options.length-1,Math.round(track.scrollLeft/width)));void showRoute(idx);});},{passive:true});}else dots.hidden=true;
+  if(options.length>1){let raf=0;scroller.addEventListener("scroll",()=>{if(raf)cancelAnimationFrame(raf);raf=requestAnimationFrame(()=>{raf=0;let closestIndex=0,closestDistance=Infinity;[...track.children].forEach((slide,index)=>{const distance=Math.abs((slide.offsetLeft||0)-(scroller.scrollLeft||0));if(distance<closestDistance){closestDistance=distance;closestIndex=index;}});void showRoute(closestIndex);});},{passive:true});}else dots.hidden=true;
   requestAnimationFrame(()=>void showRoute(0));
 }
 function buildTransitRoutePlanner(item,dayId=""){
   if(!transitPlannerEligible(item))return null;const planner=document.createElement("section");planner.className="transit-route-planner";planner.dataset.transitRoutePlanner="true";planner.dataset.dayId=String(dayId||"");planner.dataset.itemId=String(item?.itemId||"");planner.dataset.routeState="idle";
-  const head=document.createElement("div");head.className="transit-route-planner-head";const title=document.createElement("strong");title.textContent="建議路線";const status=document.createElement("small");status.textContent="展開時載入";head.append(title,status);const gallery=document.createElement("div");gallery.className="transit-route-gallery";renderTransitRoutePlannerState(gallery,"展開交通項目後，會按前後地點搜尋公共交通方案。");const note=document.createElement("div");note.className="transit-route-basis-note";note.hidden=true;planner.append(head,gallery,note);return planner;
+  const head=document.createElement("div");head.className="transit-route-planner-head";const title=document.createElement("strong");title.textContent="建議路線";const status=document.createElement("small");status.textContent="展開時載入";head.append(title,status);const gallery=document.createElement("div");gallery.className="transit-route-gallery";renderTransitRoutePlannerState(gallery,"展開交通項目後，會按前後地點搜尋公共交通方案。");const note=document.createElement("div");note.className="transit-route-basis-note";note.hidden=true;const googleLink=document.createElement("a");googleLink.className="inline-action-btn transit-route-google-link";googleLink.target="_blank";googleLink.rel="noopener";googleLink.textContent="在 Google Maps 查看最新路線";googleLink.hidden=true;googleLink.addEventListener("click",event=>event.stopPropagation());planner.append(head,gallery,note,googleLink);return planner;
 }
 async function ensureTransitRoutePlanner(itemEl){
   const planner=itemEl?.querySelector?.("[data-transit-route-planner]");if(!planner||planner.dataset.routeState==="loading"||planner.dataset.routeState==="loaded")return;const dayId=String(planner.dataset.dayId||itemEl?.dataset?.dayId||""),itemId=String(planner.dataset.itemId||itemEl?.dataset?.itemId||""),context=transitRouteContext(dayId,itemId),gallery=planner.querySelector(".transit-route-gallery"),status=planner.querySelector(".transit-route-planner-head small");
   if(!context?.origin||!context?.destination){planner.dataset.routeState="error";if(status)status.textContent="未能判斷路線";if(gallery)renderTransitRoutePlannerState(gallery,"暫時未能由現有行程判斷呢一程嘅出發點或目的地；之後 Edit Mode 可以正式指定。");return;}
+  updateTransitGoogleMapsLink(planner,context);
   planner.dataset.routeState="loading";if(status)status.textContent="搜尋中…";if(gallery)renderTransitRoutePlannerState(gallery,"正在搜尋公共交通方案…");
   try{const [routeService,mapService]=await Promise.all([transitRouteService(),tripMapService()]),result=await routeService.computeTransitRouteOptions({origin:context.origin,destination:context.destination,departureTime:context.departureTime,locationContext:context.locationContext});planner.dataset.routeState="loaded";renderTransitRoutePlannerOptions(planner,result,context,mapService);}catch(error){console.warn("Transit planner",error);planner.dataset.routeState="error";if(status)status.textContent="暫時未能載入";if(gallery)renderTransitRoutePlannerState(gallery,error?.code==="transit-location-unresolved"?"暫時未能由現有 Google 地圖參照定位出發點或目的地。":"暫時未能取得建議路線，請稍後再試。");}
 }
@@ -7648,7 +7673,7 @@ function updateCollapsingChrome(){
   const start=18,end=106;
   const progress=clamp((y-start)/(end-start),0,1);
   const itineraryActive=currentAppView==="itinerary";
-  const isStuck=!!(dayTabsChromeEl&&itineraryActive&&dayTabsChromeEl.getBoundingClientRect().top<=collapseStickyTop+0.75&&y>4);
+  const isStuck=!!(dayTabsChromeEl&&itineraryActive&&dayTabsChromeEl.getBoundingClientRect().top<=collapseStickyTop+4&&y>4);
   const eased=1-Math.pow(1-progress,2);
 
   // Write phase. --collapse-progress was unused anywhere in CSS, so Layer 2

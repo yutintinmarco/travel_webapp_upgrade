@@ -1,3 +1,34 @@
+# v7.9.8.7 · Transit Gallery Gesture + Google Maps Latest Route
+
+Phase 3C interaction correction on top of v7.9.8.6. No provider or Trip Overview Map redesign.
+
+## Day selector regression
+
+* Restored the stable Day selector stacking behaviour by making the material behind the selector effectively opaque once it becomes sticky, so scrolling Day content no longer remains visibly layered behind the Day pills.
+* Kept the existing compact-header transition, Day colours, sizing and Day switching logic unchanged.
+
+## Transit route gallery gesture
+
+* Reworked the route option scroller to use the same native horizontal scroll / snap ownership pattern as the itinerary photo gallery: a dedicated scroll viewport wrapping a flex track, without the old `touch-action: pan-x` lock.
+* Vertical gestures that begin inside a route option can now continue scrolling the itinerary page instead of becoming inert.
+* Added `scroll-snap-stop: always` to route slides so a strong horizontal flick stops at the next route rather than jumping directly from option 1 to option 3.
+* Route dots and embedded Google Map preview still follow the closest snapped option.
+
+## Google Maps latest-route deep link
+
+* Every eligible Transit planner now keeps a normal, always-available `在 Google Maps 查看最新路線` action once the previous Stop and next Stop are known.
+* The link uses the same semantic A / B endpoints as the in-app planner, prefers canonical coordinates / Place IDs when available, and opens Google Maps Directions with `travelmode=transit`.
+* Japan still uses ls8h for in-app planning; non-Japan still uses Google Routes Transit. The Deep Link is independent of provider success and remains available as a current-route check / permanent fallback.
+* Google Maps JavaScript API remains the only in-app map renderer. No second map SDK is introduced.
+
+## Scope
+
+* No change to ls8h routing, Google Routes Transit routing, provider selection, Trip Overview Map, media, Firebase schema, Rules, Indexes, Functions or CORS.
+* v7.9.8.6 Quality Guard remains provider-neutral and does not alter provider ranking; no additional route-ranking heuristics were added in this build.
+* Persistent Transit cache remains deferred until this interaction / fallback behaviour is accepted on device.
+
+---
+
 # v7.9.8.6 · Transit Route Quality Guard
 
 Phase 3C route-quality hardening on top of the v7.9.8.5 provider prototype.
