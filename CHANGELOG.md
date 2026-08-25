@@ -1,3 +1,29 @@
+# v7.9.8.0 · Phase 3C Real Route Foundation
+
+## Route engine
+
+• Replaced the Phase 3B straight Stop sequence as the preferred path with the current Google Maps JavaScript Routes Library `Route.computeRoutes()` path. The existing planned sequence line remains a graceful fallback for unsupported or unavailable segments.
+• Route nodes remain semantic Stops only. Transit itinerary rows are used as edge metadata between two Stops and do not become numbered route waypoints.
+• Segment mode is inferred from canonical / legacy Transit metadata: walking, driving / taxi, bicycling and public transit are routed with the corresponding Google mode; flight segments remain planned-line fallback because air routing is outside the road / transit route engine.
+• Adjacent Stops with no explicit Transit connector default to walking for this foundation. Future Edit Mode will make the intended transport mode explicit instead of relying on compatibility inference.
+• Team routing remains isolated. Each Team route receives its own matched Team plus shared itinerary sequence, so Team paths do not cross-connect to another Team's private Stops.
+
+## Cost and resilience
+
+• Added a local 30-day route-path cache keyed by travel mode plus origin / destination coordinates. Reopening the same Day or switching back to the same Team can reuse the local route path instead of repeating a Routes request.
+• Route requests use the required response field mask and request only `path` with `OVERVIEW` polyline quality. No traffic, toll, matrix, navigation step or Places data is requested in this build.
+• Real route computation is bounded to two concurrent segments. A failed segment falls back to the existing Apple-style planned line without blocking the Map or changing itinerary data.
+• Walking / bicycling routes display a persistent compact safety warning because Google marks those route modes as beta and requires the warning when such routes are shown.
+
+## Architecture / deployment
+
+• No Firestore writeback, coordinate migration, Route result persistence to Firebase, media change, Rules, Functions, Indexes or canonical Trip data mutation is introduced.
+• `maps-config.js` remains user-owned and excluded from release ZIPs.
+• Google Cloud setup now requires Routes API to be enabled and the existing restricted Maps browser key to allow Maps JavaScript API, Geocoding API and Routes API.
+• Phase 3D remains responsible for detailed public-transit station, line, platform, transfer and schedule presentation.
+
+---
+
 # v7.9.7.2 · Transit Compact Connector UI Cleanup
 
 ## Scope
