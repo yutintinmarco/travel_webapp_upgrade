@@ -1,5 +1,5 @@
 /*
- * v7.9.5.0 · Phase 3A Saved Place Multi Image Media Integration
+ * v7.9.5.4 · Phase 3A Lifecycle Cleanup Retention Hardening
  *
  * Local commit happens first: compressed display / thumbnail Blobs are stored
  * in IndexedDB under their final Storage paths and a durable metadata-only job
@@ -267,6 +267,23 @@ function fatalSyncError(error) {
     "invalid-media-record"
   ].includes(code);
 }
+function cleanupAccessBarrier(error) {
+  const code = clean(error?.code).toLowerCase();
+  return [
+    "auth-required",
+    "insufficient-role",
+    "permission-denied",
+    "firestore/permission-denied",
+    "storage/unauthorized",
+    "trip-global-locked"
+  ].includes(code);
+}
+function cleanupBarrierRetryMs(attempts) {
+  // Cleanup is non-blocking once canonical data is safe. Permission / Lock
+  // barriers should therefore sleep quietly instead of being discarded or
+  // hammering Firebase.
+  return Math.min(60 * 60 * 1000, Math.max(5 * 60 * 1000, backoffMs(Math.max(8, finiteNumber(attempts)))));
+}
 function backoffMs(attempts) {
   return Math.min(60 * 1000, 1500 * Math.pow(2, Math.max(0, Math.min(5, finiteNumber(attempts) - 1))));
 }
@@ -515,11 +532,25 @@ async function processCleanup(job, user) {
     try {
       await deleteTripMedia(previous, { user });
     } catch (error) {
+      const attempts = finiteNumber(job.attempts) + 1;
+      if (cleanupAccessBarrier(error)) {
+        const delay = cleanupBarrierRetryMs(attempts);
+        const next = await persistJob(job, {
+          state: "cleanup",
+          blocking: false,
+          attempts,
+          lastErrorCode: clean(error?.code),
+          lastErrorMessage: clean(error?.message),
+          nextAttemptAt: Date.now() + delay
+        });
+        await publishState({ changedJobId: clean(next.jobId), cleanupDeferred: true, cleanupAccessBlocked: true });
+        scheduleFlush(delay);
+        return false;
+      }
       if (fatalSyncError(error)) {
         await settleJob(job, { cleanupDeferred: true, cleanupErrorCode: clean(error?.code) });
         return false;
       }
-      const attempts = finiteNumber(job.attempts) + 1;
       const delay = backoffMs(attempts);
       const next = await persistJob(job, {
         state: "cleanup",
@@ -597,12 +628,19 @@ async function processJob(job, user) {
       await removeTripMediaPendingJob(job.jobId);
       await publishState({ changedJobId: clean(job.jobId) });
     } catch (error) {
+      const attempts = finiteNumber(job.attempts) + 1;
+      if (cleanupAccessBarrier(error)) {
+        const delay = cleanupBarrierRetryMs(attempts);
+        await persistJob(job, { attempts, nextAttemptAt: Date.now() + delay, lastErrorCode: clean(error?.code), lastErrorMessage: clean(error?.message) });
+        await publishState({ changedJobId: clean(job.jobId), orphanCleanupDeferred: true, cleanupAccessBlocked: true });
+        scheduleFlush(delay + 50);
+        return;
+      }
       if (fatalSyncError(error)) {
         await removeTripMediaPendingJob(job.jobId);
         await publishState({ changedJobId: clean(job.jobId), orphanCleanupDeferred: true });
         return;
       }
-      const attempts = finiteNumber(job.attempts) + 1;
       const delay = backoffMs(attempts);
       await persistJob(job, { attempts, nextAttemptAt: Date.now() + delay, lastErrorCode: clean(error?.code), lastErrorMessage: clean(error?.message) });
       scheduleFlush(delay + 50);

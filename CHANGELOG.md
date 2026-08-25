@@ -1,3 +1,27 @@
+# v7.9.5.4 · Phase 3A Lifecycle Cleanup Retention Hardening
+
+## Final lifecycle hardening audit
+
+• Audited the persistent Local First media queue, Storage / Registry resume contract, Lock and revoke enforcement, Backup canonical-media integrity, Restore rollback, and Permanent Delete prefix verification.
+• Canonical media mutations remain protected by Firestore and Storage Rules: Owner / Admin only, Global Lock blocks writes, deleting Trips block writes, and revoked members cannot continue canonical media writes.
+• Upload interruption remains resumable because pending jobs are persisted before Cloud work and retries reuse the same immutable Storage paths instead of creating duplicate objects.
+
+## Fixed
+
+• Non-blocking old-media cleanup is no longer discarded when it temporarily hits Global Lock or an access / permission barrier after the new canonical media has already committed.
+• Orphan-cleanup jobs now remain durably queued and retry quietly after temporary access barriers instead of forgetting the orphan Storage / Registry record.
+• Truly terminal cleanup states such as Trip deletion / missing Trip still stop local cleanup because Permanent Delete owns the complete `trips/{tripId}/` prefix cleanup.
+• Backup remains unaffected by deferred orphan cleanup: canonical references remain authoritative and unreferenced ready media stays excluded from Full Backup.
+
+## Deferred by design
+
+• `cleanupStaleTripMediaUploads()` remains an explicit repair primitive rather than an automatic App-start sweep. Automatically listing the Media Registry on every launch would add routine Firestore reads for an edge case that requires the local IndexedDB queue itself to have been lost.
+• A shared cross-device orphan sweeper is deferred to the future Edit Session / Cloud-commit architecture; Permanent Delete already guarantees final zero-residue cleanup.
+
+## Deployment
+
+• No Firestore Rules, Storage Rules, indexes, Firebase config, CORS or Cloud Function changes.
+
 # v7.9.5.3 · Permanent Delete Handoff & Trip Title Hygiene
 
 - After a successful Permanent Delete, the protected Profile navigation state now returns to the established root page instead of leaving the fallback Trip inside the previous Trip's destructive screen.
