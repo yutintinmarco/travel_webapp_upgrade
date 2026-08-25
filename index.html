@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
   <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
   <link rel="dns-prefetch" href="https://api.open-meteo.com">
-  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?build=7.9.8.2">
+  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?build=7.9.8.3">
   <title id="page-title">行程</title>
   <script>
   // v7.7.5.0 · Performance Lite. Memory only: no Firebase reads/writes, no
@@ -1186,7 +1186,7 @@ html.theme-dark .bottom-nav {
   border-color: rgba(255,255,255,0.13);
 }
 
-/* v7.9.8.2 · Transit compact connector card.
+/* v7.9.8.3 · Transit compact connector card.
    Semantic role remains movement between Stops, but the presentation now uses
    a compact frosted surface for much stronger readability over trip artwork. */
 .timeline-item.itinerary-item.is-transit {
@@ -1298,45 +1298,53 @@ html:not(.theme-light):not(.theme-dark) .itinerary-item.is-transit.is-booked {
   background: linear-gradient(180deg, rgba(39,39,47,0.88), rgba(27,61,39,0.70)) !important;
 }
 
-/* v7.9.8.2 · Transit route gallery. Route suggestions live inside the
-   Transit item like an image gallery; Google Routes is queried only on demand. */
+/* v7.9.8.3 · Transit Visual Route Gallery. One shared route-map stage follows
+   the swiped option, while the main Trip Map remains a planning overview. */
 .transit-route-planner{margin:0 0 10px;}
 .transit-route-planner-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:0 0 8px;padding:0 2px;}
 .transit-route-planner-head strong{font-size:calc(12px * var(--font-scale));font-weight:790;color:var(--label-primary);letter-spacing:-.12px;}
 .transit-route-planner-head small{font-size:calc(9.5px * var(--font-scale));font-weight:620;color:var(--label-secondary);text-align:right;}
-.transit-route-gallery{position:relative;overflow:hidden;border-radius:17px;}
-.transit-route-track{display:flex;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;touch-action:pan-x;}
+.transit-route-gallery{position:relative;overflow:visible;}
+.transit-route-visual{margin-bottom:10px;border:1px solid rgba(60,60,67,.11);border-radius:20px;background:rgba(255,255,255,.52);box-shadow:0 5px 18px rgba(15,23,42,.055),inset 0 1px 0 rgba(255,255,255,.64);overflow:hidden;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);}
+.transit-route-endpoints{display:grid;grid-template-columns:minmax(0,1fr) 26px minmax(0,1fr);align-items:center;gap:7px;padding:11px 12px 10px;}
+.transit-route-endpoint{min-width:0;display:flex;align-items:center;gap:7px;font-size:calc(10.5px * var(--font-scale));font-weight:720;color:var(--label-primary);}
+.transit-route-endpoint:last-child{justify-content:flex-end;text-align:right;}
+.transit-route-endpoint-label{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.transit-route-endpoint-pin{width:22px;height:22px;flex:0 0 22px;border-radius:999px;background:#111114;color:#fff;display:grid;place-items:center;font-size:10px;font-weight:800;box-shadow:0 1px 5px rgba(0,0,0,.18);}
+.transit-route-endpoint-arrow{text-align:center;color:var(--label-tertiary);font-size:14px;font-weight:780;}
+.transit-route-map-wrap{position:relative;height:190px;margin:0 9px 9px;border-radius:16px;overflow:hidden;background:rgba(118,118,128,.10);}
+.transit-route-map{position:absolute;inset:0;}
+.transit-route-map-status{position:absolute;inset:0;display:grid;place-items:center;padding:20px;text-align:center;background:rgba(246,246,248,.78);color:var(--label-secondary);font-size:calc(10px * var(--font-scale));font-weight:620;line-height:1.4;z-index:2;transition:opacity .18s ease;}
+.transit-route-map-wrap.is-ready .transit-route-map-status{opacity:0;pointer-events:none;}
+.transit-route-track{display:flex;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;touch-action:pan-x;border-radius:18px;}
 .transit-route-track::-webkit-scrollbar{display:none;}
-.transit-route-slide{flex:0 0 100%;min-width:100%;scroll-snap-align:center;padding:0 1px;box-sizing:border-box;}
-.transit-route-card{width:100%;border:1px solid rgba(60,60,67,.12);border-radius:17px;background:rgba(255,255,255,.78);box-shadow:0 5px 18px rgba(15,23,42,.07),inset 0 1px 0 rgba(255,255,255,.72);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);overflow:hidden;color:var(--label-primary);}
-.transit-route-summary{appearance:none;-webkit-appearance:none;width:100%;border:0;background:transparent;padding:12px 13px 11px;text-align:left;font:inherit;color:inherit;-webkit-tap-highlight-color:transparent;}
+.transit-route-slide{flex:0 0 100%;min-width:100%;scroll-snap-align:center;box-sizing:border-box;background:transparent;border-radius:18px;overflow:hidden;}
+.transit-route-card{width:100%;box-sizing:border-box;border:1px solid rgba(60,60,67,.12);border-radius:18px;background:rgba(255,255,255,.80);box-shadow:0 5px 18px rgba(15,23,42,.07),inset 0 1px 0 rgba(255,255,255,.72);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);overflow:hidden;color:var(--label-primary);}
+.transit-route-summary{padding:12px 13px 10px;text-align:left;color:inherit;}
 .transit-route-topline{display:flex;align-items:center;justify-content:space-between;gap:10px;}
 .transit-route-option{font-size:calc(9.5px * var(--font-scale));font-weight:780;color:#007aff;letter-spacing:.02em;}
 .transit-route-duration{font-size:calc(14px * var(--font-scale));font-weight:800;letter-spacing:-.25px;color:var(--label-primary);}
 .transit-route-chain{margin-top:8px;font-size:calc(13px * var(--font-scale));font-weight:720;line-height:1.35;color:var(--label-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .transit-route-meta{margin-top:5px;font-size:calc(10px * var(--font-scale));font-weight:600;line-height:1.35;color:var(--label-secondary);}
-.transit-route-chevron{display:inline-block;margin-left:4px;color:var(--label-secondary);transition:transform .22s ease;}
-.transit-route-card.is-expanded .transit-route-chevron{transform:rotate(180deg);}
-.transit-route-details{display:grid;grid-template-rows:0fr;border-top:0 solid rgba(60,60,67,.10);transition:grid-template-rows .28s cubic-bezier(.22,.86,.26,1),border-width .2s ease;}
-.transit-route-card.is-expanded .transit-route-details{grid-template-rows:1fr;border-top-width:1px;}
-.transit-route-details-clip{min-height:0;overflow:hidden;}
-.transit-route-step-list{padding:8px 13px 11px;display:grid;gap:8px;}
-.transit-route-step{display:grid;grid-template-columns:28px minmax(0,1fr);gap:8px;align-items:start;}
-.transit-route-step-icon{width:28px;height:28px;border-radius:9px;background:rgba(0,122,255,.09);display:grid;place-items:center;font-size:15px;line-height:1;}
+.transit-route-detail-title{padding:9px 13px 0;border-top:1px solid rgba(60,60,67,.09);font-size:calc(9.5px * var(--font-scale));font-weight:760;color:var(--label-secondary);}
+.transit-route-step-list{padding:8px 13px 12px;display:grid;gap:9px;}
+.transit-route-step{display:grid;grid-template-columns:28px minmax(0,1fr);gap:8px;align-items:start;position:relative;}
+.transit-route-step:not(:last-child)::after{content:"";position:absolute;left:13.5px;top:29px;bottom:-9px;width:1px;background:rgba(60,60,67,.13);}
+.transit-route-step-icon{width:28px;height:28px;border-radius:9px;background:rgba(0,122,255,.09);display:grid;place-items:center;font-size:15px;line-height:1;position:relative;z-index:1;}
 .transit-route-step-copy{min-width:0;padding-top:1px;}
 .transit-route-step-copy strong{display:block;font-size:calc(11px * var(--font-scale));font-weight:730;line-height:1.35;color:var(--label-primary);}
 .transit-route-step-copy small{display:block;margin-top:2px;font-size:calc(9.5px * var(--font-scale));font-weight:560;line-height:1.4;color:var(--label-secondary);}
-.transit-route-warning{padding:0 13px 9px;font-size:calc(9px * var(--font-scale));line-height:1.35;color:var(--label-secondary);}
-.transit-route-attribution{padding:7px 2px 1px;font-size:12px;font-weight:400;line-height:1;color:#5e5e5e;white-space:nowrap;text-align:right;}
-.transit-route-dots{display:flex;justify-content:center;align-items:center;gap:5px;margin-top:7px;min-height:7px;}
+.transit-route-warning{padding:0 13px 10px;font-size:calc(9px * var(--font-scale));line-height:1.35;color:var(--label-secondary);}
+.transit-route-dots{display:flex;justify-content:center;align-items:center;gap:5px;margin-top:8px;min-height:7px;}
 .transit-route-dot{width:5px;height:5px;border-radius:999px;background:rgba(60,60,67,.24);transition:transform .16s ease,background .16s ease;}
 .transit-route-dot.active{background:#007aff;transform:scale(1.22);}
 .transit-route-state{padding:13px;border:1px solid rgba(60,60,67,.10);border-radius:16px;background:rgba(255,255,255,.62);font-size:calc(10.5px * var(--font-scale));font-weight:610;line-height:1.45;color:var(--label-secondary);}
 .transit-route-basis-note{margin:7px 2px 0;font-size:calc(9px * var(--font-scale));line-height:1.35;color:#9a6700;}
-html.theme-dark .transit-route-card,html:not(.theme-light):not(.theme-dark) .transit-route-card{background:rgba(42,42,46,.76);border-color:rgba(235,235,245,.12);box-shadow:0 6px 20px rgba(0,0,0,.20),inset 0 1px 0 rgba(255,255,255,.06);}
+html.theme-dark .transit-route-visual,html:not(.theme-light):not(.theme-dark) .transit-route-visual{background:rgba(42,42,46,.58);border-color:rgba(235,235,245,.11);box-shadow:0 6px 20px rgba(0,0,0,.16),inset 0 1px 0 rgba(255,255,255,.05);}
+html.theme-dark .transit-route-card,html:not(.theme-light):not(.theme-dark) .transit-route-card{background:rgba(42,42,46,.78);border-color:rgba(235,235,245,.12);box-shadow:0 6px 20px rgba(0,0,0,.20),inset 0 1px 0 rgba(255,255,255,.06);}
 html.theme-dark .transit-route-state,html:not(.theme-light):not(.theme-dark) .transit-route-state{background:rgba(42,42,46,.62);border-color:rgba(235,235,245,.10);}
-html.theme-dark .transit-route-attribution,html:not(.theme-light):not(.theme-dark) .transit-route-attribution{color:#b7b7bc;}
-@media (prefers-reduced-motion:reduce){.transit-route-details,.transit-route-chevron{transition:none!important;}}
+html.theme-dark .transit-route-map-status,html:not(.theme-light):not(.theme-dark) .transit-route-map-status{background:rgba(34,34,38,.80);}
+@media (prefers-reduced-motion:reduce){.transit-route-map-status{transition:none!important;}}
 
 /* Itinerary detail is primary content, so it expands in place rather than
    opening a modal sheet. */
@@ -3844,7 +3852,7 @@ body.expenses-view-active #app-version-note{
 #snacks-view::after,
 #info-view::after,
 #profile-view::after{
-  content:"v7.9.8.2" !important;
+  content:"v7.9.8.3" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3865,7 +3873,7 @@ body.expenses-view-active #app-version-note{
   display:none !important;
 }
 body.expenses-view-active .expenses-module .expenses-app::after{
-  content:"v7.9.8.2" !important;
+  content:"v7.9.8.3" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -4182,7 +4190,7 @@ html.theme-dark .trip-map-place-copy strong,html:not(.theme-light):not(.theme-da
 </style>
             <link rel="apple-touch-icon" href="assets/icon/trip_icon.png">
   <link rel="icon" type="image/png" href="assets/icon/trip_icon.png">
-  <link rel="manifest" href="manifest.json?build=7.9.8.2">
+  <link rel="manifest" href="manifest.json?build=7.9.8.3">
   <meta name="apple-mobile-web-app-title" content="關嘉露西生日之旅">
   <!-- v7.7.1.2: expenses.css is 144KB and every rule is scoped under
        .expenses-module, yet it used to block the very first paint of the
@@ -4190,8 +4198,8 @@ html.theme-dark .trip-map-place-copy strong,html:not(.theme-light):not(.theme-da
        priority without blocking paint; ensureExpensesStylesheet() flips it to
        media="all" before the 支出 view is ever mounted, so the styling is
        byte-for-byte identical by the time anything expenses-related renders. -->
-  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?build=7.9.8.2" media="print">
-  <noscript><link rel="stylesheet" href="assets/css/expenses.css?build=7.9.8.2"></noscript>
+  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?build=7.9.8.3" media="print">
+  <noscript><link rel="stylesheet" href="assets/css/expenses.css?build=7.9.8.3"></noscript>
 </head>
 <body class="app-entry-gated app-entry-pending">
 <div class="bg-fixed"></div>
@@ -4980,7 +4988,7 @@ html.theme-dark .trip-map-place-copy strong,html:not(.theme-light):not(.theme-da
         <span class="profile-detail-spacer"></span>
       </div>
       <section class="profile-card" aria-label="App 資訊">
-        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.9.8.2</strong></div>
+        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.9.8.3</strong></div>
         <div class="profile-meta-row"><span>資料架構</span><strong>Phase 2G.2</strong></div>
         <div class="profile-meta-row"><span>主要資料來源</span><strong id="app-data-source-label">Firebase / 本機快取</strong></div>
       </section>
@@ -5218,7 +5226,7 @@ html.theme-dark .trip-map-place-copy strong,html:not(.theme-light):not(.theme-da
 </div>
 
 <script>
-const APP_VERSION = "7.9.8.2";
+const APP_VERSION = "7.9.8.3";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 let tripMapServicePromise=null,tripMapController=null,tripMapScope="day",tripMapRenderEpoch=0,tripMapSelectedPoint=null;
@@ -7117,7 +7125,7 @@ function resetTripScopedUi(data){
   applyTripVisualTheme(data);
 }
 
-// v7.9.8.2 presentation compatibility. Canonical normalized Trips carry
+// v7.9.8.3 presentation compatibility. Canonical normalized Trips carry
 // item.kind. Bundled legacy trip.json can render before the schema module is
 // ready, so this mirrors only the conservative legacy hints needed for the UI.
 function itineraryPresentationKind(item={}){
@@ -7178,21 +7186,33 @@ function transitRouteTimeText(iso,timeZone){if(!iso)return"";try{return new Intl
 function transitRouteStepTitle(step={}){if(step?.transit){const t=step.transit,line=String(t.lineName||t.vehicleType||"公共交通").trim()||"公共交通";return t.headsign?`${line} · 往 ${t.headsign}`:line;}return String(step?.instruction||step?.mode||"步行").replace(/<[^>]*>/g,"").trim()||"步行";}
 function transitRouteStepMeta(step={},timeZone=""){if(step?.transit){const t=step.transit,from=String(t.departureStop||"").trim(),to=String(t.arrivalStop||"").trim(),dep=transitRouteTimeText(t.departureTime,timeZone),arr=transitRouteTimeText(t.arrivalTime,timeZone),stops=Number(t.stopCount||0);return [[dep,arr].filter(Boolean).join(" → "),[from,to].filter(Boolean).join(" → "),stops?`${stops} 站`:""].filter(Boolean).join(" · ");}return [String(step?.durationText||""),String(step?.distanceText||"")].filter(Boolean).join(" · ");}
 function renderTransitRoutePlannerState(host,text){host.replaceChildren();const state=document.createElement("div");state.className="transit-route-state";state.textContent=text;host.appendChild(state);}
-function renderTransitRoutePlannerOptions(planner,result,timeZone=""){
-  const gallery=planner.querySelector(".transit-route-gallery"),status=planner.querySelector(".transit-route-planner-head small"),basis=planner.querySelector(".transit-route-basis-note");if(!gallery)return;const options=Array.isArray(result?.options)?result.options:[];
+function transitRouteEndpointTitle(record={},fallback="地點"){
+  return String(record?.title||record?.location?.name||record?.name||record?.location?.address||fallback).trim()||fallback;
+}
+function renderTransitRoutePlannerOptions(planner,result,context={},service=null){
+  const gallery=planner.querySelector(".transit-route-gallery"),status=planner.querySelector(".transit-route-planner-head small"),basis=planner.querySelector(".transit-route-basis-note");if(!gallery)return;const options=Array.isArray(result?.options)?result.options:[],timeZone=context?.timeZone||"";
   if(basis){basis.hidden=result?.basis!=="now-fallback";basis.textContent=result?.basis==="now-fallback"?"原行程時間超出 Google 班次查詢範圍，以下按目前時間提供示例方案。":"";}
   if(!options.length){renderTransitRoutePlannerState(gallery,"暫時搵唔到合適嘅公共交通方案。");if(status)status.textContent="未有方案";return;}
   if(status)status.textContent=`${options.length} 個方案`;
-  gallery.replaceChildren();const track=document.createElement("div");track.className="transit-route-track";const dots=document.createElement("div");dots.className="transit-route-dots";
-  options.forEach((route,index)=>{const slide=document.createElement("div");slide.className="transit-route-slide";const card=document.createElement("div");card.className="transit-route-card";const summary=document.createElement("button");summary.type="button";summary.className="transit-route-summary";summary.setAttribute("aria-expanded","false");
-    const top=document.createElement("div");top.className="transit-route-topline";const label=document.createElement("span");label.className="transit-route-option";label.textContent=`方案 ${index+1}`;const duration=document.createElement("span");duration.className="transit-route-duration";duration.textContent=route.durationText||"交通方案";top.append(label,duration);
+  gallery.replaceChildren();
+  const visual=document.createElement("div");visual.className="transit-route-visual";
+  const endpoints=document.createElement("div");endpoints.className="transit-route-endpoints";
+  const origin=document.createElement("div");origin.className="transit-route-endpoint";const originPin=document.createElement("span");originPin.className="transit-route-endpoint-pin";originPin.textContent="A";const originText=document.createElement("span");originText.className="transit-route-endpoint-label";originText.textContent=transitRouteEndpointTitle(context?.origin,"出發點");origin.append(originPin,originText);
+  const arrow=document.createElement("div");arrow.className="transit-route-endpoint-arrow";arrow.textContent="→";
+  const destination=document.createElement("div");destination.className="transit-route-endpoint";const destinationText=document.createElement("span");destinationText.className="transit-route-endpoint-label";destinationText.textContent=transitRouteEndpointTitle(context?.destination,"目的地");const destinationPin=document.createElement("span");destinationPin.className="transit-route-endpoint-pin";destinationPin.textContent="B";destination.append(destinationText,destinationPin);endpoints.append(origin,arrow,destination);
+  const mapWrap=document.createElement("div");mapWrap.className="transit-route-map-wrap";const mapHost=document.createElement("div");mapHost.className="transit-route-map";const mapStatus=document.createElement("div");mapStatus.className="transit-route-map-status";mapStatus.textContent="正在載入路線地圖…";mapWrap.append(mapHost,mapStatus);visual.append(endpoints,mapWrap);gallery.appendChild(visual);
+  const track=document.createElement("div");track.className="transit-route-track";const dots=document.createElement("div");dots.className="transit-route-dots";
+  options.forEach((route,index)=>{const slide=document.createElement("div");slide.className="transit-route-slide";const card=document.createElement("div");card.className="transit-route-card";
+    const summary=document.createElement("div");summary.className="transit-route-summary";const top=document.createElement("div");top.className="transit-route-topline";const label=document.createElement("span");label.className="transit-route-option";label.textContent=`方案 ${index+1}`;const duration=document.createElement("span");duration.className="transit-route-duration";duration.textContent=route.durationText||"交通方案";top.append(label,duration);
     const chain=document.createElement("div");chain.className="transit-route-chain";chain.textContent=(route.modeChain||[]).join(" → ")||"🚆 公共交通";
-    const meta=document.createElement("div");meta.className="transit-route-meta";const dep=transitRouteTimeText(route.departureTime,timeZone),arr=transitRouteTimeText(route.arrivalTime,timeZone),rides=Number(route.rideCount||0),transfers=Number(route.transferCount||0);meta.textContent=[[dep,arr].filter(Boolean).join(" → "),rides?`${rides} 次乘車`:"",transfers?`${transfers} 次轉乘`:"無轉乘"].filter(Boolean).join(" · ");const chev=document.createElement("span");chev.className="transit-route-chevron";chev.textContent="⌄";meta.appendChild(chev);summary.append(top,chain,meta);
-    const details=document.createElement("div");details.className="transit-route-details";const clip=document.createElement("div");clip.className="transit-route-details-clip";const list=document.createElement("div");list.className="transit-route-step-list";
-    (route.steps||[]).forEach(step=>{const row=document.createElement("div");row.className="transit-route-step";const icon=document.createElement("span");icon.className="transit-route-step-icon";icon.textContent=step.icon||"•";const copy=document.createElement("div");copy.className="transit-route-step-copy";const strong=document.createElement("strong");strong.textContent=transitRouteStepTitle(step);const small=document.createElement("small");small.textContent=transitRouteStepMeta(step,timeZone);copy.appendChild(strong);if(small.textContent)copy.appendChild(small);row.append(icon,copy);list.appendChild(row);});clip.appendChild(list);
-    if(route.warnings?.length){const warn=document.createElement("div");warn.className="transit-route-warning";warn.textContent=route.warnings.join(" · ");clip.appendChild(warn);}details.appendChild(clip);card.append(summary,details);slide.appendChild(card);track.appendChild(slide);
-    summary.addEventListener("click",()=>{const open=!card.classList.contains("is-expanded");card.classList.toggle("is-expanded",open);summary.setAttribute("aria-expanded",open?"true":"false");});const dot=document.createElement("span");dot.className="transit-route-dot"+(index===0?" active":"");dots.appendChild(dot);});
-  if(options.length>1){let raf=0;track.addEventListener("scroll",()=>{if(raf)cancelAnimationFrame(raf);raf=requestAnimationFrame(()=>{raf=0;const width=track.clientWidth||1,idx=Math.max(0,Math.min(options.length-1,Math.round(track.scrollLeft/width)));dots.querySelectorAll(".transit-route-dot").forEach((dot,i)=>dot.classList.toggle("active",i===idx));});},{passive:true});}else dots.hidden=true;const attr=document.createElement("div");attr.className="transit-route-attribution";attr.setAttribute("translate","no");attr.textContent="Google Maps";gallery.append(track,dots,attr);
+    const meta=document.createElement("div");meta.className="transit-route-meta";const dep=transitRouteTimeText(route.departureTime,timeZone),arr=transitRouteTimeText(route.arrivalTime,timeZone),rides=Number(route.rideCount||0),transfers=Number(route.transferCount||0);meta.textContent=[[dep,arr].filter(Boolean).join(" → "),rides?`${rides} 次乘車`:"",transfers?`${transfers} 次轉乘`:"無轉乘"].filter(Boolean).join(" · ");summary.append(top,chain,meta);card.appendChild(summary);
+    if((route.steps||[]).length){const detailTitle=document.createElement("div");detailTitle.className="transit-route-detail-title";detailTitle.textContent="點樣去";const list=document.createElement("div");list.className="transit-route-step-list";(route.steps||[]).forEach(step=>{const row=document.createElement("div");row.className="transit-route-step";const icon=document.createElement("span");icon.className="transit-route-step-icon";icon.textContent=step.icon||"•";const copy=document.createElement("div");copy.className="transit-route-step-copy";const strong=document.createElement("strong");strong.textContent=transitRouteStepTitle(step);const small=document.createElement("small");small.textContent=transitRouteStepMeta(step,timeZone);copy.appendChild(strong);if(small.textContent)copy.appendChild(small);row.append(icon,copy);list.appendChild(row);});card.append(detailTitle,list);}
+    if(route.warnings?.length){const warn=document.createElement("div");warn.className="transit-route-warning";warn.textContent=route.warnings.join(" · ");card.appendChild(warn);}slide.appendChild(card);track.appendChild(slide);const dot=document.createElement("span");dot.className="transit-route-dot"+(index===0?" active":"");dots.appendChild(dot);});
+  gallery.append(track,dots);
+  let previewController=null,activeIndex=-1,previewToken=0;
+  const showRoute=async index=>{const safe=Math.max(0,Math.min(options.length-1,Number(index)||0));if(safe===activeIndex&&previewController)return;activeIndex=safe;dots.querySelectorAll(".transit-route-dot").forEach((dot,i)=>dot.classList.toggle("active",i===safe));const route=options[safe];mapWrap.classList.remove("is-ready");mapStatus.textContent=Array.isArray(route?.path)&&route.path.length>1?"正在載入路線地圖…":"此方案暫時未提供可繪製嘅路線圖。";const token=++previewToken;if(!service?.createTransitRoutePreview||!Array.isArray(route?.path)||route.path.length<2)return;try{if(previewController){previewController.setRoute({route,origin:result?.origin,destination:result?.destination});}else{previewController=await service.createTransitRoutePreview(mapHost,{route,origin:result?.origin,destination:result?.destination});}if(token!==previewToken)return;mapWrap.classList.add("is-ready");}catch(error){console.warn("Transit route preview",error);if(token===previewToken)mapStatus.textContent="路線資料已載入，但地圖預覽暫時未能顯示。";}};
+  if(options.length>1){let raf=0;track.addEventListener("scroll",()=>{if(raf)cancelAnimationFrame(raf);raf=requestAnimationFrame(()=>{raf=0;const width=track.clientWidth||1,idx=Math.max(0,Math.min(options.length-1,Math.round(track.scrollLeft/width)));void showRoute(idx);});},{passive:true});}else dots.hidden=true;
+  requestAnimationFrame(()=>void showRoute(0));
 }
 function buildTransitRoutePlanner(item,dayId=""){
   if(!transitPlannerEligible(item))return null;const planner=document.createElement("section");planner.className="transit-route-planner";planner.dataset.transitRoutePlanner="true";planner.dataset.dayId=String(dayId||"");planner.dataset.itemId=String(item?.itemId||"");planner.dataset.routeState="idle";
@@ -7202,7 +7222,7 @@ async function ensureTransitRoutePlanner(itemEl){
   const planner=itemEl?.querySelector?.("[data-transit-route-planner]");if(!planner||planner.dataset.routeState==="loading"||planner.dataset.routeState==="loaded")return;const dayId=String(planner.dataset.dayId||itemEl?.dataset?.dayId||""),itemId=String(planner.dataset.itemId||itemEl?.dataset?.itemId||""),context=transitRouteContext(dayId,itemId),gallery=planner.querySelector(".transit-route-gallery"),status=planner.querySelector(".transit-route-planner-head small");
   if(!context?.origin||!context?.destination){planner.dataset.routeState="error";if(status)status.textContent="未能判斷路線";if(gallery)renderTransitRoutePlannerState(gallery,"暫時未能由現有行程判斷呢一程嘅出發點或目的地；之後 Edit Mode 可以正式指定。");return;}
   planner.dataset.routeState="loading";if(status)status.textContent="搜尋中…";if(gallery)renderTransitRoutePlannerState(gallery,"正在搜尋公共交通方案…");
-  try{const service=await tripMapService(),result=await service.computeTransitRouteOptions({origin:context.origin,destination:context.destination,departureTime:context.departureTime});planner.dataset.routeState="loaded";renderTransitRoutePlannerOptions(planner,result,context.timeZone);}catch(error){console.warn("Transit planner",error);planner.dataset.routeState="error";if(status)status.textContent="暫時未能載入";if(gallery)renderTransitRoutePlannerState(gallery,error?.code==="transit-location-unresolved"?"暫時未能由現有 Google 地圖參照定位出發點或目的地。":"暫時未能取得建議路線；請確認 Routes API 已啟用後再試。");}
+  try{const service=await tripMapService(),result=await service.computeTransitRouteOptions({origin:context.origin,destination:context.destination,departureTime:context.departureTime});planner.dataset.routeState="loaded";renderTransitRoutePlannerOptions(planner,result,context,service);}catch(error){console.warn("Transit planner",error);planner.dataset.routeState="error";if(status)status.textContent="暫時未能載入";if(gallery)renderTransitRoutePlannerState(gallery,error?.code==="transit-location-unresolved"?"暫時未能由現有 Google 地圖參照定位出發點或目的地。":"暫時未能取得建議路線；請確認 Routes API 已啟用後再試。");}
 }
 
 
@@ -7342,7 +7362,7 @@ function render(data,{includeSnacks=true}={}){
       if(who!=="all"&&travellers[who]){const tc=teamDisplayColour(who,travellers[who]);if(isTransit)el.style.setProperty("--transit-accent",tc);else el.style.borderLeft=`3px solid ${tc}`;}
       let itemGallery=[];const hasTransitPlanner=isTransit&&transitPlannerEligible(item),hasInlineDetail=Boolean(item.popup||hasTransitPlanner);
       if(hasInlineDetail)el.classList.add("clickable");
-      if(item.popup)itemGallery=getGalleryForItem(item,day,ck,matchedCities,meta);
+      if(item.popup)itemGallery=hasTransitPlanner?storageGalleryForItem(item,dayId):getGalleryForItem(item,day,ck,matchedCities,meta);
 
       const summary=document.createElement("div");summary.className="itinerary-summary";
       const cw=document.createElement("div");cw.className="content";

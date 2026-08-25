@@ -1,3 +1,31 @@
+# v7.9.8.3 · Transit Visual Route Gallery
+
+## Route Gallery presentation
+
+• Reworked the first Transit Route Gallery from a text-first option card into a visual journey surface: previous Stop → route map → next Stop → route steps.
+• The previous and next itinerary Stops are now named directly above the embedded route preview, with A / B endpoint markers on the map.
+• Swiping between方案 updates one shared embedded map to the selected route rather than creating a separate map instance for every alternative.
+• Each route option now keeps the easy-scan duration / mode / time summary and shows `點樣去` walking / transit steps directly below it, closer to the information hierarchy of a directions result while retaining the App's own gallery grammar.
+• Removed the square slide backing / 1px outer padding that left grey corners visible behind the rounded route option card. The slide and track are now transparent clipped surfaces and the visible card owns the radius.
+
+## Route geometry
+
+• Transit `Route.computeRoutes()` now requests the `path` field in addition to the existing `legs` / duration fields so the selected suggestion can be drawn on the embedded map.
+• Route geometry remains view-only, memory-only data. It is not written to Firestore, Backup or canonical itinerary data.
+• The embedded Transit map is lazy and only exists after an eligible Transit item has been expanded and Google has returned at least one route. The main Trip Map remains a Trip overview and still does not become a navigation map.
+
+## Transit media hierarchy
+
+• Transit items with the route planner no longer pull generic `galleryDefaults` placeholder artwork into the expanded detail. Actual item-owned media remains available through the existing item media data, but the route map becomes the primary Transit visual surface.
+
+## Release / backend
+
+• No Firestore schema migration, Storage change, Rules change, Index change, Function change, CORS change or Cloud Shell deployment is introduced.
+• `assets/js/maps-config.js` remains user-owned and is intentionally excluded from the release ZIP.
+• This visual route preview adds route geometry (`path`) to the existing user-triggered Transit request. No traffic-aware or other advanced routing modifier is added; actual billing should be verified from the real-device request after this prototype test.
+
+---
+
 # v7.9.8.2 · Transit Route Query Reliability Fix
 
 ## Blocking Transit Gallery fix

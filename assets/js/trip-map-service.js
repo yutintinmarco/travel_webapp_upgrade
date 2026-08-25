@@ -427,6 +427,14 @@ function transitStepPlain(step = {}) {
     } : null
   };
 }
+function routePathPlain(route = {}) {
+  return (Array.isArray(route?.path) ? route.path : []).map(point => {
+    const latSource = typeof point?.lat === "function" ? point.lat() : (point?.lat ?? point?.latitude);
+    const lngSource = typeof point?.lng === "function" ? point.lng() : (point?.lng ?? point?.longitude);
+    const lat = finiteNumber(latSource), lng = finiteNumber(lngSource);
+    return lat == null || lng == null ? null : { lat, lng };
+  }).filter(Boolean);
+}
 function transitRoutePlain(route = {}, index = 0) {
   const steps = (Array.isArray(route?.legs) ? route.legs : []).flatMap(leg => Array.isArray(leg?.steps) ? leg.steps : []).map(transitStepPlain);
   const transitSteps = steps.filter(step => step.transit);
@@ -447,6 +455,7 @@ function transitRoutePlain(route = {}, index = 0) {
     rideCount: transitSteps.length,
     transferCount: Math.max(0, transitSteps.length - 1),
     modeChain,
+    path: routePathPlain(route),
     steps,
     warnings: Array.isArray(route?.warnings) ? route.warnings.map(clean).filter(Boolean) : []
   };
@@ -495,7 +504,7 @@ async function computeTransitRoutesOnce(Route, { origin, destination, departureT
     travelMode: "TRANSIT",
     departureTime,
     computeAlternativeRoutes: alternatives,
-    fields: ["durationMillis", "localizedValues", "legs", "warnings"]
+    fields: ["durationMillis", "localizedValues", "legs", "path", "warnings"]
   };
   const response = await Route.computeRoutes(request);
   return Array.isArray(response?.routes) ? response.routes : [];
@@ -577,6 +586,70 @@ function markerElement(point) {
   el.textContent = isSaved ? "★" : (isTransit ? (point.icon || "↗︎") : String(point.displayOrder || "•"));
   el.setAttribute("aria-hidden", "true");
   return el;
+}
+
+export async function createTransitRoutePreview(container, { route = null, origin = null, destination = null } = {}) {
+  if (!container) throw new Error("Transit route map container is required");
+  const { maps, marker, core } = await loadGoogleMapsLibraries();
+  const map = new maps.Map(container, {
+    center: origin?.position || destination?.position || { lat: 22.3027, lng: 114.1772 },
+    zoom: 13,
+    mapId: clean(GOOGLE_MAPS_CONFIG?.mapId) || "DEMO_MAP_ID",
+    disableDefaultUI: true,
+    clickableIcons: false,
+    gestureHandling: "cooperative",
+    keyboardShortcuts: false
+  });
+  let overlays = [];
+  const removeOverlays = () => {
+    overlays.forEach(row => {
+      try { if (row?.setMap) row.setMap(null); else if ("map" in row) row.map = null; } catch (_) {}
+    });
+    overlays = [];
+  };
+  const markerContent = label => {
+    const el = document.createElement("div");
+    el.textContent = label;
+    Object.assign(el.style, {
+      width: "28px", height: "28px", borderRadius: "999px", display: "grid", placeItems: "center",
+      background: "#111114", color: "#fff", border: "2px solid #fff", boxShadow: "0 2px 8px rgba(0,0,0,.24)",
+      fontSize: "12px", fontWeight: "800", lineHeight: "1"
+    });
+    return el;
+  };
+  const setRoute = ({ route: nextRoute = null, origin: nextOrigin = null, destination: nextDestination = null } = {}) => {
+    removeOverlays();
+    const path = Array.isArray(nextRoute?.path) ? nextRoute.path.filter(point => finiteNumber(point?.lat) != null && finiteNumber(point?.lng) != null) : [];
+    if (path.length > 1 && maps.Polyline) {
+      const halo = new maps.Polyline({ map, path, clickable: false, geodesic: false, strokeColor: "#ffffff", strokeOpacity: .94, strokeWeight: 8, zIndex: 1 });
+      const line = new maps.Polyline({ map, path, clickable: false, geodesic: false, strokeColor: "#0a84ff", strokeOpacity: .96, strokeWeight: 5, zIndex: 2 });
+      overlays.push(halo, line);
+    }
+    const start = nextOrigin?.position || path[0] || null;
+    const end = nextDestination?.position || path[path.length - 1] || null;
+    if (start) {
+      const pin = new marker.AdvancedMarkerElement({ map, position: start, content: markerContent("A"), zIndex: 20 });
+      overlays.push(pin);
+    }
+    if (end) {
+      const pin = new marker.AdvancedMarkerElement({ map, position: end, content: markerContent("B"), zIndex: 20 });
+      overlays.push(pin);
+    }
+    const bounds = new core.LatLngBounds();
+    path.forEach(point => bounds.extend(point));
+    if (start) bounds.extend(start);
+    if (end) bounds.extend(end);
+    if (!bounds.isEmpty()) {
+      map.fitBounds(bounds, { top: 30, right: 28, bottom: 36, left: 28 });
+      core.event.addListenerOnce(map, "idle", () => { if (map.getZoom() > 16) map.setZoom(16); });
+    }
+  };
+  setRoute({ route, origin, destination });
+  return {
+    map,
+    setRoute(next = {}) { setRoute(next); },
+    destroy() { removeOverlays(); container.replaceChildren(); }
+  };
 }
 
 export async function createTripMap(container, { points = [], onSelect = null, onMapTap = null, connectSequence = false, routeGroups = [], focusPaddingTop = 122, showSequenceLine = true } = {}) {
