@@ -136,7 +136,8 @@ function journeyLegStep(leg = {}, serviceDate, timeZone) {
       instruction: fromName && toName ? `步行 ${fromName} → ${toName}` : "步行",
       durationText: durationTextFromSeconds(durationSecs),
       distanceText: "",
-      transit: null
+      transit: null,
+      role: "walk"
     };
   }
   const mode = safeText(leg?.mode, "rail");
@@ -165,7 +166,7 @@ function journeyLegStep(leg = {}, serviceDate, timeZone) {
     }
   };
 }
-function accessWalkStep(seconds, fromLabel, toLabel) {
+function accessWalkStep(seconds, fromLabel, toLabel, role = "walk") {
   const secs = finiteNumber(seconds);
   if (secs == null || secs <= 0) return null;
   return {
@@ -174,7 +175,8 @@ function accessWalkStep(seconds, fromLabel, toLabel) {
     instruction: `步行 ${safeText(fromLabel, "出發點")} → ${safeText(toLabel, "車站")}`,
     durationText: durationTextFromSeconds(secs),
     distanceText: "",
-    transit: null
+    transit: null,
+    role
   };
 }
 function farePlain(fare = null) {
@@ -212,8 +214,8 @@ export async function normalizeLs8hGuidanceResponse(data = {}, { originRecord = 
     const lastTransitIndex = (() => { for (let i = rawLegs.length - 1; i >= 0; i -= 1) if (clean(rawLegs[i]?.kind).toLowerCase() === "transit") return i; return -1; })();
     const firstTransit = firstTransitIndex >= 0 ? rawLegs[firstTransitIndex] : null;
     const lastTransit = lastTransitIndex >= 0 ? rawLegs[lastTransitIndex] : null;
-    const access = accessWalkStep(journey?.accessWalkSecs, endpointLabel(originRecord, safeText(data?.from?.name, "出發點")), safeText(firstTransit?.from?.name, firstTransit?.from?.id, "車站"));
-    const egress = accessWalkStep(journey?.egressWalkSecs, safeText(lastTransit?.to?.name, lastTransit?.to?.id, "車站"), endpointLabel(destinationRecord, safeText(data?.to?.name, "目的地")));
+    const access = accessWalkStep(journey?.accessWalkSecs, endpointLabel(originRecord, safeText(data?.from?.name, "出發點")), safeText(firstTransit?.from?.name, firstTransit?.from?.id, "車站"), "access");
+    const egress = accessWalkStep(journey?.egressWalkSecs, safeText(lastTransit?.to?.name, lastTransit?.to?.id, "車站"), endpointLabel(destinationRecord, safeText(data?.to?.name, "目的地")), "egress");
     if (access) steps.unshift(access);
     if (egress) steps.push(egress);
     const transitSteps = steps.filter(step => step?.transit);
@@ -235,6 +237,8 @@ export async function normalizeLs8hGuidanceResponse(data = {}, { originRecord = 
       departureTime: serviceSecondsIso(serviceDate, departureSecs, timeZone),
       arrivalTime: serviceSecondsIso(serviceDate, arrivalSecs, timeZone),
       rideCount: transitSteps.length,
+      accessWalkSecs: finiteNumber(journey?.accessWalkSecs),
+      egressWalkSecs: finiteNumber(journey?.egressWalkSecs),
       transferCount: Math.max(0, Number(metrics?.transferCount ?? journey?.transferCount ?? Math.max(0, transitSteps.length - 1))),
       modeChain,
       path,
