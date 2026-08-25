@@ -160,6 +160,29 @@ function pointResolveSpec(record = {}) {
   return { type: "none", key: "" };
 }
 
+function orderedPreviewImages(record = {}) {
+  const images = Array.isArray(record?.images) ? record.images.filter(Boolean) : [];
+  if (images.length) {
+    return images.slice().sort((a, b) => Number(a?.sortOrder ?? 0) - Number(b?.sortOrder ?? 0));
+  }
+  const gallery = Array.isArray(record?.gallery) ? record.gallery.filter(Boolean) : (record?.gallery ? [record.gallery] : []);
+  if (gallery.length) return gallery;
+  const bookingGallery = Array.isArray(record?.booking?.gallery) ? record.booking.gallery.filter(Boolean) : (record?.booking?.gallery ? [record.booking.gallery] : []);
+  return bookingGallery;
+}
+function previewImageFromRecord(record = {}) { return orderedPreviewImages(record)[0] || null; }
+function regionLabelFromSavedPlace(place = {}) {
+  const explicit = clean(place?.region || place?.district || place?.city);
+  if (explicit) return explicit;
+  const area = clean(place?.area);
+  if (area) {
+    const first = clean(area.split(/[\s/／·・|]+/)[0]);
+    if (first) return first;
+  }
+  const tags = Array.isArray(place?.tags) ? place.tags.map(clean).filter(Boolean) : [];
+  return tags[0] || "其他";
+}
+
 export function itineraryMapPoints(trip, activeDayId = "") {
   const days = Array.isArray(trip?.days) ? trip.days : [];
   const wanted = clean(activeDayId);
@@ -167,14 +190,21 @@ export function itineraryMapPoints(trip, activeDayId = "") {
   if (!day) return [];
   return (Array.isArray(day.items) ? day.items : []).map((item, index) => {
     const spec = pointResolveSpec(item);
+    const time = clean(item?.time);
+    const note = clean(item?.note);
+    const detail = clean(item?.detail);
     return {
       kind: "itinerary",
       identity: `item:${clean(day.dayId)}:${clean(item?.itemId) || index}`,
       dayId: clean(day.dayId),
       itemId: clean(item?.itemId),
       order: index + 1,
+      icon: clean(item?.icon) || "•",
       title: clean(item?.title) || `行程 ${index + 1}`,
-      subtitle: [clean(item?.time), clean(item?.note)].filter(Boolean).join(" · "),
+      subtitle: [time, note].filter(Boolean).join(" · "),
+      meta: time || "行程地點",
+      detail: note || detail,
+      previewImage: previewImageFromRecord(item),
       mapsUrl: clean(item?.location?.mapsUrl || item?.maps || item?.mapsUrl),
       resolve: spec
     };
@@ -186,13 +216,21 @@ export function savedPlaceMapPoints(trip) {
   const rows = Array.isArray(raw) ? raw : (Array.isArray(raw?.items) ? raw.items : []);
   return rows.map((place, index) => {
     const spec = pointResolveSpec(place);
+    const area = clean(place?.area);
+    const category = clean(place?.category);
+    const note = clean(place?.note || place?.must);
     return {
       kind: "saved",
       identity: `saved:${clean(place?.placeId) || index}`,
       placeId: clean(place?.placeId),
       order: index + 1,
+      icon: "★",
       title: clean(place?.title || place?.name) || `收藏 ${index + 1}`,
-      subtitle: clean(place?.category || place?.note || place?.address),
+      subtitle: [area, category].filter(Boolean).join(" · ") || note,
+      meta: [area, category].filter(Boolean).join(" · ") || "收藏地點",
+      detail: note,
+      region: regionLabelFromSavedPlace(place),
+      previewImage: previewImageFromRecord(place),
       mapsUrl: clean(place?.location?.mapsUrl || place?.maps || place?.mapsUrl),
       resolve: spec
     };
@@ -250,7 +288,7 @@ function markerElement(point) {
   return el;
 }
 
-export async function createTripMap(container, { points = [], onSelect = null, onMapTap = null } = {}) {
+export async function createTripMap(container, { points = [], onSelect = null, onMapTap = null, connectSequence = false } = {}) {
   if (!container) throw new Error("Map container is required");
   const { maps, marker, core } = await loadGoogleMapsLibraries();
   const map = new maps.Map(container, {
@@ -262,33 +300,79 @@ export async function createTripMap(container, { points = [], onSelect = null, o
     gestureHandling: "greedy",
     keyboardShortcuts: false
   });
-  const markers = [];
-  const bounds = new core.LatLngBounds();
+
+  const markerRows = [];
+  const routeOverlays = [];
+  const pointByIdentity = new Map();
+  points.forEach(point => { if (point?.identity && point?.position) pointByIdentity.set(point.identity, point); });
+
+  const focusPoints = (focusRows, { maxZoom = 15, padding = null } = {}) => {
+    const rows = (Array.isArray(focusRows) ? focusRows : []).filter(row => row?.position);
+    if (!rows.length) return;
+    if (rows.length === 1) {
+      map.panTo(rows[0].position);
+      if (map.getZoom() !== 14) map.setZoom(14);
+      return;
+    }
+    const bounds = new core.LatLngBounds();
+    rows.forEach(row => bounds.extend(row.position));
+    map.fitBounds(bounds, padding || { top: 154, right: 34, bottom: 188, left: 34 });
+    core.event.addListenerOnce(map, "idle", () => { if (map.getZoom() > maxZoom) map.setZoom(maxZoom); });
+  };
+
+  if (connectSequence) {
+    const path = points.filter(point => point?.position).sort((a, b) => Number(a.order || 0) - Number(b.order || 0)).map(point => point.position);
+    if (path.length > 1 && maps.Polyline) {
+      const halo = new maps.Polyline({
+        map, path, clickable: false, geodesic: false,
+        strokeColor: "#ffffff", strokeOpacity: 0.88, strokeWeight: 8, zIndex: 1
+      });
+      const route = new maps.Polyline({
+        map, path, clickable: false, geodesic: false,
+        strokeColor: "#007aff", strokeOpacity: 0.92, strokeWeight: 4, zIndex: 2
+      });
+      routeOverlays.push(halo, route);
+    }
+  }
+
   points.forEach(point => {
     if (!point?.position) return;
-    bounds.extend(point.position);
     const advanced = new marker.AdvancedMarkerElement({
       map,
       position: point.position,
       title: point.title,
       content: markerElement(point),
       gmpClickable: true,
-      zIndex: Number(point.order || 0)
+      zIndex: 100 + Number(point.order || 0)
     });
     advanced.addEventListener("gmp-click", () => { try { onSelect?.(point, advanced, map); } catch (_) {} });
-    markers.push(advanced);
+    markerRows.push({ point, marker: advanced });
   });
-  if (points.length > 1) {
-    map.fitBounds(bounds, { top: 112, right: 34, bottom: 180, left: 34 });
-    core.event.addListenerOnce(map, "idle", () => { if (map.getZoom() > 15) map.setZoom(15); });
-  } else if (points.length === 1) {
-    map.setCenter(points[0].position);
-    map.setZoom(14);
-  }
+
+  focusPoints(points, { maxZoom: 15, padding: { top: 122, right: 34, bottom: 188, left: 34 } });
   map.addListener("click", () => { try { onMapTap?.(); } catch (_) {} });
+
   return {
     map,
-    markers,
-    destroy() { markers.forEach(item => { try { item.map = null; } catch (_) {} }); container.replaceChildren(); }
+    markers: markerRows.map(row => row.marker),
+    points: points.slice(),
+    focusPoints,
+    setVisibleIdentities(identities, { focus = true } = {}) {
+      const wanted = identities == null ? null : new Set(Array.isArray(identities) ? identities : []);
+      const visible = [];
+      markerRows.forEach(row => {
+        const show = !wanted || wanted.has(row.point.identity);
+        row.marker.map = show ? map : null;
+        if (show) visible.push(row.point);
+      });
+      if (focus && visible.length) focusPoints(visible, { maxZoom: 15, padding: { top: 168, right: 34, bottom: 188, left: 34 } });
+      return visible;
+    },
+    point(identity) { return pointByIdentity.get(identity) || null; },
+    destroy() {
+      markerRows.forEach(row => { try { row.marker.map = null; } catch (_) {} });
+      routeOverlays.forEach(line => { try { line.setMap(null); } catch (_) {} });
+      container.replaceChildren();
+    }
   };
 }

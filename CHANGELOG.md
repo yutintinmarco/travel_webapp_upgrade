@@ -1,3 +1,42 @@
+# v7.9.6.1 · Phase 3B Map Experience Pass
+
+## Map Route Overlay
+
+• Current Day markers are now connected in itinerary order with a restrained Apple style sequence overlay.
+• The overlay is deliberately a visual itinerary sequence only. It does not claim to follow roads, walking paths or transit routing; Routes API remains deferred to Phase 3C.
+• A subtle light halo keeps the system blue route legible over dense Google basemap detail while markers remain visually above the route.
+
+## Marker Preview Card
+
+• Tapping an itinerary or Saved Place marker now reuses the App's own first image as a compact preview thumbnail when available.
+• Firebase managed media resolves through the existing Local First media binder and thumbnail variant; legacy static gallery images remain supported.
+• Preview cards show compact App metadata and a short detail line without adding Places Photo API or a second media lifecycle.
+• Places without an image fall back to the existing itinerary icon or Saved Place star.
+
+## Saved Place Region Filter
+
+• Saved Place map scope now adds a second horizontal iOS style pill row derived from existing Saved Place area metadata.
+• Region grouping prefers explicit region / district / city metadata and otherwise uses the first area segment, preserving the current Saved Place data model with no Firestore migration.
+• Selecting a region hides unrelated Saved Place markers and automatically reframes the map to the visible markers with UI aware padding.
+• Selecting `全部` restores and reframes all resolved Saved Place markers.
+
+## Full Screen / Attribution
+
+• Google attribution placement is intentionally unchanged. The map remains true full bleed instead of shrinking the canvas to manufacture extra bottom space.
+
+## Maps Configuration Release Contract
+
+• `assets/js/maps-config.js` is now treated as a user owned deployment file and is intentionally excluded from release ZIP updates so an existing restricted API key cannot be overwritten by future whole folder uploads.
+• Added `assets/js/maps-config.example.js` as the versioned reference template.
+• The Service Worker no longer precaches the user owned config during installation; it remains fetched normally when the map module is opened.
+
+## Firebase / Data Contract
+
+• No Firestore, Storage, Backup, Restore, Permanent Delete, media path or permission behaviour changed.
+• No Routes API, Places API or additional Google Maps API is required by this build.
+
+---
+
 # v7.9.6.0 · Phase 3B Maps Foundation
 
 ## Added
