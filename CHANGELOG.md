@@ -1,3 +1,11 @@
+# v7.9.5.3 · Permanent Delete Handoff & Trip Title Hygiene
+
+- After a successful Permanent Delete, the protected Profile navigation state now returns to the established root page instead of leaving the fallback Trip inside the previous Trip's destructive screen.
+- Clears the DELETE confirmation and delete-backup state during the successful Trip handoff.
+- Trip catalog titles are normalized to plain text before the Trip Switcher / My Trips UI consumes them, preventing legacy `titleMain` presentation markup such as `<span class=...>` from leaking into switcher labels.
+- Permanent Delete Cloud Function audited with no backend changes required: it deletes the complete `trips/{tripId}/` Storage prefix and verifies that prefix is empty before the Trip root can be deleted. This automatically covers Trip icon, background, itinerary media and Saved Place media.
+- No Firestore Rules, Storage Rules, indexes, Firebase config, CORS or Cloud Function deployment changes.
+
 # v7.9.5.2 · Canonical Media Backup Integrity
 
 ## Phase 3A · Media-aware Full Backup finalization
