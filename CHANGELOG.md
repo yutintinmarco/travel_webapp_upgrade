@@ -1,3 +1,20 @@
+# v7.9.8.4 · Collapsible Transit Route Detail
+
+## Route Gallery hierarchy
+
+• Restored the original tap-to-expand behaviour for `點樣去`. Route steps are collapsed by default so expanding a Transit item no longer produces a very tall directions list immediately.
+• Moved the swipeable route option summary above the embedded Route Map. The selected plan can now be scanned first, while the map remains the primary visual directly underneath.
+• Added a compact disclosure chevron to each route summary. Tapping the summary expands or collapses that plan's detailed walking / transit steps.
+• Swiping to another route collapses any open detail automatically, preventing an off-screen expanded plan from forcing excess gallery height.
+• Warnings, when present, follow the detailed route content and collapse with `點樣去`.
+
+## Scope
+
+• No change to Google Routes queries, route geometry, Transit provider logic, main Trip Map, Firestore, Storage, Rules, Indexes, Functions or CORS.
+• `assets/js/maps-config.js` remains user-owned and is intentionally excluded from the release ZIP.
+
+---
+
 # v7.9.8.3 · Transit Visual Route Gallery
 
 ## Route Gallery presentation
