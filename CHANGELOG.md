@@ -1,3 +1,10 @@
+# v7.9.6.3 · Map Filter, Hero Preview & Direction Readability
+
+• Removed the residual iOS Safari grey tap tray under Day, Team and Saved region filter pills by making the filter hosts fully transparent, removing sub-filter shadows, and disabling the WebKit tap highlight while retaining an explicit keyboard focus-visible state.
+• Upgraded map place previews with media from the small square thumbnail to a full-width 16:9 hero image above the place information. The preview now uses the Display media variant and reuses the canonical itinerary / Saved Place crop metadata so the framing matches the app gallery.
+• Enlarged route direction arrows and reduced their frequency slightly so travel direction is easier to read without turning the sequence line into navigation-style signage.
+• No Firebase backend, Google API scope, Maps config, route calculation, or canonical trip data changes.
+
 # v7.9.6.2 · Phase 3B Day / Team Map Interaction Pass
 
 ## Directional Sequence Overlay

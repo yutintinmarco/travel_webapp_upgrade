@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
   <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
   <link rel="dns-prefetch" href="https://api.open-meteo.com">
-  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?build=7.9.6.2">
+  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?build=7.9.6.3">
   <title id="page-title">行程</title>
   <script>
   // v7.7.5.0 · Performance Lite. Memory only: no Firebase reads/writes, no
@@ -3692,7 +3692,7 @@ body.expenses-view-active #app-version-note{
 #snacks-view::after,
 #info-view::after,
 #profile-view::after{
-  content:"v7.9.6.2" !important;
+  content:"v7.9.6.3" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3713,7 +3713,7 @@ body.expenses-view-active #app-version-note{
   display:none !important;
 }
 body.expenses-view-active .expenses-module .expenses-app::after{
-  content:"v7.9.6.2" !important;
+  content:"v7.9.6.3" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3961,7 +3961,7 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
 
 
 
-/* v7.9.6.2 · Phase 3B Map interaction refinement. Reuses the existing circular
+/* v7.9.6.3 · Phase 3B Map interaction refinement. Reuses the existing circular
    header action, itinerary Day pills and Team filter grammar. */
 .header-action-row{display:flex;align-items:center;justify-content:flex-end;gap:6px;}
 .trip-map-overlay{position:fixed;inset:0;z-index:3550;background:var(--surface-primary,#f7f7fa);opacity:0;pointer-events:none;transition:opacity .18s ease;}
@@ -3976,9 +3976,11 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
 .trip-map-filters .trip-activity-filter{padding:6px 12px;font-size:11px;border:0;box-shadow:none;}
 .trip-map-state{position:absolute;z-index:3;left:50%;bottom:max(24px,calc(env(safe-area-inset-bottom) + 18px));transform:translateX(-50%);max-width:min(86vw,360px);padding:9px 13px;border-radius:15px;background:rgba(248,248,250,.88);color:rgba(60,60,67,.78);font-size:11px;font-weight:600;line-height:1.35;text-align:center;box-shadow:0 4px 18px rgba(15,23,42,.12);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);}
 .trip-map-state[hidden]{display:none!important;}
-.trip-map-place-card{position:absolute;z-index:4;left:14px;right:14px;bottom:max(16px,calc(env(safe-area-inset-bottom) + 12px));display:flex;align-items:center;gap:12px;max-width:452px;margin:0 auto;padding:12px 12px 12px 14px;border-radius:20px;background:rgba(248,248,250,.94);box-shadow:0 8px 30px rgba(15,23,42,.20),inset 0 1px 0 rgba(255,255,255,.72);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);}
+.trip-map-place-card{position:absolute;z-index:4;left:14px;right:14px;bottom:max(16px,calc(env(safe-area-inset-bottom) + 12px));display:grid;grid-template-columns:58px minmax(0,1fr) auto;align-items:center;gap:10px 12px;max-width:452px;margin:0 auto;padding:12px 12px 12px 14px;border-radius:20px;background:rgba(248,248,250,.94);box-shadow:0 8px 30px rgba(15,23,42,.20),inset 0 1px 0 rgba(255,255,255,.72);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);overflow:hidden;}
+.trip-map-place-card.has-media{grid-template-columns:minmax(0,1fr) auto;padding:10px 10px 12px;}
 .trip-map-place-card[hidden]{display:none!important;}
-.trip-map-place-copy{min-width:0;flex:1;}
+.trip-map-place-card.has-media .trip-map-place-copy{padding-left:4px;}
+.trip-map-place-copy{min-width:0;}
 .trip-map-place-copy strong{display:block;color:#111;font-size:14px;font-weight:720;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .trip-map-place-copy small{display:block;margin-top:3px;color:rgba(60,60,67,.72);font-size:10.5px;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .trip-map-open-google{flex:0 0 auto;border:0;border-radius:12px;background:rgba(0,122,255,.11);color:#007aff;padding:8px 10px;font:650 11px/1 -apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,sans-serif;}
@@ -3990,15 +3992,19 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
 .trip-map-team-filters{top:max(158px,calc(env(safe-area-inset-top) + 152px));}
 .trip-map-region-filters::-webkit-scrollbar,.trip-map-day-filters::-webkit-scrollbar,.trip-map-team-filters::-webkit-scrollbar{display:none;}
 .trip-map-region-filters[hidden],.trip-map-day-filters[hidden],.trip-map-team-filters[hidden]{display:none!important;}
-.trip-map-region-filter,.trip-map-day-filter,.trip-map-team-filter{flex:0 0 auto;border:1px solid rgba(60,60,67,.14);border-radius:999px;padding:7px 13px;background:rgba(255,255,255,.90);color:rgba(28,28,30,.84);font:650 11px/1 -apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,sans-serif;box-shadow:0 2px 9px rgba(15,23,42,.09),inset 0 1px 0 rgba(255,255,255,.78);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);white-space:nowrap;}
-.trip-map-region-filter.active,.trip-map-day-filter.active,.trip-map-team-filter.active-all{background:#111;color:#fff;border-color:#111;box-shadow:0 4px 14px rgba(15,23,42,.20);}
-.trip-map-team-filter.active-team{color:#fff;font-weight:720;}
-.trip-map-place-media{width:58px;height:58px;flex:0 0 58px;border-radius:14px;overflow:hidden;background:rgba(118,118,128,.10);display:grid;place-items:center;box-shadow:inset 0 0 0 1px rgba(60,60,67,.08);}
+.trip-map-region-filters,.trip-map-day-filters,.trip-map-team-filters{background:transparent!important;box-shadow:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;}
+.trip-map-region-filter,.trip-map-day-filter,.trip-map-team-filter{flex:0 0 auto;appearance:none;-webkit-appearance:none;-webkit-tap-highlight-color:transparent;border:1px solid rgba(60,60,67,.14);border-radius:999px;padding:7px 13px;background:rgba(255,255,255,.92);background-clip:padding-box;color:rgba(28,28,30,.84);font:650 11px/1 -apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,sans-serif;box-shadow:none!important;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);white-space:nowrap;outline:none;}
+.trip-map-region-filter:focus-visible,.trip-map-day-filter:focus-visible,.trip-map-team-filter:focus-visible{outline:2px solid rgba(0,122,255,.34);outline-offset:2px;}
+.trip-map-region-filter.active,.trip-map-day-filter.active,.trip-map-team-filter.active-all{background:#111;color:#fff;border-color:#111;box-shadow:none!important;}
+.trip-map-team-filter.active-team{color:#fff;font-weight:720;box-shadow:none!important;}
+.trip-map-place-media{width:58px;height:58px;border-radius:14px;overflow:hidden;background:rgba(118,118,128,.10);display:grid;place-items:center;box-shadow:inset 0 0 0 1px rgba(60,60,67,.08);position:relative;}
+.trip-map-place-card.has-media .trip-map-place-media{grid-column:1/-1;width:100%;height:auto;aspect-ratio:16/9;border-radius:16px;margin:0 0 2px;box-shadow:none;}
 .trip-map-place-media img{width:100%;height:100%;display:block;object-fit:cover;}
+.trip-map-place-card.has-media .trip-map-place-media img.itinerary-crop-positioned{position:absolute;max-width:none;max-height:none;object-fit:fill;}
 .trip-map-place-media-fallback{font-size:23px;line-height:1;}
 .trip-map-place-meta{display:block;margin-top:3px;color:rgba(60,60,67,.72);font-size:10.5px;font-weight:600;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .trip-map-place-detail{display:block;margin-top:2px;color:rgba(60,60,67,.58);font-size:9.5px;font-weight:520;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-html.theme-dark .trip-map-region-filter,html.theme-dark .trip-map-day-filter,html.theme-dark .trip-map-team-filter,html:not(.theme-light):not(.theme-dark) .trip-map-region-filter,html:not(.theme-light):not(.theme-dark) .trip-map-day-filter,html:not(.theme-light):not(.theme-dark) .trip-map-team-filter{background:rgba(30,30,34,.88);border-color:rgba(235,235,245,.14);color:rgba(245,245,247,.90);}
+html.theme-dark .trip-map-region-filter,html.theme-dark .trip-map-day-filter,html.theme-dark .trip-map-team-filter,html:not(.theme-light):not(.theme-dark) .trip-map-region-filter,html:not(.theme-light):not(.theme-dark) .trip-map-day-filter,html:not(.theme-light):not(.theme-dark) .trip-map-team-filter{background:rgba(30,30,34,.90);border-color:rgba(235,235,245,.14);color:rgba(245,245,247,.90);box-shadow:none!important;}
 html.theme-dark .trip-map-region-filter.active,html.theme-dark .trip-map-day-filter.active,html.theme-dark .trip-map-team-filter.active-all,html:not(.theme-light):not(.theme-dark) .trip-map-region-filter.active,html:not(.theme-light):not(.theme-dark) .trip-map-day-filter.active,html:not(.theme-light):not(.theme-dark) .trip-map-team-filter.active-all{background:#f5f5f7;color:#111;border-color:#f5f5f7;}
 html.theme-dark .trip-map-place-media,html:not(.theme-light):not(.theme-dark) .trip-map-place-media{background:rgba(118,118,128,.20);box-shadow:inset 0 0 0 1px rgba(235,235,245,.08);}
 html.theme-dark .trip-map-place-meta,html.theme-dark .trip-map-place-detail,html:not(.theme-light):not(.theme-dark) .trip-map-place-meta,html:not(.theme-light):not(.theme-dark) .trip-map-place-detail{color:rgba(235,235,245,.62);}
@@ -4008,7 +4014,7 @@ html.theme-dark .trip-map-place-copy strong,html:not(.theme-light):not(.theme-da
 </style>
             <link rel="apple-touch-icon" href="assets/icon/trip_icon.png">
   <link rel="icon" type="image/png" href="assets/icon/trip_icon.png">
-  <link rel="manifest" href="manifest.json?build=7.9.6.2">
+  <link rel="manifest" href="manifest.json?build=7.9.6.3">
   <meta name="apple-mobile-web-app-title" content="關嘉露西生日之旅">
   <!-- v7.7.1.2: expenses.css is 144KB and every rule is scoped under
        .expenses-module, yet it used to block the very first paint of the
@@ -4016,8 +4022,8 @@ html.theme-dark .trip-map-place-copy strong,html:not(.theme-light):not(.theme-da
        priority without blocking paint; ensureExpensesStylesheet() flips it to
        media="all" before the 支出 view is ever mounted, so the styling is
        byte-for-byte identical by the time anything expenses-related renders. -->
-  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?build=7.9.6.2" media="print">
-  <noscript><link rel="stylesheet" href="assets/css/expenses.css?build=7.9.6.2"></noscript>
+  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?build=7.9.6.3" media="print">
+  <noscript><link rel="stylesheet" href="assets/css/expenses.css?build=7.9.6.3"></noscript>
 </head>
 <body class="app-entry-gated app-entry-pending">
 <div class="bg-fixed"></div>
@@ -4806,7 +4812,7 @@ html.theme-dark .trip-map-place-copy strong,html:not(.theme-light):not(.theme-da
         <span class="profile-detail-spacer"></span>
       </div>
       <section class="profile-card" aria-label="App 資訊">
-        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.9.6.2</strong></div>
+        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.9.6.3</strong></div>
         <div class="profile-meta-row"><span>資料架構</span><strong>Phase 2G.2</strong></div>
         <div class="profile-meta-row"><span>主要資料來源</span><strong id="app-data-source-label">Firebase / 本機快取</strong></div>
       </section>
@@ -5043,7 +5049,7 @@ html.theme-dark .trip-map-place-copy strong,html:not(.theme-light):not(.theme-da
 </div>
 
 <script>
-const APP_VERSION = "7.9.6.2";
+const APP_VERSION = "7.9.6.3";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 let tripMapServicePromise=null,tripMapController=null,tripMapScope="day",tripMapRenderEpoch=0,tripMapSelectedPoint=null;
@@ -5064,7 +5070,7 @@ function updateTripMapButton(data=window.tripData){const btn=document.getElement
 function tripMapOverlayOpen(){return document.getElementById("trip-map-overlay")?.classList.contains("is-open");}
 function clearTripMapSelection(){
   tripMapSelectedPoint=null;
-  const card=document.getElementById("trip-map-place-card");if(card)card.hidden=true;
+  const card=document.getElementById("trip-map-place-card");if(card){card.hidden=true;card.classList.remove("has-media");}
 }
 function tripMapHydratedPreview(point){
   try{
@@ -5086,16 +5092,20 @@ function tripMapHydratedPreview(point){
 }
 function hydrateTripMapPointPreviews(points){return (Array.isArray(points)?points:[]).map(point=>({...point,previewImage:tripMapHydratedPreview(point)}));}
 function renderTripMapPreviewMedia(point){
-  const host=document.getElementById("trip-map-place-media");if(!host)return;
+  const host=document.getElementById("trip-map-place-media"),card=document.getElementById("trip-map-place-card");if(!host)return false;
   host.replaceChildren();
   const media=tripMapHydratedPreview(point);
+  card?.classList.toggle("has-media",!!media);
   if(media){
     const img=document.createElement("img");img.alt="";img.decoding="async";img.loading="eager";
     const fallback=tripMediaDescriptorFallback(media);
-    img.addEventListener("error",()=>{if(!img.isConnected)return;const span=document.createElement("span");span.className="trip-map-place-media-fallback";span.setAttribute("aria-hidden","true");span.textContent=point?.icon||(point?.kind==="saved"?"★":"📍");host.replaceChildren(span);},{once:true});
-    host.appendChild(img);bindTripMediaImageElement(img,media,{variant:"thumbnail",fallbackSrc:fallback});return;
+    img.addEventListener("error",()=>{if(!img.isConnected)return;card?.classList.remove("has-media");const span=document.createElement("span");span.className="trip-map-place-media-fallback";span.setAttribute("aria-hidden","true");span.textContent=point?.icon||(point?.kind==="saved"?"★":"📍");host.replaceChildren(span);},{once:true});
+    host.appendChild(img);
+    bindTripMediaImageElement(img,media,{variant:"display",fallbackSrc:fallback});
+    if(itineraryMediaCrop(media))applyItineraryMediaCropVisual(img,media,host);
+    return true;
   }
-  const span=document.createElement("span");span.className="trip-map-place-media-fallback";span.setAttribute("aria-hidden","true");span.textContent=point?.icon||(point?.kind==="saved"?"★":"📍");host.appendChild(span);
+  const span=document.createElement("span");span.className="trip-map-place-media-fallback";span.setAttribute("aria-hidden","true");span.textContent=point?.icon||(point?.kind==="saved"?"★":"📍");host.appendChild(span);return false;
 }
 function showTripMapSelection(point){
   tripMapSelectedPoint=point||null;

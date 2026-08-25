@@ -339,15 +339,15 @@ export async function createTripMap(container, { points = [], onSelect = null, o
     const icons = arrowPath ? [{
       icon: {
         path: arrowPath,
-        scale: 2.15,
+        scale: 3.15,
         fillColor: color,
-        fillOpacity: 0.96,
+        fillOpacity: 1,
         strokeColor: "#ffffff",
-        strokeOpacity: 0.72,
-        strokeWeight: 0.65
+        strokeOpacity: 0.92,
+        strokeWeight: 1.0
       },
-      offset: "48px",
-      repeat: "112px"
+      offset: "58px",
+      repeat: "132px"
     }] : undefined;
     const route = new maps.Polyline({
       map, path, clickable: false, geodesic: false,
