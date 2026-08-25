@@ -1,3 +1,38 @@
+# v7.9.6.2 · Phase 3B Day / Team Map Interaction Pass
+
+## Directional Sequence Overlay
+
+• Added restrained directional arrowheads to the existing itinerary sequence polyline using supported Google Maps polyline symbols.
+• Arrows remain a visual itinerary-order cue only and do not claim road, walking or transit routing.
+• Single-team views use the selected Team colour; Trips without multiple Teams retain the existing system blue route.
+
+## Map Day and Team Filters
+
+• Day scope now adds a centered horizontal Day pill row so users can switch Map Day without leaving the full-screen map.
+• Trips with multiple traveller Teams add a second Team pill row using the App's existing Team labels and colours.
+• Selecting a Team shows that Team's own items plus shared `who: all` items.
+• Selecting `全部` keeps all markers visible but draws separate Team route sequences so divergent Team itineraries are not incorrectly connected to each other. Shared itinerary points participate in each Team's route.
+
+## Preview Media Hydration Fix
+
+• Map preview cards no longer rely only on raw `images[]` data. They now resolve through the same itinerary / Saved Place gallery hydration path used by the live App UI.
+• Firebase managed media, Local First pending overlays and legacy static gallery images therefore share the same preview source-of-truth as the existing gallery surfaces.
+• Saved Places without a stable placeId retain an ordered fallback lookup so legacy rows can still resolve their gallery preview.
+
+## Saved Place Filter Harmony
+
+• Saved Place region pills are now genuinely centered as a compact row.
+• Removed the previous grey tray feeling: inactive pills use lightweight white glass surfaces with no enclosing background panel; active selection remains high-contrast black.
+• Region selection continues to auto-fit the visible markers.
+
+## Release / Backend
+
+• `assets/js/maps-config.js` remains a user-owned deployment file and is intentionally excluded from release ZIP updates.
+• No Firestore, Storage, Rules, Functions, Backup, Restore or media lifecycle contract changed.
+• No Routes API or additional Google Maps API is required.
+
+---
+
 # v7.9.6.1 · Phase 3B Map Experience Pass
 
 ## Map Route Overlay

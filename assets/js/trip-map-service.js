@@ -199,6 +199,7 @@ export function itineraryMapPoints(trip, activeDayId = "") {
       dayId: clean(day.dayId),
       itemId: clean(item?.itemId),
       order: index + 1,
+      who: clean(item?.who) || "all",
       icon: clean(item?.icon) || "•",
       title: clean(item?.title) || `行程 ${index + 1}`,
       subtitle: [time, note].filter(Boolean).join(" · "),
@@ -288,7 +289,7 @@ function markerElement(point) {
   return el;
 }
 
-export async function createTripMap(container, { points = [], onSelect = null, onMapTap = null, connectSequence = false } = {}) {
+export async function createTripMap(container, { points = [], onSelect = null, onMapTap = null, connectSequence = false, routeGroups = [], focusPaddingTop = 122 } = {}) {
   if (!container) throw new Error("Map container is required");
   const { maps, marker, core } = await loadGoogleMapsLibraries();
   const map = new maps.Map(container, {
@@ -316,24 +317,45 @@ export async function createTripMap(container, { points = [], onSelect = null, o
     }
     const bounds = new core.LatLngBounds();
     rows.forEach(row => bounds.extend(row.position));
-    map.fitBounds(bounds, padding || { top: 154, right: 34, bottom: 188, left: 34 });
+    map.fitBounds(bounds, padding || { top: Math.max(122, Number(focusPaddingTop) || 122), right: 34, bottom: 188, left: 34 });
     core.event.addListenerOnce(map, "idle", () => { if (map.getZoom() > maxZoom) map.setZoom(maxZoom); });
   };
 
-  if (connectSequence) {
-    const path = points.filter(point => point?.position).sort((a, b) => Number(a.order || 0) - Number(b.order || 0)).map(point => point.position);
-    if (path.length > 1 && maps.Polyline) {
-      const halo = new maps.Polyline({
-        map, path, clickable: false, geodesic: false,
-        strokeColor: "#ffffff", strokeOpacity: 0.88, strokeWeight: 8, zIndex: 1
-      });
-      const route = new maps.Polyline({
-        map, path, clickable: false, geodesic: false,
-        strokeColor: "#007aff", strokeOpacity: 0.92, strokeWeight: 4, zIndex: 2
-      });
-      routeOverlays.push(halo, route);
-    }
-  }
+  const effectiveRouteGroups = Array.isArray(routeGroups) && routeGroups.length
+    ? routeGroups
+    : (connectSequence ? [{ points, color: "#007aff" }] : []);
+  effectiveRouteGroups.forEach((group, groupIndex) => {
+    const rows = (Array.isArray(group?.points) ? group.points : [])
+      .filter(point => point?.position)
+      .sort((a, b) => Number(a.order || 0) - Number(b.order || 0));
+    const path = rows.map(point => point.position);
+    if (path.length <= 1 || !maps.Polyline) return;
+    const color = clean(group?.color) || "#007aff";
+    const halo = new maps.Polyline({
+      map, path, clickable: false, geodesic: false,
+      strokeColor: "#ffffff", strokeOpacity: effectiveRouteGroups.length > 1 ? 0.72 : 0.88, strokeWeight: 8, zIndex: 1 + groupIndex * 2
+    });
+    const arrowPath = window.google?.maps?.SymbolPath?.FORWARD_CLOSED_ARROW;
+    const icons = arrowPath ? [{
+      icon: {
+        path: arrowPath,
+        scale: 2.15,
+        fillColor: color,
+        fillOpacity: 0.96,
+        strokeColor: "#ffffff",
+        strokeOpacity: 0.72,
+        strokeWeight: 0.65
+      },
+      offset: "48px",
+      repeat: "112px"
+    }] : undefined;
+    const route = new maps.Polyline({
+      map, path, clickable: false, geodesic: false,
+      strokeColor: color, strokeOpacity: effectiveRouteGroups.length > 1 ? 0.84 : 0.92, strokeWeight: 4,
+      icons, zIndex: 2 + groupIndex * 2
+    });
+    routeOverlays.push(halo, route);
+  });
 
   points.forEach(point => {
     if (!point?.position) return;
@@ -349,7 +371,7 @@ export async function createTripMap(container, { points = [], onSelect = null, o
     markerRows.push({ point, marker: advanced });
   });
 
-  focusPoints(points, { maxZoom: 15, padding: { top: 122, right: 34, bottom: 188, left: 34 } });
+  focusPoints(points, { maxZoom: 15, padding: { top: Math.max(122, Number(focusPaddingTop) || 122), right: 34, bottom: 188, left: 34 } });
   map.addListener("click", () => { try { onMapTap?.(); } catch (_) {} });
 
   return {
