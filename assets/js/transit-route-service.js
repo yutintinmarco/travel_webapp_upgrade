@@ -1,5 +1,6 @@
 import { computeGoogleTransitRouteOptions, GOOGLE_TRANSIT_PROVIDER_ID } from "./transit-providers/google-transit-provider.js";
 import { computeJapanTransitRouteOptions, JAPAN_TRANSIT_PROVIDER_ID } from "./transit-providers/japan-transit-provider.js";
+import { evaluateTransitRouteResult } from "./transit-route-quality-service.js";
 
 function clean(value) { return String(value ?? "").trim(); }
 function finiteNumber(value) {
@@ -39,6 +40,8 @@ export function selectTransitProvider({ origin = null, destination = null, locat
 
 export async function computeTransitRouteOptions(request = {}) {
   const provider = selectTransitProvider(request);
-  if (provider === JAPAN_TRANSIT_PROVIDER_ID) return computeJapanTransitRouteOptions(request);
-  return computeGoogleTransitRouteOptions(request);
+  const result = provider === JAPAN_TRANSIT_PROVIDER_ID
+    ? await computeJapanTransitRouteOptions(request)
+    : await computeGoogleTransitRouteOptions(request);
+  return evaluateTransitRouteResult(result);
 }
