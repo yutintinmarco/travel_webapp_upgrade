@@ -456,7 +456,11 @@ function transitRoutePlain(route = {}, index = 0) {
     transferCount: Math.max(0, transitSteps.length - 1),
     modeChain,
     path: routePathPlain(route),
+    segments: [],
     steps,
+    fare: null,
+    provider: "google-routes-transit",
+    attribution: ["Google Maps"],
     warnings: Array.isArray(route?.warnings) ? route.warnings.map(clean).filter(Boolean) : []
   };
 }
@@ -488,6 +492,9 @@ async function resolveRecordPosition(record = {}) {
   };
   resolved.routeLocation = routeLocationFromResolved(resolved);
   return resolved;
+}
+export async function resolveTransitEndpoint(record = {}) {
+  return resolveRecordPosition(record);
 }
 function transitRequestCacheKey(origin, destination, effectiveDepartureTime) {
   const a = origin?.position, b = destination?.position;
@@ -620,13 +627,26 @@ export async function createTransitRoutePreview(container, { route = null, origi
   const setRoute = ({ route: nextRoute = null, origin: nextOrigin = null, destination: nextDestination = null } = {}) => {
     removeOverlays();
     const path = Array.isArray(nextRoute?.path) ? nextRoute.path.filter(point => finiteNumber(point?.lat) != null && finiteNumber(point?.lng) != null) : [];
-    if (path.length > 1 && maps.Polyline) {
+    const segments = (Array.isArray(nextRoute?.segments) ? nextRoute.segments : []).map(segment => ({
+      ...segment,
+      path: (Array.isArray(segment?.path) ? segment.path : []).filter(point => finiteNumber(point?.lat) != null && finiteNumber(point?.lng) != null)
+    })).filter(segment => segment.path.length > 1);
+    if (maps.Polyline && segments.length) {
+      segments.forEach((segment, index) => {
+        const isWalk = clean(segment?.kind).toLowerCase() === "walk";
+        const color = /^#[0-9a-f]{6}$/i.test(clean(segment?.color)) ? clean(segment.color) : (isWalk ? "#8e8e93" : "#0a84ff");
+        const halo = new maps.Polyline({ map, path: segment.path, clickable: false, geodesic: false, strokeColor: "#ffffff", strokeOpacity: .90, strokeWeight: isWalk ? 6 : 8, zIndex: 1 + index * 2 });
+        const line = new maps.Polyline({ map, path: segment.path, clickable: false, geodesic: false, strokeColor: color, strokeOpacity: isWalk ? .74 : .96, strokeWeight: isWalk ? 3 : 5, zIndex: 2 + index * 2 });
+        overlays.push(halo, line);
+      });
+    } else if (path.length > 1 && maps.Polyline) {
       const halo = new maps.Polyline({ map, path, clickable: false, geodesic: false, strokeColor: "#ffffff", strokeOpacity: .94, strokeWeight: 8, zIndex: 1 });
       const line = new maps.Polyline({ map, path, clickable: false, geodesic: false, strokeColor: "#0a84ff", strokeOpacity: .96, strokeWeight: 5, zIndex: 2 });
       overlays.push(halo, line);
     }
-    const start = nextOrigin?.position || path[0] || null;
-    const end = nextDestination?.position || path[path.length - 1] || null;
+    const start = nextOrigin?.position || path[0] || segments[0]?.path?.[0] || null;
+    const lastSegmentPath = segments[segments.length - 1]?.path || [];
+    const end = nextDestination?.position || path[path.length - 1] || lastSegmentPath[lastSegmentPath.length - 1] || null;
     if (start) {
       const pin = new marker.AdvancedMarkerElement({ map, position: start, content: markerContent("A"), zIndex: 20 });
       overlays.push(pin);
