@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
   <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
   <link rel="dns-prefetch" href="https://api.open-meteo.com">
-  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?build=7.9.8.1">
+  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?build=7.9.8.2">
   <title id="page-title">行程</title>
   <script>
   // v7.7.5.0 · Performance Lite. Memory only: no Firebase reads/writes, no
@@ -1186,7 +1186,7 @@ html.theme-dark .bottom-nav {
   border-color: rgba(255,255,255,0.13);
 }
 
-/* v7.9.8.1 · Transit compact connector card.
+/* v7.9.8.2 · Transit compact connector card.
    Semantic role remains movement between Stops, but the presentation now uses
    a compact frosted surface for much stronger readability over trip artwork. */
 .timeline-item.itinerary-item.is-transit {
@@ -1298,7 +1298,7 @@ html:not(.theme-light):not(.theme-dark) .itinerary-item.is-transit.is-booked {
   background: linear-gradient(180deg, rgba(39,39,47,0.88), rgba(27,61,39,0.70)) !important;
 }
 
-/* v7.9.8.1 · Transit route gallery. Route suggestions live inside the
+/* v7.9.8.2 · Transit route gallery. Route suggestions live inside the
    Transit item like an image gallery; Google Routes is queried only on demand. */
 .transit-route-planner{margin:0 0 10px;}
 .transit-route-planner-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:0 0 8px;padding:0 2px;}
@@ -3844,7 +3844,7 @@ body.expenses-view-active #app-version-note{
 #snacks-view::after,
 #info-view::after,
 #profile-view::after{
-  content:"v7.9.8.1" !important;
+  content:"v7.9.8.2" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3865,7 +3865,7 @@ body.expenses-view-active #app-version-note{
   display:none !important;
 }
 body.expenses-view-active .expenses-module .expenses-app::after{
-  content:"v7.9.8.1" !important;
+  content:"v7.9.8.2" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -4182,7 +4182,7 @@ html.theme-dark .trip-map-place-copy strong,html:not(.theme-light):not(.theme-da
 </style>
             <link rel="apple-touch-icon" href="assets/icon/trip_icon.png">
   <link rel="icon" type="image/png" href="assets/icon/trip_icon.png">
-  <link rel="manifest" href="manifest.json?build=7.9.8.1">
+  <link rel="manifest" href="manifest.json?build=7.9.8.2">
   <meta name="apple-mobile-web-app-title" content="關嘉露西生日之旅">
   <!-- v7.7.1.2: expenses.css is 144KB and every rule is scoped under
        .expenses-module, yet it used to block the very first paint of the
@@ -4190,8 +4190,8 @@ html.theme-dark .trip-map-place-copy strong,html:not(.theme-light):not(.theme-da
        priority without blocking paint; ensureExpensesStylesheet() flips it to
        media="all" before the 支出 view is ever mounted, so the styling is
        byte-for-byte identical by the time anything expenses-related renders. -->
-  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?build=7.9.8.1" media="print">
-  <noscript><link rel="stylesheet" href="assets/css/expenses.css?build=7.9.8.1"></noscript>
+  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?build=7.9.8.2" media="print">
+  <noscript><link rel="stylesheet" href="assets/css/expenses.css?build=7.9.8.2"></noscript>
 </head>
 <body class="app-entry-gated app-entry-pending">
 <div class="bg-fixed"></div>
@@ -4980,7 +4980,7 @@ html.theme-dark .trip-map-place-copy strong,html:not(.theme-light):not(.theme-da
         <span class="profile-detail-spacer"></span>
       </div>
       <section class="profile-card" aria-label="App 資訊">
-        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.9.8.1</strong></div>
+        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.9.8.2</strong></div>
         <div class="profile-meta-row"><span>資料架構</span><strong>Phase 2G.2</strong></div>
         <div class="profile-meta-row"><span>主要資料來源</span><strong id="app-data-source-label">Firebase / 本機快取</strong></div>
       </section>
@@ -5218,7 +5218,7 @@ html.theme-dark .trip-map-place-copy strong,html:not(.theme-light):not(.theme-da
 </div>
 
 <script>
-const APP_VERSION = "7.9.8.1";
+const APP_VERSION = "7.9.8.2";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 let tripMapServicePromise=null,tripMapController=null,tripMapScope="day",tripMapRenderEpoch=0,tripMapSelectedPoint=null;
@@ -7117,7 +7117,7 @@ function resetTripScopedUi(data){
   applyTripVisualTheme(data);
 }
 
-// v7.9.8.1 presentation compatibility. Canonical normalized Trips carry
+// v7.9.8.2 presentation compatibility. Canonical normalized Trips carry
 // item.kind. Bundled legacy trip.json can render before the schema module is
 // ready, so this mirrors only the conservative legacy hints needed for the UI.
 function itineraryPresentationKind(item={}){
@@ -7163,10 +7163,14 @@ function transitDepartureDate(day,item){return zonedDateFromTripParts(String(day
 function transitRouteContext(dayIdInput,itemIdInput){
   const dayId=String(dayIdInput||"").trim(),itemId=String(itemIdInput||"").trim(),day=(window.tripData?.days||[]).find(row=>String(row?.dayId||"").trim()===dayId);if(!day)return null;
   const items=Array.isArray(day?.items)?day.items:[],index=items.findIndex(row=>String(row?.itemId||"").trim()===itemId);if(index<0)return null;const item=items[index];if(!transitPlannerEligible(item))return null;
-  const who=String(item?.who||"all").trim()||"all",explicit=item?.transit||item?.transport||{};let origin=transitEndpointRecord(explicit?.origin),destination=transitEndpointRecord(explicit?.destination);
-  if(!origin){for(let i=index-1;i>=0;i--){const row=items[i];if(!transitNeighbourCompatible(row,who))continue;const rowKind=itineraryPresentationKind(row);if(rowKind==="transit"){if(itineraryRecordHasLocation(row)){origin=row;break;}continue;}if(!itineraryRecordHasLocation(row))break;origin=row;break;}}
-  if(!origin){const dayIndex=(window.tripData?.days||[]).findIndex(row=>String(row?.dayId||"").trim()===dayId);for(let d=dayIndex-1;d>=0&&!origin;d--){const priorItems=Array.isArray(window.tripData?.days?.[d]?.items)?window.tripData.days[d].items:[];for(let i=priorItems.length-1;i>=0;i--){const row=priorItems[i];if(!transitNeighbourCompatible(row,who))continue;if(itineraryPresentationKind(row)!=="stop")continue;if(!itineraryRecordHasLocation(row))break;origin=row;break;}}}
-  if(!destination&&itineraryRecordHasLocation(item))destination=item;
+  const who=String(item?.who||"all").trim()||"all",explicit=item?.transit||item?.transport||{};let origin=transitEndpointRecord(explicit?.origin),destination=transitEndpointRecord(explicit?.destination),originBlocked=false;
+  // Transit is an edge between Stops. Legacy Transit rows may contain a Maps URL
+  // for presentation, but that must not replace the semantic previous/next Stop.
+  if(!origin){for(let i=index-1;i>=0;i--){const row=items[i];if(!transitNeighbourCompatible(row,who))continue;const rowKind=itineraryPresentationKind(row);if(rowKind==="transit")continue;if(!itineraryRecordHasLocation(row)){originBlocked=true;break;}origin=row;break;}}
+  // Previous-Day fallback is allowed only when the current Day genuinely starts
+  // with Transit. If a real current-Day Stop exists but is unresolved, do not jump
+  // across it and silently use an older origin.
+  if(!origin&&!originBlocked){const dayIndex=(window.tripData?.days||[]).findIndex(row=>String(row?.dayId||"").trim()===dayId);for(let d=dayIndex-1;d>=0&&!origin;d--){const priorItems=Array.isArray(window.tripData?.days?.[d]?.items)?window.tripData.days[d].items:[];for(let i=priorItems.length-1;i>=0;i--){const row=priorItems[i];if(!transitNeighbourCompatible(row,who))continue;if(itineraryPresentationKind(row)!=="stop")continue;if(!itineraryRecordHasLocation(row))break;origin=row;break;}}}
   if(!destination){for(let i=index+1;i<items.length;i++){const row=items[i];if(!transitNeighbourCompatible(row,who))continue;if(itineraryPresentationKind(row)!=="stop")continue;if(!itineraryRecordHasLocation(row))break;destination=row;break;}}
   return {day,item,origin,destination,timeZone:transitDayTimeZone(day),departureTime:transitDepartureDate(day,item)};
 }
@@ -7176,8 +7180,9 @@ function transitRouteStepMeta(step={},timeZone=""){if(step?.transit){const t=ste
 function renderTransitRoutePlannerState(host,text){host.replaceChildren();const state=document.createElement("div");state.className="transit-route-state";state.textContent=text;host.appendChild(state);}
 function renderTransitRoutePlannerOptions(planner,result,timeZone=""){
   const gallery=planner.querySelector(".transit-route-gallery"),status=planner.querySelector(".transit-route-planner-head small"),basis=planner.querySelector(".transit-route-basis-note");if(!gallery)return;const options=Array.isArray(result?.options)?result.options:[];
+  if(basis){basis.hidden=result?.basis!=="now-fallback";basis.textContent=result?.basis==="now-fallback"?"原行程時間超出 Google 班次查詢範圍，以下按目前時間提供示例方案。":"";}
   if(!options.length){renderTransitRoutePlannerState(gallery,"暫時搵唔到合適嘅公共交通方案。");if(status)status.textContent="未有方案";return;}
-  if(status)status.textContent=`${options.length} 個方案`;if(basis){basis.hidden=result?.basis!=="now-fallback";basis.textContent=result?.basis==="now-fallback"?"原行程時間超出 Google 班次查詢範圍，以下按目前時間提供示例方案。":"";}
+  if(status)status.textContent=`${options.length} 個方案`;
   gallery.replaceChildren();const track=document.createElement("div");track.className="transit-route-track";const dots=document.createElement("div");dots.className="transit-route-dots";
   options.forEach((route,index)=>{const slide=document.createElement("div");slide.className="transit-route-slide";const card=document.createElement("div");card.className="transit-route-card";const summary=document.createElement("button");summary.type="button";summary.className="transit-route-summary";summary.setAttribute("aria-expanded","false");
     const top=document.createElement("div");top.className="transit-route-topline";const label=document.createElement("span");label.className="transit-route-option";label.textContent=`方案 ${index+1}`;const duration=document.createElement("span");duration.className="transit-route-duration";duration.textContent=route.durationText||"交通方案";top.append(label,duration);

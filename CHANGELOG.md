@@ -1,3 +1,26 @@
+# v7.9.8.2 · Transit Route Query Reliability Fix
+
+## Blocking Transit Gallery fix
+
+• Fixed the v7.9.8.1 real-device state where eligible Transit items could complete the Routes request successfully but still return an empty route array, leaving every gallery at `暫時搵唔到合適嘅公共交通方案。`.
+• Out-of-window Trip dates now send an explicit current `departureTime` instead of relying on an omitted field to imply `now`. This follows the current Google Transit request example while keeping the UI clearly labelled as a current-time sample rather than the original Trip schedule.
+• Transit routing now prefers the Geocoding result's Place resource name when available, falling back conservatively to the resolved coordinate only if the preferred endpoint returns no route. This avoids making raw coordinates the only routing source for legacy POI data.
+• A zero-route response may trigger one bounded fallback Routes request. Normal successful lookups still use one Routes call; the extra call occurs only when Google returns no route for the preferred endpoint representation.
+
+## Stop / Transit context correction
+
+• Transit Planner now follows the agreed semantic contract: previous Stop → Transit → next Stop. A legacy Maps URL stored on the Transit row itself is no longer treated as the route destination or origin.
+• Previous-Day origin fallback now stops when a real same-Day Stop exists but has unresolved location data. It no longer jumps across that unresolved Stop to an older Day.
+
+## Diagnostics / presentation
+
+• The out-of-window schedule note is now shown even when Google returns zero routes, so a failed current-time sample is distinguishable from an in-range scheduled lookup.
+• Transit Route Gallery remains read-only. No Firestore write, schema migration, Storage change, Rules change, Index change, Function change, CORS change or Cloud Shell deployment is introduced.
+• Planning Map remains a Trip overview with the existing planned sequence line. No Google navigation route is reintroduced to Map.
+• `assets/js/maps-config.js` remains user-owned and is intentionally excluded from the release ZIP.
+
+---
+
 # v7.9.8.1 · Planned Map Line + Transit Route Gallery
 
 ## Map direction correction

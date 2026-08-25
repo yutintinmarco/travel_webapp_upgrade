@@ -54,14 +54,26 @@ function cacheLookup(key) {
   if (!updatedAt || Date.now() - updatedAt > COORD_CACHE_TTL_MS) return null;
   const lat = finiteNumber(row.lat), lng = finiteNumber(row.lng);
   if (lat == null || lng == null) return null;
-  return { lat, lng, formattedAddress: clean(row.formattedAddress), source: "local-cache" };
+  return {
+    lat,
+    lng,
+    formattedAddress: clean(row.formattedAddress),
+    placeId: clean(row.placeId),
+    source: "local-cache"
+  };
 }
 function cacheStore(key, value) {
   if (!key || !value) return;
   const lat = finiteNumber(value.lat), lng = finiteNumber(value.lng);
   if (lat == null || lng == null) return;
   const cache = readCoordCache();
-  cache[key] = { lat, lng, formattedAddress: clean(value.formattedAddress), updatedAt: Date.now() };
+  cache[key] = {
+    lat,
+    lng,
+    formattedAddress: clean(value.formattedAddress),
+    placeId: clean(value.placeId),
+    updatedAt: Date.now()
+  };
   writeCoordCache(cache);
 }
 
@@ -307,9 +319,15 @@ export function savedPlaceMapPoints(trip) {
 
 async function geocodeOne(geocoder, point) {
   const spec = point.resolve || {};
-  if (spec.type === "coords") return { ...point, position: spec.coords, resolveSource: "canonical" };
+  if (spec.type === "coords") return { ...point, position: spec.coords, resolveSource: "canonical", placeId: "" };
   const cached = cacheLookup(spec.key);
-  if (cached) return { ...point, position: { lat: cached.lat, lng: cached.lng }, formattedAddress: cached.formattedAddress, resolveSource: cached.source };
+  if (cached) return {
+    ...point,
+    position: { lat: cached.lat, lng: cached.lng },
+    formattedAddress: cached.formattedAddress,
+    placeId: cached.placeId,
+    resolveSource: cached.source
+  };
   let response;
   if (spec.type === "placeId") response = await geocoder.geocode({ placeId: spec.value });
   else if (spec.type === "query") response = await geocoder.geocode({ address: spec.value });
@@ -318,9 +336,20 @@ async function geocodeOne(geocoder, point) {
   const lat = finiteNumber(result?.geometry?.location?.lat?.());
   const lng = finiteNumber(result?.geometry?.location?.lng?.());
   if (lat == null || lng == null) return null;
-  const resolved = { lat, lng, formattedAddress: clean(result?.formatted_address) };
+  const resolved = {
+    lat,
+    lng,
+    formattedAddress: clean(result?.formatted_address),
+    placeId: clean(result?.place_id)
+  };
   cacheStore(spec.key, resolved);
-  return { ...point, position: { lat, lng }, formattedAddress: resolved.formattedAddress, resolveSource: "geocoder" };
+  return {
+    ...point,
+    position: { lat, lng },
+    formattedAddress: resolved.formattedAddress,
+    placeId: resolved.placeId,
+    resolveSource: "geocoder"
+  };
 }
 
 export async function resolveMapPoints(points, { concurrency = 3, onProgress = null } = {}) {
@@ -428,19 +457,48 @@ function transitDepartureSupport(date) {
   const min = -7 * 24 * 60 * 60 * 1000, max = 100 * 24 * 60 * 60 * 1000;
   return delta >= min && delta <= max ? { supported: true, reason: "scheduled" } : { supported: false, reason: "outside-window" };
 }
+function routeLocationFromResolved(row = {}) {
+  const placeId = clean(row?.placeId);
+  if (placeId) return `places/${placeId}`;
+  const address = clean(row?.formattedAddress);
+  if (address) return address;
+  return row?.position || null;
+}
 async function resolveRecordPosition(record = {}) {
   const spec = pointResolveSpec(record);
   if (spec.type === "none") return null;
   const { geocoding } = await loadGoogleMapsLibraries();
   const geocoder = new geocoding.Geocoder();
   const row = await geocodeOne(geocoder, { resolve: spec });
-  return row?.position ? { position: row.position, formattedAddress: clean(row.formattedAddress), resolveSource: clean(row.resolveSource) } : null;
+  if (!row?.position) return null;
+  const resolved = {
+    position: row.position,
+    formattedAddress: clean(row.formattedAddress),
+    placeId: clean(row.placeId),
+    resolveSource: clean(row.resolveSource)
+  };
+  resolved.routeLocation = routeLocationFromResolved(resolved);
+  return resolved;
 }
-function transitRequestCacheKey(origin, destination, departureTime, basis) {
+function transitRequestCacheKey(origin, destination, effectiveDepartureTime) {
   const a = origin?.position, b = destination?.position;
   if (!a || !b) return "";
-  const stamp = basis === "scheduled" && departureTime instanceof Date ? Math.floor(departureTime.getTime() / 300000) : "now";
+  const stamp = effectiveDepartureTime instanceof Date && Number.isFinite(effectiveDepartureTime.getTime())
+    ? Math.floor(effectiveDepartureTime.getTime() / 300000)
+    : "now";
   return `${Number(a.lat).toFixed(5)},${Number(a.lng).toFixed(5)}>${Number(b.lat).toFixed(5)},${Number(b.lng).toFixed(5)}@${stamp}`;
+}
+async function computeTransitRoutesOnce(Route, { origin, destination, departureTime, alternatives = true } = {}) {
+  const request = {
+    origin,
+    destination,
+    travelMode: "TRANSIT",
+    departureTime,
+    computeAlternativeRoutes: alternatives,
+    fields: ["durationMillis", "localizedValues", "legs", "warnings"]
+  };
+  const response = await Route.computeRoutes(request);
+  return Array.isArray(response?.routes) ? response.routes : [];
 }
 export async function computeTransitRouteOptions({ origin = null, destination = null, departureTime = null } = {}) {
   if (!origin || !destination) {
@@ -456,7 +514,11 @@ export async function computeTransitRouteOptions({ origin = null, destination = 
   }
   const support = transitDepartureSupport(departureTime);
   const basis = support.supported ? "scheduled" : "now-fallback";
-  const cacheKey = transitRequestCacheKey(resolvedOrigin, resolvedDestination, departureTime, basis);
+  // v7.9.8.1 relied on an omitted departureTime to mean "now". Google documents
+  // that behaviour, but an explicit Date is more deterministic and makes the
+  // fallback request identical to the official Transit example.
+  const effectiveDepartureTime = support.supported ? departureTime : new Date();
+  const cacheKey = transitRequestCacheKey(resolvedOrigin, resolvedDestination, effectiveDepartureTime);
   if (cacheKey && transitRouteMemoryCache.has(cacheKey)) return transitRouteMemoryCache.get(cacheKey);
   const promise = (async () => {
     const routes = await loadGoogleRoutesLibrary();
@@ -466,20 +528,39 @@ export async function computeTransitRouteOptions({ origin = null, destination = 
       error.code = "routes-unavailable";
       throw error;
     }
-    const request = {
-      origin: resolvedOrigin.position,
-      destination: resolvedDestination.position,
-      travelMode: "TRANSIT",
-      computeAlternativeRoutes: true,
-      fields: ["durationMillis", "localizedValues", "legs", "warnings"]
-    };
-    if (support.supported) request.departureTime = departureTime;
-    const response = await Route.computeRoutes(request);
-    const options = (Array.isArray(response?.routes) ? response.routes : []).slice(0, 4).map(transitRoutePlain);
+
+    // Prefer the geocoder's Place resource name when available. Google recommends
+    // Place-based route endpoints because raw coordinates can snap to a nearby
+    // road rather than a useful entrance / transit access point.
+    const preferredOrigin = resolvedOrigin.routeLocation || resolvedOrigin.position;
+    const preferredDestination = resolvedDestination.routeLocation || resolvedDestination.position;
+    let routeRows = await computeTransitRoutesOnce(Route, {
+      origin: preferredOrigin,
+      destination: preferredDestination,
+      departureTime: effectiveDepartureTime,
+      alternatives: true
+    });
+
+    // A zero-route response is a valid API response rather than an exception.
+    // Retry once with the already resolved coordinates only when the preferred
+    // Place/address endpoints produced no route. This keeps normal cost at one
+    // Routes call while giving legacy location data a conservative recovery path.
+    const preferredUsesCoordinates = preferredOrigin === resolvedOrigin.position && preferredDestination === resolvedDestination.position;
+    if (!routeRows.length && !preferredUsesCoordinates) {
+      routeRows = await computeTransitRoutesOnce(Route, {
+        origin: resolvedOrigin.position,
+        destination: resolvedDestination.position,
+        departureTime: effectiveDepartureTime,
+        alternatives: false
+      });
+    }
+
+    const options = routeRows.slice(0, 4).map(transitRoutePlain);
     return {
       options,
       basis,
       requestedDepartureTime: support.supported ? departureTime.toISOString() : "",
+      effectiveDepartureTime: effectiveDepartureTime.toISOString(),
       origin: resolvedOrigin,
       destination: resolvedDestination
     };
