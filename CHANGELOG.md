@@ -1,3 +1,26 @@
+# v7.9.8.6 · Transit Route Quality Guard
+
+Phase 3C route-quality hardening on top of the v7.9.8.5 provider prototype.
+
+## Quality guard
+
+* Added a provider-neutral `transit-route-quality-service.js` between normalized provider results and Transit Route Gallery.
+* Walking-only suggestions remain valid and keep the provider's original ranking; the guard does not automatically push walking behind public transport.
+* Each canonical option is classified as walking, mixed, or transit without exposing provider-specific response fields to the UI.
+* Japan options now carry canonical access / egress walking metrics so the quality layer can compare unusually long edge-walk times with the returned route geometry.
+* A deliberately conservative sanity rule flags only large short-distance access / egress timing mismatches. Suspicious edge-walk duration text becomes `步行時間待確認`, with a collapsed detail warning; the provider's overall route ranking and scheduled transit legs remain untouched.
+* Walking-only cards now say `步行方案` rather than presenting `無轉乘` as if a ride existed.
+
+## Protected behaviour
+
+* Previous Stop and next Stop remain the automatic A / B endpoints. Existing Google Maps references / canonical location data continue through the same resolver before provider selection.
+* Japan still routes through ls8h; non-Japan still routes through Google Routes Transit.
+* Google Maps JavaScript API remains the only map renderer.
+* No Trip Overview Map, Day / Team filtering, Saved Places, media, Firebase schema, Edit Mode or provider ranking redesign is included.
+* Persistent Transit cache is deliberately deferred to the next step after this quality-guard real-device check.
+
+---
+
 # v7.9.8.5 · Japan Transit Provider Prototype
 
 Phase 3C minimal provider-layer prototype, continuing only from v7.9.8.4.
