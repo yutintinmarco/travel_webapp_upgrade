@@ -1,3 +1,30 @@
+# v7.9.8.5 · Japan Transit Provider Prototype
+
+Phase 3C minimal provider-layer prototype, continuing only from v7.9.8.4.
+
+## Transit provider policy
+
+* Japan Transit routing uses the public ls8h Transit Guidance API.
+* Non-Japan Transit routing continues to use Google Routes Transit unchanged.
+* Google Maps JavaScript API remains the only map renderer for both providers.
+* HERE is not used, imported, configured, or referenced by the runtime.
+
+## Provider layer
+
+* Added `transit-route-service.js` as the provider selector used by Transit Route Gallery.
+* Added isolated Google and Japan provider modules.
+* Provider selection happens before the route request from country/timezone/canonical coordinate context; there is no provider guessing after a failed route result.
+* Both providers normalize into the existing Transit Gallery contract, including provider, route/leg/stop/line data, times, duration, transfers, fare, geometry and attribution fields.
+
+## Japan prototype
+
+* Calls `https://api.transit.ls8h.com/api/v1/guidance/plan` directly from the browser with no API key.
+* Uses standard `response.json()` first, with UTF-8 `TextDecoder` recovery only if JSON parsing fails.
+* Broken replacement-character text is filtered before presentation, with safer names/IDs/mode labels used as fallback.
+* Preserves official Japanese station, line and headsign strings when valid.
+* Guidance map segments normalize to Google Maps coordinates; walking and Transit segments render through the existing Google Maps route-preview layer.
+* No changes to Trip Overview Map, Day/Team filters, Saved Places, marker behaviour, sequence lines, Firebase schema, media or Edit Mode.
+
 # v7.9.8.4 · Collapsible Transit Route Detail
 
 ## Route Gallery hierarchy
