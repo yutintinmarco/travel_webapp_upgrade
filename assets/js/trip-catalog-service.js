@@ -9,6 +9,7 @@ import {
 } from "./firestore-observed-service.js";
 
 function clean(value) { return String(value ?? "").trim(); }
+function plainTitle(value) { return clean(value).replace(/<[^>]*>/g, "").trim(); }
 function clonePlain(value) {
   if (Array.isArray(value)) return value.map(clonePlain);
   if (!value || typeof value !== "object") return value;
@@ -50,7 +51,7 @@ function normalizeTripDoc(snapshot) {
     tripId: snapshot.id,
     schemaVersion: Number(data.schemaVersion) || 0,
     revision: Number(data.revision) || 0,
-    title: clean(data.title || data.titleSmall || snapshot.id),
+    title: plainTitle(data.title || data.titleSmall || snapshot.id),
     titleSmall: clean(data.titleSmall),
     dateRange: clean(data.dateRange),
     startDate: clean(data.startDate),
