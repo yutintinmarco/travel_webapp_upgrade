@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
   <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
   <link rel="dns-prefetch" href="https://api.open-meteo.com">
-  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?build=7.9.5.4">
+  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?build=7.9.6.0">
   <title id="page-title">行程</title>
   <script>
   // v7.7.5.0 · Performance Lite. Memory only: no Firebase reads/writes, no
@@ -1285,7 +1285,7 @@ html.theme-dark .inline-gallery-dot,
 html:not(.theme-light):not(.theme-dark) .inline-gallery-dot { background: rgba(235,235,245,0.30); }
 html.theme-dark .inline-gallery-dot.active,
 html:not(.theme-light):not(.theme-dark) .inline-gallery-dot.active { background: rgba(255,255,255,0.92); }
-/* v7.9.5.4 · iOS-style itinerary photo viewer. No parallel card grammar: this is
+/* v7.9.6.0 · iOS-style itinerary photo viewer. No parallel card grammar: this is
    intentionally a full-screen media surface, matching native Photos behaviour. */
 .itinerary-photo-viewer {
   position: fixed;
@@ -1377,7 +1377,7 @@ html:not(.theme-light):not(.theme-dark) .inline-gallery-dot.active { background:
   text-align: center;
 }
 
-/* v7.9.5.4 · iOS Photos-inspired non-destructive crop positioning.
+/* v7.9.6.0 · iOS Photos-inspired non-destructive crop positioning.
    The full Display image remains intact for the Photo Viewer. The editor keeps
    source context visible outside the fixed 16:9 crop window and stores only
    focal metadata for itinerary-card presentation. */
@@ -1585,7 +1585,7 @@ html:not(.theme-light):not(.theme-dark) .inline-gallery-dot.active { background:
 .inline-media-status { margin-top: 8px; color: var(--label-secondary); font-size: calc(11px * var(--font-scale)); line-height: 1.45; }
 .inline-media-status.is-error { color: #d63a36; }
 
-/* v7.9.5.4 · Itinerary media is an item capability, independent of legacy popup metadata.
+/* v7.9.6.0 · Itinerary media is an item capability, independent of legacy popup metadata.
    Non-popup items get a compact photo accessory and a lightweight media-only panel;
    existing popup / detail arrows and interaction remain unchanged. */
 .itinerary-media-accessory {
@@ -3692,7 +3692,7 @@ body.expenses-view-active #app-version-note{
 #snacks-view::after,
 #info-view::after,
 #profile-view::after{
-  content:"v7.9.5.4" !important;
+  content:"v7.9.6.0" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3713,7 +3713,7 @@ body.expenses-view-active #app-version-note{
   display:none !important;
 }
 body.expenses-view-active .expenses-module .expenses-app::after{
-  content:"v7.9.5.4" !important;
+  content:"v7.9.6.0" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3824,7 +3824,7 @@ html.theme-dark .modal-actions .modal-close-btn{
   color:#f5f5f7 !important;
 }
 
-/* v7.9.5.4 · Saved Place media reuses the established sheet action grammar. */
+/* v7.9.6.0 · Saved Place media reuses the established sheet action grammar. */
 .modal-actions .modal-link-btn:disabled{
   opacity:.38 !important;
   color:var(--label-secondary,#8e8e93) !important;
@@ -3960,10 +3960,37 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
 @media(max-width:370px){.app-entry-shell{padding-left:12px;padding-right:12px;}}
 
 
+
+/* v7.9.6.0 · Phase 3B Maps Foundation. Reuses the existing circular header action
+   and activity-filter grammar; only the full-screen map surface is new. */
+.header-action-row{display:flex;align-items:center;justify-content:flex-end;gap:6px;}
+.trip-map-overlay{position:fixed;inset:0;z-index:3550;background:var(--surface-primary,#f7f7fa);opacity:0;pointer-events:none;transition:opacity .18s ease;}
+.trip-map-overlay.is-open{opacity:1;pointer-events:auto;}
+.trip-map-canvas{position:absolute;inset:0;background:#e9edf0;}
+.trip-map-topbar{position:absolute;top:0;left:0;right:0;z-index:3;display:grid;grid-template-columns:44px 1fr 44px;align-items:center;padding:max(14px,calc(env(safe-area-inset-top) + 10px)) 14px 8px;pointer-events:none;}
+.trip-map-close{width:38px;height:38px;border:0;border-radius:999px;background:rgba(248,248,250,.88);color:#111;font:400 28px/1 -apple-system,BlinkMacSystemFont,"SF Pro Display",system-ui,sans-serif;box-shadow:0 4px 18px rgba(15,23,42,.16),inset 0 1px 0 rgba(255,255,255,.72);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);pointer-events:auto;padding:0 0 3px;}
+.trip-map-heading{justify-self:center;max-width:min(70vw,300px);padding:6px 12px;border-radius:15px;background:rgba(248,248,250,.84);box-shadow:0 4px 18px rgba(15,23,42,.12),inset 0 1px 0 rgba(255,255,255,.66);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);text-align:center;color:#111;}
+.trip-map-heading strong{display:block;font-size:14px;font-weight:720;line-height:1.15;}
+.trip-map-heading small{display:block;margin-top:2px;font-size:10.5px;font-weight:520;color:rgba(60,60,67,.72);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.trip-map-filters{position:absolute;z-index:3;top:max(72px,calc(env(safe-area-inset-top) + 66px));left:50%;transform:translateX(-50%);display:grid;grid-template-columns:repeat(2,minmax(74px,1fr));gap:5px;width:min(210px,62vw);padding:5px;border-radius:999px;background:rgba(248,248,250,.86);box-shadow:0 4px 18px rgba(15,23,42,.12);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);}
+.trip-map-filters .trip-activity-filter{padding:6px 12px;font-size:11px;border:0;box-shadow:none;}
+.trip-map-state{position:absolute;z-index:3;left:50%;bottom:max(24px,calc(env(safe-area-inset-bottom) + 18px));transform:translateX(-50%);max-width:min(86vw,360px);padding:9px 13px;border-radius:15px;background:rgba(248,248,250,.88);color:rgba(60,60,67,.78);font-size:11px;font-weight:600;line-height:1.35;text-align:center;box-shadow:0 4px 18px rgba(15,23,42,.12);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);}
+.trip-map-state[hidden]{display:none!important;}
+.trip-map-place-card{position:absolute;z-index:4;left:14px;right:14px;bottom:max(16px,calc(env(safe-area-inset-bottom) + 12px));display:flex;align-items:center;gap:12px;max-width:452px;margin:0 auto;padding:12px 12px 12px 14px;border-radius:20px;background:rgba(248,248,250,.94);box-shadow:0 8px 30px rgba(15,23,42,.20),inset 0 1px 0 rgba(255,255,255,.72);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);}
+.trip-map-place-card[hidden]{display:none!important;}
+.trip-map-place-copy{min-width:0;flex:1;}
+.trip-map-place-copy strong{display:block;color:#111;font-size:14px;font-weight:720;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.trip-map-place-copy small{display:block;margin-top:3px;color:rgba(60,60,67,.72);font-size:10.5px;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.trip-map-open-google{flex:0 0 auto;border:0;border-radius:12px;background:rgba(0,122,255,.11);color:#007aff;padding:8px 10px;font:650 11px/1 -apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,sans-serif;}
+.trip-map-marker{width:30px;height:30px;border:2px solid rgba(255,255,255,.96);border-radius:999px;display:grid;place-items:center;background:#111;color:#fff;font:750 12px/1 -apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,sans-serif;box-shadow:0 3px 10px rgba(15,23,42,.28);transform:translateY(-2px);}
+.trip-map-marker.is-saved{background:#ff9500;font-size:13px;}
+html.theme-dark .trip-map-heading,html.theme-dark .trip-map-close,html.theme-dark .trip-map-filters,html.theme-dark .trip-map-state,html.theme-dark .trip-map-place-card,html:not(.theme-light):not(.theme-dark) .trip-map-heading,html:not(.theme-light):not(.theme-dark) .trip-map-close,html:not(.theme-light):not(.theme-dark) .trip-map-filters,html:not(.theme-light):not(.theme-dark) .trip-map-state,html:not(.theme-light):not(.theme-dark) .trip-map-place-card{background:rgba(30,30,34,.88);color:rgba(245,245,247,.96);box-shadow:0 6px 24px rgba(0,0,0,.34),inset 0 1px 0 rgba(255,255,255,.08);}
+html.theme-dark .trip-map-heading small,html.theme-dark .trip-map-state,html.theme-dark .trip-map-place-copy small,html:not(.theme-light):not(.theme-dark) .trip-map-heading small,html:not(.theme-light):not(.theme-dark) .trip-map-state,html:not(.theme-light):not(.theme-dark) .trip-map-place-copy small{color:rgba(235,235,245,.62);}
+html.theme-dark .trip-map-place-copy strong,html:not(.theme-light):not(.theme-dark) .trip-map-place-copy strong{color:#fff;}
 </style>
             <link rel="apple-touch-icon" href="assets/icon/trip_icon.png">
   <link rel="icon" type="image/png" href="assets/icon/trip_icon.png">
-  <link rel="manifest" href="manifest.json?build=7.9.5.4">
+  <link rel="manifest" href="manifest.json?build=7.9.6.0">
   <meta name="apple-mobile-web-app-title" content="關嘉露西生日之旅">
   <!-- v7.7.1.2: expenses.css is 144KB and every rule is scoped under
        .expenses-module, yet it used to block the very first paint of the
@@ -3971,8 +3998,8 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
        priority without blocking paint; ensureExpensesStylesheet() flips it to
        media="all" before the 支出 view is ever mounted, so the styling is
        byte-for-byte identical by the time anything expenses-related renders. -->
-  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?build=7.9.5.4" media="print">
-  <noscript><link rel="stylesheet" href="assets/css/expenses.css?build=7.9.5.4"></noscript>
+  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?build=7.9.6.0" media="print">
+  <noscript><link rel="stylesheet" href="assets/css/expenses.css?build=7.9.6.0"></noscript>
 </head>
 <body class="app-entry-gated app-entry-pending">
 <div class="bg-fixed"></div>
@@ -4086,7 +4113,10 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
         </div>
         <div class="header-right">
           <div id="today-chip" class="today-chip">載入行程中…</div>
-          <button class="refresh-btn" id="refresh-btn" type="button" aria-label="重新載入"><svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;flex-shrink:0;"><path d="M13 7.5a5.5 5.5 0 1 1-1.17-3.4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><polyline points="8.5,1.5 11.8,4.1 9.2,6.8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg></button>
+          <div class="header-action-row">
+            <button class="refresh-btn" id="trip-map-btn" type="button" aria-label="開啟旅程地圖" hidden><svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;flex-shrink:0;"><path d="M9 4L3.8 6.2v13.1L9 17.1l6 2.7 5.2-2.2V4.5L15 6.7 9 4Z" stroke="currentColor" stroke-width="1.65" stroke-linejoin="round"/><path d="M9 4v13.1M15 6.7v13.1" stroke="currentColor" stroke-width="1.65" stroke-linecap="round"/></svg></button>
+            <button class="refresh-btn" id="refresh-btn" type="button" aria-label="重新載入"><svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;flex-shrink:0;"><path d="M13 7.5a5.5 5.5 0 1 1-1.17-3.4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><polyline points="8.5,1.5 11.8,4.1 9.2,6.8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg></button>
+          </div>
         </div>
       </div>
       <div class="header-sub-row">
@@ -4758,7 +4788,7 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
         <span class="profile-detail-spacer"></span>
       </div>
       <section class="profile-card" aria-label="App 資訊">
-        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.9.5.4</strong></div>
+        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.9.6.0</strong></div>
         <div class="profile-meta-row"><span>資料架構</span><strong>Phase 2G.2</strong></div>
         <div class="profile-meta-row"><span>主要資料來源</span><strong id="app-data-source-label">Firebase / 本機快取</strong></div>
       </section>
@@ -4808,6 +4838,24 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
   </div>
 </div>
 </div>
+</div>
+
+<div class="trip-map-overlay" id="trip-map-overlay" aria-hidden="true">
+  <div class="trip-map-canvas" id="trip-map-canvas" aria-label="旅程地圖"></div>
+  <div class="trip-map-topbar">
+    <button class="trip-map-close" id="trip-map-close" type="button" aria-label="關閉地圖">×</button>
+    <div class="trip-map-heading"><strong>旅程地圖</strong><small id="trip-map-subtitle">目前行程</small></div>
+    <span class="trip-map-topbar-spacer" aria-hidden="true"></span>
+  </div>
+  <div class="trip-map-filters" id="trip-map-filters" aria-label="地圖篩選">
+    <button class="trip-activity-filter active" type="button" data-map-scope="day">當日</button>
+    <button class="trip-activity-filter" type="button" data-map-scope="saved">收藏</button>
+  </div>
+  <div class="trip-map-state" id="trip-map-state" role="status" aria-live="polite">正在準備地圖…</div>
+  <div class="trip-map-place-card" id="trip-map-place-card" hidden>
+    <div class="trip-map-place-copy"><strong id="trip-map-place-title"></strong><small id="trip-map-place-subtitle"></small></div>
+    <button class="trip-map-open-google" id="trip-map-open-google" type="button">Google 地圖</button>
+  </div>
 </div>
 
 <nav class="bottom-nav" id="bottom-nav" aria-label="主要導覽">
@@ -4969,9 +5017,81 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
 </div>
 
 <script>
-const APP_VERSION = "7.9.5.4";
+const APP_VERSION = "7.9.6.0";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
+let tripMapServicePromise=null,tripMapController=null,tripMapScope="day",tripMapRenderEpoch=0,tripMapSelectedPoint=null;
+function tripMapService(){
+  if(!tripMapServicePromise)tripMapServicePromise=import(`./assets/js/trip-map-service.js?build=${APP_VERSION}`);
+  return tripMapServicePromise;
+}
+function tripHasMapCandidates(data=window.tripData){
+  if(!data)return false;
+  const days=Array.isArray(data.days)?data.days:[];
+  const itemHas=days.some(day=>(Array.isArray(day?.items)?day.items:[]).some(item=>{const loc=item?.location||{};return !!(loc.mapsUrl||loc.placeId||loc.address||item?.maps||item?.mapsUrl||(Number.isFinite(Number(loc.latitude??loc.lat))&&Number.isFinite(Number(loc.longitude??loc.lng))));}));
+  const raw=data.snacks||{},saved=Array.isArray(raw)?raw:(Array.isArray(raw.items)?raw.items:[]);
+  const savedHas=saved.some(place=>{const loc=place?.location||{};return !!(loc.mapsUrl||loc.placeId||loc.address||place?.maps||place?.mapsUrl||(Number.isFinite(Number(loc.latitude??loc.lat))&&Number.isFinite(Number(loc.longitude??loc.lng))));});
+  return itemHas||savedHas;
+}
+function updateTripMapButton(data=window.tripData){const btn=document.getElementById("trip-map-btn");if(btn)btn.hidden=!tripHasMapCandidates(data);}
+function tripMapOverlayOpen(){return document.getElementById("trip-map-overlay")?.classList.contains("is-open");}
+function clearTripMapSelection(){
+  tripMapSelectedPoint=null;
+  const card=document.getElementById("trip-map-place-card");if(card)card.hidden=true;
+}
+function showTripMapSelection(point){
+  tripMapSelectedPoint=point||null;
+  const card=document.getElementById("trip-map-place-card"),title=document.getElementById("trip-map-place-title"),sub=document.getElementById("trip-map-place-subtitle"),open=document.getElementById("trip-map-open-google");
+  if(!card||!point){if(card)card.hidden=true;return;}
+  if(title)title.textContent=point.title||"地點";
+  if(sub)sub.textContent=point.subtitle||point.formattedAddress||(point.kind==="saved"?"收藏地點":"行程地點");
+  if(open){open.hidden=!point.mapsUrl;open.onclick=()=>{if(point.mapsUrl)window.open(point.mapsUrl,"_blank","noopener");};}
+  card.hidden=false;
+}
+async function renderTripMapScope(scope=tripMapScope){
+  tripMapScope=scope==="saved"?"saved":"day";
+  const overlay=document.getElementById("trip-map-overlay"),canvas=document.getElementById("trip-map-canvas"),state=document.getElementById("trip-map-state"),subtitle=document.getElementById("trip-map-subtitle");
+  if(!overlay||!canvas||!state||!tripMapOverlayOpen())return;
+  const epoch=++tripMapRenderEpoch;clearTripMapSelection();
+  document.querySelectorAll("#trip-map-filters [data-map-scope]").forEach(btn=>btn.classList.toggle("active",btn.dataset.mapScope===tripMapScope));
+  try{tripMapController?.destroy?.();}catch(_){ }tripMapController=null;canvas.replaceChildren();
+  state.hidden=false;state.textContent="正在準備地圖…";
+  try{
+    const service=await tripMapService();
+    if(!service.googleMapsConfigured()){state.textContent="Google Maps 尚未設定；請先加入受網站限制嘅 Maps browser key。";return;}
+    const activeDayId=currentActiveDayId();
+    const rawPoints=tripMapScope==="saved"?service.savedPlaceMapPoints(window.tripData):service.itineraryMapPoints(window.tripData,activeDayId);
+    const activeDay=(window.tripData?.days||[]).find(day=>String(day?.dayId||"")===activeDayId);
+    if(subtitle)subtitle.textContent=tripMapScope==="saved"?`收藏 · ${rawPoints.length} 個可定位地點`:`${activeDay?.label||"當日"} · ${rawPoints.length} 個地圖參照`;
+    if(!rawPoints.length){state.textContent=tripMapScope==="saved"?"收藏暫時未有可定位嘅地點。":"呢一日暫時未有可定位嘅行程。";return;}
+    state.textContent=`正在定位 0 / ${rawPoints.length}…`;
+    const result=await service.resolveMapPoints(rawPoints,{concurrency:3,onProgress:progress=>{if(epoch===tripMapRenderEpoch)state.textContent=`正在定位 ${progress.completed} / ${progress.total}…`;}});
+    if(epoch!==tripMapRenderEpoch||!tripMapOverlayOpen())return;
+    if(!result.resolved.length){state.textContent="暫時未能由現有 Google 地圖參照取得座標；資料冇被修改。";return;}
+    tripMapController=await service.createTripMap(canvas,{points:result.resolved,onSelect:showTripMapSelection,onMapTap:clearTripMapSelection});
+    if(epoch!==tripMapRenderEpoch){tripMapController?.destroy?.();tripMapController=null;return;}
+    const unresolved=result.unresolved.length;
+    state.textContent=unresolved?`已顯示 ${result.resolved.length} 個地點 · ${unresolved} 個參照暫時未能定位`:`已顯示 ${result.resolved.length} 個地點`;
+    setTimeout(()=>{if(epoch===tripMapRenderEpoch&&!tripMapSelectedPoint)state.hidden=true;},1800);
+  }catch(error){
+    console.warn("Trip map",error);
+    if(epoch!==tripMapRenderEpoch)return;
+    state.hidden=false;
+    state.textContent=error?.code==="maps-not-configured"?"Google Maps 尚未設定。":"Google Maps 暫時未能載入；行程資料冇受影響。";
+  }
+}
+async function openTripMap(){
+  const overlay=document.getElementById("trip-map-overlay");if(!overlay||!tripHasMapCandidates())return;
+  overlay.classList.add("is-open");overlay.setAttribute("aria-hidden","false");document.body.classList.add("modal-open");tripMapScope="day";
+  await renderTripMapScope("day");
+}
+function closeTripMap(){
+  const overlay=document.getElementById("trip-map-overlay");if(!overlay)return;
+  ++tripMapRenderEpoch;overlay.classList.remove("is-open");overlay.setAttribute("aria-hidden","true");clearTripMapSelection();
+  try{tripMapController?.destroy?.();}catch(_){ }tripMapController=null;document.getElementById("trip-map-canvas")?.replaceChildren();
+  document.body.classList.remove("modal-open");
+}
+
 window.__tripMediaMutationBusy = false;
 window.__tripMediaPendingByTrip = {};
 const TRIP_PENDING_MEDIA_OVERLAY_KEY="travel_pending_media_overlays_v1";
@@ -5013,7 +5133,7 @@ function tripMediaDescriptorFallback(input){
   return String(input.src||input.url||input.path||"").trim();
 }
 function tripMediaHasStorage(input){return Boolean(input&&typeof input==="object"&&String(input.storagePath||"").trim());}
-// v7.9.5.4 · Keep a last-known-good visual URL for the same immutable media
+// v7.9.6.0 · Keep a last-known-good visual URL for the same immutable media
 // asset, but treat it as a soft visual hint rather than an unquestioned source.
 // Safari can occasionally invalidate an in-memory Blob URL while the underlying
 // IndexedDB bytes remain healthy. A failed continuity URL is discarded and the
@@ -5097,7 +5217,7 @@ function itineraryMediaCrop(input){
   const focusX=clamp(Number.isFinite(focusXRaw)?focusXRaw:0.5,0,1),focusY=clamp(Number.isFinite(focusYRaw)?focusYRaw:0.5,0,1),zoom=clamp(Number.isFinite(zoomRaw)?zoomRaw:1,1,4);
   return {focusX,focusY,zoom,aspect:Number.isFinite(aspectRaw)?aspectRaw:16/9};
 }
-// v7.9.5.4 · Gallery crop placement is layout-reactive. Multi-image add / move /
+// v7.9.6.0 · Gallery crop placement is layout-reactive. Multi-image add / move /
 // remove operations rebuild the Gallery immediately, while Safari can still be
 // settling the new slide width. A one-shot crop calculation can therefore use a
 // transient frame size and stay visibly wrong until a full refresh. Keep the
@@ -5577,7 +5697,7 @@ function updateImg({animate=true}={}){
   img.classList.add("fade-out");setTimeout(()=>{apply();img.classList.remove("fade-out");img.classList.add("fade-in");setTimeout(()=>img.classList.remove("fade-in"),220);},120);
 }
 
-// v7.9.5.4 · Keep the selected itinerary photo stable across Local First →
+// v7.9.6.0 · Keep the selected itinerary photo stable across Local First →
 // Firebase rerenders. Identity follows the immutable asset, not its array index,
 // so pending → canonical generation promotion does not jump back to photo 1.
 const itineraryGallerySelectionByItem=new Map();
@@ -5597,7 +5717,7 @@ function rememberItineraryGallerySelection(dayId,itemId,gallery,index){
   const safeIndex=clamp(Number(index)||0,0,Math.max(0,(gallery?.length||1)-1));
   itineraryGallerySelectionByItem.set(key,itineraryGalleryMediaIdentity(gallery?.[safeIndex],safeIndex));
 }
-// v7.9.5.4 · Before any queue / Firebase rerender destroys the old Gallery
+// v7.9.6.0 · Before any queue / Firebase rerender destroys the old Gallery
 // DOM, capture the image that is actually on screen. This avoids a race where
 // the scroll RAF has not yet persisted photo 2 when Cloud sync triggers render.
 function captureItineraryGallerySelectionsFromDom(){
@@ -5973,6 +6093,11 @@ savedSheet?.addEventListener("touchcancel",cancelSheetTouch,{passive:true});
 document.getElementById("detail-close").addEventListener("click",()=>closeSavedItemSheet());
 savedSheetBackdrop?.addEventListener("click",e=>{if(e.target===savedSheetBackdrop)closeSavedItemSheet();});
 document.getElementById("detail-maps-btn").addEventListener("click",()=>{if(curMaps)window.open(curMaps,"_blank");});
+document.getElementById("trip-map-btn")?.addEventListener("click",()=>{void openTripMap();});
+document.getElementById("trip-map-close")?.addEventListener("click",closeTripMap);
+document.getElementById("trip-map-filters")?.addEventListener("click",event=>{const btn=event.target.closest("[data-map-scope]");if(!btn)return;void renderTripMapScope(btn.dataset.mapScope);});
+document.getElementById("trip-map-overlay")?.addEventListener("keydown",event=>{if(event.key==="Escape")closeTripMap();});
+
 document.getElementById("detail-dianping-btn").addEventListener("click",()=>{if(curDP)window.open(curDP,"_blank");});
 document.getElementById("detail-booking-btn").addEventListener("click",()=>{if(curBook)window.open(curBook,"_blank");});
 
@@ -6804,6 +6929,7 @@ function render(data,{includeSnacks=true}={}){
       tab.classList.add("active");
       document.querySelector(`.day-content[data-day-index="${tab.dataset.dayIndex}"]`)?.classList.add("active");
       setTripRealtimeDay(tab.dataset.dayId);
+      if(tripMapOverlayOpen()&&tripMapScope==="day")void renderTripMapScope("day");
       if(tabsEl.classList.contains("is-scrollable-days")) tab.scrollIntoView({behavior:"smooth",block:"nearest",inline:"center"});
       updateCompactHeader();
       updateNowIndicator();
@@ -6819,7 +6945,7 @@ function render(data,{includeSnacks=true}={}){
     const mediaTarget=[...document.querySelectorAll(".itinerary-item")].find(node=>node.dataset.dayId===previousMediaExpandedDayId&&node.dataset.itemId===previousMediaExpandedItemId);
     if(mediaTarget?.querySelector(".itinerary-media-shell")){mediaTarget.classList.add("media-expanded");mediaTarget.querySelector(".itinerary-media-accessory")?.setAttribute("aria-expanded","true");}
   }
-  if(includeSnacks)renderSnacks(data);updateChip(data);applyTeam("all");
+  if(includeSnacks)renderSnacks(data);updateChip(data);applyTeam("all");updateTripMapButton(data);
   // Refresh now indicator every minute. Cloud re-renders must not stack timers.
   if(nowIndicatorTimer) clearInterval(nowIndicatorTimer);
   nowIndicatorTimer=setInterval(updateNowIndicator, 60000);
@@ -8297,6 +8423,8 @@ function applyFirebaseTripData(data,{source="server",tripId="",dirtySections=[]}
   const currentSessionServerConfirmed=source!=="instant-cache"&&data?.cloudMeta?.serverConfirmed===true;
   tripLoaderState={status:"ready",source,tripId:nextId,updatedAt:data?.cloudMeta?.updatedAt||"",serverConfirmed:currentSessionServerConfirmed,hasPendingWrites:data?.cloudMeta?.hasPendingWrites===true,error:null};
   window.tripData=data;
+  updateTripMapButton(data);
+  if(tripMapOverlayOpen())void renderTripMapScope(tripMapScope);
   setDataSourceLabel(source==="instant-cache"?"即時旅程快取":(source==="cache"?"Firebase 快取":"Firebase"));
   if(String(appEntryTripSwitchHandoff.toTripId||"")===nextId){
     clearAppEntryTripSwitchHandoff();
@@ -10737,7 +10865,7 @@ function itineraryMediaFriendlyError(error){
   return error?.message||"未能更新行程相片。";
 }
 
-// v7.9.5.4 · iOS Photos-inspired non-destructive itinerary crop positioning.
+// v7.9.6.0 · iOS Photos-inspired non-destructive itinerary crop positioning.
 // The image is no longer clipped by the crop frame: source context remains visible
 // beneath a dim mask. Pinch uses a frozen gesture baseline and keeps the image point
 // beneath the finger midpoint anchored throughout the gesture, avoiding feedback jumps.
@@ -10915,7 +11043,7 @@ async function moveItineraryMedia(dayId,itemId,direction){
   finally{itineraryMediaBusyKeys.delete(key);setTripMediaMutationBusy(false);try{render(window.tripData);}catch(error){}}
 }
 
-// v7.9.5.4 · Local First can paint the itinerary before the membership listener
+// v7.9.6.0 · Local First can paint the itinerary before the membership listener
 // has resolved the current Trip role. Media controls are role-dependent, so a
 // later owner/admin confirmation must refresh the itinerary surface once. Keep
 // the refresh keyed to the current Trip + capability only: cache/server metadata
@@ -10935,7 +11063,7 @@ window.addEventListener("app-trip-access",event=>{
 });
 
 // =========================================================================
-// v7.9.5.4 · Saved Place Multi Image Media Integration
+// v7.9.6.0 · Saved Place Multi Image Media Integration
 // Reuses the existing Saved Place bottom sheet, Gallery viewer, Crop editor and
 // Local First media queue. This is intentionally a compatibility slice rather
 // than a new parallel media UI.

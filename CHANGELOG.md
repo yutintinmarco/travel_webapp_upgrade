@@ -1,3 +1,29 @@
+# v7.9.6.0 · Phase 3B Maps Foundation
+
+## Added
+
+• Added a lazy loaded Google Maps full screen surface opened from the existing circular itinerary header action grammar. Normal cold boot does not load Google Maps.
+• Added current Day and Saved Place map scopes using the existing pill filter visual language.
+• Added Advanced Marker based itinerary and Saved Place markers, with an iOS style floating place card and direct Google Maps handoff.
+• Existing canonical latitude / longitude, placeId, address and Google Maps search references can resolve to map positions.
+• Existing item and Saved Place location contracts remain authoritative; Phase 3B.1 does not write coordinates back to Firestore.
+• Search references that need geocoding are cached locally on the device for 180 days to reduce repeated Geocoding requests without adding Firebase reads or writes.
+• Unsupported short Google Maps links remain unresolved rather than guessing a location.
+• Added a dedicated Maps browser configuration module. Google Maps stays disabled with a clear in App status until a restricted browser key is configured.
+
+## Architecture
+
+• Maps JavaScript API is loaded only when the user opens the map.
+• Uses the current Google Maps importLibrary flow and AdvancedMarkerElement with a map ID.
+• The initial release uses DEMO_MAP_ID by default so a separate production Map ID is not required for first device validation.
+• Route calculation, polylines, travel time and Transit remain intentionally deferred to Phase 3C and 3D.
+• No Firestore, Storage, Backup, Restore, Permanent Delete or media lifecycle behaviour changed.
+
+## Deployment
+
+• Requires a dedicated Google Maps browser API key restricted to the deployed HTTPS website and to Maps JavaScript API plus Geocoding API.
+• No Firestore Rules, Storage Rules, indexes, Firebase config, CORS or Cloud Function changes.
+
 # v7.9.5.4 · Phase 3A Lifecycle Cleanup Retention Hardening
 
 ## Final lifecycle hardening audit
