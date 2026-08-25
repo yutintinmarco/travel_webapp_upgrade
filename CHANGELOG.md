@@ -1,3 +1,21 @@
+# v7.9.7.1 · Transit Connector Presentation Foundation
+
+## Itinerary semantic presentation
+
+• Transit rows now render as lightweight movement connectors instead of full destination cards. Stop cards remain the visual hierarchy for places / activities and future Route nodes.
+• Transit keeps its existing time, transport icon, title, note, Team tag, booking state and expandable detail data; this build changes presentation only and does not discard legacy itinerary information.
+• A subtle vertical connector rail and compact circular transport icon give Transit an Apple-style in-between-step treatment without pretending it is a numbered destination.
+• Team-specific Transit uses the existing Team colour as a restrained connector accent rather than the Stop card's left border. Shared Transit uses the neutral system accent.
+• A compact `交通` semantic label makes legacy inferred Transit explicit to the user while Edit Mode remains deferred.
+
+## Compatibility / architecture
+
+• Canonical `kind: stop / transit` remains authoritative when present. Bundled legacy trip.json has a conservative synchronous presentation fallback because it can paint before the schema module finishes loading.
+• No Firestore migration, canonical data write, Routes API, route calculation, Map coordinate writeback, Firebase backend, Rules, Functions or media lifecycle changes are introduced.
+• Future Edit Mode remains responsible for the explicit new-item chooser: `行程` writes `kind: stop`; `交通` writes `kind: transit`.
+
+---
+
 # v7.9.7.0 · Itinerary Stop / Transit Semantic Foundation
 
 ## Phase 3C pre-route data semantics

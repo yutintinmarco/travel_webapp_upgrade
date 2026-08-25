@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
   <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
   <link rel="dns-prefetch" href="https://api.open-meteo.com">
-  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?build=7.9.7.0">
+  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?build=7.9.7.1">
   <title id="page-title">行程</title>
   <script>
   // v7.7.5.0 · Performance Lite. Memory only: no Firebase reads/writes, no
@@ -1184,6 +1184,91 @@ html.theme-dark .snack-item { background: rgba(31,31,38,0.78); }
 html.theme-dark .bottom-nav {
   background: linear-gradient(180deg, rgba(49,49,58,0.84), rgba(26,26,32,0.78));
   border-color: rgba(255,255,255,0.13);
+}
+
+/* v7.9.7.1 · Transit rows are movement connectors, not destination cards.
+   Keep the same itinerary grammar and data/details, but reduce visual weight so
+   Stop cards remain the primary nodes for the future route model. */
+.timeline-item.itinerary-item.is-transit {
+  --transit-accent: #8E8E93;
+  margin: 0 8px 4px;
+  background: transparent !important;
+  border-color: transparent !important;
+  border-left: 0 !important;
+  border-bottom: 0 !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  overflow: visible;
+}
+.itinerary-item.is-transit .itinerary-summary {
+  position: relative;
+  align-items: center;
+  min-height: 42px;
+  padding: 7px 8px;
+}
+.itinerary-item.is-transit .itinerary-summary::before {
+  content: "";
+  position: absolute;
+  left: 101px;
+  top: -8px;
+  bottom: -8px;
+  width: 2px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--transit-accent) 34%, transparent);
+  pointer-events: none;
+}
+.itinerary-item.is-transit .time {
+  color: var(--label-secondary);
+  font-size: calc(12px * var(--font-scale));
+}
+.itinerary-item.is-transit .icon {
+  position: relative;
+  z-index: 1;
+  width: 28px;
+  height: 28px;
+  flex: 0 0 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  font-size: calc(16px * var(--font-scale));
+  line-height: 1;
+  background: color-mix(in srgb, var(--surface-primary) 91%, white 9%);
+  border: 1px solid color-mix(in srgb, var(--transit-accent) 24%, var(--hairline));
+  box-shadow: 0 2px 8px rgba(15,23,42,0.08);
+}
+.itinerary-item.is-transit .content-title {
+  margin-bottom: 1px;
+  color: var(--label-secondary);
+  font-size: calc(13px * var(--font-scale));
+  font-weight: 650;
+}
+.itinerary-item.is-transit .content-note {
+  color: var(--label-tertiary);
+  font-weight: 500;
+}
+.transit-kind-label {
+  display: inline-flex;
+  align-items: center;
+  min-height: 18px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  font-size: calc(9px * var(--font-scale));
+  font-weight: 700;
+  letter-spacing: .01em;
+  color: color-mix(in srgb, var(--transit-accent) 72%, var(--label-primary));
+  background: color-mix(in srgb, var(--transit-accent) 10%, transparent);
+}
+.itinerary-item.is-transit.clickable .itinerary-summary:active {
+  background: rgba(127,127,127,0.055);
+  border-radius: 12px;
+}
+.itinerary-item.is-transit.is-booked { background: transparent !important; }
+html.theme-dark .itinerary-item.is-transit .icon,
+html:not(.theme-light):not(.theme-dark) .itinerary-item.is-transit .icon {
+  background: rgba(44,44,52,0.90);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.22);
 }
 
 /* Itinerary detail is primary content, so it expands in place rather than
@@ -3692,7 +3777,7 @@ body.expenses-view-active #app-version-note{
 #snacks-view::after,
 #info-view::after,
 #profile-view::after{
-  content:"v7.9.7.0" !important;
+  content:"v7.9.7.1" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3713,7 +3798,7 @@ body.expenses-view-active #app-version-note{
   display:none !important;
 }
 body.expenses-view-active .expenses-module .expenses-app::after{
-  content:"v7.9.7.0" !important;
+  content:"v7.9.7.1" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -4023,7 +4108,7 @@ html.theme-dark .trip-map-place-copy strong,html:not(.theme-light):not(.theme-da
 </style>
             <link rel="apple-touch-icon" href="assets/icon/trip_icon.png">
   <link rel="icon" type="image/png" href="assets/icon/trip_icon.png">
-  <link rel="manifest" href="manifest.json?build=7.9.7.0">
+  <link rel="manifest" href="manifest.json?build=7.9.7.1">
   <meta name="apple-mobile-web-app-title" content="關嘉露西生日之旅">
   <!-- v7.7.1.2: expenses.css is 144KB and every rule is scoped under
        .expenses-module, yet it used to block the very first paint of the
@@ -4031,8 +4116,8 @@ html.theme-dark .trip-map-place-copy strong,html:not(.theme-light):not(.theme-da
        priority without blocking paint; ensureExpensesStylesheet() flips it to
        media="all" before the 支出 view is ever mounted, so the styling is
        byte-for-byte identical by the time anything expenses-related renders. -->
-  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?build=7.9.7.0" media="print">
-  <noscript><link rel="stylesheet" href="assets/css/expenses.css?build=7.9.7.0"></noscript>
+  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?build=7.9.7.1" media="print">
+  <noscript><link rel="stylesheet" href="assets/css/expenses.css?build=7.9.7.1"></noscript>
 </head>
 <body class="app-entry-gated app-entry-pending">
 <div class="bg-fixed"></div>
@@ -4821,7 +4906,7 @@ html.theme-dark .trip-map-place-copy strong,html:not(.theme-light):not(.theme-da
         <span class="profile-detail-spacer"></span>
       </div>
       <section class="profile-card" aria-label="App 資訊">
-        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.9.7.0</strong></div>
+        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.9.7.1</strong></div>
         <div class="profile-meta-row"><span>資料架構</span><strong>Phase 2G.2</strong></div>
         <div class="profile-meta-row"><span>主要資料來源</span><strong id="app-data-source-label">Firebase / 本機快取</strong></div>
       </section>
@@ -5058,7 +5143,7 @@ html.theme-dark .trip-map-place-copy strong,html:not(.theme-light):not(.theme-da
 </div>
 
 <script>
-const APP_VERSION = "7.9.7.0";
+const APP_VERSION = "7.9.7.1";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 let tripMapServicePromise=null,tripMapController=null,tripMapScope="day",tripMapRenderEpoch=0,tripMapSelectedPoint=null;
@@ -6938,6 +7023,24 @@ function resetTripScopedUi(data){
   applyTripVisualTheme(data);
 }
 
+// v7.9.7.1 presentation compatibility. Canonical normalized Trips carry
+// item.kind. Bundled legacy trip.json can render before the schema module is
+// ready, so this mirrors only the conservative legacy hints needed for the UI.
+function itineraryPresentationKind(item={}){
+  const explicit=String(item?.kind||item?.itemKind||item?.semanticKind||item?.type||"").trim().toLowerCase();
+  if(["transit","transport","transportation","travel","transfer","flight"].includes(explicit))return "transit";
+  if(["stop","activity","itinerary","place","visit"].includes(explicit))return "stop";
+  const mode=String(item?.transportMode||item?.travelMode||item?.mode||"").trim().toLowerCase();
+  if(["transit","walking","walk","driving","drive","bicycling","bicycle","flight","train","rail","bus","taxi","ferry"].includes(mode))return "transit";
+  if((item?.transport&&typeof item.transport==="object")||(item?.transit&&typeof item.transit==="object"))return "transit";
+  const icon=String(item?.icon||"").replace(/\uFE0F/g,"");
+  if(/^(✈|🛫|🛬|🚆|🚄|🚅|🚈|🚇|🚊|🚉|🚋|🚌|🚍|🚎|🚐|🚕|🚖|🚗|🚙|🚶|🚲|🛵|🏍|⛴|🚢|🛥|🚤)/u.test(icon))return "transit";
+  const text=`${String(item?.title||"").trim()} ${String(item?.note||"").trim()}`.trim();
+  if(/^(travel|transfer|transit|transport|walking|walk|driving|drive|taxi|bus|train|flight)\b/i.test(text))return "transit";
+  if(/^(前往|乘搭|乘坐|搭乘|轉乘|轉車|步行往|步行前往)/.test(text))return "transit";
+  return "stop";
+}
+
 // Main render
 function render(data,{includeSnacks=true}={}){
   perfLiteInc("fullRender");
@@ -7064,11 +7167,14 @@ function render(data,{includeSnacks=true}={}){
     if(day.subtitle){const sub=document.createElement("div");sub.className="section-sub";sub.textContent=day.subtitle;content.appendChild(sub);}
 
     (day.items||[]).forEach(item=>{
+      const semanticKind=itineraryPresentationKind(item);
+      const isTransit=semanticKind==="transit";
       const el=document.createElement("div");el.className="timeline-item itinerary-item";
-      el.dataset.dayId=dayId;el.dataset.itemId=String(item?.itemId||"").trim();
+      el.dataset.dayId=dayId;el.dataset.itemId=String(item?.itemId||"").trim();el.dataset.itemKind=semanticKind;
+      if(isTransit)el.classList.add("is-transit");else el.classList.add("is-stop");
       if(item.booked)el.classList.add("is-booked");
       const who=item.who||"all";el.setAttribute("data-who",who);
-      if(who!=="all"&&travellers[who]){el.style.borderLeft=`3px solid ${teamDisplayColour(who,travellers[who])}`;}
+      if(who!=="all"&&travellers[who]){const tc=teamDisplayColour(who,travellers[who]);if(isTransit)el.style.setProperty("--transit-accent",tc);else el.style.borderLeft=`3px solid ${tc}`;}
       let itemGallery=[];
       if(item.popup){
         el.classList.add("clickable");
@@ -7078,6 +7184,7 @@ function render(data,{includeSnacks=true}={}){
       const summary=document.createElement("div");summary.className="itinerary-summary";
       const cw=document.createElement("div");cw.className="content";
       const noteRow=document.createElement("div");noteRow.className="content-note-row";
+      if(isTransit){const kindLabel=document.createElement("span");kindLabel.className="transit-kind-label";kindLabel.textContent="交通";noteRow.appendChild(kindLabel);}
       if(item.note){const n=document.createElement("div");n.className="content-note";n.textContent=item.note;noteRow.appendChild(n);}
       if(item.booked){const b=document.createElement("div");b.className="booked-badge";b.textContent="✓ 已預約";noteRow.appendChild(b);}
       if(who!=="all"&&travellers[who]){const tag=document.createElement("div");tag.className="who-tag";tag.dataset.team=who;const tc=teamDisplayColour(who,travellers[who]);tag.style.setProperty("--badge-color",tc);tag.textContent=travellers[who].label||who;noteRow.appendChild(tag);}
