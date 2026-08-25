@@ -5,12 +5,10 @@ const MAPS_SCRIPT_ID = "travel-google-maps-js";
 const COORD_CACHE_KEY = "travel-map-coordinate-cache-v1";
 const COORD_CACHE_MAX = 240;
 const COORD_CACHE_TTL_MS = 180 * 24 * 60 * 60 * 1000;
-const ROUTE_CACHE_KEY = "travel-map-route-cache-v1";
-const ROUTE_CACHE_MAX = 220;
-const ROUTE_CACHE_TTL_MS = 30 * 24 * 60 * 60 * 1000;
 let mapsLoadPromise = null;
 let mapsLibrariesPromise = null;
 let routesLibraryPromise = null;
+const transitRouteMemoryCache = new Map();
 
 function clean(value) { return String(value ?? "").trim(); }
 function finiteNumber(value) {
@@ -65,43 +63,6 @@ function cacheStore(key, value) {
   const cache = readCoordCache();
   cache[key] = { lat, lng, formattedAddress: clean(value.formattedAddress), updatedAt: Date.now() };
   writeCoordCache(cache);
-}
-function readRouteCache() {
-  if (!storageAvailable()) return {};
-  try {
-    const parsed = JSON.parse(localStorage.getItem(ROUTE_CACHE_KEY) || "{}");
-    return parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed : {};
-  } catch (_) { return {}; }
-}
-function writeRouteCache(cache) {
-  if (!storageAvailable()) return;
-  try {
-    const rows = Object.entries(cache || {})
-      .filter(([, value]) => Array.isArray(value?.path) && value.path.length > 1)
-      .sort((a, b) => Number(b[1]?.updatedAt || 0) - Number(a[1]?.updatedAt || 0))
-      .slice(0, ROUTE_CACHE_MAX);
-    localStorage.setItem(ROUTE_CACHE_KEY, JSON.stringify(Object.fromEntries(rows)));
-  } catch (_) {}
-}
-function routeCacheKey(origin, destination, mode) {
-  const aLat = finiteNumber(origin?.lat), aLng = finiteNumber(origin?.lng);
-  const bLat = finiteNumber(destination?.lat), bLng = finiteNumber(destination?.lng);
-  if ([aLat, aLng, bLat, bLng].some(value => value == null)) return "";
-  return `${clean(mode).toUpperCase()}:${aLat.toFixed(5)},${aLng.toFixed(5)}>${bLat.toFixed(5)},${bLng.toFixed(5)}`;
-}
-function routeCacheLookup(key) {
-  if (!key) return null;
-  const row = readRouteCache()[key];
-  if (!row || Date.now() - Number(row.updatedAt || 0) > ROUTE_CACHE_TTL_MS) return null;
-  const path = (Array.isArray(row.path) ? row.path : []).map(point => ({ lat: finiteNumber(point?.lat), lng: finiteNumber(point?.lng) })).filter(point => point.lat != null && point.lng != null);
-  return path.length > 1 ? path : null;
-}
-function routeCacheStore(key, path) {
-  const rows = (Array.isArray(path) ? path : []).map(point => ({ lat: finiteNumber(point?.lat), lng: finiteNumber(point?.lng) })).filter(point => point.lat != null && point.lng != null);
-  if (!key || rows.length <= 1) return;
-  const cache = readRouteCache();
-  cache[key] = { path: rows, updatedAt: Date.now() };
-  writeRouteCache(cache);
 }
 
 export function googleMapsConfigured() { return !!configuredKey(); }
@@ -387,92 +348,144 @@ export async function resolveMapPoints(points, { concurrency = 3, onProgress = n
   return { resolved, unresolved };
 }
 
-function routeSegmentMode(pointsBetween = []) {
-  const transitRows = (Array.isArray(pointsBetween) ? pointsBetween : []).filter(point => point?.itemKind === ITINERARY_ITEM_KIND.TRANSIT);
-  if (!transitRows.length) return MAP_ROUTE_MODE.WALKING;
-  const ranked = [MAP_ROUTE_MODE.FLIGHT, MAP_ROUTE_MODE.DRIVING, MAP_ROUTE_MODE.BICYCLING, MAP_ROUTE_MODE.TRANSIT, MAP_ROUTE_MODE.WALKING];
-  for (const mode of ranked) if (transitRows.some(point => point?.routeMode === mode)) return mode;
-  return MAP_ROUTE_MODE.TRANSIT;
+function transitVehicleIcon(vehicleType = "", fallbackMode = "TRANSIT") {
+  const raw = clean(vehicleType).toUpperCase();
+  if (/SUBWAY|METRO/.test(raw)) return "🚇";
+  if (/BUS|TROLLEYBUS/.test(raw)) return "🚌";
+  if (/TRAM|LIGHT_RAIL/.test(raw)) return "🚊";
+  if (/RAIL|TRAIN|COMMUTER|HIGH_SPEED|HEAVY_RAIL|MONORAIL/.test(raw)) return "🚆";
+  if (/FERRY|BOAT/.test(raw)) return "⛴️";
+  if (clean(fallbackMode).toUpperCase() === "WALKING") return "🚶";
+  return "🚆";
 }
-function buildRouteSegments(group = {}) {
-  const rows = (Array.isArray(group?.points) ? group.points : []).slice().sort((a, b) => Number(a.order || 0) - Number(b.order || 0));
-  const segments = [];
-  let previousStop = null;
-  for (const row of rows) {
-    const isStop = row?.routeEligible !== false && row?.itemKind !== ITINERARY_ITEM_KIND.TRANSIT;
-    if (!isStop) continue;
-    if (previousStop?.position && row?.position) {
-      const between = rows.filter(point => Number(point.order || 0) > Number(previousStop.order || 0) && Number(point.order || 0) < Number(row.order || 0));
-      segments.push({
-        origin: previousStop,
-        destination: row,
-        mode: routeSegmentMode(between),
-        color: clean(group?.color) || "#007aff",
-        teamKey: clean(group?.teamKey),
-        between
-      });
-    }
-    // An unresolved Stop deliberately breaks the route. Do not silently bridge
-    // across a missing itinerary node and pretend the next Stop is adjacent.
-    previousStop = row;
-  }
-  return segments;
+function durationTextFromMillis(value) {
+  const minutes = Math.max(0, Math.round(Number(value || 0) / 60000));
+  if (!minutes) return "";
+  if (minutes < 60) return `約 ${minutes} 分鐘`;
+  const hours = Math.floor(minutes / 60), rest = minutes % 60;
+  return rest ? `約 ${hours} 小時 ${rest} 分鐘` : `約 ${hours} 小時`;
 }
-function plainPath(routePath = []) {
-  return (Array.isArray(routePath) ? routePath : []).map(point => {
-    const lat = finiteNumber(typeof point?.lat === "function" ? point.lat() : point?.lat);
-    const lng = finiteNumber(typeof point?.lng === "function" ? point.lng() : point?.lng);
-    return lat == null || lng == null ? null : { lat, lng };
-  }).filter(Boolean);
+function isoTime(value) {
+  try { return value instanceof Date && Number.isFinite(value.getTime()) ? value.toISOString() : ""; } catch (_) { return ""; }
 }
-async function computeRealRouteSegment(segment) {
-  const mode = clean(segment?.mode).toUpperCase();
-  if (!segment?.origin?.position || !segment?.destination?.position || mode === MAP_ROUTE_MODE.FLIGHT || mode === MAP_ROUTE_MODE.UNKNOWN) return null;
-  const key = routeCacheKey(segment.origin.position, segment.destination.position, mode);
-  const cached = routeCacheLookup(key);
-  if (cached) return { path: cached, source: "local-cache", mode };
-  const routes = await loadGoogleRoutesLibrary();
-  const Route = routes?.Route;
-  if (!Route?.computeRoutes) throw new Error("Google Routes library is unavailable");
-  const response = await Route.computeRoutes({
-    origin: segment.origin.position,
-    destination: segment.destination.position,
-    travelMode: mode,
-    fields: ["path"],
-    polylineQuality: "OVERVIEW"
-  });
-  const path = plainPath(response?.routes?.[0]?.path || []);
-  if (path.length <= 1) return null;
-  routeCacheStore(key, path);
-  return { path, source: "google-routes", mode };
-}
-async function resolveRouteSegments(routeGroups, { concurrency = 2, onProgress = null } = {}) {
-  const segments = (Array.isArray(routeGroups) ? routeGroups : []).flatMap(buildRouteSegments);
-  if (!segments.length) return { segments: [], realCount: 0, fallbackCount: 0, warningModes: [] };
-  let cursor = 0, completed = 0, realCount = 0, fallbackCount = 0;
-  const warningModes = new Set();
-  const output = new Array(segments.length);
-  const worker = async () => {
-    while (true) {
-      const index = cursor++;
-      if (index >= segments.length) return;
-      const segment = segments[index];
-      let resolved = null;
-      try { resolved = await computeRealRouteSegment(segment); } catch (error) { resolved = null; }
-      if (resolved?.path?.length > 1) {
-        realCount += 1;
-        if ([MAP_ROUTE_MODE.WALKING, MAP_ROUTE_MODE.BICYCLING].includes(resolved.mode)) warningModes.add(resolved.mode);
-        output[index] = { ...segment, ...resolved, fallback: false };
-      } else {
-        fallbackCount += 1;
-        output[index] = { ...segment, path: [segment.origin.position, segment.destination.position], source: "planned-line", fallback: true };
-      }
-      completed += 1;
-      try { onProgress?.({ completed, total: segments.length, realCount, fallbackCount }); } catch (_) {}
-    }
+function transitStepPlain(step = {}) {
+  const mode = clean(step?.travelMode).toUpperCase() || "UNKNOWN";
+  const details = step?.transitDetails || null;
+  const line = details?.transitLine || null;
+  const vehicleType = clean(line?.vehicle?.vehicleType || line?.vehicle?.name);
+  const lineName = clean(line?.shortName || line?.name || line?.vehicle?.name);
+  const departureStop = clean(details?.departureStop?.name);
+  const arrivalStop = clean(details?.arrivalStop?.name);
+  return {
+    mode,
+    icon: transitVehicleIcon(vehicleType, mode),
+    instruction: clean(step?.instructions),
+    durationText: clean(step?.localizedValues?.staticDuration) || durationTextFromMillis(step?.staticDurationMillis),
+    distanceText: clean(step?.localizedValues?.distance),
+    transit: details ? {
+      lineName,
+      lineColor: clean(line?.color),
+      textColor: clean(line?.textColor),
+      vehicleType,
+      headsign: clean(details?.headsign),
+      departureStop,
+      arrivalStop,
+      departureTime: isoTime(details?.departureTime),
+      arrivalTime: isoTime(details?.arrivalTime),
+      stopCount: Number(details?.stopCount || 0),
+      tripShortText: clean(details?.tripShortText),
+      agency: clean(line?.agencies?.[0]?.name)
+    } : null
   };
-  await Promise.all(Array.from({ length: Math.max(1, Math.min(concurrency, segments.length)) }, worker));
-  return { segments: output.filter(Boolean), realCount, fallbackCount, warningModes: [...warningModes] };
+}
+function transitRoutePlain(route = {}, index = 0) {
+  const steps = (Array.isArray(route?.legs) ? route.legs : []).flatMap(leg => Array.isArray(leg?.steps) ? leg.steps : []).map(transitStepPlain);
+  const transitSteps = steps.filter(step => step.transit);
+  const modeChain = [];
+  steps.forEach(step => {
+    const token = step.transit?.lineName ? `${step.icon} ${step.transit.lineName}` : step.icon;
+    if (token && modeChain[modeChain.length - 1] !== token) modeChain.push(token);
+  });
+  const firstTransit = transitSteps[0]?.transit || null;
+  const lastTransit = transitSteps[transitSteps.length - 1]?.transit || null;
+  return {
+    id: `route-${index + 1}`,
+    index,
+    durationText: clean(route?.localizedValues?.duration) || durationTextFromMillis(route?.durationMillis),
+    distanceText: clean(route?.localizedValues?.distance),
+    departureTime: firstTransit?.departureTime || "",
+    arrivalTime: lastTransit?.arrivalTime || "",
+    rideCount: transitSteps.length,
+    transferCount: Math.max(0, transitSteps.length - 1),
+    modeChain,
+    steps,
+    warnings: Array.isArray(route?.warnings) ? route.warnings.map(clean).filter(Boolean) : []
+  };
+}
+function transitDepartureSupport(date) {
+  if (!(date instanceof Date) || !Number.isFinite(date.getTime())) return { supported: false, reason: "missing" };
+  const now = Date.now(), delta = date.getTime() - now;
+  const min = -7 * 24 * 60 * 60 * 1000, max = 100 * 24 * 60 * 60 * 1000;
+  return delta >= min && delta <= max ? { supported: true, reason: "scheduled" } : { supported: false, reason: "outside-window" };
+}
+async function resolveRecordPosition(record = {}) {
+  const spec = pointResolveSpec(record);
+  if (spec.type === "none") return null;
+  const { geocoding } = await loadGoogleMapsLibraries();
+  const geocoder = new geocoding.Geocoder();
+  const row = await geocodeOne(geocoder, { resolve: spec });
+  return row?.position ? { position: row.position, formattedAddress: clean(row.formattedAddress), resolveSource: clean(row.resolveSource) } : null;
+}
+function transitRequestCacheKey(origin, destination, departureTime, basis) {
+  const a = origin?.position, b = destination?.position;
+  if (!a || !b) return "";
+  const stamp = basis === "scheduled" && departureTime instanceof Date ? Math.floor(departureTime.getTime() / 300000) : "now";
+  return `${Number(a.lat).toFixed(5)},${Number(a.lng).toFixed(5)}>${Number(b.lat).toFixed(5)},${Number(b.lng).toFixed(5)}@${stamp}`;
+}
+export async function computeTransitRouteOptions({ origin = null, destination = null, departureTime = null } = {}) {
+  if (!origin || !destination) {
+    const error = new Error("Transit origin and destination are required");
+    error.code = "transit-context-missing";
+    throw error;
+  }
+  const [resolvedOrigin, resolvedDestination] = await Promise.all([resolveRecordPosition(origin), resolveRecordPosition(destination)]);
+  if (!resolvedOrigin?.position || !resolvedDestination?.position) {
+    const error = new Error("Transit origin or destination could not be located");
+    error.code = "transit-location-unresolved";
+    throw error;
+  }
+  const support = transitDepartureSupport(departureTime);
+  const basis = support.supported ? "scheduled" : "now-fallback";
+  const cacheKey = transitRequestCacheKey(resolvedOrigin, resolvedDestination, departureTime, basis);
+  if (cacheKey && transitRouteMemoryCache.has(cacheKey)) return transitRouteMemoryCache.get(cacheKey);
+  const promise = (async () => {
+    const routes = await loadGoogleRoutesLibrary();
+    const Route = routes?.Route;
+    if (!Route?.computeRoutes) {
+      const error = new Error("Google Routes library is unavailable");
+      error.code = "routes-unavailable";
+      throw error;
+    }
+    const request = {
+      origin: resolvedOrigin.position,
+      destination: resolvedDestination.position,
+      travelMode: "TRANSIT",
+      computeAlternativeRoutes: true,
+      fields: ["durationMillis", "localizedValues", "legs", "warnings"]
+    };
+    if (support.supported) request.departureTime = departureTime;
+    const response = await Route.computeRoutes(request);
+    const options = (Array.isArray(response?.routes) ? response.routes : []).slice(0, 4).map(transitRoutePlain);
+    return {
+      options,
+      basis,
+      requestedDepartureTime: support.supported ? departureTime.toISOString() : "",
+      origin: resolvedOrigin,
+      destination: resolvedDestination
+    };
+  })();
+  if (cacheKey) transitRouteMemoryCache.set(cacheKey, promise);
+  try { return await promise; } catch (error) { if (cacheKey) transitRouteMemoryCache.delete(cacheKey); throw error; }
 }
 
 function markerElement(point) {
@@ -485,7 +498,7 @@ function markerElement(point) {
   return el;
 }
 
-export async function createTripMap(container, { points = [], onSelect = null, onMapTap = null, connectSequence = false, routeGroups = [], focusPaddingTop = 122, onRouteProgress = null, onRouteStatus = null } = {}) {
+export async function createTripMap(container, { points = [], onSelect = null, onMapTap = null, connectSequence = false, routeGroups = [], focusPaddingTop = 122, showSequenceLine = true } = {}) {
   if (!container) throw new Error("Map container is required");
   const { maps, marker, core } = await loadGoogleMapsLibraries();
   const map = new maps.Map(container, {
@@ -520,44 +533,50 @@ export async function createTripMap(container, { points = [], onSelect = null, o
   const effectiveRouteGroups = Array.isArray(routeGroups) && routeGroups.length
     ? routeGroups
     : (connectSequence ? [{ points, color: "#007aff" }] : []);
-  const drawRouteSegment = (segment, segmentIndex) => {
-    const path = Array.isArray(segment?.path) ? segment.path : [];
-    if (path.length <= 1 || !maps.Polyline) return;
-    const color = clean(segment?.color) || "#007aff";
-    const fallback = Boolean(segment?.fallback);
-    const zBase = 1 + segmentIndex * 2;
-    const halo = new maps.Polyline({
-      map, path, clickable: false, geodesic: false,
-      strokeColor: "#ffffff", strokeOpacity: fallback ? 0.48 : 0.86, strokeWeight: fallback ? 6 : 8, zIndex: zBase
+  effectiveRouteGroups.forEach((group, groupIndex) => {
+    const rows = (Array.isArray(group?.points) ? group.points : []).slice().sort((a, b) => Number(a.order || 0) - Number(b.order || 0));
+    const paths = [];
+    let current = [];
+    rows.forEach(point => {
+      if (point?.itemKind === ITINERARY_ITEM_KIND.TRANSIT || point?.routeEligible === false) return;
+      if (!point?.position) {
+        if (current.length > 1) paths.push(current);
+        current = [];
+        return;
+      }
+      current.push(point.position);
     });
-    const arrowPath = window.google?.maps?.SymbolPath?.FORWARD_CLOSED_ARROW;
-    const icons = arrowPath ? [{
-      icon: {
-        path: arrowPath,
-        scale: fallback ? 3.6 : 4.35,
-        fillColor: color,
-        fillOpacity: fallback ? 0.72 : 1,
-        strokeColor: "#ffffff",
-        strokeOpacity: fallback ? 0.72 : 0.94,
-        strokeWeight: 1.2
-      },
-      offset: "58px",
-      repeat: fallback ? "150px" : "132px"
-    }] : undefined;
-    const route = new maps.Polyline({
-      map, path, clickable: false, geodesic: false,
-      strokeColor: color, strokeOpacity: fallback ? 0.52 : 0.90, strokeWeight: fallback ? 3 : 4,
-      icons, zIndex: zBase + 1
+    if (current.length > 1) paths.push(current);
+    const color = clean(group?.color) || "#007aff";
+    paths.forEach((path, pathIndex) => {
+      if (!maps.Polyline) return;
+      const zBase = 1 + groupIndex * 20 + pathIndex * 2;
+      const halo = new maps.Polyline({
+        map: showSequenceLine ? map : null, path, clickable: false, geodesic: false,
+        strokeColor: "#ffffff", strokeOpacity: effectiveRouteGroups.length > 1 ? 0.72 : 0.88, strokeWeight: 8, zIndex: zBase
+      });
+      const arrowPath = window.google?.maps?.SymbolPath?.FORWARD_CLOSED_ARROW;
+      const icons = arrowPath ? [{
+        icon: {
+          path: arrowPath,
+          scale: 4.15,
+          fillColor: color,
+          fillOpacity: 1,
+          strokeColor: "#ffffff",
+          strokeOpacity: 0.92,
+          strokeWeight: 1.15
+        },
+        offset: "58px",
+        repeat: "132px"
+      }] : undefined;
+      const route = new maps.Polyline({
+        map: showSequenceLine ? map : null, path, clickable: false, geodesic: false,
+        strokeColor: color, strokeOpacity: effectiveRouteGroups.length > 1 ? 0.84 : 0.92, strokeWeight: 4,
+        icons, zIndex: zBase + 1
+      });
+      routeOverlays.push(halo, route);
     });
-    routeOverlays.push(halo, route);
-  };
-  let routeResult = { segments: [], realCount: 0, fallbackCount: 0, warningModes: [] };
-  if (effectiveRouteGroups.length) {
-    routeResult = await resolveRouteSegments(effectiveRouteGroups, { concurrency: 2, onProgress: onRouteProgress });
-    routeResult.segments.forEach(drawRouteSegment);
-  }
-
-  try { onRouteStatus?.({ ...routeResult }); } catch (_) {}
+  });
 
   points.forEach(point => {
     if (!point?.position) return;
@@ -600,6 +619,10 @@ export async function createTripMap(container, { points = [], onSelect = null, o
         try { row.content?.classList?.toggle("is-selected", active); } catch (_) {}
         try { row.marker.zIndex = active ? 10000 : row.baseZIndex; } catch (_) {}
       });
+    },
+    setRouteVisible(visible = true) {
+      const show = Boolean(visible);
+      routeOverlays.forEach(line => { try { line.setMap(show ? map : null); } catch (_) {} });
     },
     point(identity) { return pointByIdentity.get(identity) || null; },
     destroy() {

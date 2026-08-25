@@ -1,3 +1,30 @@
+# v7.9.8.1 · Planned Map Line + Transit Route Gallery
+
+## Map direction correction
+
+• Returned the Day Map to the existing planned itinerary sequence line. Opening the Map no longer calls Routes API or draws an automatically chosen road / transit path that could imply the traveller must follow that route.
+• Added an iOS-style `行程線` control in Day Map. The planned line can be shown or hidden without removing markers, Stop numbering, Transit icons, Day filters or Team filters.
+• The `行程線` preference is stored locally on the device and reused the next time the Map is opened. Saved Places Map does not show the control.
+• Planned lines continue to respect Team separation and unresolved-Stop breaks. Transit rows remain non-numbered semantic connectors rather than route nodes.
+
+## Transit Route Gallery foundation
+
+• Eligible public-transport Transit items now contain a `建議路線` gallery inside the existing expandable itinerary detail. Google transit lookup is lazy: no Routes request is made until the user actually expands that Transit item.
+• Suggested routes use the same interaction grammar as the photo gallery: one large option card at a time, horizontal swipe between alternatives and page dots below.
+• Each option first shows an easy-scan summary including approximate duration, departure / arrival time, major transport chain, ride count and transfer count. Tapping a card expands its detailed walking / rail / metro / bus / ferry steps.
+• Detailed transit steps can surface line / vehicle, direction (headsign), departure and arrival stops, times and stop count when Google supplies them. Google Maps attribution remains visible with the route content.
+• The first Transit Planner slice is read-only. No route option is adopted, saved to Firestore or written into canonical itinerary data yet. A future Edit Mode can add `採用此方案` once the suggestions have been validated in real use.
+• Legacy Transit data is handled conservatively. The planner derives origin / destination only where the existing itinerary contains enough location context; otherwise it shows an explicit unable-to-determine state rather than inventing a journey.
+• For a Transit item at the start of a Day, legacy compatibility can use the previous Day’s final compatible located Stop as the origin (for example hotel → first station). An unresolved real Stop still blocks inference rather than being silently skipped.
+• Transit requests use the itinerary departure time when it falls inside Google's supported transit schedule window. Older / far-future itinerary dates are clearly labelled as current-time example suggestions instead of being presented as historical / future schedule truth.
+• Transit route results are cached only in memory for the current app session. Map browsing itself no longer spends Routes quota.
+
+## Release / backend
+
+• No Firebase schema migration, Firestore write, Storage change, Rules change, Index change, Function change, CORS change or Cloud Shell deployment is required.
+• `assets/js/maps-config.js` remains user-owned and is intentionally excluded from release ZIPs. The existing restricted browser key is not overwritten.
+• Routes API is required only for the new Transit suggestion gallery. If it is not enabled / allowed on the browser key, the rest of the Map continues to work and the Transit gallery shows a recoverable unavailable state.
+
 # v7.9.8.0 · Phase 3C Real Route Foundation
 
 ## Route engine

@@ -1,7 +1,7 @@
 // Travel WebApp · Google Maps browser configuration
 // Browser API keys are visible to clients by design. Use a dedicated Google Maps
-// browser key restricted to the deployed HTTPS website and to Maps JavaScript API
-// plus Geocoding API only.
+// browser key restricted to the deployed HTTPS website and to Maps JavaScript API,
+// Geocoding API and Routes API (Routes is used only by the lazy Transit suggestion gallery).
 export const GOOGLE_MAPS_CONFIG = Object.freeze({
   apiKey: "YOUR_RESTRICTED_GOOGLE_MAPS_BROWSER_KEY",
   mapId: "DEMO_MAP_ID",

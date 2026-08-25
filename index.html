@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
   <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
   <link rel="dns-prefetch" href="https://api.open-meteo.com">
-  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?build=7.9.8.0">
+  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?build=7.9.8.1">
   <title id="page-title">行程</title>
   <script>
   // v7.7.5.0 · Performance Lite. Memory only: no Firebase reads/writes, no
@@ -1186,7 +1186,7 @@ html.theme-dark .bottom-nav {
   border-color: rgba(255,255,255,0.13);
 }
 
-/* v7.9.8.0 · Transit compact connector card.
+/* v7.9.8.1 · Transit compact connector card.
    Semantic role remains movement between Stops, but the presentation now uses
    a compact frosted surface for much stronger readability over trip artwork. */
 .timeline-item.itinerary-item.is-transit {
@@ -1297,6 +1297,46 @@ html.theme-dark .itinerary-item.is-transit.is-booked,
 html:not(.theme-light):not(.theme-dark) .itinerary-item.is-transit.is-booked {
   background: linear-gradient(180deg, rgba(39,39,47,0.88), rgba(27,61,39,0.70)) !important;
 }
+
+/* v7.9.8.1 · Transit route gallery. Route suggestions live inside the
+   Transit item like an image gallery; Google Routes is queried only on demand. */
+.transit-route-planner{margin:0 0 10px;}
+.transit-route-planner-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:0 0 8px;padding:0 2px;}
+.transit-route-planner-head strong{font-size:calc(12px * var(--font-scale));font-weight:790;color:var(--label-primary);letter-spacing:-.12px;}
+.transit-route-planner-head small{font-size:calc(9.5px * var(--font-scale));font-weight:620;color:var(--label-secondary);text-align:right;}
+.transit-route-gallery{position:relative;overflow:hidden;border-radius:17px;}
+.transit-route-track{display:flex;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;touch-action:pan-x;}
+.transit-route-track::-webkit-scrollbar{display:none;}
+.transit-route-slide{flex:0 0 100%;min-width:100%;scroll-snap-align:center;padding:0 1px;box-sizing:border-box;}
+.transit-route-card{width:100%;border:1px solid rgba(60,60,67,.12);border-radius:17px;background:rgba(255,255,255,.78);box-shadow:0 5px 18px rgba(15,23,42,.07),inset 0 1px 0 rgba(255,255,255,.72);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);overflow:hidden;color:var(--label-primary);}
+.transit-route-summary{appearance:none;-webkit-appearance:none;width:100%;border:0;background:transparent;padding:12px 13px 11px;text-align:left;font:inherit;color:inherit;-webkit-tap-highlight-color:transparent;}
+.transit-route-topline{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.transit-route-option{font-size:calc(9.5px * var(--font-scale));font-weight:780;color:#007aff;letter-spacing:.02em;}
+.transit-route-duration{font-size:calc(14px * var(--font-scale));font-weight:800;letter-spacing:-.25px;color:var(--label-primary);}
+.transit-route-chain{margin-top:8px;font-size:calc(13px * var(--font-scale));font-weight:720;line-height:1.35;color:var(--label-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.transit-route-meta{margin-top:5px;font-size:calc(10px * var(--font-scale));font-weight:600;line-height:1.35;color:var(--label-secondary);}
+.transit-route-chevron{display:inline-block;margin-left:4px;color:var(--label-secondary);transition:transform .22s ease;}
+.transit-route-card.is-expanded .transit-route-chevron{transform:rotate(180deg);}
+.transit-route-details{display:grid;grid-template-rows:0fr;border-top:0 solid rgba(60,60,67,.10);transition:grid-template-rows .28s cubic-bezier(.22,.86,.26,1),border-width .2s ease;}
+.transit-route-card.is-expanded .transit-route-details{grid-template-rows:1fr;border-top-width:1px;}
+.transit-route-details-clip{min-height:0;overflow:hidden;}
+.transit-route-step-list{padding:8px 13px 11px;display:grid;gap:8px;}
+.transit-route-step{display:grid;grid-template-columns:28px minmax(0,1fr);gap:8px;align-items:start;}
+.transit-route-step-icon{width:28px;height:28px;border-radius:9px;background:rgba(0,122,255,.09);display:grid;place-items:center;font-size:15px;line-height:1;}
+.transit-route-step-copy{min-width:0;padding-top:1px;}
+.transit-route-step-copy strong{display:block;font-size:calc(11px * var(--font-scale));font-weight:730;line-height:1.35;color:var(--label-primary);}
+.transit-route-step-copy small{display:block;margin-top:2px;font-size:calc(9.5px * var(--font-scale));font-weight:560;line-height:1.4;color:var(--label-secondary);}
+.transit-route-warning{padding:0 13px 9px;font-size:calc(9px * var(--font-scale));line-height:1.35;color:var(--label-secondary);}
+.transit-route-attribution{padding:7px 2px 1px;font-size:12px;font-weight:400;line-height:1;color:#5e5e5e;white-space:nowrap;text-align:right;}
+.transit-route-dots{display:flex;justify-content:center;align-items:center;gap:5px;margin-top:7px;min-height:7px;}
+.transit-route-dot{width:5px;height:5px;border-radius:999px;background:rgba(60,60,67,.24);transition:transform .16s ease,background .16s ease;}
+.transit-route-dot.active{background:#007aff;transform:scale(1.22);}
+.transit-route-state{padding:13px;border:1px solid rgba(60,60,67,.10);border-radius:16px;background:rgba(255,255,255,.62);font-size:calc(10.5px * var(--font-scale));font-weight:610;line-height:1.45;color:var(--label-secondary);}
+.transit-route-basis-note{margin:7px 2px 0;font-size:calc(9px * var(--font-scale));line-height:1.35;color:#9a6700;}
+html.theme-dark .transit-route-card,html:not(.theme-light):not(.theme-dark) .transit-route-card{background:rgba(42,42,46,.76);border-color:rgba(235,235,245,.12);box-shadow:0 6px 20px rgba(0,0,0,.20),inset 0 1px 0 rgba(255,255,255,.06);}
+html.theme-dark .transit-route-state,html:not(.theme-light):not(.theme-dark) .transit-route-state{background:rgba(42,42,46,.62);border-color:rgba(235,235,245,.10);}
+html.theme-dark .transit-route-attribution,html:not(.theme-light):not(.theme-dark) .transit-route-attribution{color:#b7b7bc;}
+@media (prefers-reduced-motion:reduce){.transit-route-details,.transit-route-chevron{transition:none!important;}}
 
 /* Itinerary detail is primary content, so it expands in place rather than
    opening a modal sheet. */
@@ -3804,7 +3844,7 @@ body.expenses-view-active #app-version-note{
 #snacks-view::after,
 #info-view::after,
 #profile-view::after{
-  content:"v7.9.8.0" !important;
+  content:"v7.9.8.1" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3825,7 +3865,7 @@ body.expenses-view-active #app-version-note{
   display:none !important;
 }
 body.expenses-view-active .expenses-module .expenses-app::after{
-  content:"v7.9.8.0" !important;
+  content:"v7.9.8.1" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -4088,9 +4128,12 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
 .trip-map-filters .trip-activity-filter{padding:6px 12px;font-size:11px;border:0;box-shadow:none;}
 .trip-map-state{position:absolute;z-index:3;left:50%;bottom:max(24px,calc(env(safe-area-inset-bottom) + 18px));transform:translateX(-50%);max-width:min(86vw,360px);padding:9px 13px;border-radius:15px;background:rgba(248,248,250,.88);color:rgba(60,60,67,.78);font-size:11px;font-weight:600;line-height:1.35;text-align:center;box-shadow:0 4px 18px rgba(15,23,42,.12);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);}
 .trip-map-state[hidden]{display:none!important;}
-.trip-map-route-notice{position:absolute;z-index:3;left:50%;top:max(198px,calc(env(safe-area-inset-top) + 192px));transform:translateX(-50%);max-width:min(82vw,340px);padding:6px 10px;border-radius:999px;background:rgba(248,248,250,.86);color:rgba(60,60,67,.72);font-size:9.5px;font-weight:600;line-height:1.2;text-align:center;white-space:nowrap;box-shadow:0 3px 14px rgba(15,23,42,.10);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);pointer-events:none;}
-.trip-map-route-notice.is-single-team{top:max(158px,calc(env(safe-area-inset-top) + 152px));}
-.trip-map-route-notice[hidden]{display:none!important;}
+.trip-map-line-toggle{position:absolute;z-index:3;left:50%;top:max(198px,calc(env(safe-area-inset-top) + 192px));transform:translateX(-50%);appearance:none;-webkit-appearance:none;-webkit-tap-highlight-color:transparent;border:1px solid rgba(60,60,67,.14);border-radius:999px;padding:7px 13px;background:rgba(255,255,255,.92);color:rgba(28,28,30,.84);font:650 11px/1 -apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,sans-serif;box-shadow:none;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);white-space:nowrap;}
+.trip-map-line-toggle.is-single-team{top:max(158px,calc(env(safe-area-inset-top) + 152px));}
+.trip-map-line-toggle.active{background:#111;color:#fff;border-color:#111;}
+html.theme-dark .trip-map-line-toggle.active,html:not(.theme-light):not(.theme-dark) .trip-map-line-toggle.active{background:#f5f5f7;color:#111;border-color:#f5f5f7;}
+.trip-map-line-toggle[hidden]{display:none!important;}
+.trip-map-line-toggle:focus-visible{outline:2px solid rgba(0,122,255,.34);outline-offset:2px;}
 .trip-map-place-card{position:absolute;z-index:4;left:14px;right:14px;bottom:max(16px,calc(env(safe-area-inset-bottom) + 12px));display:grid;grid-template-columns:58px minmax(0,1fr) auto;align-items:center;gap:10px 12px;max-width:452px;margin:0 auto;padding:12px 12px 12px 14px;border-radius:20px;background:rgba(248,248,250,.94);box-shadow:0 8px 30px rgba(15,23,42,.20),inset 0 1px 0 rgba(255,255,255,.72);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);overflow:hidden;}
 .trip-map-place-card.has-media{grid-template-columns:minmax(0,1fr) auto;padding:10px 10px 12px;}
 .trip-map-place-card[hidden]{display:none!important;}
@@ -4132,13 +4175,14 @@ html.theme-dark .trip-map-region-filter.active,html.theme-dark .trip-map-day-fil
 html.theme-dark .trip-map-place-media,html:not(.theme-light):not(.theme-dark) .trip-map-place-media{background:rgba(118,118,128,.20);box-shadow:inset 0 0 0 1px rgba(235,235,245,.08);}
 html.theme-dark .trip-map-place-meta,html.theme-dark .trip-map-place-detail,html:not(.theme-light):not(.theme-dark) .trip-map-place-meta,html:not(.theme-light):not(.theme-dark) .trip-map-place-detail{color:rgba(235,235,245,.62);}
 html.theme-dark .trip-map-marker.is-transit,html:not(.theme-light):not(.theme-dark) .trip-map-marker.is-transit{background:rgba(42,42,46,.94);color:#64a9ff;border-color:rgba(255,255,255,.30);box-shadow:0 3px 10px rgba(0,0,0,.32),inset 0 0 0 1px rgba(255,255,255,.08);}
-html.theme-dark .trip-map-heading,html.theme-dark .trip-map-close,html.theme-dark .trip-map-filters,html.theme-dark .trip-map-state,html.theme-dark .trip-map-route-notice,html.theme-dark .trip-map-place-card,html:not(.theme-light):not(.theme-dark) .trip-map-heading,html:not(.theme-light):not(.theme-dark) .trip-map-close,html:not(.theme-light):not(.theme-dark) .trip-map-filters,html:not(.theme-light):not(.theme-dark) .trip-map-state,html:not(.theme-light):not(.theme-dark) .trip-map-route-notice,html:not(.theme-light):not(.theme-dark) .trip-map-place-card{background:rgba(30,30,34,.88);color:rgba(245,245,247,.96);box-shadow:0 6px 24px rgba(0,0,0,.34),inset 0 1px 0 rgba(255,255,255,.08);}
-html.theme-dark .trip-map-heading small,html.theme-dark .trip-map-state,html.theme-dark .trip-map-route-notice,html.theme-dark .trip-map-place-copy small,html:not(.theme-light):not(.theme-dark) .trip-map-heading small,html:not(.theme-light):not(.theme-dark) .trip-map-state,html:not(.theme-light):not(.theme-dark) .trip-map-route-notice,html:not(.theme-light):not(.theme-dark) .trip-map-place-copy small{color:rgba(235,235,245,.62);}
+html.theme-dark .trip-map-heading,html.theme-dark .trip-map-close,html.theme-dark .trip-map-filters,html.theme-dark .trip-map-state,html.theme-dark .trip-map-line-toggle,html.theme-dark .trip-map-place-card,html:not(.theme-light):not(.theme-dark) .trip-map-heading,html:not(.theme-light):not(.theme-dark) .trip-map-close,html:not(.theme-light):not(.theme-dark) .trip-map-filters,html:not(.theme-light):not(.theme-dark) .trip-map-state,html:not(.theme-light):not(.theme-dark) .trip-map-line-toggle,html:not(.theme-light):not(.theme-dark) .trip-map-place-card{background:rgba(30,30,34,.88);color:rgba(245,245,247,.96);box-shadow:0 6px 24px rgba(0,0,0,.34),inset 0 1px 0 rgba(255,255,255,.08);}
+html.theme-dark .trip-map-heading small,html.theme-dark .trip-map-state,html.theme-dark .trip-map-line-toggle,html.theme-dark .trip-map-place-copy small,html:not(.theme-light):not(.theme-dark) .trip-map-heading small,html:not(.theme-light):not(.theme-dark) .trip-map-state,html:not(.theme-light):not(.theme-dark) .trip-map-line-toggle,html:not(.theme-light):not(.theme-dark) .trip-map-place-copy small{color:rgba(235,235,245,.62);}
+html.theme-dark .trip-map-line-toggle.active,html:not(.theme-light):not(.theme-dark) .trip-map-line-toggle.active{background:#f5f5f7;color:#111;border-color:#f5f5f7;box-shadow:none;}
 html.theme-dark .trip-map-place-copy strong,html:not(.theme-light):not(.theme-dark) .trip-map-place-copy strong{color:#fff;}
 </style>
             <link rel="apple-touch-icon" href="assets/icon/trip_icon.png">
   <link rel="icon" type="image/png" href="assets/icon/trip_icon.png">
-  <link rel="manifest" href="manifest.json?build=7.9.8.0">
+  <link rel="manifest" href="manifest.json?build=7.9.8.1">
   <meta name="apple-mobile-web-app-title" content="關嘉露西生日之旅">
   <!-- v7.7.1.2: expenses.css is 144KB and every rule is scoped under
        .expenses-module, yet it used to block the very first paint of the
@@ -4146,8 +4190,8 @@ html.theme-dark .trip-map-place-copy strong,html:not(.theme-light):not(.theme-da
        priority without blocking paint; ensureExpensesStylesheet() flips it to
        media="all" before the 支出 view is ever mounted, so the styling is
        byte-for-byte identical by the time anything expenses-related renders. -->
-  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?build=7.9.8.0" media="print">
-  <noscript><link rel="stylesheet" href="assets/css/expenses.css?build=7.9.8.0"></noscript>
+  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?build=7.9.8.1" media="print">
+  <noscript><link rel="stylesheet" href="assets/css/expenses.css?build=7.9.8.1"></noscript>
 </head>
 <body class="app-entry-gated app-entry-pending">
 <div class="bg-fixed"></div>
@@ -4936,7 +4980,7 @@ html.theme-dark .trip-map-place-copy strong,html:not(.theme-light):not(.theme-da
         <span class="profile-detail-spacer"></span>
       </div>
       <section class="profile-card" aria-label="App 資訊">
-        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.9.8.0</strong></div>
+        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.9.8.1</strong></div>
         <div class="profile-meta-row"><span>資料架構</span><strong>Phase 2G.2</strong></div>
         <div class="profile-meta-row"><span>主要資料來源</span><strong id="app-data-source-label">Firebase / 本機快取</strong></div>
       </section>
@@ -5002,7 +5046,7 @@ html.theme-dark .trip-map-place-copy strong,html:not(.theme-light):not(.theme-da
   <div class="trip-map-day-filters" id="trip-map-day-filters" aria-label="行程日子" hidden></div>
   <div class="trip-map-team-filters" id="trip-map-team-filters" aria-label="行程隊伍" hidden></div>
   <div class="trip-map-region-filters" id="trip-map-region-filters" aria-label="收藏地區" hidden></div>
-  <div class="trip-map-route-notice" id="trip-map-route-notice" hidden>步行／單車路線可能未完整反映行人路、行人徑或單車徑，請按現場情況行走。</div>
+  <button class="trip-map-line-toggle active" id="trip-map-line-toggle" type="button" aria-pressed="true" hidden>✓ 行程線</button>
   <div class="trip-map-state" id="trip-map-state" role="status" aria-live="polite">正在準備地圖…</div>
   <div class="trip-map-place-card" id="trip-map-place-card" hidden>
     <div class="trip-map-place-media" id="trip-map-place-media"><span class="trip-map-place-media-fallback" aria-hidden="true">📍</span></div>
@@ -5174,11 +5218,13 @@ html.theme-dark .trip-map-place-copy strong,html:not(.theme-light):not(.theme-da
 </div>
 
 <script>
-const APP_VERSION = "7.9.8.0";
+const APP_VERSION = "7.9.8.1";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 let tripMapServicePromise=null,tripMapController=null,tripMapScope="day",tripMapRenderEpoch=0,tripMapSelectedPoint=null;
 let tripMapResolvedPoints=[],tripMapRegion="__all__",tripMapDayId="",tripMapTeam="all";
+const TRIP_MAP_SEQUENCE_LINE_KEY="travel-map-sequence-line-v1";
+let tripMapSequenceLineEnabled=(()=>{try{return localStorage.getItem(TRIP_MAP_SEQUENCE_LINE_KEY)!=="0";}catch(_){return true;}})();
 function tripMapService(){
   if(!tripMapServicePromise)tripMapServicePromise=import(`./assets/js/trip-map-service.js?build=${APP_VERSION}`);
   return tripMapServicePromise;
@@ -5320,32 +5366,30 @@ function tripMapRouteGroups(points){
   return groups.length?groups:[{points:list,color:"#007aff"}];
 }
 function tripMapVisibleDayPoints(points){return tripMapTeam==="all"?(Array.isArray(points)?points:[]):(Array.isArray(points)?points:[]).filter(point=>tripMapPointMatchesTeam(point,tripMapTeam));}
-function setTripMapRouteNotice(status=null){
-  const notice=document.getElementById("trip-map-route-notice");if(!notice)return;
-  const modes=new Set(Array.isArray(status?.warningModes)?status.warningModes:[]),needsWarning=modes.has("WALKING")||modes.has("BICYCLING");
-  notice.classList.toggle("is-single-team",tripMapTravellerRows().length<2);
-  notice.hidden=tripMapScope!=="day"||!needsWarning;
+function syncTripMapLineToggle(){
+  const btn=document.getElementById("trip-map-line-toggle");if(!btn)return;
+  const dayMode=tripMapScope==="day";btn.hidden=!dayMode;
+  btn.classList.toggle("active",tripMapSequenceLineEnabled);btn.classList.toggle("is-single-team",tripMapTravellerRows().length<2);
+  btn.setAttribute("aria-pressed",tripMapSequenceLineEnabled?"true":"false");btn.textContent=tripMapSequenceLineEnabled?"✓ 行程線":"行程線";
 }
-function tripMapRouteStatusText(status){
-  const real=Number(status?.realCount||0),fallback=Number(status?.fallbackCount||0);
-  if(real&&fallback)return `實際路線 ${real} 段 · ${fallback} 段暫用行程線`;
-  if(real)return `實際路線已完成 · ${real} 段`;
-  if(fallback)return "實際路線暫未取得 · 已保留行程順序線";
-  return "";
+function setTripMapSequenceLineEnabled(value,{persist=true}={}){
+  tripMapSequenceLineEnabled=Boolean(value);if(persist){try{localStorage.setItem(TRIP_MAP_SEQUENCE_LINE_KEY,tripMapSequenceLineEnabled?"1":"0");}catch(_){}}
+  syncTripMapLineToggle();try{tripMapController?.setRouteVisible?.(tripMapSequenceLineEnabled);}catch(_){ }
 }
+
 function tripMapTopPadding(){const teamRows=tripMapTravellerRows();return tripMapScope==="day"?(teamRows.length>=2?236:194):170;}
 async function renderTripMapScope(scope=tripMapScope){
   tripMapScope=scope==="saved"?"saved":"day";
   if(tripMapScope!=="saved")tripMapRegion="__all__";
-  const overlay=document.getElementById("trip-map-overlay"),canvas=document.getElementById("trip-map-canvas"),state=document.getElementById("trip-map-state"),subtitle=document.getElementById("trip-map-subtitle"),regionHost=document.getElementById("trip-map-region-filters"),dayHost=document.getElementById("trip-map-day-filters"),teamHost=document.getElementById("trip-map-team-filters"),routeNotice=document.getElementById("trip-map-route-notice");
+  const overlay=document.getElementById("trip-map-overlay"),canvas=document.getElementById("trip-map-canvas"),state=document.getElementById("trip-map-state"),subtitle=document.getElementById("trip-map-subtitle"),regionHost=document.getElementById("trip-map-region-filters"),dayHost=document.getElementById("trip-map-day-filters"),teamHost=document.getElementById("trip-map-team-filters"),lineToggle=document.getElementById("trip-map-line-toggle");
   if(!overlay||!canvas||!state||!tripMapOverlayOpen())return;
   const epoch=++tripMapRenderEpoch;clearTripMapSelection();tripMapResolvedPoints=[];
   document.querySelectorAll("#trip-map-filters [data-map-scope]").forEach(btn=>btn.classList.toggle("active",btn.dataset.mapScope===tripMapScope));
   if(regionHost){regionHost.hidden=true;regionHost.replaceChildren();}
   if(dayHost){dayHost.hidden=true;dayHost.replaceChildren();}
   if(teamHost){teamHost.hidden=true;teamHost.replaceChildren();}
-  if(routeNotice)routeNotice.hidden=true;
-  if(tripMapScope==="day"){const days=tripMapDays();if(!tripMapDayId||!days.some(day=>String(day?.dayId||"").trim()===tripMapDayId))tripMapDayId=currentActiveDayId()||String(days[0]?.dayId||"").trim();renderTripMapDayFilters();renderTripMapTeamFilters();}
+  if(lineToggle)lineToggle.hidden=true;
+  if(tripMapScope==="day"){const days=tripMapDays();if(!tripMapDayId||!days.some(day=>String(day?.dayId||"").trim()===tripMapDayId))tripMapDayId=currentActiveDayId()||String(days[0]?.dayId||"").trim();renderTripMapDayFilters();renderTripMapTeamFilters();syncTripMapLineToggle();}
   try{tripMapController?.destroy?.();}catch(_){ }tripMapController=null;canvas.replaceChildren();
   state.hidden=false;state.textContent="正在準備地圖…";
   try{
@@ -5368,9 +5412,7 @@ async function renderTripMapScope(scope=tripMapScope){
       const visible=tripMapRenumberVisibleStops(tripMapVisibleDayPoints(resolved));tripMapResolvedPoints=visible.slice();
       const resolvedByIdentity=new Map(resolved.map(point=>[point.identity,point]));
       const routeContext=rawPoints.map(point=>resolvedByIdentity.has(point.identity)?{...point,...resolvedByIdentity.get(point.identity)}:point);
-      let routeStatus=null;
-      tripMapController=await service.createTripMap(canvas,{points:visible,routeGroups:tripMapRouteGroups(routeContext),onSelect:showTripMapSelection,onMapTap:clearTripMapSelection,focusPaddingTop:tripMapTopPadding(),onRouteProgress:progress=>{if(epoch===tripMapRenderEpoch)state.textContent=`正在計算路線 ${progress.completed} / ${progress.total}…`;},onRouteStatus:status=>{routeStatus=status;setTripMapRouteNotice(status);}});
-      if(routeStatus&&epoch===tripMapRenderEpoch){const routeText=tripMapRouteStatusText(routeStatus);if(routeText)state.textContent=routeText;}
+      tripMapController=await service.createTripMap(canvas,{points:visible,routeGroups:tripMapRouteGroups(routeContext),showSequenceLine:tripMapSequenceLineEnabled,onSelect:showTripMapSelection,onMapTap:clearTripMapSelection,focusPaddingTop:tripMapTopPadding()});
     }
     if(epoch!==tripMapRenderEpoch){tripMapController?.destroy?.();tripMapController=null;return;}
     if(tripMapScope==="saved"){tripMapRegion="__all__";renderSavedMapRegionFilters(tripMapResolvedPoints);applySavedMapRegion("__all__",{focus:true});}
@@ -5379,7 +5421,7 @@ async function renderTripMapScope(scope=tripMapScope){
     }
     const unresolved=result.unresolved.length;
     if(tripMapScope==="saved")state.textContent=unresolved?`已顯示 ${tripMapResolvedPoints.length} 個地點 · ${unresolved} 個參照暫時未能定位`:`已顯示 ${tripMapResolvedPoints.length} 個地點`;
-    else if(unresolved)state.textContent=`${state.textContent} · ${unresolved} 個參照暫時未能定位`;
+    else state.textContent=unresolved?`已顯示 ${tripMapResolvedPoints.length} 個項目 · ${unresolved} 個參照暫時未能定位`:`已顯示 ${tripMapResolvedPoints.length} 個項目`;
     setTimeout(()=>{if(epoch===tripMapRenderEpoch&&!tripMapSelectedPoint)state.hidden=true;},2400);
   }catch(error){
     console.warn("Trip map",error);
@@ -5398,7 +5440,7 @@ async function openTripMap(){
 function closeTripMap(){
   const overlay=document.getElementById("trip-map-overlay");if(!overlay)return;
   ++tripMapRenderEpoch;overlay.classList.remove("is-open");overlay.setAttribute("aria-hidden","true");clearTripMapSelection();tripMapResolvedPoints=[];tripMapRegion="__all__";tripMapTeam="all";tripMapDayId="";
-  try{tripMapController?.destroy?.();}catch(_){ }tripMapController=null;document.getElementById("trip-map-canvas")?.replaceChildren();["trip-map-region-filters","trip-map-day-filters","trip-map-team-filters"].forEach(id=>{const host=document.getElementById(id);if(host){host.hidden=true;host.replaceChildren();}});const routeNotice=document.getElementById("trip-map-route-notice");if(routeNotice)routeNotice.hidden=true;
+  try{tripMapController?.destroy?.();}catch(_){ }tripMapController=null;document.getElementById("trip-map-canvas")?.replaceChildren();["trip-map-region-filters","trip-map-day-filters","trip-map-team-filters"].forEach(id=>{const host=document.getElementById(id);if(host){host.hidden=true;host.replaceChildren();}});const lineToggle=document.getElementById("trip-map-line-toggle");if(lineToggle)lineToggle.hidden=true;
   document.body.classList.remove("modal-open");
 }
 
@@ -6182,6 +6224,7 @@ function appendInlineDetails(itemEl,item,gallery,dayId=""){
   const shell=document.createElement("div");shell.className="inline-detail-shell";
   const clip=document.createElement("div");clip.className="inline-detail-clip";
   const detail=document.createElement("div");detail.className="inline-detail-content";
+  const routePlanner=buildTransitRoutePlanner(item,dayId);if(routePlanner)detail.appendChild(routePlanner);
   const galleryBlock=buildItineraryGalleryBlock(item,gallery,dayId);if(galleryBlock)detail.appendChild(galleryBlock);
   const body=document.createElement("div");body.className="inline-detail-body";
   if(item.detailLines?.length){item.detailLines.forEach(line=>{const row=document.createElement("div");row.textContent=line;body.appendChild(row);});}else if(item.detail){body.textContent=item.detail;}
@@ -6274,6 +6317,7 @@ function setupClicks(){
       item.classList.add("is-detail-transitioning");
       item.classList.toggle("expanded",willOpen);
       summary.setAttribute("aria-expanded",willOpen?"true":"false");
+      if(willOpen)void ensureTransitRoutePlanner(item);
       window.setTimeout(()=>{
         if(item.classList.contains("is-detail-transitioning"))finishTransition();
       },430);
@@ -6409,6 +6453,7 @@ document.getElementById("trip-map-filters")?.addEventListener("click",event=>{co
 document.getElementById("trip-map-day-filters")?.addEventListener("click",event=>{const btn=event.target.closest("[data-map-day-id]");if(!btn)return;tripMapDayId=String(btn.dataset.mapDayId||"");void renderTripMapScope("day");});
 document.getElementById("trip-map-team-filters")?.addEventListener("click",event=>{const btn=event.target.closest("[data-map-team]");if(!btn)return;tripMapTeam=String(btn.dataset.mapTeam||"all");void renderTripMapScope("day");});
 document.getElementById("trip-map-region-filters")?.addEventListener("click",event=>{const btn=event.target.closest("[data-map-region]");if(!btn)return;applySavedMapRegion(btn.dataset.mapRegion,{focus:true});});
+document.getElementById("trip-map-line-toggle")?.addEventListener("click",()=>setTripMapSequenceLineEnabled(!tripMapSequenceLineEnabled));
 document.getElementById("trip-map-overlay")?.addEventListener("keydown",event=>{if(event.key==="Escape")closeTripMap();});
 
 document.getElementById("detail-dianping-btn").addEventListener("click",()=>{if(curDP)window.open(curDP,"_blank");});
@@ -7072,7 +7117,7 @@ function resetTripScopedUi(data){
   applyTripVisualTheme(data);
 }
 
-// v7.9.8.0 presentation compatibility. Canonical normalized Trips carry
+// v7.9.8.1 presentation compatibility. Canonical normalized Trips carry
 // item.kind. Bundled legacy trip.json can render before the schema module is
 // ready, so this mirrors only the conservative legacy hints needed for the UI.
 function itineraryPresentationKind(item={}){
@@ -7089,6 +7134,72 @@ function itineraryPresentationKind(item={}){
   if(/^(前往|乘搭|乘坐|搭乘|轉乘|轉車|步行往|步行前往)/.test(text))return "transit";
   return "stop";
 }
+function transitPlannerEligible(item={}){
+  if(itineraryPresentationKind(item)!=="transit")return false;
+  const icon=String(item?.icon||"").replace(/\uFE0F/g,"");
+  if(/^(✈|🛫|🛬)/u.test(icon))return false;
+  if(/^(🚆|🚄|🚅|🚈|🚇|🚊|🚉|🚋|🚌|🚍|🚎|⛴|🚢|🛥)/u.test(icon))return true;
+  const text=`${String(item?.title||"")} ${String(item?.note||"")} ${String(item?.detail||"")}`.toLowerCase();
+  return /train|rail|metro|subway|bus|transit|tram|ferry|火車|鐵路|地鐵|巴士|公車|電車|渡輪|特急|新幹線/.test(text);
+}
+function itineraryRecordHasLocation(record={}){
+  const loc=record?.location||{};
+  return Boolean(loc?.mapsUrl||loc?.placeId||loc?.address||record?.maps||record?.mapsUrl||record?.googleMapsUrl||(Number.isFinite(Number(loc?.latitude??loc?.lat))&&Number.isFinite(Number(loc?.longitude??loc?.lng))));
+}
+function transitEndpointRecord(value){if(!value)return null;if(typeof value==="string")return {location:{address:value}};return typeof value==="object"?value:null;}
+function transitNeighbourCompatible(row,transitWho){const who=String(row?.who||"all").trim()||"all";return transitWho==="all"?who==="all":(who==="all"||who===transitWho);}
+function transitDayTimeZone(day={}){
+  const direct=String(day?.timezone||"").trim();if(direct)return direct;
+  const cities=window.tripData?.meta?.cities||{},cityKey=String(day?.city||"").trim();if(cityKey&&cities?.[cityKey]?.timezone)return String(cities[cityKey].timezone);
+  const iso=String(day?.isoDate||day?.dateIso||"").trim();if(iso){for(const city of Object.values(cities)){const st=String(city?.startIso||""),en=String(city?.endIso||"");if(city?.timezone&&(!st||iso>=st)&&(!en||iso<=en))return String(city.timezone);}}
+  return String(window.tripData?.meta?.timezone||Intl.DateTimeFormat().resolvedOptions().timeZone||"UTC");
+}
+function zonedDateFromTripParts(isoDate,timeText,timeZone){
+  const dm=String(isoDate||"").match(/^(\d{4})-(\d{2})-(\d{2})$/),tm=String(timeText||"").match(/(\d{1,2}):(\d{2})/);if(!dm||!tm)return null;
+  const y=+dm[1],m=+dm[2],d=+dm[3],h=+tm[1],min=+tm[2];let guess=Date.UTC(y,m-1,d,h,min,0),target=guess;
+  try{const fmt=new Intl.DateTimeFormat("en-CA",{timeZone:timeZone||"UTC",year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",second:"2-digit",hourCycle:"h23"});for(let pass=0;pass<2;pass++){const parts=Object.fromEntries(fmt.formatToParts(new Date(guess)).filter(p=>p.type!=="literal").map(p=>[p.type,p.value]));const represented=Date.UTC(+parts.year,+parts.month-1,+parts.day,+parts.hour,+parts.minute,+(parts.second||0));guess-=represented-target;}}catch(_){return new Date(target);}const out=new Date(guess);return Number.isFinite(out.getTime())?out:null;
+}
+function transitDepartureDate(day,item){return zonedDateFromTripParts(String(day?.isoDate||day?.dateIso||""),String(item?.time||""),transitDayTimeZone(day));}
+function transitRouteContext(dayIdInput,itemIdInput){
+  const dayId=String(dayIdInput||"").trim(),itemId=String(itemIdInput||"").trim(),day=(window.tripData?.days||[]).find(row=>String(row?.dayId||"").trim()===dayId);if(!day)return null;
+  const items=Array.isArray(day?.items)?day.items:[],index=items.findIndex(row=>String(row?.itemId||"").trim()===itemId);if(index<0)return null;const item=items[index];if(!transitPlannerEligible(item))return null;
+  const who=String(item?.who||"all").trim()||"all",explicit=item?.transit||item?.transport||{};let origin=transitEndpointRecord(explicit?.origin),destination=transitEndpointRecord(explicit?.destination);
+  if(!origin){for(let i=index-1;i>=0;i--){const row=items[i];if(!transitNeighbourCompatible(row,who))continue;const rowKind=itineraryPresentationKind(row);if(rowKind==="transit"){if(itineraryRecordHasLocation(row)){origin=row;break;}continue;}if(!itineraryRecordHasLocation(row))break;origin=row;break;}}
+  if(!origin){const dayIndex=(window.tripData?.days||[]).findIndex(row=>String(row?.dayId||"").trim()===dayId);for(let d=dayIndex-1;d>=0&&!origin;d--){const priorItems=Array.isArray(window.tripData?.days?.[d]?.items)?window.tripData.days[d].items:[];for(let i=priorItems.length-1;i>=0;i--){const row=priorItems[i];if(!transitNeighbourCompatible(row,who))continue;if(itineraryPresentationKind(row)!=="stop")continue;if(!itineraryRecordHasLocation(row))break;origin=row;break;}}}
+  if(!destination&&itineraryRecordHasLocation(item))destination=item;
+  if(!destination){for(let i=index+1;i<items.length;i++){const row=items[i];if(!transitNeighbourCompatible(row,who))continue;if(itineraryPresentationKind(row)!=="stop")continue;if(!itineraryRecordHasLocation(row))break;destination=row;break;}}
+  return {day,item,origin,destination,timeZone:transitDayTimeZone(day),departureTime:transitDepartureDate(day,item)};
+}
+function transitRouteTimeText(iso,timeZone){if(!iso)return"";try{return new Intl.DateTimeFormat("zh-HK",{timeZone:timeZone||undefined,hour:"2-digit",minute:"2-digit",hour12:false}).format(new Date(iso));}catch(_){return"";}}
+function transitRouteStepTitle(step={}){if(step?.transit){const t=step.transit,line=String(t.lineName||t.vehicleType||"公共交通").trim()||"公共交通";return t.headsign?`${line} · 往 ${t.headsign}`:line;}return String(step?.instruction||step?.mode||"步行").replace(/<[^>]*>/g,"").trim()||"步行";}
+function transitRouteStepMeta(step={},timeZone=""){if(step?.transit){const t=step.transit,from=String(t.departureStop||"").trim(),to=String(t.arrivalStop||"").trim(),dep=transitRouteTimeText(t.departureTime,timeZone),arr=transitRouteTimeText(t.arrivalTime,timeZone),stops=Number(t.stopCount||0);return [[dep,arr].filter(Boolean).join(" → "),[from,to].filter(Boolean).join(" → "),stops?`${stops} 站`:""].filter(Boolean).join(" · ");}return [String(step?.durationText||""),String(step?.distanceText||"")].filter(Boolean).join(" · ");}
+function renderTransitRoutePlannerState(host,text){host.replaceChildren();const state=document.createElement("div");state.className="transit-route-state";state.textContent=text;host.appendChild(state);}
+function renderTransitRoutePlannerOptions(planner,result,timeZone=""){
+  const gallery=planner.querySelector(".transit-route-gallery"),status=planner.querySelector(".transit-route-planner-head small"),basis=planner.querySelector(".transit-route-basis-note");if(!gallery)return;const options=Array.isArray(result?.options)?result.options:[];
+  if(!options.length){renderTransitRoutePlannerState(gallery,"暫時搵唔到合適嘅公共交通方案。");if(status)status.textContent="未有方案";return;}
+  if(status)status.textContent=`${options.length} 個方案`;if(basis){basis.hidden=result?.basis!=="now-fallback";basis.textContent=result?.basis==="now-fallback"?"原行程時間超出 Google 班次查詢範圍，以下按目前時間提供示例方案。":"";}
+  gallery.replaceChildren();const track=document.createElement("div");track.className="transit-route-track";const dots=document.createElement("div");dots.className="transit-route-dots";
+  options.forEach((route,index)=>{const slide=document.createElement("div");slide.className="transit-route-slide";const card=document.createElement("div");card.className="transit-route-card";const summary=document.createElement("button");summary.type="button";summary.className="transit-route-summary";summary.setAttribute("aria-expanded","false");
+    const top=document.createElement("div");top.className="transit-route-topline";const label=document.createElement("span");label.className="transit-route-option";label.textContent=`方案 ${index+1}`;const duration=document.createElement("span");duration.className="transit-route-duration";duration.textContent=route.durationText||"交通方案";top.append(label,duration);
+    const chain=document.createElement("div");chain.className="transit-route-chain";chain.textContent=(route.modeChain||[]).join(" → ")||"🚆 公共交通";
+    const meta=document.createElement("div");meta.className="transit-route-meta";const dep=transitRouteTimeText(route.departureTime,timeZone),arr=transitRouteTimeText(route.arrivalTime,timeZone),rides=Number(route.rideCount||0),transfers=Number(route.transferCount||0);meta.textContent=[[dep,arr].filter(Boolean).join(" → "),rides?`${rides} 次乘車`:"",transfers?`${transfers} 次轉乘`:"無轉乘"].filter(Boolean).join(" · ");const chev=document.createElement("span");chev.className="transit-route-chevron";chev.textContent="⌄";meta.appendChild(chev);summary.append(top,chain,meta);
+    const details=document.createElement("div");details.className="transit-route-details";const clip=document.createElement("div");clip.className="transit-route-details-clip";const list=document.createElement("div");list.className="transit-route-step-list";
+    (route.steps||[]).forEach(step=>{const row=document.createElement("div");row.className="transit-route-step";const icon=document.createElement("span");icon.className="transit-route-step-icon";icon.textContent=step.icon||"•";const copy=document.createElement("div");copy.className="transit-route-step-copy";const strong=document.createElement("strong");strong.textContent=transitRouteStepTitle(step);const small=document.createElement("small");small.textContent=transitRouteStepMeta(step,timeZone);copy.appendChild(strong);if(small.textContent)copy.appendChild(small);row.append(icon,copy);list.appendChild(row);});clip.appendChild(list);
+    if(route.warnings?.length){const warn=document.createElement("div");warn.className="transit-route-warning";warn.textContent=route.warnings.join(" · ");clip.appendChild(warn);}details.appendChild(clip);card.append(summary,details);slide.appendChild(card);track.appendChild(slide);
+    summary.addEventListener("click",()=>{const open=!card.classList.contains("is-expanded");card.classList.toggle("is-expanded",open);summary.setAttribute("aria-expanded",open?"true":"false");});const dot=document.createElement("span");dot.className="transit-route-dot"+(index===0?" active":"");dots.appendChild(dot);});
+  if(options.length>1){let raf=0;track.addEventListener("scroll",()=>{if(raf)cancelAnimationFrame(raf);raf=requestAnimationFrame(()=>{raf=0;const width=track.clientWidth||1,idx=Math.max(0,Math.min(options.length-1,Math.round(track.scrollLeft/width)));dots.querySelectorAll(".transit-route-dot").forEach((dot,i)=>dot.classList.toggle("active",i===idx));});},{passive:true});}else dots.hidden=true;const attr=document.createElement("div");attr.className="transit-route-attribution";attr.setAttribute("translate","no");attr.textContent="Google Maps";gallery.append(track,dots,attr);
+}
+function buildTransitRoutePlanner(item,dayId=""){
+  if(!transitPlannerEligible(item))return null;const planner=document.createElement("section");planner.className="transit-route-planner";planner.dataset.transitRoutePlanner="true";planner.dataset.dayId=String(dayId||"");planner.dataset.itemId=String(item?.itemId||"");planner.dataset.routeState="idle";
+  const head=document.createElement("div");head.className="transit-route-planner-head";const title=document.createElement("strong");title.textContent="建議路線";const status=document.createElement("small");status.textContent="展開時載入";head.append(title,status);const gallery=document.createElement("div");gallery.className="transit-route-gallery";renderTransitRoutePlannerState(gallery,"展開交通項目後，會按前後地點搜尋公共交通方案。");const note=document.createElement("div");note.className="transit-route-basis-note";note.hidden=true;planner.append(head,gallery,note);return planner;
+}
+async function ensureTransitRoutePlanner(itemEl){
+  const planner=itemEl?.querySelector?.("[data-transit-route-planner]");if(!planner||planner.dataset.routeState==="loading"||planner.dataset.routeState==="loaded")return;const dayId=String(planner.dataset.dayId||itemEl?.dataset?.dayId||""),itemId=String(planner.dataset.itemId||itemEl?.dataset?.itemId||""),context=transitRouteContext(dayId,itemId),gallery=planner.querySelector(".transit-route-gallery"),status=planner.querySelector(".transit-route-planner-head small");
+  if(!context?.origin||!context?.destination){planner.dataset.routeState="error";if(status)status.textContent="未能判斷路線";if(gallery)renderTransitRoutePlannerState(gallery,"暫時未能由現有行程判斷呢一程嘅出發點或目的地；之後 Edit Mode 可以正式指定。");return;}
+  planner.dataset.routeState="loading";if(status)status.textContent="搜尋中…";if(gallery)renderTransitRoutePlannerState(gallery,"正在搜尋公共交通方案…");
+  try{const service=await tripMapService(),result=await service.computeTransitRouteOptions({origin:context.origin,destination:context.destination,departureTime:context.departureTime});planner.dataset.routeState="loaded";renderTransitRoutePlannerOptions(planner,result,context.timeZone);}catch(error){console.warn("Transit planner",error);planner.dataset.routeState="error";if(status)status.textContent="暫時未能載入";if(gallery)renderTransitRoutePlannerState(gallery,error?.code==="transit-location-unresolved"?"暫時未能由現有 Google 地圖參照定位出發點或目的地。":"暫時未能取得建議路線；請確認 Routes API 已啟用後再試。");}
+}
+
 
 // Main render
 function render(data,{includeSnacks=true}={}){
@@ -7224,11 +7335,9 @@ function render(data,{includeSnacks=true}={}){
       if(item.booked)el.classList.add("is-booked");
       const who=item.who||"all";el.setAttribute("data-who",who);
       if(who!=="all"&&travellers[who]){const tc=teamDisplayColour(who,travellers[who]);if(isTransit)el.style.setProperty("--transit-accent",tc);else el.style.borderLeft=`3px solid ${tc}`;}
-      let itemGallery=[];
-      if(item.popup){
-        el.classList.add("clickable");
-        itemGallery=getGalleryForItem(item,day,ck,matchedCities,meta);
-      }
+      let itemGallery=[];const hasTransitPlanner=isTransit&&transitPlannerEligible(item),hasInlineDetail=Boolean(item.popup||hasTransitPlanner);
+      if(hasInlineDetail)el.classList.add("clickable");
+      if(item.popup)itemGallery=getGalleryForItem(item,day,ck,matchedCities,meta);
 
       const summary=document.createElement("div");summary.className="itinerary-summary";
       const cw=document.createElement("div");cw.className="content";
@@ -7242,7 +7351,7 @@ function render(data,{includeSnacks=true}={}){
       const iconEl=document.createElement("div");iconEl.className="icon";iconEl.textContent=item.icon||"";
       summary.append(timeEl,iconEl,cw);
       let standaloneMediaSurface=null;
-      if(item.popup){
+      if(hasInlineDetail){
         const chevron=document.createElement("div");chevron.className="detail-chevron";chevron.setAttribute("aria-hidden","true");chevron.innerHTML='<svg viewBox="0 0 20 20" fill="none"><path d="M5.5 7.5L10 12l4.5-4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
         summary.appendChild(chevron);
       }else{
@@ -7250,7 +7359,7 @@ function render(data,{includeSnacks=true}={}){
         if(standaloneMediaSurface?.accessory)summary.appendChild(standaloneMediaSurface.accessory);
       }
       el.appendChild(summary);
-      if(item.popup)appendInlineDetails(el,item,itemGallery,dayId);
+      if(hasInlineDetail)appendInlineDetails(el,item,itemGallery,dayId);
       else if(standaloneMediaSurface?.shell)el.appendChild(standaloneMediaSurface.shell);
       content.appendChild(el);
     });
