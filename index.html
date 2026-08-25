@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
   <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
   <link rel="dns-prefetch" href="https://api.open-meteo.com">
-  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?build=7.9.7.1">
+  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?build=7.9.7.2">
   <title id="page-title">行程</title>
   <script>
   // v7.7.5.0 · Performance Lite. Memory only: no Firebase reads/writes, no
@@ -1186,89 +1186,116 @@ html.theme-dark .bottom-nav {
   border-color: rgba(255,255,255,0.13);
 }
 
-/* v7.9.7.1 · Transit rows are movement connectors, not destination cards.
-   Keep the same itinerary grammar and data/details, but reduce visual weight so
-   Stop cards remain the primary nodes for the future route model. */
+/* v7.9.7.2 · Transit compact connector card.
+   Semantic role remains movement between Stops, but the presentation now uses
+   a compact frosted surface for much stronger readability over trip artwork. */
 .timeline-item.itinerary-item.is-transit {
   --transit-accent: #8E8E93;
-  margin: 0 8px 4px;
-  background: transparent !important;
-  border-color: transparent !important;
+  margin: 2px 10px 7px;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.58), rgba(255,255,255,0.40)) !important;
+  border: 1px solid rgba(255,255,255,0.70) !important;
   border-left: 0 !important;
-  border-bottom: 0 !important;
-  box-shadow: none !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-  overflow: visible;
+  border-bottom: 1px solid rgba(255,255,255,0.70) !important;
+  border-radius: 17px;
+  box-shadow:
+    0 4px 14px rgba(15,23,42,0.075),
+    inset 3px 0 0 color-mix(in srgb, var(--transit-accent) 58%, transparent),
+    inset 0 1px 0 rgba(255,255,255,0.42) !important;
+  backdrop-filter: blur(20px) saturate(1.10) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(1.10) !important;
+  overflow: hidden;
 }
 .itinerary-item.is-transit .itinerary-summary {
   position: relative;
   align-items: center;
-  min-height: 42px;
-  padding: 7px 8px;
+  min-height: 56px;
+  padding: 8px 10px 8px 12px;
+  gap: 9px;
 }
 .itinerary-item.is-transit .itinerary-summary::before {
-  content: "";
-  position: absolute;
-  left: 101px;
-  top: -8px;
-  bottom: -8px;
-  width: 2px;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--transit-accent) 34%, transparent);
-  pointer-events: none;
+  content: none;
 }
 .itinerary-item.is-transit .time {
+  width: 58px;
+  flex: 0 0 58px;
   color: var(--label-secondary);
   font-size: calc(12px * var(--font-scale));
+  font-weight: 600;
 }
 .itinerary-item.is-transit .icon {
   position: relative;
   z-index: 1;
-  width: 28px;
-  height: 28px;
-  flex: 0 0 28px;
+  width: 32px;
+  height: 32px;
+  flex: 0 0 32px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 999px;
-  font-size: calc(16px * var(--font-scale));
+  border-radius: 10px;
+  font-size: calc(18px * var(--font-scale));
   line-height: 1;
-  background: color-mix(in srgb, var(--surface-primary) 91%, white 9%);
-  border: 1px solid color-mix(in srgb, var(--transit-accent) 24%, var(--hairline));
-  box-shadow: 0 2px 8px rgba(15,23,42,0.08);
+  background: color-mix(in srgb, var(--transit-accent) 11%, rgba(255,255,255,0.78));
+  border: 1px solid color-mix(in srgb, var(--transit-accent) 24%, rgba(255,255,255,0.66));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.60);
+}
+.itinerary-item.is-transit .content {
+  min-width: 0;
 }
 .itinerary-item.is-transit .content-title {
-  margin-bottom: 1px;
-  color: var(--label-secondary);
+  margin-bottom: 3px;
+  color: var(--label-primary);
   font-size: calc(13px * var(--font-scale));
-  font-weight: 650;
+  font-weight: 700;
+  line-height: 1.22;
+}
+.itinerary-item.is-transit .content-note-row {
+  gap: 5px;
 }
 .itinerary-item.is-transit .content-note {
-  color: var(--label-tertiary);
+  color: var(--label-secondary);
+  font-size: calc(10.5px * var(--font-scale));
   font-weight: 500;
+  line-height: 1.25;
 }
 .transit-kind-label {
   display: inline-flex;
   align-items: center;
-  min-height: 18px;
+  min-height: 17px;
   padding: 1px 6px;
   border-radius: 999px;
   font-size: calc(9px * var(--font-scale));
-  font-weight: 700;
+  font-weight: 750;
   letter-spacing: .01em;
-  color: color-mix(in srgb, var(--transit-accent) 72%, var(--label-primary));
-  background: color-mix(in srgb, var(--transit-accent) 10%, transparent);
+  color: color-mix(in srgb, var(--transit-accent) 76%, var(--label-primary));
+  background: color-mix(in srgb, var(--transit-accent) 12%, rgba(255,255,255,0.56));
+  border: .5px solid color-mix(in srgb, var(--transit-accent) 22%, transparent);
 }
 .itinerary-item.is-transit.clickable .itinerary-summary:active {
-  background: rgba(127,127,127,0.055);
-  border-radius: 12px;
+  background: rgba(127,127,127,0.075);
 }
-.itinerary-item.is-transit.is-booked { background: transparent !important; }
+.itinerary-item.is-transit.is-booked {
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.58), rgba(52,199,89,0.13)) !important;
+}
+html.theme-dark .timeline-item.itinerary-item.is-transit,
+html:not(.theme-light):not(.theme-dark) .timeline-item.itinerary-item.is-transit {
+  background: linear-gradient(180deg, rgba(39,39,47,0.88), rgba(29,29,36,0.80)) !important;
+  border-color: rgba(255,255,255,0.11) !important;
+  box-shadow:
+    0 5px 16px rgba(0,0,0,0.22),
+    inset 3px 0 0 color-mix(in srgb, var(--transit-accent) 68%, transparent),
+    inset 0 1px 0 rgba(255,255,255,0.055) !important;
+}
 html.theme-dark .itinerary-item.is-transit .icon,
 html:not(.theme-light):not(.theme-dark) .itinerary-item.is-transit .icon {
-  background: rgba(44,44,52,0.90);
-  box-shadow: 0 2px 10px rgba(0,0,0,0.22);
+  background: color-mix(in srgb, var(--transit-accent) 15%, rgba(44,44,52,0.92));
+  border-color: color-mix(in srgb, var(--transit-accent) 30%, rgba(255,255,255,0.10));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
+}
+html.theme-dark .itinerary-item.is-transit.is-booked,
+html:not(.theme-light):not(.theme-dark) .itinerary-item.is-transit.is-booked {
+  background: linear-gradient(180deg, rgba(39,39,47,0.88), rgba(27,61,39,0.70)) !important;
 }
 
 /* Itinerary detail is primary content, so it expands in place rather than
@@ -3777,7 +3804,7 @@ body.expenses-view-active #app-version-note{
 #snacks-view::after,
 #info-view::after,
 #profile-view::after{
-  content:"v7.9.7.1" !important;
+  content:"v7.9.7.2" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3798,7 +3825,7 @@ body.expenses-view-active #app-version-note{
   display:none !important;
 }
 body.expenses-view-active .expenses-module .expenses-app::after{
-  content:"v7.9.7.1" !important;
+  content:"v7.9.7.2" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -4108,7 +4135,7 @@ html.theme-dark .trip-map-place-copy strong,html:not(.theme-light):not(.theme-da
 </style>
             <link rel="apple-touch-icon" href="assets/icon/trip_icon.png">
   <link rel="icon" type="image/png" href="assets/icon/trip_icon.png">
-  <link rel="manifest" href="manifest.json?build=7.9.7.1">
+  <link rel="manifest" href="manifest.json?build=7.9.7.2">
   <meta name="apple-mobile-web-app-title" content="關嘉露西生日之旅">
   <!-- v7.7.1.2: expenses.css is 144KB and every rule is scoped under
        .expenses-module, yet it used to block the very first paint of the
@@ -4116,8 +4143,8 @@ html.theme-dark .trip-map-place-copy strong,html:not(.theme-light):not(.theme-da
        priority without blocking paint; ensureExpensesStylesheet() flips it to
        media="all" before the 支出 view is ever mounted, so the styling is
        byte-for-byte identical by the time anything expenses-related renders. -->
-  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?build=7.9.7.1" media="print">
-  <noscript><link rel="stylesheet" href="assets/css/expenses.css?build=7.9.7.1"></noscript>
+  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?build=7.9.7.2" media="print">
+  <noscript><link rel="stylesheet" href="assets/css/expenses.css?build=7.9.7.2"></noscript>
 </head>
 <body class="app-entry-gated app-entry-pending">
 <div class="bg-fixed"></div>
@@ -4906,7 +4933,7 @@ html.theme-dark .trip-map-place-copy strong,html:not(.theme-light):not(.theme-da
         <span class="profile-detail-spacer"></span>
       </div>
       <section class="profile-card" aria-label="App 資訊">
-        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.9.7.1</strong></div>
+        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.9.7.2</strong></div>
         <div class="profile-meta-row"><span>資料架構</span><strong>Phase 2G.2</strong></div>
         <div class="profile-meta-row"><span>主要資料來源</span><strong id="app-data-source-label">Firebase / 本機快取</strong></div>
       </section>
@@ -5143,7 +5170,7 @@ html.theme-dark .trip-map-place-copy strong,html:not(.theme-light):not(.theme-da
 </div>
 
 <script>
-const APP_VERSION = "7.9.7.1";
+const APP_VERSION = "7.9.7.2";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 let tripMapServicePromise=null,tripMapController=null,tripMapScope="day",tripMapRenderEpoch=0,tripMapSelectedPoint=null;
@@ -7023,7 +7050,7 @@ function resetTripScopedUi(data){
   applyTripVisualTheme(data);
 }
 
-// v7.9.7.1 presentation compatibility. Canonical normalized Trips carry
+// v7.9.7.2 presentation compatibility. Canonical normalized Trips carry
 // item.kind. Bundled legacy trip.json can render before the schema module is
 // ready, so this mirrors only the conservative legacy hints needed for the UI.
 function itineraryPresentationKind(item={}){

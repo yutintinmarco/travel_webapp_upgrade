@@ -1,3 +1,23 @@
+# v7.9.7.2 · Transit Compact Connector UI Cleanup
+
+## Scope
+
+Presentation only. The v7.9.7.0 Stop / Transit semantic contract, Map behaviour, Team logic, Firebase data and backend remain unchanged.
+
+## Changes
+
+• Replaced the low contrast floating Transit connector presentation with a compact frosted iOS style transport card.
+• Transit remains visually lighter and shorter than a Stop card, but now has a reliable background surface over trip artwork.
+• Preserved a restrained Team accent as a thin inset rail instead of a heavy Stop style border.
+• Increased transport icon clarity with a compact rounded icon tile.
+• Restored primary title contrast and tightened secondary information so Transit rows are easy to scan.
+• Kept the existing 交通 semantic label, Team badge, booking state, detail expansion and underlying data untouched.
+• Dark mode receives the same compact hierarchy with an appropriate material surface.
+
+## Deployment
+
+No Firebase Rules, Storage Rules, Indexes, Functions, config, CORS or Google Maps API changes.
+
 # v7.9.7.1 · Transit Connector Presentation Foundation
 
 ## Itinerary semantic presentation
