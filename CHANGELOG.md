@@ -1,3 +1,31 @@
+# v7.9.8.8 · Expanded Transit Paging + Persistent Local Route Cache
+
+Phase 3C interaction close-out and Local-First route reuse on top of v7.9.8.7. Day selector is protected and unchanged.
+
+## Expanded Transit Gallery paging
+
+* Kept the accepted native photo-gallery scroll behaviour when route detail is collapsed.
+* When `點樣去` is expanded, horizontal paging now switches to the same one-gesture / one-item threshold used by the full-screen itinerary photo viewer: the gesture is classified only after movement begins, vertical movement remains owned by the itinerary page, and a horizontal swipe can advance at most one route option.
+* Expanded-route horizontal drag follows the finger, then snaps specifically to the adjacent option (or back to the current option if the threshold is not met). This prevents a strong flick from jumping from option 1 directly to option 3 or 4.
+* Route detail still collapses when the selected option actually changes.
+
+## Persistent Transit route cache
+
+* Added provider-neutral IndexedDB caching above both Transit providers. The cached payload is the normalized / quality-checked canonical Transit result, not raw ls8h or Google response data.
+* Cache keys include provider, A/B endpoint identity, departure date/time and location context, so different journeys or times cannot silently share a result.
+* A successful route result is reused immediately for 24 hours. `now-fallback` schedule results use a shorter 2-hour freshness window.
+* If a cached result is older than its freshness window, the provider is queried normally; if that provider request fails, the existing local result is still available as an offline/stale fallback.
+* Cache entries are local-only, capped at 120 records and pruned after 14 days. No Firestore writes or cross-device canonical data are introduced.
+
+## Protected behaviour
+
+* Day bar styling, sticky behaviour and switching logic are unchanged from accepted v7.9.8.7.
+* Japan remains ls8h; non-Japan remains Google Routes Transit; Google Maps JavaScript API remains the sole in-app map renderer.
+* `在 Google Maps 查看最新路線` remains always available for eligible Transit items.
+* No Trip Overview Map, Firebase schema, Rules, Indexes, Functions, CORS, media or Edit Mode change.
+
+---
+
 # v7.9.8.7 · Transit Gallery Gesture + Google Maps Latest Route
 
 Phase 3C interaction correction on top of v7.9.8.6. No provider or Trip Overview Map redesign.
