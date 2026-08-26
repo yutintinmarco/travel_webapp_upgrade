@@ -1,3 +1,10 @@
+# v7.9.8.9 — Transit Interaction Regression Fix
+
+* Restores the accepted v7.9.8.7 Day bar behaviour at the behavioural level: cached Transit results no longer expand the route UI during the itinerary opening transition and indirectly trigger the existing auto-scroll/sticky threshold. Day bar CSS, sticky logic, stacking, sizing, colours and Day switching logic are unchanged.
+* Fixes restored-expanded Transit items after a re-render. If an item is visually restored as expanded, its Transit planner now resumes automatically instead of remaining on the idle “展開交通項目後” placeholder until the user closes and reopens it.
+* Expanded Transit route paging now follows the photo-gallery one-step gesture model. A horizontal gesture changes at most one option, vertical page scrolling remains available, and an expanded “點樣去” detail stays expanded on the adjacent option rather than collapsing.
+* Keeps the v7.9.8.8 persistent local Transit cache, ls8h Japan provider, Google Routes non-Japan provider, Google Maps route preview, and always-available Google Maps latest-route deep link unchanged.
+
 # v7.9.8.8 · Expanded Transit Paging + Persistent Local Route Cache
 
 Phase 3C interaction close-out and Local-First route reuse on top of v7.9.8.7. Day selector is protected and unchanged.
