@@ -1,6 +1,7 @@
 import { computeGoogleTransitRouteOptions, GOOGLE_TRANSIT_PROVIDER_ID } from "./transit-providers/google-transit-provider.js";
 import { computeJapanTransitRouteOptions, JAPAN_TRANSIT_PROVIDER_ID } from "./transit-providers/japan-transit-provider.js";
 import { evaluateTransitRouteResult } from "./transit-route-quality-service.js";
+import { buildTransitRouteCacheKey, getTransitRouteCache, putTransitRouteCache } from "./transit-route-cache-service.js";
 
 function clean(value) { return String(value ?? "").trim(); }
 function finiteNumber(value) {
@@ -40,8 +41,23 @@ export function selectTransitProvider({ origin = null, destination = null, locat
 
 export async function computeTransitRouteOptions(request = {}) {
   const provider = selectTransitProvider(request);
-  const result = provider === JAPAN_TRANSIT_PROVIDER_ID
-    ? await computeJapanTransitRouteOptions(request)
-    : await computeGoogleTransitRouteOptions(request);
-  return evaluateTransitRouteResult(result);
+  const cacheKey = buildTransitRouteCacheKey(provider, request);
+  const cached = await getTransitRouteCache(cacheKey);
+  if (cached?.fresh && cached?.result) {
+    return { ...cached.result, cache: { source: "indexeddb", hit: true, stale: false, cachedAt: cached.cachedAt } };
+  }
+  try {
+    const providerResult = provider === JAPAN_TRANSIT_PROVIDER_ID
+      ? await computeJapanTransitRouteOptions(request)
+      : await computeGoogleTransitRouteOptions(request);
+    const result = evaluateTransitRouteResult(providerResult);
+    void putTransitRouteCache(cacheKey, result, { tripId: request?.tripId || "" });
+    return { ...result, cache: { source: "provider", hit: false, stale: false, cachedAt: Date.now() } };
+  } catch (error) {
+    if (cached?.result) {
+      console.warn("Transit provider unavailable; using stale local route cache", error);
+      return { ...cached.result, cache: { source: "indexeddb", hit: true, stale: true, cachedAt: cached.cachedAt } };
+    }
+    throw error;
+  }
 }
