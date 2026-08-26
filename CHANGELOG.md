@@ -1,3 +1,48 @@
+# v7.9.9.1 · Phase 3E Edit Mode Ordering & Entry Refinement
+
+Phase 3D Transit Planner Expansion is treated as functionally closed at the accepted v7.9.8.9 checkpoint. This release continues Phase 3E from v7.9.9.0 without changing Transit, the protected Day bar, or the Phase 3B Trip Overview Map system.
+
+## Edit Mode entry
+
+* Removed the itinerary header pencil as the normal Edit Mode entry point. The header keeps only the active-session `取消` and `儲存` actions once editing has started.
+* Added `進入編輯模式` inside `我的 → 我的旅程`, using the existing grouped Profile menu grammar.
+* The entry is available only to Owner / Admin on the current unlocked Trip. Locked Trips and non-edit roles remain read-only.
+* Entering from `我的旅程` returns to the itinerary and starts the local Edit Session against the current Trip revision.
+
+## Native time editing
+
+* Replaced the numeric text field with the platform-native `input type="time"` control (`step=60`). iPhone therefore uses the native time picker instead of requiring direct numeric typing.
+* Time remains stored canonically as `HH:MM` text; no schema migration is introduced.
+
+## Chronological Local Draft ordering
+
+* Changing an item's time now re-evaluates the whole Day inside the Local Draft before anything is written to Firebase.
+* Valid `HH:MM` items are ordered chronologically. Equal times preserve their existing relative order. Items without a valid clock time remain stable after timed items.
+* The resulting Day order is written back into draft `sortOrder` values, so the final Save persists both the changed time and every affected `sortOrder` in the same single Firestore transaction / single Trip revision bump.
+* The itinerary immediately re-renders from a local preview copy after the item sheet is completed. The user therefore sees the new sequence before Save while canonical `window.tripData` remains untouched until commit.
+
+## Map sequence consistency
+
+* During an active Edit Session, the Trip Map and Transit endpoint resolver read from the same local preview copy rather than the canonical server copy.
+* If a time change moves a Stop, the Trip Overview Map sequence changes immediately as well.
+* Stop numbers are recalculated from the preview Day order using the existing rule: Transit items do not consume a number, and Team filtering still renumbers the visible Stop sequence contiguously.
+* No Trip Overview Map rendering, Day / Team filtering, Saved Places, marker behaviour, or sequence-line styling was redesigned.
+
+## Save once contract
+
+* Individual item completion still writes only to the Local Draft.
+* `儲存` remains the only Firebase commit point for the Edit Session and retains the existing revision-conflict protection.
+* `取消` discards both field changes and draft ordering and restores the canonical itinerary / Map sequence.
+
+## Protected behaviour
+
+* Day bar CSS, sticky behaviour, stacking, sizing, colours and Day switching logic are unchanged from the accepted v7.9.8.9 behaviour.
+* Japan Transit remains ls8h; non-Japan Transit remains Google Routes Transit.
+* Google Maps JavaScript API remains the only in-app map renderer.
+* Persistent Transit cache, Transit Gallery interaction and `在 Google Maps 查看最新路線` are unchanged.
+* No Firestore Rules, Storage Rules, Indexes, Functions or CORS change is required.
+
+---
 # v7.9.9.0 · Phase 3E Edit Session Foundation
 
 Phase 3C Transit Route Gallery is kept unchanged from the accepted v7.9.8.9 behaviour. This release opens Phase 3E with the smallest useful Edit Mode slice.

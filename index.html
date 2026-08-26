@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
   <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
   <link rel="dns-prefetch" href="https://api.open-meteo.com">
-  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?build=7.9.9.0">
+  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?build=7.9.9.1">
   <title id="page-title">行程</title>
   <script>
   // v7.7.5.0 · Performance Lite. Memory only: no Firebase reads/writes, no
@@ -1298,7 +1298,7 @@ html:not(.theme-light):not(.theme-dark) .itinerary-item.is-transit.is-booked {
   background: linear-gradient(180deg, rgba(39,39,47,0.88), rgba(27,61,39,0.70)) !important;
 }
 
-/* v7.9.9.0 · Transit route summary sits above the route map and restores the
+/* v7.9.9.1 · Transit route summary sits above the route map and restores the
    original tap-to-expand detail hierarchy. The main Trip Map remains unchanged. */
 .transit-route-planner{margin:0 0 10px;}
 .transit-route-planner-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:0 0 8px;padding:0 2px;}
@@ -3862,7 +3862,7 @@ body.expenses-view-active #app-version-note{
 #snacks-view::after,
 #info-view::after,
 #profile-view::after{
-  content:"v7.9.9.0" !important;
+  content:"v7.9.9.1" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3883,7 +3883,7 @@ body.expenses-view-active #app-version-note{
   display:none !important;
 }
 body.expenses-view-active .expenses-module .expenses-app::after{
-  content:"v7.9.9.0" !important;
+  content:"v7.9.9.1" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -4198,8 +4198,8 @@ html.theme-dark .trip-map-heading small,html.theme-dark .trip-map-state,html.the
 html.theme-dark .trip-map-line-toggle.active,html:not(.theme-light):not(.theme-dark) .trip-map-line-toggle.active{background:#f5f5f7;color:#111;border-color:#f5f5f7;box-shadow:none;}
 html.theme-dark .trip-map-place-copy strong,html:not(.theme-light):not(.theme-dark) .trip-map-place-copy strong{color:#fff;}
 
-/* v7.9.9.0 · Phase 3E Edit Session foundation. Day bar CSS is intentionally untouched. */
-.trip-edit-btn[hidden],.trip-edit-session-actions[hidden]{display:none !important;}
+/* v7.9.9.1 · Phase 3E Edit Mode entry, native time picker, and chronological draft ordering. Day bar CSS is intentionally untouched. */
+.trip-edit-btn{display:none !important;}.trip-edit-session-actions[hidden]{display:none !important;}
 .trip-edit-session-actions{display:flex;align-items:center;gap:6px;}
 .trip-edit-text-btn{min-height:34px;padding:0 12px;border-radius:999px;border:1px solid rgba(15,23,42,.10);background:rgba(255,255,255,.72);color:#1478d4;font:inherit;font-size:12px;font-weight:760;backdrop-filter:blur(18px) saturate(1.1);-webkit-backdrop-filter:blur(18px) saturate(1.1);box-shadow:inset 0 1px 0 rgba(255,255,255,.72);}
 .trip-edit-text-btn.is-primary{background:#1478d4;color:#fff;border-color:#1478d4;}
@@ -4222,7 +4222,7 @@ html.theme-dark .trip-edit-input,html.theme-dark .trip-edit-textarea,html:not(.t
 </style>
             <link rel="apple-touch-icon" href="assets/icon/trip_icon.png">
   <link rel="icon" type="image/png" href="assets/icon/trip_icon.png">
-  <link rel="manifest" href="manifest.json?build=7.9.9.0">
+  <link rel="manifest" href="manifest.json?build=7.9.9.1">
   <meta name="apple-mobile-web-app-title" content="關嘉露西生日之旅">
   <!-- v7.7.1.2: expenses.css is 144KB and every rule is scoped under
        .expenses-module, yet it used to block the very first paint of the
@@ -4230,8 +4230,8 @@ html.theme-dark .trip-edit-input,html.theme-dark .trip-edit-textarea,html:not(.t
        priority without blocking paint; ensureExpensesStylesheet() flips it to
        media="all" before the 支出 view is ever mounted, so the styling is
        byte-for-byte identical by the time anything expenses-related renders. -->
-  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?build=7.9.9.0" media="print">
-  <noscript><link rel="stylesheet" href="assets/css/expenses.css?build=7.9.9.0"></noscript>
+  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?build=7.9.9.1" media="print">
+  <noscript><link rel="stylesheet" href="assets/css/expenses.css?build=7.9.9.1"></noscript>
 </head>
 <body class="app-entry-gated app-entry-pending">
 <div class="bg-fixed"></div>
@@ -4500,6 +4500,11 @@ html.theme-dark .trip-edit-input,html.theme-dark .trip-edit-textarea,html:not(.t
         <div class="trip-library-status" id="trip-library-status">正在準備旅程資料…</div>
       </section>
       <section class="profile-card profile-menu-card profile-trip-actions-card" aria-label="旅程管理">
+        <button class="profile-row" id="trip-edit-mode-entry" type="button">
+          <span class="profile-row-icon profile-icon-blue">✎</span>
+          <span class="profile-row-copy"><strong>進入編輯模式</strong><small id="trip-edit-mode-entry-note">變更先留喺本機 Edit Session，最後一次儲存</small></span>
+          <span class="profile-chevron">›</span>
+        </button>
         <button class="profile-row" type="button" disabled>
           <span class="profile-row-icon profile-icon-blue">＋</span>
           <span class="profile-row-copy"><strong>新增空白旅程</strong><small>Phase 3 編輯器完成後開放</small></span>
@@ -5025,7 +5030,7 @@ html.theme-dark .trip-edit-input,html.theme-dark .trip-edit-textarea,html:not(.t
         <span class="profile-detail-spacer"></span>
       </div>
       <section class="profile-card" aria-label="App 資訊">
-        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.9.9.0</strong></div>
+        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.9.9.1</strong></div>
         <div class="profile-meta-row"><span>資料架構</span><strong>Phase 2G.2</strong></div>
         <div class="profile-meta-row"><span>主要資料來源</span><strong id="app-data-source-label">Firebase / 本機快取</strong></div>
       </section>
@@ -5235,9 +5240,9 @@ html.theme-dark .trip-edit-input,html.theme-dark .trip-edit-textarea,html:not(.t
 <div class="modal-backdrop" id="trip-edit-item-backdrop" aria-hidden="true">
   <div class="modal trip-edit-item-modal" role="dialog" aria-modal="true" aria-labelledby="trip-edit-item-title">
     <div class="modal-title" id="trip-edit-item-title">編輯行程項目</div>
-    <p class="trip-edit-local-note">呢度嘅變更只會先放入今次 Edit Session；要等你撳右上角「儲存」先一次寫入 Firebase。</p>
+    <p class="trip-edit-local-note">呢度嘅變更只會先放入今次 Edit Session；完成所有修改後，先一次「儲存」寫入 Firebase。</p>
     <div class="trip-edit-form">
-      <label class="trip-edit-field"><span>時間</span><input class="trip-edit-input" id="trip-edit-item-time" type="text" inputmode="numeric" placeholder="09:00" maxlength="20"></label>
+      <label class="trip-edit-field"><span>時間</span><input class="trip-edit-input" id="trip-edit-item-time" type="time" step="60"></label>
       <label class="trip-edit-field"><span>標題</span><input class="trip-edit-input" id="trip-edit-item-title-input" type="text" autocomplete="off" maxlength="120"></label>
       <label class="trip-edit-field"><span>備註</span><textarea class="trip-edit-textarea" id="trip-edit-item-note" maxlength="500"></textarea></label>
     </div>
@@ -5279,7 +5284,7 @@ html.theme-dark .trip-edit-input,html.theme-dark .trip-edit-textarea,html:not(.t
 </div>
 
 <script>
-const APP_VERSION = "7.9.9.0";
+const APP_VERSION = "7.9.9.1";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 let tripMapServicePromise=null,transitRouteServicePromise=null,tripEditServicePromise=null,tripMapController=null,tripMapScope="day",tripMapRenderEpoch=0,tripMapSelectedPoint=null;
@@ -5298,7 +5303,8 @@ function tripEditService(){
   if(!tripEditServicePromise)tripEditServicePromise=import(`./assets/js/trip-edit-session-service.js?build=${APP_VERSION}`);
   return tripEditServicePromise;
 }
-function tripHasMapCandidates(data=window.tripData){
+function activeTripPresentationData(){return window.__tripEditPreviewData||window.tripData;}
+function tripHasMapCandidates(data=activeTripPresentationData()){
   if(!data)return false;
   const days=Array.isArray(data.days)?data.days:[];
   const itemHas=days.some(day=>(Array.isArray(day?.items)?day.items:[]).some(item=>{const loc=item?.location||{};return !!(loc.mapsUrl||loc.placeId||loc.address||item?.maps||item?.mapsUrl||(Number.isFinite(Number(loc.latitude??loc.lat))&&Number.isFinite(Number(loc.longitude??loc.lng))));}));
@@ -5306,7 +5312,7 @@ function tripHasMapCandidates(data=window.tripData){
   const savedHas=saved.some(place=>{const loc=place?.location||{};return !!(loc.mapsUrl||loc.placeId||loc.address||place?.maps||place?.mapsUrl||(Number.isFinite(Number(loc.latitude??loc.lat))&&Number.isFinite(Number(loc.longitude??loc.lng))));});
   return itemHas||savedHas;
 }
-function updateTripMapButton(data=window.tripData){const btn=document.getElementById("trip-map-btn");if(btn)btn.hidden=!tripHasMapCandidates(data);}
+function updateTripMapButton(data=activeTripPresentationData()){const btn=document.getElementById("trip-map-btn");if(btn)btn.hidden=!tripHasMapCandidates(data);}
 function tripMapOverlayOpen(){return document.getElementById("trip-map-overlay")?.classList.contains("is-open");}
 function clearTripMapSelection(){
   tripMapSelectedPoint=null;
@@ -5316,7 +5322,7 @@ function clearTripMapSelection(){
 function tripMapGalleryForPoint(point){
   try{
     if(point?.kind==="itinerary"){
-      const day=(window.tripData?.days||[]).find(row=>String(row?.dayId||"").trim()===String(point?.dayId||"").trim());
+      const day=(activeTripPresentationData()?.days||[]).find(row=>String(row?.dayId||"").trim()===String(point?.dayId||"").trim());
       const items=Array.isArray(day?.items)?day.items:[];
       const item=items.find(row=>String(row?.itemId||"").trim()===String(point?.itemId||"").trim())||items[Math.max(0,Number(point?.order||1)-1)]||null;
       const gallery=item?storageGalleryForItem(item,String(day?.dayId||"")):[];
@@ -5396,7 +5402,7 @@ function applySavedMapRegion(regionInput,{focus=true}={}){
   const subtitle=document.getElementById("trip-map-subtitle");if(subtitle)subtitle.textContent=tripMapRegion==="__all__"?`收藏 · ${visible.length} 個可定位地點`:`${tripMapRegion} · ${visible.length} 個收藏`;
   const activeBtn=host?.querySelector?.(`[data-map-region="${CSS.escape(tripMapRegion)}"]`);activeBtn?.scrollIntoView?.({behavior:"smooth",block:"nearest",inline:"center"});
 }
-function tripMapDays(){return Array.isArray(window.tripData?.days)?window.tripData.days:[];}
+function tripMapDays(){const data=activeTripPresentationData();return Array.isArray(data?.days)?data.days:[];}
 function renderTripMapDayFilters(){
   const host=document.getElementById("trip-map-day-filters");if(!host)return;
   if(tripMapScope!=="day"){host.hidden=true;host.replaceChildren();return;}
@@ -5408,7 +5414,7 @@ function renderTripMapDayFilters(){
   host.querySelector(".trip-map-day-filter.active")?.scrollIntoView?.({block:"nearest",inline:"center"});
 }
 function tripMapTravellerRows(){
-  const travellers=window.tripData?.meta?.travellers||{},keys=orderedTravellerKeys(travellers);
+  const travellers=activeTripPresentationData()?.meta?.travellers||{},keys=orderedTravellerKeys(travellers);
   return keys.map(key=>({key,label:String(travellers?.[key]?.label||key).trim()||key,color:teamDisplayColour(key,travellers?.[key]||{})}));
 }
 function renderTripMapTeamFilters(){
@@ -5464,7 +5470,7 @@ async function renderTripMapScope(scope=tripMapScope){
   try{
     const service=await tripMapService();
     if(!service.googleMapsConfigured()){state.textContent="Google Maps 尚未設定；請先加入受網站限制嘅 Maps browser key。";return;}
-    const rawPoints=tripMapScope==="saved"?service.savedPlaceMapPoints(window.tripData):service.itineraryMapPoints(window.tripData,tripMapDayId);
+    const mapData=activeTripPresentationData(),rawPoints=tripMapScope==="saved"?service.savedPlaceMapPoints(mapData):service.itineraryMapPoints(mapData,tripMapDayId);
     const activeDay=tripMapDays().find(day=>String(day?.dayId||"").trim()===tripMapDayId);
     const teamRow=tripMapTravellerRows().find(row=>row.key===tripMapTeam);
     if(subtitle)subtitle.textContent=tripMapScope==="saved"?`收藏 · ${rawPoints.length} 個可定位地點`:`${activeDay?.label||"當日"}${tripMapTeam!=="all"&&teamRow?` · ${teamRow.label}`:""} · ${tripMapDayPointSummary(rawPoints)}`;
@@ -5838,6 +5844,11 @@ document.getElementById("trip-edit-save-btn")?.addEventListener("click",()=>void
 document.getElementById("trip-edit-item-cancel")?.addEventListener("click",closeTripEditItemModal);
 document.getElementById("trip-edit-item-done")?.addEventListener("click",()=>void finishTripEditItemModal());
 document.getElementById("trip-edit-item-backdrop")?.addEventListener("click",event=>{if(event.target===event.currentTarget)closeTripEditItemModal();});
+document.getElementById("trip-edit-mode-entry")?.addEventListener("click",()=>{
+  if(!tripEditHasPermission()||tripEditIsActive())return;
+  setView("itinerary",{restoreScroll:true});
+  requestAnimationFrame(()=>void beginTripEditSession());
+});
 const FMIN=0.85,FMAX=1.30,FSTEP=0.08;
 function applyFont(s){s=clamp(s,FMIN,FMAX);document.documentElement.style.setProperty("--font-scale",s);try{localStorage.setItem("trip_font_scale",s);}catch(e){}return s;}
 function updateFontScaleLabel(){
@@ -7225,12 +7236,12 @@ function transitEndpointRecord(value){if(!value)return null;if(typeof value==="s
 function transitNeighbourCompatible(row,transitWho){const who=String(row?.who||"all").trim()||"all";return transitWho==="all"?who==="all":(who==="all"||who===transitWho);}
 function transitDayTimeZone(day={}){
   const direct=String(day?.timezone||"").trim();if(direct)return direct;
-  const cities=window.tripData?.meta?.cities||{},cityKey=String(day?.city||"").trim();if(cityKey&&cities?.[cityKey]?.timezone)return String(cities[cityKey].timezone);
+  const data=activeTripPresentationData(),cities=data?.meta?.cities||{},cityKey=String(day?.city||"").trim();if(cityKey&&cities?.[cityKey]?.timezone)return String(cities[cityKey].timezone);
   const iso=String(day?.isoDate||day?.dateIso||"").trim();if(iso){for(const city of Object.values(cities)){const st=String(city?.startIso||""),en=String(city?.endIso||"");if(city?.timezone&&(!st||iso>=st)&&(!en||iso<=en))return String(city.timezone);}}
-  return String(window.tripData?.meta?.timezone||Intl.DateTimeFormat().resolvedOptions().timeZone||"UTC");
+  return String(data?.meta?.timezone||Intl.DateTimeFormat().resolvedOptions().timeZone||"UTC");
 }
 function transitLocationContext(day={}){
-  const meta=window.tripData?.meta||{},cities=meta?.cities||{},cityKey=String(day?.city||"").trim(),city=cityKey&&cities?.[cityKey]?cities[cityKey]:{};
+  const meta=activeTripPresentationData()?.meta||{},cities=meta?.cities||{},cityKey=String(day?.city||"").trim(),city=cityKey&&cities?.[cityKey]?cities[cityKey]:{};
   const latitude=Number(city?.latitude??city?.lat),longitude=Number(city?.longitude??city?.lng??city?.lon);
   const providerTimeZone=String(day?.timezone||city?.timezone||meta?.timezone||"").trim();
   return {
@@ -7250,7 +7261,8 @@ function zonedDateFromTripParts(isoDate,timeText,timeZone){
 }
 function transitDepartureDate(day,item){return zonedDateFromTripParts(String(day?.isoDate||day?.dateIso||""),String(item?.time||""),transitDayTimeZone(day));}
 function transitRouteContext(dayIdInput,itemIdInput){
-  const dayId=String(dayIdInput||"").trim(),itemId=String(itemIdInput||"").trim(),day=(window.tripData?.days||[]).find(row=>String(row?.dayId||"").trim()===dayId);if(!day)return null;
+  const routeData=activeTripPresentationData();
+  const dayId=String(dayIdInput||"").trim(),itemId=String(itemIdInput||"").trim(),day=(routeData?.days||[]).find(row=>String(row?.dayId||"").trim()===dayId);if(!day)return null;
   const items=Array.isArray(day?.items)?day.items:[],index=items.findIndex(row=>String(row?.itemId||"").trim()===itemId);if(index<0)return null;const item=items[index];if(!transitPlannerEligible(item))return null;
   const who=String(item?.who||"all").trim()||"all",explicit=item?.transit||item?.transport||{};let origin=transitEndpointRecord(explicit?.origin),destination=transitEndpointRecord(explicit?.destination),originBlocked=false;
   // Transit is an edge between Stops. Legacy Transit rows may contain a Maps URL
@@ -7259,7 +7271,7 @@ function transitRouteContext(dayIdInput,itemIdInput){
   // Previous-Day fallback is allowed only when the current Day genuinely starts
   // with Transit. If a real current-Day Stop exists but is unresolved, do not jump
   // across it and silently use an older origin.
-  if(!origin&&!originBlocked){const dayIndex=(window.tripData?.days||[]).findIndex(row=>String(row?.dayId||"").trim()===dayId);for(let d=dayIndex-1;d>=0&&!origin;d--){const priorItems=Array.isArray(window.tripData?.days?.[d]?.items)?window.tripData.days[d].items:[];for(let i=priorItems.length-1;i>=0;i--){const row=priorItems[i];if(!transitNeighbourCompatible(row,who))continue;if(itineraryPresentationKind(row)!=="stop")continue;if(!itineraryRecordHasLocation(row))break;origin=row;break;}}}
+  if(!origin&&!originBlocked){const dayIndex=(routeData?.days||[]).findIndex(row=>String(row?.dayId||"").trim()===dayId);for(let d=dayIndex-1;d>=0&&!origin;d--){const priorItems=Array.isArray(routeData?.days?.[d]?.items)?routeData.days[d].items:[];for(let i=priorItems.length-1;i>=0;i--){const row=priorItems[i];if(!transitNeighbourCompatible(row,who))continue;if(itineraryPresentationKind(row)!=="stop")continue;if(!itineraryRecordHasLocation(row))break;origin=row;break;}}}
   if(!destination){for(let i=index+1;i<items.length;i++){const row=items[i];if(!transitNeighbourCompatible(row,who))continue;if(itineraryPresentationKind(row)!=="stop")continue;if(!itineraryRecordHasLocation(row))break;destination=row;break;}}
   return {day,item,origin,destination,timeZone:transitDayTimeZone(day),locationContext:transitLocationContext(day),departureTime:transitDepartureDate(day,item)};
 }
@@ -7379,18 +7391,26 @@ async function ensureTransitRoutePlanner(itemEl){
 
 // Phase 3E · Edit Session foundation
 let tripEditSession=null,tripEditItemTarget=null,tripEditSaving=false;
-function tripEditCanStart(){
+window.__tripEditPreviewData=null;
+function tripEditHasPermission(){
   const role=String(window.__appTripAccess?.role||"");
-  return currentAppView==="itinerary"&&!currentTripGlobalLocked()&&(role==="owner"||role==="admin")&&!!dataTripId(window.tripData);
+  return !currentTripGlobalLocked()&&(role==="owner"||role==="admin")&&!!dataTripId(window.tripData);
 }
+function tripEditCanStart(){return currentAppView==="itinerary"&&tripEditHasPermission();}
 function tripEditIsActive(){return !!tripEditSession;}
 function tripEditCurrentRevision(){return Math.max(1,Number(window.tripData?.revision)||1);}
+function tripEditSyncProfileEntry(){
+  const entry=document.getElementById("trip-edit-mode-entry"),note=document.getElementById("trip-edit-mode-entry-note");if(!entry)return;
+  const allowed=tripEditHasPermission(),active=tripEditIsActive();entry.disabled=!allowed||active;
+  if(note)note.textContent=active?"目前已進入 Edit Mode":(currentTripGlobalLocked()?"旅程已鎖定，目前只可查看":(allowed?"變更先留喺本機 Edit Session，最後一次儲存":"只有 Owner／Admin 可以編輯"));
+}
 function tripEditSyncHeader(){
   const edit=document.getElementById("trip-edit-btn"),actions=document.getElementById("trip-edit-session-actions"),save=document.getElementById("trip-edit-save-btn");
-  if(edit)edit.hidden=tripEditIsActive()||!tripEditCanStart();
+  if(edit)edit.hidden=true;
   if(actions)actions.hidden=!tripEditIsActive();
   if(save){save.disabled=tripEditSaving;save.textContent=tripEditSaving?"儲存中…":"儲存";}
   document.body.classList.toggle("trip-edit-mode",tripEditIsActive());
+  tripEditSyncProfileEntry();
 }
 function tripEditFindDomItem(dayId,itemId){
   return [...document.querySelectorAll(".itinerary-item")].find(node=>String(node.dataset.dayId||"")===String(dayId||"")&&String(node.dataset.itemId||"")===String(itemId||""))||null;
@@ -7426,7 +7446,7 @@ function tripEditDecorateItems(){
 async function beginTripEditSession(){
   if(tripEditSession||!tripEditCanStart())return;
   const service=await tripEditService();
-  try{tripEditSession=service.createTripEditSession(window.tripData);tripEditSyncHeader();tripEditDecorateItems();}
+  try{tripEditSession=service.createTripEditSession(window.tripData);window.__tripEditPreviewData=service.applyTripEditDraftToTrip(tripEditSession,window.tripData);tripEditSyncHeader();tripEditDecorateItems();}
   catch(error){console.warn("Begin edit session",error);window.alert("暫時未能開始編輯，請稍後再試。");}
 }
 function closeTripEditItemModal(){
@@ -7439,21 +7459,23 @@ async function openTripEditItemModal(dayId,itemId){
   const time=document.getElementById("trip-edit-item-time"),title=document.getElementById("trip-edit-item-title-input"),note=document.getElementById("trip-edit-item-note"),backdrop=document.getElementById("trip-edit-item-backdrop");
   if(time)time.value=draft.time||"";if(title)title.value=draft.title||"";if(note)note.value=draft.note||"";
   if(backdrop){backdrop.classList.add("active");backdrop.setAttribute("aria-hidden","false");}
-  setTimeout(()=>title?.focus?.(),180);
+
 }
 async function finishTripEditItemModal(){
   if(!tripEditSession||!tripEditItemTarget)return closeTripEditItemModal();
   const service=await tripEditService(),time=document.getElementById("trip-edit-item-time")?.value||"",title=document.getElementById("trip-edit-item-title-input")?.value||"",note=document.getElementById("trip-edit-item-note")?.value||"";
   if(!String(title).trim()){window.alert("標題唔可以留空。");return;}
-  const draft=service.updateTripEditDraftItem(tripEditSession,tripEditItemTarget.dayId,tripEditItemTarget.itemId,{time,title,note});
-  tripEditApplyDraftPreview(tripEditItemTarget.dayId,tripEditItemTarget.itemId,draft);closeTripEditItemModal();
+  service.updateTripEditDraftItem(tripEditSession,tripEditItemTarget.dayId,tripEditItemTarget.itemId,{time,title,note});
+  window.__tripEditPreviewData=service.applyTripEditDraftToTrip(tripEditSession,window.tripData);
+  closeTripEditItemModal();render(window.__tripEditPreviewData,{includeSnacks:false});
+  if(tripMapOverlayOpen()&&tripMapScope==="day")void renderTripMapScope("day");
 }
 function cancelTripEditSession(){
   if(!tripEditSession)return;
   const dirtyPromise=tripEditService().then(service=>service.tripEditChangeCount(tripEditSession)).catch(()=>0);
   void dirtyPromise.then(count=>{
     if(count>0&&!window.confirm("取消今次編輯？所有未儲存變更會被捨棄。"))return;
-    closeTripEditItemModal();tripEditSession=null;tripEditSaving=false;tripEditSyncHeader();render(window.tripData);
+    closeTripEditItemModal();tripEditSession=null;tripEditSaving=false;window.__tripEditPreviewData=null;tripEditSyncHeader();render(window.tripData);
   });
 }
 function tripEditFriendlyError(error){
@@ -7471,7 +7493,7 @@ async function saveTripEditSession(){
   try{
     const service=await tripEditService(),user=window.__appAuthUser||tripLibraryCurrentUser||null,result=await service.commitTripEditSession(tripEditSession,{user});
     const applied=service.applyTripEditDraftToTrip(tripEditSession,window.tripData,{revision:result.revision});
-    tripEditSession=null;tripEditSaving=false;window.tripData=applied;tripEditSyncHeader();
+    tripEditSession=null;tripEditSaving=false;window.__tripEditPreviewData=null;window.tripData=applied;tripEditSyncHeader();
     try{await persistInstantTripCache(window.tripData);}catch(_){}
     render(window.tripData);
   }catch(error){console.error("Save edit session",error);tripEditSaving=false;tripEditSyncHeader();window.alert(tripEditFriendlyError(error));}
@@ -8544,6 +8566,7 @@ function renderTripLibrary(){
   renderTripSwitcher();
   renderArchivedTrips();
   renderTripGlobalLockState();
+  tripEditSyncProfileEntry();
   hydrateTripLibraryMediaImages();
 }
 
