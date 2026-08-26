@@ -1,3 +1,22 @@
+# v7.9.9.2 · Low-Risk Shell Extraction + Edit UI Refinement
+
+This release deliberately avoids feature refactoring. It keeps the accepted v7.9.9.1 Edit Session, Transit, Map and protected Day bar behaviour while shrinking the monolithic `index.html` into connector-friendly shell assets.
+
+## Edit UI
+
+* Edit Session `取消` / `儲存` actions move out of the crowded itinerary header into a dedicated two-button floating action bar in the existing bottom-navigation position. The normal tab bar temporarily yields to the Edit Session actions, keeping both actions on one line and preventing accidental view switching while editing.
+* The native iOS `input type=time` picker remains in use, but the field now has explicit zero minimum width / inline-size containment so WebKit cannot push the control beyond the right edge of the edit sheet.
+* No change to Edit Session data semantics, chronological draft ordering, Firebase save-once transaction, Map draft preview or Stop numbering.
+
+## Low-risk shell extraction
+
+* The original inline CSS remains in exactly the same cascade order: a small first-paint prefix stays inline, while the remaining rules are moved into ordered `assets/shell/app-shell-*.css` files.
+* The early visual/performance boot script stays inline and unchanged so first-paint / warm-resume timing is untouched.
+* The original main runtime source is preserved byte-for-byte and still executes as one classic script. For GitHub transport only, its text is stored in ordered small `assets/shell/app-runtime-part-*.js` carrier files; a tiny executor concatenates the text and injects one classic script at the exact former runtime position. This preserves function hoisting, global lexical scope and document-relative dynamic imports.
+* Runtime carrier scripts are parser-blocking and execute before document parsing completes, so the existing window-load registration timing is preserved.
+* All shell parts are transactional critical Service Worker assets; an incomplete deployment cannot replace the last known-good worker.
+* Protected Day bar CSS and collapsing/sticky logic are exact-match retained from v7.9.9.1.
+
 # v7.9.9.1 · Phase 3E Edit Mode Ordering & Entry Refinement
 
 Phase 3D Transit Planner Expansion is treated as functionally closed at the accepted v7.9.8.9 checkpoint. This release continues Phase 3E from v7.9.9.0 without changing Transit, the protected Day bar, or the Phase 3B Trip Overview Map system.

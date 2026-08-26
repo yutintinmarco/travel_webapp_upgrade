@@ -1,5 +1,5 @@
 /* Travel WebApp Service Worker
- * v7.9.9.1 · Phase 3E Edit Mode Ordering and Entry Refinement; Layer 0–3 retained
+ * v7.9.9.2 · Phase 3E Edit Mode Ordering and Entry Refinement; Layer 0–3 retained
  *
  * Keeps the v7.7.0.14 cold-start behaviour, while hardening installation:
  *  1. Critical shell assets are transactional. If any critical file cannot be
@@ -14,7 +14,7 @@
  *     explicit reload stays network-first.
  */
 
-const SW_VERSION = "travel-shell-v7.9.9.1";
+const SW_VERSION = "travel-shell-v7.9.9.2";
 const CORE_CACHE = SW_VERSION;
 
 // Required for a useful offline launch and remembered-Trip boot.
@@ -22,6 +22,24 @@ const CRITICAL_ASSETS = [
   "./",
   "./index.html",
   "./manifest.json",
+  "./assets/shell/app-shell-01.css",
+  "./assets/shell/app-shell-02.css",
+  "./assets/shell/app-shell-03.css",
+  "./assets/shell/app-shell-04.css",
+  "./assets/shell/app-runtime-init.js",
+  "./assets/shell/app-runtime-part-01.js",
+  "./assets/shell/app-runtime-part-02.js",
+  "./assets/shell/app-runtime-part-03.js",
+  "./assets/shell/app-runtime-part-04.js",
+  "./assets/shell/app-runtime-part-05.js",
+  "./assets/shell/app-runtime-part-06.js",
+  "./assets/shell/app-runtime-part-07.js",
+  "./assets/shell/app-runtime-part-08.js",
+  "./assets/shell/app-runtime-part-09.js",
+  "./assets/shell/app-runtime-part-10.js",
+  "./assets/shell/app-runtime-part-11.js",
+  "./assets/shell/app-runtime-part-12.js",
+  "./assets/shell/app-runtime-exec.js",
   "./trip.json",
   "./assets/js/auth-service.js",
   "./assets/js/firebase-config.js",

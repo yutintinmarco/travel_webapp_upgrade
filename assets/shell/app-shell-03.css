@@ -1,0 +1,1076 @@
+
+.portrait-lock-card{width:min(360px,82vw);display:grid;justify-items:center;gap:9px;padding:22px 20px;border:1px solid rgba(118,118,128,.14);border-radius:24px;background:rgba(255,255,255,.72);box-shadow:0 18px 48px rgba(24,24,28,.12);-webkit-backdrop-filter:blur(24px) saturate(1.1);backdrop-filter:blur(24px) saturate(1.1);}
+.portrait-lock-icon{width:48px;height:48px;display:grid;place-items:center;border-radius:14px;background:rgba(10,132,255,.11);color:#0a84ff;font-size:27px;font-weight:760;}
+.portrait-lock-card strong{font-size:20px;line-height:1.25;}
+.portrait-lock-card span{color:var(--label-secondary,#6e6e73);font-size:14px;line-height:1.45;}
+html.theme-dark .portrait-lock-overlay,html:not(.theme-light):not(.theme-dark) .portrait-lock-overlay{background:#1c1c22;}
+html.theme-dark .portrait-lock-card,html:not(.theme-light):not(.theme-dark) .portrait-lock-card{background:rgba(44,44,50,.88);border-color:rgba(255,255,255,.09);}
+@media (orientation:landscape) and (hover:none) and (pointer:coarse){.portrait-lock-overlay{display:flex!important;}}
+
+/* Phase 2E · v7.6.3 · legacy trip compatibility, visual reset + expense bootstrap */
+.app-progress-backdrop{position:fixed;inset:0;z-index:3900;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(13,18,28,.28);-webkit-backdrop-filter:blur(8px) saturate(1.05);backdrop-filter:blur(8px) saturate(1.05);opacity:0;visibility:hidden;pointer-events:none;transition:opacity .22s ease,visibility .22s step-end;}
+.app-progress-backdrop.active{opacity:1;visibility:visible;pointer-events:auto;transition:opacity .22s ease,visibility 0s;}
+.app-progress-card{width:min(360px,calc(100vw - 40px));border-radius:26px;padding:22px 22px 20px;background:rgba(248,249,252,.88);border:1px solid rgba(255,255,255,.76);box-shadow:0 18px 55px rgba(24,31,42,.22);-webkit-backdrop-filter:blur(28px) saturate(1.18);backdrop-filter:blur(28px) saturate(1.18);}
+.app-progress-kicker{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:rgba(60,60,67,.56);margin-bottom:5px;}
+.app-progress-title{font-size:24px;font-weight:760;letter-spacing:-.02em;color:#17171a;margin:0;}
+.app-progress-subtitle{font-size:14px;color:rgba(60,60,67,.72);line-height:1.45;margin:7px 0 18px;}
+.app-progress-meter-row{display:flex;align-items:center;gap:12px;}
+.app-progress-meter{height:9px;flex:1;border-radius:999px;overflow:hidden;background:rgba(118,118,128,.15);}
+.app-progress-meter span{display:block;height:100%;width:0;border-radius:inherit;background:#0a84ff;transition:width .26s cubic-bezier(.22,.61,.36,1);}
+.app-progress-percent{width:44px;text-align:right;font-variant-numeric:tabular-nums;font-weight:700;color:#1c1c1e;font-size:14px;}
+.app-progress-stage{margin-top:16px;padding-top:15px;border-top:1px solid rgba(60,60,67,.12);display:flex;align-items:flex-start;gap:11px;}
+.app-progress-stage-icon{width:26px;height:26px;flex:0 0 26px;border-radius:50%;display:grid;place-items:center;background:rgba(10,132,255,.11);color:#0a84ff;font-size:13px;font-weight:800;}
+.app-progress-stage-copy{min-width:0;}
+.app-progress-stage-copy strong{display:block;font-size:15px;color:#1c1c1e;line-height:1.25;}
+.app-progress-stage-copy small{display:block;margin-top:3px;font-size:13px;line-height:1.35;color:rgba(60,60,67,.66);font-variant-numeric:tabular-nums;}
+.app-progress-done{width:100%;min-height:46px;margin-top:18px;border:0;border-radius:14px;background:#0a84ff;color:#fff;font:inherit;font-size:15px;font-weight:720;box-shadow:inset 0 1px 0 rgba(255,255,255,.22);}
+.app-progress-done:active{opacity:.72;}
+.app-progress-done[hidden]{display:none!important;}
+.app-progress-backdrop.is-success .app-progress-done{background:#30b35a;}
+.app-progress-backdrop.is-error .app-progress-done{background:#ff3b30;}
+.app-progress-backdrop.is-success .app-progress-meter span{background:#30b35a;}
+.app-progress-backdrop.is-success .app-progress-stage-icon{background:rgba(48,179,90,.13);color:#248a3d;}
+.app-progress-backdrop.is-error .app-progress-meter span{background:#ff3b30;}
+.app-progress-backdrop.is-error .app-progress-stage-icon{background:rgba(255,59,48,.12);color:#d92d20;}
+body.app-progress-active{overscroll-behavior:none;}
+body.app-progress-active .bottom-bar{pointer-events:none;}
+html.theme-dark .app-progress-card,html:not(.theme-light):not(.theme-dark) .app-progress-card{background:rgba(29,29,32,.90);border-color:rgba(255,255,255,.13);box-shadow:0 18px 58px rgba(0,0,0,.44);}
+html.theme-dark .app-progress-title,html:not(.theme-light):not(.theme-dark) .app-progress-title,html.theme-dark .app-progress-percent,html:not(.theme-light):not(.theme-dark) .app-progress-percent,html.theme-dark .app-progress-stage-copy strong,html:not(.theme-light):not(.theme-dark) .app-progress-stage-copy strong{color:#f5f5f7;}
+html.theme-dark .app-progress-kicker,html:not(.theme-light):not(.theme-dark) .app-progress-kicker,html.theme-dark .app-progress-subtitle,html:not(.theme-light):not(.theme-dark) .app-progress-subtitle,html.theme-dark .app-progress-stage-copy small,html:not(.theme-light):not(.theme-dark) .app-progress-stage-copy small{color:rgba(235,235,245,.64);}
+
+.trip-activity-toolbar{padding:0;background:transparent!important;border:0!important;box-shadow:none!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;overflow:visible;}
+.trip-activity-filters{width:100vw;box-sizing:border-box;margin-left:calc(50% - 50vw);margin-right:calc(50% - 50vw);padding-left:max(18px,calc((100vw - 480px)/2 + 18px));padding-right:max(18px,calc((100vw - 480px)/2 + 18px));display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:5px;overflow:visible;}
+.trip-activity-filter{min-width:0;width:100%;padding:7px 2px;border-radius:999px;border:1px solid #dadada;background:#f8f8fa;color:#555;font:inherit;font-size:calc(10.5px * var(--font-scale));font-weight:500;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:transform .12s ease,background-color .18s ease,border-color .18s ease,color .18s ease;}
+.trip-activity-filter:active{transform:scale(.96);}
+.trip-activity-filter.active{background:#111;border-color:#111;color:#fff;font-weight:650;box-shadow:0 4px 12px rgba(15,23,42,.10),inset 0 1px 0 rgba(255,255,255,.18);}
+.trip-activity-list{overflow:hidden;}
+.trip-activity-item{display:flex;gap:12px;padding:15px 16px;border-top:1px solid rgba(60,60,67,.11);}
+.trip-activity-item:first-child{border-top:0;}
+.trip-activity-icon{width:36px;height:36px;flex:0 0 36px;border-radius:11px;display:grid;place-items:center;font-size:17px;background:rgba(118,118,128,.10);}
+.trip-activity-copy{min-width:0;flex:1;}
+.trip-activity-copy strong{display:block;font-size:16px;line-height:1.25;color:#1c1c1e;}
+.trip-activity-summary{margin-top:4px;font-size:13px;line-height:1.38;color:rgba(60,60,67,.72);overflow-wrap:anywhere;}
+.trip-activity-meta{margin-top:6px;font-size:12px;color:rgba(60,60,67,.52);display:flex;gap:6px;flex-wrap:wrap;}
+.trip-activity-category{font-weight:700;}
+.trip-activity-empty{padding:30px 18px;text-align:center;color:rgba(60,60,67,.6);font-size:14px;}
+.trip-activity-status{padding:12px 16px 15px;border-top:1px solid rgba(60,60,67,.10);font-size:12px;color:rgba(60,60,67,.54);}
+html.theme-dark .trip-activity-filter,html:not(.theme-light):not(.theme-dark) .trip-activity-filter{background:rgba(36,36,44,.70);border-color:rgba(255,255,255,.12);color:rgba(200,200,215,.78);}
+html.theme-dark .trip-activity-filter.active,html:not(.theme-light):not(.theme-dark) .trip-activity-filter.active{background:#f5f5f7;border-color:#f5f5f7;color:#151517;box-shadow:0 4px 12px rgba(0,0,0,.24);}
+html.theme-dark .trip-activity-copy strong,html:not(.theme-light):not(.theme-dark) .trip-activity-copy strong{color:#f5f5f7;}
+html.theme-dark .trip-activity-summary,html:not(.theme-light):not(.theme-dark) .trip-activity-summary{color:rgba(235,235,245,.7);}
+html.theme-dark .trip-activity-meta,html:not(.theme-light):not(.theme-dark) .trip-activity-meta,html.theme-dark .trip-activity-status,html:not(.theme-light):not(.theme-dark) .trip-activity-status,html.theme-dark .trip-activity-empty,html:not(.theme-light):not(.theme-dark) .trip-activity-empty{color:rgba(235,235,245,.5);}
+
+
+/* Phase 2E · v7.6.3 · per-trip visual fallbacks + inline expense loading */
+.trip-switch-row-icon .trip-icon-emoji,.trip-switch-row-icon .trip-icon-monogram{
+  width:100%;height:100%;display:grid;place-items:center;font-weight:800;color:var(--label-primary);
+}
+.trip-switch-row-icon .trip-icon-emoji{font-size:18px;line-height:1;}
+.trip-switch-row-icon .trip-icon-monogram{font-size:12px;letter-spacing:-.2px;background:rgba(0,122,255,.10);}
+.expenses-inline-status{padding:18px 4px 8px;color:var(--label-primary);}
+.expenses-inline-status-copy{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:9px;}
+.expenses-inline-status-copy strong{font-size:calc(13px * var(--font-scale));font-weight:760;}
+.expenses-inline-status-copy span{font-size:calc(10px * var(--font-scale));color:var(--label-secondary);text-align:right;}
+.expenses-inline-progress{height:4px;border-radius:999px;overflow:hidden;background:rgba(120,120,128,.16);}
+.expenses-inline-progress span{display:block;width:38%;height:100%;border-radius:inherit;background:var(--accent-color,#0a84ff);animation:expensesInlineProgress 1.15s ease-in-out infinite;}
+@keyframes expensesInlineProgress{0%{transform:translateX(-110%)}55%{transform:translateX(105%)}100%{transform:translateX(265%)}}
+.expenses-empty-state{padding:22px 4px;color:var(--label-secondary);font-size:calc(12px * var(--font-scale));line-height:1.55;}
+@media(prefers-reduced-motion:reduce){.expenses-inline-progress span{animation:none;width:64%;}}
+
+
+/* v7.6.3.1 · My Trips visual hotfix */
+.trip-library-icon{
+  overflow:hidden;
+}
+.trip-library-icon img{
+  width:100%;
+  height:100%;
+  display:block;
+  object-fit:cover;
+  border-radius:inherit;
+}
+.trip-library-icon .trip-icon-emoji,
+.trip-library-icon .trip-icon-monogram{
+  width:100%;
+  height:100%;
+  display:grid;
+  place-items:center;
+}
+.trip-library-icon .trip-icon-emoji{font-size:20px;line-height:1;}
+.trip-library-icon .trip-icon-monogram{
+  font-size:12px;
+  font-weight:800;
+  letter-spacing:-.2px;
+  background:rgba(0,122,255,.10);
+}
+/* .container already owns bottom-bar clearance. Avoid a second 118px gap
+   between the active Profile page and the global version label. */
+#profile-view{
+  padding-bottom:0 !important;
+}
+
+
+/* v7.6.3.2 · Version note follows each active page's real content. */
+.app-view > #app-version-note{
+  position:relative !important;
+  display:block !important;
+  width:100% !important;
+  max-width:none !important;
+  clear:both !important;
+  box-sizing:border-box !important;
+  margin:8px 0 0 !important;
+  padding:0 8px !important;
+  white-space:nowrap !important;
+  overflow:visible !important;
+  text-overflow:clip !important;
+}
+body.expenses-view-active #app-version-note{
+  margin:4px 0 0 !important;
+  padding:0 8px !important;
+}
+body.expenses-view-active #expenses-root{
+  margin-bottom:0 !important;
+  padding-bottom:0 !important;
+}
+
+
+/* v7.6.3.5 · App & Data diagnostics */
+.profile-nav-page[data-profile-page="app-data"] .profile-meta-row{
+  gap:18px;
+  align-items:flex-start;
+}
+.profile-nav-page[data-profile-page="app-data"] .profile-meta-row > span{
+  flex:0 0 auto;
+}
+.profile-nav-page[data-profile-page="app-data"] .profile-meta-row > strong{
+  min-width:0;
+  max-width:68%;
+  text-align:right;
+  overflow-wrap:anywhere;
+  word-break:break-word;
+}
+.profile-section-label{
+  margin:14px 14px 7px;
+  font-size:12px;
+  font-weight:650;
+  color:var(--muted);
+}
+
+
+/* ==========================================================================
+   Phase 2E · v7.6.4 Member Sharing
+   ========================================================================== */
+.trip-invite-inbox-list,.trip-member-list,.trip-member-pending-list{display:grid;gap:8px;margin-top:10px;}
+.trip-invite-row,.trip-member-row,.trip-member-pending-row{
+  display:grid;grid-template-columns:42px minmax(0,1fr) auto;align-items:center;gap:10px;min-width:0;
+  padding:10px;border-radius:14px;background:rgba(118,118,128,.07);
+  border:1px solid rgba(255,255,255,.34);box-shadow:inset 0 1px 0 rgba(255,255,255,.26);
+}
+.trip-member-avatar{
+  width:42px;height:42px;border-radius:13px;overflow:hidden;display:grid;place-items:center;
+  background:linear-gradient(145deg,rgba(0,122,255,.18),rgba(52,199,89,.12));
+  color:var(--label-primary);font-size:13px;font-weight:800;
+}
+.trip-member-avatar img{width:100%;height:100%;display:block;object-fit:cover;}
+.trip-member-copy{min-width:0;display:grid;gap:3px;}
+.trip-member-copy strong{color:var(--label-primary);font-size:calc(12.5px * var(--font-scale));overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.trip-member-copy small{color:var(--label-secondary);font-size:calc(9.5px * var(--font-scale));overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.trip-member-copy .trip-member-meta{display:flex;flex-wrap:wrap;gap:5px;margin-top:2px;}
+.trip-member-role-pill,.trip-member-you-pill{
+  display:inline-flex;align-items:center;min-height:20px;padding:2px 7px;border-radius:999px;
+  background:rgba(0,122,255,.10);color:#1478d4;font-size:9px;font-weight:780;
+}
+.trip-member-you-pill{background:rgba(52,199,89,.12);color:#238844;}
+.trip-member-side{display:grid;justify-items:end;gap:6px;min-width:76px;}
+.trip-member-role-select{
+  max-width:104px;height:31px;padding:0 24px 0 9px;border:0;border-radius:999px;
+  background:rgba(118,118,128,.10);color:var(--label-primary);font:inherit;
+  font-size:10px;font-weight:760;text-align-last:center;
+}
+.trip-member-role-select:disabled{opacity:.62;}
+.trip-member-remove,.trip-member-cancel,.trip-invite-action{
+  border:0;border-radius:10px;min-height:29px;padding:5px 9px;font-size:9.5px;font-weight:780;
+}
+.trip-member-remove,.trip-member-cancel{background:rgba(255,59,48,.10);color:#c8352d;}
+.trip-member-card-title{display:grid;gap:3px;margin-bottom:12px;}
+.trip-member-card-title strong{font-size:calc(14px * var(--font-scale));color:var(--label-primary);}
+.trip-member-card-title small,.trip-member-role-help,.trip-member-inline-status{
+  color:var(--label-secondary);font-size:calc(9.5px * var(--font-scale));line-height:1.45;
+}
+.trip-member-role-help{margin-top:8px;padding-top:8px;border-top:1px solid var(--separator);}
+.trip-member-field{display:grid;gap:6px;margin-top:10px;color:var(--label-secondary);font-size:10px;font-weight:720;}
+.trip-member-field input{
+  width:100%;height:44px;box-sizing:border-box;border:0;border-radius:13px;padding:0 13px;
+  background:rgba(118,118,128,.08);color:var(--label-primary);font:inherit;font-size:14px;
+  outline:none;box-shadow:inset 0 0 0 1px rgba(118,118,128,.07);
+}
+.trip-member-field input:focus{box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--accent-color,#0a84ff) 72%,transparent);}
+.trip-member-role-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;}
+.trip-member-role-tabs button{
+  min-width:0;height:34px;border:1px solid rgba(255,255,255,.58);border-radius:999px;
+  background:rgba(248,248,250,.82);color:var(--label-secondary);font-size:10px;font-weight:760;
+  box-shadow:0 2px 8px rgba(15,23,42,.06),inset 0 1px 0 rgba(255,255,255,.72);
+}
+.trip-member-role-tabs button.active{
+  color:var(--label-primary);
+  background:color-mix(in srgb,var(--accent-color,#0a84ff) 16%,rgba(248,248,250,.92));
+  border-color:color-mix(in srgb,var(--accent-color,#0a84ff) 62%,rgba(255,255,255,.62));
+}
+.trip-member-role-tabs button:disabled{display:none;}
+.trip-member-primary-action{
+  width:100%;height:44px;margin-top:12px;border:0;border-radius:13px;
+  background:var(--accent-color,#0a84ff);color:#fff;font-size:12px;font-weight:800;
+  box-shadow:0 7px 18px color-mix(in srgb,var(--accent-color,#0a84ff) 28%,transparent);
+}
+.trip-member-primary-action:disabled{opacity:.54;}
+.trip-media-icon-preview-card{padding:16px;display:grid;grid-template-columns:72px minmax(0,1fr);gap:14px;align-items:center;}
+.trip-media-icon-preview{
+  width:72px;height:72px;border-radius:21px;display:grid;place-items:center;overflow:hidden;
+  background:linear-gradient(145deg,rgba(0,122,255,.16),rgba(175,82,222,.10));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.52),0 6px 18px rgba(15,23,42,.06);
+}
+.trip-media-icon-preview img{width:100%;height:100%;display:block;object-fit:cover;}
+.trip-media-icon-preview .trip-icon-emoji{font-size:31px;line-height:1;}
+.trip-media-icon-preview .trip-icon-monogram{font-size:20px;font-weight:820;letter-spacing:-.4px;}
+.trip-media-background-preview-card{padding:14px;display:grid;gap:11px;}
+.trip-media-background-preview{
+  width:100%;aspect-ratio:16/9;border-radius:17px;overflow:hidden;position:relative;
+  background:linear-gradient(145deg,rgba(0,122,255,.13),rgba(175,82,222,.09));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.48),0 6px 18px rgba(15,23,42,.06);
+}
+.trip-media-background-preview img{width:100%;height:100%;display:block;object-fit:cover;}
+.trip-media-background-preview-copy{min-width:0;display:grid;gap:3px;padding:0 2px 1px;}
+.trip-media-background-preview-copy strong{font-size:calc(13.5px * var(--font-scale));color:var(--label-primary);}
+.trip-media-background-preview-copy small{font-size:calc(9.5px * var(--font-scale));line-height:1.45;color:var(--label-secondary);}
+.trip-media-icon-preview-copy{min-width:0;display:grid;gap:4px;}
+.trip-media-icon-preview-copy strong{font-size:calc(14px * var(--font-scale));color:var(--label-primary);}
+.trip-media-icon-preview-copy small{font-size:calc(9.5px * var(--font-scale));line-height:1.45;color:var(--label-secondary);}
+.trip-media-upload-status{margin:10px 3px 0;text-align:left;}
+.trip-media-upload-status.is-error{color:#c8352d;}
+.trip-media-upload-progress{height:4px;margin:10px 2px 0;border-radius:999px;background:rgba(118,118,128,.13);overflow:hidden;}
+.trip-media-upload-progress>span{display:block;width:0;height:100%;border-radius:inherit;background:var(--accent-color,#0a84ff);transition:width .16s ease;}
+.profile-row.trip-media-remove-row .profile-row-copy strong{color:#c8352d;}
+.trip-member-inline-status{margin-top:8px;text-align:center;}
+.trip-member-inline-status.is-error{color:#c8352d;}
+.trip-invite-actions{display:flex;gap:6px;align-items:center;}
+.trip-invite-action.is-accept{background:rgba(52,199,89,.13);color:#238844;}
+.trip-invite-action.is-decline{background:rgba(118,118,128,.10);color:var(--label-secondary);}
+html.theme-dark .trip-invite-row,html.theme-dark .trip-member-row,html.theme-dark .trip-member-pending-row,
+html:not(.theme-light):not(.theme-dark) .trip-invite-row,html:not(.theme-light):not(.theme-dark) .trip-member-row,html:not(.theme-light):not(.theme-dark) .trip-member-pending-row{
+  background:rgba(255,255,255,.055);border-color:rgba(255,255,255,.07);
+}
+html.theme-dark .trip-member-field input,html:not(.theme-light):not(.theme-dark) .trip-member-field input{background:rgba(255,255,255,.07);}
+html.theme-dark .trip-member-role-tabs button,html:not(.theme-light):not(.theme-dark) .trip-member-role-tabs button{
+  background:rgba(38,38,46,.88);border-color:rgba(255,255,255,.10);
+}
+
+
+/* ==========================================================================
+   v7.6.5 · Visual Consistency Pass
+   Reference: itinerary Liquid Glass.
+   Profile / 我的 intentionally keeps its denser Apple Settings glass.
+   ========================================================================== */
+
+/* 1) Membership secondary pills: same vertical centering as the primary pill.
+      The old .trip-library-pill was inline text with padding only, which made
+      the second pill appear optically too high beside .trip-member-you-pill. */
+.trip-library-pill,
+.trip-member-role-pill,
+.trip-member-you-pill{
+  box-sizing:border-box;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:20px;
+  line-height:1 !important;
+  vertical-align:middle;
+}
+.trip-member-meta{
+  align-items:center !important;
+}
+
+/* 2) Profile status/help lines are text, not another translucent card.
+      This removes the pale full-width slab visible in Dark Mode. */
+.profile-nav-page .trip-library-status{
+  background:transparent !important;
+  box-shadow:none !important;
+  border:0 !important;
+  border-radius:0 !important;
+  padding-left:2px !important;
+  padding-right:2px !important;
+}
+html.theme-dark .profile-nav-page .trip-library-status,
+html:not(.theme-light):not(.theme-dark) .profile-nav-page .trip-library-status{
+  background:transparent !important;
+}
+
+/* 3) Non-Profile pages share the itinerary visual language.
+      Avoid nested glass-on-glass shells, which visually increases opacity. */
+#snacks-view > .card{
+  background:transparent;
+  border:0;
+  box-shadow:none;
+  backdrop-filter:none;
+  -webkit-backdrop-filter:none;
+  padding-left:0;
+  padding-right:0;
+}
+#info-view .trip-info-only-card{
+  background:transparent;
+  border:0;
+  box-shadow:none;
+  backdrop-filter:none;
+  -webkit-backdrop-filter:none;
+  padding-left:0;
+  padding-right:0;
+}
+
+/* Explicit LIGHT theme: activity / saved / info / expense cards use the
+   itinerary timeline-item glass values. */
+html.theme-light #snacks-view .snack-item,
+html.theme-light #info-view .info-team-card{
+  background:rgba(255,255,255,0.20) !important;
+  border-color:rgba(255,255,255,0.52) !important;
+  box-shadow:0 6px 16px rgba(15,23,42,0.08) !important;
+  backdrop-filter:blur(24px) saturate(1.08) !important;
+  -webkit-backdrop-filter:blur(24px) saturate(1.08) !important;
+}
+
+/* System LIGHT when no explicit theme class is selected. */
+@media (prefers-color-scheme: light){
+  html:not(.theme-light):not(.theme-dark) #snacks-view .snack-item,
+  html:not(.theme-light):not(.theme-dark) #info-view .info-team-card{
+    background:rgba(255,255,255,0.20) !important;
+    border-color:rgba(255,255,255,0.52) !important;
+    box-shadow:0 6px 16px rgba(15,23,42,0.08) !important;
+    backdrop-filter:blur(24px) saturate(1.08) !important;
+    -webkit-backdrop-filter:blur(24px) saturate(1.08) !important;
+  }
+}
+
+/* Keep inner Info blocks as hierarchy, but do not add another pale card. */
+html.theme-light #info-view .info-flight-block{
+  background:rgba(255,255,255,0.10) !important;
+}
+@media (prefers-color-scheme: light){
+  html:not(.theme-light):not(.theme-dark) #info-view .info-flight-block{
+    background:rgba(255,255,255,0.10) !important;
+  }
+}
+
+
+/* ==========================================================================
+   v7.6.5.1 · Grouping Glass + Member Control Polish
+   ========================================================================== */
+
+/* Saved Places: restore one soft grouping substrate around title, filters
+   and the saved-place list. It is intentionally lighter than an item card,
+   so nested glass does not become milky or look like a different app. */
+#snacks-view > .card{
+  padding:12px 14px !important;
+  border-radius:16px !important;
+  background:rgba(255,255,255,0.11) !important;
+  border:1px solid rgba(255,255,255,0.40) !important;
+  box-shadow:0 6px 18px rgba(15,23,42,0.055) !important;
+  backdrop-filter:blur(24px) saturate(1.05) !important;
+  -webkit-backdrop-filter:blur(24px) saturate(1.05) !important;
+}
+
+/* Travel Details: same grouping substrate as Saved Places.
+   Individual team cards remain the actual itinerary-strength glass cards. */
+#info-view .trip-info-only-card{
+  padding:15px 14px 14px !important;
+  border-radius:20px !important;
+  background:rgba(255,255,255,0.11) !important;
+  border:1px solid rgba(255,255,255,0.40) !important;
+  box-shadow:0 6px 18px rgba(15,23,42,0.055) !important;
+  backdrop-filter:blur(24px) saturate(1.05) !important;
+  -webkit-backdrop-filter:blur(24px) saturate(1.05) !important;
+}
+
+/* The team colour is semantic information and must survive the common
+   glass border rule. */
+#info-view .info-team-card{
+  border-left-width:4px !important;
+  border-left-style:solid !important;
+  border-left-color:var(--info-team-color,#888) !important;
+}
+
+/* System light follows the same material values. */
+@media (prefers-color-scheme: light){
+  html:not(.theme-light):not(.theme-dark) #snacks-view > .card,
+  html:not(.theme-light):not(.theme-dark) #info-view .trip-info-only-card{
+    background:rgba(255,255,255,0.11) !important;
+    border-color:rgba(255,255,255,0.40) !important;
+    box-shadow:0 6px 18px rgba(15,23,42,0.055) !important;
+  }
+}
+
+/* Dark Mode grouping substrate: enough structure to read the sections,
+   without pale slabs or a second opaque theme. */
+html.theme-dark #snacks-view > .card,
+html.theme-dark #info-view .trip-info-only-card{
+  background:rgba(20,20,28,0.16) !important;
+  border-color:rgba(255,255,255,0.10) !important;
+  box-shadow:0 8px 22px rgba(0,0,0,0.16) !important;
+  backdrop-filter:blur(24px) saturate(1.05) !important;
+  -webkit-backdrop-filter:blur(24px) saturate(1.05) !important;
+}
+@media (prefers-color-scheme: dark){
+  html:not(.theme-light):not(.theme-dark) #snacks-view > .card,
+  html:not(.theme-light):not(.theme-dark) #info-view .trip-info-only-card{
+    background:rgba(20,20,28,0.16) !important;
+    border-color:rgba(255,255,255,0.10) !important;
+    box-shadow:0 8px 22px rgba(0,0,0,0.16) !important;
+  }
+}
+
+/* Editable members: keep avatar + identity as the main row, then place
+   Role and Remove together in a compact horizontal action row underneath.
+   Non-editable Owner rows keep the existing right-side role pill. */
+.trip-member-row.is-manageable{
+  grid-template-columns:42px minmax(0,1fr) !important;
+  grid-template-rows:auto auto;
+  align-items:center !important;
+  column-gap:10px !important;
+  row-gap:4px !important;
+}
+.trip-member-row.is-manageable .trip-member-avatar{
+  grid-column:1;
+  grid-row:1 / span 2;
+  align-self:center;
+}
+.trip-member-row.is-manageable .trip-member-copy{
+  grid-column:2;
+  grid-row:1;
+}
+.trip-member-row.is-manageable .trip-member-side{
+  grid-column:2;
+  grid-row:2;
+  width:100%;
+  min-width:0;
+  display:flex !important;
+  align-items:center;
+  justify-content:flex-start;
+  gap:7px;
+  margin-top:2px;
+}
+.trip-member-row.is-manageable .trip-member-role-select{
+  width:auto;
+  min-width:104px;
+  max-width:128px;
+  height:29px;
+  padding:0 24px 0 11px;
+  border-radius:999px;
+  background:rgba(118,118,128,.10);
+  box-shadow:inset 0 0 0 1px rgba(118,118,128,.06);
+  font-size:9.5px;
+}
+.trip-member-row.is-manageable .trip-member-remove{
+  min-height:29px;
+  padding:5px 11px;
+  border-radius:999px;
+  background:rgba(255,59,48,.085);
+  color:#c8352d;
+}
+.trip-member-row.is-manageable .trip-member-remove:active,
+.trip-member-row.is-manageable .trip-member-role-select:active{
+  transform:scale(.97);
+}
+html.theme-dark .trip-member-row.is-manageable .trip-member-role-select,
+html:not(.theme-light):not(.theme-dark) .trip-member-row.is-manageable .trip-member-role-select{
+  background:rgba(255,255,255,.075);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.055);
+}
+
+
+/* ==========================================================================
+   v7.6.5.2 · Member row compact right-side controls
+   Keep editable Member cards the same visual height as Owner cards.
+   Role selector + Remove sit together on the right, vertically centred.
+   ========================================================================== */
+.trip-member-row.is-manageable{
+  grid-template-columns:42px minmax(0,1fr) auto !important;
+  grid-template-rows:auto !important;
+  align-items:center !important;
+  column-gap:10px !important;
+  row-gap:0 !important;
+}
+.trip-member-row.is-manageable .trip-member-avatar{
+  grid-column:1 !important;
+  grid-row:1 !important;
+  align-self:center !important;
+}
+.trip-member-row.is-manageable .trip-member-copy{
+  grid-column:2 !important;
+  grid-row:1 !important;
+  align-self:center !important;
+}
+.trip-member-row.is-manageable .trip-member-side{
+  grid-column:3 !important;
+  grid-row:1 !important;
+  width:auto !important;
+  min-width:0 !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:flex-end !important;
+  align-self:center !important;
+  gap:6px !important;
+  margin-top:0 !important;
+}
+.trip-member-row.is-manageable .trip-member-role-select{
+  width:96px !important;
+  min-width:96px !important;
+  max-width:96px !important;
+  height:31px !important;
+  padding:0 22px 0 9px !important;
+  border-radius:999px !important;
+  font-size:9.5px !important;
+}
+.trip-member-row.is-manageable .trip-member-remove{
+  min-width:46px !important;
+  min-height:31px !important;
+  height:31px !important;
+  padding:0 10px !important;
+  display:inline-flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  border-radius:999px !important;
+  white-space:nowrap !important;
+}
+
+/* Slightly tighten identity text so small iPhones still keep both controls
+   on the right without increasing card height. */
+@media (max-width:390px){
+  .trip-member-row.is-manageable{
+    grid-template-columns:40px minmax(0,1fr) auto !important;
+    column-gap:8px !important;
+    padding-left:9px !important;
+    padding-right:9px !important;
+  }
+  .trip-member-row.is-manageable .trip-member-avatar{
+    width:40px !important;
+    height:40px !important;
+  }
+  .trip-member-row.is-manageable .trip-member-role-select{
+    width:86px !important;
+    min-width:86px !important;
+    max-width:86px !important;
+    padding-left:7px !important;
+    padding-right:20px !important;
+  }
+  .trip-member-row.is-manageable .trip-member-remove{
+    min-width:42px !important;
+    padding-left:8px !important;
+    padding-right:8px !important;
+  }
+}
+
+
+/* ==========================================================================
+   v7.6.5.3 · Travel Details Team selector + protected Team accent stripe
+   ========================================================================== */
+
+/* Same spacing as itinerary Team Bar, immediately before the Travel Details card. */
+#info-view > #info-team-bar{
+  margin-bottom:12px;
+}
+
+/* v7.6.5 common glass rules use border-color !important.
+   Protect the semantic left stripe with matching theme specificity so the
+   team's own colour remains visible in both Light and Dark Mode. */
+html.theme-light #info-view .info-team-card{
+  border-left-width:4px !important;
+  border-left-style:solid !important;
+  border-left-color:var(--info-team-color,#888) !important;
+}
+html.theme-dark #info-view .info-team-card{
+  border-left-width:4px !important;
+  border-left-style:solid !important;
+  border-left-color:var(--info-team-color,#888) !important;
+}
+@media (prefers-color-scheme: light){
+  html:not(.theme-light):not(.theme-dark) #info-view .info-team-card{
+    border-left-width:4px !important;
+    border-left-style:solid !important;
+    border-left-color:var(--info-team-color,#888) !important;
+  }
+}
+@media (prefers-color-scheme: dark){
+  html:not(.theme-light):not(.theme-dark) #info-view .info-team-card{
+    border-left-width:4px !important;
+    border-left-style:solid !important;
+    border-left-color:var(--info-team-color,#888) !important;
+  }
+}
+
+
+/* ==========================================================================
+   Phase 2F · v7.7.0 · Cloud safety / offline status
+   ========================================================================== */
+.cloud-safety-strip{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  min-height:30px;
+  margin:-2px 0 10px;
+  padding:6px 11px;
+  border-radius:12px;
+  background:rgba(255,255,255,.14);
+  border:1px solid rgba(255,255,255,.38);
+  box-shadow:0 4px 12px rgba(15,23,42,.05);
+  backdrop-filter:blur(18px) saturate(1.05);
+  -webkit-backdrop-filter:blur(18px) saturate(1.05);
+  color:var(--label-secondary);
+  font-size:calc(10px * var(--font-scale));
+  font-weight:650;
+  line-height:1.35;
+}
+.cloud-safety-strip[hidden]{display:none !important;}
+.cloud-safety-dot{
+  width:7px;height:7px;border-radius:999px;flex:0 0 auto;
+  background:#ff9f0a;box-shadow:0 0 0 3px rgba(255,159,10,.12);
+}
+.cloud-safety-strip.is-offline .cloud-safety-dot{
+  background:#ff9f0a;box-shadow:0 0 0 3px rgba(255,159,10,.12);
+}
+.cloud-safety-strip.is-busy .cloud-safety-dot{
+  background:#0a84ff;box-shadow:0 0 0 3px rgba(10,132,255,.12);
+}
+.cloud-safety-strip.is-revoked .cloud-safety-dot{
+  background:#ff453a;box-shadow:0 0 0 3px rgba(255,69,58,.12);
+}
+html.theme-dark .cloud-safety-strip,
+html:not(.theme-light):not(.theme-dark) .cloud-safety-strip{
+  background:rgba(24,24,30,.24);
+  border-color:rgba(255,255,255,.09);
+  box-shadow:0 6px 16px rgba(0,0,0,.14);
+}
+
+
+/* ==========================================================================
+   v7.7.0.1 · Profile snapshot style parity + stable version footer
+   ========================================================================== */
+
+/* Legacy singleton stays in the DOM for compatibility with older code, but
+   never participates in layout or paint. */
+#app-version-note{
+  display:none !important;
+}
+
+/* Each normal view paints its own footer in its natural final position.
+   No visible DOM reparenting occurs when changing tabs. */
+#itinerary-view::after,
+#snacks-view::after,
+#info-view::after,
+#profile-view::after{
+  content:"v7.7.0.1";
+  display:block;
+  width:100%;
+  box-sizing:border-box;
+  margin:8px 0 0;
+  padding:0 8px;
+  color:rgba(63,63,63,.62);
+  font-size:calc(9px * var(--font-scale));
+  line-height:1.3;
+  font-weight:600;
+  text-align:center;
+  pointer-events:none;
+  user-select:none;
+  -webkit-user-select:none;
+}
+html.theme-dark #itinerary-view::after,
+html.theme-dark #snacks-view::after,
+html.theme-dark #info-view::after,
+html.theme-dark #profile-view::after,
+html:not(.theme-light):not(.theme-dark) #itinerary-view::after,
+html:not(.theme-light):not(.theme-dark) #snacks-view::after,
+html:not(.theme-light):not(.theme-dark) #info-view::after,
+html:not(.theme-light):not(.theme-dark) #profile-view::after{
+  color:rgba(220,220,232,.48);
+}
+
+/* During a protected Profile push/pop, page geometry is being swapped.
+   Keep the footer out of that animation and reveal it only at the settled
+   final position. */
+body.profile-navigation-active #profile-view::after,
+body.profile-edge-swipe-active #profile-view::after{
+  visibility:hidden;
+}
+
+/* Expenses keeps the v7.6.3.4 visual structure: version after the real
+   expense content, with bottom-nav clearance below it. */
+#expenses-view::after{
+  content:none !important;
+}
+body.expenses-view-active .expenses-module .expenses-app::after{
+  content:"v7.7.0.1";
+  display:block;
+  width:100%;
+  box-sizing:border-box;
+  margin:4px 0 0;
+  padding:0 8px;
+  color:rgba(63,63,63,.62);
+  font-size:calc(9px * var(--font-scale));
+  line-height:1.3;
+  font-weight:600;
+  text-align:center;
+  pointer-events:none;
+  user-select:none;
+  -webkit-user-select:none;
+}
+html.theme-dark body.expenses-view-active .expenses-module .expenses-app::after,
+html:not(.theme-light):not(.theme-dark) body.expenses-view-active .expenses-module .expenses-app::after{
+  color:rgba(220,220,232,.48);
+}
+
+
+/* ==========================================================================
+   v7.7.0.2 · Single stable global version renderer
+   ========================================================================== */
+
+/* v7.7.0.1 pseudo footers are fully retired. */
+#itinerary-view::after,
+#snacks-view::after,
+#info-view::after,
+#profile-view::after,
+#expenses-view::after,
+body.expenses-view-active .expenses-module .expenses-app::after{
+  content:none !important;
+  display:none !important;
+}
+
+/* Exactly one real DOM footer. It lives after all app views and never gets
+   reparented, so tab changes cannot animate or duplicate it. */
+#app-version-note{
+  display:block !important;
+  position:relative !important;
+  width:100% !important;
+  max-width:none !important;
+  clear:both !important;
+  box-sizing:border-box !important;
+  margin:8px 0 10px !important;
+  padding:0 8px !important;
+  color:rgba(63,63,63,.62) !important;
+  font-size:calc(9px * var(--font-scale)) !important;
+  line-height:1.3 !important;
+  font-weight:600 !important;
+  text-align:center !important;
+  opacity:.72 !important;
+  visibility:visible;
+  pointer-events:none !important;
+  user-select:none !important;
+  -webkit-user-select:none !important;
+  white-space:nowrap !important;
+  overflow:visible !important;
+  transform:none !important;
+  transition:none !important;
+}
+html.theme-dark #app-version-note,
+html:not(.theme-light):not(.theme-dark) #app-version-note{
+  color:rgba(220,220,232,.48) !important;
+}
+
+/* Profile page heights change during protected push/pop. The global version
+   does not participate in that geometry swap: it is simply withheld and
+   shown once at the settled final position. */
+body.profile-navigation-active #app-version-note,
+body.profile-edge-swipe-active #app-version-note{
+  visibility:hidden !important;
+}
+
+/* Expense view keeps enough bottom-nav clearance while the same global footer
+   remains outside the expense module. */
+body.expenses-view-active #app-version-note{
+  display:block !important;
+  margin:8px 0 calc(var(--tabbar-h) + env(safe-area-inset-bottom,0px) + 24px) !important;
+}
+
+
+/* ==========================================================================
+   v7.7.0.3 · Stable per-view version footer
+   ========================================================================== */
+#app-version-note,
+.app-version-note{
+  display:none !important;
+}
+#itinerary-view::after,
+#snacks-view::after,
+#info-view::after,
+#profile-view::after{
+  content:"v7.9.9.2" !important;
+  display:block !important;
+  width:100%;
+  box-sizing:border-box;
+  margin:8px 0 0;
+  padding:0 8px;
+  color:rgba(63,63,63,.62);
+  font-size:calc(9px * var(--font-scale));
+  line-height:1.3;
+  font-weight:600;
+  text-align:center;
+  opacity:.72;
+  pointer-events:none;
+  user-select:none;
+  -webkit-user-select:none;
+}
+#expenses-view::after{
+  content:none !important;
+  display:none !important;
+}
+body.expenses-view-active .expenses-module .expenses-app::after{
+  content:"v7.9.9.2" !important;
+  display:block !important;
+  width:100%;
+  box-sizing:border-box;
+  margin:6px 0 0;
+  padding:0 8px;
+  color:rgba(63,63,63,.62);
+  font-size:calc(9px * var(--font-scale));
+  line-height:1.3;
+  font-weight:600;
+  text-align:center;
+  opacity:.72;
+  pointer-events:none;
+  user-select:none;
+  -webkit-user-select:none;
+}
+html.theme-dark #itinerary-view::after,
+html.theme-dark #snacks-view::after,
+html.theme-dark #info-view::after,
+html.theme-dark #profile-view::after,
+html.theme-dark body.expenses-view-active .expenses-module .expenses-app::after,
+html:not(.theme-light):not(.theme-dark) #itinerary-view::after,
+html:not(.theme-light):not(.theme-dark) #snacks-view::after,
+html:not(.theme-light):not(.theme-dark) #info-view::after,
+html:not(.theme-light):not(.theme-dark) #profile-view::after,
+html:not(.theme-light):not(.theme-dark) body.expenses-view-active .expenses-module .expenses-app::after{
+  color:rgba(220,220,232,.48);
+}
+body.profile-navigation-active #profile-view::after,
+body.profile-edge-swipe-active #profile-view::after{
+  visibility:hidden !important;
+}
+
+
+/* ==========================================================================
+   v7.7.0.10 · Weather city selector UX
+   ========================================================================== */
+.trip-boot-placeholder{
+  display:flex;align-items:center;justify-content:center;gap:9px;
+  min-height:58px;margin:2px 0 12px;padding:12px 14px;border-radius:16px;
+  background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.36);
+  box-shadow:0 5px 16px rgba(15,23,42,.05);
+  backdrop-filter:blur(20px) saturate(1.05);
+  -webkit-backdrop-filter:blur(20px) saturate(1.05);
+  color:var(--label-secondary);font-size:calc(11px * var(--font-scale));
+  font-weight:650;
+}
+.trip-boot-placeholder[hidden]{display:none !important;}
+.trip-boot-spinner{
+  width:16px;height:16px;border-radius:999px;
+  border:2px solid rgba(120,120,128,.22);border-top-color:#0a84ff;
+  animation:tripBootSpin .8s linear infinite;
+}
+@keyframes tripBootSpin{to{transform:rotate(360deg)}}
+body.trip-boot-deferred .app-view{visibility:hidden !important;pointer-events:none !important;}
+body.trip-boot-deferred .cloud-safety-strip{display:none !important;}
+html.theme-dark .trip-boot-placeholder,
+html:not(.theme-light):not(.theme-dark) .trip-boot-placeholder{
+  background:rgba(24,24,30,.25);border-color:rgba(255,255,255,.09);
+}
+.profile-nav-surface .trip-boot-placeholder{display:none !important;}
+
+
+
+/* ==========================================================================
+   v7.7.5.0 · App action button harmony
+   Modal-level CTAs share one geometry and semantic colour hierarchy.
+   Menu rows, tabs and inline field controls intentionally keep their own UI.
+   ========================================================================== */
+:root{
+  --app-action-height:48px;
+  --app-action-radius:14px;
+  --app-action-primary:var(--accent-color,#0a84ff);
+  --app-action-danger:#ff3b30;
+  --app-action-secondary-bg:rgba(255,255,255,.68);
+  --app-action-secondary-border:rgba(60,60,67,.15);
+}
+.trip-import-actions button,
+.app-progress-done,
+.modal-actions .modal-link-btn,
+.modal-actions .modal-close-btn{
+  min-height:var(--app-action-height) !important;
+  border-radius:var(--app-action-radius) !important;
+  font-weight:720 !important;
+  line-height:1.15 !important;
+}
+.trip-import-confirm,
+.app-progress-done{
+  background:var(--app-action-primary) !important;
+  color:#fff !important;
+}
+.trip-import-cancel,
+.modal-actions .modal-close-btn{
+  background:var(--app-action-secondary-bg) !important;
+  border:1px solid var(--app-action-secondary-border) !important;
+  color:var(--label-primary) !important;
+}
+.modal-actions .modal-link-btn{
+  background:var(--app-action-secondary-bg) !important;
+  border:1px solid var(--app-action-secondary-border) !important;
+  color:var(--app-action-primary) !important;
+}
+html.theme-dark{
+  --app-action-secondary-bg:rgba(255,255,255,.075);
+  --app-action-secondary-border:rgba(255,255,255,.13);
+}
+html.theme-dark .trip-import-cancel,
+html.theme-dark .modal-actions .modal-close-btn{
+  color:#f5f5f7 !important;
+}
+
+/* v7.9.6.2 · Saved Place media reuses the established sheet action grammar. */
+.modal-actions .modal-link-btn:disabled{
+  opacity:.38 !important;
+  color:var(--label-secondary,#8e8e93) !important;
+  pointer-events:none;
+}
+.modal.snack-modal .modal-img-stage{
+  border-radius:14px;
+  overflow:hidden;
+}
+.modal.snack-modal .modal-img-stage.has-media-crop{
+  position:relative;
+  aspect-ratio:16/9;
+  overflow:hidden;
+  background:rgba(120,120,128,.10);
+}
+.modal.snack-modal .modal-img-stage.has-media-crop img{
+  position:absolute;
+  max-height:none;
+  margin:0;
+}
+@media (prefers-color-scheme: dark){
+  html:not(.theme-light):not(.theme-dark){
+    --app-action-secondary-bg:rgba(255,255,255,.075);
+    --app-action-secondary-border:rgba(255,255,255,.13);
+  }
+  html:not(.theme-light):not(.theme-dark) .trip-import-cancel,
+  html:not(.theme-light):not(.theme-dark) .modal-actions .modal-close-btn{
+    color:#f5f5f7 !important;
+  }
+}
+.app-progress-backdrop.is-success .app-progress-done{background:#30b35a !important;}
+.app-progress-backdrop.is-error .app-progress-done{background:var(--app-action-danger) !important;}
+
+/* Phase 2G.1 · Entry / Access Gateway
+   Lobby and restricted states keep the proven 我的 Apple Settings cards.
+   v7.8.0.5 keeps a true signed-out Login Gateway, but ordinary in-app reloads
+   stay on the warm App shell instead of replaying a full login/loading screen. */
+.app-entry-gateway{
+  position:fixed;inset:0;z-index:1800;display:none;overflow:auto;-webkit-overflow-scrolling:touch;
+  background:var(--page-bg,#f7f4f6);color:var(--label-primary);
+}
+body.app-entry-gated .app-entry-gateway{display:block;}
+body.app-entry-gated .ios-compact-header,
+body.app-entry-gated #scroll-shell,
+body.app-entry-gated #bottom-nav,
+body.app-entry-gated #trip-quick-popover{visibility:hidden!important;pointer-events:none!important;}
+/* Fast Resume: a remembered user-bound Trip is continuation on both a PWA
+   Home Screen launch and an in-app reload. Keep the App shell visible while
+   IndexedDB + Auth + Firestore reconcile behind it. If Auth later resolves
+   signed-out / different-user, JS removes this class and the real Login
+   Gateway becomes authoritative. */
+html.app-entry-refresh-warm body.app-entry-gated .app-entry-gateway{display:none!important;}
+html.app-entry-refresh-warm body.app-entry-gated .ios-compact-header,
+html.app-entry-refresh-warm body.app-entry-gated #scroll-shell,
+html.app-entry-refresh-warm body.app-entry-gated #bottom-nav,
+html.app-entry-refresh-warm body.app-entry-gated #trip-quick-popover{visibility:visible!important;pointer-events:auto!important;}
+.app-entry-shell{
+  width:min(480px,100%);min-height:100%;margin:0 auto;box-sizing:border-box;
+  padding:calc(env(safe-area-inset-top,0px) + 28px) 16px calc(env(safe-area-inset-bottom,0px) + 32px);
+}
+.app-entry-shell>.profile-section-label{margin:0 4px 9px;}
+.app-entry-status-card .profile-row{pointer-events:none;}
+.app-entry-status-icon{overflow:hidden;}
+.app-entry-status-icon .trip-boot-spinner{width:17px;height:17px;border-width:2px;}
+.app-entry-login-panel{display:none;min-height:calc(100dvh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px) - 60px);box-sizing:border-box;flex-direction:column;justify-content:center;padding:22px 14px 44px;text-align:center;}
+.app-entry-login-brand{display:flex;flex-direction:column;align-items:center;}
+.app-entry-login-logo{width:96px;height:96px;border-radius:24px;box-shadow:0 12px 32px rgba(45,46,50,.12);object-fit:cover;}
+.app-entry-login-brand h1{margin:22px 0 7px;font-size:calc(30px * var(--font-scale));line-height:1.08;letter-spacing:-.028em;}
+.app-entry-login-brand p{margin:0;color:var(--label-secondary);font-size:calc(14px * var(--font-scale));line-height:1.45;}
+.app-entry-login-actions{margin-top:54px;display:grid;gap:12px;}
+.app-entry-login-button{width:100%;min-height:58px;border:0;border-radius:18px;background:var(--card-bg);color:var(--label-primary);box-shadow:0 10px 28px rgba(45,46,50,.09);display:flex;align-items:center;justify-content:center;gap:12px;padding:0 20px;font:inherit;font-weight:700;font-size:calc(15px * var(--font-scale));-webkit-tap-highlight-color:transparent;}
+.app-entry-login-button:active{transform:scale(.985);opacity:.82;}
+.app-entry-login-google-mark{width:30px;height:30px;border-radius:9px;background:var(--app-action-secondary-bg);display:grid;place-items:center;font-size:17px;font-weight:800;color:var(--label-primary);}
+.app-entry-login-note{margin:0 20px;color:var(--label-tertiary,var(--label-secondary));font-size:calc(11px * var(--font-scale));line-height:1.45;}
+.app-entry-login-opening{display:none;align-items:center;justify-content:center;gap:9px;color:var(--label-secondary);font-size:calc(12px * var(--font-scale));}
+.app-entry-login-opening .trip-boot-spinner{width:15px;height:15px;border-width:2px;}
+.app-entry-gateway[data-entry-state="pending"] .app-entry-login-panel,
+.app-entry-gateway[data-entry-state="login"] .app-entry-login-panel{display:flex;}
+.app-entry-gateway[data-entry-state="pending"] .app-entry-login-button,
+.app-entry-gateway[data-entry-state="pending"] .app-entry-login-note{display:none;}
+.app-entry-gateway[data-entry-state="pending"] .app-entry-login-opening{display:flex;}
+/* Resolving never uses the legacy identity + access-confirmation cards.
+   Fast Resume normally hides the Gateway entirely; without a usable cache,
+   use only the branded lightweight opening panel. */
+.app-entry-gateway[data-entry-state="resolving"] .app-entry-login-panel{display:flex;}
+.app-entry-gateway[data-entry-state="resolving"] .app-entry-login-button,
+.app-entry-gateway[data-entry-state="resolving"] .app-entry-login-note{display:none;}
+.app-entry-gateway[data-entry-state="resolving"] .app-entry-login-opening{display:flex;}
+.app-entry-gateway[data-entry-state="resolving"] #entry-identity-card,
+.app-entry-gateway[data-entry-state="resolving"] #entry-state-card,
+.app-entry-gateway[data-entry-state="resolving"] #entry-invite-card,
+.app-entry-gateway[data-entry-state="resolving"] #entry-creator-card,
+.app-entry-gateway[data-entry-state="resolving"] #entry-system-admin-card,
+.app-entry-gateway[data-entry-state="resolving"] #entry-signout-card{display:none!important;}
+
+/* After a deliberate Google login, remain on the same branded Login Gateway until the
+   destination is resolved. Never flash the legacy identity/access cards in
+   between the Login Gateway and the Trip workspace. */
+.app-entry-gateway[data-login-handoff="true"][data-entry-state="resolving"] .app-entry-login-panel{display:flex;}
+.app-entry-gateway[data-login-handoff="true"][data-entry-state="resolving"] .app-entry-login-button,
+.app-entry-gateway[data-login-handoff="true"][data-entry-state="resolving"] .app-entry-login-note{display:none;}
+.app-entry-gateway[data-login-handoff="true"][data-entry-state="resolving"] .app-entry-login-opening{display:flex;}
+.app-entry-gateway[data-login-handoff="true"][data-entry-state="resolving"] #entry-identity-card,
+.app-entry-gateway[data-login-handoff="true"][data-entry-state="resolving"] #entry-state-card,
+.app-entry-gateway[data-login-handoff="true"][data-entry-state="resolving"] #entry-invite-card,
+.app-entry-gateway[data-login-handoff="true"][data-entry-state="resolving"] #entry-creator-card,
+.app-entry-gateway[data-login-handoff="true"][data-entry-state="resolving"] #entry-system-admin-card,
+.app-entry-gateway[data-login-handoff="true"][data-entry-state="resolving"] #entry-signout-card{display:none!important;}
+.app-entry-gateway[data-entry-state="pending"] #entry-identity-card,
+.app-entry-gateway[data-entry-state="pending"] #entry-state-card,
+.app-entry-gateway[data-entry-state="login"] #entry-identity-card,
+.app-entry-gateway[data-entry-state="login"] #entry-state-card{display:none;}
+.app-entry-gateway[data-entry-state="pending"] #entry-invite-card,
+.app-entry-gateway[data-entry-state="pending"] #entry-creator-card,
+.app-entry-gateway[data-entry-state="pending"] #entry-system-admin-card,
+.app-entry-gateway[data-entry-state="pending"] #entry-signout-card,
+.app-entry-gateway[data-entry-state="login"] #entry-invite-card,
+.app-entry-gateway[data-entry-state="login"] #entry-creator-card,
+.app-entry-gateway[data-entry-state="login"] #entry-system-admin-card,
+.app-entry-gateway[data-entry-state="login"] #entry-signout-card{display:none!important;}
+.app-entry-gateway[data-entry-state="resolving"] #entry-account-btn,
+.app-entry-gateway[data-entry-state="lobby"] #entry-account-btn,
+.app-entry-gateway[data-entry-state="error"] #entry-account-btn{display:none;}
+.app-entry-gateway[data-entry-state="workspace"]{display:none!important;}
+.app-entry-target-note{margin-top:8px;color:var(--label-secondary);font-size:calc(10px * var(--font-scale));line-height:1.45;}
+/* v7.8.0.1 · App Admin uses the same proven member rows and operation-sheet
+   geometry. This is deliberately not a second Settings design system. */
+.app-admin-sheet-heading{margin:2px 2px 8px;}
+.app-admin-sheet-list{display:grid;gap:8px;}
+.app-admin-actions{grid-template-columns:1fr;}
+.app-admin-bootstrap-note{margin-top:8px;}
+body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
+@media(max-width:370px){.app-entry-shell{padding-left:12px;padding-right:12px;}}
+
+
+
+/* v7.9.7.0 · Phase 3B Map interaction refinement. Reuses the existing circular
+   header action, itinerary Day pills and Team filter grammar. */
+.header-action-row{display:flex;align-items:center;justify-content:flex-end;gap:6px;}
+.trip-map-overlay{position:fixed;inset:0;z-index:3550;background:var(--surface-primary,#f7f7fa);opacity:0;pointer-events:none;transition:opacity .18s ease;}
+.trip-map-overlay.is-open{opacity:1;pointer-events:auto;}
+.trip-map-canvas{position:absolute;inset:0;background:#e9edf0;}
+.trip-map-topbar{position:absolute;top:0;left:0;right:0;z-index:3;display:grid;grid-template-columns:44px 1fr 44px;align-items:center;padding:max(14px,calc(env(safe-area-inset-top) + 10px)) 14px 8px;pointer-events:none;}
