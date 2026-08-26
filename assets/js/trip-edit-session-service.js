@@ -6,7 +6,8 @@ import {
   serverTimestamp
 } from "./firestore-observed-service.js";
 
-const EDITABLE_ITEM_FIELDS = ["time", "title", "note"];
+const USER_EDITABLE_ITEM_FIELDS = ["time", "title", "note"];
+const PERSISTED_ITEM_FIELDS = ["time", "title", "note", "sortOrder"];
 const VALID_ROLES = new Set(["owner", "admin"]);
 
 function clean(value) { return String(value ?? "").trim(); }
@@ -21,13 +22,56 @@ function clonePlain(value) {
   return output;
 }
 function itemKey(dayId, itemId) { return `${clean(dayId)}|${clean(itemId)}`; }
-function editableSnapshot(item = {}) {
-  const out = {};
-  EDITABLE_ITEM_FIELDS.forEach(field => { out[field] = clean(item?.[field]); });
-  return out;
+function normalizedSortOrder(value, fallback = 999999) {
+  const next = Number(value);
+  return Number.isFinite(next) ? next : fallback;
 }
-function sameEditable(a = {}, b = {}) {
-  return EDITABLE_ITEM_FIELDS.every(field => clean(a?.[field]) === clean(b?.[field]));
+function itemSnapshot(item = {}, fallbackSortOrder = 999999) {
+  return {
+    time: clean(item?.time),
+    title: clean(item?.title),
+    note: clean(item?.note),
+    sortOrder: normalizedSortOrder(item?.sortOrder, fallbackSortOrder)
+  };
+}
+function samePersisted(a = {}, b = {}) {
+  return PERSISTED_ITEM_FIELDS.every(field => field === "sortOrder"
+    ? normalizedSortOrder(a?.[field]) === normalizedSortOrder(b?.[field])
+    : clean(a?.[field]) === clean(b?.[field]));
+}
+function parseClockMinutes(value) {
+  const match = clean(value).match(/^(\d{1,2}):(\d{2})$/);
+  if (!match) return null;
+  const hour = Number(match[1]), minute = Number(match[2]);
+  if (!Number.isInteger(hour) || !Number.isInteger(minute) || hour < 0 || hour > 23 || minute < 0 || minute > 59) return null;
+  return hour * 60 + minute;
+}
+function dayDraftRows(session, dayIdInput) {
+  const dayId = clean(dayIdInput);
+  const rows = [];
+  session?.draftItems?.forEach?.(draft => {
+    if (clean(draft?.dayId) === dayId) rows.push(draft);
+  });
+  return rows;
+}
+function stableChronologicalOrder(rows = []) {
+  return rows.slice().sort((a, b) => {
+    const at = parseClockMinutes(a?.time), bt = parseClockMinutes(b?.time);
+    if (at != null && bt != null && at !== bt) return at - bt;
+    if (at != null && bt == null) return -1;
+    if (at == null && bt != null) return 1;
+    const ao = normalizedSortOrder(a?.sortOrder), bo = normalizedSortOrder(b?.sortOrder);
+    if (ao !== bo) return ao - bo;
+    return clean(a?.itemId).localeCompare(clean(b?.itemId));
+  });
+}
+function normalizeDaySortOrders(session, dayIdInput) {
+  if (!session) return [];
+  const ordered = stableChronologicalOrder(dayDraftRows(session, dayIdInput));
+  ordered.forEach((draft, index) => {
+    session.draftItems.set(itemKey(draft.dayId, draft.itemId), { ...draft, sortOrder: index });
+  });
+  return ordered.map(row => clonePlain(row));
 }
 
 export function createTripEditSession(tripDataInput) {
@@ -44,11 +88,11 @@ export function createTripEditSession(tripDataInput) {
   (Array.isArray(trip.days) ? trip.days : []).forEach(day => {
     const dayId = clean(day?.dayId);
     if (!dayId) return;
-    (Array.isArray(day?.items) ? day.items : []).forEach(item => {
+    (Array.isArray(day?.items) ? day.items : []).forEach((item, index) => {
       const itemId = clean(item?.itemId);
       if (!itemId) return;
       const key = itemKey(dayId, itemId);
-      const snap = editableSnapshot(item);
+      const snap = itemSnapshot(item, index);
       baseItems.set(key, { dayId, itemId, ...snap });
       draftItems.set(key, { dayId, itemId, ...clonePlain(snap) });
     });
@@ -78,11 +122,18 @@ export function updateTripEditDraftItem(session, dayIdInput, itemIdInput, patchI
     throw error;
   }
   const next = { ...current };
-  EDITABLE_ITEM_FIELDS.forEach(field => {
+  USER_EDITABLE_ITEM_FIELDS.forEach(field => {
     if (Object.prototype.hasOwnProperty.call(patchInput || {}, field)) next[field] = clean(patchInput[field]);
   });
   session.draftItems.set(key, next);
-  return clonePlain(next);
+  if (Object.prototype.hasOwnProperty.call(patchInput || {}, "time") && clean(patchInput.time) !== clean(current.time)) {
+    normalizeDaySortOrders(session, current.dayId);
+  }
+  return getTripEditDraftItem(session, current.dayId, current.itemId);
+}
+
+export function reorderTripEditDraftDayByTime(session, dayIdInput) {
+  return normalizeDaySortOrders(session, dayIdInput);
 }
 
 export function tripEditChanges(session) {
@@ -90,10 +141,14 @@ export function tripEditChanges(session) {
   const changes = [];
   session.draftItems.forEach((draft, key) => {
     const base = session.baseItems.get(key);
-    if (!base || sameEditable(base, draft)) return;
+    if (!base || samePersisted(base, draft)) return;
     const patch = {};
-    EDITABLE_ITEM_FIELDS.forEach(field => {
-      if (clean(base[field]) !== clean(draft[field])) patch[field] = clean(draft[field]);
+    PERSISTED_ITEM_FIELDS.forEach(field => {
+      if (field === "sortOrder") {
+        if (normalizedSortOrder(base[field]) !== normalizedSortOrder(draft[field])) patch[field] = normalizedSortOrder(draft[field]);
+      } else if (clean(base[field]) !== clean(draft[field])) {
+        patch[field] = clean(draft[field]);
+      }
     });
     changes.push({ dayId: draft.dayId, itemId: draft.itemId, patch });
   });
@@ -107,12 +162,25 @@ export function tripEditChangeCount(session) {
 export function applyTripEditDraftToTrip(session, tripInput, { revision = null } = {}) {
   const trip = clonePlain(tripInput || {}) || {};
   if (!session) return trip;
-  const changes = new Map(tripEditChanges(session).map(change => [itemKey(change.dayId, change.itemId), change.patch]));
+  const draftMap = new Map();
+  session.draftItems.forEach(draft => draftMap.set(itemKey(draft.dayId, draft.itemId), draft));
   (Array.isArray(trip.days) ? trip.days : []).forEach(day => {
     const dayId = clean(day?.dayId);
-    (Array.isArray(day?.items) ? day.items : []).forEach(item => {
-      const patch = changes.get(itemKey(dayId, item?.itemId));
-      if (patch) Object.assign(item, clonePlain(patch));
+    if (!Array.isArray(day?.items)) return;
+    day.items = day.items.map((item, index) => {
+      const draft = draftMap.get(itemKey(dayId, item?.itemId));
+      if (!draft) return clonePlain(item);
+      return {
+        ...clonePlain(item),
+        time: clean(draft.time),
+        title: clean(draft.title),
+        note: clean(draft.note),
+        sortOrder: normalizedSortOrder(draft.sortOrder, index)
+      };
+    }).sort((a, b) => {
+      const ao = normalizedSortOrder(a?.sortOrder), bo = normalizedSortOrder(b?.sortOrder);
+      if (ao !== bo) return ao - bo;
+      return clean(a?.itemId).localeCompare(clean(b?.itemId));
     });
   });
   if (revision != null) trip.revision = Math.max(1, Number(revision) || Number(trip.revision) || 1);
