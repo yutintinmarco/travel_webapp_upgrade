@@ -1,3 +1,36 @@
+# v7.9.9.0 · Phase 3E Edit Session Foundation
+
+Phase 3C Transit Route Gallery is kept unchanged from the accepted v7.9.8.9 behaviour. This release opens Phase 3E with the smallest useful Edit Mode slice.
+
+## Edit Session foundation
+
+* Owner / Admin users on an unlocked Trip now get a dedicated itinerary Edit action. Viewer / Member and globally locked Trips remain read-only.
+* Entering Edit Mode creates a local draft against the current Trip `revision`; individual field edits do not write Firestore.
+* Existing itinerary items can edit only the first safe field set in this prototype: time, title and note. The item sheet writes into the local Edit Session only.
+* The header exposes explicit `取消` and `儲存` actions. Cancel discards the entire draft; Save commits every changed itinerary item together in one Firestore transaction and bumps the Trip revision once.
+* Save performs server-side revision conflict protection. If the Trip revision changed after the Edit Session started, no item is overwritten and the user is asked to reload / re-enter Edit Mode.
+* A successful Edit Save invalidates the old import content hash, appends an itinerary activity-log record and refreshes the local instant render cache.
+* Navigation away from the itinerary is blocked while an Edit Session is open so the draft cannot be silently abandoned.
+
+## Deliberately deferred
+
+* No Add Stop / Add Transit yet.
+* No delete or reorder yet.
+* No Location editor or canonical coordinate selection yet.
+* No Transit `採用此方案` yet.
+* No Edit-session media staging yet; existing Phase 3A media behaviour is untouched.
+* No Saved Place Edit Mode yet.
+
+## Protected behaviour
+
+* Day bar CSS, sticky behaviour, stacking, sizing, colours and Day switching logic are unchanged from v7.9.8.9.
+* Japan Transit remains ls8h; non-Japan Transit remains Google Routes Transit.
+* Google Maps JavaScript API remains the only in-app map renderer.
+* Persistent Transit cache and `在 Google Maps 查看最新路線` are unchanged.
+* No Firestore Rules, Storage Rules, Indexes, Functions or CORS change is required.
+
+---
+
 # v7.9.8.9 — Transit Interaction Regression Fix
 
 * Restores the accepted v7.9.8.7 Day bar behaviour at the behavioural level: cached Transit results no longer expand the route UI during the itinerary opening transition and indirectly trigger the existing auto-scroll/sticky threshold. Day bar CSS, sticky logic, stacking, sizing, colours and Day switching logic are unchanged.
