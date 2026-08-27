@@ -1,3 +1,12 @@
+# v7.9.12.1 · Phase 3E Trip Date/Team UI Hotfix
+
+- Fixed iOS Trip Edit date controls overflowing the modal by reusing the proven overflow-safe native control shell used by itinerary time editing.
+- Trip start/end date edits now reconcile the canonical Day collection inside the same Local Edit Session: extending the date range creates empty Days, shrinking removes only empty Days, and remaining Days are relabelled/reordered consistently.
+- Added a safety gate that blocks shortening the date range when an affected Day still contains itinerary items, preventing accidental itinerary/media loss.
+- Day create/update/delete writes are revision-checked and committed in the same Global Save transaction as Trip details, Team changes and itinerary item edits.
+- Replaced the raw Team colour input in Team Management with the app's existing Team colour visual grammar: preset swatches, custom colour action and reset-to-default. Colour changes remain Local Draft until Global Save.
+- Map, Transit, Media, Loader, Firebase Functions and security rules remain unchanged.
+
 # v7.9.12.0 · Phase 3E Trip Info + Team Management
 
 - Added Edit Mode controls in the existing 旅程資料 tab for Trip basic information and Team management; View Mode remains read-only.

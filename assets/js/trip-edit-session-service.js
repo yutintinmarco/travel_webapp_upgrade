@@ -10,6 +10,7 @@ const USER_EDITABLE_ITEM_FIELDS = ["time", "title", "note", "who"];
 const PERSISTED_ITEM_FIELDS = ["time", "title", "note", "who", "booked", "sortOrder"];
 const VALID_ITEM_KINDS = new Set(["stop", "transit"]);
 const VALID_ROLES = new Set(["owner", "admin"]);
+const PERSISTED_DAY_FIELDS = ["label", "date", "isoDate", "title", "subtitle", "city", "cities", "sortOrder"];
 
 function clean(value) { return String(value ?? "").trim(); }
 function clonePlain(value) {
@@ -55,6 +56,111 @@ function inferTripStatus(startInput, endInput) {
   if (todayIso < start) return "upcoming";
   if (todayIso > end) return "completed";
   return "active";
+}
+function isoDateUtc(value) {
+  const iso = clean(value);
+  if (!validIsoDate(iso)) return null;
+  const [year, month, day] = iso.split("-").map(Number);
+  const date = new Date(Date.UTC(year, month - 1, day));
+  if (date.getUTCFullYear() !== year || date.getUTCMonth() !== month - 1 || date.getUTCDate() !== day) return null;
+  return date;
+}
+function isoFromUtcDate(date) {
+  return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}-${String(date.getUTCDate()).padStart(2, "0")}`;
+}
+function inclusiveIsoDates(startInput, endInput) {
+  const start = isoDateUtc(startInput), end = isoDateUtc(endInput);
+  if (!start || !end || end < start) return [];
+  const out = [];
+  for (let cursor = new Date(start.getTime()); cursor <= end; cursor.setUTCDate(cursor.getUTCDate() + 1)) out.push(isoFromUtcDate(cursor));
+  return out;
+}
+function formatDayDateLabel(isoInput) {
+  const date = isoDateUtc(isoInput);
+  if (!date) return "";
+  const weekdays = ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"];
+  return `${date.getUTCMonth() + 1}月${date.getUTCDate()}日（${weekdays[date.getUTCDay()]}）`;
+}
+function dayIdFromIso(isoInput) { return `day_${clean(isoInput).replace(/-/g, "")}`; }
+function daySnapshot(day = {}, fallbackSortOrder = 999999) {
+  return {
+    dayId: clean(day?.dayId || day?.id),
+    label: clean(day?.label),
+    date: clean(day?.date),
+    isoDate: clean(day?.isoDate),
+    title: clean(day?.title),
+    subtitle: clean(day?.subtitle),
+    city: clean(day?.city),
+    cities: Array.isArray(day?.cities) ? day.cities.map(clean).filter(Boolean) : [],
+    sortOrder: normalizedSortOrder(day?.sortOrder, fallbackSortOrder)
+  };
+}
+function sameDay(a = {}, b = {}) {
+  return PERSISTED_DAY_FIELDS.every(field => field === "sortOrder"
+    ? normalizedSortOrder(a?.[field]) === normalizedSortOrder(b?.[field])
+    : field === "cities"
+      ? stableJson(Array.isArray(a?.cities) ? a.cities.map(clean).filter(Boolean) : []) === stableJson(Array.isArray(b?.cities) ? b.cities.map(clean).filter(Boolean) : [])
+      : clean(a?.[field]) === clean(b?.[field]));
+}
+function dayHasDraftItems(session, dayIdInput) {
+  const dayId = clean(dayIdInput);
+  let has = false;
+  session?.draftItems?.forEach?.((draft, key) => {
+    if (has || session?.deletedItems?.has?.(key)) return;
+    if (clean(draft?.dayId) === dayId) has = true;
+  });
+  return has;
+}
+function uniqueDayId(session, isoInput) {
+  const base = dayIdFromIso(isoInput);
+  if (!session?.draftDays?.has?.(base) && !session?.baseDays?.has?.(base)) return base;
+  let suffix = 2;
+  while (session?.draftDays?.has?.(`${base}_${suffix}`) || session?.baseDays?.has?.(`${base}_${suffix}`)) suffix += 1;
+  return `${base}_${suffix}`;
+}
+function reconcileDraftDaysForDateRange(session, startInput, endInput) {
+  if (!session) return [];
+  const desiredDates = inclusiveIsoDates(startInput, endInput);
+  if (!desiredDates.length) return [];
+  const desiredSet = new Set(desiredDates);
+  const currentDays = [...(session.draftDays?.values?.() || [])];
+  const byIso = new Map();
+  currentDays.forEach(day => { const iso = clean(day?.isoDate); if (iso && !byIso.has(iso)) byIso.set(iso, day); });
+  currentDays.forEach(day => {
+    const iso = clean(day?.isoDate);
+    if (iso && desiredSet.has(iso)) return;
+    if (dayHasDraftItems(session, day.dayId)) {
+      const error = new Error("Cannot remove a day that still contains itinerary items");
+      error.code = "edit-trip-day-not-empty";
+      error.dayId = clean(day.dayId);
+      error.dayLabel = clean(day.label) || clean(day.date) || clean(day.isoDate);
+      throw error;
+    }
+  });
+  const nextDays = new Map();
+  desiredDates.forEach((iso, index) => {
+    const existing = byIso.get(iso);
+    const day = existing ? clonePlain(existing) : {
+      dayId: uniqueDayId(session, iso),
+      label: `Day ${index + 1}`,
+      date: formatDayDateLabel(iso),
+      isoDate: iso,
+      title: "待安排",
+      subtitle: "",
+      city: "",
+      cities: [],
+      sortOrder: index,
+      isNew: true
+    };
+    day.label = `Day ${index + 1}`;
+    day.date = formatDayDateLabel(iso);
+    day.isoDate = iso;
+    day.sortOrder = index;
+    nextDays.set(clean(day.dayId), day);
+  });
+  session.draftDays = nextDays;
+  session.dayIds = new Set([...nextDays.keys()]);
+  return [...nextDays.values()].map(clonePlain);
 }
 function tripDetailsSnapshot(trip = {}) {
   const meta = trip?.meta && typeof trip.meta === "object" ? trip.meta : {};
@@ -287,9 +393,14 @@ export function createTripEditSession(tripDataInput) {
   const baseRevision = Math.max(1, Number(trip.revision) || 1);
   const baseItems = new Map();
   const draftItems = new Map();
-  (Array.isArray(trip.days) ? trip.days : []).forEach(day => {
+  const baseDays = new Map();
+  const draftDays = new Map();
+  (Array.isArray(trip.days) ? trip.days : []).forEach((day, dayIndex) => {
     const dayId = clean(day?.dayId);
     if (!dayId) return;
+    const daySnap = daySnapshot(day, dayIndex);
+    baseDays.set(dayId, daySnap);
+    draftDays.set(dayId, clonePlain(daySnap));
     (Array.isArray(day?.items) ? day.items : []).forEach((item, index) => {
       const itemId = clean(item?.itemId);
       if (!itemId) return;
@@ -306,7 +417,9 @@ export function createTripEditSession(tripDataInput) {
     tripId,
     baseRevision,
     startedAt: Date.now(),
-    dayIds: new Set((Array.isArray(trip.days) ? trip.days : []).map(day => clean(day?.dayId)).filter(Boolean)),
+    dayIds: new Set([...draftDays.keys()]),
+    baseDays,
+    draftDays,
     baseItems,
     draftItems,
     deletedItems: new Set(),
@@ -335,6 +448,7 @@ export function updateTripEditDraftTripDetails(session, patchInput = {}) {
   if (next.startDate && !validIsoDate(next.startDate)) { const error = new Error("Invalid start date"); error.code = "edit-trip-date-invalid"; throw error; }
   if (next.endDate && !validIsoDate(next.endDate)) { const error = new Error("Invalid end date"); error.code = "edit-trip-date-invalid"; throw error; }
   if (next.startDate && next.endDate && next.endDate < next.startDate) { const error = new Error("End date is before start date"); error.code = "edit-trip-date-order"; throw error; }
+  if (next.startDate && next.endDate) reconcileDraftDaysForDateRange(session, next.startDate, next.endDate);
   session.draftTripDetails = next;
   return clonePlain(next);
 }
@@ -519,8 +633,38 @@ export function tripEditChanges(session) {
   return changes;
 }
 
+export function tripEditDayChanges(session) {
+  if (!session) return [];
+  const changes = [];
+  session.baseDays?.forEach?.((base, dayId) => {
+    if (!session.draftDays?.has?.(dayId)) changes.push({ operation: "delete", dayId });
+  });
+  session.draftDays?.forEach?.((draft, dayId) => {
+    const base = session.baseDays?.get?.(dayId);
+    if (!base) {
+      const data = clonePlain(draft);
+      delete data.isNew;
+      changes.push({ operation: "create", dayId, data });
+      return;
+    }
+    if (sameDay(base, draft)) return;
+    const patch = {};
+    PERSISTED_DAY_FIELDS.forEach(field => {
+      if (field === "sortOrder") {
+        if (normalizedSortOrder(base[field]) !== normalizedSortOrder(draft[field])) patch[field] = normalizedSortOrder(draft[field]);
+      } else if (field === "cities") {
+        const left = Array.isArray(base.cities) ? base.cities.map(clean).filter(Boolean) : [];
+        const right = Array.isArray(draft.cities) ? draft.cities.map(clean).filter(Boolean) : [];
+        if (stableJson(left) !== stableJson(right)) patch.cities = right;
+      } else if (clean(base[field]) !== clean(draft[field])) patch[field] = clean(draft[field]);
+    });
+    changes.push({ operation: "update", dayId, patch });
+  });
+  return changes;
+}
+
 export function tripEditDomainChanges(session) {
-  if (!session) return { tripDetailsChanged: false, travellersChanged: false, flightsChanged: false, teamChangeCount: 0 };
+  if (!session) return { tripDetailsChanged: false, travellersChanged: false, flightsChanged: false, teamChangeCount: 0, daysChanged: false, dayChangeCount: 0 };
   const tripDetailsChanged = !sameTripDetails(session.baseTripDetails || {}, session.draftTripDetails || {});
   const travellersChanged = !sameTravellers(session.baseTravellers || {}, session.draftTravellers || {});
   const flightsChanged = !sameFlights(session.baseFlights || [], session.draftFlights || []);
@@ -529,13 +673,14 @@ export function tripEditDomainChanges(session) {
   new Set([...baseKeys, ...draftKeys]).forEach(key => {
     if (stableJson(session.baseTravellers?.[key] || null) !== stableJson(session.draftTravellers?.[key] || null)) teamChangeCount += 1;
   });
-  return { tripDetailsChanged, travellersChanged, flightsChanged, teamChangeCount };
+  const dayChangeCount = tripEditDayChanges(session).length;
+  return { tripDetailsChanged, travellersChanged, flightsChanged, teamChangeCount, daysChanged: dayChangeCount > 0, dayChangeCount };
 }
 
 export function tripEditChangeCount(session) {
   const itemCount = tripEditChanges(session).length;
   const domain = tripEditDomainChanges(session);
-  return itemCount + (domain.tripDetailsChanged ? 1 : 0) + domain.teamChangeCount + (domain.flightsChanged && !domain.travellersChanged ? 1 : 0);
+  return itemCount + domain.dayChangeCount + (domain.tripDetailsChanged ? 1 : 0) + domain.teamChangeCount + (domain.flightsChanged && !domain.travellersChanged ? 1 : 0);
 }
 
 export function applyTripEditDraftToTrip(session, tripInput, { revision = null } = {}) {
@@ -543,9 +688,14 @@ export function applyTripEditDraftToTrip(session, tripInput, { revision = null }
   if (!session) return trip;
   const draftMap = new Map();
   session.draftItems.forEach(draft => draftMap.set(itemKey(draft.dayId, draft.itemId), draft));
-  (Array.isArray(trip.days) ? trip.days : []).forEach(day => {
-    const dayId = clean(day?.dayId);
-    if (!Array.isArray(day?.items)) day.items = [];
+  const sourceDays = new Map((Array.isArray(trip.days) ? trip.days : []).map(day => [clean(day?.dayId), day]));
+  const orderedDays = [...(session.draftDays?.values?.() || [])].sort((a, b) => normalizedSortOrder(a?.sortOrder) - normalizedSortOrder(b?.sortOrder));
+  trip.days = orderedDays.map(dayDraft => {
+    const dayId = clean(dayDraft?.dayId);
+    const source = clonePlain(sourceDays.get(dayId) || {}) || {};
+    const day = { ...source, ...clonePlain(dayDraft), dayId };
+    delete day.isNew;
+    if (!Array.isArray(day.items)) day.items = [];
     const existingIds = new Set(day.items.map(item => clean(item?.itemId)).filter(Boolean));
     day.items = day.items.map((item, index) => {
       const key = itemKey(dayId, item?.itemId);
@@ -573,6 +723,7 @@ export function applyTripEditDraftToTrip(session, tripInput, { revision = null }
       if (ao !== bo) return ao - bo;
       return clean(a?.itemId).localeCompare(clean(b?.itemId));
     });
+    return day;
   });
   if (!trip.meta || typeof trip.meta !== "object") trip.meta = {};
   const details = normalizeTripDetails(session.draftTripDetails || session.baseTripDetails || {}, tripDetailsSnapshot(trip));
@@ -602,10 +753,11 @@ export async function commitTripEditSession(session, { user: userInput = null } 
     throw error;
   }
   const changes = tripEditChanges(session);
+  const dayChanges = tripEditDayChanges(session);
   const domainChanges = tripEditDomainChanges(session);
-  const anyDomainChange = domainChanges.tripDetailsChanged || domainChanges.travellersChanged || domainChanges.flightsChanged;
-  if (!changes.length && !anyDomainChange) return { revision: session.baseRevision, changedItems: 0, changedTrip: false, changedTeams: 0, noChange: true };
-  if (changes.length > 448) {
+  const anyDomainChange = domainChanges.tripDetailsChanged || domainChanges.travellersChanged || domainChanges.flightsChanged || dayChanges.length > 0;
+  if (!changes.length && !anyDomainChange) return { revision: session.baseRevision, changedItems: 0, changedDays: 0, changedTrip: false, changedTeams: 0, noChange: true };
+  if (changes.length + dayChanges.length > 448) {
     const error = new Error("Too many itinerary changes in one edit session");
     error.code = "edit-too-large";
     throw error;
@@ -645,6 +797,15 @@ export async function commitTripEditSession(session, { user: userInput = null } 
     }
 
     const nextRevision = serverRevision + 1;
+    dayChanges.forEach(change => {
+      const ref = doc(db, "trips", session.tripId, "days", change.dayId);
+      if (change.operation === "delete") { tx.delete(ref); return; }
+      if (change.operation === "create") {
+        tx.set(ref, { ...change.data, dayId: change.dayId, createdAt: serverTimestamp(), createdBy: user.uid, updatedAt: serverTimestamp(), updatedBy: user.uid });
+        return;
+      }
+      tx.set(ref, { ...change.patch, updatedAt: serverTimestamp(), updatedBy: user.uid }, { merge: true });
+    });
     changes.forEach(change => {
       const ref = doc(db, "trips", session.tripId, "days", change.dayId, "items", change.itemId);
       if (change.operation === "create") {
@@ -696,6 +857,7 @@ export async function commitTripEditSession(session, { user: userInput = null } 
     }
     const summaryParts = [];
     if (changes.length) summaryParts.push(`${changes.length} 個行程項目`);
+    if (dayChanges.length) summaryParts.push(`${dayChanges.length} 個行程日`);
     if (domainChanges.tripDetailsChanged) summaryParts.push("旅程資料");
     if (domainChanges.teamChangeCount || domainChanges.flightsChanged) summaryParts.push(`${domainChanges.teamChangeCount} 個 Team`);
     tx.set(logRef, {
@@ -708,6 +870,7 @@ export async function commitTripEditSession(session, { user: userInput = null } 
       actorName: clean(user.displayName),
       revision: nextRevision,
       changedItems: changes.length,
+      changedDays: dayChanges.length,
       changedTrip: domainChanges.tripDetailsChanged,
       changedTeams: domainChanges.teamChangeCount,
       createdItems: changes.filter(change => change.operation === "create").length,
@@ -716,6 +879,6 @@ export async function commitTripEditSession(session, { user: userInput = null } 
       createdAt: serverTimestamp()
     });
 
-    return { revision: nextRevision, changedItems: changes.length, changedTrip: domainChanges.tripDetailsChanged, changedTeams: domainChanges.teamChangeCount, noChange: false };
+    return { revision: nextRevision, changedItems: changes.length, changedDays: dayChanges.length, changedTrip: domainChanges.tripDetailsChanged, changedTeams: domainChanges.teamChangeCount, noChange: false };
   });
 }
