@@ -316,6 +316,100 @@ function routeModeFromItineraryItem(item = {}) {
   return normalizeItineraryItemKind(item) === ITINERARY_ITEM_KIND.TRANSIT ? MAP_ROUTE_MODE.TRANSIT : MAP_ROUTE_MODE.UNKNOWN;
 }
 
+function normalizedAnchorType(value) {
+  const raw = clean(value).toLowerCase();
+  if (["hotel", "lodging", "accommodation"].includes(raw)) return "hotel";
+  if (["flight", "airport", "plane", "air"].includes(raw)) return "flight";
+  if (["rail", "train", "station"].includes(raw)) return "rail";
+  if (["ferry", "port", "harbour", "harbor"].includes(raw)) return "ferry";
+  return "";
+}
+function routeAnchorTypeFromItem(item = {}, itemKind = normalizeItineraryItemKind(item)) {
+  const explicit = normalizedAnchorType(item?.routeAnchorType || item?.mapAnchorType || item?.anchorType || item?.routeAnchor);
+  if (explicit) return explicit;
+  const mode = routeModeFromItineraryItem(item);
+  // A normal stop note may mention a later flight (e.g. "視乎航班時間").
+  // Only transit-class rows can be promoted by inferred FLIGHT mode; explicit
+  // anchor metadata above can still deliberately promote a stop.
+  if (itemKind === ITINERARY_ITEM_KIND.TRANSIT && mode === MAP_ROUTE_MODE.FLIGHT) return "flight";
+  const icon = clean(item?.icon);
+  const text = `${clean(item?.title)} ${clean(item?.note)} ${clean(item?.detail)}`;
+  // Hotel check-in can remain a real numbered itinerary activity. Only a hotel
+  // row that clearly means returning/resting/departing is promoted to route
+  // context. Days without such a row get a synthetic lodging anchor below.
+  if (/🏨|🛏️?/.test(icon) && /(返回|回到|返抵|返酒店|回酒店|休息|住宿休息|酒店出發|住宿出發|離開酒店|離開住宿)/.test(text)) return "hotel";
+  if (itemKind === ITINERARY_ITEM_KIND.TRANSIT && /⛴️|🚢/.test(icon) && /^(港口|碼頭|渡輪|ferry|port)/i.test(clean(item?.title))) return "ferry";
+  return "";
+}
+function anchorIcon(type, fallback = "") {
+  if (type === "hotel") return "🏨";
+  if (type === "flight") return "✈️";
+  if (type === "rail") return "🚆";
+  if (type === "ferry") return "⛴️";
+  return clean(fallback) || "•";
+}
+function isoDayValue(day = {}) {
+  const direct = clean(day?.dateIso || day?.isoDate || day?.iso || day?.dateISO);
+  if (/^\d{4}-\d{2}-\d{2}$/.test(direct)) return direct;
+  const idMatch = clean(day?.dayId).match(/(20\d{2})(\d{2})(\d{2})/);
+  return idMatch ? `${idMatch[1]}-${idMatch[2]}-${idMatch[3]}` : "";
+}
+function hotelPlain(value) {
+  if (!value) return { name: "", address: "" };
+  if (typeof value === "string") return { name: clean(value), address: "" };
+  return { name: clean(value?.name || value?.label), address: clean(value?.address) };
+}
+function lodgingAnchorForDay(trip = {}, day = {}) {
+  const meta = trip?.meta && typeof trip.meta === "object" ? trip.meta : {};
+  const hotels = meta?.hotels && typeof meta.hotels === "object" ? meta.hotels : {};
+  const cities = meta?.cities && typeof meta.cities === "object" ? meta.cities : {};
+  const dateIso = isoDayValue(day);
+  const rows = Object.entries(hotels).map(([cityKey, raw]) => {
+    const hotel = hotelPlain(raw), city = cities?.[cityKey] || {};
+    return { cityKey, hotel, city, startIso: clean(city?.startIso), endIso: clean(city?.endIso) };
+  }).filter(row => row.hotel.name || row.hotel.address);
+  if (!rows.length) return null;
+  let candidates = rows;
+  if (dateIso) {
+    const dated = rows.filter(row => (!row.startIso || row.startIso <= dateIso) && (!row.endIso || row.endIso >= dateIso));
+    if (dated.length) candidates = dated;
+  }
+  // Transition dates can belong to both old and new city windows. The lodging
+  // whose stay starts latest is the one relevant to that night's route.
+  candidates.sort((a, b) => clean(b.startIso).localeCompare(clean(a.startIso)) || a.cityKey.localeCompare(b.cityKey));
+  const selected = candidates[0];
+  if (!selected) return null;
+  const title = selected.hotel.name || `${clean(selected.city?.label) || selected.cityKey}住宿`;
+  const mapsUrl = editableMapsUrl({ address: selected.hotel.address, name: title });
+  const record = { location: { name: title, address: selected.hotel.address, mapsUrl } };
+  const resolve = pointResolveSpec(record);
+  if (resolve.type === "none") return null;
+  return {
+    kind: "itinerary",
+    itemKind: ITINERARY_ITEM_KIND.STOP,
+    mapRole: "anchor",
+    anchorType: "hotel",
+    routeEligible: true,
+    routeMode: MAP_ROUTE_MODE.UNKNOWN,
+    identity: `anchor:hotel:${clean(day?.dayId)}:${selected.cityKey}`,
+    dayId: clean(day?.dayId),
+    itemId: "",
+    order: 0,
+    displayOrder: null,
+    who: "all",
+    icon: "🏨",
+    title,
+    subtitle: [clean(selected.city?.label), selected.hotel.address].filter(Boolean).join(" · "),
+    meta: "住宿 · 行程起終點",
+    detail: selected.hotel.address,
+    previewImages: [],
+    previewImage: null,
+    mapsUrl,
+    resolve,
+    syntheticAnchor: true
+  };
+}
+
 export function itineraryMapPoints(trip, activeDayId = "") {
   const days = Array.isArray(trip?.days) ? trip.days : [];
   const wanted = clean(activeDayId);
@@ -328,11 +422,16 @@ export function itineraryMapPoints(trip, activeDayId = "") {
     const note = clean(item?.note);
     const detail = clean(item?.detail);
     const itemKind = normalizeItineraryItemKind(item);
+    const anchorType = routeAnchorTypeFromItem(item, itemKind);
+    const mapRole = anchorType ? "anchor" : (itemKind === ITINERARY_ITEM_KIND.TRANSIT ? "transit" : "stop");
+    const routeMode = itemKind === ITINERARY_ITEM_KIND.TRANSIT || anchorType ? routeModeFromItineraryItem(item) : MAP_ROUTE_MODE.UNKNOWN;
     return {
       kind: "itinerary",
       itemKind,
-      routeEligible: itemKind === ITINERARY_ITEM_KIND.STOP,
-      routeMode: itemKind === ITINERARY_ITEM_KIND.TRANSIT ? routeModeFromItineraryItem(item) : MAP_ROUTE_MODE.UNKNOWN,
+      mapRole,
+      anchorType,
+      routeEligible: mapRole === "anchor" || itemKind === ITINERARY_ITEM_KIND.STOP,
+      routeMode,
       identity: `item:${clean(day.dayId)}:${clean(item?.itemId) || index}`,
       dayId: clean(day.dayId),
       itemId: clean(item?.itemId),
@@ -341,10 +440,10 @@ export function itineraryMapPoints(trip, activeDayId = "") {
       order: index + 1,
       displayOrder: null,
       who: clean(item?.who) || "all",
-      icon: clean(item?.icon) || (itemKind === ITINERARY_ITEM_KIND.TRANSIT ? "↗︎" : "•"),
+      icon: anchorType ? anchorIcon(anchorType, item?.icon) : (clean(item?.icon) || (itemKind === ITINERARY_ITEM_KIND.TRANSIT ? "↗︎" : "•")),
       title: clean(item?.title) || (itemKind === ITINERARY_ITEM_KIND.TRANSIT ? "交通" : `行程 ${index + 1}`),
       subtitle: [time, note].filter(Boolean).join(" · "),
-      meta: time || (itemKind === ITINERARY_ITEM_KIND.TRANSIT ? "交通" : "行程地點"),
+      meta: time || (mapRole === "anchor" ? "行程起終點" : (itemKind === ITINERARY_ITEM_KIND.TRANSIT ? "交通" : "行程地點")),
       detail: note || detail,
       previewImages: previewImagesFromRecord(item),
       previewImage: previewImageFromRecord(item),
@@ -353,10 +452,17 @@ export function itineraryMapPoints(trip, activeDayId = "") {
     };
   }).filter(point => point.resolve.type !== "none");
 
+  // A real itinerary hotel-return row wins so the marker keeps its own card.
+  // Otherwise derive the day's lodging from Trip metadata as route context.
+  if (!candidates.some(point => point.anchorType === "hotel")) {
+    const lodging = lodgingAnchorForDay(trip, day);
+    if (lodging) candidates.unshift(lodging);
+  }
+
   let stopOrder = 0;
   return candidates.map(point => ({
     ...point,
-    displayOrder: point.itemKind === ITINERARY_ITEM_KIND.STOP ? ++stopOrder : null
+    displayOrder: point.mapRole === "stop" ? ++stopOrder : null
   }));
 }
 
@@ -844,9 +950,11 @@ export async function computeTransitRouteOptions({ origin = null, destination = 
 function markerElement(point) {
   const el = document.createElement("div");
   const isSaved = point.kind === "saved";
-  const isTransit = point.kind === "itinerary" && point.itemKind === ITINERARY_ITEM_KIND.TRANSIT;
-  el.className = `trip-map-marker ${isSaved ? "is-saved" : "is-itinerary"}${isTransit ? " is-transit" : ""}`;
-  el.textContent = isSaved ? "★" : (isTransit ? (point.icon || "↗︎") : String(point.displayOrder || "•"));
+  const isAnchor = point.kind === "itinerary" && point.mapRole === "anchor";
+  const isTransit = point.kind === "itinerary" && point.itemKind === ITINERARY_ITEM_KIND.TRANSIT && !isAnchor;
+  const anchorClass = isAnchor && point.anchorType ? ` is-anchor-${clean(point.anchorType)}` : "";
+  el.className = `trip-map-marker ${isSaved ? "is-saved" : "is-itinerary"}${isTransit ? " is-transit" : ""}${isAnchor ? ` is-anchor${anchorClass}` : ""}`;
+  el.textContent = isSaved ? "★" : (isAnchor ? anchorIcon(point.anchorType, point.icon) : (isTransit ? (point.icon || "↗︎") : String(point.displayOrder || "•")));
   el.setAttribute("aria-hidden", "true");
   return el;
 }
@@ -964,11 +1072,12 @@ export async function createTripMap(container, { points = [], onSelect = null, o
     ? routeGroups
     : (connectSequence ? [{ points, color: "#007aff" }] : []);
   effectiveRouteGroups.forEach((group, groupIndex) => {
-    const rows = (Array.isArray(group?.points) ? group.points : []).slice().sort((a, b) => Number(a.order || 0) - Number(b.order || 0));
+    const rows = (Array.isArray(group?.points) ? group.points : []).slice().sort((a, b) => Number(a.routeOrder ?? a.order ?? 0) - Number(b.routeOrder ?? b.order ?? 0));
     const paths = [];
     let current = [];
     rows.forEach(point => {
-      if (point?.itemKind === ITINERARY_ITEM_KIND.TRANSIT || point?.routeEligible === false) return;
+      if (point?.routeEligible === false) return;
+      if (point?.itemKind === ITINERARY_ITEM_KIND.TRANSIT && point?.mapRole !== "anchor") return;
       if (!point?.position) {
         if (current.length > 1) paths.push(current);
         current = [];
