@@ -1,3 +1,10 @@
+# v7.9.9.4 · Phase 3E Add Stop / Add Transit Draft Foundation
+
+* Edit Mode now shows `新增地點` and `新增交通` for each Day.
+* New items stay in the Local Draft and are created only by the final global `儲存` transaction.
+* Adding an item normalizes chronological `sortOrder`, so itinerary and Map draft sequence share the same order.
+* Transit drafts use the existing previous Stop / next Stop routing semantics. Location editing remains a later Phase 3E increment.
+
 # v7.9.9.3 · Regression Recovery + Persistent Edit Navigation
 
 This release deliberately rolls back the v7.9.9.2 shell extraction. The accepted monolithic CSS and classic runtime execution model are restored before applying only the necessary Edit Mode UI corrections. Transit, Map, the protected Day selector and Firebase data semantics are not redesigned.

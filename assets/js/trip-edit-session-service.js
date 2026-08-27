@@ -8,6 +8,7 @@ import {
 
 const USER_EDITABLE_ITEM_FIELDS = ["time", "title", "note"];
 const PERSISTED_ITEM_FIELDS = ["time", "title", "note", "sortOrder"];
+const VALID_ITEM_KINDS = new Set(["stop", "transit"]);
 const VALID_ROLES = new Set(["owner", "admin"]);
 
 function clean(value) { return String(value ?? "").trim(); }
@@ -22,6 +23,70 @@ function clonePlain(value) {
   return output;
 }
 function itemKey(dayId, itemId) { return `${clean(dayId)}|${clean(itemId)}`; }
+function makeItemId() {
+  try {
+    if (globalThis.crypto?.randomUUID) return `itm_${globalThis.crypto.randomUUID().replace(/-/g, "").slice(0, 12)}`;
+  } catch (_) {}
+  return `itm_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
+}
+function normalizedKind(value) {
+  const kind = clean(value).toLowerCase();
+  return VALID_ITEM_KINDS.has(kind) ? kind : "stop";
+}
+function newDraftRecord(dayId, kindInput, fields = {}) {
+  const kind = normalizedKind(kindInput);
+  const title = clean(fields.title) || (kind === "transit" ? "Travel" : "新地點");
+  const icon = clean(fields.icon) || (kind === "transit" ? "🚆" : "📍");
+  return {
+    dayId: clean(dayId),
+    itemId: makeItemId(),
+    isNew: true,
+    kind,
+    transportMode: kind === "transit" ? "transit" : "",
+    time: clean(fields.time),
+    title,
+    note: clean(fields.note),
+    sortOrder: normalizedSortOrder(fields.sortOrder),
+    icon,
+    who: clean(fields.who) || "all",
+    popup: false,
+    booked: false,
+    detail: "",
+    maps: "",
+    gallery: [],
+    images: [],
+    location: { name: title, placeId: "", latitude: null, longitude: null, address: "", mapsUrl: "" }
+  };
+}
+function draftToNewItem(draft = {}) {
+  const kind = normalizedKind(draft.kind);
+  const title = clean(draft.title) || (kind === "transit" ? "Travel" : "新地點");
+  return {
+    itemId: clean(draft.itemId),
+    kind,
+    ...(kind === "transit" ? { transportMode: "transit" } : {}),
+    time: clean(draft.time),
+    icon: clean(draft.icon) || (kind === "transit" ? "🚆" : "📍"),
+    title,
+    note: clean(draft.note),
+    who: clean(draft.who) || "all",
+    popup: Boolean(draft.popup),
+    booked: Boolean(draft.booked),
+    detail: clean(draft.detail),
+    maps: clean(draft.maps),
+    gallery: Array.isArray(draft.gallery) ? clonePlain(draft.gallery) : [],
+    images: Array.isArray(draft.images) ? clonePlain(draft.images) : [],
+    location: {
+      name: clean(draft.location?.name) || title,
+      placeId: clean(draft.location?.placeId),
+      latitude: clean(draft.location?.latitude) !== "" && Number.isFinite(Number(draft.location?.latitude)) ? Number(draft.location.latitude) : null,
+      longitude: clean(draft.location?.longitude) !== "" && Number.isFinite(Number(draft.location?.longitude)) ? Number(draft.location.longitude) : null,
+      address: clean(draft.location?.address),
+      mapsUrl: clean(draft.location?.mapsUrl)
+    },
+    sortOrder: normalizedSortOrder(draft.sortOrder)
+  };
+}
 function normalizedSortOrder(value, fallback = 999999) {
   const next = Number(value);
   return Number.isFinite(next) ? next : fallback;
@@ -101,6 +166,7 @@ export function createTripEditSession(tripDataInput) {
     tripId,
     baseRevision,
     startedAt: Date.now(),
+    dayIds: new Set((Array.isArray(trip.days) ? trip.days : []).map(day => clean(day?.dayId)).filter(Boolean)),
     baseItems,
     draftItems
   };
@@ -110,6 +176,22 @@ export function getTripEditDraftItem(session, dayIdInput, itemIdInput) {
   if (!session) return null;
   const row = session.draftItems?.get?.(itemKey(dayIdInput, itemIdInput));
   return row ? clonePlain(row) : null;
+}
+
+export function addTripEditDraftItem(session, dayIdInput, kindInput, fields = {}) {
+  if (!session) return null;
+  const dayId = clean(dayIdInput);
+  if (!dayId || !session.dayIds?.has?.(dayId)) {
+    const error = new Error("Day is not part of this edit session");
+    error.code = "edit-day-missing";
+    throw error;
+  }
+  const currentRows = dayDraftRows(session, dayId);
+  const maxSort = currentRows.reduce((max, row) => Math.max(max, normalizedSortOrder(row?.sortOrder, -1)), -1);
+  const draft = newDraftRecord(dayId, kindInput, { ...fields, sortOrder: maxSort + 1 });
+  session.draftItems.set(itemKey(dayId, draft.itemId), draft);
+  normalizeDaySortOrders(session, dayId);
+  return getTripEditDraftItem(session, dayId, draft.itemId);
 }
 
 export function updateTripEditDraftItem(session, dayIdInput, itemIdInput, patchInput = {}) {
@@ -125,6 +207,9 @@ export function updateTripEditDraftItem(session, dayIdInput, itemIdInput, patchI
   USER_EDITABLE_ITEM_FIELDS.forEach(field => {
     if (Object.prototype.hasOwnProperty.call(patchInput || {}, field)) next[field] = clean(patchInput[field]);
   });
+  if (next.isNew && Object.prototype.hasOwnProperty.call(patchInput || {}, "title")) {
+    next.location = { ...(next.location || {}), name: clean(next.title) };
+  }
   session.draftItems.set(key, next);
   if (Object.prototype.hasOwnProperty.call(patchInput || {}, "time") && clean(patchInput.time) !== clean(current.time)) {
     normalizeDaySortOrders(session, current.dayId);
@@ -141,7 +226,11 @@ export function tripEditChanges(session) {
   const changes = [];
   session.draftItems.forEach((draft, key) => {
     const base = session.baseItems.get(key);
-    if (!base || samePersisted(base, draft)) return;
+    if (!base) {
+      if (draft?.isNew) changes.push({ operation: "create", dayId: draft.dayId, itemId: draft.itemId, item: draftToNewItem(draft) });
+      return;
+    }
+    if (samePersisted(base, draft)) return;
     const patch = {};
     PERSISTED_ITEM_FIELDS.forEach(field => {
       if (field === "sortOrder") {
@@ -150,7 +239,7 @@ export function tripEditChanges(session) {
         patch[field] = clean(draft[field]);
       }
     });
-    changes.push({ dayId: draft.dayId, itemId: draft.itemId, patch });
+    changes.push({ operation: "update", dayId: draft.dayId, itemId: draft.itemId, patch });
   });
   return changes;
 }
@@ -166,7 +255,8 @@ export function applyTripEditDraftToTrip(session, tripInput, { revision = null }
   session.draftItems.forEach(draft => draftMap.set(itemKey(draft.dayId, draft.itemId), draft));
   (Array.isArray(trip.days) ? trip.days : []).forEach(day => {
     const dayId = clean(day?.dayId);
-    if (!Array.isArray(day?.items)) return;
+    if (!Array.isArray(day?.items)) day.items = [];
+    const existingIds = new Set(day.items.map(item => clean(item?.itemId)).filter(Boolean));
     day.items = day.items.map((item, index) => {
       const draft = draftMap.get(itemKey(dayId, item?.itemId));
       if (!draft) return clonePlain(item);
@@ -177,7 +267,12 @@ export function applyTripEditDraftToTrip(session, tripInput, { revision = null }
         note: clean(draft.note),
         sortOrder: normalizedSortOrder(draft.sortOrder, index)
       };
-    }).sort((a, b) => {
+    });
+    session.draftItems.forEach(draft => {
+      if (clean(draft?.dayId) !== dayId || !draft?.isNew || existingIds.has(clean(draft?.itemId))) return;
+      day.items.push(draftToNewItem(draft));
+    });
+    day.items = day.items.sort((a, b) => {
       const ao = normalizedSortOrder(a?.sortOrder), bo = normalizedSortOrder(b?.sortOrder);
       if (ao !== bo) return ao - bo;
       return clean(a?.itemId).localeCompare(clean(b?.itemId));
@@ -242,6 +337,16 @@ export async function commitTripEditSession(session, { user: userInput = null } 
     const nextRevision = serverRevision + 1;
     changes.forEach(change => {
       const ref = doc(db, "trips", session.tripId, "days", change.dayId, "items", change.itemId);
+      if (change.operation === "create") {
+        tx.set(ref, {
+          ...change.item,
+          createdAt: serverTimestamp(),
+          createdBy: user.uid,
+          updatedAt: serverTimestamp(),
+          updatedBy: user.uid
+        });
+        return;
+      }
       tx.set(ref, {
         ...change.patch,
         updatedAt: serverTimestamp(),
@@ -265,6 +370,7 @@ export async function commitTripEditSession(session, { user: userInput = null } 
       actorName: clean(user.displayName),
       revision: nextRevision,
       changedItems: changes.length,
+      createdItems: changes.filter(change => change.operation === "create").length,
       changedItemIds: changes.slice(0, 80).map(change => change.itemId),
       createdAt: serverTimestamp()
     });
