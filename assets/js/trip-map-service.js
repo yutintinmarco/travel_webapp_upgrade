@@ -8,6 +8,7 @@ const COORD_CACHE_TTL_MS = 180 * 24 * 60 * 60 * 1000;
 let mapsLoadPromise = null;
 let mapsLibrariesPromise = null;
 let routesLibraryPromise = null;
+let placesLibraryPromise = null;
 const transitRouteMemoryCache = new Map();
 
 function clean(value) { return String(value ?? "").trim(); }
@@ -152,6 +153,16 @@ async function loadGoogleRoutesLibrary() {
     });
   }
   return routesLibraryPromise;
+}
+async function loadGooglePlacesLibrary() {
+  await loadGoogleMapsLibraries();
+  if (!placesLibraryPromise) {
+    placesLibraryPromise = window.google.maps.importLibrary("places").catch(error => {
+      placesLibraryPromise = null;
+      throw error;
+    });
+  }
+  return placesLibraryPromise;
 }
 
 function coordsFromLocation(location = {}) {
@@ -368,34 +379,177 @@ async function geocodeOne(geocoder, point) {
   };
 }
 
-export async function searchEditableLocations(input, { limit = 5 } = {}) {
-  const raw = clean(input);
-  if (!raw) return [];
+async function geocoderEditableLocations(query, { placeId = "", limit = 5 } = {}) {
   const { geocoding } = await loadGoogleMapsLibraries();
   const geocoder = new geocoding.Geocoder();
-  const urlPlaceId = mapsPlaceIdFromUrl(raw);
-  const query = mapsQueryFromUrl(raw) || raw;
-  const response = urlPlaceId
-    ? await geocoder.geocode({ placeId: urlPlaceId })
-    : await geocoder.geocode({ address: query });
+  const response = clean(placeId)
+    ? await geocoder.geocode({ placeId: clean(placeId) })
+    : await geocoder.geocode({ address: clean(query) });
   const max = Math.max(1, Math.min(8, Number(limit) || 5));
   return (Array.isArray(response?.results) ? response.results : []).slice(0, max).map((result, index) => {
     const latitude = finiteNumber(result?.geometry?.location?.lat?.());
     const longitude = finiteNumber(result?.geometry?.location?.lng?.());
     if (latitude == null || longitude == null) return null;
-    const placeId = clean(result?.place_id);
+    const nextPlaceId = clean(result?.place_id);
     const address = clean(result?.formatted_address);
     const name = clean(query) || address;
     return {
       resultIndex: index,
+      source: "geocoder",
+      resolved: true,
       name,
-      placeId,
+      addressHint: address,
+      placeId: nextPlaceId,
       latitude,
       longitude,
       address,
-      mapsUrl: editableMapsUrl({ placeId, address, latitude, longitude, name })
+      mapsUrl: editableMapsUrl({ placeId: nextPlaceId, address, latitude, longitude, name })
     };
   }).filter(Boolean);
+}
+
+function formattableText(value) {
+  try { return clean(value?.toString?.() ?? value); } catch (_) { return clean(value); }
+}
+
+export async function searchEditableLocations(input, { limit = 5 } = {}) {
+  const raw = clean(input);
+  if (!raw) return [];
+  const urlPlaceId = mapsPlaceIdFromUrl(raw);
+  const query = mapsQueryFromUrl(raw) || raw;
+  const max = Math.max(1, Math.min(8, Number(limit) || 5));
+  if (urlPlaceId) return geocoderEditableLocations(query, { placeId: urlPlaceId, limit: max });
+  try {
+    const { AutocompleteSessionToken, AutocompleteSuggestion } = await loadGooglePlacesLibrary();
+    const sessionToken = new AutocompleteSessionToken();
+    const request = { input: query, sessionToken };
+    const language = clean(GOOGLE_MAPS_CONFIG?.language);
+    if (language) request.language = language;
+    const response = await AutocompleteSuggestion.fetchAutocompleteSuggestions(request);
+    const suggestions = Array.isArray(response?.suggestions) ? response.suggestions : [];
+    const rows = suggestions.slice(0, max).map((suggestion, index) => {
+      const prediction = suggestion?.placePrediction;
+      if (!prediction) return null;
+      const name = formattableText(prediction.mainText) || formattableText(prediction.text) || query;
+      const addressHint = formattableText(prediction.secondaryText) || formattableText(prediction.text);
+      return {
+        resultIndex: index,
+        source: "places",
+        resolved: false,
+        name,
+        addressHint,
+        placeId: clean(prediction.placeId),
+        prediction
+      };
+    }).filter(Boolean);
+    if (rows.length) return rows;
+  } catch (error) {
+    console.warn("Places autocomplete unavailable; falling back to Geocoder", error);
+  }
+  return geocoderEditableLocations(query, { limit: max });
+}
+
+export async function resolveEditableLocationCandidate(candidate = {}) {
+  if (candidate?.resolved && finiteNumber(candidate?.latitude) != null && finiteNumber(candidate?.longitude) != null) {
+    return {
+      name: clean(candidate?.name),
+      placeId: clean(candidate?.placeId),
+      latitude: finiteNumber(candidate?.latitude),
+      longitude: finiteNumber(candidate?.longitude),
+      address: clean(candidate?.address || candidate?.addressHint),
+      mapsUrl: clean(candidate?.mapsUrl) || editableMapsUrl(candidate)
+    };
+  }
+  const prediction = candidate?.prediction;
+  if (!prediction?.toPlace) throw new Error("Place prediction is unavailable");
+  const place = prediction.toPlace();
+  await place.fetchFields({ fields: ["displayName", "formattedAddress", "location", "googleMapsURI"] });
+  const latitude = finiteNumber(place?.location?.lat?.() ?? place?.location?.lat);
+  const longitude = finiteNumber(place?.location?.lng?.() ?? place?.location?.lng);
+  if (latitude == null || longitude == null) throw new Error("Selected place has no location");
+  const name = clean(place?.displayName) || clean(candidate?.name);
+  const placeId = clean(place?.id || candidate?.placeId);
+  const address = clean(place?.formattedAddress || candidate?.addressHint);
+  return {
+    name,
+    placeId,
+    latitude,
+    longitude,
+    address,
+    mapsUrl: clean(place?.googleMapsURI) || editableMapsUrl({ placeId, address, latitude, longitude, name })
+  };
+}
+
+export async function reverseGeocodeEditableLocation({ latitude = null, longitude = null, name = "" } = {}) {
+  const lat = finiteNumber(latitude), lng = finiteNumber(longitude);
+  if (lat == null || lng == null) throw new Error("Coordinates are required");
+  const { geocoding } = await loadGoogleMapsLibraries();
+  const geocoder = new geocoding.Geocoder();
+  let address = "";
+  try {
+    const response = await geocoder.geocode({ location: { lat, lng } });
+    address = clean(response?.results?.[0]?.formatted_address);
+  } catch (_) {}
+  const label = clean(name) || address || `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+  return {
+    name: label,
+    placeId: "",
+    latitude: lat,
+    longitude: lng,
+    address,
+    mapsUrl: editableMapsUrl({ latitude: lat, longitude: lng, name: label })
+  };
+}
+
+export async function createEditableLocationPreview(container, { location = null, onPick = null } = {}) {
+  if (!container) throw new Error("Location preview container is required");
+  const { maps, marker } = await loadGoogleMapsLibraries();
+  const initial = coordsFromLocation(location || {});
+  const map = new maps.Map(container, {
+    center: initial || { lat: 35.681236, lng: 139.767125 },
+    zoom: initial ? 17 : 13,
+    mapId: clean(GOOGLE_MAPS_CONFIG?.mapId) || "DEMO_MAP_ID",
+    disableDefaultUI: true,
+    clickableIcons: false,
+    gestureHandling: "greedy",
+    keyboardShortcuts: false
+  });
+  let pin = null;
+  const setLocation = (next = {}, { focus = true } = {}) => {
+    const position = coordsFromLocation(next);
+    if (!position) return false;
+    if (!pin) {
+      pin = new marker.AdvancedMarkerElement({ map, position, title: clean(next?.name) || "已選定位", zIndex: 50 });
+    } else {
+      pin.position = position;
+      pin.title = clean(next?.name) || "已選定位";
+      pin.map = map;
+    }
+    if (focus) {
+      map.panTo(position);
+      if (map.getZoom() < 16) map.setZoom(17);
+    }
+    return true;
+  };
+  if (initial) setLocation(location, { focus: false });
+  const clickListener = map.addListener("click", event => {
+    const lat = finiteNumber(event?.latLng?.lat?.());
+    const lng = finiteNumber(event?.latLng?.lng?.());
+    if (lat == null || lng == null) return;
+    const next = { latitude: lat, longitude: lng, name: clean(location?.name) };
+    setLocation(next, { focus: false });
+    try { onPick?.({ latitude: lat, longitude: lng }); } catch (_) {}
+  });
+  return {
+    map,
+    setLocation(next = {}, options = {}) { return setLocation(next, options); },
+    destroy() {
+      try { clickListener?.remove?.(); } catch (_) {}
+      try { if (pin) pin.map = null; } catch (_) {}
+      pin = null;
+      container.replaceChildren();
+    }
+  };
 }
 
 export async function resolveMapPoints(points, { concurrency = 3, onProgress = null } = {}) {

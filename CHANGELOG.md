@@ -1,3 +1,13 @@
+# v7.9.10.0 · Phase 3E Places Powered Interactive Location Picker
+
+* Upgraded Stop location search from Geocoder-first matching to Google Places Autocomplete Data results, with Geocoder retained as a graceful fallback when Places is unavailable.
+* Search results now show multiple candidate place names plus secondary location text so same-name businesses, branches, stations and POIs can be distinguished before selection.
+* Selecting a Places result fetches only the required Place fields for the Edit preview: display name, formatted address, location and Google Maps URI.
+* Added an inline Google Map preview for the selected Stop location. The preview uses the existing Google Maps JavaScript renderer and does not introduce a second map SDK.
+* The preview map supports direct map tapping to fine-tune the exact coordinate. A tapped coordinate is reverse-geocoded for confirmation and is kept only in the current Local Draft until the global Edit Mode Save.
+* Places predictions include adjacent Google Maps attribution. Transit items remain endpoint-driven and do not expose a Location field.
+* Protected Day selector sticky/collapse functions, Transit providers, Trip Overview Map behaviour, Firebase Rules, media and Save-once transaction architecture are unchanged.
+
 # v7.9.9.9 · Phase 3E Stop Location Picker
 
 * Added Stop-only Google Maps location search inside Edit Mode using the existing Google Maps JavaScript geocoding layer. No Places SDK or second map SDK is introduced.
