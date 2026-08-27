@@ -1,3 +1,10 @@
+# v7.9.10.4 · Phase 3E Offline Edit / Trip Map State Coherence
+
+* Fixed a Local First state-coherence edge case found during real-device testing: after a successful itinerary delete, a later offline Firestore cache snapshot could repopulate `window.tripData` with an older or same-revision inconsistent itinerary while the already-rendered itinerary UI stayed on the accepted edit result. Trip Overview Map could then redraw from that stale snapshot and temporarily show the deleted point until another edit forced convergence.
+* A successful global Edit Mode Save now immediately aligns the itinerary render signature with the accepted revision and refreshes the Trip library summary / open Trip Map from that same local snapshot.
+* Same-Trip Firebase data can no longer roll the active workspace back to a lower revision. Same-revision cache or partially confirmed snapshots are also rejected when their Edit/Map presentation fields disagree with the accepted Local First snapshot; a coherent fully confirmed snapshot is still accepted normally.
+* Trip Overview Map renderer, Day Bar, Transit Gallery / providers, Location Picker, Google Maps route logic, Firebase schema and the single Edit Session Save transaction are unchanged.
+
 # v7.9.10.3 · Phase 3E Same Day Reorder + Media Safe Item Delete
 
 * Added explicit same-day itinerary order controls inside the existing item editor. Reorder choices remain in the current Local Draft and are written only by the global Edit Mode Save; Trip Map sequence numbering follows the same draft sort order.
