@@ -1,3 +1,12 @@
+# v7.9.12.0 · Phase 3E Trip Info + Team Management
+
+- Added Edit Mode controls in the existing 旅程資料 tab for Trip basic information and Team management; View Mode remains read-only.
+- Trip title, short title, start/end dates and route summary now live inside the same Local Edit Session and are committed only by the existing global Save. Existing decorated title HTML is preserved when the visible title text is left unchanged.
+- Team management now supports add, rename, member display text, identification colour and safe delete. Deleting a Team reassigns itinerary items that used it to `all`; flights must be reassigned to another Team before that Team can be removed.
+- Trip root metadata, settings/general travellers/flights and itinerary item edits share the same revision-checked Firestore transaction and one revision bump.
+- Extended the accepted Local First presentation signature to cover booking state, editable Trip metadata, Team structure and flight Team assignment. A post-save authoritative fence rejects transient same-revision mixed listener composites until Firebase converges to the locally accepted Save result.
+- Day Bar, Trip Map renderer, Transit providers/Gallery, Location Picker, media lifecycle, Firebase Functions and rules are unchanged.
+
 # v7.9.11.0 · Phase 3E Itinerary Item Edit completion
 
 - Item Edit and Add now expose the existing canonical `booked` state as an `已預訂` control.
