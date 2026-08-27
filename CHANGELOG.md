@@ -1,3 +1,12 @@
+# v7.9.13.0 · Phase 3E Map Semantic Anchors
+
+- Added semantic Map anchors without changing canonical itinerary data: flight/airport endpoints render as ✈️ route anchors rather than numbered itinerary stops, while actual itinerary stops keep contiguous `1, 2, 3…` numbering.
+- Added a lodging route anchor derived from the Trip's existing hotel/city metadata when the active Day has no explicit hotel-return anchor. Transition dates choose the lodging stay with the latest applicable start date.
+- Route sequence semantics now read naturally per Team: arrival day `✈️ → 1 → 2 → … → 🏨`, ordinary day `🏨 → 1 → 2 → … → 🏨`, and departure day `🏨 → 1 → 2 → … → ✈️`. Team-specific flight anchors continue to respect the existing Team filter.
+- Existing hotel-return/rest itinerary rows are promoted to 🏨 Map anchors; a genuine hotel check-in activity can remain a numbered itinerary stop. Transit connectors remain unnumbered and do not become ordinary Map stops.
+- Fixed the >7-Day sticky Day Bar material disappearing after horizontal scrolling by painting the stuck material on the fixed scrollport rather than the horizontally scrolling pseudo-element. Frozen Day Bar pill geometry, spacing, sticky position, colours and switching logic are unchanged.
+- No Firebase schema/write, Transit provider, Media lifecycle, Edit transaction or security-rule changes.
+
 # v7.9.12.1 · Phase 3E Trip Date/Team UI Hotfix
 
 - Fixed iOS Trip Edit date controls overflowing the modal by reusing the proven overflow-safe native control shell used by itinerary time editing.
