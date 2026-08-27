@@ -6,8 +6,8 @@ import {
   serverTimestamp
 } from "./firestore-observed-service.js";
 
-const USER_EDITABLE_ITEM_FIELDS = ["time", "title", "note"];
-const PERSISTED_ITEM_FIELDS = ["time", "title", "note", "sortOrder"];
+const USER_EDITABLE_ITEM_FIELDS = ["time", "title", "note", "who"];
+const PERSISTED_ITEM_FIELDS = ["time", "title", "note", "who", "booked", "sortOrder"];
 const VALID_ITEM_KINDS = new Set(["stop", "transit"]);
 const VALID_ROLES = new Set(["owner", "admin"]);
 
@@ -88,7 +88,7 @@ function newDraftRecord(dayId, kindInput, fields = {}) {
     icon,
     who: clean(fields.who) || "all",
     popup: false,
-    booked: false,
+    booked: Boolean(fields.booked),
     detail: "",
     maps: clean(fields.location?.mapsUrl),
     gallery: [],
@@ -128,6 +128,8 @@ function itemSnapshot(item = {}, fallbackSortOrder = 999999) {
     time: clean(item?.time),
     title: clean(item?.title),
     note: clean(item?.note),
+    who: clean(item?.who) || "all",
+    booked: Boolean(item?.booked),
     sortOrder: normalizedSortOrder(item?.sortOrder, fallbackSortOrder),
     location,
     maps: clean(location.mapsUrl)
@@ -136,7 +138,9 @@ function itemSnapshot(item = {}, fallbackSortOrder = 999999) {
 function samePersisted(a = {}, b = {}) {
   return PERSISTED_ITEM_FIELDS.every(field => field === "sortOrder"
     ? normalizedSortOrder(a?.[field]) === normalizedSortOrder(b?.[field])
-    : clean(a?.[field]) === clean(b?.[field])) && sameLocation(a?.location, b?.location);
+    : field === "booked"
+      ? Boolean(a?.[field]) === Boolean(b?.[field])
+      : clean(a?.[field]) === clean(b?.[field])) && sameLocation(a?.location, b?.location);
 }
 function parseClockMinutes(value) {
   const match = clean(value).match(/^(\d{1,2}):(\d{2})$/);
@@ -262,6 +266,8 @@ export function updateTripEditDraftItem(session, dayIdInput, itemIdInput, patchI
   USER_EDITABLE_ITEM_FIELDS.forEach(field => {
     if (Object.prototype.hasOwnProperty.call(patchInput || {}, field)) next[field] = clean(patchInput[field]);
   });
+  if (!clean(next.who)) next.who = "all";
+  if (Object.prototype.hasOwnProperty.call(patchInput || {}, "booked")) next.booked = Boolean(patchInput.booked);
   if (Object.prototype.hasOwnProperty.call(patchInput || {}, "location")) {
     next.location = normalizeDraftLocation(patchInput.location || {}, next.title);
     next.maps = clean(next.location?.mapsUrl);
@@ -350,8 +356,10 @@ export function tripEditChanges(session) {
     PERSISTED_ITEM_FIELDS.forEach(field => {
       if (field === "sortOrder") {
         if (normalizedSortOrder(base[field]) !== normalizedSortOrder(draft[field])) patch[field] = normalizedSortOrder(draft[field]);
+      } else if (field === "booked") {
+        if (Boolean(base[field]) !== Boolean(draft[field])) patch[field] = Boolean(draft[field]);
       } else if (clean(base[field]) !== clean(draft[field])) {
-        patch[field] = clean(draft[field]);
+        patch[field] = field === "who" ? (clean(draft[field]) || "all") : clean(draft[field]);
       }
     });
     if (!sameLocation(base.location, draft.location)) {
@@ -386,6 +394,8 @@ export function applyTripEditDraftToTrip(session, tripInput, { revision = null }
         time: clean(draft.time),
         title: clean(draft.title),
         note: clean(draft.note),
+        who: clean(draft.who) || "all",
+        booked: Boolean(draft.booked),
         sortOrder: normalizedSortOrder(draft.sortOrder, index),
         location: normalizeDraftLocation(draft.location || {}, draft.title),
         maps: clean(draft.maps)

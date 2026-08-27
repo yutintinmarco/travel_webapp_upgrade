@@ -1,3 +1,12 @@
+# v7.9.11.0 · Phase 3E Itinerary Item Edit completion
+
+- Item Edit and Add now expose the existing canonical `booked` state as an `已預訂` control.
+- Item Edit and Add now expose canonical single-Team assignment through existing `who` (`all` or one existing Team), preserving current Team filters, Map semantics and Transit neighbour matching.
+- Existing-item Local Draft snapshots now retain and diff `who` and `booked`, so Global Save commits both fields atomically with title/time/note/location/reorder changes.
+- Draft preview applies Team and booking state immediately; Global Cancel still restores the pre-edit state.
+- The visible itinerary badge wording is standardised from `已預約` to `已預訂`.
+- No Transit provider, Day Bar, Trip Map route engine, Firebase rule, media lifecycle or save-once transaction architecture changes.
+
 # v7.9.10.5 · Phase 3E Post-Save Item Reconciliation
 
 * Fixed the brief deleted-item flash seen on real device after a successful Edit Mode Save. The Trip root revision and per-Day item listeners can settle independently; a new root revision could therefore be combined momentarily with previous-revision item data.

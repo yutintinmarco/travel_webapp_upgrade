@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
   <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
   <link rel="dns-prefetch" href="https://api.open-meteo.com">
-  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?build=7.9.10.5">
+  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?build=7.9.11.0">
   <title id="page-title">行程</title>
   <script>
   // v7.7.5.0 · Performance Lite. Memory only: no Firebase reads/writes, no
@@ -3863,7 +3863,7 @@ body.expenses-view-active #app-version-note{
 #snacks-view::after,
 #info-view::after,
 #profile-view::after{
-  content:"v7.9.10.5" !important;
+  content:"v7.9.11.0" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3884,7 +3884,7 @@ body.expenses-view-active #app-version-note{
   display:none !important;
 }
 body.expenses-view-active .expenses-module .expenses-app::after{
-  content:"v7.9.10.5" !important;
+  content:"v7.9.11.0" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -4259,6 +4259,20 @@ html.theme-dark .trip-edit-time-display,html:not(.theme-light):not(.theme-dark) 
 .trip-edit-location-selected small{font-size:10.5px;line-height:1.4;color:var(--label-secondary);word-break:break-word;}
 .trip-edit-location-actions{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
 .trip-edit-location-action{min-height:35px;border:0;border-radius:11px;background:rgba(118,118,128,.09);color:#1478d4;font:inherit;font-size:11px;font-weight:700;}
+/* v7.9.11.0 · Item Edit completion: booking status + canonical single-Team assignment. */
+.trip-edit-booked-toggle{width:100%;min-height:44px;border:1px solid rgba(60,60,67,.13);border-radius:13px;background:rgba(255,255,255,.74);color:var(--label-primary);font:inherit;font-size:13px;font-weight:720;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 11px;text-align:left;}
+.trip-edit-booked-toggle::after{content:"";width:22px;height:22px;flex:0 0 22px;border-radius:999px;border:1.5px solid rgba(60,60,67,.24);background:rgba(255,255,255,.92);box-shadow:inset 0 0 0 5px rgba(255,255,255,.92);transition:background .16s ease,border-color .16s ease,box-shadow .16s ease;}
+.trip-edit-booked-toggle.is-selected{color:#177c3b;border-color:rgba(34,168,82,.30);background:rgba(52,199,89,.10);}
+.trip-edit-booked-toggle.is-selected::after{border-color:#22a852;background:#22a852;box-shadow:inset 0 0 0 5px #fff;}
+.trip-edit-team-options{display:flex;flex-wrap:wrap;gap:7px;}
+.trip-edit-team-option{min-height:38px;padding:8px 12px;border-radius:999px;border:1px solid rgba(60,60,67,.14);background:rgba(255,255,255,.72);color:var(--label-primary);font:inherit;font-size:12.5px;font-weight:700;display:inline-flex;align-items:center;gap:7px;}
+.trip-edit-team-option::before{content:"";width:8px;height:8px;border-radius:999px;background:var(--trip-edit-team-accent,#8e8e93);box-shadow:0 0 0 2px color-mix(in srgb,var(--trip-edit-team-accent,#8e8e93) 18%,transparent);}
+.trip-edit-team-option[data-team="all"]::before{background:#8e8e93;box-shadow:none;}
+.trip-edit-team-option.is-selected{border-color:color-mix(in srgb,var(--trip-edit-team-accent,#1478d4) 48%,rgba(60,60,67,.10));background:color-mix(in srgb,var(--trip-edit-team-accent,#1478d4) 13%,rgba(255,255,255,.92));color:color-mix(in srgb,var(--trip-edit-team-accent,#1478d4) 78%,#111);}
+.trip-edit-team-note{font-size:10.5px;line-height:1.4;color:var(--label-secondary);}
+html.theme-dark .trip-edit-booked-toggle,html:not(.theme-light):not(.theme-dark) .trip-edit-booked-toggle,html.theme-dark .trip-edit-team-option,html:not(.theme-light):not(.theme-dark) .trip-edit-team-option{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.12);color:#f5f5f7;}
+html.theme-dark .trip-edit-booked-toggle.is-selected,html:not(.theme-light):not(.theme-dark) .trip-edit-booked-toggle.is-selected{background:rgba(72,220,118,.13);border-color:rgba(72,220,118,.34);color:#d7ffe0;}
+html.theme-dark .trip-edit-team-option.is-selected,html:not(.theme-light):not(.theme-dark) .trip-edit-team-option.is-selected{background:color-mix(in srgb,var(--trip-edit-team-accent,#6aaff5) 22%,rgba(28,28,36,.88));border-color:color-mix(in srgb,var(--trip-edit-team-accent,#6aaff5) 48%,rgba(255,255,255,.12));color:#fff;}
 /* v7.9.10.5 · Same-day Local Draft reorder + media-safe item delete. */
 .trip-edit-order-field[hidden],.trip-edit-delete-block[hidden]{display:none!important;}
 .trip-edit-order-controls{display:grid;grid-template-columns:1fr 1fr;gap:7px;}
@@ -4293,7 +4307,7 @@ body.trip-edit-mode .container{padding-bottom:calc(var(--tabbar-h) + env(safe-ar
 </style>
             <link rel="apple-touch-icon" href="assets/icon/trip_icon.png">
   <link rel="icon" type="image/png" href="assets/icon/trip_icon.png">
-  <link rel="manifest" href="manifest.json?build=7.9.10.5">
+  <link rel="manifest" href="manifest.json?build=7.9.11.0">
   <meta name="apple-mobile-web-app-title" content="關嘉露西生日之旅">
   <!-- v7.7.1.2: expenses.css is 144KB and every rule is scoped under
        .expenses-module, yet it used to block the very first paint of the
@@ -4301,8 +4315,8 @@ body.trip-edit-mode .container{padding-bottom:calc(var(--tabbar-h) + env(safe-ar
        priority without blocking paint; ensureExpensesStylesheet() flips it to
        media="all" before the 支出 view is ever mounted, so the styling is
        byte-for-byte identical by the time anything expenses-related renders. -->
-  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?build=7.9.10.5" media="print">
-  <noscript><link rel="stylesheet" href="assets/css/expenses.css?build=7.9.10.5"></noscript>
+  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?build=7.9.11.0" media="print">
+  <noscript><link rel="stylesheet" href="assets/css/expenses.css?build=7.9.11.0"></noscript>
 </head>
 <body class="app-entry-gated app-entry-pending">
 <div class="bg-fixed"></div>
@@ -5101,7 +5115,7 @@ body.trip-edit-mode .container{padding-bottom:calc(var(--tabbar-h) + env(safe-ar
         <span class="profile-detail-spacer"></span>
       </div>
       <section class="profile-card" aria-label="App 資訊">
-        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.9.10.5</strong></div>
+        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.9.11.0</strong></div>
         <div class="profile-meta-row"><span>資料架構</span><strong>Phase 2G.2</strong></div>
         <div class="profile-meta-row"><span>主要資料來源</span><strong id="app-data-source-label">Firebase / 本機快取</strong></div>
       </section>
@@ -5321,6 +5335,15 @@ body.trip-edit-mode .container{padding-bottom:calc(var(--tabbar-h) + env(safe-ar
       <div class="trip-edit-form">
       <label class="trip-edit-field"><span>時間</span><span class="trip-edit-time-control"><span class="trip-edit-time-display" id="trip-edit-item-time-display">--:--</span><input id="trip-edit-item-time" type="time" step="60" aria-label="時間"></span></label>
       <label class="trip-edit-field"><span>標題</span><input class="trip-edit-input" id="trip-edit-item-title-input" type="text" autocomplete="off" maxlength="120"></label>
+      <div class="trip-edit-field">
+        <span>預訂狀態</span>
+        <button class="trip-edit-booked-toggle" id="trip-edit-item-booked" type="button" aria-pressed="false"><span>已預訂</span></button>
+      </div>
+      <div class="trip-edit-field">
+        <span>Team</span>
+        <div class="trip-edit-team-options" id="trip-edit-item-team-options" role="group" aria-label="選擇 Team"></div>
+        <div class="trip-edit-team-note" id="trip-edit-item-team-note">「所有人」代表呢個項目唔受 Team 篩選限制。</div>
+      </div>
       <div class="trip-edit-field trip-edit-location-field" id="trip-edit-location-field">
         <span>Google Maps 地點</span>
         <div class="trip-edit-location-search">
@@ -5402,7 +5425,7 @@ body.trip-edit-mode .container{padding-bottom:calc(var(--tabbar-h) + env(safe-ar
 </div>
 
 <script>
-const APP_VERSION = "7.9.10.5";
+const APP_VERSION = "7.9.11.0";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 let tripMapServicePromise=null,transitRouteServicePromise=null,tripEditServicePromise=null,tripMapController=null,tripMapScope="day",tripMapRenderEpoch=0,tripMapSelectedPoint=null;
@@ -5964,6 +5987,7 @@ document.getElementById("trip-edit-item-done")?.addEventListener("click",()=>voi
 document.getElementById("trip-edit-order-up")?.addEventListener("click",()=>tripEditMovePendingOrder(-1));
 document.getElementById("trip-edit-order-down")?.addEventListener("click",()=>tripEditMovePendingOrder(1));
 document.getElementById("trip-edit-item-delete")?.addEventListener("click",()=>void deleteTripEditItemFromSession());
+document.getElementById("trip-edit-item-booked")?.addEventListener("click",()=>tripEditConfigureBooked(!tripEditBookedValue));
 const tripEditTimeInput=document.getElementById("trip-edit-item-time");
 const syncTripEditTimeDisplay=()=>{const display=document.getElementById("trip-edit-item-time-display");if(display)display.textContent=String(tripEditTimeInput?.value||"").trim()||"--:--";};
 tripEditTimeInput?.addEventListener("input",syncTripEditTimeDisplay);
@@ -7736,6 +7760,17 @@ async function tripEditImportMapsLink(){
   try{await tripEditSearchLocation();}
   finally{if(button){button.disabled=false;button.textContent="匯入";}}
 }
+let tripEditBookedValue=false,tripEditTeamValue="all";
+function tripEditConfigureBooked(value=false){
+  tripEditBookedValue=Boolean(value);const button=document.getElementById("trip-edit-item-booked");if(!button)return;button.classList.toggle("is-selected",tripEditBookedValue);button.setAttribute("aria-pressed",tripEditBookedValue?"true":"false");const label=button.querySelector("span");if(label)label.textContent=tripEditBookedValue?"✓ 已預訂":"已預訂";
+}
+function tripEditConfigureTeam(value="all"){
+  const travellers=activeTripPresentationData()?.meta?.travellers||window.tripData?.meta?.travellers||{},keys=orderedTravellerKeys(travellers),container=document.getElementById("trip-edit-item-team-options"),note=document.getElementById("trip-edit-item-team-note");
+  let selected=String(value||"all").trim()||"all";if(selected!=="all"&&!travellers[selected])selected="all";tripEditTeamValue=selected;if(!container)return;container.innerHTML="";
+  const add=(key,label,color)=>{const button=document.createElement("button");button.type="button";button.className="trip-edit-team-option";button.dataset.team=key;button.textContent=label;button.style.setProperty("--trip-edit-team-accent",color||"#8e8e93");button.classList.toggle("is-selected",key===selected);button.setAttribute("aria-pressed",key===selected?"true":"false");button.addEventListener("click",()=>tripEditConfigureTeam(key));container.appendChild(button);};
+  add("all","所有人","#8e8e93");keys.forEach(key=>add(key,travellers[key]?.label||key,teamDisplayColour(key,travellers[key])));
+  if(note)note.textContent=selected==="all"?"所有人都會見到；唔受 Team 篩選限制。":`只屬於 ${travellers[selected]?.label||selected}；Map、行程同 Transit 會沿用同一 Team 篩選。`;
+}
 function tripEditConfigureOrder(position=null,{visible=false}={}){
   const field=document.getElementById("trip-edit-order-field"),up=document.getElementById("trip-edit-order-up"),down=document.getElementById("trip-edit-order-down"),status=document.getElementById("trip-edit-order-status");
   if(!visible||!position||Number(position.index)<0){tripEditOrderState=null;if(field)field.hidden=true;if(status)status.textContent="";return;}
@@ -7815,7 +7850,7 @@ async function beginTripEditSession(){
   catch(error){console.warn("Begin edit session",error);window.alert("暫時未能開始編輯，請稍後再試。");}
 }
 function closeTripEditItemModal(){
-  ++tripEditLocationSearchEpoch;++tripEditLocationReverseEpoch;tripEditDestroyLocationPreview();tripEditItemTarget=null;tripEditLocationSelection=null;tripEditOrderState=null;tripEditResetLocationResults();tripEditConfigureOrder(null,{visible:false});tripEditConfigureDelete("","",{visible:false});const backdrop=document.getElementById("trip-edit-item-backdrop");if(backdrop){backdrop.classList.remove("active");backdrop.setAttribute("aria-hidden","true");}
+  ++tripEditLocationSearchEpoch;++tripEditLocationReverseEpoch;tripEditDestroyLocationPreview();tripEditItemTarget=null;tripEditLocationSelection=null;tripEditOrderState=null;tripEditBookedValue=false;tripEditTeamValue="all";tripEditResetLocationResults();tripEditConfigureOrder(null,{visible:false});tripEditConfigureDelete("","",{visible:false});const backdrop=document.getElementById("trip-edit-item-backdrop");if(backdrop){backdrop.classList.remove("active");backdrop.setAttribute("aria-hidden","true");}
 }
 function openTripEditAddModal(dayId,kind){
   if(!tripEditSession)return;
@@ -7824,7 +7859,7 @@ function openTripEditAddModal(dayId,kind){
   const modalTitle=document.getElementById("trip-edit-item-title"),time=document.getElementById("trip-edit-item-time"),title=document.getElementById("trip-edit-item-title-input"),note=document.getElementById("trip-edit-item-note"),backdrop=document.getElementById("trip-edit-item-backdrop");
   if(modalTitle)modalTitle.textContent=normalized==="transit"?"新增交通":"新增地點";
   if(time)time.value="";const timeDisplay=document.getElementById("trip-edit-item-time-display");if(timeDisplay)timeDisplay.textContent="--:--";
-  if(title)title.value=normalized==="transit"?"Travel":"";if(note)note.value="";tripEditConfigureLocation(normalized,tripEditBlankLocation());tripEditConfigureOrder(null,{visible:false});tripEditConfigureDelete("","",{visible:false});
+  if(title)title.value=normalized==="transit"?"Travel":"";if(note)note.value="";tripEditConfigureBooked(false);tripEditConfigureTeam("all");tripEditConfigureLocation(normalized,tripEditBlankLocation());tripEditConfigureOrder(null,{visible:false});tripEditConfigureDelete("","",{visible:false});
   if(backdrop){backdrop.classList.add("active");backdrop.setAttribute("aria-hidden","false");}
 }
 async function openTripEditItemModal(dayId,itemId){
@@ -7834,7 +7869,7 @@ async function openTripEditItemModal(dayId,itemId){
   tripEditItemTarget={mode:"edit",dayId:String(dayId||""),itemId:String(itemId||""),kind:itemKind};
   const modalTitle=document.getElementById("trip-edit-item-title"),time=document.getElementById("trip-edit-item-time"),title=document.getElementById("trip-edit-item-title-input"),note=document.getElementById("trip-edit-item-note"),backdrop=document.getElementById("trip-edit-item-backdrop");
   if(modalTitle)modalTitle.textContent="編輯行程項目";
-  if(time)time.value=draft.time||"";const timeDisplay=document.getElementById("trip-edit-item-time-display");if(timeDisplay)timeDisplay.textContent=String(draft.time||"").trim()||"--:--";if(title)title.value=draft.title||"";if(note)note.value=draft.note||"";tripEditConfigureLocation(itemKind,draft.location||tripEditBlankLocation());
+  if(time)time.value=draft.time||"";const timeDisplay=document.getElementById("trip-edit-item-time-display");if(timeDisplay)timeDisplay.textContent=String(draft.time||"").trim()||"--:--";if(title)title.value=draft.title||"";if(note)note.value=draft.note||"";tripEditConfigureBooked(Boolean(draft.booked));tripEditConfigureTeam(draft.who||"all");tripEditConfigureLocation(itemKind,draft.location||tripEditBlankLocation());
   tripEditConfigureOrder(service.getTripEditDraftPosition(tripEditSession,dayId,itemId),{visible:true});tripEditConfigureDelete(dayId,itemId,{visible:true});
   if(backdrop){backdrop.classList.add("active");backdrop.setAttribute("aria-hidden","false");}
 
@@ -7843,7 +7878,7 @@ async function finishTripEditItemModal(){
   if(!tripEditSession||!tripEditItemTarget)return closeTripEditItemModal();
   const service=await tripEditService(),time=document.getElementById("trip-edit-item-time")?.value||"",title=document.getElementById("trip-edit-item-title-input")?.value||"",note=document.getElementById("trip-edit-item-note")?.value||"";
   if(!String(title).trim()){window.alert("標題唔可以留空。");return;}
-  const patch={time,title,note},kind=tripEditTargetKind();if(kind==="stop")patch.location=tripEditNormalizeLocation(tripEditLocationSelection||tripEditBlankLocation());
+  const patch={time,title,note,who:tripEditTeamValue||"all",booked:Boolean(tripEditBookedValue)},kind=tripEditTargetKind();if(kind==="stop")patch.location=tripEditNormalizeLocation(tripEditLocationSelection||tripEditBlankLocation());
   if(tripEditItemTarget.mode==="add")service.addTripEditDraftItem(tripEditSession,tripEditItemTarget.dayId,tripEditItemTarget.kind,patch);
   else{
     service.updateTripEditDraftItem(tripEditSession,tripEditItemTarget.dayId,tripEditItemTarget.itemId,patch);
@@ -8031,7 +8066,7 @@ function render(data,{includeSnacks=true}={}){
       const noteRow=document.createElement("div");noteRow.className="content-note-row";
       if(isTransit){const kindLabel=document.createElement("span");kindLabel.className="transit-kind-label";kindLabel.textContent="交通";noteRow.appendChild(kindLabel);}
       if(item.note){const n=document.createElement("div");n.className="content-note";n.textContent=item.note;noteRow.appendChild(n);}
-      if(item.booked){const b=document.createElement("div");b.className="booked-badge";b.textContent="✓ 已預約";noteRow.appendChild(b);}
+      if(item.booked){const b=document.createElement("div");b.className="booked-badge";b.textContent="✓ 已預訂";noteRow.appendChild(b);}
       if(who!=="all"&&travellers[who]){const tag=document.createElement("div");tag.className="who-tag";tag.dataset.team=who;const tc=teamDisplayColour(who,travellers[who]);tag.style.setProperty("--badge-color",tc);tag.textContent=travellers[who].label||who;noteRow.appendChild(tag);}
       const title=document.createElement("div");title.className="content-title";title.textContent=item.title||"";cw.append(title,noteRow);
       const timeEl=document.createElement("div");timeEl.className="time";timeEl.textContent=item.time||"";
