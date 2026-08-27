@@ -1,0 +1,137 @@
+name: v7.9.10.3 Phase 3E reorder and delete release
+
+on:
+  push:
+    paths:
+      - '.github/workflows/v79103-release.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Preserve accepted v7.9.10.2 baseline
+        run: git show HEAD:index.html > /tmp/v79102-index.html
+
+      - name: Apply exact audited patch
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import base64, zlib, hashlib, subprocess
+          expected = {
+            'index.html': '544dc871e12b98a648c26e9592d0a3cd5b4e7cb8',
+            'assets/js/trip-edit-session-service.js': '3e3b66b82574f225b469f21702b33876a9bebcc8',
+            'manifest.json': '670a7e66226111302391c7ea7faddc77fe9f44e1',
+            'sw.js': '27f2f745125c9b0a9f437acd54080205318852d0',
+            'CHANGELOG.md': '91e5b7d9292c67820cebc84b4f7c33151b870095'
+          }
+          for path, sha in expected.items():
+              got = subprocess.check_output(['git','rev-parse',f'HEAD:{path}'], text=True).strip()
+              if got != sha:
+                  raise SystemExit(f'Baseline guard failed for {path}: {got} != {sha}')
+          encoded = ''.join(Path(f'.release/v79103.part{i}').read_text() for i in range(1,5))
+          patch = zlib.decompress(base64.b64decode(encoded))
+          digest = hashlib.sha256(patch).hexdigest()
+          if digest != '9cea887fa995c1994cc8da0535b75e5ff82e9f8215ad4dd54b7a6159c0fdc726':
+              raise SystemExit(f'Patch digest mismatch: {digest}')
+          Path('/tmp/v79103.patch').write_bytes(patch)
+          subprocess.check_call(['git','apply','--check','/tmp/v79103.patch'])
+          subprocess.check_call(['git','apply','/tmp/v79103.patch'])
+          print('Verified v7.9.10.3 patch applied')
+          PY
+
+      - name: Static QA and protected Day bar check
+        run: |
+          node --check sw.js
+          node --input-type=module --check < assets/js/trip-edit-session-service.js
+          git diff --check
+          python - <<'PY'
+          from pathlib import Path
+          import json, re, hashlib
+          s = Path('index.html').read_text()
+          base = Path('/tmp/v79102-index.html').read_text()
+          json.loads(Path('manifest.json').read_text())
+          assert '7.9.10.3' in s and '7.9.10.2' not in s
+          assert 'trip-edit-order-field' in s
+          assert 'trip-edit-item-delete' in s
+          assert 'media-safe item delete' in s
+          assert 'moveTripEditDraftItemToIndex' in Path('assets/js/trip-edit-session-service.js').read_text()
+          assert 'removeTripEditDraftItem' in Path('assets/js/trip-edit-session-service.js').read_text()
+          for fn in ['refreshCollapseMetrics','updateCompactHeader','updateCollapsingChrome','scheduleCollapseUpdate']:
+              pat = re.compile(rf'function {fn}\([^)]*\)\{{.*?\n\}}', re.S)
+              a, b = pat.search(base), pat.search(s)
+              assert a and b, fn
+              assert hashlib.sha256(a.group(0).encode()).hexdigest() == hashlib.sha256(b.group(0).encode()).hexdigest(), fn
+          blocks = re.findall(r'<script(?:\s[^>]*)?>(.*?)</script>', s, re.S|re.I)
+          for i, block in enumerate(blocks):
+              if block.strip(): Path(f'/tmp/inline_{i}.js').write_text(block)
+          print('Static QA OK')
+          PY
+          for f in /tmp/inline_*.js; do node --check "$f"; done
+
+      - name: Pure Local Draft reorder and delete QA
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          s = Path('assets/js/trip-edit-session-service.js').read_text()
+          s = re.sub(r'import \{ db \} from "\.\/firebase-service\.js";\n', '', s, count=1)
+          s = re.sub(r'import \{\n  collection,\n  doc,\n  runTransaction,\n  serverTimestamp\n\} from "\.\/firestore-observed-service\.js";\n', '', s, count=1)
+          Path('/tmp/trip-edit-test-module.mjs').write_text(s)
+          PY
+          cat > /tmp/test-trip-edit.mjs <<'JS'
+          import * as svc from 'file:///tmp/trip-edit-test-module.mjs';
+          const trip={tripId:'t1',revision:7,days:[{dayId:'d1',items:[
+            {itemId:'a',time:'09:00',title:'A',note:'',sortOrder:0},
+            {itemId:'b',time:'10:00',title:'B',note:'',sortOrder:1},
+            {itemId:'c',time:'11:00',title:'C',note:'',sortOrder:2}
+          ]}]};
+          const s=svc.createTripEditSession(trip);
+          const titles=t=>t.days[0].items.map(x=>x.title).join('');
+          if(titles(svc.applyTripEditDraftToTrip(s,trip))!=='ABC') throw new Error('baseline');
+          svc.moveTripEditDraftItemToIndex(s,'d1','c',0);
+          if(titles(svc.applyTripEditDraftToTrip(s,trip))!=='CAB') throw new Error('manual reorder');
+          svc.updateTripEditDraftItem(s,'d1','c',{time:'12:00'});
+          if(titles(svc.applyTripEditDraftToTrip(s,trip))!=='ABC') throw new Error('time reorder');
+          svc.moveTripEditDraftItemToIndex(s,'d1','c',1);
+          if(titles(svc.applyTripEditDraftToTrip(s,trip))!=='ACB') throw new Error('manual final reorder');
+          const deleted=svc.removeTripEditDraftItem(s,'d1','b');
+          if(!deleted.removed||deleted.wasNew) throw new Error('existing delete');
+          if(titles(svc.applyTripEditDraftToTrip(s,trip))!=='AC') throw new Error('delete preview');
+          if(!svc.tripEditChanges(s).some(x=>x.operation==='delete'&&x.itemId==='b')) throw new Error('delete op missing');
+          const d=svc.addTripEditDraftItem(s,'d1','stop',{time:'10:30',title:'D'});
+          const removedNew=svc.removeTripEditDraftItem(s,'d1',d.itemId);
+          if(!removedNew.removed||!removedNew.wasNew) throw new Error('new draft delete');
+          if(svc.tripEditChanges(s).some(x=>x.operation==='create'&&x.itemId===d.itemId)) throw new Error('deleted draft still creates');
+          console.log('Pure Local Draft QA OK');
+          JS
+          node /tmp/test-trip-edit.mjs
+
+      - name: Build clean backup ZIP
+        run: |
+          zip -qr /tmp/travel-webapp-phase3e-v7.9.10.3.zip . \
+            -x '.git/*' '.github/workflows/v79103-release.yml' '.release/v79103.part*'
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: travel-webapp-phase3e-v7.9.10.3
+          path: /tmp/travel-webapp-phase3e-v7.9.10.3.zip
+          retention-days: 7
+
+      - name: Commit verified release
+        run: |
+          git config user.name 'yutintinmarco'
+          git config user.email 'marcoyu1121@gmail.com'
+          git add index.html assets/js/trip-edit-session-service.js manifest.json sw.js CHANGELOG.md
+          git commit -m 'v7.9.10.3 Phase 3E same-day reorder and media-safe item delete'
+          git push origin main
