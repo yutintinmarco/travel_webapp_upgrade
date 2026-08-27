@@ -1,3 +1,9 @@
+# v7.9.9.8 · Edit Add Action / Day Tab Event Isolation
+
+* Fixed an Edit Mode regression where tapping `新增地點` or `新增交通` also triggered the generic Day-tab click handler because the two add controls reuse the Day-tab visual class. That handler cleared every active Day and Day-content panel, making the itinerary appear blank until a real Day tab was tapped again.
+* Day switching is now bound only to direct children of `#day-tabs`, and the add controls stop same-target propagation before opening their Edit sheet. This keeps the accepted Day selector visuals unchanged while separating Day navigation from Edit actions.
+* No itinerary data, Local Draft data, Firebase data, Transit, Map, media, ordering, sticky Day behaviour or Save-once semantics are changed.
+
 # v7.9.9.7 · Edit Chrome Regression Cleanup
 
 * Kept the trip lifecycle status chip, including `行程已完成`, on one line by reserving its natural width and letting the trip title wrap in the remaining header space.
