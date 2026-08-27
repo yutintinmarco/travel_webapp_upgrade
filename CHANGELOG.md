@@ -1,3 +1,10 @@
+# v7.9.10.5 · Phase 3E Post-Save Item Reconciliation
+
+* Fixed the brief deleted-item flash seen on real device after a successful Edit Mode Save. The Trip root revision and per-Day item listeners can settle independently; a new root revision could therefore be combined momentarily with previous-revision item data.
+* Day item server-confirmation evidence is now explicitly revision-scoped. When the Trip root advances, prior `itemServerReady` evidence is invalidated once for that target revision and every required Day must re-confirm before the assembled Trip can be marked fully server-confirmed.
+* This works with the v7.9.10.4 Local First regression guard: transient same-revision composites are ignored until their itinerary presentation matches the already accepted Edit result, preventing a deleted Stop/Transit from flashing back into the itinerary or Trip Map.
+* Day Bar, Trip Overview Map renderer, Transit Gallery/providers, Location Picker, Edit Save-once transaction, Firebase schema and Firebase Functions are unchanged.
+
 # v7.9.10.4 · Phase 3E Offline Edit / Trip Map State Coherence
 
 * Fixed a Local First state-coherence edge case found during real-device testing: after a successful itinerary delete, a later offline Firestore cache snapshot could repopulate `window.tripData` with an older or same-revision inconsistent itinerary while the already-rendered itinerary UI stayed on the accepted edit result. Trip Overview Map could then redraw from that stale snapshot and temporarily show the deleted point until another edit forced convergence.

@@ -157,6 +157,11 @@ export function subscribeTripData(tripIdInput, callback, options = {}) {
     : null;
   const seedRevision = seedData ? Math.max(1, numberOr(seedData.revision, 1)) : 0;
   let hydratedRevision = seedRevision;
+  // v7.9.10.5 · Server-confirmation evidence for Day item listeners is
+  // revision-scoped. When the Trip root advances first, old itemServerReady
+  // flags must not certify a transient composite of the new revision with
+  // previous-revision item data.
+  let hydrationTargetRevision = 0;
   const seedDays = Array.isArray(seedData?.days) ? seedData.days : [];
   const seedComplete = seedDays.length > 0 && seedDays.every(day => Array.isArray(day?.items));
   // Phase 3A.3 passive Backup gate: a render-cache seed may stand in for
@@ -378,6 +383,7 @@ export function subscribeTripData(tripIdInput, callback, options = {}) {
     state.days.forEach((_, dayId) => seededItemDays.add(dayId));
     if (sourceMeta.get("trip")?.fromCache === false) {
       hydratedRevision = Math.max(1, numberOr(state.tripDoc?.revision, hydratedRevision || 1));
+      hydrationTargetRevision = 0;
     }
     return true;
   }
@@ -458,6 +464,14 @@ export function subscribeTripData(tripIdInput, callback, options = {}) {
 
       const serverRevision = Math.max(1, numberOr(next.revision, 1));
       if (hydratedRevision && serverRevision !== hydratedRevision) {
+        // A root revision can arrive before every Day/items listener reflects
+        // the same transaction. Invalidate old-revision hydration evidence once
+        // per target revision so assemblePortableTrip cannot label that mixed
+        // snapshot serverConfirmed and briefly resurrect a deleted item.
+        if (hydrationTargetRevision !== serverRevision) {
+          hydrationTargetRevision = serverRevision;
+          itemServerReady.clear();
+        }
         fullHydrationNeeded = true;
         reconcileItemListeners();
       }
