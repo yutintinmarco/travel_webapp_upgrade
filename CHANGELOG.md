@@ -1,3 +1,9 @@
+# v7.9.9.5 · Sticky Edit Add Actions
+
+* In Edit Mode, `新增地點` and `新增交通` now use the same capsule visual grammar as the Day selector and remain sticky directly below the protected Day bar while the itinerary scrolls.
+* The action row always targets the currently active Day.
+* The accepted Day bar itself is unchanged; no Transit, Map, Firebase schema, ordering or Save-once semantics were modified.
+
 # v7.9.9.4 · Phase 3E Add Stop / Add Transit Draft Foundation
 
 * Edit Mode now shows `新增地點` and `新增交通` for each Day.

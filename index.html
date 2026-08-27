@@ -4200,10 +4200,12 @@ html.theme-dark .trip-map-place-copy strong,html:not(.theme-light):not(.theme-da
 
 /* v7.9.9.4 · Phase 3E Edit Mode entry, native time picker, and chronological draft ordering. Day bar CSS is intentionally untouched. */
 .trip-edit-btn{display:none !important;}.trip-edit-session-actions[hidden]{display:none !important;}
-.trip-edit-day-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0 12px;padding:0 2px;}
-.trip-edit-day-add{min-height:42px;border:1px solid rgba(60,60,67,.13);border-radius:15px;background:rgba(255,255,255,.56);color:#1478d4;font:inherit;font-size:12px;font-weight:720;display:flex;align-items:center;justify-content:center;gap:6px;box-shadow:inset 0 1px 0 rgba(255,255,255,.70);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);}
-.trip-edit-day-add:active{background:rgba(10,132,255,.10);}
-html.theme-dark .trip-edit-day-add,html:not(.theme-light):not(.theme-dark) .trip-edit-day-add{background:rgba(40,40,48,.72);border-color:rgba(255,255,255,.12);color:#69aef5;}
+.trip-edit-day-actions{display:none!important;}
+.trip-edit-sticky-add{position:sticky;top:calc(var(--compact-header-h) + env(safe-area-inset-top,0px) + 49px);z-index:1190;width:100vw;box-sizing:border-box;margin:0 0 10px calc(50% - 50vw);padding:4px max(18px,calc((100vw - 480px)/2 + 18px)) 8px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;background:transparent;isolation:isolate;}
+.trip-edit-sticky-add[hidden]{display:none!important;}
+.trip-edit-sticky-add::before{content:"";position:absolute;z-index:-1;left:50%;top:0;width:100vw;height:100%;transform:translateX(-50%);background:transparent;border-bottom:.5px solid transparent;pointer-events:none;}
+.trip-edit-sticky-add .day-tab{margin:0;min-width:0!important;width:100%;padding-left:2px!important;padding-right:2px!important;font-size:calc(10.5px * var(--font-scale));color:#1478d4;font-weight:650;}
+html.theme-dark .trip-edit-sticky-add .day-tab,html:not(.theme-light):not(.theme-dark) .trip-edit-sticky-add .day-tab{color:#69aef5;}
 
 .trip-edit-session-actions{position:fixed;left:50%;bottom:max(86px,calc(env(safe-area-inset-bottom,0px) + 82px));z-index:2050;width:min(456px,calc(100% - 24px));min-height:62px;box-sizing:border-box;padding:6px;display:grid;grid-template-columns:1fr 1fr;align-items:stretch;gap:6px;transform:translateX(-50%);border:1px solid rgba(255,255,255,.62);border-radius:27px;background:linear-gradient(180deg,rgba(255,255,255,.80),rgba(244,247,249,.64));box-shadow:0 16px 38px rgba(20,39,55,.17),0 3px 10px rgba(20,39,55,.08),inset 0 1px 0 rgba(255,255,255,.95);backdrop-filter:blur(30px) saturate(185%);-webkit-backdrop-filter:blur(30px) saturate(185%);}
 .trip-edit-text-btn{min-width:0;min-height:48px;padding:0 14px;border-radius:21px;border:0;background:transparent;color:#1478d4;font:inherit;font-size:14px;line-height:1;font-weight:720;letter-spacing:0;display:flex;align-items:center;justify-content:center;white-space:nowrap;}
@@ -4399,6 +4401,10 @@ body.trip-edit-mode .container{padding-bottom:calc(var(--tabbar-h) + env(safe-ar
   </div>
 
   <div class="day-tabs" id="day-tabs"></div>
+  <div class="trip-edit-sticky-add" id="trip-edit-sticky-add" hidden>
+    <button class="day-tab" id="trip-edit-sticky-add-stop" type="button"><span aria-hidden="true">＋</span> 新增地點</button>
+    <button class="day-tab" id="trip-edit-sticky-add-transit" type="button"><span aria-hidden="true">＋</span> 新增交通</button>
+  </div>
   <div id="day-contents"></div>
   <div class="footer-note" id="footer-note"></div>
 </div>
@@ -5297,7 +5303,7 @@ body.trip-edit-mode .container{padding-bottom:calc(var(--tabbar-h) + env(safe-ar
 </div>
 
 <script>
-const APP_VERSION = "7.9.9.4";
+const APP_VERSION = "7.9.9.5";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 let tripMapServicePromise=null,transitRouteServicePromise=null,tripEditServicePromise=null,tripMapController=null,tripMapScope="day",tripMapRenderEpoch=0,tripMapSelectedPoint=null;
@@ -7422,9 +7428,10 @@ function tripEditSyncProfileEntry(){
   if(note)note.textContent=active?"目前已進入 Edit Mode":(currentTripGlobalLocked()?"旅程已鎖定，目前只可查看":(allowed?"變更先留喺本機 Edit Session，最後一次儲存":"只有 Owner／Admin 可以編輯"));
 }
 function tripEditSyncHeader(){
-  const edit=document.getElementById("trip-edit-btn"),actions=document.getElementById("trip-edit-session-actions"),save=document.getElementById("trip-edit-save-btn");
+  const edit=document.getElementById("trip-edit-btn"),actions=document.getElementById("trip-edit-session-actions"),save=document.getElementById("trip-edit-save-btn"),stickyAdd=document.getElementById("trip-edit-sticky-add");
   if(edit)edit.hidden=true;
   if(actions)actions.hidden=!tripEditIsActive();
+  if(stickyAdd)stickyAdd.hidden=!tripEditIsActive();
   if(save){save.disabled=tripEditSaving;save.textContent=tripEditSaving?"儲存中…":"儲存";}
   document.body.classList.toggle("trip-edit-mode",tripEditIsActive());
   tripEditSyncProfileEntry();
@@ -7448,20 +7455,7 @@ async function tripEditRefreshDraftPreviews(){
   });
 }
 function tripEditDecorateItems(){
-  document.querySelectorAll(".day-content[data-day-id]").forEach(content=>{
-    let actions=content.querySelector(":scope > .trip-edit-day-actions");
-    if(!tripEditSession){if(actions)actions.remove();return;}
-    if(!actions){
-      actions=document.createElement("div");actions.className="trip-edit-day-actions";
-      const stop=document.createElement("button");stop.type="button";stop.className="trip-edit-day-add";stop.innerHTML='<span aria-hidden="true">＋</span><span>新增地點</span>';
-      const transit=document.createElement("button");transit.type="button";transit.className="trip-edit-day-add";transit.innerHTML='<span aria-hidden="true">＋</span><span>新增交通</span>';
-      stop.addEventListener("click",()=>openTripEditAddModal(content.dataset.dayId,"stop"));
-      transit.addEventListener("click",()=>openTripEditAddModal(content.dataset.dayId,"transit"));
-      actions.append(stop,transit);
-      const firstItem=content.querySelector(":scope > .itinerary-item");
-      if(firstItem)content.insertBefore(actions,firstItem);else content.appendChild(actions);
-    }
-  });
+  document.querySelectorAll(".trip-edit-day-actions").forEach(actions=>actions.remove());
   document.querySelectorAll(".itinerary-item").forEach(el=>{
     const summary=el.querySelector(":scope > .itinerary-summary");if(!summary)return;
     let button=summary.querySelector(":scope > .itinerary-edit-accessory");
@@ -7474,6 +7468,12 @@ function tripEditDecorateItems(){
   tripEditSyncHeader();
   if(tripEditSession)void tripEditRefreshDraftPreviews();
 }
+function tripEditActiveDayId(){
+  return String(document.querySelector(".day-tab.active[data-day-id]")?.dataset?.dayId||"").trim();
+}
+document.getElementById("trip-edit-sticky-add-stop")?.addEventListener("click",()=>{const dayId=tripEditActiveDayId();if(dayId)openTripEditAddModal(dayId,"stop");});
+document.getElementById("trip-edit-sticky-add-transit")?.addEventListener("click",()=>{const dayId=tripEditActiveDayId();if(dayId)openTripEditAddModal(dayId,"transit");});
+
 async function beginTripEditSession(){
   if(tripEditSession||!tripEditCanStart())return;
   const service=await tripEditService();
