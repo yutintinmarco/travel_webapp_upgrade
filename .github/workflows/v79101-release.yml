@@ -1,0 +1,89 @@
+name: v7.9.10.1 Place Identity and Maps Link release
+
+on:
+  push:
+    paths:
+      - '.github/workflows/v79101-release.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Preserve protected baseline
+        run: git show HEAD:index.html > /tmp/index.before.html
+
+      - name: Apply audited release patch
+        run: python .release/apply_v79101.py
+
+      - name: Regression QA
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re, subprocess, json, hashlib, tempfile
+
+          before=Path('/tmp/index.before.html').read_text()
+          after=Path('index.html').read_text()
+          names=['refreshCollapseMetrics','updateCompactHeader','updateCollapsingChrome','scheduleCollapseUpdate']
+          def extract(src,name):
+              start=src.find('function '+name+'(')
+              if start<0: raise SystemExit('Missing protected function '+name)
+              brace=src.find('{',start); depth=0
+              for i in range(brace,len(src)):
+                  if src[i]=='{': depth+=1
+                  elif src[i]=='}':
+                      depth-=1
+                      if depth==0: return src[start:i+1]
+              raise SystemExit('Unclosed protected function '+name)
+          for name in names:
+              if extract(before,name)!=extract(after,name):
+                  raise SystemExit('Protected Day bar function changed: '+name)
+
+          scripts=[]
+          for match in re.finditer(r'<script([^>]*)>(.*?)</script>',after,re.S|re.I):
+              if re.search(r'\bsrc\s*=',match.group(1),re.I): continue
+              scripts.append(match.group(2))
+          for i,code in enumerate(scripts):
+              path=Path('/tmp')/f'inline_{i}.js'
+              path.write_text(code)
+              subprocess.run(['node','--check',str(path)],check=True)
+
+          json.loads(Path('manifest.json').read_text())
+          assert 'const APP_VERSION = "7.9.10.1";' in after
+          assert 'content:"v7.9.10.1"' in after
+          assert 'trip-edit-location-link-btn' in after
+          assert 'origin_place_id' in after and 'destination_place_id' in after
+          assert 'travel-shell-v7.9.10.1' in Path('sw.js').read_text()
+          assert 'build=7.9.10.1' in Path('manifest.json').read_text()
+          print('Protected Day bar hashes retained:', {n:hashlib.sha256(extract(after,n).encode()).hexdigest()[:12] for n in names})
+          PY
+          cp assets/js/trip-map-service.js /tmp/trip-map-service.mjs
+          node --check /tmp/trip-map-service.mjs
+          node --check sw.js
+          git diff --check
+
+      - name: Commit release
+        run: |
+          git config user.name "Travel WebApp Release"
+          git config user.email "release@travel-webapp.local"
+          git add index.html assets/js/trip-map-service.js manifest.json sw.js CHANGELOG.md
+          git commit -m "Release v7.9.10.1 place identity and Maps link import"
+          git push
+
+      - name: Build clean backup ZIP
+        run: |
+          zip -qr /tmp/travel-webapp-phase3e-v7.9.10.1.zip . -x '.git/*' '.github/*' '.release/*'
+
+      - name: Upload backup ZIP
+        uses: actions/upload-artifact@v4
+        with:
+          name: travel-webapp-phase3e-v7.9.10.1
+          path: /tmp/travel-webapp-phase3e-v7.9.10.1.zip
+          if-no-files-found: error
+          retention-days: 7
