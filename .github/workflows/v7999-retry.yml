@@ -1,0 +1,23 @@
+name: Correct v7.9.9.9 baseline guard and retry
+on:
+  push:
+    paths:
+      - '.github/workflows/v7999-retry.yml'
+permissions:
+  contents: write
+jobs:
+  correct:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Correct CHANGELOG baseline hash
+        run: |
+          grep -q 'cfd8805aa41b8c0c2abb403ef8a00b46ae42fc56' .github/workflows/v7999-release.yml
+          sed -i 's/cfd8805aa41b8c0c2abb403ef8a00b46ae42fc56/3c8bf39fbe8c31fc5fb90c1e896317f7d3d11b34/' .github/workflows/v7999-release.yml
+      - name: Commit corrected guard
+        run: |
+          git config user.name 'Travel WebApp Release Bot'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add .github/workflows/v7999-release.yml
+          git commit -m 'Correct v7.9.9.9 baseline guard'
+          git push
