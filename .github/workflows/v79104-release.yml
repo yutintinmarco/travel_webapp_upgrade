@@ -1,0 +1,258 @@
+name: v7.9.10.4 Phase 3E offline state coherence release
+
+on:
+  push:
+    paths:
+      - '.github/workflows/v79104-release.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Preserve accepted v7.9.10.3 baseline
+        run: cp index.html /tmp/v79103-index.html
+
+      - name: Apply exact audited v7.9.10.4 patch
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import hashlib, subprocess
+
+          expected = {
+            'index.html': '5bf81803796196c756291fad2085ed0dc3f22e7e',
+            'manifest.json': '1efa43b944807ef3fde672f41891ccf48bbc92fd',
+            'sw.js': '8889056154f5938f56094948d2b06e17c855b31a',
+            'CHANGELOG.md': 'db3850207561833e5d27119a3403b72fdd9ec413',
+            'assets/js/trip-edit-session-service.js': '2c0728cd83c4e6e0bce97b1b8eccd0e6ec01b3d0',
+            'functions/index.js': 'f154eee2b1c8340737c8558ce38a478a10d87d44'
+          }
+          for path, sha in expected.items():
+              got = subprocess.check_output(['git','rev-parse',f'HEAD:{path}'], text=True).strip()
+              if got != sha:
+                  raise SystemExit(f'Baseline guard failed for {path}: {got} != {sha}')
+
+          index = Path('index.html')
+          s = index.read_text()
+          s = s.replace('7.9.10.3','7.9.10.4')
+
+          old = '''// Phase 3E · Edit Session foundation
+let tripEditSession=null,tripEditItemTarget=null,tripEditSaving=false,tripEditLocationSelection=null,tripEditOrderState=null,tripEditLocationSearchEpoch=0,tripEditLocationMapController=null,tripEditLocationMapEpoch=0,tripEditLocationReverseEpoch=0;
+window.__tripEditPreviewData=null;
+'''
+          new = '''// Phase 3E · Edit Session foundation
+let tripEditSession=null,tripEditItemTarget=null,tripEditSaving=false,tripEditLocationSelection=null,tripEditOrderState=null,tripEditLocationSearchEpoch=0,tripEditLocationMapController=null,tripEditLocationMapEpoch=0,tripEditLocationReverseEpoch=0;
+window.__tripEditPreviewData=null;
+function tripEditPresentationSignature(data){
+  if(!data)return"";
+  const days=(Array.isArray(data?.days)?data.days:[]).map(day=>({
+    dayId:String(day?.dayId||""),
+    items:(Array.isArray(day?.items)?day.items:[]).map(item=>({
+      itemId:String(item?.itemId||""),kind:String(item?.kind||""),transportMode:String(item?.transportMode||""),
+      time:String(item?.time||""),title:String(item?.title||""),note:String(item?.note||""),sortOrder:Number.isFinite(Number(item?.sortOrder))?Number(item.sortOrder):null,
+      who:String(item?.who||""),icon:String(item?.icon||""),detail:String(item?.detail||""),maps:String(item?.maps||item?.mapsUrl||""),
+      location:item?.location&&typeof item.location==="object"?{
+        name:String(item.location.name||""),placeId:String(item.location.placeId||""),
+        latitude:Number.isFinite(Number(item.location.latitude??item.location.lat))?Number(item.location.latitude??item.location.lat):null,
+        longitude:Number.isFinite(Number(item.location.longitude??item.location.lng??item.location.lon))?Number(item.location.longitude??item.location.lng??item.location.lon):null,
+        address:String(item.location.address||""),mapsUrl:String(item.location.mapsUrl||item.location.googleMapsUrl||"")
+      }:null
+    }))
+  }));
+  return renderSignature(days,`${dataTripId(data)}:${Math.max(0,Number(data?.revision)||0)}`);
+}
+function tripEditIncomingSnapshotRegressesCurrent(data,{source="server",nextId="",currentId=""}={}){
+  const sameTrip=Boolean(currentId&&nextId&&currentId===nextId);if(!sameTrip)return false;
+  const currentRevision=Math.max(0,Number(window.tripData?.revision)||0),incomingRevision=Math.max(0,Number(data?.revision)||0);
+  if(currentRevision>0&&incomingRevision>0&&incomingRevision<currentRevision)return true;
+  const incomingFullyConfirmed=data?.cloudMeta?.serverConfirmed===true&&data?.cloudMeta?.hasPendingWrites!==true;
+  if(!incomingFullyConfirmed&&currentRevision>0&&incomingRevision===currentRevision){
+    const currentSignature=tripEditPresentationSignature(window.tripData),incomingSignature=tripEditPresentationSignature(data);
+    if(currentSignature&&incomingSignature&&currentSignature!==incomingSignature)return true;
+  }
+  return false;
+}
+'''
+          if s.count(old) != 1:
+              raise SystemExit('Edit foundation anchor mismatch')
+          s = s.replace(old,new,1)
+
+          old_save = '''    const applied=service.applyTripEditDraftToTrip(tripEditSession,window.tripData,{revision:result.revision});
+    tripEditSession=null;tripEditSaving=false;window.__tripEditPreviewData=null;window.tripData=applied;tripEditSyncHeader();
+    try{await persistInstantTripCache(window.tripData);}catch(_){}
+    render(window.tripData);
+'''
+          new_save = '''    const applied=service.applyTripEditDraftToTrip(tripEditSession,window.tripData,{revision:result.revision});
+    tripEditSession=null;tripEditSaving=false;window.__tripEditPreviewData=null;window.tripData=applied;tripEditSyncHeader();
+    // v7.9.10.4 · A successful Edit transaction is already an accepted new
+    // revision. Align the local render baseline immediately so a later offline
+    // Firestore cache snapshot cannot split itinerary DOM and Trip Map state.
+    tripRenderSignature=tripContentRenderSignature(window.tripData);
+    updateTripLibrarySummaryFromData(window.tripData);
+    try{await persistInstantTripCache(window.tripData);}catch(_){}
+    render(window.tripData);
+    if(tripMapOverlayOpen())void renderTripMapScope(tripMapScope);
+'''
+          if s.count(old_save) != 1:
+              raise SystemExit('Save anchor mismatch')
+          s = s.replace(old_save,new_save,1)
+
+          old_apply = '''function applyFirebaseTripData(data,{source="server",tripId="",dirtySections=[]}={}){
+  if(!data)return;
+  const currentId=dataTripId(window.tripData),nextId=dataTripId(data)||tripId;
+  const sameTrip=Boolean(currentId&&nextId&&currentId===nextId);
+'''
+          new_apply = '''function applyFirebaseTripData(data,{source="server",tripId="",dirtySections=[]}={}){
+  if(!data)return;
+  const currentId=dataTripId(window.tripData),nextId=dataTripId(data)||tripId;
+  const sameTrip=Boolean(currentId&&nextId&&currentId===nextId);
+  // v7.9.10.4 · Never let an offline/cache listener roll an already accepted
+  // itinerary revision backwards. Same-revision cache / partially confirmed
+  // payloads must also agree on Edit/Map presentation fields; otherwise keep
+  // the newer Local First snapshot until Firebase supplies a coherent snapshot.
+  if(tripEditIncomingSnapshotRegressesCurrent(data,{source,nextId,currentId})){
+    console.warn("Ignored stale Trip cache snapshot",{tripId:nextId,currentRevision:Number(window.tripData?.revision)||0,incomingRevision:Number(data?.revision)||0,source});
+    refreshAppDataDiagnostics();refreshFullBackupSyncGate();
+    return;
+  }
+'''
+          if s.count(old_apply) != 1:
+              raise SystemExit('Firebase apply anchor mismatch')
+          s = s.replace(old_apply,new_apply,1)
+          index.write_text(s)
+
+          for name in ['manifest.json','sw.js']:
+              p=Path(name)
+              t=p.read_text()
+              if '7.9.10.3' not in t:
+                  raise SystemExit(f'{name} version anchor missing')
+              p.write_text(t.replace('7.9.10.3','7.9.10.4'))
+
+          changelog=Path('CHANGELOG.md')
+          ct=changelog.read_text()
+          if not ct.startswith('# v7.9.10.3'):
+              raise SystemExit('Unexpected changelog head')
+          entry='''# v7.9.10.4 · Phase 3E Offline Edit / Trip Map State Coherence
+
+* Fixed a Local First state-coherence edge case found during real-device testing: after a successful itinerary delete, a later offline Firestore cache snapshot could repopulate `window.tripData` with an older or same-revision inconsistent itinerary while the already-rendered itinerary UI stayed on the accepted edit result. Trip Overview Map could then redraw from that stale snapshot and temporarily show the deleted point until another edit forced convergence.
+* A successful global Edit Mode Save now immediately aligns the itinerary render signature with the accepted revision and refreshes the Trip library summary / open Trip Map from that same local snapshot.
+* Same-Trip Firebase data can no longer roll the active workspace back to a lower revision. Same-revision cache or partially confirmed snapshots are also rejected when their Edit/Map presentation fields disagree with the accepted Local First snapshot; a coherent fully confirmed snapshot is still accepted normally.
+* Trip Overview Map renderer, Day Bar, Transit Gallery / providers, Location Picker, Google Maps route logic, Firebase schema and the single Edit Session Save transaction are unchanged.
+
+'''
+          changelog.write_text(entry+ct)
+
+          expected_sha256={
+            'index.html':'c503cf8f497cfeb7d2c1a04ed1b9c678eeaf8fc082af0572332e72bd3bc885e4',
+            'manifest.json':'785be50c3215d1c9b708a996511262181dd7f76f56016870af5a93435146b6fb',
+            'sw.js':'abca69cf57f1e065fdf53025a3070e078d42255f4c335c323772e7887636c91e',
+            'CHANGELOG.md':'331420525f93977be45c2e6ad8217e5b3be4a62cc42b0daf4a36c420a675408f'
+          }
+          for path,digest in expected_sha256.items():
+              got=hashlib.sha256(Path(path).read_bytes()).hexdigest()
+              if got!=digest:
+                  raise SystemExit(f'Output digest mismatch for {path}: {got} != {digest}')
+          print('Exact v7.9.10.4 patch applied')
+          PY
+
+      - name: Static QA and protected surface checks
+        run: |
+          node --check sw.js
+          node --check functions/index.js
+          node --input-type=module --check < assets/js/trip-edit-session-service.js
+          python -m json.tool manifest.json >/dev/null
+          git diff --check
+          python - <<'PY'
+          from pathlib import Path
+          import json, re, hashlib
+          s=Path('index.html').read_text()
+          base=Path('/tmp/v79103-index.html').read_text()
+          assert 'const APP_VERSION = "7.9.10.4";' in s
+          assert '7.9.10.3' not in s
+          assert json.loads(Path('manifest.json').read_text())['start_url'].endswith('build=7.9.10.4')
+          assert 'travel-shell-v7.9.10.4' in Path('sw.js').read_text()
+          assert subprocess_check := True
+
+          ids=re.findall(r'\bid="([^"]+)"',s)
+          duplicates=sorted({x for x in ids if ids.count(x)>1})
+          if duplicates:
+              raise SystemExit(f'Duplicate static DOM ids: {duplicates[:20]}')
+
+          def unchanged(start,end):
+              a0=base.index(start); a1=base.index(end,a0)
+              b0=s.index(start); b1=s.index(end,b0)
+              ah=hashlib.sha256(base[a0:a1].encode()).hexdigest()
+              bh=hashlib.sha256(s[b0:b1].encode()).hexdigest()
+              if ah!=bh: raise SystemExit(f'Protected block changed: {start}')
+
+          unchanged('async function renderTripMapScope(scope=tripMapScope){','async function openTripMap(){')
+          unchanged('async function ensureTransitRoutePlanner(itemEl){','// Phase 3E · Edit Session foundation')
+          unchanged('async function tripEditHandleMapPick(coords={}){','async function deleteTripEditItemFromSession(){')
+          unchanged('function refreshCollapseMetrics(){','function compactHeaderScrollThreshold(){')
+          unchanged('function updateCompactHeader(){','function updateCollapsingChrome(){')
+          unchanged('function updateCollapsingChrome(){','function scheduleCollapseUpdate(){')
+          unchanged('function scheduleCollapseUpdate(){','function updateBottomNavIndicator(){')
+
+          blocks=re.findall(r'<script(?:\s[^>]*)?>(.*?)</script>',s,re.S|re.I)
+          for i,block in enumerate(blocks):
+              if block.strip(): Path(f'/tmp/inline_{i}.js').write_text(block)
+          print('Static and protected surface QA OK')
+          PY
+          for f in /tmp/inline_*.js; do node --check "$f"; done
+
+      - name: Offline revision regression guard QA
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          s=Path('index.html').read_text()
+          start=s.index('function tripEditPresentationSignature(data){')
+          end=s.index('function tripEditHasPermission(){',start)
+          block=s[start:end]
+          test='''
+          function dataTripId(data){return String(data?.tripId||data?.meta?.tripId||"");}
+          function renderSignature(value,fallback=""){try{return JSON.stringify(value)+"|"+fallback}catch(_){return fallback}}
+          globalThis.window={tripData:null};
+          '''+block+'''
+          const item=(id,title)=>({itemId:id,kind:"stop",time:"09:00",title,note:"",sortOrder:id==="a"?0:1,who:"all",icon:"📍",detail:"",maps:"",location:{name:title,placeId:"",latitude:1,longitude:2,address:"",mapsUrl:""}});
+          const trip=(revision,items,confirmed=false)=>({tripId:"t1",revision,cloudMeta:{serverConfirmed:confirmed,hasPendingWrites:false},days:[{dayId:"d1",items}]});
+          window.tripData=trip(10,[item("a","A")],true);
+          if(!tripEditIncomingSnapshotRegressesCurrent(trip(9,[item("a","A"),item("b","B")],false),{source:"cache",nextId:"t1",currentId:"t1"}))throw new Error("lower revision not blocked");
+          if(!tripEditIncomingSnapshotRegressesCurrent(trip(10,[item("a","A"),item("b","B")],false),{source:"cache",nextId:"t1",currentId:"t1"}))throw new Error("same revision stale cache not blocked");
+          if(tripEditIncomingSnapshotRegressesCurrent(trip(10,[item("a","A")],false),{source:"cache",nextId:"t1",currentId:"t1"}))throw new Error("matching cache blocked");
+          if(tripEditIncomingSnapshotRegressesCurrent(trip(10,[item("a","A"),item("b","B")],true),{source:"server",nextId:"t1",currentId:"t1"}))throw new Error("fully confirmed same revision blocked");
+          if(tripEditIncomingSnapshotRegressesCurrent(trip(11,[item("a","A"),item("b","B")],true),{source:"server",nextId:"t1",currentId:"t1"}))throw new Error("newer revision blocked");
+          console.log("Offline regression guard QA OK");
+          '''
+          Path('/tmp/test-v79104.js').write_text(test)
+          PY
+          node /tmp/test-v79104.js
+
+      - name: Build clean backup ZIP
+        run: |
+          zip -qr /tmp/Travel_WebApp_v7.9.10.4_backup.zip . \
+            -x '.git/*' '.github/workflows/v79104-release.yml'
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Travel_WebApp_v7.9.10.4_backup
+          path: /tmp/Travel_WebApp_v7.9.10.4_backup.zip
+          retention-days: 7
+
+      - name: Commit verified release and clean staging workflow
+        run: |
+          git config user.name 'yutintinmarco'
+          git config user.email 'marcoyu1121@gmail.com'
+          git add index.html manifest.json sw.js CHANGELOG.md
+          git rm .github/workflows/v79104-release.yml
+          git commit -m 'v7.9.10.4 Phase 3E offline edit and map state coherence'
+          git push origin main
