@@ -10,6 +10,7 @@ initializeApp();
 
 const db = getFirestore();
 const DELETE_REGION = "asia-east2";
+const MAP_LINK_REGION = "asia-east2";
 const DELETE_SCHEMA_VERSION = 1;
 const OPERATION_TTL_MS = 12 * 60 * 1000;
 const DELETE_LEASE_MS = 11 * 60 * 1000;
@@ -276,6 +277,109 @@ async function expireDeletionLease(tripRef, runId, errorCode = "") {
     });
   } catch (leaseError) {}
 }
+
+
+const GOOGLE_MAPS_SHORT_HOSTS = new Set(["maps.app.goo.gl", "goo.gl"]);
+const GOOGLE_MAPS_REDIRECT_HOSTS = new Set([
+  "google.com", "www.google.com", "maps.google.com",
+  "google.co.jp", "www.google.co.jp", "maps.google.co.jp",
+  "google.com.hk", "www.google.com.hk", "maps.google.com.hk"
+]);
+const GOOGLE_MAPS_REDIRECT_CODES = new Set([301, 302, 303, 307, 308]);
+
+function normalizedHost(value) {
+  return clean(value).toLowerCase().replace(/\.$/, "");
+}
+
+function parseGoogleMapsRedirectUrl(value, { initial = false } = {}) {
+  let url;
+  try { url = new URL(clean(value)); }
+  catch (error) { throw new HttpsError("invalid-argument", "Invalid Google Maps URL."); }
+  const host = normalizedHost(url.hostname);
+  if (url.protocol !== "https:" || url.username || url.password) {
+    throw new HttpsError("invalid-argument", "Only secure Google Maps URLs are supported.");
+  }
+  if (initial ? !GOOGLE_MAPS_SHORT_HOSTS.has(host) : !(GOOGLE_MAPS_SHORT_HOSTS.has(host) || GOOGLE_MAPS_REDIRECT_HOSTS.has(host))) {
+    throw new HttpsError("invalid-argument", "Unsupported Google Maps URL host.");
+  }
+  return url;
+}
+
+function finalGoogleMapsUrlAllowed(url) {
+  const host = normalizedHost(url?.hostname);
+  if (!GOOGLE_MAPS_REDIRECT_HOSTS.has(host)) return false;
+  if (host.startsWith("maps.")) return true;
+  return String(url?.pathname || "").startsWith("/maps");
+}
+
+async function followGoogleMapsShortLink(inputUrl) {
+  let current = parseGoogleMapsRedirectUrl(inputUrl, { initial: true });
+  const maxRedirects = 6;
+  for (let hop = 0; hop <= maxRedirects; hop += 1) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 7000);
+    let response;
+    try {
+      response = await fetch(current, {
+        method: "GET",
+        redirect: "manual",
+        signal: controller.signal,
+        headers: {
+          "user-agent": "TravelWebApp/1.0 (+Google Maps short-link resolver)",
+          "accept": "text/html,application/xhtml+xml;q=0.9,*/*;q=0.8"
+        }
+      });
+    } catch (error) {
+      if (error?.name === "AbortError") {
+        throw new HttpsError("deadline-exceeded", "Google Maps short link timed out.", { code: "maps-short-link-timeout" });
+      }
+      throw new HttpsError("unavailable", "Google Maps short link could not be opened.", { code: "maps-short-link-unavailable" });
+    } finally {
+      clearTimeout(timer);
+    }
+
+    if (GOOGLE_MAPS_REDIRECT_CODES.has(Number(response.status))) {
+      const location = clean(response.headers.get("location"));
+      try { await response.body?.cancel?.(); } catch (error) {}
+      if (!location) {
+        throw new HttpsError("failed-precondition", "Google Maps redirect did not include a destination.", { code: "maps-short-link-invalid-redirect" });
+      }
+      const next = new URL(location, current);
+      parseGoogleMapsRedirectUrl(next.toString());
+      current = next;
+      continue;
+    }
+
+    try { await response.body?.cancel?.(); } catch (error) {}
+    if (response.ok && finalGoogleMapsUrlAllowed(current)) {
+      return { url: current.toString(), redirectCount: hop };
+    }
+    throw new HttpsError("failed-precondition", "Google Maps short link did not resolve to a supported Maps page.", {
+      code: "maps-short-link-unresolved",
+      status: Number(response.status) || 0
+    });
+  }
+  throw new HttpsError("failed-precondition", "Google Maps short link redirected too many times.", { code: "maps-short-link-too-many-redirects" });
+}
+
+exports.resolveGoogleMapsShortLink = onCall({
+  region: MAP_LINK_REGION,
+  timeoutSeconds: 20,
+  memory: "256MiB",
+  maxInstances: 4
+}, async request => {
+  const uid = clean(request.auth?.uid);
+  if (!uid) throw new HttpsError("unauthenticated", "Google sign-in required.");
+
+  const inputUrl = clean(request.data?.url);
+  if (!inputUrl || inputUrl.length > 1200) {
+    throw new HttpsError("invalid-argument", "Invalid Google Maps short link.");
+  }
+
+  const result = await followGoogleMapsShortLink(inputUrl);
+  logger.info("Google Maps short link resolved", { uid, redirectCount: result.redirectCount });
+  return { url: result.url, redirectCount: result.redirectCount };
+});
 
 exports.permanentDeleteTrip = onCall({
   region: DELETE_REGION,

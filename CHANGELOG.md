@@ -1,3 +1,10 @@
+# v7.9.10.2 · Phase 3E Google Maps Short Link Resolver + Stationary Edit Action Dock
+
+* Google Maps mobile share links (`maps.app.goo.gl` / `goo.gl`) now resolve through a narrowly scoped authenticated Firebase callable before entering the existing Place identity pipeline. The resolver accepts only approved Google Maps hosts, validates every redirect hop, limits redirect count and execution time, and never acts as a general URL proxy.
+* Short-link resolution returns only the final supported Google Maps URL. Existing Places / Place ID parsing remains authoritative for POI identity, while user-picked map coordinates remain explicit custom pins.
+* The itinerary item editor now follows the established Expense sheet action-dock grammar: form content scrolls independently while `取消` / `完成` remain stationary at the bottom with safe-area handling.
+* Protected Day selector behaviour, Transit Gallery, Trip Overview Map, Firebase data schema, media and the single Edit Session Save transaction are unchanged.
+
 # v7.9.10.1 · Phase 3E Place Identity + Google Maps Link Import
 
 * Transit Google Maps Deep Links now preserve a selected Google Places establishment or POI as a named Place ID endpoint. Canonical coordinates remain available for in-app Map and Transit planning, but no longer override official place identity in the consumer Google Maps Directions URL.

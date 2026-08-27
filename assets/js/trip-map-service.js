@@ -9,6 +9,7 @@ let mapsLoadPromise = null;
 let mapsLibrariesPromise = null;
 let routesLibraryPromise = null;
 let placesLibraryPromise = null;
+let mapsShortLinkCallablePromise = null;
 const transitRouteMemoryCache = new Map();
 
 function clean(value) { return String(value ?? "").trim(); }
@@ -163,6 +164,41 @@ async function loadGooglePlacesLibrary() {
     });
   }
   return placesLibraryPromise;
+}
+
+async function mapsShortLinkCallable() {
+  if (!mapsShortLinkCallablePromise) {
+    mapsShortLinkCallablePromise = Promise.all([
+      import("./firebase-service.js"),
+      import("https://www.gstatic.com/firebasejs/11.8.0/firebase-functions.js")
+    ]).then(([firebaseService, functionsSdk]) => {
+      const functions = functionsSdk.getFunctions(firebaseService.firebaseApp, "asia-east2");
+      return functionsSdk.httpsCallable(functions, "resolveGoogleMapsShortLink", { timeout: 15000 });
+    }).catch(error => {
+      mapsShortLinkCallablePromise = null;
+      throw error;
+    });
+  }
+  return mapsShortLinkCallablePromise;
+}
+async function expandGoogleMapsShortLink(input) {
+  try {
+    const callable = await mapsShortLinkCallable();
+    const result = await callable({ url: clean(input) });
+    const url = clean(result?.data?.url);
+    if (!url) { const error = new Error("Short-link resolver returned no URL"); error.code = "maps-short-link-unresolved"; throw error; }
+    return url;
+  } catch (error) {
+    if (String(error?.code || "").startsWith("maps-short-link-")) throw error;
+    const details = error?.details || error?.customData?.details || {};
+    const detailCode = clean(details?.code);
+    const wrapped = new Error(error?.message || "Google Maps short-link resolver unavailable");
+    if (detailCode) wrapped.code = detailCode;
+    else if (clean(error?.code) === "functions/unauthenticated") wrapped.code = "maps-short-link-auth-required";
+    else wrapped.code = "maps-short-link-resolver-unavailable";
+    wrapped.cause = error;
+    throw wrapped;
+  }
 }
 
 function coordsFromLocation(location = {}) {
@@ -422,10 +458,15 @@ function formattableText(value) {
 export async function searchEditableLocations(input, { limit = 5 } = {}) {
   const raw = clean(input);
   if (!raw) return [];
-  const linkInfo = googleMapsUrlInfo(raw);
-  if (linkInfo?.isShort) { const error = new Error("Google Maps short links cannot be safely expanded in browser-only mode"); error.code = "maps-short-link"; throw error; }
-  const urlPlaceId = clean(linkInfo?.placeId || mapsPlaceIdFromUrl(raw));
-  const query = clean(linkInfo?.query || mapsQueryFromUrl(raw) || (linkInfo ? "" : raw));
+  let effectiveRaw = raw;
+  let linkInfo = googleMapsUrlInfo(effectiveRaw);
+  if (linkInfo?.isShort) {
+    effectiveRaw = await expandGoogleMapsShortLink(effectiveRaw);
+    linkInfo = googleMapsUrlInfo(effectiveRaw);
+    if (!linkInfo || linkInfo.isShort) { const error = new Error("Google Maps short link did not resolve"); error.code = "maps-short-link-unresolved"; throw error; }
+  }
+  const urlPlaceId = clean(linkInfo?.placeId || mapsPlaceIdFromUrl(effectiveRaw));
+  const query = clean(linkInfo?.query || mapsQueryFromUrl(effectiveRaw) || (linkInfo ? "" : effectiveRaw));
   const max = Math.max(1, Math.min(8, Number(limit) || 5));
   if (urlPlaceId) return geocoderEditableLocations(query, { placeId: urlPlaceId, limit: max });
   if (linkInfo && !query && linkInfo.coords) {
