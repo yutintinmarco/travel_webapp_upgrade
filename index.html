@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
   <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
   <link rel="dns-prefetch" href="https://api.open-meteo.com">
-  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?build=7.9.10.0">
+  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?build=7.9.10.1">
   <title id="page-title">行程</title>
   <script>
   // v7.7.5.0 · Performance Lite. Memory only: no Firebase reads/writes, no
@@ -1299,7 +1299,7 @@ html:not(.theme-light):not(.theme-dark) .itinerary-item.is-transit.is-booked {
   background: linear-gradient(180deg, rgba(39,39,47,0.88), rgba(27,61,39,0.70)) !important;
 }
 
-/* v7.9.10.0 · Transit route summary sits above the route map and restores the
+/* v7.9.10.1 · Transit route summary sits above the route map and restores the
    original tap-to-expand detail hierarchy. The main Trip Map remains unchanged. */
 .transit-route-planner{margin:0 0 10px;}
 .transit-route-planner-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:0 0 8px;padding:0 2px;}
@@ -3863,7 +3863,7 @@ body.expenses-view-active #app-version-note{
 #snacks-view::after,
 #info-view::after,
 #profile-view::after{
-  content:"v7.9.10.0" !important;
+  content:"v7.9.10.1" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3884,7 +3884,7 @@ body.expenses-view-active #app-version-note{
   display:none !important;
 }
 body.expenses-view-active .expenses-module .expenses-app::after{
-  content:"v7.9.10.0" !important;
+  content:"v7.9.10.1" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -4199,7 +4199,7 @@ html.theme-dark .trip-map-heading small,html.theme-dark .trip-map-state,html.the
 html.theme-dark .trip-map-line-toggle.active,html:not(.theme-light):not(.theme-dark) .trip-map-line-toggle.active{background:#f5f5f7;color:#111;border-color:#f5f5f7;box-shadow:none;}
 html.theme-dark .trip-map-place-copy strong,html:not(.theme-light):not(.theme-dark) .trip-map-place-copy strong{color:#fff;}
 
-/* v7.9.10.0 · Phase 3E Edit Mode entry, native time picker, and chronological draft ordering. Day bar CSS is intentionally untouched. */
+/* v7.9.10.1 · Phase 3E Edit Mode entry, native time picker, and chronological draft ordering. Day bar CSS is intentionally untouched. */
 .trip-edit-btn{display:none !important;}.trip-edit-session-actions[hidden]{display:none !important;}
 .trip-edit-day-actions{display:none!important;}
 .trip-edit-sticky-add{position:sticky;top:calc(var(--compact-header-h) + env(safe-area-inset-top,0px) + 49px);z-index:1190;width:100vw;box-sizing:border-box;margin:0 0 10px calc(50% - 50vw);padding:4px max(18px,calc((100vw - 480px)/2 + 18px)) 8px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;background:transparent;isolation:isolate;}
@@ -4229,12 +4229,16 @@ body.trip-edit-mode .itinerary-edit-accessory{display:flex;}
 .trip-edit-time-control:focus-within .trip-edit-time-display{border-color:rgba(10,132,255,.56);box-shadow:0 0 0 3px rgba(10,132,255,.10);}
 html.theme-dark .trip-edit-time-display,html:not(.theme-light):not(.theme-dark) .trip-edit-time-display{background:rgba(34,34,42,.88);border-color:rgba(255,255,255,.11);color:#f2f2f7;}
 
-/* v7.9.10.0 · Places-powered interactive Stop Location Picker. Day bar and Trip Map overview remain untouched. */
+/* v7.9.10.1 · Places-powered interactive Stop Location Picker. Day bar and Trip Map overview remain untouched. */
 .trip-edit-location-field[hidden]{display:none!important;}
 .trip-edit-location-search{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:7px;align-items:stretch;}
 .trip-edit-location-search .trip-edit-input{min-width:0;}
 .trip-edit-location-search-btn{min-width:70px;border:0;border-radius:14px;padding:0 12px;background:rgba(10,132,255,.11);color:#1478d4;font:inherit;font-size:13px;font-weight:720;white-space:nowrap;}
 .trip-edit-location-search-btn:disabled{opacity:.48;}
+.trip-edit-location-link-separator{display:flex;align-items:center;gap:8px;color:var(--label-secondary);font-size:9.5px;line-height:1;padding:1px 2px;}
+.trip-edit-location-link-separator::before,.trip-edit-location-link-separator::after{content:"";height:1px;flex:1;background:rgba(118,118,128,.16);transform:scaleY(.5);}
+.trip-edit-location-link-row .trip-edit-input{font-size:12px;}
+.trip-edit-location-link-note{font-size:9.5px;line-height:1.4;color:var(--label-secondary);padding:0 2px;}
 .trip-edit-location-status{font-size:10.5px;line-height:1.45;color:var(--label-secondary);padding:0 2px;}
 .trip-edit-location-results{display:grid;gap:6px;max-height:176px;overflow:auto;-webkit-overflow-scrolling:touch;}
 .trip-edit-location-results[hidden]{display:none!important;}
@@ -4270,7 +4274,7 @@ body.trip-edit-mode .container{padding-bottom:calc(var(--tabbar-h) + env(safe-ar
 </style>
             <link rel="apple-touch-icon" href="assets/icon/trip_icon.png">
   <link rel="icon" type="image/png" href="assets/icon/trip_icon.png">
-  <link rel="manifest" href="manifest.json?build=7.9.10.0">
+  <link rel="manifest" href="manifest.json?build=7.9.10.1">
   <meta name="apple-mobile-web-app-title" content="關嘉露西生日之旅">
   <!-- v7.7.1.2: expenses.css is 144KB and every rule is scoped under
        .expenses-module, yet it used to block the very first paint of the
@@ -4278,8 +4282,8 @@ body.trip-edit-mode .container{padding-bottom:calc(var(--tabbar-h) + env(safe-ar
        priority without blocking paint; ensureExpensesStylesheet() flips it to
        media="all" before the 支出 view is ever mounted, so the styling is
        byte-for-byte identical by the time anything expenses-related renders. -->
-  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?build=7.9.10.0" media="print">
-  <noscript><link rel="stylesheet" href="assets/css/expenses.css?build=7.9.10.0"></noscript>
+  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?build=7.9.10.1" media="print">
+  <noscript><link rel="stylesheet" href="assets/css/expenses.css?build=7.9.10.1"></noscript>
 </head>
 <body class="app-entry-gated app-entry-pending">
 <div class="bg-fixed"></div>
@@ -5078,7 +5082,7 @@ body.trip-edit-mode .container{padding-bottom:calc(var(--tabbar-h) + env(safe-ar
         <span class="profile-detail-spacer"></span>
       </div>
       <section class="profile-card" aria-label="App 資訊">
-        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.9.10.0</strong></div>
+        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.9.10.1</strong></div>
         <div class="profile-meta-row"><span>資料架構</span><strong>Phase 2G.2</strong></div>
         <div class="profile-meta-row"><span>主要資料來源</span><strong id="app-data-source-label">Firebase / 本機快取</strong></div>
       </section>
@@ -5300,9 +5304,15 @@ body.trip-edit-mode .container{padding-bottom:calc(var(--tabbar-h) + env(safe-ar
       <div class="trip-edit-field trip-edit-location-field" id="trip-edit-location-field">
         <span>Google Maps 地點</span>
         <div class="trip-edit-location-search">
-          <input class="trip-edit-input" id="trip-edit-location-query" type="text" autocomplete="off" maxlength="240" placeholder="輸入地點、地址或 Google Maps 連結">
+          <input class="trip-edit-input" id="trip-edit-location-query" type="text" autocomplete="off" maxlength="240" placeholder="輸入店舖、景點、車站或地址">
           <button class="trip-edit-location-search-btn" id="trip-edit-location-search-btn" type="button">搜尋</button>
         </div>
+        <div class="trip-edit-location-link-separator"><span>或貼上 Google Maps 連結</span></div>
+        <div class="trip-edit-location-search trip-edit-location-link-row">
+          <input class="trip-edit-input" id="trip-edit-location-link" type="url" inputmode="url" autocomplete="off" maxlength="900" placeholder="https://www.google.com/maps/…">
+          <button class="trip-edit-location-search-btn" id="trip-edit-location-link-btn" type="button">匯入</button>
+        </div>
+        <div class="trip-edit-location-link-note">完整 Google Maps 網址可用正式 Place ID／名稱重新確認；短連結如無法解析會提示改用上面 Places 搜尋。</div>
         <div class="trip-edit-location-status" id="trip-edit-location-status">可選；未設定定位嘅地點唔會加入 Map route sequence。</div>
         <div class="trip-edit-location-results" id="trip-edit-location-results" hidden></div>
         <div class="trip-edit-location-attribution" id="trip-edit-location-attribution" hidden>Google Maps</div>
@@ -5359,7 +5369,7 @@ body.trip-edit-mode .container{padding-bottom:calc(var(--tabbar-h) + env(safe-ar
 </div>
 
 <script>
-const APP_VERSION = "7.9.10.0";
+const APP_VERSION = "7.9.10.1";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 let tripMapServicePromise=null,transitRouteServicePromise=null,tripEditServicePromise=null,tripMapController=null,tripMapScope="day",tripMapRenderEpoch=0,tripMapSelectedPoint=null;
@@ -7364,12 +7374,16 @@ function transitRouteEndpointTitle(record={},fallback="地點"){
 function transitGoogleMapsEndpoint(record={},fallback="地點"){
   const loc=record?.location&&typeof record.location==="object"?record.location:{};
   const lat=Number(loc?.latitude??loc?.lat),lng=Number(loc?.longitude??loc?.lng??loc?.lon);
-  const placeId=String(loc?.placeId||record?.placeId||"").trim();
-  if(Number.isFinite(lat)&&Number.isFinite(lng))return {value:`${lat},${lng}`,placeId};
+  let placeId=String(loc?.placeId||record?.placeId||"").trim();
+  const officialName=String(loc?.name||record?.locationName||record?.title||record?.name||"").trim();
+  const address=String(loc?.address||record?.address||"").trim();
   const mapsUrl=String(loc?.mapsUrl||record?.maps||record?.mapsUrl||record?.googleMapsUrl||"").trim();
-  if(mapsUrl){try{const parsed=new URL(mapsUrl,location.href),query=String(parsed.searchParams.get("query")||parsed.searchParams.get("q")||"").trim(),queryPlaceId=String(parsed.searchParams.get("query_place_id")||"").trim();if(query)return {value:query,placeId:placeId||queryPlaceId};}catch(_){}}
-  const value=String(loc?.address||record?.address||loc?.name||record?.title||record?.name||fallback).trim()||fallback;
-  return {value,placeId};
+  let mapsQuery="";
+  if(mapsUrl){try{const parsed=new URL(mapsUrl,location.href);mapsQuery=String(parsed.searchParams.get("query")||parsed.searchParams.get("q")||parsed.searchParams.get("destination")||"").trim();placeId=placeId||String(parsed.searchParams.get("query_place_id")||parsed.searchParams.get("destination_place_id")||parsed.searchParams.get("place_id")||"").trim();}catch(_){} }
+  if(placeId)return {value:officialName||mapsQuery||address||fallback,placeId};
+  if(Number.isFinite(lat)&&Number.isFinite(lng))return {value:`${lat},${lng}`,placeId:""};
+  if(mapsQuery)return {value:mapsQuery,placeId:""};
+  return {value:address||officialName||fallback,placeId:""};
 }
 function transitGoogleMapsDirectionsUrl(context={}){
   const origin=transitGoogleMapsEndpoint(context?.origin,"出發點"),destination=transitGoogleMapsEndpoint(context?.destination,"目的地");
@@ -7592,8 +7606,9 @@ function tripEditRenderLocationSelection(value={}){
 }
 function tripEditConfigureLocation(kind,value={}){
   ++tripEditLocationSearchEpoch;++tripEditLocationReverseEpoch;tripEditResetLocationResults();tripEditDestroyLocationPreview();
-  const field=document.getElementById("trip-edit-location-field"),query=document.getElementById("trip-edit-location-query"),button=document.getElementById("trip-edit-location-search-btn");
-  const isStop=String(kind||"")!=="transit";if(field)field.hidden=!isStop;if(button){button.disabled=false;button.textContent="搜尋";}
+  const field=document.getElementById("trip-edit-location-field"),query=document.getElementById("trip-edit-location-query"),link=document.getElementById("trip-edit-location-link"),button=document.getElementById("trip-edit-location-search-btn"),linkButton=document.getElementById("trip-edit-location-link-btn");
+  const isStop=String(kind||"")!=="transit";if(field)field.hidden=!isStop;if(button){button.disabled=false;button.textContent="搜尋";}if(linkButton){linkButton.disabled=false;linkButton.textContent="匯入";}
+  if(link)link.value="";
   if(!isStop){tripEditLocationSelection=tripEditBlankLocation();if(query)query.value="";return;}
   const loc=tripEditNormalizeLocation(value);tripEditRenderLocationSelection(loc);
   if(query)query.value=loc.name||loc.address||"";
@@ -7634,8 +7649,26 @@ async function tripEditSearchLocation(){
     if(status)status.textContent=rows.some(row=>row.source==="places")?"請揀一個 Google Places 結果；名稱同地區會先幫你分辨同名地點。":"Places 暫時未能使用，現以 Google 地址結果 fallback；請揀一個結果。";
   }catch(error){
     console.warn("Trip edit location search",error);if(epoch!==tripEditLocationSearchEpoch)return;
-    if(status)status.textContent=error?.code==="maps-not-configured"?"Google Maps 尚未設定，暫時未能搜尋定位。":"Google 地點搜尋暫時未能使用，請稍後再試。";
+    if(status){
+      if(error?.code==="maps-short-link")status.textContent="呢個係 Google Maps 短連結，純 browser 無法可靠展開。請用上面 Places 搜尋店名，或者喺瀏覽器貼完整 google.com/maps 網址。";
+      else if(error?.code==="maps-link-unresolved")status.textContent="呢條 Google Maps 連結未能識別正式地點；請改用店名／景點名搜尋，再揀正確結果。";
+      else status.textContent=error?.code==="maps-not-configured"?"Google Maps 尚未設定，暫時未能搜尋定位。":"Google 地點搜尋暫時未能使用，請稍後再試。";
+    }
   }finally{if(epoch===tripEditLocationSearchEpoch&&button){button.disabled=false;button.textContent="搜尋";}}
+}
+async function tripEditImportMapsLink(){
+  if(!tripEditSession||tripEditTargetKind()!=="stop")return;
+  const link=document.getElementById("trip-edit-location-link"),query=document.getElementById("trip-edit-location-query"),button=document.getElementById("trip-edit-location-link-btn"),status=document.getElementById("trip-edit-location-status");
+  const value=String(link?.value||"").trim();
+  if(!value){if(status)status.textContent="請先貼上 Google Maps 連結。";link?.focus();return;}
+  let parsed=null;try{parsed=new URL(value);}catch(_){if(status)status.textContent="呢個唔似有效網址，請重新貼上 Google Maps 連結。";link?.focus();return;}
+  const host=String(parsed.hostname||"").toLowerCase();
+  const isGoogle=host==="maps.app.goo.gl"||host==="goo.gl"||host.endsWith(".google.com")||host==="google.com"||host.endsWith(".google.co.jp")||host==="google.co.jp";
+  if(!isGoogle){if(status)status.textContent="暫時只支援 Google Maps 連結。";return;}
+  if(query)query.value=value;
+  if(button){button.disabled=true;button.textContent="匯入中…";}
+  try{await tripEditSearchLocation();}
+  finally{if(button){button.disabled=false;button.textContent="匯入";}}
 }
 function tripEditApplyDraftPreview(dayId,itemId,draft){
   const el=tripEditFindDomItem(dayId,itemId);if(!el||!draft)return;
@@ -7673,7 +7706,9 @@ document.getElementById("trip-edit-sticky-add-stop")?.addEventListener("click",e
 document.getElementById("trip-edit-sticky-add-transit")?.addEventListener("click",event=>{event.preventDefault();event.stopImmediatePropagation();const dayId=tripEditActiveDayId();if(dayId)openTripEditAddModal(dayId,"transit");});
 document.getElementById("trip-edit-location-search-btn")?.addEventListener("click",()=>void tripEditSearchLocation());
 document.getElementById("trip-edit-location-query")?.addEventListener("keydown",event=>{if(event.key==="Enter"){event.preventDefault();void tripEditSearchLocation();}});
-document.getElementById("trip-edit-location-clear")?.addEventListener("click",()=>{tripEditRenderLocationSelection(tripEditBlankLocation());tripEditResetLocationResults();const query=document.getElementById("trip-edit-location-query");if(query)query.value="";});
+document.getElementById("trip-edit-location-link-btn")?.addEventListener("click",()=>void tripEditImportMapsLink());
+document.getElementById("trip-edit-location-link")?.addEventListener("keydown",event=>{if(event.key==="Enter"){event.preventDefault();void tripEditImportMapsLink();}});
+document.getElementById("trip-edit-location-clear")?.addEventListener("click",()=>{tripEditRenderLocationSelection(tripEditBlankLocation());tripEditResetLocationResults();const query=document.getElementById("trip-edit-location-query"),link=document.getElementById("trip-edit-location-link");if(query)query.value="";if(link)link.value="";});
 document.getElementById("trip-edit-location-open-maps")?.addEventListener("click",()=>{const url=String(tripEditLocationSelection?.mapsUrl||"").trim();if(url)window.open(url,"_blank","noopener");});
 
 async function beginTripEditSession(){

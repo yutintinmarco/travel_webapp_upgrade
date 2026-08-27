@@ -1,3 +1,11 @@
+# v7.9.10.1 · Phase 3E Place Identity + Google Maps Link Import
+
+* Transit Google Maps Deep Links now preserve a selected Google Places establishment or POI as a named Place ID endpoint. Canonical coordinates remain available for in-app Map and Transit planning, but no longer override official place identity in the consumer Google Maps Directions URL.
+* A manual tap on the Location Preview map still intentionally clears Place ID identity and remains a coordinate-based custom pin, keeping official Places selections and user-defined pins semantically distinct.
+* Added a second Stop Location Picker input for full Google Maps URLs. Expanded `google.com/maps/...` links can recover Place IDs directly or use the embedded place name plus map coordinates as a Places search bias before the user confirms a candidate.
+* Browser-only builds detect `maps.app.goo.gl` / `goo.gl` short links and explain that they cannot be reliably expanded cross-origin; Places search remains the supported fallback without adding a backend redirect resolver.
+* Protected Day selector behaviour, Trip Overview Map, Japan ls8h / non-Japan Google Transit providers, Firebase Rules, media and the single Edit Session Save transaction are unchanged.
+
 # v7.9.10.0 · Phase 3E Places Powered Interactive Location Picker
 
 * Upgraded Stop location search from Geocoder-first matching to Google Places Autocomplete Data results, with Geocoder retained as a graceful fallback when Places is unavailable.

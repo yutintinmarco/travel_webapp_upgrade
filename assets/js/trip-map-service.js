@@ -170,27 +170,34 @@ function coordsFromLocation(location = {}) {
   const lng = finiteNumber(location?.longitude ?? location?.lng ?? location?.lon);
   return lat == null || lng == null ? null : { lat, lng };
 }
-function mapsQueryFromUrl(input) {
+function googleMapsUrlInfo(input) {
   const raw = clean(input);
-  if (!raw) return "";
+  if (!raw || !/^https?:\/\//i.test(raw)) return null;
   try {
-    const url = new URL(raw, window.location.href);
-    const query = clean(url.searchParams.get("query") || url.searchParams.get("q"));
-    if (query) return query.replace(/\+/g, " ");
+    const url = new URL(raw);
+    const host = clean(url.hostname).toLowerCase();
+    const isShort = host === "maps.app.goo.gl" || host === "goo.gl";
+    const isGoogle = isShort || host === "google.com" || host.endsWith(".google.com") || host === "google.co.jp" || host.endsWith(".google.co.jp");
+    if (!isGoogle) return null;
+    const query = clean(url.searchParams.get("query") || url.searchParams.get("q") || url.searchParams.get("destination"));
+    const embeddedPlaceId = clean(raw.match(/!1s(ChI[^!/?&#]+)/)?.[1]);
+    const placeId = clean(url.searchParams.get("query_place_id") || url.searchParams.get("destination_place_id") || url.searchParams.get("place_id") || embeddedPlaceId);
     const path = decodeURIComponent(url.pathname || "");
     const placeMatch = path.match(/\/place\/([^/]+)/i);
-    if (placeMatch?.[1]) return clean(placeMatch[1].replace(/\+/g, " "));
-  } catch (_) {}
-  return "";
+    const pathName = clean(placeMatch?.[1]?.replace(/\+/g, " "));
+    const directCoords = [query, clean(url.searchParams.get("center")), clean(url.searchParams.get("ll"))]
+      .map(value => String(value || "").match(/^\s*(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)\s*$/))
+      .find(Boolean);
+    const dataCoords = raw.match(/!3d(-?\d+(?:\.\d+)?)!4d(-?\d+(?:\.\d+)?)/i);
+    const atCoords = raw.match(/@(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)(?:,|\/|$)/);
+    const match = dataCoords || directCoords || atCoords;
+    const latitude = match ? finiteNumber(match[1]) : null;
+    const longitude = match ? finiteNumber(match[2]) : null;
+    return {raw,isShort,query:(query && !directCoords ? query.replace(/\+/g, " ") : "") || pathName,placeId,coords:latitude == null || longitude == null ? null : { lat: latitude, lng: longitude }};
+  } catch (_) { return null; }
 }
-function mapsPlaceIdFromUrl(input) {
-  const raw = clean(input);
-  if (!raw) return "";
-  try {
-    const url = new URL(raw, window.location.href);
-    return clean(url.searchParams.get("query_place_id") || url.searchParams.get("place_id"));
-  } catch (_) { return ""; }
-}
+function mapsQueryFromUrl(input) { return clean(googleMapsUrlInfo(input)?.query); }
+function mapsPlaceIdFromUrl(input) { return clean(googleMapsUrlInfo(input)?.placeId); }
 function editableMapsUrl({ placeId = "", address = "", latitude = null, longitude = null, name = "" } = {}) {
   const lat = finiteNumber(latitude), lng = finiteNumber(longitude);
   const query = clean(address || name) || (lat != null && lng != null ? `${lat},${lng}` : "");
@@ -415,14 +422,22 @@ function formattableText(value) {
 export async function searchEditableLocations(input, { limit = 5 } = {}) {
   const raw = clean(input);
   if (!raw) return [];
-  const urlPlaceId = mapsPlaceIdFromUrl(raw);
-  const query = mapsQueryFromUrl(raw) || raw;
+  const linkInfo = googleMapsUrlInfo(raw);
+  if (linkInfo?.isShort) { const error = new Error("Google Maps short links cannot be safely expanded in browser-only mode"); error.code = "maps-short-link"; throw error; }
+  const urlPlaceId = clean(linkInfo?.placeId || mapsPlaceIdFromUrl(raw));
+  const query = clean(linkInfo?.query || mapsQueryFromUrl(raw) || (linkInfo ? "" : raw));
   const max = Math.max(1, Math.min(8, Number(limit) || 5));
   if (urlPlaceId) return geocoderEditableLocations(query, { placeId: urlPlaceId, limit: max });
+  if (linkInfo && !query && linkInfo.coords) {
+    const manual = await reverseGeocodeEditableLocation({ latitude: linkInfo.coords.lat, longitude: linkInfo.coords.lng, name: "Google Maps 定位" });
+    return [{ ...manual, source: "google-maps-link", resolved: true, addressHint: manual.address }];
+  }
+  if (linkInfo && !query) { const error = new Error("Google Maps link does not expose a resolvable place"); error.code = "maps-link-unresolved"; throw error; }
   try {
     const { AutocompleteSessionToken, AutocompleteSuggestion } = await loadGooglePlacesLibrary();
     const sessionToken = new AutocompleteSessionToken();
     const request = { input: query, sessionToken };
+    if (linkInfo?.coords) { request.locationBias = { center: linkInfo.coords, radius: 1800 }; request.origin = linkInfo.coords; }
     const language = clean(GOOGLE_MAPS_CONFIG?.language);
     if (language) request.language = language;
     const response = await AutocompleteSuggestion.fetchAutocompleteSuggestions(request);
