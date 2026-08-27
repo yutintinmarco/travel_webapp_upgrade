@@ -1,3 +1,19 @@
+# v7.9.9.3 · Regression Recovery + Persistent Edit Navigation
+
+This release deliberately rolls back the v7.9.9.2 shell extraction. The accepted monolithic CSS and classic runtime execution model are restored before applying only the necessary Edit Mode UI corrections. Transit, Map, the protected Day selector and Firebase data semantics are not redesigned.
+
+## Regression recovery
+
+* Restored document-owned CSS and one classic runtime so existing background asset paths and the accepted Day selector sticky/material timing return to the proven execution model.
+* Removed all `assets/shell/*` runtime dependencies from the Service Worker and release package.
+
+## Edit Mode UI
+
+* The accepted floating `取消` / `儲存` dock now sits above the normal Bottom Navigation instead of replacing it.
+* `行程`, `收藏` and `資料` may be previewed while the local Edit Session remains active; `支出` and `我的` stay protected until cross-section editing is formally implemented.
+* The iPhone native time picker remains the real input, but is now an invisible full-field overlay above an app-owned visible time field, preventing WebKit from sizing the edit sheet wider than the viewport.
+* Chronological draft sorting, Map sequence/Stop numbering and the save-once Firestore transaction are unchanged.
+
 # v7.9.9.2 · Low-Risk Shell Extraction + Edit UI Refinement
 
 This release deliberately avoids feature refactoring. It keeps the accepted v7.9.9.1 Edit Session, Transit, Map and protected Day bar behaviour while shrinking the monolithic `index.html` into connector-friendly shell assets.
