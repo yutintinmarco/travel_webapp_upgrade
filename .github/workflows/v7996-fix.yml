@@ -1,0 +1,48 @@
+name: v7.9.9.6 sticky Edit material and version consistency
+on:
+  push:
+    paths:
+      - '.github/workflows/v7996-fix.yml'
+permissions:
+  contents: write
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Patch v7.9.9.6
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('index.html'); s=p.read_text()
+          s=s.replace('7.9.9.4','7.9.9.6').replace('7.9.9.5','7.9.9.6')
+          old='''.trip-edit-sticky-add::before{content:"";position:absolute;z-index:-1;left:50%;top:0;width:100vw;height:100%;transform:translateX(-50%);background:transparent;border-bottom:.5px solid transparent;backdrop-filter:blur(0);-webkit-backdrop-filter:blur(0);transition:background .20s ease,border-color .20s ease,backdrop-filter .20s ease;pointer-events:none;}'''
+          new='''.trip-edit-sticky-add::before{content:"";position:absolute;z-index:-1;left:50%;top:0;width:100vw;height:100%;transform:translateX(-50%);background:var(--sticky-material);border-bottom:.5px solid var(--separator);backdrop-filter:blur(24px) saturate(155%);-webkit-backdrop-filter:blur(24px) saturate(155%);pointer-events:none;}'''
+          assert old in s
+          s=s.replace(old,new,1)
+          p.write_text(s)
+          for name in ['manifest.json','sw.js']:
+            q=Path(name)
+            q.write_text(q.read_text().replace('7.9.9.4','7.9.9.6').replace('7.9.9.5','7.9.9.6'))
+          q=Path('CHANGELOG.md')
+          entry='''# v7.9.9.6 · Sticky Edit Action Material + Version Consistency\n\n* Added the same full-width sticky material backing used by the Day selector behind the Edit Mode `新增地點` / `新增交通` capsule row, preventing itinerary content from showing through while it remains sticky.\n* Corrected all visible and asset build version references so the app consistently reports v7.9.9.6 instead of the mixed v7.9.9.4 / v7.9.9.5 state.\n* The protected Day selector itself, Transit, Map, Firebase schema, draft ordering and Save-once semantics are unchanged.\n\n'''
+          q.write_text(entry+q.read_text())
+          PY
+      - name: Validate
+        run: |
+          grep -q 'const APP_VERSION = "7.9.9.6"' index.html
+          grep -q '<strong>v7.9.9.6</strong>' index.html
+          grep -q 'background:var(--sticky-material)' index.html
+          ! grep -Eq '7\.9\.9\.(4|5)' index.html manifest.json sw.js
+          grep -q 'travel-shell-v7.9.9.6' sw.js
+          python -m json.tool manifest.json >/dev/null
+      - name: Commit release
+        run: |
+          git config user.name 'Travel WebApp Release Bot'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html manifest.json sw.js CHANGELOG.md
+          git commit -m 'v7.9.9.6 sticky Edit material and version consistency'
+          git push
