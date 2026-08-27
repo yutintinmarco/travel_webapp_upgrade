@@ -1,4 +1,4 @@
-name: v7.9.10.5 exact patch release
+name: v7.9.10.5 literal-anchor release
 
 on:
   push:
@@ -18,64 +18,130 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Apply exact audited patch
+
+      - name: Apply audited source changes
         run: |
           cp index.html /tmp/base-index.html
           python - <<'PY'
           from pathlib import Path
-          import base64,hashlib,subprocess,zlib
-          expected={'index.html':'a21831e41a0df76674d2bcb681877270656a5deb','manifest.json':'9f00fea970a5555e80e7ae67065b4e55d73ac378','sw.js':'ccab07113ca71196521c0e639e5a67978d77dd34','CHANGELOG.md':'b571058f3c14576161f03ce765da5a883134a01a','assets/js/trip-loader-service.js':'b8a0ebb54d951ff688d64b4c3ab82ec2c2f06635','functions/index.js':'f154eee2b1c8340737c8558ce38a478a10d87d44'}
-          for path,sha in expected.items():
-              got=subprocess.check_output(['git','rev-parse',f'HEAD:{path}'],text=True).strip()
-              if got!=sha: raise SystemExit(f'Baseline mismatch {path}: {got} != {sha}')
-          encoded='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'
-          patch=zlib.decompress(base64.b64decode(encoded))
-          if hashlib.sha256(patch).hexdigest()!='355b8c1dcf3eddc1287bc924fb6736a811f1db7ca210c2d1b72e45553327dff0': raise SystemExit('Patch digest mismatch')
-          Path('/tmp/v79105.patch').write_bytes(patch)
-          subprocess.check_call(['git','apply','-p1','--check','/tmp/v79105.patch'])
-          subprocess.check_call(['git','apply','-p1','/tmp/v79105.patch'])
-          out={'index.html':'eacdc62789c33a237a8ddb26339cfdeb772e74fd16877600e5c404633643a03c','manifest.json':'949aa0fd5e11a60feae96906679ff3dbcaa2f9760b05dfc6cf2a51d4a8b9f048','sw.js':'1df7b7f1d440f26672e8d2e9329410b1305af26280699f56ab19056d81703757','CHANGELOG.md':'8e05c87014e98f8be090cf5e7e2b897dab4b2abc69646078488cea6dbe1006b7','assets/js/trip-loader-service.js':'c9d27634eadcf7f6b4f9a0940f79354651fd140531ebb3ebfe6243d3a53ab8e7'}
-          for path,want in out.items():
-              got=hashlib.sha256(Path(path).read_bytes()).hexdigest()
-              if got!=want: raise SystemExit(f'Output mismatch {path}: {got} != {want}')
-          print('Exact v7.9.10.5 outputs OK')
+          import hashlib, subprocess
+
+          expected = {
+            'index.html': 'a21831e41a0df76674d2bcb681877270656a5deb',
+            'manifest.json': '9f00fea970a5555e80e7ae67065b4e55d73ac378',
+            'sw.js': 'ccab07113ca71196521c0e639e5a67978d77dd34',
+            'CHANGELOG.md': 'b571058f3c14576161f03ce765da5a883134a01a',
+            'assets/js/trip-loader-service.js': 'b8a0ebb54d951ff688d64b4c3ab82ec2c2f06635',
+            'functions/index.js': 'f154eee2b1c8340737c8558ce38a478a10d87d44'
+          }
+          for path, sha in expected.items():
+              got = subprocess.check_output(['git', 'rev-parse', f'HEAD:{path}'], text=True).strip()
+              if got != sha:
+                  raise SystemExit(f'Baseline mismatch {path}: {got} != {sha}')
+
+          loader = Path('assets/js/trip-loader-service.js')
+          s = loader.read_text()
+
+          old = '''  let hydratedRevision = seedRevision;\n  const seedDays = Array.isArray(seedData?.days) ? seedData.days : [];\n'''
+          new = '''  let hydratedRevision = seedRevision;\n  // v7.9.10.5 · Server-confirmation evidence for Day item listeners is\n  // revision-scoped. When the Trip root advances first, old itemServerReady\n  // flags must not certify a transient composite of the new revision with\n  // previous-revision item data.\n  let hydrationTargetRevision = 0;\n  const seedDays = Array.isArray(seedData?.days) ? seedData.days : [];\n'''
+          if s.count(old) != 1:
+              raise SystemExit('loader anchor 1 mismatch')
+          s = s.replace(old, new, 1)
+
+          old = '''    if (sourceMeta.get("trip")?.fromCache === false) {\n      hydratedRevision = Math.max(1, numberOr(state.tripDoc?.revision, hydratedRevision || 1));\n    }\n    return true;\n'''
+          new = '''    if (sourceMeta.get("trip")?.fromCache === false) {\n      hydratedRevision = Math.max(1, numberOr(state.tripDoc?.revision, hydratedRevision || 1));\n      hydrationTargetRevision = 0;\n    }\n    return true;\n'''
+          if s.count(old) != 1:
+              raise SystemExit('loader anchor 2 mismatch')
+          s = s.replace(old, new, 1)
+
+          old = '''      const serverRevision = Math.max(1, numberOr(next.revision, 1));\n      if (hydratedRevision && serverRevision !== hydratedRevision) {\n        fullHydrationNeeded = true;\n        reconcileItemListeners();\n      }\n'''
+          new = '''      const serverRevision = Math.max(1, numberOr(next.revision, 1));\n      if (hydratedRevision && serverRevision !== hydratedRevision) {\n        // A root revision can arrive before every Day/items listener reflects\n        // the same transaction. Invalidate old-revision hydration evidence once\n        // per target revision so assemblePortableTrip cannot label that mixed\n        // snapshot serverConfirmed and briefly resurrect a deleted item.\n        if (hydrationTargetRevision !== serverRevision) {\n          hydrationTargetRevision = serverRevision;\n          itemServerReady.clear();\n        }\n        fullHydrationNeeded = true;\n        reconcileItemListeners();\n      }\n'''
+          if s.count(old) != 1:
+              raise SystemExit('loader anchor 3 mismatch')
+          s = s.replace(old, new, 1)
+          loader.write_text(s)
+
+          for rel in ['index.html', 'manifest.json', 'sw.js']:
+              p = Path(rel)
+              t = p.read_text()
+              if '7.9.10.4' not in t:
+                  raise SystemExit(f'{rel} version anchor missing')
+              p.write_text(t.replace('7.9.10.4', '7.9.10.5'))
+
+          changelog = Path('CHANGELOG.md')
+          t = changelog.read_text()
+          if not t.startswith('# v7.9.10.4'):
+              raise SystemExit('Unexpected changelog head')
+          entry = '''# v7.9.10.5 · Phase 3E Post-Save Item Reconciliation\n\n* Fixed the brief deleted-item flash seen on real device after a successful Edit Mode Save. The Trip root revision and per-Day item listeners can settle independently; a new root revision could therefore be combined momentarily with previous-revision item data.\n* Day item server-confirmation evidence is now explicitly revision-scoped. When the Trip root advances, prior `itemServerReady` evidence is invalidated once for that target revision and every required Day must re-confirm before the assembled Trip can be marked fully server-confirmed.\n* This works with the v7.9.10.4 Local First regression guard: transient same-revision composites are ignored until their itinerary presentation matches the already accepted Edit result, preventing a deleted Stop/Transit from flashing back into the itinerary or Trip Map.\n* Day Bar, Trip Overview Map renderer, Transit Gallery/providers, Location Picker, Edit Save-once transaction, Firebase schema and Firebase Functions are unchanged.\n\n'''
+          changelog.write_text(entry + t)
+
+          outputs = {
+            'index.html': 'eacdc62789c33a237a8ddb26339cfdeb772e74fd16877600e5c404633643a03c',
+            'manifest.json': '949aa0fd5e11a60feae96906679ff3dbcaa2f9760b05dfc6cf2a51d4a8b9f048',
+            'sw.js': '1df7b7f1d440f26672e8d2e9329410b1305af26280699f56ab19056d81703757',
+            'CHANGELOG.md': '8e05c87014e98f8be090cf5e7e2b897dab4b2abc69646078488cea6dbe1006b7',
+            'assets/js/trip-loader-service.js': 'c9d27634eadcf7f6b4f9a0940f79354651fd140531ebb3ebfe6243d3a53ab8e7'
+          }
+          for path, wanted in outputs.items():
+              got = hashlib.sha256(Path(path).read_bytes()).hexdigest()
+              if got != wanted:
+                  raise SystemExit(f'Output mismatch {path}: {got} != {wanted}')
+          print('Exact v7.9.10.5 source hashes OK')
           PY
+
+      - name: Focused QA
+        run: |
           node --check sw.js
           node --check functions/index.js
           node --input-type=module --check < assets/js/trip-loader-service.js
           python -m json.tool manifest.json >/dev/null
           git diff --check
-      - name: Protected surface guard
-        run: |
           python - <<'PY'
           from pathlib import Path
-          import hashlib,re
-          s=Path('index.html').read_text();b=Path('/tmp/base-index.html').read_text()
-          def same(a,z):
-              a0=b.index(a);a1=b.index(z,a0);b0=s.index(a);b1=s.index(z,b0)
-              if hashlib.sha256(b[a0:a1].encode()).digest()!=hashlib.sha256(s[b0:b1].encode()).digest(): raise SystemExit(a)
-          same('async function renderTripMapScope(scope=tripMapScope){','async function openTripMap(){')
-          same('async function ensureTransitRoutePlanner(itemEl){','// Phase 3E · Edit Session foundation')
-          same('async function tripEditHandleMapPick(coords={}){','async function deleteTripEditItemFromSession(){')
-          for fn in ['refreshCollapseMetrics','updateCompactHeader','updateCollapsingChrome','scheduleCollapseUpdate']:
-              pat=re.compile(rf'function {fn}\([^)]*\)\{{.*?\n\}}',re.S);x,y=pat.search(b),pat.search(s)
-              if not x or not y or hashlib.sha256(x.group(0).encode()).digest()!=hashlib.sha256(y.group(0).encode()).digest(): raise SystemExit(fn)
-          blocks=re.findall(r'<script(?:\s[^>]*)?>(.*?)</script>',s,re.S|re.I)
-          for i,v in enumerate(blocks):
-              if v.strip(): Path(f'/tmp/i{i}.js').write_text(v)
-          print('Protected surfaces OK')
+          import hashlib, re
+          s = Path('index.html').read_text()
+          base = Path('/tmp/base-index.html').read_text()
+          assert 'const APP_VERSION = "7.9.10.5";' in s
+          assert 'travel-shell-v7.9.10.5' in Path('sw.js').read_text()
+
+          def unchanged(start, end):
+              a0 = base.index(start); a1 = base.index(end, a0)
+              b0 = s.index(start); b1 = s.index(end, b0)
+              if hashlib.sha256(base[a0:a1].encode()).digest() != hashlib.sha256(s[b0:b1].encode()).digest():
+                  raise SystemExit(f'Protected block changed: {start}')
+
+          unchanged('async function renderTripMapScope(scope=tripMapScope){', 'async function openTripMap(){')
+          unchanged('async function ensureTransitRoutePlanner(itemEl){', '// Phase 3E · Edit Session foundation')
+          unchanged('async function tripEditHandleMapPick(coords={}){', 'async function deleteTripEditItemFromSession(){')
+          for fn in ['refreshCollapseMetrics', 'updateCompactHeader', 'updateCollapsingChrome', 'scheduleCollapseUpdate']:
+              pat = re.compile(rf'function {fn}\([^)]*\)\{{.*?\n\}}', re.S)
+              a, b = pat.search(base), pat.search(s)
+              if not a or not b or hashlib.sha256(a.group(0).encode()).digest() != hashlib.sha256(b.group(0).encode()).digest():
+                  raise SystemExit(f'Protected function changed: {fn}')
+          blocks = re.findall(r'<script(?:\s[^>]*)?>(.*?)</script>', s, re.S | re.I)
+          for i, block in enumerate(blocks):
+              if block.strip():
+                  Path(f'/tmp/inline_{i}.js').write_text(block)
+          print('Focused protected-surface QA OK')
           PY
-          for f in /tmp/i*.js; do node --check "$f"; done
+          for f in /tmp/inline_*.js; do node --check "$f"; done
+
       - name: Build backup
         run: |
-          zip -qr /tmp/Travel_WebApp_v7.9.10.5_backup.zip . -x '.git/*' '.github/workflows/v79105-release.yml' '.github/workflows/v79105-final.yml' '.github/workflows/v79105-patch-release.yml'
+          zip -qr /tmp/Travel_WebApp_v7.9.10.5_backup.zip . \
+            -x '.git/*' \
+               '.github/workflows/v79105-release.yml' \
+               '.github/workflows/v79105-final.yml' \
+               '.github/workflows/v79105-patch-release.yml'
           unzip -t /tmp/Travel_WebApp_v7.9.10.5_backup.zip >/dev/null
+
       - uses: actions/upload-artifact@v4
         with:
           name: Travel_WebApp_v7.9.10.5_backup
           path: /tmp/Travel_WebApp_v7.9.10.5_backup.zip
           retention-days: 7
-      - name: Commit release
+
+      - name: Commit release and clean staging
         run: |
           git config user.name 'yutintinmarco'
           git config user.email 'marcoyu1121@gmail.com'
