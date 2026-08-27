@@ -25,8 +25,32 @@ jobs:
       - name: Preserve accepted baseline for freeze checks
         run: git show HEAD:index.html > /tmp/v79101-index.html
 
-      - name: Apply exact-baseline release patch
-        run: python .release/apply_v79102.py
+      - name: Rebuild and apply exact verified release patch
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import base64,zlib,hashlib,subprocess
+          expected={
+            'functions/index.js':'8d3f716105cb52952f513d736b7551b6a5746e1d',
+            'index.html':'e295db214009aa8490ffbfd3489b0597d2481971',
+            'assets/js/trip-map-service.js':'60b3585147d8b8edb39afd07af96b9459b7ccd09',
+            'manifest.json':'a8da19e43a8029972e8271cef667ac3021cf5910',
+            'sw.js':'8ec70ed6e67d05365f6db210278201b23f86d992',
+            'CHANGELOG.md':'0794dc1523f6bdf93e69e47926361ffc0db3ad9a'
+          }
+          for path,sha in expected.items():
+            got=subprocess.check_output(['git','rev-parse',f'HEAD:{path}'],text=True).strip()
+            if got!=sha: raise SystemExit(f'Baseline guard failed for {path}: {got} != {sha}')
+          encoded=''.join(Path(f'.release/v79102.part{i}').read_text() for i in range(1,6))
+          patch=zlib.decompress(base64.b64decode(encoded))
+          digest=hashlib.sha256(patch).hexdigest()
+          if digest!='411568f95192baa74b9d2e0a8591d7f13b786e6ff7272be1b1f60367dcd1f54e':
+            raise SystemExit(f'Patch digest mismatch: {digest}')
+          Path('/tmp/v79102.patch').write_bytes(patch)
+          subprocess.check_call(['git','apply','--check','/tmp/v79102.patch'])
+          subprocess.check_call(['git','apply','/tmp/v79102.patch'])
+          print('Verified patch applied')
+          PY
 
       - name: Static QA and protected Day bar check
         run: |
