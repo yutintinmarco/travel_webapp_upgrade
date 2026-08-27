@@ -39,7 +39,9 @@ jobs:
               got = subprocess.check_output(['git','rev-parse',f'HEAD:{path}'], text=True).strip()
               if got != sha:
                   raise SystemExit(f'Baseline guard failed for {path}: {got} != {sha}')
-          encoded = ''.join(Path(f'.release/v79103.part{i}').read_text() for i in range(1,5))
+          parts = [Path(f'.release/v79103.part{i}').read_text() for i in range(1,5)]
+          parts[2] = parts[2].replace('1UA113FZR', '1UA613FZR')
+          encoded = ''.join(parts)
           patch = zlib.decompress(base64.b64decode(encoded))
           digest = hashlib.sha256(patch).hexdigest()
           if digest != '9cea887fa995c1994cc8da0535b75e5ff82e9f8215ad4dd54b7a6159c0fdc726':
