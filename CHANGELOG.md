@@ -1,3 +1,9 @@
+# v7.9.9.6 · Sticky Edit Action Material + Version Consistency
+
+* Added the same full-width sticky material backing used by the Day selector behind the Edit Mode `新增地點` / `新增交通` capsule row, preventing itinerary content from showing through while it remains sticky.
+* Corrected all visible and asset build version references so the app consistently reports v7.9.9.6 instead of the mixed v7.9.9.4 / v7.9.9.5 state.
+* The protected Day selector itself, Transit, Map, Firebase schema, draft ordering and Save-once semantics are unchanged.
+
 # v7.9.9.5 · Sticky Edit Add Actions
 
 * In Edit Mode, `新增地點` and `新增交通` now use the same capsule visual grammar as the Day selector and remain sticky directly below the protected Day bar while the itinerary scrolls.

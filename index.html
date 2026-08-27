@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
   <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
   <link rel="dns-prefetch" href="https://api.open-meteo.com">
-  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?build=7.9.9.4">
+  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?build=7.9.9.6">
   <title id="page-title">行程</title>
   <script>
   // v7.7.5.0 · Performance Lite. Memory only: no Firebase reads/writes, no
@@ -1298,7 +1298,7 @@ html:not(.theme-light):not(.theme-dark) .itinerary-item.is-transit.is-booked {
   background: linear-gradient(180deg, rgba(39,39,47,0.88), rgba(27,61,39,0.70)) !important;
 }
 
-/* v7.9.9.4 · Transit route summary sits above the route map and restores the
+/* v7.9.9.6 · Transit route summary sits above the route map and restores the
    original tap-to-expand detail hierarchy. The main Trip Map remains unchanged. */
 .transit-route-planner{margin:0 0 10px;}
 .transit-route-planner-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:0 0 8px;padding:0 2px;}
@@ -3862,7 +3862,7 @@ body.expenses-view-active #app-version-note{
 #snacks-view::after,
 #info-view::after,
 #profile-view::after{
-  content:"v7.9.9.4" !important;
+  content:"v7.9.9.6" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3883,7 +3883,7 @@ body.expenses-view-active #app-version-note{
   display:none !important;
 }
 body.expenses-view-active .expenses-module .expenses-app::after{
-  content:"v7.9.9.4" !important;
+  content:"v7.9.9.6" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -4198,12 +4198,12 @@ html.theme-dark .trip-map-heading small,html.theme-dark .trip-map-state,html.the
 html.theme-dark .trip-map-line-toggle.active,html:not(.theme-light):not(.theme-dark) .trip-map-line-toggle.active{background:#f5f5f7;color:#111;border-color:#f5f5f7;box-shadow:none;}
 html.theme-dark .trip-map-place-copy strong,html:not(.theme-light):not(.theme-dark) .trip-map-place-copy strong{color:#fff;}
 
-/* v7.9.9.4 · Phase 3E Edit Mode entry, native time picker, and chronological draft ordering. Day bar CSS is intentionally untouched. */
+/* v7.9.9.6 · Phase 3E Edit Mode entry, native time picker, and chronological draft ordering. Day bar CSS is intentionally untouched. */
 .trip-edit-btn{display:none !important;}.trip-edit-session-actions[hidden]{display:none !important;}
 .trip-edit-day-actions{display:none!important;}
 .trip-edit-sticky-add{position:sticky;top:calc(var(--compact-header-h) + env(safe-area-inset-top,0px) + 49px);z-index:1190;width:100vw;box-sizing:border-box;margin:0 0 10px calc(50% - 50vw);padding:4px max(18px,calc((100vw - 480px)/2 + 18px)) 8px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;background:transparent;isolation:isolate;}
 .trip-edit-sticky-add[hidden]{display:none!important;}
-.trip-edit-sticky-add::before{content:"";position:absolute;z-index:-1;left:50%;top:0;width:100vw;height:100%;transform:translateX(-50%);background:transparent;border-bottom:.5px solid transparent;pointer-events:none;}
+.trip-edit-sticky-add::before{content:"";position:absolute;z-index:-1;left:50%;top:0;width:100vw;height:100%;transform:translateX(-50%);background:var(--sticky-material);border-bottom:.5px solid var(--separator);backdrop-filter:blur(24px) saturate(155%);-webkit-backdrop-filter:blur(24px) saturate(155%);pointer-events:none;}
 .trip-edit-sticky-add .day-tab{margin:0;min-width:0!important;width:100%;padding-left:2px!important;padding-right:2px!important;font-size:calc(10.5px * var(--font-scale));color:#1478d4;font-weight:650;}
 html.theme-dark .trip-edit-sticky-add .day-tab,html:not(.theme-light):not(.theme-dark) .trip-edit-sticky-add .day-tab{color:#69aef5;}
 
@@ -4236,7 +4236,7 @@ body.trip-edit-mode .container{padding-bottom:calc(var(--tabbar-h) + env(safe-ar
 </style>
             <link rel="apple-touch-icon" href="assets/icon/trip_icon.png">
   <link rel="icon" type="image/png" href="assets/icon/trip_icon.png">
-  <link rel="manifest" href="manifest.json?build=7.9.9.4">
+  <link rel="manifest" href="manifest.json?build=7.9.9.6">
   <meta name="apple-mobile-web-app-title" content="關嘉露西生日之旅">
   <!-- v7.7.1.2: expenses.css is 144KB and every rule is scoped under
        .expenses-module, yet it used to block the very first paint of the
@@ -4244,8 +4244,8 @@ body.trip-edit-mode .container{padding-bottom:calc(var(--tabbar-h) + env(safe-ar
        priority without blocking paint; ensureExpensesStylesheet() flips it to
        media="all" before the 支出 view is ever mounted, so the styling is
        byte-for-byte identical by the time anything expenses-related renders. -->
-  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?build=7.9.9.4" media="print">
-  <noscript><link rel="stylesheet" href="assets/css/expenses.css?build=7.9.9.4"></noscript>
+  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?build=7.9.9.6" media="print">
+  <noscript><link rel="stylesheet" href="assets/css/expenses.css?build=7.9.9.6"></noscript>
 </head>
 <body class="app-entry-gated app-entry-pending">
 <div class="bg-fixed"></div>
@@ -5044,7 +5044,7 @@ body.trip-edit-mode .container{padding-bottom:calc(var(--tabbar-h) + env(safe-ar
         <span class="profile-detail-spacer"></span>
       </div>
       <section class="profile-card" aria-label="App 資訊">
-        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.9.9.4</strong></div>
+        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.9.9.6</strong></div>
         <div class="profile-meta-row"><span>資料架構</span><strong>Phase 2G.2</strong></div>
         <div class="profile-meta-row"><span>主要資料來源</span><strong id="app-data-source-label">Firebase / 本機快取</strong></div>
       </section>
@@ -5303,7 +5303,7 @@ body.trip-edit-mode .container{padding-bottom:calc(var(--tabbar-h) + env(safe-ar
 </div>
 
 <script>
-const APP_VERSION = "7.9.9.5";
+const APP_VERSION = "7.9.9.6";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 let tripMapServicePromise=null,transitRouteServicePromise=null,tripEditServicePromise=null,tripMapController=null,tripMapScope="day",tripMapRenderEpoch=0,tripMapSelectedPoint=null;
