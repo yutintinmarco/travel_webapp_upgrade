@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
   <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
   <link rel="dns-prefetch" href="https://api.open-meteo.com">
-  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?build=7.9.9.8">
+  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?build=7.9.9.9">
   <title id="page-title">行程</title>
   <script>
   // v7.7.5.0 · Performance Lite. Memory only: no Firebase reads/writes, no
@@ -1299,7 +1299,7 @@ html:not(.theme-light):not(.theme-dark) .itinerary-item.is-transit.is-booked {
   background: linear-gradient(180deg, rgba(39,39,47,0.88), rgba(27,61,39,0.70)) !important;
 }
 
-/* v7.9.9.8 · Transit route summary sits above the route map and restores the
+/* v7.9.9.9 · Transit route summary sits above the route map and restores the
    original tap-to-expand detail hierarchy. The main Trip Map remains unchanged. */
 .transit-route-planner{margin:0 0 10px;}
 .transit-route-planner-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:0 0 8px;padding:0 2px;}
@@ -3863,7 +3863,7 @@ body.expenses-view-active #app-version-note{
 #snacks-view::after,
 #info-view::after,
 #profile-view::after{
-  content:"v7.9.9.8" !important;
+  content:"v7.9.9.9" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3884,7 +3884,7 @@ body.expenses-view-active #app-version-note{
   display:none !important;
 }
 body.expenses-view-active .expenses-module .expenses-app::after{
-  content:"v7.9.9.8" !important;
+  content:"v7.9.9.9" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -4199,7 +4199,7 @@ html.theme-dark .trip-map-heading small,html.theme-dark .trip-map-state,html.the
 html.theme-dark .trip-map-line-toggle.active,html:not(.theme-light):not(.theme-dark) .trip-map-line-toggle.active{background:#f5f5f7;color:#111;border-color:#f5f5f7;box-shadow:none;}
 html.theme-dark .trip-map-place-copy strong,html:not(.theme-light):not(.theme-dark) .trip-map-place-copy strong{color:#fff;}
 
-/* v7.9.9.8 · Phase 3E Edit Mode entry, native time picker, and chronological draft ordering. Day bar CSS is intentionally untouched. */
+/* v7.9.9.9 · Phase 3E Edit Mode entry, native time picker, and chronological draft ordering. Day bar CSS is intentionally untouched. */
 .trip-edit-btn{display:none !important;}.trip-edit-session-actions[hidden]{display:none !important;}
 .trip-edit-day-actions{display:none!important;}
 .trip-edit-sticky-add{position:sticky;top:calc(var(--compact-header-h) + env(safe-area-inset-top,0px) + 49px);z-index:1190;width:100vw;box-sizing:border-box;margin:0 0 10px calc(50% - 50vw);padding:4px max(18px,calc((100vw - 480px)/2 + 18px)) 8px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;background:transparent;isolation:isolate;}
@@ -4228,6 +4228,29 @@ body.trip-edit-mode .itinerary-edit-accessory{display:flex;}
 #trip-edit-item-time{position:absolute;inset:0;width:100%;height:100%;min-width:0;max-width:100%;margin:0;padding:0;border:0;opacity:0;appearance:none;-webkit-appearance:none;cursor:pointer;}
 .trip-edit-time-control:focus-within .trip-edit-time-display{border-color:rgba(10,132,255,.56);box-shadow:0 0 0 3px rgba(10,132,255,.10);}
 html.theme-dark .trip-edit-time-display,html:not(.theme-light):not(.theme-dark) .trip-edit-time-display{background:rgba(34,34,42,.88);border-color:rgba(255,255,255,.11);color:#f2f2f7;}
+
+/* v7.9.9.9 · Stop Location Picker. Uses the existing Google Maps JS geocoding layer only; no Places SDK dependency. */
+.trip-edit-location-field[hidden]{display:none!important;}
+.trip-edit-location-search{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:7px;align-items:stretch;}
+.trip-edit-location-search .trip-edit-input{min-width:0;}
+.trip-edit-location-search-btn{min-width:70px;border:0;border-radius:14px;padding:0 12px;background:rgba(10,132,255,.11);color:#1478d4;font:inherit;font-size:13px;font-weight:720;white-space:nowrap;}
+.trip-edit-location-search-btn:disabled{opacity:.48;}
+.trip-edit-location-status{font-size:10.5px;line-height:1.45;color:var(--label-secondary);padding:0 2px;}
+.trip-edit-location-results{display:grid;gap:6px;max-height:176px;overflow:auto;-webkit-overflow-scrolling:touch;}
+.trip-edit-location-results[hidden]{display:none!important;}
+.trip-edit-location-result{width:100%;min-width:0;border:1px solid rgba(118,118,128,.12);border-radius:13px;background:rgba(118,118,128,.055);color:var(--label-primary);padding:9px 10px;text-align:left;display:grid;gap:3px;font:inherit;}
+.trip-edit-location-result strong{font-size:12.5px;line-height:1.35;font-weight:700;}
+.trip-edit-location-result small{font-size:10px;line-height:1.35;color:var(--label-secondary);}
+.trip-edit-location-selected{border:1px solid rgba(10,132,255,.18);border-radius:14px;background:rgba(10,132,255,.06);padding:10px 11px;display:grid;gap:7px;}
+.trip-edit-location-selected[hidden]{display:none!important;}
+.trip-edit-location-selected strong{font-size:12.5px;line-height:1.35;}
+.trip-edit-location-selected small{font-size:10.5px;line-height:1.4;color:var(--label-secondary);word-break:break-word;}
+.trip-edit-location-actions{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+.trip-edit-location-action{min-height:35px;border:0;border-radius:11px;background:rgba(118,118,128,.09);color:#1478d4;font:inherit;font-size:11px;font-weight:700;}
+.trip-edit-item-modal{max-height:calc(100dvh - 72px);overflow-y:auto;-webkit-overflow-scrolling:touch;}
+html.theme-dark .trip-edit-location-search-btn,html:not(.theme-light):not(.theme-dark) .trip-edit-location-search-btn{background:rgba(10,132,255,.18);color:#69aef5;}
+html.theme-dark .trip-edit-location-result,html:not(.theme-light):not(.theme-dark) .trip-edit-location-result{background:rgba(118,118,128,.10);border-color:rgba(255,255,255,.10);}
+html.theme-dark .trip-edit-location-selected,html:not(.theme-light):not(.theme-dark) .trip-edit-location-selected{background:rgba(10,132,255,.11);border-color:rgba(10,132,255,.24);}
 .trip-edit-input:focus,.trip-edit-textarea:focus{border-color:rgba(10,132,255,.56);box-shadow:0 0 0 3px rgba(10,132,255,.10);}
 .trip-edit-local-note{margin:0 0 12px;color:var(--label-secondary);font-size:11px;line-height:1.45;}
 html.theme-dark .trip-edit-session-actions,html:not(.theme-light):not(.theme-dark) .trip-edit-session-actions{background:linear-gradient(180deg,rgba(42,42,48,.88),rgba(28,28,34,.78));border-color:rgba(255,255,255,.14);box-shadow:0 12px 32px rgba(0,0,0,.32),inset 0 1px 0 rgba(255,255,255,.08);}
@@ -4238,7 +4261,7 @@ body.trip-edit-mode .container{padding-bottom:calc(var(--tabbar-h) + env(safe-ar
 </style>
             <link rel="apple-touch-icon" href="assets/icon/trip_icon.png">
   <link rel="icon" type="image/png" href="assets/icon/trip_icon.png">
-  <link rel="manifest" href="manifest.json?build=7.9.9.8">
+  <link rel="manifest" href="manifest.json?build=7.9.9.9">
   <meta name="apple-mobile-web-app-title" content="關嘉露西生日之旅">
   <!-- v7.7.1.2: expenses.css is 144KB and every rule is scoped under
        .expenses-module, yet it used to block the very first paint of the
@@ -4246,8 +4269,8 @@ body.trip-edit-mode .container{padding-bottom:calc(var(--tabbar-h) + env(safe-ar
        priority without blocking paint; ensureExpensesStylesheet() flips it to
        media="all" before the 支出 view is ever mounted, so the styling is
        byte-for-byte identical by the time anything expenses-related renders. -->
-  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?build=7.9.9.8" media="print">
-  <noscript><link rel="stylesheet" href="assets/css/expenses.css?build=7.9.9.8"></noscript>
+  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?build=7.9.9.9" media="print">
+  <noscript><link rel="stylesheet" href="assets/css/expenses.css?build=7.9.9.9"></noscript>
 </head>
 <body class="app-entry-gated app-entry-pending">
 <div class="bg-fixed"></div>
@@ -5046,7 +5069,7 @@ body.trip-edit-mode .container{padding-bottom:calc(var(--tabbar-h) + env(safe-ar
         <span class="profile-detail-spacer"></span>
       </div>
       <section class="profile-card" aria-label="App 資訊">
-        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.9.9.8</strong></div>
+        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.9.9.9</strong></div>
         <div class="profile-meta-row"><span>資料架構</span><strong>Phase 2G.2</strong></div>
         <div class="profile-meta-row"><span>主要資料來源</span><strong id="app-data-source-label">Firebase / 本機快取</strong></div>
       </section>
@@ -5265,6 +5288,23 @@ body.trip-edit-mode .container{padding-bottom:calc(var(--tabbar-h) + env(safe-ar
     <div class="trip-edit-form">
       <label class="trip-edit-field"><span>時間</span><span class="trip-edit-time-control"><span class="trip-edit-time-display" id="trip-edit-item-time-display">--:--</span><input id="trip-edit-item-time" type="time" step="60" aria-label="時間"></span></label>
       <label class="trip-edit-field"><span>標題</span><input class="trip-edit-input" id="trip-edit-item-title-input" type="text" autocomplete="off" maxlength="120"></label>
+      <div class="trip-edit-field trip-edit-location-field" id="trip-edit-location-field">
+        <span>Google Maps 地點</span>
+        <div class="trip-edit-location-search">
+          <input class="trip-edit-input" id="trip-edit-location-query" type="text" autocomplete="off" maxlength="240" placeholder="輸入地點、地址或 Google Maps 連結">
+          <button class="trip-edit-location-search-btn" id="trip-edit-location-search-btn" type="button">搜尋</button>
+        </div>
+        <div class="trip-edit-location-status" id="trip-edit-location-status">可選；未設定定位嘅地點唔會加入 Map route sequence。</div>
+        <div class="trip-edit-location-results" id="trip-edit-location-results" hidden></div>
+        <div class="trip-edit-location-selected" id="trip-edit-location-selected" hidden>
+          <strong id="trip-edit-location-selected-title">已選定位</strong>
+          <small id="trip-edit-location-selected-address"></small>
+          <div class="trip-edit-location-actions">
+            <button class="trip-edit-location-action" id="trip-edit-location-open-maps" type="button">Google Maps</button>
+            <button class="trip-edit-location-action" id="trip-edit-location-clear" type="button">清除定位</button>
+          </div>
+        </div>
+      </div>
       <label class="trip-edit-field"><span>備註</span><textarea class="trip-edit-textarea" id="trip-edit-item-note" maxlength="500"></textarea></label>
     </div>
     <div class="modal-actions">
@@ -5305,7 +5345,7 @@ body.trip-edit-mode .container{padding-bottom:calc(var(--tabbar-h) + env(safe-ar
 </div>
 
 <script>
-const APP_VERSION = "7.9.9.8";
+const APP_VERSION = "7.9.9.9";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 let tripMapServicePromise=null,transitRouteServicePromise=null,tripEditServicePromise=null,tripMapController=null,tripMapScope="day",tripMapRenderEpoch=0,tripMapSelectedPoint=null;
@@ -7415,7 +7455,7 @@ async function ensureTransitRoutePlanner(itemEl){
 
 
 // Phase 3E · Edit Session foundation
-let tripEditSession=null,tripEditItemTarget=null,tripEditSaving=false;
+let tripEditSession=null,tripEditItemTarget=null,tripEditSaving=false,tripEditLocationSelection=null,tripEditLocationSearchEpoch=0;
 window.__tripEditPreviewData=null;
 function tripEditHasPermission(){
   const role=String(window.__appTripAccess?.role||"");
@@ -7457,6 +7497,81 @@ function tripEditSyncHeader(){
 function tripEditFindDomItem(dayId,itemId){
   return [...document.querySelectorAll(".itinerary-item")].find(node=>String(node.dataset.dayId||"")===String(dayId||"")&&String(node.dataset.itemId||"")===String(itemId||""))||null;
 }
+function tripEditBlankLocation(){return {name:"",placeId:"",latitude:null,longitude:null,address:"",mapsUrl:""};}
+function tripEditNormalizeLocation(value={}){
+  const lat=String(value?.latitude??value?.lat??"").trim(),lng=String(value?.longitude??value?.lng??value?.lon??"").trim();
+  return {
+    name:String(value?.name||"").trim(),
+    placeId:String(value?.placeId||"").trim(),
+    latitude:lat!==""&&Number.isFinite(Number(lat))?Number(lat):null,
+    longitude:lng!==""&&Number.isFinite(Number(lng))?Number(lng):null,
+    address:String(value?.address||"").trim(),
+    mapsUrl:String(value?.mapsUrl||value?.googleMapsUrl||"").trim()
+  };
+}
+function tripEditLocationHasValue(value={}){
+  const loc=tripEditNormalizeLocation(value);
+  return !!(loc.placeId||loc.address||loc.mapsUrl||(loc.latitude!=null&&loc.longitude!=null));
+}
+function tripEditTargetKind(){
+  if(String(tripEditItemTarget?.kind||"").trim())return String(tripEditItemTarget.kind).trim()==="transit"?"transit":"stop";
+  const el=tripEditFindDomItem(tripEditItemTarget?.dayId,tripEditItemTarget?.itemId);
+  return String(el?.dataset?.itemKind||"stop")==="transit"?"transit":"stop";
+}
+function tripEditResetLocationResults(){
+  const results=document.getElementById("trip-edit-location-results");if(results){results.innerHTML="";results.hidden=true;}
+}
+function tripEditRenderLocationSelection(value={}){
+  tripEditLocationSelection=tripEditNormalizeLocation(value);
+  const selected=document.getElementById("trip-edit-location-selected"),title=document.getElementById("trip-edit-location-selected-title"),address=document.getElementById("trip-edit-location-selected-address"),open=document.getElementById("trip-edit-location-open-maps"),status=document.getElementById("trip-edit-location-status");
+  const has=tripEditLocationHasValue(tripEditLocationSelection);
+  if(selected)selected.hidden=!has;
+  if(title)title.textContent=tripEditLocationSelection.name||"已選定位";
+  if(address){
+    const coords=tripEditLocationSelection.latitude!=null&&tripEditLocationSelection.longitude!=null?`${tripEditLocationSelection.latitude.toFixed(5)}, ${tripEditLocationSelection.longitude.toFixed(5)}`:"";
+    address.textContent=[tripEditLocationSelection.address,coords].filter(Boolean).join(" · ")||tripEditLocationSelection.mapsUrl||"";
+  }
+  if(open)open.disabled=!tripEditLocationSelection.mapsUrl;
+  if(status)status.textContent=has?"已選定位；撳「完成」只會先更新今次 Local Draft。":"可選；未設定定位嘅地點唔會加入 Map route sequence。";
+}
+function tripEditConfigureLocation(kind,value={}){
+  ++tripEditLocationSearchEpoch;tripEditResetLocationResults();
+  const field=document.getElementById("trip-edit-location-field"),query=document.getElementById("trip-edit-location-query"),button=document.getElementById("trip-edit-location-search-btn");
+  const isStop=String(kind||"")!=="transit";if(field)field.hidden=!isStop;if(button){button.disabled=false;button.textContent="搜尋";}
+  if(!isStop){tripEditLocationSelection=tripEditBlankLocation();if(query)query.value="";return;}
+  const loc=tripEditNormalizeLocation(value);tripEditRenderLocationSelection(loc);
+  if(query)query.value=loc.name||loc.address||"";
+}
+async function tripEditSearchLocation(){
+  if(!tripEditSession||tripEditTargetKind()!=="stop")return;
+  const queryEl=document.getElementById("trip-edit-location-query"),button=document.getElementById("trip-edit-location-search-btn"),status=document.getElementById("trip-edit-location-status"),results=document.getElementById("trip-edit-location-results");
+  const query=String(queryEl?.value||"").trim();if(!query){if(status)status.textContent="請先輸入地點、地址或 Google Maps 連結。";queryEl?.focus();return;}
+  const epoch=++tripEditLocationSearchEpoch;if(button){button.disabled=true;button.textContent="搜尋中…";}if(status)status.textContent="正在用 Google Maps 搜尋定位…";tripEditResetLocationResults();
+  try{
+    const service=await tripMapService(),rows=await service.searchEditableLocations(query,{limit:5});
+    if(epoch!==tripEditLocationSearchEpoch||!tripEditItemTarget)return;
+    if(!rows.length){if(status)status.textContent="搵唔到合適位置；可試更完整嘅地點名或地址。";return;}
+    if(results){
+      rows.forEach(row=>{
+        const btn=document.createElement("button");btn.type="button";btn.className="trip-edit-location-result";
+        const strong=document.createElement("strong");strong.textContent=row.address||row.name||query;
+        const small=document.createElement("small");small.textContent=`${Number(row.latitude).toFixed(5)}, ${Number(row.longitude).toFixed(5)}`;btn.append(strong,small);
+        btn.addEventListener("click",()=>{
+          if(epoch!==tripEditLocationSearchEpoch)return;
+          const titleInput=document.getElementById("trip-edit-item-title-input"),label=String(titleInput?.value||"").trim()||String(row.name||query).trim();
+          if(titleInput&&!String(titleInput.value||"").trim())titleInput.value=String(row.name||query).trim();
+          tripEditRenderLocationSelection({...row,name:label});tripEditResetLocationResults();if(queryEl)queryEl.value=String(row.address||row.name||query).trim();
+        });
+        results.appendChild(btn);
+      });
+      results.hidden=false;
+    }
+    if(status)status.textContent="請揀一個搜尋結果；揀完仍然只會留喺 Local Draft。";
+  }catch(error){
+    console.warn("Trip edit location search",error);if(epoch!==tripEditLocationSearchEpoch)return;
+    if(status)status.textContent=error?.code==="maps-not-configured"?"Google Maps 尚未設定，暫時未能搜尋定位。":"Google Maps 暫時未能搜尋定位，請稍後再試。";
+  }finally{if(epoch===tripEditLocationSearchEpoch&&button){button.disabled=false;button.textContent="搜尋";}}
+}
 function tripEditApplyDraftPreview(dayId,itemId,draft){
   const el=tripEditFindDomItem(dayId,itemId);if(!el||!draft)return;
   const time=el.querySelector(":scope > .itinerary-summary > .time"),title=el.querySelector(":scope > .itinerary-summary .content-title"),note=el.querySelector(":scope > .itinerary-summary .content-note");
@@ -7491,6 +7606,10 @@ function tripEditActiveDayId(){
 }
 document.getElementById("trip-edit-sticky-add-stop")?.addEventListener("click",event=>{event.preventDefault();event.stopImmediatePropagation();const dayId=tripEditActiveDayId();if(dayId)openTripEditAddModal(dayId,"stop");});
 document.getElementById("trip-edit-sticky-add-transit")?.addEventListener("click",event=>{event.preventDefault();event.stopImmediatePropagation();const dayId=tripEditActiveDayId();if(dayId)openTripEditAddModal(dayId,"transit");});
+document.getElementById("trip-edit-location-search-btn")?.addEventListener("click",()=>void tripEditSearchLocation());
+document.getElementById("trip-edit-location-query")?.addEventListener("keydown",event=>{if(event.key==="Enter"){event.preventDefault();void tripEditSearchLocation();}});
+document.getElementById("trip-edit-location-clear")?.addEventListener("click",()=>{tripEditRenderLocationSelection(tripEditBlankLocation());tripEditResetLocationResults();const query=document.getElementById("trip-edit-location-query");if(query)query.value="";});
+document.getElementById("trip-edit-location-open-maps")?.addEventListener("click",()=>{const url=String(tripEditLocationSelection?.mapsUrl||"").trim();if(url)window.open(url,"_blank","noopener");});
 
 async function beginTripEditSession(){
   if(tripEditSession||!tripEditCanStart())return;
@@ -7499,7 +7618,7 @@ async function beginTripEditSession(){
   catch(error){console.warn("Begin edit session",error);window.alert("暫時未能開始編輯，請稍後再試。");}
 }
 function closeTripEditItemModal(){
-  tripEditItemTarget=null;const backdrop=document.getElementById("trip-edit-item-backdrop");if(backdrop){backdrop.classList.remove("active");backdrop.setAttribute("aria-hidden","true");}
+  ++tripEditLocationSearchEpoch;tripEditItemTarget=null;tripEditLocationSelection=null;tripEditResetLocationResults();const backdrop=document.getElementById("trip-edit-item-backdrop");if(backdrop){backdrop.classList.remove("active");backdrop.setAttribute("aria-hidden","true");}
 }
 function openTripEditAddModal(dayId,kind){
   if(!tripEditSession)return;
@@ -7508,16 +7627,17 @@ function openTripEditAddModal(dayId,kind){
   const modalTitle=document.getElementById("trip-edit-item-title"),time=document.getElementById("trip-edit-item-time"),title=document.getElementById("trip-edit-item-title-input"),note=document.getElementById("trip-edit-item-note"),backdrop=document.getElementById("trip-edit-item-backdrop");
   if(modalTitle)modalTitle.textContent=normalized==="transit"?"新增交通":"新增地點";
   if(time)time.value="";const timeDisplay=document.getElementById("trip-edit-item-time-display");if(timeDisplay)timeDisplay.textContent="--:--";
-  if(title)title.value=normalized==="transit"?"Travel":"";if(note)note.value="";
+  if(title)title.value=normalized==="transit"?"Travel":"";if(note)note.value="";tripEditConfigureLocation(normalized,tripEditBlankLocation());
   if(backdrop){backdrop.classList.add("active");backdrop.setAttribute("aria-hidden","false");}
 }
 async function openTripEditItemModal(dayId,itemId){
   if(!tripEditSession)return;
   const service=await tripEditService(),draft=service.getTripEditDraftItem(tripEditSession,dayId,itemId);if(!draft)return;
-  tripEditItemTarget={mode:"edit",dayId:String(dayId||""),itemId:String(itemId||"")};
+  const itemKind=String(tripEditFindDomItem(dayId,itemId)?.dataset?.itemKind||"stop")==="transit"?"transit":"stop";
+  tripEditItemTarget={mode:"edit",dayId:String(dayId||""),itemId:String(itemId||""),kind:itemKind};
   const modalTitle=document.getElementById("trip-edit-item-title"),time=document.getElementById("trip-edit-item-time"),title=document.getElementById("trip-edit-item-title-input"),note=document.getElementById("trip-edit-item-note"),backdrop=document.getElementById("trip-edit-item-backdrop");
   if(modalTitle)modalTitle.textContent="編輯行程項目";
-  if(time)time.value=draft.time||"";const timeDisplay=document.getElementById("trip-edit-item-time-display");if(timeDisplay)timeDisplay.textContent=String(draft.time||"").trim()||"--:--";if(title)title.value=draft.title||"";if(note)note.value=draft.note||"";
+  if(time)time.value=draft.time||"";const timeDisplay=document.getElementById("trip-edit-item-time-display");if(timeDisplay)timeDisplay.textContent=String(draft.time||"").trim()||"--:--";if(title)title.value=draft.title||"";if(note)note.value=draft.note||"";tripEditConfigureLocation(itemKind,draft.location||tripEditBlankLocation());
   if(backdrop){backdrop.classList.add("active");backdrop.setAttribute("aria-hidden","false");}
 
 }
@@ -7525,8 +7645,9 @@ async function finishTripEditItemModal(){
   if(!tripEditSession||!tripEditItemTarget)return closeTripEditItemModal();
   const service=await tripEditService(),time=document.getElementById("trip-edit-item-time")?.value||"",title=document.getElementById("trip-edit-item-title-input")?.value||"",note=document.getElementById("trip-edit-item-note")?.value||"";
   if(!String(title).trim()){window.alert("標題唔可以留空。");return;}
-  if(tripEditItemTarget.mode==="add")service.addTripEditDraftItem(tripEditSession,tripEditItemTarget.dayId,tripEditItemTarget.kind,{time,title,note});
-  else service.updateTripEditDraftItem(tripEditSession,tripEditItemTarget.dayId,tripEditItemTarget.itemId,{time,title,note});
+  const patch={time,title,note},kind=tripEditTargetKind();if(kind==="stop")patch.location=tripEditNormalizeLocation(tripEditLocationSelection||tripEditBlankLocation());
+  if(tripEditItemTarget.mode==="add")service.addTripEditDraftItem(tripEditSession,tripEditItemTarget.dayId,tripEditItemTarget.kind,patch);
+  else service.updateTripEditDraftItem(tripEditSession,tripEditItemTarget.dayId,tripEditItemTarget.itemId,patch);
   window.__tripEditPreviewData=service.applyTripEditDraftToTrip(tripEditSession,window.tripData);
   closeTripEditItemModal();render(window.__tripEditPreviewData,{includeSnacks:false});
   if(tripMapOverlayOpen()&&tripMapScope==="day")void renderTripMapScope("day");

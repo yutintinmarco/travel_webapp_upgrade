@@ -172,6 +172,22 @@ function mapsQueryFromUrl(input) {
   } catch (_) {}
   return "";
 }
+function mapsPlaceIdFromUrl(input) {
+  const raw = clean(input);
+  if (!raw) return "";
+  try {
+    const url = new URL(raw, window.location.href);
+    return clean(url.searchParams.get("query_place_id") || url.searchParams.get("place_id"));
+  } catch (_) { return ""; }
+}
+function editableMapsUrl({ placeId = "", address = "", latitude = null, longitude = null, name = "" } = {}) {
+  const lat = finiteNumber(latitude), lng = finiteNumber(longitude);
+  const query = clean(address || name) || (lat != null && lng != null ? `${lat},${lng}` : "");
+  if (!query && !clean(placeId)) return "";
+  const params = new URLSearchParams({ api: "1", query: query || clean(placeId) });
+  if (clean(placeId)) params.set("query_place_id", clean(placeId));
+  return `https://www.google.com/maps/search/?${params.toString()}`;
+}
 function pointResolveSpec(record = {}) {
   const location = record?.location && typeof record.location === "object" ? record.location : {};
   const coords = coordsFromLocation(location) || coordsFromLocation(record);
@@ -350,6 +366,36 @@ async function geocodeOne(geocoder, point) {
     placeId: resolved.placeId,
     resolveSource: "geocoder"
   };
+}
+
+export async function searchEditableLocations(input, { limit = 5 } = {}) {
+  const raw = clean(input);
+  if (!raw) return [];
+  const { geocoding } = await loadGoogleMapsLibraries();
+  const geocoder = new geocoding.Geocoder();
+  const urlPlaceId = mapsPlaceIdFromUrl(raw);
+  const query = mapsQueryFromUrl(raw) || raw;
+  const response = urlPlaceId
+    ? await geocoder.geocode({ placeId: urlPlaceId })
+    : await geocoder.geocode({ address: query });
+  const max = Math.max(1, Math.min(8, Number(limit) || 5));
+  return (Array.isArray(response?.results) ? response.results : []).slice(0, max).map((result, index) => {
+    const latitude = finiteNumber(result?.geometry?.location?.lat?.());
+    const longitude = finiteNumber(result?.geometry?.location?.lng?.());
+    if (latitude == null || longitude == null) return null;
+    const placeId = clean(result?.place_id);
+    const address = clean(result?.formatted_address);
+    const name = clean(query) || address;
+    return {
+      resultIndex: index,
+      name,
+      placeId,
+      latitude,
+      longitude,
+      address,
+      mapsUrl: editableMapsUrl({ placeId, address, latitude, longitude, name })
+    };
+  }).filter(Boolean);
 }
 
 export async function resolveMapPoints(points, { concurrency = 3, onProgress = null } = {}) {

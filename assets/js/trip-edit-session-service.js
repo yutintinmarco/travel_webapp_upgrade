@@ -33,6 +33,44 @@ function normalizedKind(value) {
   const kind = clean(value).toLowerCase();
   return VALID_ITEM_KINDS.has(kind) ? kind : "stop";
 }
+function finiteCoordinate(value) {
+  if (clean(value) === "") return null;
+  const next = Number(value);
+  return Number.isFinite(next) ? next : null;
+}
+function normalizeDraftLocation(record = {}, fallbackTitle = "") {
+  const source = record?.location && typeof record.location === "object" ? record.location : record;
+  const latitude = finiteCoordinate(source?.latitude ?? source?.lat);
+  const longitude = finiteCoordinate(source?.longitude ?? source?.lng ?? source?.lon);
+  return {
+    name: clean(source?.name) || clean(fallbackTitle),
+    placeId: clean(source?.placeId),
+    latitude,
+    longitude,
+    address: clean(source?.address),
+    mapsUrl: clean(source?.mapsUrl || source?.googleMapsUrl)
+  };
+}
+function locationSnapshot(item = {}) {
+  const source = item?.location && typeof item.location === "object" ? item.location : {};
+  return normalizeDraftLocation({
+    name: source?.name || item?.placeName || item?.title,
+    placeId: source?.placeId || item?.googlePlaceId || item?.googleMapsPlaceId,
+    latitude: source?.latitude ?? source?.lat ?? item?.latitude ?? item?.lat,
+    longitude: source?.longitude ?? source?.lng ?? source?.lon ?? item?.longitude ?? item?.lng ?? item?.lon,
+    address: source?.address || item?.address,
+    mapsUrl: source?.mapsUrl || source?.googleMapsUrl || item?.maps || item?.mapsUrl || item?.googleMapsUrl
+  }, item?.title);
+}
+function sameLocation(a = {}, b = {}) {
+  const left = normalizeDraftLocation(a), right = normalizeDraftLocation(b);
+  return clean(left.name) === clean(right.name)
+    && clean(left.placeId) === clean(right.placeId)
+    && finiteCoordinate(left.latitude) === finiteCoordinate(right.latitude)
+    && finiteCoordinate(left.longitude) === finiteCoordinate(right.longitude)
+    && clean(left.address) === clean(right.address)
+    && clean(left.mapsUrl) === clean(right.mapsUrl);
+}
 function newDraftRecord(dayId, kindInput, fields = {}) {
   const kind = normalizedKind(kindInput);
   const title = clean(fields.title) || (kind === "transit" ? "Travel" : "新地點");
@@ -52,10 +90,10 @@ function newDraftRecord(dayId, kindInput, fields = {}) {
     popup: false,
     booked: false,
     detail: "",
-    maps: "",
+    maps: clean(fields.location?.mapsUrl),
     gallery: [],
     images: [],
-    location: { name: title, placeId: "", latitude: null, longitude: null, address: "", mapsUrl: "" }
+    location: normalizeDraftLocation(fields.location || {}, title)
   };
 }
 function draftToNewItem(draft = {}) {
@@ -73,17 +111,10 @@ function draftToNewItem(draft = {}) {
     popup: Boolean(draft.popup),
     booked: Boolean(draft.booked),
     detail: clean(draft.detail),
-    maps: clean(draft.maps),
+    maps: clean(draft.location?.mapsUrl || draft.maps),
     gallery: Array.isArray(draft.gallery) ? clonePlain(draft.gallery) : [],
     images: Array.isArray(draft.images) ? clonePlain(draft.images) : [],
-    location: {
-      name: clean(draft.location?.name) || title,
-      placeId: clean(draft.location?.placeId),
-      latitude: clean(draft.location?.latitude) !== "" && Number.isFinite(Number(draft.location?.latitude)) ? Number(draft.location.latitude) : null,
-      longitude: clean(draft.location?.longitude) !== "" && Number.isFinite(Number(draft.location?.longitude)) ? Number(draft.location.longitude) : null,
-      address: clean(draft.location?.address),
-      mapsUrl: clean(draft.location?.mapsUrl)
-    },
+    location: normalizeDraftLocation(draft.location || {}, title),
     sortOrder: normalizedSortOrder(draft.sortOrder)
   };
 }
@@ -92,17 +123,20 @@ function normalizedSortOrder(value, fallback = 999999) {
   return Number.isFinite(next) ? next : fallback;
 }
 function itemSnapshot(item = {}, fallbackSortOrder = 999999) {
+  const location = locationSnapshot(item);
   return {
     time: clean(item?.time),
     title: clean(item?.title),
     note: clean(item?.note),
-    sortOrder: normalizedSortOrder(item?.sortOrder, fallbackSortOrder)
+    sortOrder: normalizedSortOrder(item?.sortOrder, fallbackSortOrder),
+    location,
+    maps: clean(location.mapsUrl)
   };
 }
 function samePersisted(a = {}, b = {}) {
   return PERSISTED_ITEM_FIELDS.every(field => field === "sortOrder"
     ? normalizedSortOrder(a?.[field]) === normalizedSortOrder(b?.[field])
-    : clean(a?.[field]) === clean(b?.[field]));
+    : clean(a?.[field]) === clean(b?.[field])) && sameLocation(a?.location, b?.location);
 }
 function parseClockMinutes(value) {
   const match = clean(value).match(/^(\d{1,2}):(\d{2})$/);
@@ -207,8 +241,14 @@ export function updateTripEditDraftItem(session, dayIdInput, itemIdInput, patchI
   USER_EDITABLE_ITEM_FIELDS.forEach(field => {
     if (Object.prototype.hasOwnProperty.call(patchInput || {}, field)) next[field] = clean(patchInput[field]);
   });
+  if (Object.prototype.hasOwnProperty.call(patchInput || {}, "location")) {
+    next.location = normalizeDraftLocation(patchInput.location || {}, next.title);
+    next.maps = clean(next.location?.mapsUrl);
+  }
   if (next.isNew && Object.prototype.hasOwnProperty.call(patchInput || {}, "title")) {
-    next.location = { ...(next.location || {}), name: clean(next.title) };
+    const location = normalizeDraftLocation(next.location || {}, next.title);
+    if (!clean(location.name) || clean(location.name) === clean(current.title) || (!location.placeId && location.latitude == null && location.longitude == null && !location.address)) location.name = clean(next.title);
+    next.location = location;
   }
   session.draftItems.set(key, next);
   if (Object.prototype.hasOwnProperty.call(patchInput || {}, "time") && clean(patchInput.time) !== clean(current.time)) {
@@ -239,6 +279,10 @@ export function tripEditChanges(session) {
         patch[field] = clean(draft[field]);
       }
     });
+    if (!sameLocation(base.location, draft.location)) {
+      patch.location = normalizeDraftLocation(draft.location || {}, draft.title);
+      patch.maps = clean(patch.location.mapsUrl);
+    }
     changes.push({ operation: "update", dayId: draft.dayId, itemId: draft.itemId, patch });
   });
   return changes;
@@ -265,7 +309,9 @@ export function applyTripEditDraftToTrip(session, tripInput, { revision = null }
         time: clean(draft.time),
         title: clean(draft.title),
         note: clean(draft.note),
-        sortOrder: normalizedSortOrder(draft.sortOrder, index)
+        sortOrder: normalizedSortOrder(draft.sortOrder, index),
+        location: normalizeDraftLocation(draft.location || {}, draft.title),
+        maps: clean(draft.maps)
       };
     });
     session.draftItems.forEach(draft => {

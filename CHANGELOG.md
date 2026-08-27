@@ -1,3 +1,11 @@
+# v7.9.9.9 · Phase 3E Stop Location Picker
+
+* Added Stop-only Google Maps location search inside Edit Mode using the existing Google Maps JavaScript geocoding layer. No Places SDK or second map SDK is introduced.
+* Stop location changes stay in the Local Draft and participate in the existing single Save Firestore transaction. Transit items remain endpoint-driven by the previous and next Stop and do not expose a Location field.
+* New and edited Stop locations carry normalized name, placeId, coordinates, formatted address and Google Maps URL into the draft preview so the Trip Map and Transit endpoint resolution can use the same pending location before global Save.
+* Existing Stop locations are preserved when an Edit Session starts; clearing a Stop location clears the draft map reference and is persisted only on global Save.
+* Protected Day selector sticky/collapse functions are unchanged. Firebase Rules, Transit providers, map renderer policy, media and Phase 3B Map behaviour are unchanged.
+
 # v7.9.9.8 · Edit Add Action / Day Tab Event Isolation
 
 * Fixed an Edit Mode regression where tapping `新增地點` or `新增交通` also triggered the generic Day-tab click handler because the two add controls reuse the Day-tab visual class. That handler cleared every active Day and Day-content panel, making the itinerary appear blank until a real Day tab was tapped again.
