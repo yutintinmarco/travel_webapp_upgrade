@@ -1,3 +1,10 @@
+# v7.9.9.7 · Edit Chrome Regression Cleanup
+
+* Kept the trip lifecycle status chip, including `行程已完成`, on one line by reserving its natural width and letting the trip title wrap in the remaining header space.
+* Matched the protected Day selector behaviour for the Edit Mode add rail: the full-width material backing is transparent in normal document flow and appears only after the add row itself actually becomes sticky.
+* The Edit add rail owns an independent scroll-state helper. The accepted Day selector CSS and its protected `refreshCollapseMetrics`, `updateCompactHeader`, `updateCollapsingChrome`, and `scheduleCollapseUpdate` functions are unchanged.
+* Focused regression review confirmed no other file-level changes since v7.9.9.4 outside index / manifest / service worker / changelog; Transit, Map, Firebase schema, draft ordering, Save-once semantics, background handling, native time picker and bottom navigation remain unchanged.
+
 # v7.9.9.6 · Sticky Edit Action Material + Version Consistency
 
 * Added the same full-width sticky material backing used by the Day selector behind the Edit Mode `新增地點` / `新增交通` capsule row, preventing itinerary content from showing through while it remains sticky.
