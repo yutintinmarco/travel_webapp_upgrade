@@ -148,10 +148,28 @@ function parseClockMinutes(value) {
 function dayDraftRows(session, dayIdInput) {
   const dayId = clean(dayIdInput);
   const rows = [];
-  session?.draftItems?.forEach?.(draft => {
+  session?.draftItems?.forEach?.((draft, key) => {
+    if (session?.deletedItems?.has?.(key)) return;
     if (clean(draft?.dayId) === dayId) rows.push(draft);
   });
   return rows;
+}
+function stablePresentationOrder(rows = []) {
+  return rows.slice().sort((a, b) => {
+    const ao = normalizedSortOrder(a?.sortOrder), bo = normalizedSortOrder(b?.sortOrder);
+    if (ao !== bo) return ao - bo;
+    const at = parseClockMinutes(a?.time), bt = parseClockMinutes(b?.time);
+    if (at != null && bt != null && at !== bt) return at - bt;
+    return clean(a?.itemId).localeCompare(clean(b?.itemId));
+  });
+}
+function renumberPresentationSortOrders(session, dayIdInput) {
+  if (!session) return [];
+  const ordered = stablePresentationOrder(dayDraftRows(session, dayIdInput));
+  ordered.forEach((draft, index) => {
+    session.draftItems.set(itemKey(draft.dayId, draft.itemId), { ...draft, sortOrder: index });
+  });
+  return ordered.map(row => clonePlain(row));
 }
 function stableChronologicalOrder(rows = []) {
   return rows.slice().sort((a, b) => {
@@ -202,13 +220,16 @@ export function createTripEditSession(tripDataInput) {
     startedAt: Date.now(),
     dayIds: new Set((Array.isArray(trip.days) ? trip.days : []).map(day => clean(day?.dayId)).filter(Boolean)),
     baseItems,
-    draftItems
+    draftItems,
+    deletedItems: new Set()
   };
 }
 
 export function getTripEditDraftItem(session, dayIdInput, itemIdInput) {
   if (!session) return null;
-  const row = session.draftItems?.get?.(itemKey(dayIdInput, itemIdInput));
+  const key = itemKey(dayIdInput, itemIdInput);
+  if (session.deletedItems?.has?.(key)) return null;
+  const row = session.draftItems?.get?.(key);
   return row ? clonePlain(row) : null;
 }
 
@@ -261,10 +282,64 @@ export function reorderTripEditDraftDayByTime(session, dayIdInput) {
   return normalizeDaySortOrders(session, dayIdInput);
 }
 
+export function getTripEditDraftPosition(session, dayIdInput, itemIdInput) {
+  if (!session) return { index: -1, count: 0, canMoveUp: false, canMoveDown: false };
+  const dayId = clean(dayIdInput), itemId = clean(itemIdInput);
+  const ordered = stablePresentationOrder(dayDraftRows(session, dayId));
+  const index = ordered.findIndex(row => clean(row?.itemId) === itemId);
+  return {
+    index,
+    count: ordered.length,
+    canMoveUp: index > 0,
+    canMoveDown: index >= 0 && index < ordered.length - 1
+  };
+}
+
+export function moveTripEditDraftItemToIndex(session, dayIdInput, itemIdInput, targetIndexInput) {
+  if (!session) return null;
+  const dayId = clean(dayIdInput), itemId = clean(itemIdInput);
+  const key = itemKey(dayId, itemId);
+  if (session.deletedItems?.has?.(key) || !session.draftItems?.has?.(key)) {
+    const error = new Error("Itinerary item is not part of this edit session");
+    error.code = "edit-item-missing";
+    throw error;
+  }
+  const ordered = stablePresentationOrder(dayDraftRows(session, dayId));
+  const fromIndex = ordered.findIndex(row => clean(row?.itemId) === itemId);
+  if (fromIndex < 0) return null;
+  const targetIndex = Math.max(0, Math.min(ordered.length - 1, Math.trunc(Number(targetIndexInput) || 0)));
+  if (targetIndex !== fromIndex) {
+    const [moved] = ordered.splice(fromIndex, 1);
+    ordered.splice(targetIndex, 0, moved);
+  }
+  ordered.forEach((draft, index) => {
+    session.draftItems.set(itemKey(draft.dayId, draft.itemId), { ...draft, sortOrder: index });
+  });
+  return getTripEditDraftItem(session, dayId, itemId);
+}
+
+export function removeTripEditDraftItem(session, dayIdInput, itemIdInput) {
+  if (!session) return { removed: false, wasNew: false };
+  const dayId = clean(dayIdInput), itemId = clean(itemIdInput), key = itemKey(dayId, itemId);
+  const draft = session.draftItems?.get?.(key);
+  if (!draft || session.deletedItems?.has?.(key)) return { removed: false, wasNew: false };
+  const base = session.baseItems?.get?.(key);
+  const wasNew = Boolean(draft?.isNew && !base);
+  if (wasNew) session.draftItems.delete(key);
+  else session.deletedItems.add(key);
+  renumberPresentationSortOrders(session, dayId);
+  return { removed: true, wasNew };
+}
+
 export function tripEditChanges(session) {
   if (!session) return [];
   const changes = [];
+  session.deletedItems?.forEach?.(key => {
+    const base = session.baseItems.get(key);
+    if (base) changes.push({ operation: "delete", dayId: base.dayId, itemId: base.itemId });
+  });
   session.draftItems.forEach((draft, key) => {
+    if (session.deletedItems?.has?.(key)) return;
     const base = session.baseItems.get(key);
     if (!base) {
       if (draft?.isNew) changes.push({ operation: "create", dayId: draft.dayId, itemId: draft.itemId, item: draftToNewItem(draft) });
@@ -302,7 +377,9 @@ export function applyTripEditDraftToTrip(session, tripInput, { revision = null }
     if (!Array.isArray(day?.items)) day.items = [];
     const existingIds = new Set(day.items.map(item => clean(item?.itemId)).filter(Boolean));
     day.items = day.items.map((item, index) => {
-      const draft = draftMap.get(itemKey(dayId, item?.itemId));
+      const key = itemKey(dayId, item?.itemId);
+      if (session.deletedItems?.has?.(key)) return null;
+      const draft = draftMap.get(key);
       if (!draft) return clonePlain(item);
       return {
         ...clonePlain(item),
@@ -313,7 +390,7 @@ export function applyTripEditDraftToTrip(session, tripInput, { revision = null }
         location: normalizeDraftLocation(draft.location || {}, draft.title),
         maps: clean(draft.maps)
       };
-    });
+    }).filter(Boolean);
     session.draftItems.forEach(draft => {
       if (clean(draft?.dayId) !== dayId || !draft?.isNew || existingIds.has(clean(draft?.itemId))) return;
       day.items.push(draftToNewItem(draft));
@@ -393,6 +470,10 @@ export async function commitTripEditSession(session, { user: userInput = null } 
         });
         return;
       }
+      if (change.operation === "delete") {
+        tx.delete(ref);
+        return;
+      }
       tx.set(ref, {
         ...change.patch,
         updatedAt: serverTimestamp(),
@@ -417,6 +498,7 @@ export async function commitTripEditSession(session, { user: userInput = null } 
       revision: nextRevision,
       changedItems: changes.length,
       createdItems: changes.filter(change => change.operation === "create").length,
+      deletedItems: changes.filter(change => change.operation === "delete").length,
       changedItemIds: changes.slice(0, 80).map(change => change.itemId),
       createdAt: serverTimestamp()
     });

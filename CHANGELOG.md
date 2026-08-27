@@ -1,3 +1,11 @@
+# v7.9.10.3 · Phase 3E Same Day Reorder + Media Safe Item Delete
+
+* Added explicit same-day itinerary order controls inside the existing item editor. Reorder choices remain in the current Local Draft and are written only by the global Edit Mode Save; Trip Map sequence numbering follows the same draft sort order.
+* Time edits keep the accepted chronological behaviour. A deliberate manual order choice in the same item editor is applied after the field update; a later time change will again recalculate chronological order.
+* Added Local Draft deletion for Stop and Transit items. Existing items become Firestore delete operations only on the global Save; newly-added draft items are simply removed from the pending session. Global Cancel still restores the accepted Firebase baseline.
+* Deletion is deliberately blocked for itinerary items that still own managed Firebase media or have pending media jobs. This avoids creating detached Storage / media-registry orphans until media-aware item deletion is implemented as a separate lifecycle-safe increment.
+* Protected Day selector behaviour, Location Picker, Transit providers / Gallery, Trip Overview Map, Google Maps short-link resolver and Firebase Functions are unchanged.
+
 # v7.9.10.2 · Phase 3E Google Maps Short Link Resolver + Stationary Edit Action Dock
 
 * Google Maps mobile share links (`maps.app.goo.gl` / `goo.gl`) now resolve through a narrowly scoped authenticated Firebase callable before entering the existing Place identity pipeline. The resolver accepts only approved Google Maps hosts, validates every redirect hop, limits redirect count and execution time, and never acts as a general URL proxy.
