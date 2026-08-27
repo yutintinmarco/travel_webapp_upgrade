@@ -22,6 +22,87 @@ function clonePlain(value) {
   });
   return output;
 }
+function stripHtml(value) { return clean(value).replace(/<[^>]*>/g, "").replace(/\s+/g, " ").trim(); }
+function stableComparable(value) {
+  if (Array.isArray(value)) return value.map(stableComparable);
+  if (!value || typeof value !== "object") return value;
+  const out = {};
+  Object.keys(value).sort().forEach(key => {
+    if (typeof value[key] === "undefined") return;
+    out[key] = stableComparable(value[key]);
+  });
+  return out;
+}
+function stableJson(value) {
+  try { return JSON.stringify(stableComparable(value)); }
+  catch (_) { return ""; }
+}
+function validIsoDate(value) { return /^\d{4}-\d{2}-\d{2}$/.test(clean(value)); }
+function formatTripDateRange(startInput, endInput) {
+  const start = clean(startInput), end = clean(endInput);
+  if (!validIsoDate(start) || !validIsoDate(end)) return "";
+  const [sy, sm, sd] = start.split("-").map(Number), [ey, em, ed] = end.split("-").map(Number);
+  if (![sy, sm, sd, ey, em, ed].every(Number.isFinite)) return "";
+  return sy === ey
+    ? `${sm}月${sd}日 至 ${em}月${ed}日`
+    : `${sy}年${sm}月${sd}日 至 ${ey}年${em}月${ed}日`;
+}
+function inferTripStatus(startInput, endInput) {
+  const start = clean(startInput), end = clean(endInput);
+  if (!validIsoDate(start) || !validIsoDate(end)) return "";
+  const today = new Date();
+  const todayIso = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+  if (todayIso < start) return "upcoming";
+  if (todayIso > end) return "completed";
+  return "active";
+}
+function tripDetailsSnapshot(trip = {}) {
+  const meta = trip?.meta && typeof trip.meta === "object" ? trip.meta : {};
+  const startDate = clean(meta.tripStartIso), endDate = clean(meta.tripEndIso);
+  return {
+    titleSmall: clean(meta.titleSmall),
+    titleMain: clean(meta.titleMain),
+    startDate,
+    endDate,
+    dateRange: clean(meta.dateRange) || formatTripDateRange(startDate, endDate),
+    route: clean(meta.route),
+    status: clean(meta.status) || inferTripStatus(startDate, endDate)
+  };
+}
+function normalizeTripDetails(input = {}, fallback = {}) {
+  const next = {
+    titleSmall: clean(input.titleSmall ?? fallback.titleSmall),
+    titleMain: clean(input.titleMain ?? fallback.titleMain),
+    startDate: clean(input.startDate ?? fallback.startDate),
+    endDate: clean(input.endDate ?? fallback.endDate),
+    route: clean(input.route ?? fallback.route)
+  };
+  if (!next.titleMain) next.titleMain = next.titleSmall;
+  if (!next.titleSmall) next.titleSmall = stripHtml(next.titleMain);
+  next.dateRange = formatTripDateRange(next.startDate, next.endDate) || clean(input.dateRange ?? fallback.dateRange);
+  next.status = inferTripStatus(next.startDate, next.endDate) || clean(input.status ?? fallback.status);
+  return next;
+}
+function normalizeTravellersForEdit(input = {}) {
+  const source = input && typeof input === "object" && !Array.isArray(input) ? input : {};
+  const out = {};
+  Object.entries(source).forEach(([keyInput, cfgInput]) => {
+    const key = clean(keyInput);
+    if (!key) return;
+    const cfg = cfgInput && typeof cfgInput === "object" && !Array.isArray(cfgInput) ? clonePlain(cfgInput) : { label: clean(cfgInput) };
+    delete cfg.sortOrder;
+    cfg.label = clean(cfg.label) || key;
+    cfg.members = clean(cfg.members);
+    out[key] = cfg;
+  });
+  return out;
+}
+function normalizeFlightsForEdit(input = []) {
+  return Array.isArray(input) ? input.map(row => clonePlain(row || {})) : [];
+}
+function sameTripDetails(a = {}, b = {}) { return stableJson(normalizeTripDetails(a, a)) === stableJson(normalizeTripDetails(b, b)); }
+function sameTravellers(a = {}, b = {}) { return stableJson(normalizeTravellersForEdit(a)) === stableJson(normalizeTravellersForEdit(b)); }
+function sameFlights(a = [], b = []) { return stableJson(normalizeFlightsForEdit(a)) === stableJson(normalizeFlightsForEdit(b)); }
 function itemKey(dayId, itemId) { return `${clean(dayId)}|${clean(itemId)}`; }
 function makeItemId() {
   try {
@@ -218,6 +299,9 @@ export function createTripEditSession(tripDataInput) {
       draftItems.set(key, { dayId, itemId, ...clonePlain(snap) });
     });
   });
+  const baseTripDetails = tripDetailsSnapshot(trip);
+  const baseTravellers = normalizeTravellersForEdit(trip?.meta?.travellers || {});
+  const baseFlights = normalizeFlightsForEdit(trip?.meta?.flights || []);
   return {
     tripId,
     baseRevision,
@@ -225,8 +309,72 @@ export function createTripEditSession(tripDataInput) {
     dayIds: new Set((Array.isArray(trip.days) ? trip.days : []).map(day => clean(day?.dayId)).filter(Boolean)),
     baseItems,
     draftItems,
-    deletedItems: new Set()
+    deletedItems: new Set(),
+    baseTripDetails,
+    draftTripDetails: clonePlain(baseTripDetails),
+    baseTravellers,
+    draftTravellers: clonePlain(baseTravellers),
+    baseFlights,
+    draftFlights: clonePlain(baseFlights)
   };
+}
+
+export function getTripEditDraftTripDetails(session) {
+  return session?.draftTripDetails ? clonePlain(session.draftTripDetails) : null;
+}
+
+export function updateTripEditDraftTripDetails(session, patchInput = {}) {
+  if (!session) return null;
+  const current = session.draftTripDetails || session.baseTripDetails || {};
+  const next = normalizeTripDetails({ ...current, ...(patchInput || {}) }, current);
+  if (!clean(next.titleMain)) {
+    const error = new Error("Trip title is required");
+    error.code = "edit-trip-title-required";
+    throw error;
+  }
+  if (next.startDate && !validIsoDate(next.startDate)) { const error = new Error("Invalid start date"); error.code = "edit-trip-date-invalid"; throw error; }
+  if (next.endDate && !validIsoDate(next.endDate)) { const error = new Error("Invalid end date"); error.code = "edit-trip-date-invalid"; throw error; }
+  if (next.startDate && next.endDate && next.endDate < next.startDate) { const error = new Error("End date is before start date"); error.code = "edit-trip-date-order"; throw error; }
+  session.draftTripDetails = next;
+  return clonePlain(next);
+}
+
+export function getTripEditDraftTeamState(session) {
+  if (!session) return { travellers: {}, flights: [] };
+  return {
+    travellers: clonePlain(session.draftTravellers || {}),
+    flights: clonePlain(session.draftFlights || [])
+  };
+}
+
+export function replaceTripEditDraftTeamState(session, { travellers = {}, flights = [] } = {}) {
+  if (!session) return { travellers: {}, flights: [] };
+  const nextTravellers = normalizeTravellersForEdit(travellers);
+  const nextFlights = normalizeFlightsForEdit(flights);
+  const labels = new Set();
+  Object.entries(nextTravellers).forEach(([key, cfg]) => {
+    const labelKey = clean(cfg?.label).toLocaleLowerCase();
+    if (!labelKey) { const error = new Error("Team label is required"); error.code = "edit-team-label-required"; error.teamKey = key; throw error; }
+    if (labels.has(labelKey)) { const error = new Error("Team labels must be unique"); error.code = "edit-team-label-duplicate"; error.teamKey = key; throw error; }
+    labels.add(labelKey);
+  });
+  nextFlights.forEach(row => {
+    const key = clean(row?.teamKey);
+    if (key && key !== "all" && !nextTravellers[key]) {
+      const error = new Error("Flight still references a removed Team");
+      error.code = "edit-team-flight-reference";
+      error.teamKey = key;
+      throw error;
+    }
+  });
+  session.draftTravellers = nextTravellers;
+  session.draftFlights = nextFlights;
+  session.draftItems?.forEach?.((draft, key) => {
+    const who = clean(draft?.who) || "all";
+    if (who === "all" || nextTravellers[who]) return;
+    session.draftItems.set(key, { ...draft, who: "all" });
+  });
+  return getTripEditDraftTeamState(session);
 }
 
 export function getTripEditDraftItem(session, dayIdInput, itemIdInput) {
@@ -371,8 +519,23 @@ export function tripEditChanges(session) {
   return changes;
 }
 
+export function tripEditDomainChanges(session) {
+  if (!session) return { tripDetailsChanged: false, travellersChanged: false, flightsChanged: false, teamChangeCount: 0 };
+  const tripDetailsChanged = !sameTripDetails(session.baseTripDetails || {}, session.draftTripDetails || {});
+  const travellersChanged = !sameTravellers(session.baseTravellers || {}, session.draftTravellers || {});
+  const flightsChanged = !sameFlights(session.baseFlights || [], session.draftFlights || []);
+  const baseKeys = new Set(Object.keys(session.baseTravellers || {})), draftKeys = new Set(Object.keys(session.draftTravellers || {}));
+  let teamChangeCount = 0;
+  new Set([...baseKeys, ...draftKeys]).forEach(key => {
+    if (stableJson(session.baseTravellers?.[key] || null) !== stableJson(session.draftTravellers?.[key] || null)) teamChangeCount += 1;
+  });
+  return { tripDetailsChanged, travellersChanged, flightsChanged, teamChangeCount };
+}
+
 export function tripEditChangeCount(session) {
-  return tripEditChanges(session).length;
+  const itemCount = tripEditChanges(session).length;
+  const domain = tripEditDomainChanges(session);
+  return itemCount + (domain.tripDetailsChanged ? 1 : 0) + domain.teamChangeCount + (domain.flightsChanged && !domain.travellersChanged ? 1 : 0);
 }
 
 export function applyTripEditDraftToTrip(session, tripInput, { revision = null } = {}) {
@@ -411,6 +574,17 @@ export function applyTripEditDraftToTrip(session, tripInput, { revision = null }
       return clean(a?.itemId).localeCompare(clean(b?.itemId));
     });
   });
+  if (!trip.meta || typeof trip.meta !== "object") trip.meta = {};
+  const details = normalizeTripDetails(session.draftTripDetails || session.baseTripDetails || {}, tripDetailsSnapshot(trip));
+  trip.meta.titleSmall = details.titleSmall;
+  trip.meta.titleMain = details.titleMain;
+  trip.meta.tripStartIso = details.startDate;
+  trip.meta.tripEndIso = details.endDate;
+  trip.meta.dateRange = details.dateRange;
+  trip.meta.route = details.route;
+  trip.meta.status = details.status;
+  trip.meta.travellers = normalizeTravellersForEdit(session.draftTravellers || {});
+  trip.meta.flights = normalizeFlightsForEdit(session.draftFlights || []);
   if (revision != null) trip.revision = Math.max(1, Number(revision) || Number(trip.revision) || 1);
   return trip;
 }
@@ -428,14 +602,17 @@ export async function commitTripEditSession(session, { user: userInput = null } 
     throw error;
   }
   const changes = tripEditChanges(session);
-  if (!changes.length) return { revision: session.baseRevision, changedItems: 0, noChange: true };
-  if (changes.length > 450) {
+  const domainChanges = tripEditDomainChanges(session);
+  const anyDomainChange = domainChanges.tripDetailsChanged || domainChanges.travellersChanged || domainChanges.flightsChanged;
+  if (!changes.length && !anyDomainChange) return { revision: session.baseRevision, changedItems: 0, changedTrip: false, changedTeams: 0, noChange: true };
+  if (changes.length > 448) {
     const error = new Error("Too many itinerary changes in one edit session");
     error.code = "edit-too-large";
     throw error;
   }
 
   const tripRef = doc(db, "trips", session.tripId);
+  const generalRef = doc(db, "trips", session.tripId, "settings", "general");
   const memberRef = doc(db, "trips", session.tripId, "members", user.uid);
   const logRef = doc(collection(db, "trips", session.tripId, "activityLogs"));
 
@@ -490,29 +667,55 @@ export async function commitTripEditSession(session, { user: userInput = null } 
         updatedBy: user.uid
       }, { merge: true });
     });
-    tx.set(tripRef, {
+    const tripPatch = {
       revision: nextRevision,
       contentHash: "",
       contentHashVersion: 0,
       updatedAt: serverTimestamp(),
       updatedBy: user.uid
-    }, { merge: true });
+    };
+    if (domainChanges.tripDetailsChanged) {
+      const details = normalizeTripDetails(session.draftTripDetails || {}, session.baseTripDetails || {});
+      tripPatch.title = stripHtml(details.titleMain || details.titleSmall || session.tripId);
+      tripPatch.titleSmall = details.titleSmall;
+      tripPatch.titleHtml = details.titleMain;
+      tripPatch.dateRange = details.dateRange;
+      tripPatch.route = details.route;
+      tripPatch.startDate = details.startDate;
+      tripPatch.endDate = details.endDate;
+      tripPatch.status = details.status;
+    }
+    tx.set(tripRef, tripPatch, { merge: true });
+    if (domainChanges.travellersChanged || domainChanges.flightsChanged) {
+      tx.set(generalRef, {
+        travellers: normalizeTravellersForEdit(session.draftTravellers || {}),
+        flights: normalizeFlightsForEdit(session.draftFlights || []),
+        updatedAt: serverTimestamp(),
+        updatedBy: user.uid
+      }, { merge: true });
+    }
+    const summaryParts = [];
+    if (changes.length) summaryParts.push(`${changes.length} 個行程項目`);
+    if (domainChanges.tripDetailsChanged) summaryParts.push("旅程資料");
+    if (domainChanges.teamChangeCount || domainChanges.flightsChanged) summaryParts.push(`${domainChanges.teamChangeCount} 個 Team`);
     tx.set(logRef, {
       type: "trip.edit.save",
       actionType: "trip.edit.save",
       category: "itinerary",
-      title: "儲存行程編輯",
-      summary: `更新 ${changes.length} 個行程項目 · Revision ${nextRevision}`,
+      title: "儲存旅程編輯",
+      summary: `更新 ${summaryParts.join("、") || "旅程內容"} · Revision ${nextRevision}`,
       actorUid: user.uid,
       actorName: clean(user.displayName),
       revision: nextRevision,
       changedItems: changes.length,
+      changedTrip: domainChanges.tripDetailsChanged,
+      changedTeams: domainChanges.teamChangeCount,
       createdItems: changes.filter(change => change.operation === "create").length,
       deletedItems: changes.filter(change => change.operation === "delete").length,
       changedItemIds: changes.slice(0, 80).map(change => change.itemId),
       createdAt: serverTimestamp()
     });
 
-    return { revision: nextRevision, changedItems: changes.length, noChange: false };
+    return { revision: nextRevision, changedItems: changes.length, changedTrip: domainChanges.tripDetailsChanged, changedTeams: domainChanges.teamChangeCount, noChange: false };
   });
 }
