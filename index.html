@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
   <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
   <link rel="dns-prefetch" href="https://api.open-meteo.com">
-  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?release=7.9.16.1">
+  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?release=7.9.16.2">
   <title id="page-title">行程</title>
   <script>
   // v7.7.5.0 · Performance Lite. Memory only: no Firebase reads/writes, no
@@ -1979,7 +1979,7 @@ html.is-standalone .scroll-shell { min-height: 100dvh; }
   scrollbar-width: none;
 }
 .day-tabs.is-scrollable-days .day-tab { flex: 0 0 auto; min-width: 52px; }
-/* v7.9.16.1 · >7-day sticky backing must stay attached to the viewport,
+/* v7.9.16.2 · >7-day sticky backing must stay attached to the viewport,
    not to the horizontally scrolling content plane. Keep the proven Day pill
    geometry / spacing / sticky top unchanged; only the backing plane is fixed. */
 .day-tabs.is-scrollable-days.is-stuck {
@@ -3885,7 +3885,7 @@ body.expenses-view-active #app-version-note{
 #snacks-view::after,
 #info-view::after,
 #profile-view::after{
-  content:"v7.9.16.1" !important;
+  content:"v7.9.16.2" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3906,7 +3906,7 @@ body.expenses-view-active #app-version-note{
   display:none !important;
 }
 body.expenses-view-active .expenses-module .expenses-app::after{
-  content:"v7.9.16.1" !important;
+  content:"v7.9.16.2" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -4246,6 +4246,7 @@ body.trip-edit-mode .itinerary-edit-accessory{display:flex;}
 .trip-edit-item-modal .modal-title{font-size:17px;font-weight:780;margin:2px 0 12px;}
 .trip-edit-form{display:grid;gap:12px;min-width:0;}
 .trip-edit-field{display:grid;gap:6px;min-width:0;}
+.trip-edit-field[hidden]{display:none!important;}
 .trip-edit-field>span{font-size:11px;font-weight:720;color:var(--label-secondary);}
 .trip-edit-input,.trip-edit-textarea{width:100%;min-width:0;max-width:100%;box-sizing:border-box;border:1px solid rgba(15,23,42,.10);border-radius:14px;background:rgba(245,245,248,.88);color:var(--label-primary);font:inherit;font-size:15px;padding:11px 12px;outline:none;}
 .trip-edit-textarea{min-height:92px;resize:vertical;line-height:1.45;}
@@ -4385,7 +4386,7 @@ body.trip-edit-mode .container{padding-bottom:calc(var(--tabbar-h) + env(safe-ar
 .trip-edit-title-icon{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;flex:0 0 28px;border-radius:999px;background:rgba(255,255,255,.72);box-shadow:inset 0 0 0 1px rgba(0,0,0,.06);font-size:16px;line-height:1;}
 .trip-edit-heading-meta{margin:4px 0 0 37px;color:var(--label-secondary);font-size:10.5px;font-weight:600;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 html.theme-dark .trip-edit-title-icon,html:not(.theme-light):not(.theme-dark) .trip-edit-title-icon{background:rgba(255,255,255,.10);box-shadow:inset 0 0 0 1px rgba(255,255,255,.10);}
-/* v7.9.16.1 rebuild · presentation-only native Item/Transit editor.
+/* v7.9.16.2 rebuild · presentation-only native Item/Transit editor.
    Existing media and Google Maps controllers remain untouched. */
 .trip-edit-item-heading-row{flex:0 0 auto;padding:14px 18px 11px;border-bottom:1px solid rgba(60,60,67,.10);background:rgba(249,249,251,.96);backdrop-filter:blur(24px) saturate(160%);-webkit-backdrop-filter:blur(24px) saturate(160%);z-index:2;}
 .trip-edit-item-heading-row h3{display:flex;align-items:center;gap:9px;margin:0;font-size:calc(18px * var(--font-scale));line-height:1.25;font-weight:800;letter-spacing:-.2px;}
@@ -4408,13 +4409,26 @@ html.theme-dark .trip-edit-title-icon,html:not(.theme-light):not(.theme-dark) .t
 .trip-edit-day-option{text-align:left;min-width:0;}
 .trip-edit-day-option small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .trip-edit-icon-custom{margin-top:9px;}
-.trip-edit-order-field,.trip-edit-delete-block{margin:0;padding:13px;border-top:1px solid rgba(60,60,67,.09);}
-.trip-edit-delete-block{background:rgba(255,59,48,.035);}
+.trip-edit-order-field{margin:0;padding:13px;border-top:1px solid rgba(60,60,67,.09);}
+.trip-edit-delete-block{width:100%;min-width:0;max-width:100%;box-sizing:border-box;margin:0;padding:13px 0 0;border-top:1px solid rgba(60,60,67,.09);background:transparent;}
+.trip-edit-delete-btn{box-sizing:border-box;max-width:100%;}
+.trip-edit-saved-chip-grid{display:flex;flex-wrap:wrap;gap:7px;padding-top:2px;}
+.trip-edit-saved-chip{appearance:none;min-height:36px;border:1px solid rgba(60,60,67,.13);border-radius:999px;background:rgba(118,118,128,.065);color:var(--label-primary);font:inherit;font-size:11.5px;font-weight:700;padding:7px 11px;}
+.trip-edit-saved-chip.is-selected{border-color:rgba(10,132,255,.38);background:rgba(10,132,255,.11);color:#1478d4;}
+.trip-edit-saved-field-note{font-size:9.8px;line-height:1.4;color:var(--label-secondary);}
+.trip-edit-area-manager-list{display:grid;gap:8px;margin-top:10px;}
+.trip-edit-area-manager-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center;padding:10px 11px;border:1px solid rgba(118,118,128,.12);border-radius:14px;background:rgba(118,118,128,.05);}
+.trip-edit-area-manager-row strong{min-width:0;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.trip-edit-area-manager-delete{border:0;border-radius:10px;background:rgba(255,59,48,.09);color:#d72d24;font:inherit;font-size:11px;font-weight:760;padding:7px 9px;}
+.trip-edit-area-manager-add{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;margin-top:12px;}
+.trip-edit-area-manager-add button{border:0;border-radius:12px;background:rgba(10,132,255,.11);color:#1478d4;font:inherit;font-size:12px;font-weight:760;padding:0 14px;}
+html.theme-dark .trip-edit-saved-chip,html:not(.theme-light):not(.theme-dark) .trip-edit-saved-chip{background:rgba(255,255,255,.065);border-color:rgba(255,255,255,.11);color:#f5f5f7;}
+html.theme-dark .trip-edit-saved-chip.is-selected,html:not(.theme-light):not(.theme-dark) .trip-edit-saved-chip.is-selected{background:rgba(10,132,255,.20);border-color:rgba(90,170,255,.40);color:#d8ecff;}
 html.theme-dark .trip-edit-item-heading-row,html:not(.theme-light):not(.theme-dark) .trip-edit-item-heading-row{background:rgba(29,29,33,.96);border-bottom-color:rgba(255,255,255,.10);}
 html.theme-dark .trip-edit-native-group,html:not(.theme-light):not(.theme-dark) .trip-edit-native-group{background:rgba(255,255,255,.065);border-color:rgba(255,255,255,.10);box-shadow:none;}
 html.theme-dark .trip-edit-disclosure-panel,html:not(.theme-light):not(.theme-dark) .trip-edit-disclosure-panel{border-top-color:rgba(255,255,255,.09);}
 html.theme-dark .trip-edit-disclosure-value i,html:not(.theme-light):not(.theme-dark) .trip-edit-disclosure-value i{color:rgba(235,235,245,.38);}
-.saved-place-edit-toolbar{display:flex;gap:8px;align-items:center;justify-content:flex-end;margin:2px 0 10px;}
+.saved-place-edit-toolbar{display:flex;gap:8px;align-items:center;justify-content:flex-end;flex-wrap:wrap;margin:2px 0 10px;}
 .saved-place-edit-toolbar button,.snack-edit-action{appearance:none;border:0;border-radius:11px;background:color-mix(in srgb,var(--saved-accent) 12%,transparent);color:var(--saved-accent);font:inherit;font-size:12px;font-weight:760;padding:8px 11px;min-height:34px;}
 .snack-item{position:relative;}
 .snack-edit-tools{display:flex;gap:7px;justify-content:flex-end;margin-top:9px;padding-top:9px;border-top:1px solid rgba(118,118,128,.11);}
@@ -4424,7 +4438,7 @@ html.theme-dark .snack-edit-tools,html:not(.theme-light):not(.theme-dark) .snack
 </style>
             <link rel="apple-touch-icon" href="assets/icon/trip_icon.png">
   <link rel="icon" type="image/png" href="assets/icon/trip_icon.png">
-  <link rel="manifest" href="manifest.json?release=7.9.16.1">
+  <link rel="manifest" href="manifest.json?release=7.9.16.2">
   <meta name="apple-mobile-web-app-title" content="關嘉露西生日之旅">
   <!-- v7.7.1.2: expenses.css is 144KB and every rule is scoped under
        .expenses-module, yet it used to block the very first paint of the
@@ -4432,8 +4446,8 @@ html.theme-dark .snack-edit-tools,html:not(.theme-light):not(.theme-dark) .snack
        priority without blocking paint; ensureExpensesStylesheet() flips it to
        media="all" before the 支出 view is ever mounted, so the styling is
        byte-for-byte identical by the time anything expenses-related renders. -->
-  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?release=7.9.16.1" media="print">
-  <noscript><link rel="stylesheet" href="assets/css/expenses.css?release=7.9.16.1"></noscript>
+  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?release=7.9.16.2" media="print">
+  <noscript><link rel="stylesheet" href="assets/css/expenses.css?release=7.9.16.2"></noscript>
 </head>
 <body class="app-entry-gated app-entry-pending">
 <div class="bg-fixed"></div>
@@ -5245,7 +5259,7 @@ html.theme-dark .snack-edit-tools,html:not(.theme-light):not(.theme-dark) .snack
         <span class="profile-detail-spacer"></span>
       </div>
       <section class="profile-card" aria-label="App 資訊">
-        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.9.16.1</strong></div>
+        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.9.16.2</strong></div>
         <div class="profile-meta-row"><span>資料架構</span><strong>Phase 2G.2</strong></div>
         <div class="profile-meta-row"><span>主要資料來源</span><strong id="app-data-source-label">Firebase / 本機快取</strong></div>
       </section>
@@ -5492,6 +5506,24 @@ html.theme-dark .snack-edit-tools,html:not(.theme-light):not(.theme-dark) .snack
   </div>
 </div>
 
+<div class="modal-backdrop" id="trip-edit-area-backdrop" aria-hidden="true">
+  <div class="modal trip-edit-manage-modal" role="dialog" aria-modal="true" aria-labelledby="trip-edit-area-title">
+    <div class="trip-edit-manage-scroll">
+      <div class="modal-title" id="trip-edit-area-title">管理收藏地區</div>
+      <p class="trip-edit-local-note">呢度管理收藏頁頂部嘅地區 Filter。新增／刪除只會先留喺今次 Local Draft；刪除 Filter 唔會刪除任何收藏。</p>
+      <div class="trip-edit-area-manager-list" id="trip-edit-area-manager-list"></div>
+      <div class="trip-edit-area-manager-add">
+        <input class="trip-edit-input" id="trip-edit-area-manager-input" type="text" autocomplete="off" maxlength="40" placeholder="例如 東京">
+        <button id="trip-edit-area-manager-add" type="button">新增</button>
+      </div>
+    </div>
+    <div class="trip-edit-manage-actions">
+      <button class="is-cancel" id="trip-edit-area-cancel" type="button">取消</button>
+      <button class="is-done" id="trip-edit-area-done" type="button">完成</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-backdrop" id="trip-edit-item-backdrop" aria-hidden="true">
   <div class="modal trip-edit-item-modal" role="dialog" aria-modal="true" aria-labelledby="trip-edit-item-title">
     <div class="trip-edit-item-heading-row">
@@ -5539,17 +5571,21 @@ html.theme-dark .snack-edit-tools,html:not(.theme-light):not(.theme-dark) .snack
 
         <section class="trip-edit-native-group" id="trip-edit-saved-place-section" hidden>
           <div class="trip-edit-native-section-title">收藏分類</div>
-          <label class="trip-edit-field"><span>地區 / Region</span><input class="trip-edit-input" id="trip-edit-saved-area" type="text" autocomplete="off" maxlength="100" placeholder="例如 京都 · 祇園"></label>
-          <label class="trip-edit-field"><span>分類</span><input class="trip-edit-input" id="trip-edit-saved-category" type="text" autocomplete="off" maxlength="80" placeholder="例如 抹茶甜品 / 景點 / 購物"></label>
-          <label class="trip-edit-field"><span>優先度</span><select class="trip-edit-select" id="trip-edit-saved-priority"><option value="must">必去 / 必食</option><option value="route">順路</option><option value="backup">後備</option><option value="souvenir">手信</option></select></label>
-          <label class="trip-edit-field"><span>類型</span><select class="trip-edit-select" id="trip-edit-saved-meal-type"><option value="snack">小食 / 一般</option><option value="dessert">甜品</option><option value="meal">正餐</option><option value="drink">飲品</option><option value="souvenir">手信</option></select></label>
-          <label class="trip-edit-field"><span>建議日子</span><input class="trip-edit-input" id="trip-edit-saved-route-fit" type="text" autocomplete="off" maxlength="40" placeholder="例如 day3 / any"></label>
-          <label class="trip-edit-field"><span>價位</span><input class="trip-edit-input" id="trip-edit-saved-price" type="text" autocomplete="off" maxlength="30" placeholder="例如 ¥¥"></label>
+          <label class="trip-edit-field"><span>地區</span><select class="trip-edit-select" id="trip-edit-saved-area"></select><div class="trip-edit-saved-field-note">地區選項由收藏頁 Filter 管理；需要新增／刪除請用收藏頁嘅「管理地區」。</div></label>
+          <label class="trip-edit-field"><span>類型</span><select class="trip-edit-select" id="trip-edit-saved-meal-type"><option value="snack">小食</option><option value="dessert">甜品</option><option value="meal">正餐</option><option value="drink">飲品</option><option value="souvenir">手信</option></select></label>
+          <label class="trip-edit-field"><span>細分類</span><select class="trip-edit-select" id="trip-edit-saved-category"></select></label>
+          <label class="trip-edit-field"><span>優先度</span><select class="trip-edit-select" id="trip-edit-saved-priority"><option value="must">必食</option><option value="route">順路</option><option value="backup">後備晚餐</option><option value="souvenir">手信</option></select></label>
+          <label class="trip-edit-field"><span>建議日子</span><select class="trip-edit-select" id="trip-edit-saved-route-fit"></select></label>
+        </section>
+
+        <section class="trip-edit-native-group" id="trip-edit-saved-practical-section" hidden>
+          <div class="trip-edit-native-section-title">實用資訊</div>
+          <label class="trip-edit-field"><span>價位</span><select class="trip-edit-select" id="trip-edit-saved-price"><option value="">未設定</option><option value="¥">¥</option><option value="¥¥">¥¥</option><option value="¥¥¥">¥¥¥</option><option value="¥¥¥¥">¥¥¥¥</option></select></label>
           <label class="trip-edit-field"><span>排隊</span><select class="trip-edit-select" id="trip-edit-saved-queue"><option value="">未設定</option><option value="low">少排隊</option><option value="medium">可能要排</option><option value="high">熱門排隊</option></select></label>
-          <label class="trip-edit-field"><span>最佳時間</span><input class="trip-edit-input" id="trip-edit-saved-best-time" type="text" autocomplete="off" maxlength="100"></label>
+          <div class="trip-edit-field"><span>適合時間</span><div class="trip-edit-saved-chip-grid" id="trip-edit-saved-best-time-options"></div><input id="trip-edit-saved-best-time" type="hidden"></div>
+          <label class="trip-edit-field"><span>營業 / 開放時間</span><input class="trip-edit-input" id="trip-edit-saved-opening" type="text" autocomplete="off" maxlength="160" placeholder="例如 09:00–18:00"></label>
           <label class="trip-edit-field"><span>必試 / 重點</span><textarea class="trip-edit-textarea" id="trip-edit-saved-must" maxlength="500"></textarea></label>
-          <label class="trip-edit-field"><span>營業 / 開放時間</span><input class="trip-edit-input" id="trip-edit-saved-opening" type="text" autocomplete="off" maxlength="160"></label>
-          <label class="trip-edit-field"><span>標籤</span><input class="trip-edit-input" id="trip-edit-saved-tags" type="text" autocomplete="off" maxlength="300" placeholder="以逗號分隔，例如 京都, 抹茶, 甜品"></label>
+          <label class="trip-edit-field"><span>標籤</span><input class="trip-edit-input" id="trip-edit-saved-tags" type="text" autocomplete="off" maxlength="300" placeholder="以逗號分隔，例如 抹茶, 甜品"></label>
         </section>
 
         <section class="trip-edit-native-group" id="trip-edit-location-section">
@@ -5641,7 +5677,7 @@ html.theme-dark .snack-edit-tools,html:not(.theme-light):not(.theme-dark) .snack
 </div>
 
 <script>
-const APP_VERSION = "7.9.16.1";
+const APP_VERSION = "7.9.16.2";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 let tripMapServicePromise=null,transitRouteServicePromise=null,tripEditServicePromise=null,tripMapController=null,tripMapScope="day",tripMapRenderEpoch=0,tripMapSelectedPoint=null;
@@ -6226,7 +6262,12 @@ document.getElementById("trip-edit-item-icon-custom")?.addEventListener("input",
 document.getElementById("trip-edit-icon-disclosure")?.addEventListener("click",event=>tripEditSetDisclosure("icon",event.currentTarget?.getAttribute("aria-expanded")!=="true"));
 document.getElementById("trip-edit-day-disclosure")?.addEventListener("click",event=>tripEditSetDisclosure("day",event.currentTarget?.getAttribute("aria-expanded")!=="true"));
 document.getElementById("trip-edit-item-title-input")?.addEventListener("input",()=>tripEditRefreshEditorHeading());
-["trip-edit-saved-area","trip-edit-saved-category"].forEach(id=>document.getElementById(id)?.addEventListener("input",()=>tripEditRefreshEditorHeading()));
+document.getElementById("trip-edit-saved-category")?.addEventListener("change",event=>{if(event.target.value!=="__custom__")return;const value=String(window.prompt("新增細分類名稱")||"").trim();if(!value){event.target.value="";return;}const option=document.createElement("option");option.value=value;option.textContent=value;event.target.insertBefore(option,event.target.querySelector('option[value="__custom__"]'));event.target.value=value;tripEditRefreshEditorHeading();});
+["trip-edit-saved-area","trip-edit-saved-category"].forEach(id=>document.getElementById(id)?.addEventListener("change",()=>tripEditRefreshEditorHeading()));
+document.getElementById("trip-edit-area-manager-add")?.addEventListener("click",()=>void addTripEditAreaManagerValue());
+document.getElementById("trip-edit-area-manager-input")?.addEventListener("keydown",event=>{if(event.key==="Enter"){event.preventDefault();void addTripEditAreaManagerValue();}});
+document.getElementById("trip-edit-area-cancel")?.addEventListener("click",()=>void cancelTripEditAreaManager());
+document.getElementById("trip-edit-area-done")?.addEventListener("click",()=>void finishTripEditAreaManager());
 const tripEditTimeInput=document.getElementById("trip-edit-item-time");
 const syncTripEditTimeDisplay=()=>{const display=document.getElementById("trip-edit-item-time-display");if(display)display.textContent=String(tripEditTimeInput?.value||"").trim()||"--:--";tripEditRefreshEditorHeading();};
 tripEditTimeInput?.addEventListener("input",syncTripEditTimeDisplay);
@@ -7076,13 +7117,22 @@ function getQueueLabel(queueLevel) {
   const labels = { low: "少排隊", medium: "可能要排", high: "熱門排隊" };
   return labels[queueLevel] || "";
 }
-function getSnackAreaGroup(area){
-  const a=String(area||"");
-  if(a.includes("宇治"))return "宇治";
-  if(a.includes("京都"))return "京都";
-  if(a.includes("大阪"))return "大阪";
-  if(a.includes("神戶"))return "神戶";
-  return "其他";
+const LEGACY_SAVED_PLACE_AREAS=["京都","宇治","大阪","神戶"];
+function savedPlaceAreaRoot(area){
+  const value=String(area||"").trim();if(!value)return "";
+  const legacy=LEGACY_SAVED_PLACE_AREAS.find(label=>value.includes(label));if(legacy)return legacy;
+  return value.split(/[\s/·・]+/).map(v=>v.trim()).filter(Boolean)[0]||value;
+}
+function savedPlaceAreaFilterValues(dataInput=null){
+  const data=dataInput||activeTripPresentationData()||window.tripData||{},snacks=data?.snacks||{},configured=Array.isArray(snacks?.areaFilters)?snacks.areaFilters.map(v=>String(v||"").trim()).filter(Boolean):[];
+  if(configured.length)return [...new Set(configured)];
+  const items=Array.isArray(snacks)?snacks:(Array.isArray(snacks?.items)?snacks.items:[]),out=[];
+  items.forEach(item=>{const root=savedPlaceAreaRoot(item?.area);if(root&&!out.includes(root))out.push(root);});
+  return out.length?out:LEGACY_SAVED_PLACE_AREAS.slice();
+}
+function getSnackAreaGroup(area,dataInput=null){
+  const value=String(area||"").trim();if(!value)return "其他";
+  const filters=savedPlaceAreaFilterValues(dataInput);const matched=filters.find(label=>value===label||value.includes(label));return matched||"其他";
 }
 function normalizeSnackItem(item){
   return {
@@ -7101,7 +7151,7 @@ function renderSnacks(data){
   const listEl=document.getElementById("snacks-list");if(!listEl)return;
   const snacks=data.snacks||{};const snackItems=Array.isArray(snacks.items)?snacks.items:[];
   const snackTab=document.getElementById("bt-snacks");
-  const appendSavedEditToolbar=host=>{if(!tripEditSession||!host)return;const bar=document.createElement("div");bar.className="saved-place-edit-toolbar";const add=document.createElement("button");add.type="button";add.textContent="＋ 新增收藏";add.addEventListener("click",event=>{event.preventDefault();event.stopPropagation();void openTripEditSavedPlaceModal("");});bar.appendChild(add);host.appendChild(bar);};
+  const appendSavedEditToolbar=host=>{if(!tripEditSession||!host)return;const bar=document.createElement("div");bar.className="saved-place-edit-toolbar";const manage=document.createElement("button");manage.type="button";manage.textContent="管理地區";manage.addEventListener("click",event=>{event.preventDefault();event.stopPropagation();void openTripEditAreaManager();});const add=document.createElement("button");add.type="button";add.textContent="＋ 新增收藏";add.addEventListener("click",event=>{event.preventDefault();event.stopPropagation();void openTripEditSavedPlaceModal("");});bar.append(manage,add);host.appendChild(bar);};
   if(!snackItems.length){
     listEl.innerHTML="";appendSavedEditToolbar(listEl);
     const count=document.getElementById("snacks-count");if(count)count.textContent=tripEditSession?"暫時未有收藏":"";
@@ -7116,7 +7166,9 @@ function renderSnacks(data){
 
   const allItems=snackItems.map(normalizeSnackItem);
   const priorityOrder={must:0,route:1,backup:2,souvenir:3};
-  const areaFilters=["全部","京都","宇治","大阪","神戶"];
+  const configuredAreas=savedPlaceAreaFilterValues(data);
+  const hasOtherArea=allItems.some(item=>getSnackAreaGroup(item.area,data)==="其他");
+  const areaFilters=["全部",...configuredAreas,...(hasOtherArea?["其他"]:[])];
   const priorityFilters=[
     {key:"all",label:"全部"},
     {key:"must",label:"必食"},
@@ -7182,7 +7234,7 @@ function renderSnacks(data){
   function renderList(){
     buildShell();
     const filtered=sortSnacks(allItems.filter(s=>{
-      const areaOk=selectedArea==="全部"||getSnackAreaGroup(s.area)===selectedArea;
+      const areaOk=selectedArea==="全部"||getSnackAreaGroup(s.area,data)===selectedArea;
       const priorityOk=selectedPriority==="all"||s.priority===selectedPriority;
       const mealOk=selectedMeal==="all"||s.mealType===selectedMeal;
       return areaOk&&priorityOk&&mealOk;
@@ -8098,18 +8150,63 @@ async function tripEditImportMapsLink(){
   finally{if(button){button.disabled=false;button.textContent="匯入";}}
 }
 const TRIP_EDIT_ICON_PRESETS=["📍","🍵","🍜","🍽️","☕","🛍️","🏨","✈️","🚆","🚇","🚌","🚕","⛩️","🏯","🎢","🌸","🌊","📷"];
+const TRIP_EDIT_SAVED_TIME_OPTIONS=["早餐","上午","午餐","下午","下午茶","晚餐","宵夜","回程前"];
+let tripEditSavedOriginalArea="",tripEditSavedAreaManagerSnapshot=null;
+function tripEditSavedAreaChoices(currentArea=""){
+  const draftMeta=tripEditSession?.draftSavedPlaceMeta||{},configured=Array.isArray(draftMeta.areaFilters)?draftMeta.areaFilters.map(v=>String(v||"").trim()).filter(Boolean):[],base=configured.length?configured:savedPlaceAreaFilterValues(activeTripPresentationData());
+  const currentRoot=getSnackAreaGroup(currentArea,activeTripPresentationData()),out=[...base];if(currentRoot&&currentRoot!=="其他"&&!out.includes(currentRoot))out.push(currentRoot);return [...new Set(out.filter(Boolean))];
+}
+function tripEditFillSelect(id,rows,value,{includeBlank=false,blankLabel="未設定"}={}){
+  const select=document.getElementById(id);if(!select)return;const current=String(value??"").trim();select.innerHTML="";
+  if(includeBlank){const option=document.createElement("option");option.value="";option.textContent=blankLabel;select.appendChild(option);}
+  rows.forEach(row=>{const item=typeof row==="string"?{value:row,label:row}:row,option=document.createElement("option");option.value=String(item.value??"");option.textContent=String(item.label??item.value??"");select.appendChild(option);});
+  if(current&&!rows.some(row=>String((typeof row==="string"?row:row.value)??"")===current)){const option=document.createElement("option");option.value=current;option.textContent=current;select.appendChild(option);}select.value=current||select.options?.[0]?.value||"";
+}
+function tripEditSavedBestTimeTokens(raw=""){
+  const value=String(raw||"").trim();if(!value)return [];const found=[];const add=token=>{if(TRIP_EDIT_SAVED_TIME_OPTIONS.includes(token)&&!found.includes(token))found.push(token);};
+  value.split(/[\/、,，]+/).map(v=>v.trim()).filter(Boolean).forEach(part=>{if(TRIP_EDIT_SAVED_TIME_OPTIONS.includes(part))add(part);else if(part==="上午至下午"){add("上午");add("下午");}else if(part==="下午至晚上"){add("下午");add("晚餐");}else if(part==="晚餐後")add("晚餐");else if(part==="午餐至下午茶"){add("午餐");add("下午茶");}});return found;
+}
+function tripEditConfigureSavedBestTime(raw=""){
+  const hidden=document.getElementById("trip-edit-saved-best-time"),host=document.getElementById("trip-edit-saved-best-time-options"),selected=new Set(tripEditSavedBestTimeTokens(raw));if(!host)return;
+  const sync=()=>{if(hidden)hidden.value=TRIP_EDIT_SAVED_TIME_OPTIONS.filter(token=>selected.has(token)).join(" / ");};host.innerHTML="";
+  TRIP_EDIT_SAVED_TIME_OPTIONS.forEach(token=>{const button=document.createElement("button");button.type="button";button.className="trip-edit-saved-chip";button.textContent=token;button.classList.toggle("is-selected",selected.has(token));button.setAttribute("aria-pressed",selected.has(token)?"true":"false");button.addEventListener("click",()=>{selected.has(token)?selected.delete(token):selected.add(token);tripEditConfigureSavedBestTime(TRIP_EDIT_SAVED_TIME_OPTIONS.filter(v=>selected.has(v)).join(" / "));});host.appendChild(button);});sync();
+}
 function tripEditSetSavedPlaceFields(place={}){
   const set=(id,value)=>{const el=document.getElementById(id);if(el)el.value=String(value??"");};
-  set("trip-edit-saved-area",place.area);set("trip-edit-saved-category",place.category);set("trip-edit-saved-priority",place.priority||"route");set("trip-edit-saved-meal-type",place.mealType||"snack");set("trip-edit-saved-route-fit",place.routeFit||"any");set("trip-edit-saved-price",place.priceLevel);set("trip-edit-saved-queue",place.queueLevel);set("trip-edit-saved-best-time",place.bestTime);set("trip-edit-saved-must",place.must);set("trip-edit-saved-opening",place.opening);set("trip-edit-saved-tags",Array.isArray(place.tags)?place.tags.join(", "):"");
+  tripEditSavedOriginalArea=String(place.area||"").trim();const areaGroup=getSnackAreaGroup(tripEditSavedOriginalArea,activeTripPresentationData());tripEditFillSelect("trip-edit-saved-area",tripEditSavedAreaChoices(tripEditSavedOriginalArea),areaGroup==="其他"?tripEditSavedOriginalArea:areaGroup,{includeBlank:true,blankLabel:"未設定"});
+  const existingCategories=savedPlaceItemsFromTrip(activeTripPresentationData()).map(row=>String(row?.category||"").trim()).filter(Boolean),categoryRows=[...new Set(existingCategories)];tripEditFillSelect("trip-edit-saved-category",categoryRows,place.category||"",{includeBlank:true,blankLabel:"未設定"});const categorySelect=document.getElementById("trip-edit-saved-category");if(categorySelect){const custom=document.createElement("option");custom.value="__custom__";custom.textContent="＋ 新增細分類…";categorySelect.appendChild(custom);}
+  const days=Array.isArray(activeTripPresentationData()?.days)?activeTripPresentationData().days:[],dayRows=[{value:"any",label:"Any / 任何一日"},...days.map((day,index)=>({value:`day${index+1}`,label:`${String(day?.label||`Day ${index+1}`)}${tripEditCompactDayDate(day)?` · ${tripEditCompactDayDate(day)}`:""}`}))];tripEditFillSelect("trip-edit-saved-route-fit",dayRows,place.routeFit||"any");
+  set("trip-edit-saved-priority",place.priority||"route");set("trip-edit-saved-meal-type",place.mealType||"snack");set("trip-edit-saved-price",place.priceLevel);set("trip-edit-saved-queue",place.queueLevel);tripEditConfigureSavedBestTime(place.bestTime);set("trip-edit-saved-must",place.must);set("trip-edit-saved-opening",place.opening);set("trip-edit-saved-tags",Array.isArray(place.tags)?place.tags.join(", "):"");
 }
 function tripEditReadSavedPlaceFields(){
-  const val=id=>String(document.getElementById(id)?.value||"").trim();
-  return {area:val("trip-edit-saved-area"),category:val("trip-edit-saved-category"),priority:val("trip-edit-saved-priority")||"route",mealType:val("trip-edit-saved-meal-type")||"snack",routeFit:val("trip-edit-saved-route-fit")||"any",priceLevel:val("trip-edit-saved-price"),queueLevel:val("trip-edit-saved-queue"),bestTime:val("trip-edit-saved-best-time"),must:val("trip-edit-saved-must"),opening:val("trip-edit-saved-opening"),tags:val("trip-edit-saved-tags").split(/[,，]/).map(v=>v.trim()).filter(Boolean)};
+  const val=id=>String(document.getElementById(id)?.value||"").trim(),selectedArea=val("trip-edit-saved-area"),originalGroup=getSnackAreaGroup(tripEditSavedOriginalArea,activeTripPresentationData());
+  const area=tripEditSavedOriginalArea&&selectedArea===originalGroup?tripEditSavedOriginalArea:selectedArea;
+  return {area,category:val("trip-edit-saved-category"),priority:val("trip-edit-saved-priority")||"route",mealType:val("trip-edit-saved-meal-type")||"snack",routeFit:val("trip-edit-saved-route-fit")||"any",priceLevel:val("trip-edit-saved-price"),queueLevel:val("trip-edit-saved-queue"),bestTime:val("trip-edit-saved-best-time"),must:val("trip-edit-saved-must"),opening:val("trip-edit-saved-opening"),tags:val("trip-edit-saved-tags").split(/[,，]/).map(v=>v.trim()).filter(Boolean)};
 }
 function tripEditConfigureEditorMode(kindInput="stop"){
   const kind=String(kindInput||"stop"),saved=kind==="savedPlace";
-  const timeField=document.getElementById("trip-edit-time-field"),arrange=document.getElementById("trip-edit-arrangement-section"),savedSection=document.getElementById("trip-edit-saved-place-section");
-  if(timeField)timeField.hidden=saved;if(arrange)arrange.hidden=saved;if(savedSection)savedSection.hidden=!saved;
+  const timeField=document.getElementById("trip-edit-time-field"),arrange=document.getElementById("trip-edit-arrangement-section"),savedSection=document.getElementById("trip-edit-saved-place-section"),savedPractical=document.getElementById("trip-edit-saved-practical-section");
+  if(timeField)timeField.hidden=saved;if(arrange)arrange.hidden=saved;if(savedSection)savedSection.hidden=!saved;if(savedPractical)savedPractical.hidden=!saved;
+}
+async function tripEditCurrentSavedPlaceAreas(){
+  const service=await tripEditService(),meta=service.getTripEditDraftSavedPlaceMeta?.(tripEditSession)||{},configured=Array.isArray(meta.areaFilters)?meta.areaFilters.map(v=>String(v||"").trim()).filter(Boolean):[];return configured.length?configured:savedPlaceAreaFilterValues(activeTripPresentationData());
+}
+function tripEditRenderAreaManagerRows(areas=[]){
+  const host=document.getElementById("trip-edit-area-manager-list");if(!host)return;host.innerHTML="";
+  if(!areas.length){const empty=document.createElement("div");empty.className="trip-edit-local-note";empty.textContent="暫時未有地區 Filter。新增一個後就會出現喺收藏頁。";host.appendChild(empty);return;}
+  areas.forEach(label=>{const row=document.createElement("div");row.className="trip-edit-area-manager-row";const strong=document.createElement("strong");strong.textContent=label;const del=document.createElement("button");del.type="button";del.className="trip-edit-area-manager-delete";del.textContent="刪除";del.addEventListener("click",async()=>{const service=await tripEditService(),current=service.getTripEditDraftSavedPlaceMeta?.(tripEditSession)?.areaFilters||[],next=current.filter(v=>String(v)!==String(label));service.replaceTripEditDraftSavedPlaceAreaFilters?.(tripEditSession,next);tripEditRenderAreaManagerRows(next);});row.append(strong,del);host.appendChild(row);});
+}
+async function openTripEditAreaManager(){
+  if(!tripEditSession)return;const service=await tripEditService(),current=await tripEditCurrentSavedPlaceAreas();tripEditSavedAreaManagerSnapshot=(service.getTripEditDraftSavedPlaceMeta?.(tripEditSession)?.areaFilters||[]).slice();if(!tripEditSavedAreaManagerSnapshot.length)service.replaceTripEditDraftSavedPlaceAreaFilters?.(tripEditSession,current);tripEditRenderAreaManagerRows(current);const input=document.getElementById("trip-edit-area-manager-input");if(input)input.value="";tripEditOpenBackdrop("trip-edit-area-backdrop");
+}
+async function addTripEditAreaManagerValue(){
+  if(!tripEditSession)return;const input=document.getElementById("trip-edit-area-manager-input"),value=String(input?.value||"").trim();if(!value)return;const service=await tripEditService(),current=service.getTripEditDraftSavedPlaceMeta?.(tripEditSession)?.areaFilters||[];if(current.some(v=>String(v).toLocaleLowerCase()===value.toLocaleLowerCase())){window.alert("呢個地區已經存在。");return;}const next=[...current,value];service.replaceTripEditDraftSavedPlaceAreaFilters?.(tripEditSession,next);if(input)input.value="";tripEditRenderAreaManagerRows(next);
+}
+async function cancelTripEditAreaManager(){
+  if(tripEditSession&&tripEditSavedAreaManagerSnapshot){const service=await tripEditService();service.replaceTripEditDraftSavedPlaceAreaFilters?.(tripEditSession,tripEditSavedAreaManagerSnapshot);}tripEditSavedAreaManagerSnapshot=null;tripEditCloseBackdrop("trip-edit-area-backdrop");
+}
+async function finishTripEditAreaManager(){
+  if(!tripEditSession)return tripEditCloseBackdrop("trip-edit-area-backdrop");const service=await tripEditService();window.__tripEditPreviewData=service.applyTripEditDraftToTrip(tripEditSession,window.tripData);tripEditSavedAreaManagerSnapshot=null;tripEditCloseBackdrop("trip-edit-area-backdrop");renderSnacks(window.__tripEditPreviewData);if(tripMapOverlayOpen()&&tripMapScope==="saved")void renderTripMapScope("saved");
 }
 let tripEditBookedValue=false,tripEditTeamValue="all",tripEditIconValue="📍",tripEditDayValue="";
 function tripEditConfigureBooked(value=false){
@@ -8309,7 +8406,7 @@ async function cancelTripEditSession(){
     const mediaDelta=service.tripEditMediaDelta?.(tripEditSession)||{additions:[]};
     if(mediaDelta.additions?.length){try{const mediaService=await getTripMediaSyncService();await mediaService.discardTripEditItemMedia({descriptors:mediaDelta.additions});}catch(error){console.warn("Discard Edit Draft media",error);}}
     if(tripEditUploadedMediaForSession.length){try{const mediaService=await getTripMediaSyncService(),user=window.__appAuthUser||tripLibraryCurrentUser||null;await mediaService.cleanupTripEditRemovedMedia({tripId:dataTripId(window.tripData),descriptors:tripEditUploadedMediaForSession,user});}catch(error){console.warn("Discard uploaded Edit media",error);}}
-    tripEditUploadedMediaForSession=[];closeTripEditItemModal();closeTripEditTripDetailsModal();closeTripEditTeamModal();closeSavedItemSheet();tripEditSession=null;tripEditSaving=false;window.__tripEditPreviewData=null;tripEditSyncHeader();render(window.tripData);
+    tripEditUploadedMediaForSession=[];closeTripEditItemModal();closeTripEditTripDetailsModal();closeTripEditTeamModal();tripEditCloseBackdrop("trip-edit-area-backdrop");closeSavedItemSheet();tripEditSession=null;tripEditSaving=false;window.__tripEditPreviewData=null;tripEditSyncHeader();render(window.tripData);
   }catch(error){console.warn("Cancel edit session",error);}
 }
 

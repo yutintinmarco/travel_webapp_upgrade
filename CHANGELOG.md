@@ -1,3 +1,13 @@
+## v7.9.16.2 — Saved Places Editor UX correction
+
+- Reworked Saved Place metadata editing from free-text fields into structured selectors aligned with the existing Saved Places filters.
+- Region now uses managed filter choices; Edit Mode adds a separate **管理地區** sheet for adding/removing region filters inside the same Local Draft / Global Save transaction.
+- Priority, type, suggested day, price level and queue level now use explicit options; best-time uses selectable time-of-day chips.
+- Removed the itinerary clock-time control from Saved Place editing; Saved Places only keep suitability/time-of-day metadata.
+- Preserved detailed legacy area text when its region selection is unchanged, avoiding accidental data loss during ordinary edits.
+- Fixed Saved Place delete control overflow by keeping the destructive block within the native grouped-form content width.
+- Saved Place region filter metadata is persisted through `settings/general.savedPlacesMeta` and preserved by JSON import schema handling.
+
 ## v7.9.16.1 — Asset Coherency Hotfix
 - Fixed a Service Worker cache race where a newly deployed `index.html` could still load an older cached JS module until several refreshes.
 - Switched versioned app JS/CSS/module URLs from `?build=` / `?v=` to `?release=` so the previous Service Worker cannot collapse a new release onto an old cache key.
