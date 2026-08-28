@@ -27,12 +27,12 @@ function publish() {
 
 export function resolveTripId(tripData) {
   if (activeTripId) return activeTripId;
-  // Explicit deep links win, then remember the user's last selected Trip.
-  // The bundled trip.json is only a bootstrap fallback and must not override a
-  // previously selected Firebase Trip on the next launch.
-  activeTripId = fromQuery() || fromLocalStorage() || fromTripData(tripData) || "demo-trip-001";
-  try { localStorage.setItem(STORAGE_KEY, activeTripId); } catch (error) {}
-  publish();
+  // Explicit deep links win, then the remembered Firebase Trip, then an
+  // already-loaded canonical Trip. There is intentionally no bundled/demo Trip
+  // fallback in the Firebase-only runtime.
+  activeTripId = fromQuery() || fromLocalStorage() || fromTripData(tripData) || "";
+  try { if (activeTripId) localStorage.setItem(STORAGE_KEY, activeTripId); } catch (error) {}
+  if (activeTripId) publish();
   return activeTripId;
 }
 
