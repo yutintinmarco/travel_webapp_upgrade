@@ -1,5 +1,5 @@
 /* Travel WebApp Service Worker
- * v7.9.14.0 · Phase 3E Item Edit Finalization + Edit presentation fence; Layer 0–3 retained
+ * v7.9.15.0 · Firebase-only runtime + native Item/Transit editor; Layer 0–3 retained
  *
  * Keeps the v7.7.0.14 cold-start behaviour, while hardening installation:
  *  1. Critical shell assets are transactional. If any critical file cannot be
@@ -14,15 +14,14 @@
  *     explicit reload stays network-first.
  */
 
-const SW_VERSION = "travel-shell-v7.9.14.0";
+const SW_VERSION = "travel-shell-v7.9.15.0";
 const CORE_CACHE = SW_VERSION;
 
-// Required for a useful offline launch and remembered-Trip boot.
+// Required for a useful offline shell launch and remembered Firebase-Trip boot.
 const CRITICAL_ASSETS = [
   "./",
   "./index.html",
   "./manifest.json",
-  "./trip.json",
   "./assets/js/auth-service.js",
   "./assets/js/firebase-config.js",
   "./assets/js/firebase-service.js",
