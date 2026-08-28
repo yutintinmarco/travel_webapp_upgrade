@@ -1,3 +1,9 @@
+## v7.9.16.1 — Asset Coherency Hotfix
+- Fixed a Service Worker cache race where a newly deployed `index.html` could still load an older cached JS module until several refreshes.
+- Switched versioned app JS/CSS/module URLs from `?build=` / `?v=` to `?release=` so the previous Service Worker cannot collapse a new release onto an old cache key.
+- The new Service Worker now preserves version query parameters in cache keys for future releases.
+- No Saved Places, itinerary, media, Maps, Team, Transit, Firebase schema, rules, or runtime behaviour changed.
+
 # v7.9.16.0 — Phase 3E Saved Places Edit + Saved Place → Itinerary
 
 - Added Saved Places to the same revision-checked Global Edit Session used by Trip, Team and itinerary editing. Add, edit and delete operations now remain Local Draft changes until the single Global Save.

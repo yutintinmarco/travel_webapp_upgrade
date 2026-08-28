@@ -1,5 +1,5 @@
 /* Travel WebApp Service Worker
- * v7.9.16.0 · Phase 3E Saved Places Edit + Saved Place → Itinerary
+ * v7.9.16.1 · Phase 3E Saved Places Edit + Saved Place → Itinerary
  *
  * Keeps the v7.7.0.14 cold-start behaviour, while hardening installation:
  *  1. Critical shell assets are transactional. If any critical file cannot be
@@ -7,14 +7,14 @@
  *     cache remain in control.
  *  2. Optional assets are best-effort. One missing optional file cannot abort
  *     the whole precache.
- *  3. Cache canonicalisation removes the app's legacy "v" and current "build"
- *     cache-busters. Other query parameters are preserved so future semantic
- *     URLs cannot collide.
+ *  3. Versioned asset query parameters are preserved end-to-end so a page
+ *     controlled by the previous worker cannot satisfy a new release from an
+ *     older canonical cache entry.
  *  4. Normal navigation stays cache-first with background revalidation; an
  *     explicit reload stays network-first.
  */
 
-const SW_VERSION = "travel-shell-v7.9.16.0";
+const SW_VERSION = "travel-shell-v7.9.16.1";
 const CORE_CACHE = SW_VERSION;
 
 // Required for a useful offline launch and remembered-Trip boot.
@@ -81,16 +81,12 @@ const OPTIONAL_ASSETS = [
 
 const SHELL_KEY = new URL("./index.html", self.location).href;
 
-/* Most dynamic imports use ?build=<APP_VERSION>. The Local-First media sync
- * contract additionally uses ?release=<APP_VERSION>; `release` is deliberately
- * preserved here so a page controlled by the previous worker cannot satisfy a
- * newly deployed media module from its old canonical cache. Legacy `v` and
- * ordinary `build` keys remain canonicalised for the rest of the shell. */
+/* Release-tagged assets deliberately keep their query string in the cache key.
+ * This prevents an older controlling Service Worker from collapsing a newly
+ * deployed module URL onto an older cached canonical path. */
 function cacheKeyFor(request) {
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return request;
-  url.searchParams.delete("v");
-  url.searchParams.delete("build");
   url.hash = "";
   return url.href;
 }

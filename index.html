@@ -5,13 +5,13 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <!-- v7.7.1.2: the no-store cache meta tags were removed. Freshness is owned
-       by the Service Worker shell version plus the "?v=" cache busters, and the
+       by the Service Worker shell version plus release-tagged asset URLs, and the
        old tags only forced every cold start back onto the network. -->
   <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
   <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
   <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
   <link rel="dns-prefetch" href="https://api.open-meteo.com">
-  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?build=7.9.16.0">
+  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?release=7.9.16.1">
   <title id="page-title">行程</title>
   <script>
   // v7.7.5.0 · Performance Lite. Memory only: no Firebase reads/writes, no
@@ -1979,7 +1979,7 @@ html.is-standalone .scroll-shell { min-height: 100dvh; }
   scrollbar-width: none;
 }
 .day-tabs.is-scrollable-days .day-tab { flex: 0 0 auto; min-width: 52px; }
-/* v7.9.16.0 · >7-day sticky backing must stay attached to the viewport,
+/* v7.9.16.1 · >7-day sticky backing must stay attached to the viewport,
    not to the horizontally scrolling content plane. Keep the proven Day pill
    geometry / spacing / sticky top unchanged; only the backing plane is fixed. */
 .day-tabs.is-scrollable-days.is-stuck {
@@ -3885,7 +3885,7 @@ body.expenses-view-active #app-version-note{
 #snacks-view::after,
 #info-view::after,
 #profile-view::after{
-  content:"v7.9.16.0" !important;
+  content:"v7.9.16.1" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3906,7 +3906,7 @@ body.expenses-view-active #app-version-note{
   display:none !important;
 }
 body.expenses-view-active .expenses-module .expenses-app::after{
-  content:"v7.9.16.0" !important;
+  content:"v7.9.16.1" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -4385,7 +4385,7 @@ body.trip-edit-mode .container{padding-bottom:calc(var(--tabbar-h) + env(safe-ar
 .trip-edit-title-icon{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;flex:0 0 28px;border-radius:999px;background:rgba(255,255,255,.72);box-shadow:inset 0 0 0 1px rgba(0,0,0,.06);font-size:16px;line-height:1;}
 .trip-edit-heading-meta{margin:4px 0 0 37px;color:var(--label-secondary);font-size:10.5px;font-weight:600;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 html.theme-dark .trip-edit-title-icon,html:not(.theme-light):not(.theme-dark) .trip-edit-title-icon{background:rgba(255,255,255,.10);box-shadow:inset 0 0 0 1px rgba(255,255,255,.10);}
-/* v7.9.16.0 rebuild · presentation-only native Item/Transit editor.
+/* v7.9.16.1 rebuild · presentation-only native Item/Transit editor.
    Existing media and Google Maps controllers remain untouched. */
 .trip-edit-item-heading-row{flex:0 0 auto;padding:14px 18px 11px;border-bottom:1px solid rgba(60,60,67,.10);background:rgba(249,249,251,.96);backdrop-filter:blur(24px) saturate(160%);-webkit-backdrop-filter:blur(24px) saturate(160%);z-index:2;}
 .trip-edit-item-heading-row h3{display:flex;align-items:center;gap:9px;margin:0;font-size:calc(18px * var(--font-scale));line-height:1.25;font-weight:800;letter-spacing:-.2px;}
@@ -4424,7 +4424,7 @@ html.theme-dark .snack-edit-tools,html:not(.theme-light):not(.theme-dark) .snack
 </style>
             <link rel="apple-touch-icon" href="assets/icon/trip_icon.png">
   <link rel="icon" type="image/png" href="assets/icon/trip_icon.png">
-  <link rel="manifest" href="manifest.json?build=7.9.16.0">
+  <link rel="manifest" href="manifest.json?release=7.9.16.1">
   <meta name="apple-mobile-web-app-title" content="關嘉露西生日之旅">
   <!-- v7.7.1.2: expenses.css is 144KB and every rule is scoped under
        .expenses-module, yet it used to block the very first paint of the
@@ -4432,8 +4432,8 @@ html.theme-dark .snack-edit-tools,html:not(.theme-light):not(.theme-dark) .snack
        priority without blocking paint; ensureExpensesStylesheet() flips it to
        media="all" before the 支出 view is ever mounted, so the styling is
        byte-for-byte identical by the time anything expenses-related renders. -->
-  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?build=7.9.16.0" media="print">
-  <noscript><link rel="stylesheet" href="assets/css/expenses.css?build=7.9.16.0"></noscript>
+  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?release=7.9.16.1" media="print">
+  <noscript><link rel="stylesheet" href="assets/css/expenses.css?release=7.9.16.1"></noscript>
 </head>
 <body class="app-entry-gated app-entry-pending">
 <div class="bg-fixed"></div>
@@ -5245,7 +5245,7 @@ html.theme-dark .snack-edit-tools,html:not(.theme-light):not(.theme-dark) .snack
         <span class="profile-detail-spacer"></span>
       </div>
       <section class="profile-card" aria-label="App 資訊">
-        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.9.16.0</strong></div>
+        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.9.16.1</strong></div>
         <div class="profile-meta-row"><span>資料架構</span><strong>Phase 2G.2</strong></div>
         <div class="profile-meta-row"><span>主要資料來源</span><strong id="app-data-source-label">Firebase / 本機快取</strong></div>
       </section>
@@ -5641,7 +5641,7 @@ html.theme-dark .snack-edit-tools,html:not(.theme-light):not(.theme-dark) .snack
 </div>
 
 <script>
-const APP_VERSION = "7.9.16.0";
+const APP_VERSION = "7.9.16.1";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 let tripMapServicePromise=null,transitRouteServicePromise=null,tripEditServicePromise=null,tripMapController=null,tripMapScope="day",tripMapRenderEpoch=0,tripMapSelectedPoint=null;
@@ -5649,15 +5649,15 @@ let tripMapResolvedPoints=[],tripMapRegion="__all__",tripMapDayId="",tripMapTeam
 const TRIP_MAP_SEQUENCE_LINE_KEY="travel-map-sequence-line-v1";
 let tripMapSequenceLineEnabled=(()=>{try{return localStorage.getItem(TRIP_MAP_SEQUENCE_LINE_KEY)!=="0";}catch(_){return true;}})();
 function tripMapService(){
-  if(!tripMapServicePromise)tripMapServicePromise=import(`./assets/js/trip-map-service.js?build=${APP_VERSION}`);
+  if(!tripMapServicePromise)tripMapServicePromise=import(`./assets/js/trip-map-service.js?release=${APP_VERSION}`);
   return tripMapServicePromise;
 }
 function transitRouteService(){
-  if(!transitRouteServicePromise)transitRouteServicePromise=import(`./assets/js/transit-route-service.js?build=${APP_VERSION}`);
+  if(!transitRouteServicePromise)transitRouteServicePromise=import(`./assets/js/transit-route-service.js?release=${APP_VERSION}`);
   return transitRouteServicePromise;
 }
 function tripEditService(){
-  if(!tripEditServicePromise)tripEditServicePromise=import(`./assets/js/trip-edit-session-service.js?build=${APP_VERSION}`);
+  if(!tripEditServicePromise)tripEditServicePromise=import(`./assets/js/trip-edit-session-service.js?release=${APP_VERSION}`);
   return tripEditServicePromise;
 }
 function activeTripPresentationData(){return window.__tripEditPreviewData||window.tripData;}
@@ -5926,7 +5926,7 @@ function dateInTZ(tz){try{return new Intl.DateTimeFormat("en-CA",{timeZone:tz||"
 function normGallery(v){if(!v)return[];if(Array.isArray(v))return v;return[v];}
 let tripMediaIntegrationPromise=null;
 function getTripMediaIntegration(){
-  if(!tripMediaIntegrationPromise)tripMediaIntegrationPromise=import(`./assets/js/trip-media-integration-service.js?build=${APP_VERSION}`);
+  if(!tripMediaIntegrationPromise)tripMediaIntegrationPromise=import(`./assets/js/trip-media-integration-service.js?release=${APP_VERSION}`);
   return tripMediaIntegrationPromise;
 }
 function tripMediaDescriptorFallback(input){
@@ -6320,7 +6320,7 @@ applyTheme(currentTheme);
 
 let preferencesServicePromise=null;
 function getPreferencesService(){
-  if(!preferencesServicePromise) preferencesServicePromise=import(`./assets/js/user-preferences-service.js?build=${APP_VERSION}`);
+  if(!preferencesServicePromise) preferencesServicePromise=import(`./assets/js/user-preferences-service.js?release=${APP_VERSION}`);
   return preferencesServicePromise;
 }
 function syncPreferencesToCloud(){
@@ -8650,7 +8650,7 @@ async function bootstrapLegacyTripExpenses(){
   showExpensesLoading("正在準備支出資料","此舊旅程第一次開啟支出");
   legacyExpenseBootstrapPromise=(async()=>{
     const [{db},{doc,setDoc,serverTimestamp}]=await Promise.all([
-      import(`./assets/js/firebase-service.js?build=${APP_VERSION}`),
+      import(`./assets/js/firebase-service.js?release=${APP_VERSION}`),
       import("https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js")
     ]);
     await setDoc(doc(db,"trips",tripId,"settings","expenses"),{enabled:true,tripId,updatedAt:serverTimestamp()},{merge:true});
@@ -8708,7 +8708,7 @@ function initExpensesViewNow(){
   }
 
   if(!expensesModuleImportPromise){
-    expensesModuleImportPromise = import(`./assets/js/expenses-module.js?v=${EXPENSES_MODULE_VERSION}`);
+    expensesModuleImportPromise = import(`./assets/js/expenses-module.js?release=${EXPENSES_MODULE_VERSION}`);
   }
 
   expensesModuleImportPromise
@@ -8926,7 +8926,7 @@ function renderProfileAuthState(user){
 let appAdminServicePromise=null;
 let appAdminState={status:"idle",enabled:false,error:null};
 function getAppAdminService(){
-  if(!appAdminServicePromise)appAdminServicePromise=import(`./assets/js/app-admin-service.js?build=${APP_VERSION}`).catch(error=>{appAdminServicePromise=null;throw error;});
+  if(!appAdminServicePromise)appAdminServicePromise=import(`./assets/js/app-admin-service.js?release=${APP_VERSION}`).catch(error=>{appAdminServicePromise=null;throw error;});
   return appAdminServicePromise;
 }
 function renderAppAdminControls(){
@@ -9105,7 +9105,7 @@ function reconcileWarmRefreshIdentity(user){
 }
 
 function getAppEntryService(){
-  if(!appEntryServicePromise)appEntryServicePromise=import(`./assets/js/app-entry-service.js?build=${APP_VERSION}`).then(service=>{appEntryService=service;appEntryTargetInviteId=appEntryTargetInviteId||service.inviteIdFromLocation?.()||"";return service;});
+  if(!appEntryServicePromise)appEntryServicePromise=import(`./assets/js/app-entry-service.js?release=${APP_VERSION}`).then(service=>{appEntryService=service;appEntryTargetInviteId=appEntryTargetInviteId||service.inviteIdFromLocation?.()||"";return service;});
   return appEntryServicePromise;
 }
 function entryUserInitials(user){return profileInitials(user);}
@@ -9229,7 +9229,7 @@ async function refreshTripCreatorEntitlement(user,{force=false}={}){
   if(!user?.uid){appEntryCreatorState={status:"idle",enabled:false,error:null};await refreshAppEntryState();return;}
   appEntryCreatorState={status:"loading",enabled:false,error:null};
   try{
-    const service=await import(`./assets/js/trip-creator-service.js?build=${APP_VERSION}`);
+    const service=await import(`./assets/js/trip-creator-service.js?release=${APP_VERSION}`);
     const result=await service.getTripCreatorEntitlement(user,{force});
     appEntryCreatorState={status:"ready",enabled:result?.enabled===true,error:null};
   }catch(error){
@@ -9242,7 +9242,7 @@ window.addEventListener("app-trip-creator-changed",event=>{
   const changedUid=String(event.detail?.uid||"").trim();
   const currentUid=String(window.__appAuthUser?.uid||"").trim();
   if(changedUid&&changedUid===currentUid){
-    import(`./assets/js/trip-creator-service.js?build=${APP_VERSION}`).then(service=>service.clearTripCreatorEntitlementCache?.()).catch(()=>{});
+    import(`./assets/js/trip-creator-service.js?release=${APP_VERSION}`).then(service=>service.clearTripCreatorEntitlementCache?.()).catch(()=>{});
     refreshTripCreatorEntitlement(window.__appAuthUser,{force:true}).catch(()=>{});
   }
 });
@@ -9252,7 +9252,7 @@ async function backfillOwnerTripRegistries(state=tripLibraryCloudState){
   const ownerTrips=(state.trips||[]).filter(trip=>trip.role==="owner");if(!ownerTrips.length)return;
   appEntryRegistryBackfillBusy=true;
   try{
-    const service=await import(`./assets/js/trip-creator-service.js?build=${APP_VERSION}`);
+    const service=await import(`./assets/js/trip-creator-service.js?release=${APP_VERSION}`);
     for(const trip of ownerTrips){
       const key=`travel_trip_registry_v1:${tripLibraryCurrentUser.uid}:${trip.tripId}`;
       try{if(localStorage.getItem(key)==="1")continue;}catch(error){}
@@ -9479,7 +9479,7 @@ function initTripLibrarySafe(data){
   if(!tripBootDeferred&&!tripExpensesSignature)tripExpensesSignature=expensesRenderSignature(data);
   if(!tripBootDeferred&&!tripDestinationThemeSignature)tripDestinationThemeSignature=destinationThemeRenderSignature(data);
   if(!tripBootDeferred&&!tripTeamThemeSignature)tripTeamThemeSignature=teamThemeRenderSignature(data);
-  import(`./assets/js/trip-schema-service.js?build=${APP_VERSION}`)
+  import(`./assets/js/trip-schema-service.js?release=${APP_VERSION}`)
     .then(schemaService=>{
       tripLibrarySchemaService=schemaService;
       const summarySource=window.tripData&&dataTripId(window.tripData)?window.tripData:data;
@@ -9491,7 +9491,7 @@ function initTripLibrarySafe(data){
       renderTripLibrary();
 
       Promise.all([
-        import(`./assets/js/trip-catalog-service.js?build=${APP_VERSION}`),
+        import(`./assets/js/trip-catalog-service.js?release=${APP_VERSION}`),
         getGlobalAuthService()
       ]).then(([catalogService,authService])=>{
         tripLibraryCatalogService=catalogService;
@@ -9807,9 +9807,9 @@ function updateTripUrl(tripId){
 }
 async function getTripLoaderServices(){
   if(!tripLoaderInitPromise)tripLoaderInitPromise=Promise.all([
-    import(`./assets/js/trip-loader-service.js?build=${APP_VERSION}`),
-    import(`./assets/js/trip-session-service.js?build=${APP_VERSION}`),
-    import(`./assets/js/trip-access-service.js?build=${APP_VERSION}`)
+    import(`./assets/js/trip-loader-service.js?release=${APP_VERSION}`),
+    import(`./assets/js/trip-session-service.js?release=${APP_VERSION}`),
+    import(`./assets/js/trip-access-service.js?release=${APP_VERSION}`)
   ]).then(([loader,session,access])=>{tripLoaderService=loader;tripSessionService=session;tripAccessService=access;return{loader,session,access};});
   return tripLoaderInitPromise;
 }
@@ -9828,7 +9828,7 @@ window.addEventListener("expense-trip-access-refresh-request",async event=>{
   }catch(error){console.warn("Expense access refresh",error);}
 });
 async function getTripRenderCacheService(){
-  if(!tripRenderCacheServicePromise)tripRenderCacheServicePromise=import(`./assets/js/trip-render-cache-service.js?build=${APP_VERSION}`).then(service=>{tripRenderCacheService=service;return service;});
+  if(!tripRenderCacheServicePromise)tripRenderCacheServicePromise=import(`./assets/js/trip-render-cache-service.js?release=${APP_VERSION}`).then(service=>{tripRenderCacheService=service;return service;});
   return tripRenderCacheServicePromise;
 }
 function currentCacheUid(user=tripLibraryCurrentUser||window.__appAuthUser){return String(user?.uid||"").trim();}
@@ -10467,7 +10467,7 @@ async function handleTripGlobalLockAction(){
   tripGlobalLockBusy=true;renderTripGlobalLockState();
   const status=document.getElementById("trip-global-lock-status");if(status)status.textContent=locked?"正在解除旅程鎖定…":"正在鎖定旅程…";
   try{
-    const service=await import(`./assets/js/trip-lifecycle-service.js?build=${APP_VERSION}`);
+    const service=await import(`./assets/js/trip-lifecycle-service.js?release=${APP_VERSION}`);
     const result=await service.setGlobalTripLocked(tripId,!locked,{user:window.__appAuthUser});
     tripLibraryCloudState={...tripLibraryCloudState,trips:(tripLibraryCloudState.trips||[]).map(item=>String(item?.tripId||"")===tripId?{...item,globalLocked:result.globalLocked===true}:item)};
     if(window.tripData&&dataTripId(window.tripData)===tripId){window.tripData.meta={...(window.tripData.meta||{}),globalLocked:result.globalLocked===true};}
@@ -10510,7 +10510,7 @@ function renderTripPermanentDeleteState(){
   }
 }
 function getTripDeleteService(){
-  if(!tripDeleteServicePromise)tripDeleteServicePromise=import(`./assets/js/trip-delete-service.js?build=${APP_VERSION}`).catch(error=>{tripDeleteServicePromise=null;throw error;});
+  if(!tripDeleteServicePromise)tripDeleteServicePromise=import(`./assets/js/trip-delete-service.js?release=${APP_VERSION}`).catch(error=>{tripDeleteServicePromise=null;throw error;});
   return tripDeleteServicePromise;
 }
 function resetLocalExportPreparationForTrip(tripId){
@@ -10755,7 +10755,7 @@ function tripCloudOffline(){
 }
 function getTripImportService(){
   if(!tripImportServicePromise){
-    tripImportServicePromise=import(`./assets/js/trip-import-service.js?build=${APP_VERSION}`)
+    tripImportServicePromise=import(`./assets/js/trip-import-service.js?release=${APP_VERSION}`)
       .catch(error=>{tripImportServicePromise=null;throw error;});
   }
   return tripImportServicePromise;
@@ -10955,7 +10955,7 @@ async function prepareTripImportFile(file){
       renderTripImportPreview(mismatch);
       return;
     }
-    const schema=await import(`./assets/js/trip-schema-service.js?build=${APP_VERSION}`);
+    const schema=await import(`./assets/js/trip-schema-service.js?release=${APP_VERSION}`);
     const validation=schema.validatePortableTrip(raw);
     const localInspection={...validation,summary:schema.getTripSummary(validation.trip),mode:validation.valid?"checking":"invalid",canImport:false};
     tripImportState={raw,inspection:localInspection,done:false,busy:false};
@@ -11046,7 +11046,7 @@ tripImportConfirm?.addEventListener("click",async()=>{
       try{const {session}=await getTripLoaderServices();appEntryForcedTripId=String(result.tripId||"");session.setActiveTripId(result.tripId);updateTripUrl(result.tripId);bootstrapVerifiedFirebaseTrip(result.tripId,user).catch(error=>console.warn("Created Trip bootstrap",error));}catch(error){console.warn("Created Trip route",error);}
     }
     if(result.mode!=="unchanged"&&result.tripId===tripLibrarySummary?.tripId){
-      import(`./assets/js/trip-access-service.js?build=${APP_VERSION}`).then(service=>service.refreshTripAccess?.()).catch(()=>{});
+      import(`./assets/js/trip-access-service.js?release=${APP_VERSION}`).then(service=>service.refreshTripAccess?.()).catch(()=>{});
     }
     mode.innerHTML=result.mode==="unchanged"
       ? `<strong>沒有變更</strong><br>${escapeHtmlText(result.tripId)} 同 Firebase 現有內容相同，冇建立 Snapshot，亦冇寫入任何旅程資料。`
@@ -11081,7 +11081,7 @@ async function handleTripArchiveAction(button,archived){
   if(!window.confirm(confirmText))return;
   button.disabled=true;
   try{
-    const service=await import(`./assets/js/trip-preferences-service.js?build=${APP_VERSION}`);
+    const service=await import(`./assets/js/trip-preferences-service.js?release=${APP_VERSION}`);
     const user=window.__appAuthUser||await getImportFirebaseUser();
     await service.setPersonalTripArchived(tripId,archived,{user});
 
@@ -11383,14 +11383,14 @@ window.addEventListener("offline",refreshFullBackupSyncGate);
 window.addEventListener("expense-backup-freshness-change",refreshFullBackupSyncGate);
 function getTripBackupService(){
   if(!tripBackupServicePromise){
-    tripBackupServicePromise=import(`./assets/js/trip-backup-service.js?build=${APP_VERSION}`)
+    tripBackupServicePromise=import(`./assets/js/trip-backup-service.js?release=${APP_VERSION}`)
       .catch(error=>{tripBackupServicePromise=null;throw error;});
   }
   return tripBackupServicePromise;
 }
 function getTripBackupPackageService(){
   if(!tripBackupPackageServicePromise){
-    tripBackupPackageServicePromise=import(`./assets/js/trip-backup-package-service.js?build=${APP_VERSION}`)
+    tripBackupPackageServicePromise=import(`./assets/js/trip-backup-package-service.js?release=${APP_VERSION}`)
       .catch(error=>{tripBackupPackageServicePromise=null;throw error;});
   }
   return tripBackupPackageServicePromise;
@@ -11828,7 +11828,7 @@ async function openFullBackupRestoreAsNewOperation(selected,{alternateIdRequired
       if(alternateIdRequired){
         targetTripId=String(document.getElementById("full-backup-restore-new-trip-id")?.value||"").trim();
         if(!targetTripId||targetTripId.includes("/")||targetTripId.length>160){const error=new Error("Invalid target Trip ID");error.code="backup-trip-id-invalid";throw error;}
-        const creator=await import(`./assets/js/trip-creator-service.js?build=${APP_VERSION}`);
+        const creator=await import(`./assets/js/trip-creator-service.js?release=${APP_VERSION}`);
         const targetRegistry=await creator.inspectTripIdRegistry(targetTripId,{user});
         if(targetRegistry.reserved){const error=new Error("Target Trip ID is already reserved");error.code="backup-trip-id-used";throw error;}
         restoreRaw=await backupService.retargetFullBackupTripId(selected.raw,targetTripId);
@@ -11879,7 +11879,7 @@ async function routeFullBackupSelection(raw,inspection,packageInput=null){
   if(accessible){const error=new Error("Backup belongs to another accessible Trip");error.code="backup-accessible-other-trip";throw error;}
   if(tripCloudOffline()){const error=new Error("Offline");error.code="offline";throw error;}
   const user=await getImportFirebaseUser();
-  const creator=await import(`./assets/js/trip-creator-service.js?build=${APP_VERSION}`);
+  const creator=await import(`./assets/js/trip-creator-service.js?release=${APP_VERSION}`);
   const registry=await creator.inspectTripIdRegistry(backupTripId,{user});
   openFullBackupRestoreAsNewOperation({raw,inspection,package:packageInput},{alternateIdRequired:registry.reserved===true});
   return registry.reserved?"create-alternate":"create";
@@ -12045,7 +12045,7 @@ let tripMemberInviteRole="member";
 let tripMemberPageTripId="";
 
 function getTripMemberService(){
-  if(!tripMemberServicePromise)tripMemberServicePromise=import(`./assets/js/trip-member-service.js?build=${APP_VERSION}`);
+  if(!tripMemberServicePromise)tripMemberServicePromise=import(`./assets/js/trip-member-service.js?release=${APP_VERSION}`);
   return tripMemberServicePromise;
 }
 function tripMemberEsc(value){return escapeHtmlText(value);}
@@ -12386,7 +12386,7 @@ let appearanceColourPickerKey="";
 let appearanceColourSaveTimer=0;
 let appearanceColourSaveChain=Promise.resolve();
 function getTripAppearanceService(){
-  if(!tripAppearanceServicePromise)tripAppearanceServicePromise=import(`./assets/js/trip-appearance-service.js?build=${APP_VERSION}`).catch(error=>{tripAppearanceServicePromise=null;throw error;});
+  if(!tripAppearanceServicePromise)tripAppearanceServicePromise=import(`./assets/js/trip-appearance-service.js?release=${APP_VERSION}`).catch(error=>{tripAppearanceServicePromise=null;throw error;});
   return tripAppearanceServicePromise;
 }
 let tripMediaSyncServicePromise=null;
@@ -13145,7 +13145,7 @@ let destinationCustomColourSaveSeq=0;
 let destinationCustomColourSaveTimer=0;
 let destinationCustomColourSaveChain=Promise.resolve();
 function getTripDestinationService(){
-  if(!tripDestinationServicePromise)tripDestinationServicePromise=import(`./assets/js/trip-destination-service.js?build=${APP_VERSION}`);
+  if(!tripDestinationServicePromise)tripDestinationServicePromise=import(`./assets/js/trip-destination-service.js?release=${APP_VERSION}`);
   return tripDestinationServicePromise;
 }
 function destinationSettingsTripId(){return String(tripLoaderActiveId||dataTripId(window.tripData)||"").trim();}
@@ -13278,7 +13278,7 @@ let teamCustomColourSaveSeq=0;
 let teamCustomColourSaveTimer=0;
 let teamCustomColourSaveChain=Promise.resolve();
 function getTripTeamService(){
-  if(!tripTeamServicePromise)tripTeamServicePromise=import(`./assets/js/trip-team-service.js?build=${APP_VERSION}`);
+  if(!tripTeamServicePromise)tripTeamServicePromise=import(`./assets/js/trip-team-service.js?release=${APP_VERSION}`);
   return tripTeamServicePromise;
 }
 function teamSettingsTripId(){return String(tripLoaderActiveId||dataTripId(window.tripData)||"").trim();}
@@ -13507,7 +13507,7 @@ let tripActivityServicePromise=null;
 let tripActivityRows=[];
 let tripActivityFilter="all";
 function getTripActivityService(){
-  if(!tripActivityServicePromise)tripActivityServicePromise=import(`./assets/js/trip-activity-service.js?build=${APP_VERSION}`);
+  if(!tripActivityServicePromise)tripActivityServicePromise=import(`./assets/js/trip-activity-service.js?release=${APP_VERSION}`);
   return tripActivityServicePromise;
 }
 function activityEsc(value=""){return escapeHtmlText(String(value??""));}
@@ -14005,8 +14005,8 @@ document.querySelector('[data-profile-open="data-management"]')?.addEventListene
 
 function initPhase2AccessContext(data){
   Promise.all([
-    import(`./assets/js/trip-session-service.js?build=${APP_VERSION}`),
-    import(`./assets/js/trip-access-service.js?build=${APP_VERSION}`)
+    import(`./assets/js/trip-session-service.js?release=${APP_VERSION}`),
+    import(`./assets/js/trip-access-service.js?release=${APP_VERSION}`)
   ])
     .then(([sessionService,accessService])=>{
       const tripId=sessionService.resolveTripId(data);
@@ -14036,7 +14036,7 @@ async function startGoogleSignIn({preserveInvite=false,entryHandoff=false}={}){
 }
 async function signOutTravelUser(){
   try{
-    try{const creator=await import(`./assets/js/trip-creator-service.js?build=${APP_VERSION}`);creator.clearTripCreatorEntitlementCache?.();}catch(error){}
+    try{const creator=await import(`./assets/js/trip-creator-service.js?release=${APP_VERSION}`);creator.clearTripCreatorEntitlementCache?.();}catch(error){}
     const {signOutCurrentUser}=await getGlobalAuthService();await signOutCurrentUser();
   }catch(error){console.error("Google sign out error",error);alert("暫時未能登出 Google 帳戶。");}
 }
@@ -14144,7 +14144,7 @@ refreshCollapseMetrics();
 // Android / Chrome PWA support. Versioned app-shell Service Worker; normal launches are cache-first while explicit reloads stay network-first.
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register(`./sw.js?build=${APP_VERSION}`).catch(() => {});
+    navigator.serviceWorker.register(`./sw.js?release=${APP_VERSION}`).catch(() => {});
   });
 }
 
