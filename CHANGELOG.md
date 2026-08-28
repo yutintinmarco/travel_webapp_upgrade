@@ -1,3 +1,12 @@
+# v7.9.15.0 — Firebase-only Runtime + Native Item / Transit Editor
+
+- Removed bundled `trip.json` from runtime boot and Service Worker critical cache; signed-in Firebase data plus the user-bound IndexedDB fast-resume cache are now the only Trip runtime sources.
+- Removed the hardcoded `demo-trip-001` session fallback so a deleted legacy Team cannot be reintroduced by a repository JSON payload after relaunch.
+- Redesigned Item Edit as a native grouped iOS-style sheet with a fixed title header matching the existing expense modal language.
+- Split editor presentation into **編輯行程項目** and **編輯交通項目**, with kind-specific headings and simplified stop-only controls.
+- Collapsed the rich Icon and Day selectors behind disclosure rows; Day dates now use compact weekday labels （一）…（日）.
+- Source baseline cleanup: Trip-specific bundled gallery assets and `trip.json` are no longer required; only generic demo SVG fallback assets remain under `assets/gallery`.
+
 # v7.9.14.0 · Phase 3E Item Edit Finalization
 
 - Fixed Edit Session presentation fencing: Firebase Day/listener refreshes can continue updating the authoritative background snapshot without repainting deleted/renamed Team or other stale server values over the active Local Draft.

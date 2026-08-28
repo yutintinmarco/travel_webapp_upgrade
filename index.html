@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
   <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
   <link rel="dns-prefetch" href="https://api.open-meteo.com">
-  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?build=7.9.14.0">
+  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?build=7.9.15.0">
   <title id="page-title">行程</title>
   <script>
   // v7.7.5.0 · Performance Lite. Memory only: no Firebase reads/writes, no
@@ -3879,7 +3879,7 @@ body.expenses-view-active #app-version-note{
 #snacks-view::after,
 #info-view::after,
 #profile-view::after{
-  content:"v7.9.14.0" !important;
+  content:"v7.9.15.0" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3900,7 +3900,7 @@ body.expenses-view-active #app-version-note{
   display:none !important;
 }
 body.expenses-view-active .expenses-module .expenses-app::after{
-  content:"v7.9.14.0" !important;
+  content:"v7.9.15.0" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -4326,7 +4326,7 @@ html.theme-dark .trip-edit-delete-btn,html:not(.theme-light):not(.theme-dark) .t
 .trip-edit-input:focus,.trip-edit-textarea:focus{border-color:rgba(10,132,255,.56);box-shadow:0 0 0 3px rgba(10,132,255,.10);}
 .trip-edit-local-note{margin:0 0 12px;color:var(--label-secondary);font-size:11px;line-height:1.45;}
 
-/* v7.9.14.0 · Item Edit finalization: icon and cross-Day selectors reuse the existing pill grammar. */
+/* v7.9.15.0 · Item Edit finalization: icon and cross-Day selectors reuse the existing pill grammar. */
 .trip-edit-icon-options,.trip-edit-day-options{display:flex;flex-wrap:wrap;gap:7px;}
 .trip-edit-icon-option,.trip-edit-day-option{min-height:38px;padding:8px 11px;border-radius:13px;border:1px solid rgba(60,60,67,.13);background:rgba(255,255,255,.72);color:var(--label-primary);font:inherit;font-size:12px;font-weight:700;}
 .trip-edit-icon-option{min-width:44px;font-size:20px;line-height:1;}
@@ -4375,10 +4375,42 @@ html.theme-dark .trip-edit-text-btn,html:not(.theme-light):not(.theme-dark) .tri
 html.theme-dark .trip-edit-text-btn.is-primary,html:not(.theme-light):not(.theme-dark) .trip-edit-text-btn.is-primary{background:#0a84ff;border-color:#0a84ff;color:#fff;}
 html.theme-dark .trip-edit-input,html.theme-dark .trip-edit-textarea,html:not(.theme-light):not(.theme-dark) .trip-edit-input,html:not(.theme-light):not(.theme-dark) .trip-edit-textarea{background:rgba(34,34,42,.88);border-color:rgba(255,255,255,.11);color:#f2f2f7;}
 body.trip-edit-mode .container{padding-bottom:calc(var(--tabbar-h) + env(safe-area-inset-bottom,0px) + 132px);}
+
+/* v7.9.15.0 · Firebase-only runtime + native grouped Item/Transit editor. */
+.trip-edit-item-heading-row{flex:0 0 auto;padding:14px 18px 11px;border-bottom:1px solid rgba(60,60,67,.10);background:rgba(249,249,251,.96);backdrop-filter:blur(24px) saturate(160%);-webkit-backdrop-filter:blur(24px) saturate(160%);z-index:2;}
+.trip-edit-item-heading-row h3{display:flex;align-items:center;gap:9px;margin:0;font-size:calc(18px * var(--font-scale));line-height:1.25;font-weight:800;letter-spacing:-.2px;}
+.trip-edit-title-icon{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;flex:0 0 28px;border-radius:999px;background:rgba(255,255,255,.72);box-shadow:inset 0 0 0 1px rgba(0,0,0,.06);font-size:16px;line-height:1;}
+.trip-edit-heading-meta{margin:4px 0 0 37px;color:var(--label-secondary);font-size:10.5px;font-weight:600;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.trip-edit-item-scroll{padding:12px 14px 16px;}
+.trip-edit-item-local-note{margin:0 4px 10px;font-size:10.5px;}
+.trip-edit-native-form{gap:12px;}
+.trip-edit-native-group{display:grid;gap:11px;padding:13px;border:1px solid rgba(60,60,67,.09);border-radius:18px;background:rgba(255,255,255,.72);box-shadow:0 1px 0 rgba(255,255,255,.7) inset;}
+.trip-edit-native-section-title{margin:0 1px -2px;color:var(--label-secondary);font-size:10px;font-weight:780;letter-spacing:.075em;text-transform:uppercase;}
+.trip-edit-disclosure{width:100%;min-height:44px;border:0;padding:0 2px;background:transparent;color:var(--label-primary);font:inherit;display:flex;align-items:center;justify-content:space-between;gap:12px;text-align:left;}
+.trip-edit-disclosure-label{font-size:12.5px;font-weight:700;}
+.trip-edit-disclosure-value{min-width:0;display:flex;align-items:center;justify-content:flex-end;gap:7px;color:var(--label-secondary);font-size:12px;font-weight:600;}
+.trip-edit-disclosure-value strong{max-width:220px;color:var(--label-primary);font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.trip-edit-disclosure-value i{font-style:normal;color:rgba(60,60,67,.42);font-size:22px;font-weight:400;line-height:1;transform:rotate(0deg);transition:transform .16s ease;}
+.trip-edit-disclosure[aria-expanded="true"] .trip-edit-disclosure-value i{transform:rotate(90deg);}
+.trip-edit-disclosure-panel{padding-top:3px;border-top:1px solid rgba(118,118,128,.12);}
+.trip-edit-disclosure-panel[hidden]{display:none!important;}
+.trip-edit-stop-only[hidden]{display:none!important;}
+.trip-edit-icon-options,.trip-edit-day-options{padding-top:9px;}
+.trip-edit-day-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;}
+.trip-edit-day-option{text-align:left;min-width:0;}
+.trip-edit-day-option small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.trip-edit-icon-custom{margin-top:9px;}
+.trip-edit-order-field,.trip-edit-delete-block{margin:0;padding:13px;border-top:1px solid rgba(60,60,67,.09);}
+.trip-edit-delete-block{background:rgba(255,59,48,.035);}
+html.theme-dark .trip-edit-item-heading-row,html:not(.theme-light):not(.theme-dark) .trip-edit-item-heading-row{background:rgba(29,29,33,.96);border-bottom-color:rgba(255,255,255,.10);}
+html.theme-dark .trip-edit-title-icon,html:not(.theme-light):not(.theme-dark) .trip-edit-title-icon{background:rgba(255,255,255,.10);box-shadow:inset 0 0 0 1px rgba(255,255,255,.10);}
+html.theme-dark .trip-edit-native-group,html:not(.theme-light):not(.theme-dark) .trip-edit-native-group{background:rgba(255,255,255,.065);border-color:rgba(255,255,255,.10);box-shadow:none;}
+html.theme-dark .trip-edit-disclosure-panel,html:not(.theme-light):not(.theme-dark) .trip-edit-disclosure-panel{border-top-color:rgba(255,255,255,.09);}
+html.theme-dark .trip-edit-disclosure-value i,html:not(.theme-light):not(.theme-dark) .trip-edit-disclosure-value i{color:rgba(235,235,245,.38);}
 </style>
             <link rel="apple-touch-icon" href="assets/icon/trip_icon.png">
   <link rel="icon" type="image/png" href="assets/icon/trip_icon.png">
-  <link rel="manifest" href="manifest.json?build=7.9.14.0">
+  <link rel="manifest" href="manifest.json?build=7.9.15.0">
   <meta name="apple-mobile-web-app-title" content="關嘉露西生日之旅">
   <!-- v7.7.1.2: expenses.css is 144KB and every rule is scoped under
        .expenses-module, yet it used to block the very first paint of the
@@ -4386,8 +4418,8 @@ body.trip-edit-mode .container{padding-bottom:calc(var(--tabbar-h) + env(safe-ar
        priority without blocking paint; ensureExpensesStylesheet() flips it to
        media="all" before the 支出 view is ever mounted, so the styling is
        byte-for-byte identical by the time anything expenses-related renders. -->
-  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?build=7.9.14.0" media="print">
-  <noscript><link rel="stylesheet" href="assets/css/expenses.css?build=7.9.14.0"></noscript>
+  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?build=7.9.15.0" media="print">
+  <noscript><link rel="stylesheet" href="assets/css/expenses.css?build=7.9.15.0"></noscript>
 </head>
 <body class="app-entry-gated app-entry-pending">
 <div class="bg-fixed"></div>
@@ -5199,7 +5231,7 @@ body.trip-edit-mode .container{padding-bottom:calc(var(--tabbar-h) + env(safe-ar
         <span class="profile-detail-spacer"></span>
       </div>
       <section class="profile-card" aria-label="App 資訊">
-        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.9.14.0</strong></div>
+        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.9.15.0</strong></div>
         <div class="profile-meta-row"><span>資料架構</span><strong>Phase 2G.2</strong></div>
         <div class="profile-meta-row"><span>主要資料來源</span><strong id="app-data-source-label">Firebase / 本機快取</strong></div>
       </section>
@@ -5448,72 +5480,100 @@ body.trip-edit-mode .container{padding-bottom:calc(var(--tabbar-h) + env(safe-ar
 
 <div class="modal-backdrop" id="trip-edit-item-backdrop" aria-hidden="true">
   <div class="modal trip-edit-item-modal" role="dialog" aria-modal="true" aria-labelledby="trip-edit-item-title">
+    <div class="trip-edit-item-heading-row">
+      <h3><span class="trip-edit-title-icon" id="trip-edit-item-heading-icon">📍</span><span id="trip-edit-item-title">編輯行程項目</span></h3>
+      <div class="trip-edit-heading-meta" id="trip-edit-item-heading-meta">Local Draft</div>
+    </div>
     <div class="trip-edit-item-scroll">
-      <div class="modal-title" id="trip-edit-item-title">編輯行程項目</div>
-      <p class="trip-edit-local-note">新增或修改都只會先放入今次 Edit Session；完成所有修改後，先一次「儲存」寫入 Firebase。</p>
-      <div class="trip-edit-form">
-      <label class="trip-edit-field"><span>時間</span><span class="trip-edit-time-control"><span class="trip-edit-time-display" id="trip-edit-item-time-display">--:--</span><input id="trip-edit-item-time" type="time" step="60" aria-label="時間"></span></label>
-      <label class="trip-edit-field"><span>標題</span><input class="trip-edit-input" id="trip-edit-item-title-input" type="text" autocomplete="off" maxlength="120"></label>
-      <div class="trip-edit-field">
-        <span>圖示</span>
-        <div class="trip-edit-icon-options" id="trip-edit-item-icon-options" role="group" aria-label="選擇圖示"></div>
-        <label class="trip-edit-icon-custom"><span>自訂 Emoji</span><input class="trip-edit-input" id="trip-edit-item-icon-custom" type="text" autocomplete="off" maxlength="8" placeholder="例如 🍵"></label>
-      </div>
-      <div class="trip-edit-field">
-        <span>預訂狀態</span>
-        <button class="trip-edit-booked-toggle" id="trip-edit-item-booked" type="button" aria-pressed="false"><span>已預訂</span></button>
-      </div>
-      <div class="trip-edit-field">
-        <span>Team</span>
-        <div class="trip-edit-team-options" id="trip-edit-item-team-options" role="group" aria-label="選擇 Team"></div>
-        <div class="trip-edit-team-note" id="trip-edit-item-team-note">「所有人」代表呢個項目唔受 Team 篩選限制。</div>
-      </div>
-      <div class="trip-edit-field" id="trip-edit-day-field">
-        <span>所屬日子</span>
-        <div class="trip-edit-day-options" id="trip-edit-item-day-options" role="group" aria-label="移動至另一日"></div>
-      </div>
-      <div class="trip-edit-field trip-edit-location-field" id="trip-edit-location-field">
-        <span>Google Maps 地點</span>
-        <div class="trip-edit-location-search">
-          <input class="trip-edit-input" id="trip-edit-location-query" type="text" autocomplete="off" maxlength="240" placeholder="輸入店舖、景點、車站或地址">
-          <button class="trip-edit-location-search-btn" id="trip-edit-location-search-btn" type="button">搜尋</button>
-        </div>
-        <div class="trip-edit-location-link-separator"><span>或貼上 Google Maps 連結</span></div>
-        <div class="trip-edit-location-search trip-edit-location-link-row">
-          <input class="trip-edit-input" id="trip-edit-location-link" type="url" inputmode="url" autocomplete="off" maxlength="900" placeholder="https://maps.app.goo.gl/…">
-          <button class="trip-edit-location-search-btn" id="trip-edit-location-link-btn" type="button">匯入</button>
-        </div>
-        <div class="trip-edit-location-link-note">支援手機 Google Maps「分享」短連結及完整網址；短連結會先安全展開，再以正式 Place ID／名稱確認。</div>
-        <div class="trip-edit-location-status" id="trip-edit-location-status">可選；未設定定位嘅地點唔會加入 Map route sequence。</div>
-        <div class="trip-edit-location-results" id="trip-edit-location-results" hidden></div>
-        <div class="trip-edit-location-attribution" id="trip-edit-location-attribution" hidden>Google Maps</div>
-        <div class="trip-edit-location-preview" id="trip-edit-location-preview" hidden>
-          <div class="trip-edit-location-map" id="trip-edit-location-map" aria-label="已選位置地圖預覽"></div>
-          <div class="trip-edit-location-map-note">可拖動地圖查看附近位置，亦可直接點地圖微調定位。</div>
-        </div>
-        <div class="trip-edit-location-selected" id="trip-edit-location-selected" hidden>
-          <strong id="trip-edit-location-selected-title">已選定位</strong>
-          <small id="trip-edit-location-selected-address"></small>
-          <div class="trip-edit-location-actions">
-            <button class="trip-edit-location-action" id="trip-edit-location-open-maps" type="button">Google Maps</button>
-            <button class="trip-edit-location-action" id="trip-edit-location-clear" type="button">清除定位</button>
+      <p class="trip-edit-local-note trip-edit-item-local-note">修改會先留喺今次 Edit Session；最下面全局「儲存」先一次寫入 Firebase。</p>
+      <div class="trip-edit-form trip-edit-native-form">
+        <section class="trip-edit-native-group">
+          <div class="trip-edit-native-section-title" id="trip-edit-primary-section-title">基本資料</div>
+          <label class="trip-edit-field"><span>時間</span><span class="trip-edit-time-control"><span class="trip-edit-time-display" id="trip-edit-item-time-display">--:--</span><input id="trip-edit-item-time" type="time" step="60" aria-label="時間"></span></label>
+          <label class="trip-edit-field"><span id="trip-edit-item-title-label">地點名稱</span><input class="trip-edit-input" id="trip-edit-item-title-input" type="text" autocomplete="off" maxlength="120"></label>
+          <div class="trip-edit-field">
+            <button class="trip-edit-disclosure" id="trip-edit-icon-disclosure" type="button" aria-expanded="false" aria-controls="trip-edit-icon-panel">
+              <span class="trip-edit-disclosure-label">圖示</span><span class="trip-edit-disclosure-value"><strong id="trip-edit-icon-summary">📍</strong><i>›</i></span>
+            </button>
+            <div class="trip-edit-disclosure-panel" id="trip-edit-icon-panel" hidden>
+              <div class="trip-edit-icon-options" id="trip-edit-item-icon-options" role="group" aria-label="選擇圖示"></div>
+              <label class="trip-edit-icon-custom"><span>自訂 Emoji</span><input class="trip-edit-input" id="trip-edit-item-icon-custom" type="text" autocomplete="off" maxlength="8" placeholder="例如 🍵"></label>
+            </div>
           </div>
-        </div>
-      </div>
-        <div class="trip-edit-field trip-edit-order-field" id="trip-edit-order-field" hidden>
-          <span>行程次序</span>
+        </section>
+
+        <section class="trip-edit-native-group">
+          <div class="trip-edit-native-section-title">安排</div>
+          <div class="trip-edit-field trip-edit-stop-only" id="trip-edit-booked-field">
+            <span>預訂狀態</span>
+            <button class="trip-edit-booked-toggle" id="trip-edit-item-booked" type="button" aria-pressed="false"><span>已預訂</span></button>
+          </div>
+          <div class="trip-edit-field">
+            <span>Team</span>
+            <div class="trip-edit-team-options" id="trip-edit-item-team-options" role="group" aria-label="選擇 Team"></div>
+            <div class="trip-edit-team-note" id="trip-edit-item-team-note">「所有人」代表呢個項目唔受 Team 篩選限制。</div>
+          </div>
+          <div class="trip-edit-field" id="trip-edit-day-field">
+            <button class="trip-edit-disclosure" id="trip-edit-day-disclosure" type="button" aria-expanded="false" aria-controls="trip-edit-day-panel">
+              <span class="trip-edit-disclosure-label">所屬日子</span><span class="trip-edit-disclosure-value"><strong id="trip-edit-day-summary">Day</strong><i>›</i></span>
+            </button>
+            <div class="trip-edit-disclosure-panel" id="trip-edit-day-panel" hidden>
+              <div class="trip-edit-day-options" id="trip-edit-item-day-options" role="group" aria-label="移動至另一日"></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="trip-edit-native-group trip-edit-stop-only" id="trip-edit-location-section">
+          <div class="trip-edit-native-section-title">地點</div>
+          <div class="trip-edit-field trip-edit-location-field" id="trip-edit-location-field">
+            <span>Google Maps 地點</span>
+            <div class="trip-edit-location-search">
+              <input class="trip-edit-input" id="trip-edit-location-query" type="text" autocomplete="off" maxlength="240" placeholder="輸入店舖、景點、車站或地址">
+              <button class="trip-edit-location-search-btn" id="trip-edit-location-search-btn" type="button">搜尋</button>
+            </div>
+            <div class="trip-edit-location-link-separator"><span>或貼上 Google Maps 連結</span></div>
+            <div class="trip-edit-location-search trip-edit-location-link-row">
+              <input class="trip-edit-input" id="trip-edit-location-link" type="url" inputmode="url" autocomplete="off" maxlength="900" placeholder="https://maps.app.goo.gl/…">
+              <button class="trip-edit-location-search-btn" id="trip-edit-location-link-btn" type="button">匯入</button>
+            </div>
+            <div class="trip-edit-location-link-note">支援手機 Google Maps「分享」短連結及完整網址；短連結會先安全展開，再以正式 Place ID／名稱確認。</div>
+            <div class="trip-edit-location-status" id="trip-edit-location-status">可選；未設定定位嘅地點唔會加入 Map route sequence。</div>
+            <div class="trip-edit-location-results" id="trip-edit-location-results" hidden></div>
+            <div class="trip-edit-location-attribution" id="trip-edit-location-attribution" hidden>Google Maps</div>
+            <div class="trip-edit-location-preview" id="trip-edit-location-preview" hidden>
+              <div class="trip-edit-location-map" id="trip-edit-location-map" aria-label="已選位置地圖預覽"></div>
+              <div class="trip-edit-location-map-note">可拖動地圖查看附近位置，亦可直接點地圖微調定位。</div>
+            </div>
+            <div class="trip-edit-location-selected" id="trip-edit-location-selected" hidden>
+              <strong id="trip-edit-location-selected-title">已選定位</strong>
+              <small id="trip-edit-location-selected-address"></small>
+              <div class="trip-edit-location-actions">
+                <button class="trip-edit-location-action" id="trip-edit-location-open-maps" type="button">Google Maps</button>
+                <button class="trip-edit-location-action" id="trip-edit-location-clear" type="button">清除定位</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="trip-edit-native-group">
+          <div class="trip-edit-native-section-title" id="trip-edit-content-section-title">內容</div>
+          <label class="trip-edit-field"><span id="trip-edit-note-label">備註</span><textarea class="trip-edit-textarea" id="trip-edit-item-note" maxlength="500"></textarea></label>
+          <label class="trip-edit-field"><span>詳細描述</span><textarea class="trip-edit-textarea" id="trip-edit-item-detail" maxlength="1200" placeholder="展開項目後顯示嘅詳細內容"></textarea></label>
+        </section>
+
+        <section class="trip-edit-native-group trip-edit-order-field" id="trip-edit-order-field" hidden>
+          <div class="trip-edit-native-section-title">次序</div>
           <div class="trip-edit-order-controls">
             <button class="trip-edit-order-btn" id="trip-edit-order-up" type="button">↑ 向上移</button>
             <button class="trip-edit-order-btn" id="trip-edit-order-down" type="button">↓ 向下移</button>
           </div>
           <div class="trip-edit-order-status" id="trip-edit-order-status"></div>
-        </div>
-        <label class="trip-edit-field"><span>備註</span><textarea class="trip-edit-textarea" id="trip-edit-item-note" maxlength="500"></textarea></label>
-        <label class="trip-edit-field"><span>詳細描述</span><textarea class="trip-edit-textarea" id="trip-edit-item-detail" maxlength="1200" placeholder="展開項目後顯示嘅詳細內容"></textarea></label>
-        <div class="trip-edit-delete-block" id="trip-edit-delete-block" hidden>
+        </section>
+
+        <section class="trip-edit-native-group trip-edit-delete-block" id="trip-edit-delete-block" hidden>
           <button class="trip-edit-delete-btn" id="trip-edit-item-delete" type="button">刪除此項目</button>
           <div class="trip-edit-delete-note" id="trip-edit-delete-note">刪除只會先套用到今次 Local Draft；全局「取消」可以還原未儲存變更。</div>
-        </div>
+        </section>
       </div>
     </div>
     <div class="modal-actions trip-edit-item-action-dock">
@@ -5523,38 +5583,8 @@ body.trip-edit-mode .container{padding-bottom:calc(var(--tabbar-h) + env(safe-ar
   </div>
 </div>
 
-<div class="itinerary-photo-viewer" id="itinerary-photo-viewer" aria-hidden="true" role="dialog" aria-modal="true" aria-label="相片檢視器">
-  <div class="itinerary-photo-viewer-stage" id="itinerary-photo-viewer-stage">
-    <img class="itinerary-photo-viewer-image" id="itinerary-photo-viewer-image" alt="行程相片">
-  </div>
-  <div class="itinerary-photo-viewer-topbar">
-    <button class="itinerary-photo-viewer-close" id="itinerary-photo-viewer-close" type="button" aria-label="關閉相片">
-      <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5.5 5.5l9 9m0-9l-9 9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-    </button>
-    <div class="itinerary-photo-viewer-counter" id="itinerary-photo-viewer-counter">1 / 1</div>
-  </div>
-</div>
-
-<div class="itinerary-crop-editor" id="itinerary-crop-editor" aria-hidden="true" role="dialog" aria-modal="true" aria-label="調整行程相片">
-  <div class="itinerary-crop-topbar">
-    <button class="itinerary-crop-action" id="itinerary-crop-cancel" type="button">取消</button>
-    <div class="itinerary-crop-title">調整相片</div>
-    <button class="itinerary-crop-action" id="itinerary-crop-confirm" type="button">使用相片</button>
-  </div>
-  <div class="itinerary-crop-stage" id="itinerary-crop-stage">
-    <img class="itinerary-crop-image" id="itinerary-crop-image" alt="調整相片位置">
-    <div class="itinerary-crop-frame" id="itinerary-crop-frame" aria-hidden="true">
-      <div class="itinerary-crop-grid" aria-hidden="true"></div>
-    </div>
-    <div class="itinerary-crop-toolbar">
-      <div class="itinerary-crop-hint">拖移 · 雙指縮放 · 雙擊放大</div>
-      <button class="itinerary-crop-reset" id="itinerary-crop-reset" type="button">重設</button>
-    </div>
-  </div>
-</div>
-
 <script>
-const APP_VERSION = "7.9.14.0";
+const APP_VERSION = "7.9.15.0";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 let tripMapServicePromise=null,transitRouteServicePromise=null,tripEditServicePromise=null,tripMapController=null,tripMapScope="day",tripMapRenderEpoch=0,tripMapSelectedPoint=null;
@@ -5831,7 +5861,6 @@ function perfLiteInc(name,amount=1){try{return window.__perfLite?.inc(name,amoun
 perfLiteMark("appShellReady");
 window.EXPENSES_MODULE_VERSION = EXPENSES_MODULE_VERSION;
 
-function getTripJsonUrl(){const p=new URLSearchParams(location.search);return p.get("data")||"trip.json";}
 function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
 function escapeHtmlText(value){return String(value??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#39;");}
 function fmtMMDD(iso){return iso.slice(5).replace("-","/");}
@@ -6135,11 +6164,14 @@ document.getElementById("trip-edit-order-up")?.addEventListener("click",()=>trip
 document.getElementById("trip-edit-order-down")?.addEventListener("click",()=>tripEditMovePendingOrder(1));
 document.getElementById("trip-edit-item-delete")?.addEventListener("click",()=>void deleteTripEditItemFromSession());
 document.getElementById("trip-edit-item-booked")?.addEventListener("click",()=>tripEditConfigureBooked(!tripEditBookedValue));
+document.getElementById("trip-edit-icon-disclosure")?.addEventListener("click",()=>tripEditSetDisclosure("icon",document.getElementById("trip-edit-icon-disclosure")?.getAttribute("aria-expanded")!=="true"));
+document.getElementById("trip-edit-day-disclosure")?.addEventListener("click",()=>tripEditSetDisclosure("day",document.getElementById("trip-edit-day-disclosure")?.getAttribute("aria-expanded")!=="true"));
 document.getElementById("trip-edit-item-icon-custom")?.addEventListener("input",event=>{const value=String(event.target?.value||"").trim();if(value)tripEditConfigureIcon(value);});
 const tripEditTimeInput=document.getElementById("trip-edit-item-time");
-const syncTripEditTimeDisplay=()=>{const display=document.getElementById("trip-edit-item-time-display");if(display)display.textContent=String(tripEditTimeInput?.value||"").trim()||"--:--";};
+const syncTripEditTimeDisplay=()=>{const display=document.getElementById("trip-edit-item-time-display");if(display)display.textContent=String(tripEditTimeInput?.value||"").trim()||"--:--";tripEditRefreshEditorHeading();};
 tripEditTimeInput?.addEventListener("input",syncTripEditTimeDisplay);
 tripEditTimeInput?.addEventListener("change",syncTripEditTimeDisplay);
+document.getElementById("trip-edit-item-title-input")?.addEventListener("input",()=>tripEditRefreshEditorHeading());
 document.getElementById("trip-edit-item-backdrop")?.addEventListener("click",event=>{if(event.target===event.currentTarget)closeTripEditItemModal();});
 document.getElementById("trip-edit-trip-details-btn")?.addEventListener("click",()=>void openTripEditTripDetailsModal());
 document.getElementById("trip-edit-team-manage-btn")?.addEventListener("click",()=>void openTripEditTeamModal());
@@ -7327,8 +7359,6 @@ function bootVisualBackgroundCss(data){
   const media=tripBackgroundMediaMeta(data),warmPreview=tripBackgroundWarmPreview(data,media);
   if(warmPreview)return safeCssUrl(warmPreview);
   let candidate=legacyTripVisualMeta(data).background;
-  const bundledId=dataTripId(bundledTripData);
-  if(!candidate&&bundledId&&id===bundledId)candidate="assets/bg/bg_trip_mobile.webp";
   return candidate?safeCssUrl(candidate):fallback;
 }
 function rememberTripBackgroundWarmPreview(data,media,image){
@@ -7385,8 +7415,6 @@ function applyTripVisualTheme(data){
   const hue=tripHashHue(id);
   const fallback=`linear-gradient(145deg,hsl(${hue} 48% 76%),hsl(${(hue+42)%360} 42% 88%))`;
   let candidate=legacyTripVisualMeta(data).background;
-  const bundledId=dataTripId(bundledTripData);
-  if(!candidate&&bundledId&&id===bundledId)candidate="assets/bg/bg_trip_mobile.webp";
   const media=tripBackgroundMediaMeta(data);
   const mediaKey=media?`storage:${String(media.storagePath||"").trim()}:${String(media.generation||"").trim()}`:"";
   const wantedSource=mediaKey||candidate||fallback;
@@ -7456,8 +7484,6 @@ function tripIconDescriptor(trip){
   const media=pending?.descriptor||(trip?.tripIconMedia&&typeof trip.tripIconMedia==="object"?trip.tripIconMedia:null);
   if(media&&String(media.storagePath||"").trim())return{type:"media",value:media,fallback:explicit,tripId:id};
   if(explicit)return{type:"image",value:explicit};
-  const bundledId=dataTripId(bundledTripData);
-  if(bundledId&&id===bundledId)return{type:"image",value:"assets/icon/trip_icon.png"};
   const text=String(trip?.titleSmall||trip?.title||trip?.titleMain||id||"Trip");
   const emoji=tripEmojiFromText(text);if(emoji)return{type:"emoji",value:emoji};
   const stripped=text.replace(/<[^>]*>/g,"").trim();
@@ -7513,7 +7539,7 @@ function resetTripScopedUi(data){
 }
 
 // v7.9.8.3 presentation compatibility. Canonical normalized Trips carry
-// item.kind. Bundled legacy trip.json can render before the schema module is
+// item.kind. Legacy imported records can render before the schema module is
 // ready, so this mirrors only the conservative legacy hints needed for the UI.
 function itineraryPresentationKind(item={}){
   const explicit=String(item?.kind||item?.itemKind||item?.semanticKind||item?.type||"").trim().toLowerCase();
@@ -7998,16 +8024,32 @@ let tripEditBookedValue=false,tripEditTeamValue="all",tripEditIconValue="📍",t
 function tripEditConfigureBooked(value=false){
   tripEditBookedValue=Boolean(value);const button=document.getElementById("trip-edit-item-booked");if(!button)return;button.classList.toggle("is-selected",tripEditBookedValue);button.setAttribute("aria-pressed",tripEditBookedValue?"true":"false");const label=button.querySelector("span");if(label)label.textContent=tripEditBookedValue?"✓ 已預訂":"已預訂";
 }
+function tripEditSetDisclosure(name,open){
+  const button=document.getElementById(`trip-edit-${name}-disclosure`),panel=document.getElementById(`trip-edit-${name}-panel`);if(!button||!panel)return;
+  const expanded=Boolean(open);button.setAttribute("aria-expanded",expanded?"true":"false");panel.hidden=!expanded;
+}
+function tripEditCloseEditorDisclosures(){tripEditSetDisclosure("icon",false);tripEditSetDisclosure("day",false);}
 function tripEditConfigureIcon(value="📍"){
   tripEditIconValue=String(value||"").trim()||"📍";
-  const container=document.getElementById("trip-edit-item-icon-options"),custom=document.getElementById("trip-edit-item-icon-custom");
-  if(container){container.innerHTML="";TRIP_EDIT_ICON_PRESETS.forEach(icon=>{const button=document.createElement("button");button.type="button";button.className="trip-edit-icon-option";button.textContent=icon;button.classList.toggle("is-selected",icon===tripEditIconValue);button.setAttribute("aria-pressed",icon===tripEditIconValue?"true":"false");button.addEventListener("click",()=>{if(custom)custom.value="";tripEditConfigureIcon(icon);});container.appendChild(button);});}
+  const container=document.getElementById("trip-edit-item-icon-options"),custom=document.getElementById("trip-edit-item-icon-custom"),summary=document.getElementById("trip-edit-icon-summary"),headingIcon=document.getElementById("trip-edit-item-heading-icon");
+  if(summary)summary.textContent=tripEditIconValue;if(headingIcon)headingIcon.textContent=tripEditIconValue;
+  if(container){container.innerHTML="";TRIP_EDIT_ICON_PRESETS.forEach(icon=>{const button=document.createElement("button");button.type="button";button.className="trip-edit-icon-option";button.textContent=icon;button.classList.toggle("is-selected",icon===tripEditIconValue);button.setAttribute("aria-pressed",icon===tripEditIconValue?"true":"false");button.addEventListener("click",()=>{if(custom)custom.value="";tripEditConfigureIcon(icon);tripEditSetDisclosure("icon",false);});container.appendChild(button);});}
   if(custom)custom.value=TRIP_EDIT_ICON_PRESETS.includes(tripEditIconValue)?"":tripEditIconValue;
 }
+function tripEditCompactDayDate(day={}){
+  const iso=String(day?.isoDate||"").trim();
+  if(/^\d{4}-\d{2}-\d{2}$/.test(iso)){
+    const d=new Date(`${iso}T12:00:00`);if(Number.isFinite(d.getTime()))return `${d.getMonth()+1}月${d.getDate()}日（${["日","一","二","三","四","五","六"][d.getDay()]}）`;
+  }
+  return String(day?.date||"").replace(/星期([一二三四五六日天])/g,"$1").replace(/週([一二三四五六日天])/g,"$1");
+}
 function tripEditConfigureDay(value=""){
-  const days=Array.isArray(activeTripPresentationData()?.days)?activeTripPresentationData().days:[],container=document.getElementById("trip-edit-item-day-options");
+  const days=Array.isArray(activeTripPresentationData()?.days)?activeTripPresentationData().days:[],container=document.getElementById("trip-edit-item-day-options"),summary=document.getElementById("trip-edit-day-summary");
   let selected=String(value||"").trim();if(!days.some(day=>String(day?.dayId||"").trim()===selected))selected=String(days[0]?.dayId||"").trim();tripEditDayValue=selected;
-  if(!container)return;container.innerHTML="";days.forEach((day,index)=>{const dayId=String(day?.dayId||"").trim();if(!dayId)return;const button=document.createElement("button");button.type="button";button.className="trip-edit-day-option";button.classList.toggle("is-selected",dayId===selected);button.setAttribute("aria-pressed",dayId===selected?"true":"false");const label=document.createElement("span");label.textContent=String(day?.label||`Day ${index+1}`);button.appendChild(label);const small=document.createElement("small");small.textContent=String(day?.date||day?.isoDate||"");if(small.textContent)button.appendChild(small);button.addEventListener("click",()=>tripEditConfigureDay(dayId));container.appendChild(button);});
+  const selectedIndex=days.findIndex(day=>String(day?.dayId||"").trim()===selected),selectedDay=selectedIndex>=0?days[selectedIndex]:null;
+  if(summary)summary.textContent=selectedDay?`${String(selectedDay?.label||`Day ${selectedIndex+1}`)}${tripEditCompactDayDate(selectedDay)?` · ${tripEditCompactDayDate(selectedDay)}`:""}`:"未設定";
+  tripEditRefreshEditorHeading();
+  if(!container)return;container.innerHTML="";days.forEach((day,index)=>{const dayId=String(day?.dayId||"").trim();if(!dayId)return;const button=document.createElement("button");button.type="button";button.className="trip-edit-day-option";button.classList.toggle("is-selected",dayId===selected);button.setAttribute("aria-pressed",dayId===selected?"true":"false");const label=document.createElement("span");label.textContent=String(day?.label||`Day ${index+1}`);button.appendChild(label);const small=document.createElement("small");small.textContent=tripEditCompactDayDate(day);if(small.textContent)button.appendChild(small);button.addEventListener("click",()=>{tripEditConfigureDay(dayId);tripEditSetDisclosure("day",false);});container.appendChild(button);});
 }
 function tripEditConfigureTeam(value="all"){
   const travellers=activeTripPresentationData()?.meta?.travellers||window.tripData?.meta?.travellers||{},keys=orderedTravellerKeys(travellers),container=document.getElementById("trip-edit-item-team-options"),note=document.getElementById("trip-edit-item-team-note");
@@ -8099,14 +8141,23 @@ async function beginTripEditSession(){
 function closeTripEditItemModal(){
   ++tripEditLocationSearchEpoch;++tripEditLocationReverseEpoch;tripEditDestroyLocationPreview();tripEditItemTarget=null;tripEditLocationSelection=null;tripEditOrderState=null;tripEditBookedValue=false;tripEditTeamValue="all";tripEditIconValue="📍";tripEditDayValue="";tripEditResetLocationResults();tripEditConfigureOrder(null,{visible:false});tripEditConfigureDelete("","",{visible:false});const backdrop=document.getElementById("trip-edit-item-backdrop");if(backdrop){backdrop.classList.remove("active");backdrop.setAttribute("aria-hidden","true");}
 }
+function tripEditRefreshEditorHeading(kindInput="",modeInput=""){
+  const kind=String(kindInput||tripEditItemTarget?.kind||"stop")==="transit"?"transit":"stop",mode=String(modeInput||tripEditItemTarget?.mode||"edit");
+  const title=document.getElementById("trip-edit-item-title"),primary=document.getElementById("trip-edit-primary-section-title"),titleLabel=document.getElementById("trip-edit-item-title-label"),contentTitle=document.getElementById("trip-edit-content-section-title"),noteLabel=document.getElementById("trip-edit-note-label"),meta=document.getElementById("trip-edit-item-heading-meta");
+  if(title)title.textContent=kind==="transit"?(mode==="add"?"新增交通項目":"編輯交通項目"):(mode==="add"?"新增行程項目":"編輯行程項目");
+  if(primary)primary.textContent=kind==="transit"?"交通資料":"基本資料";if(titleLabel)titleLabel.textContent=kind==="transit"?"交通名稱":"地點名稱";if(contentTitle)contentTitle.textContent=kind==="transit"?"交通備註":"內容";if(noteLabel)noteLabel.textContent=kind==="transit"?"路線 / 備註":"備註";
+  document.querySelectorAll(".trip-edit-stop-only").forEach(el=>{el.hidden=kind==="transit";});
+  const itemName=String(document.getElementById("trip-edit-item-title-input")?.value||"").trim(),time=String(document.getElementById("trip-edit-item-time")?.value||"").trim(),days=Array.isArray(activeTripPresentationData()?.days)?activeTripPresentationData().days:[],idx=days.findIndex(day=>String(day?.dayId||"").trim()===String(tripEditDayValue||tripEditItemTarget?.dayId||"")),day=idx>=0?days[idx]:null;
+  if(meta){const parts=[];if(itemName)parts.push(itemName);if(day)parts.push(String(day?.label||`Day ${idx+1}`));if(time)parts.push(time);if(!parts.length)parts.push("Local Draft");meta.textContent=parts.join(" · ");}
+}
 function openTripEditAddModal(dayId,kind){
   if(!tripEditSession)return;
   const normalized=String(kind||"")==="transit"?"transit":"stop";
   tripEditItemTarget={mode:"add",dayId:String(dayId||""),kind:normalized};
-  const modalTitle=document.getElementById("trip-edit-item-title"),time=document.getElementById("trip-edit-item-time"),title=document.getElementById("trip-edit-item-title-input"),note=document.getElementById("trip-edit-item-note"),detail=document.getElementById("trip-edit-item-detail"),backdrop=document.getElementById("trip-edit-item-backdrop");
-  if(modalTitle)modalTitle.textContent=normalized==="transit"?"新增交通":"新增地點";
+  const time=document.getElementById("trip-edit-item-time"),title=document.getElementById("trip-edit-item-title-input"),note=document.getElementById("trip-edit-item-note"),detail=document.getElementById("trip-edit-item-detail"),backdrop=document.getElementById("trip-edit-item-backdrop");
+  tripEditCloseEditorDisclosures();tripEditRefreshEditorHeading(normalized,"add");
   if(time)time.value="";const timeDisplay=document.getElementById("trip-edit-item-time-display");if(timeDisplay)timeDisplay.textContent="--:--";
-  if(title)title.value=normalized==="transit"?"Travel":"";if(note)note.value="";if(detail)detail.value="";tripEditConfigureIcon(normalized==="transit"?"🚆":"📍");tripEditConfigureBooked(false);tripEditConfigureTeam("all");tripEditConfigureDay(dayId);tripEditConfigureLocation(normalized,tripEditBlankLocation());tripEditConfigureOrder(null,{visible:false});tripEditConfigureDelete("","",{visible:false});
+  if(title)title.value=normalized==="transit"?"Travel":"";if(note)note.value="";if(detail)detail.value="";tripEditConfigureIcon(normalized==="transit"?"🚆":"📍");tripEditConfigureBooked(false);tripEditConfigureTeam("all");tripEditConfigureDay(dayId);tripEditConfigureLocation(normalized,tripEditBlankLocation());tripEditConfigureOrder(null,{visible:false});tripEditConfigureDelete("","",{visible:false});tripEditRefreshEditorHeading(normalized,"add");
   if(backdrop){backdrop.classList.add("active");backdrop.setAttribute("aria-hidden","false");}
 }
 async function openTripEditItemModal(dayId,itemId){
@@ -8114,10 +8165,10 @@ async function openTripEditItemModal(dayId,itemId){
   const service=await tripEditService(),draft=service.getTripEditDraftItem(tripEditSession,dayId,itemId);if(!draft)return;
   const itemKind=String(tripEditFindDomItem(dayId,itemId)?.dataset?.itemKind||"stop")==="transit"?"transit":"stop";
   tripEditItemTarget={mode:"edit",dayId:String(dayId||""),itemId:String(itemId||""),kind:itemKind};
-  const modalTitle=document.getElementById("trip-edit-item-title"),time=document.getElementById("trip-edit-item-time"),title=document.getElementById("trip-edit-item-title-input"),note=document.getElementById("trip-edit-item-note"),detail=document.getElementById("trip-edit-item-detail"),backdrop=document.getElementById("trip-edit-item-backdrop");
-  if(modalTitle)modalTitle.textContent="編輯行程項目";
+  const time=document.getElementById("trip-edit-item-time"),title=document.getElementById("trip-edit-item-title-input"),note=document.getElementById("trip-edit-item-note"),detail=document.getElementById("trip-edit-item-detail"),backdrop=document.getElementById("trip-edit-item-backdrop");
+  tripEditCloseEditorDisclosures();tripEditRefreshEditorHeading(itemKind,"edit");
   if(time)time.value=draft.time||"";const timeDisplay=document.getElementById("trip-edit-item-time-display");if(timeDisplay)timeDisplay.textContent=String(draft.time||"").trim()||"--:--";if(title)title.value=draft.title||"";if(note)note.value=draft.note||"";if(detail)detail.value=draft.detail||"";tripEditConfigureIcon(draft.icon||(itemKind==="transit"?"🚆":"📍"));tripEditConfigureBooked(Boolean(draft.booked));tripEditConfigureTeam(draft.who||"all");tripEditConfigureDay(dayId);tripEditConfigureLocation(itemKind,draft.location||tripEditBlankLocation());
-  tripEditConfigureOrder(service.getTripEditDraftPosition(tripEditSession,dayId,itemId),{visible:true});tripEditConfigureDelete(dayId,itemId,{visible:true});
+  tripEditConfigureOrder(service.getTripEditDraftPosition(tripEditSession,dayId,itemId),{visible:true});tripEditConfigureDelete(dayId,itemId,{visible:true});tripEditRefreshEditorHeading(itemKind,"edit");
   if(backdrop){backdrop.classList.add("active");backdrop.setAttribute("aria-hidden","false");}
 
 }
@@ -9104,15 +9155,14 @@ let tripLibraryCurrentUser=null;
 let tripLibraryCloudState={status:"signed-out",trips:[],error:null,fromCache:false,serverConfirmed:false};
 let tripLibraryLastReadyCatalog={uid:"",trips:[]};
 
-// Phase 2E · Firebase is the live trip source once an authenticated member trip
-// is available. Bundled trip.json remains the safe bootstrap / signed-out fallback.
-let bundledTripData=null;
+// Phase 2E · Firebase-only runtime. Trip content comes from Firebase or the
+// authenticated user-bound IndexedDB fast-resume cache; no repository Trip payload exists.
 let tripLoaderService=null;
 let tripSessionService=null;
 let tripAccessService=null;
 let tripLoaderStop=null;
 let tripLoaderActiveId="";
-let tripLoaderState={status:"local",source:"local",tripId:"",updatedAt:"",serverConfirmed:false,hasPendingWrites:false,error:null};
+let tripLoaderState={status:"idle",source:"unknown",tripId:"",updatedAt:"",serverConfirmed:false,hasPendingWrites:false,error:null};
 function setTripRealtimeDay(dayIdInput){
   const dayId=String(dayIdInput||"").trim();
   if(!dayId)return;
@@ -9172,7 +9222,7 @@ function currentTripLibraryRow(){
     <span class="trip-library-copy">
       <strong>${tripLibraryEsc(tripLibrarySummary.title||currentId)}</strong>
       <small>${tripLibraryEsc(tripLibrarySummary.dateRange||[tripLibrarySummary.startDate,tripLibrarySummary.endDate].filter(Boolean).join(" → ")||currentId)}</small>
-      <span class="trip-library-meta"><span class="trip-library-pill is-current">目前</span><span class="trip-library-pill">${tripLoaderState.status==="ready"&&tripLoaderState.tripId===currentId?(tripLoaderState.source==="instant-cache"?"即時快取":(tripLoaderState.source==="cache"?"Firebase 快取":"Firebase")):"本機 JSON"}</span>${statusLabel?`<span class="trip-library-pill">${statusLabel}</span>`:""}${lockPill}${importPill}${currentRole?`<span class="trip-library-pill is-role">${currentRole}</span>`:""}</span>
+      <span class="trip-library-meta"><span class="trip-library-pill is-current">目前</span><span class="trip-library-pill">${tripLoaderState.status==="ready"&&tripLoaderState.tripId===currentId?(tripLoaderState.source==="instant-cache"?"即時快取":(tripLoaderState.source==="cache"?"Firebase 快取":"Firebase")):"同步中"}</span>${statusLabel?`<span class="trip-library-pill">${statusLabel}</span>`:""}${lockPill}${importPill}${currentRole?`<span class="trip-library-pill is-role">${currentRole}</span>`:""}</span>
     </span>
     <span class="trip-library-side"><strong>${tripLibrarySummary.dayCount} 日</strong><small>${tripLibrarySummary.itemCount} 項</small>${archiveAction}</span>
   </div>`;
@@ -9199,15 +9249,16 @@ function cloudTripLibraryRow(trip,{archived=false}={}){
 
 function renderTripSwitcher(){
   const list=document.getElementById("trip-switch-list");
-  if(!list||!tripLibrarySummary)return;
-  const currentId=tripLibrarySummary.tripId;
+  if(!list)return;
+  const currentId=String(tripLibrarySummary?.tripId||dataTripId(window.tripData)||tripLoaderActiveId||window.__activeTripId||"").trim();
   const cloudTrips=Array.isArray(tripLibraryCloudState.trips)?tripLibraryCloudState.trips:[];
   const others=cloudTrips.filter(trip=>trip.tripId!==currentId && trip.archived!==true);
-  const rows=[`<button class="trip-switch-row is-current" type="button" data-trip-switch-current="true" role="menuitem">
+  const rows=[];
+  if(tripLibrarySummary&&currentId)rows.push(`<button class="trip-switch-row is-current" type="button" data-trip-switch-current="true" role="menuitem">
     <span class="trip-switch-row-icon">${tripIconMarkup({...tripLibrarySummary,...(cloudTrips.find(t=>t.tripId===currentId)||{})})}</span>
     <span class="trip-switch-row-copy"><strong>${tripLibraryEsc(tripLibrarySummary.title||currentId)}</strong></span>
     <span class="trip-switch-check">✓</span>
-  </button>`];
+  </button>`);
   others.forEach(trip=>rows.push(`<button class="trip-switch-row" type="button" data-trip-switch-id="${tripLibraryEsc(trip.tripId)}" role="menuitem">
     <span class="trip-switch-row-icon">${tripIconMarkup(trip)}</span>
     <span class="trip-switch-row-copy"><strong>${tripLibraryEsc(trip.title||trip.tripId)}</strong></span>
@@ -9252,27 +9303,27 @@ function renderTripLibrary(){
   const list=document.getElementById("trip-library-list");
   const status=document.getElementById("trip-library-status");
   const count=document.getElementById("trip-library-count");
-  if(!list||!tripLibrarySummary)return;
+  if(!list)return;
 
-  const currentId=tripLibrarySummary.tripId;
+  const currentId=String(tripLibrarySummary?.tripId||dataTripId(window.tripData)||tripLoaderActiveId||window.__activeTripId||"").trim();
   const allCloudTrips=Array.isArray(tripLibraryCloudState.trips)?tripLibraryCloudState.trips:[];
   const cloudTrips=allCloudTrips.filter(trip=>trip.archived!==true);
-  const currentAny=allCloudTrips.find(trip=>trip.tripId===currentId)||null;
-  const currentCloud=cloudTrips.find(trip=>trip.tripId===currentId)||null;
-  const others=cloudTrips.filter(trip=>trip.tripId!==currentId);
-  const showLocalCurrent=tripLibraryCloudState.status!=="ready"||!currentAny||currentAny.archived!==true;
-  list.innerHTML=(showLocalCurrent?currentTripLibraryRow():"")+others.map(trip=>cloudTripLibraryRow(trip)).join("");
-  if(count) count.textContent=String(tripLibraryCloudState.status==="ready"?cloudTrips.length:Math.max(1,cloudTrips.length+(currentCloud?0:1)));
+  const currentAny=currentId?allCloudTrips.find(trip=>trip.tripId===currentId)||null:null;
+  const currentCloud=currentId?cloudTrips.find(trip=>trip.tripId===currentId)||null:null;
+  const others=currentId?cloudTrips.filter(trip=>trip.tripId!==currentId):cloudTrips;
+  const showCurrent=Boolean(tripLibrarySummary&&currentId&&(tripLibraryCloudState.status!=="ready"||!currentAny||currentAny.archived!==true));
+  list.innerHTML=(showCurrent?currentTripLibraryRow():"")+others.map(trip=>cloudTripLibraryRow(trip)).join("");
+  if(count) count.textContent=String(tripLibraryCloudState.status==="ready"?cloudTrips.length:Math.max(0,cloudTrips.length+(showCurrent&&!currentCloud?1:0)));
 
   if(status){
     const state=tripLibraryCloudState.status;
-    if(state==="signed-out") status.textContent="目前使用本機 trip.json。登入 Google 後會顯示你有權使用嘅 Active Trips。";
+    if(state==="signed-out") status.textContent="登入 Google 後會顯示你有權使用嘅 Firebase Trips。";
     else if(state==="loading") status.textContent="已登入 Google，正在讀取未封存旅程…";
     else if(state==="rules-pending") status.textContent="Google 登入正常。請先部署 ZIP 內 firestore.rules，Phase 2G.1 Entry & Access 權限先可以安全寫入 Firebase。";
     else if(state==="index-required") status.textContent="Firestore 欠 Trip catalog composite index；按 Console error 提供嘅連結建立一次就得。";
     else if(state==="ready"&&cloudTrips.length===0) status.textContent=appEntryCreatorState.enabled?"暫時未有雲端旅程。你已獲授權，可用「匯入 trip.json」建立新 Trip；亦可以等待旅程邀請。":"暫時未有雲端旅程。收到旅程邀請後會自動顯示喺呢度。";
     else if(state==="ready") status.textContent=`已讀取 ${cloudTrips.length} 個未封存雲端旅程。Firebase Loader 已連接，可直接切換。`;
-    else status.textContent="旅程清單暫時未能同步，但目前本機行程不受影響。";
+    else status.textContent="旅程清單暫時未能同步；已驗證嘅裝置快取仍可用作離線續開。";
   }
   renderTripSwitcher();
   renderArchivedTrips();
@@ -9301,24 +9352,21 @@ function restartActiveTripCatalog(){
 }
 function loadArchivedTrips(){ renderArchivedTrips(); }
 
-function initTripLibrarySafe(data){
-  bundledTripData=data;
-  if(!tripBootDeferred&&!tripRenderSignature)tripRenderSignature=tripContentRenderSignature(data);
-  if(!tripBootDeferred&&!tripSnacksSignature)tripSnacksSignature=snacksRenderSignature(data);
-  if(!tripBootDeferred&&!tripInfoSignature)tripInfoSignature=infoRenderSignature(data);
-  if(!tripBootDeferred&&!tripWeatherSignature)tripWeatherSignature=weatherRenderSignature(data);
-  if(!tripBootDeferred&&!tripVisualSignature)tripVisualSignature=tripVisualRenderSignature(data);
-  if(!tripBootDeferred&&!tripExpensesSignature)tripExpensesSignature=expensesRenderSignature(data);
-  if(!tripBootDeferred&&!tripDestinationThemeSignature)tripDestinationThemeSignature=destinationThemeRenderSignature(data);
-  if(!tripBootDeferred&&!tripTeamThemeSignature)tripTeamThemeSignature=teamThemeRenderSignature(data);
+function initTripLibrarySafe(data=null){
+  if(data&&!tripBootDeferred&&!tripRenderSignature)tripRenderSignature=tripContentRenderSignature(data);
+  if(data&&!tripBootDeferred&&!tripSnacksSignature)tripSnacksSignature=snacksRenderSignature(data);
+  if(data&&!tripBootDeferred&&!tripInfoSignature)tripInfoSignature=infoRenderSignature(data);
+  if(data&&!tripBootDeferred&&!tripWeatherSignature)tripWeatherSignature=weatherRenderSignature(data);
+  if(data&&!tripBootDeferred&&!tripVisualSignature)tripVisualSignature=tripVisualRenderSignature(data);
+  if(data&&!tripBootDeferred&&!tripExpensesSignature)tripExpensesSignature=expensesRenderSignature(data);
+  if(data&&!tripBootDeferred&&!tripDestinationThemeSignature)tripDestinationThemeSignature=destinationThemeRenderSignature(data);
+  if(data&&!tripBootDeferred&&!tripTeamThemeSignature)tripTeamThemeSignature=teamThemeRenderSignature(data);
   import(`./assets/js/trip-schema-service.js?build=${APP_VERSION}`)
     .then(schemaService=>{
       tripLibrarySchemaService=schemaService;
-      const summarySource=window.tripData&&dataTripId(window.tripData)?window.tripData:data;
-      const result=schemaService.validatePortableTrip(summarySource);
-      tripLibrarySummary=schemaService.getTripSummary(result.trip);
-      tripLibrarySummaryDataSignature=tripLibraryDataSignature(summarySource);
-      window.__portableTripSchema=result;
+      const summarySource=window.tripData&&dataTripId(window.tripData)?window.tripData:(data&&dataTripId(data)?data:null);
+      if(summarySource){const result=schemaService.validatePortableTrip(summarySource);tripLibrarySummary=schemaService.getTripSummary(result.trip);tripLibrarySummaryDataSignature=tripLibraryDataSignature(summarySource);window.__portableTripSchema=result;}
+      else{tripLibrarySummary=null;tripLibrarySummaryDataSignature="";window.__portableTripSchema=null;}
       tripLibraryCloudState={status:window.__appAuthUser?"loading":"signed-out",trips:[],error:null,fromCache:false,serverConfirmed:false};
       renderTripLibrary();
 
@@ -9360,20 +9408,12 @@ function initTripLibrarySafe(data){
       console.error("Phase 2B portable trip schema init error",error);
       const status=document.getElementById("trip-library-status");
       if(status) status.textContent="旅程 Schema service 載入失敗；目前行程仍可正常使用。";
-      if(tripBootDeferred){
-        const preferred=tripBootPreferredId||resolveBootPreferredTripId();
-        const localId=dataTripId(bundledTripData);
-        if(preferred&&localId===preferred)applyBundledTripFallback();
-        else showDeferredTripBootPlaceholder("旅程同步暫時未完成，正在重試…");
-      }
+      if(tripBootDeferred)showDeferredTripBootPlaceholder("旅程同步暫時未完成，正在重試…");
     });
 }
 
 
-// Phase 2E · v7.6.3 · Firebase live-loader wiring + legacy trip reset.
-// v7.6.0/v7.6.1 shipped the loader service but never subscribed the app renderer
-// to it. Firestore therefore changed while the visible itinerary kept rendering
-// bundled trip.json. This block makes Firebase the authenticated source of truth.
+// Phase 2E · Firebase live-loader wiring. v7.9.15.0 removes bundled Trip runtime; Firebase is the authenticated source of truth.
 let tripLoaderInitPromise=null;
 let tripLoaderReconcileToken=0;
 const tripLoaderRevisionWaiters=new Set();
@@ -9411,12 +9451,6 @@ function armDeferredTripBootFailSafe(){
     if(activeId&&(!preferred||activeId===preferred)){
       console.warn("Deferred Trip boot watchdog released an already-rendered Trip.");
       releaseDeferredTripBoot();
-      return;
-    }
-    const localId=dataTripId(bundledTripData);
-    if(preferred&&localId&&preferred===localId){
-      console.warn("Deferred Trip boot watchdog using same-Trip bundled fallback while Firebase continues in background.");
-      applyBundledTripFallback();
       return;
     }
     showDeferredTripBootPlaceholder("正在重新連接上次旅程…");
@@ -9964,38 +9998,10 @@ function applyFirebaseTripData(data,{source="server",tripId="",dirtySections=[]}
   // Metadata-only cache/server transitions never reach this path.
   if(source!=="instant-cache")persistInstantTripCache(data).catch(()=>{});
 }
-function applyBundledTripFallback(){
-  if(!bundledTripData)return;
-  if(dataTripId(window.tripData)===dataTripId(bundledTripData)&&tripLoaderState.status==="local")return;
-  const sig=tripContentRenderSignature(bundledTripData);
-  window.tripData=bundledTripData;
-  if(sig!==tripRenderSignature){
-    render(bundledTripData);
-    runOptionalAppStep("Local travel info render",()=>renderInfo(bundledTripData));
-    runOptionalAppStep("Local weather render",()=>renderWeather(bundledTripData));
-    updateLargeHeaderForView();updateCompactHeader();
-  }
-  tripRenderSignature=sig;
-  tripSnacksSignature=snacksRenderSignature(bundledTripData);
-  tripInfoSignature=infoRenderSignature(bundledTripData);
-  tripWeatherSignature=weatherRenderSignature(bundledTripData);
-  tripVisualSignature=tripVisualRenderSignature(bundledTripData);
-  tripExpensesSignature=expensesRenderSignature(bundledTripData);
-  tripDestinationThemeSignature=destinationThemeRenderSignature(bundledTripData);
-  tripTeamThemeSignature=teamThemeRenderSignature(bundledTripData);
-  tripLoaderState={status:"local",source:"local",tripId:dataTripId(bundledTripData),updatedAt:"",serverConfirmed:false,hasPendingWrites:false,error:null};
-  setDataSourceLabel("本機 trip.json");updateTripLibrarySummaryFromData(bundledTripData);
-  try{refreshAppearanceColourMenuState(bundledTripData);}catch(error){}
-  try{window.__teamSettingsRefresh?.(bundledTripData);}catch(error){}
-  // Pure local / signed-out use still benefits from first-paint visual restore,
-  // but never overwrite a remembered Firebase appearance with bundled defaults.
-  if(!rememberedCacheUid())persistBootVisualSnapshot(bundledTripData);
-  releaseDeferredTripBoot();
-}
 function stopFirebaseTripLoader({fallback=false}={}){
   if(tripLoaderStop){try{tripLoaderStop();}catch(error){}tripLoaderStop=null;}
   tripLoaderActiveId="";
-  if(fallback)applyBundledTripFallback();
+  if(fallback){releaseDeferredTripBoot();refreshAppEntryState();}
 }
 let accessRevokeRoutePromise=null;
 let accessRevokeRouteSourceId="";
@@ -10068,7 +10074,6 @@ async function startFirebaseTripLoader(tripIdInput,{preserveVisibleReady=false}=
   const keepVisibleReady=preserveVisibleReady===true&&!!priorTripData&&tripLoaderState.status==="ready";
   const preservedState=keepVisibleReady?{...tripLoaderState,tripId,error:null}:null;
   // Only the trusted IndexedDB render cache is used as the inactive-Day seed.
-  // Bundled trip.json is deliberately excluded because Firebase may be newer.
   const seedData=priorLoaderSource==="instant-cache"?priorTripData:null;
   const activeDayId=preferredRealtimeDayId(seedData||priorTripData);
   stopFirebaseTripLoader();
@@ -10142,16 +10147,14 @@ async function startFirebaseTripLoader(tripIdInput,{preserveVisibleReady=false}=
 }
 async function reconcileFirebaseTripLoader(){
   const token=++tripLoaderReconcileToken;
-  if(!bundledTripData)return;
   if(!tripLibraryCurrentUser){stopFirebaseTripLoader({fallback:false});refreshAppEntryState();return;}
   if(tripLibraryCloudState.status!=="ready")return;
   const trips=(tripLibraryCloudState.trips||[]).filter(t=>t.archived!==true);
   if(!trips.length){stopFirebaseTripLoader({fallback:false});refreshAppEntryState();return;}
   const {session}=await getTripLoaderServices();if(token!==tripLoaderReconcileToken)return;
-  const desired=session.resolveTripId(bundledTripData);
-  const bundledId=dataTripId(bundledTripData);
-  const target=trips.find(t=>t.tripId===desired)||trips.find(t=>t.tripId===bundledId)||trips[0];
-  if(!target){stopFirebaseTripLoader({fallback:true});return;}
+  const desired=String(session.getActiveTripId?.()||resolveBootPreferredTripId()||"").trim();
+  const target=trips.find(t=>t.tripId===desired)||trips[0];
+  if(!target){stopFirebaseTripLoader({fallback:false});refreshAppEntryState();return;}
   session.setActiveTripId(target.tripId);updateTripUrl(target.tripId);await startFirebaseTripLoader(target.tripId);
 }
 let manualTripSwitchRecoveryToken=0;
@@ -10571,7 +10574,7 @@ function restoreProgressPresentation(progress){
 }
 
 // Phase 2C · Portable JSON -> Firestore import. This is deliberately isolated
-// from the critical trip.json renderer, so an import or rules failure can never
+// from the active Firebase renderer, so an import or rules failure can never
 // blank the itinerary.
 const tripImportButton=document.getElementById("trip-import-btn");
 const tripImportFile=document.getElementById("trip-import-file");
@@ -12785,7 +12788,7 @@ function renderTripBackgroundSettings(data=window.tripData,{preserveStatus=false
   const hasCustom=tripMediaHasStorage(media),canEdit=appearanceSettingsCanEdit(),pendingAny=!!pending,pendingBlocking=pending?.blocking===true;
   const previousPreviewSrc=String(preview.querySelector("img")?.currentSrc||preview.querySelector("img")?.getAttribute("src")||"").trim();
   preview.innerHTML="";
-  const legacy=legacyTripVisualMeta(data).background||((dataTripId(bundledTripData)===tripId)?"assets/bg/bg_trip_mobile.webp":"");
+  const legacy=legacyTripVisualMeta(data).background;
   if(hasCustom){
     const img=document.createElement("img");img.alt="";preview.appendChild(img);
     bindTripMediaImageElement(img,media,{variant:"thumbnail",tripId,fallbackSrc:previousPreviewSrc||legacy});
@@ -13824,7 +13827,7 @@ function initPhase2AccessContext(data){
   ])
     .then(([sessionService,accessService])=>{
       const tripId=sessionService.resolveTripId(data);
-      accessService.initTripAccess(tripId);
+      if(tripId)accessService.initTripAccess(tripId);
     })
     .catch(error=>console.error("Phase 2 trip services load error",error));
 }
@@ -13964,64 +13967,25 @@ if ("serviceWorker" in navigator) {
 
 // Load
 function runOptionalAppStep(label,fn){try{return fn();}catch(error){console.error(`${label} error`,error);return null;}}
-// Phase 2G.1 root entry does not wait for trip.json before resolving Google
-// Authentication. Signed-out users still see the Login Gateway promptly. A
-// returning user with a valid local Trip cache stays on the workspace from the
-// first frame while Auth and Trip access reconcile silently in the background.
+// v7.9.15.0 · Firebase-only runtime. GitHub no longer provides a bundled Trip
+// payload. Authentication resolves first; the remembered Trip may paint from
+// the user-bound IndexedDB render cache, then Firebase becomes canonical.
 initGlobalAuthSafe();
 getAppEntryService().then(()=>refreshAppEntryState()).catch(error=>console.error("Entry gate init",error));
-// v7.8.0.5 · Begin IndexedDB Fast Resume before the bundled trip.json network
-// request. Returning users should see their local Trip immediately on both a
-// Home Screen launch and an in-app reload; Auth and membership reconcile behind
-// the already-visible workspace.
+tripBootPreferredId=resolveBootPreferredTripId();
 const appEntryEarlyResumePromise=appEntryWarmRefresh
   ? bootstrapRememberedTripBeforeAuthFastResume().catch(error=>{console.warn("Early Trip Fast Resume",error);endWarmRefreshGate();return false;})
   : Promise.resolve(false);
-fetch(getTripJsonUrl())
-  .then(r=>{if(!r.ok)throw new Error("HTTP "+r.status);return r.json();})
-  .then(async data=>{
-    bundledTripData=data;
-    const deferBundled=beginDeferredTripBoot(data);
-    const earlyResumed=await appEntryEarlyResumePromise;
-    const resumedTripId=String(appEntryOptimisticTripId||"").trim();
-    const keepInstantTrip=earlyResumed&&resumedTripId&&dataTripId(window.tripData)===resumedTripId&&tripLoaderState?.source==="instant-cache";
-    // A later bundled trip.json response must never overwrite a Trip that Fast
-    // Resume has already painted from the user-bound IndexedDB cache.
-    if(keepInstantTrip){
-      if(tripBootDeferred)releaseDeferredTripBoot();
-    }else{
-      window.tripData=deferBundled?null:data;
-      // A remembered/deep-linked Firebase Trip wins before first paint.
-      // If it differs from bundled trip.json, never paint the bundled Trip.
-      if(!deferBundled){
-        render(data);
-        runOptionalAppStep("Weather render",()=>renderWeather(data));
-        runOptionalAppStep("Travel info render",()=>renderInfo(data));
-      }else{
-        if(appEntryWarmRefresh){
-          const applied=await appEntryEarlyResumePromise;
-          if(!applied&&tripBootDeferred)showDeferredTripBootPlaceholder("正在開啟上次旅程…");
-        }else showDeferredTripBootPlaceholder("正在開啟上次旅程…");
-      }
-    }
-    runOptionalAppStep("Trip library init",()=>initTripLibrarySafe(data));
-    runOptionalAppStep("Compact header init",()=>updateCompactHeader());
-    requestAnimationFrame(()=>{runOptionalAppStep("Bottom nav update",updateBottomNavIndicator);runOptionalAppStep("Chrome update",updateCollapsingChrome);});
-    runOptionalAppStep("View restore",()=>{
-      let saved="";
-      try{saved=sessionStorage.getItem("trip_current_view")||"";}catch(e){}
-      setView(["itinerary","snacks","info","expenses","profile"].includes(saved)?saved:"itinerary",{restoreScroll:false});
-    });
-    runOptionalAppStep("Preference sync init",initPreferencesCloudSyncSafe);
-    runOptionalAppStep("Global auth init",initGlobalAuthSafe);
-    runOptionalAppStep("Trip access init",()=>initPhase2AccessContext(data));
-  })
-  .catch(error=>{
-    console.error("Trip JSON / critical itinerary render error",error);
-    const chip=document.getElementById("today-chip"),title=document.getElementById("header-title-main");
-    if(chip)chip.textContent="無法載入行程資料";
-    if(title)title.textContent="無法載入行程資料";
-  });
+runOptionalAppStep("Trip library init",()=>initTripLibrarySafe(null));
+runOptionalAppStep("Compact header init",()=>updateCompactHeader());
+requestAnimationFrame(()=>{runOptionalAppStep("Bottom nav update",updateBottomNavIndicator);runOptionalAppStep("Chrome update",updateCollapsingChrome);});
+runOptionalAppStep("View restore",()=>{
+  let saved="";try{saved=sessionStorage.getItem("trip_current_view")||"";}catch(e){}
+  setView(["itinerary","snacks","info","expenses","profile"].includes(saved)?saved:"itinerary",{restoreScroll:false});
+});
+runOptionalAppStep("Preference sync init",initPreferencesCloudSyncSafe);
+runOptionalAppStep("Global auth init",initGlobalAuthSafe);
+appEntryEarlyResumePromise.then(applied=>{if(!applied)refreshAppEntryState();}).catch(()=>refreshAppEntryState());
 </script>
 
 </body></html>
