@@ -1048,6 +1048,96 @@ export async function moveTripItemMedia({
   return { moved: true, images: nextImages, index: target };
 }
 
+// v7.9.14.0 · Edit Mode media staging. Itinerary image bytes are prepared into
+// the existing Local First cache immediately, but no Firestore item mutation or
+// Storage upload happens until the user presses the global Edit Save button.
+export async function prepareTripEditItemMedia({
+  tripId: tripIdInput,
+  itemId: itemIdInput,
+  file,
+  crop: cropInput = null,
+  sortOrder: sortOrderInput = 0
+} = {}) {
+  const tripId = clean(tripIdInput), itemId = clean(itemIdInput);
+  if (!tripId || !itemId) throw errorWithCode("Invalid itinerary edit media target", "invalid-media-record");
+  if (!(file instanceof Blob)) throw errorWithCode("Image file is required", "invalid-media-file");
+  const prepared = await prepareTripImageLocalAsset({
+    tripId,
+    ownerType: TRIP_MEDIA_OWNER_TYPES.ITEM,
+    ownerId: itemId,
+    slot: "gallery",
+    file
+  });
+  prepared.record.ownerType = "item";
+  prepared.record.ownerId = itemId;
+  prepared.record.slot = "gallery";
+  prepared.record.crop = normalizeItineraryCrop(cropInput);
+  prepared.record.sortOrder = Math.max(0, finiteNumber(sortOrderInput, 0));
+  return { ...plainDescriptor(prepared.record), editDraft: true };
+}
+
+export async function uploadTripEditItemMedia({ descriptors = [], user: userInput = null, onProgress = null } = {}) {
+  const user = userInput || getCurrentUser() || await waitForInitialAuth();
+  if (!user?.uid) throw errorWithCode("Google sign-in required", "auth-required");
+  const rows = Array.isArray(descriptors) ? descriptors.filter(row => row && typeof row === "object" && row.editDraft === true) : [];
+  const uploaded = [];
+  for (let index = 0; index < rows.length; index += 1) {
+    const row = rows[index];
+    try {
+      const ready = await uploadPreparedTripImage(row, {
+        user,
+        onProgress: info => {
+          if (typeof onProgress === "function") onProgress({ ...info, index, count: rows.length, mediaId: clean(row.mediaId || row.imageId) });
+        }
+      });
+      const next = plainDescriptor(ready);
+      delete next.editDraft;
+      uploaded.push(next);
+    } catch (error) {
+      error.uploadedDescriptors = uploaded.slice();
+      throw error;
+    }
+  }
+  return uploaded;
+}
+
+export async function discardTripEditItemMedia({ descriptors = [] } = {}) {
+  const rows = Array.isArray(descriptors) ? descriptors.filter(row => row && typeof row === "object" && row.editDraft === true) : [];
+  await Promise.allSettled(rows.flatMap(row => [
+    removeTripMediaCache(clean(row.storagePath)),
+    removeTripMediaCache(clean(row.thumbnailStoragePath))
+  ]));
+  return { discarded: rows.length };
+}
+
+export async function cleanupTripEditRemovedMedia({ tripId: tripIdInput = "", descriptors = [], user: userInput = null } = {}) {
+  const tripId = clean(tripIdInput);
+  const user = userInput || getCurrentUser() || await waitForInitialAuth();
+  if (!user?.uid) throw errorWithCode("Google sign-in required", "auth-required");
+  const rows = Array.isArray(descriptors) ? descriptors.filter(row => row && typeof row === "object" && !row.editDraft) : [];
+  let cleaned = 0, deferred = 0;
+  for (const row of rows) {
+    const record = recordForDelete({ ...row, tripId: clean(row.tripId) || tripId }, clean(row.tripId) || tripId);
+    if (!record) continue;
+    try {
+      await deleteTripMedia(record, { user });
+      cleaned += 1;
+    } catch (error) {
+      deferred += 1;
+      await putTripMediaPendingJob({
+        jobId: nowJobId("edit-cleanup"), kind: "item-image-cleanup", tripId: clean(record.tripId) || tripId,
+        itemId: clean(row.ownerId), slot: itemImageSlot("edit", clean(row.ownerId), clean(row.mediaId || row.imageId)),
+        uid: user.uid, state: "orphan-cleanup", blocking: false, orphanDescriptor: record,
+        attempts: 0, nextAttemptAt: Date.now() + 10000, createdAt: Date.now(), updatedAt: Date.now(),
+        lastErrorCode: clean(error?.code), lastErrorMessage: clean(error?.message)
+      });
+    }
+  }
+  if (deferred) scheduleFlush(10100);
+  await publishState({ tripEditMediaCleanup: true, tripId, cleaned, deferred });
+  return { cleaned, deferred };
+}
+
 export async function flushTripMediaSyncQueue() {
   if (flushPromise) return flushPromise;
   flushPromise = (async () => {
