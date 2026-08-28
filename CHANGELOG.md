@@ -1,11 +1,11 @@
-# v7.9.15.0 — Firebase-only Runtime + Native Item / Transit Editor
+# v7.9.15.1 · Stable Rebuild from v7.9.14.0
 
-- Removed bundled `trip.json` from runtime boot and Service Worker critical cache; signed-in Firebase data plus the user-bound IndexedDB fast-resume cache are now the only Trip runtime sources.
-- Removed the hardcoded `demo-trip-001` session fallback so a deleted legacy Team cannot be reintroduced by a repository JSON payload after relaunch.
-- Redesigned Item Edit as a native grouped iOS-style sheet with a fixed title header matching the existing expense modal language.
-- Split editor presentation into **編輯行程項目** and **編輯交通項目**, with kind-specific headings and simplified stop-only controls.
-- Collapsed the rich Icon and Day selectors behind disclosure rows; Day dates now use compact weekday labels （一）…（日）.
-- Source baseline cleanup: Trip-specific bundled gallery assets and `trip.json` are no longer required; only generic demo SVG fallback assets remain under `assets/gallery`.
+- Discards the rejected v7.9.15.0 branch and rebuilds directly from the verified v7.9.14.0 Item Edit baseline, preserving the proven itinerary media and Google Maps edit paths unchanged.
+- Fixed Team deletion persistence at the Firestore source: `settings/general.travellers` and `flights` are now replaced as top-level aggregate fields via `mergeFields`, instead of recursively merged with `merge: true`; deleted Team keys therefore cannot survive on the server and reappear after a fresh app launch.
+- Reworked the Item editor presentation only: a fixed iOS-style heading distinguishes `編輯／新增行程項目` from `編輯／新增交通項目`, while the existing field IDs and save controllers remain intact.
+- Collapsed the rich Icon and Day selectors behind disclosure rows to reduce visual noise. Day choices keep the useful date context but shorten weekdays to `（一）…（日）`.
+- Rebuilt the >7-Day sticky backing as a viewport-fixed material plane while leaving the frozen Day pill size, spacing, horizontal scrolling, sticky top and switching logic unchanged.
+- `trip.json`, bundled gallery assets, media services, Map services and Firebase-only runtime behaviour are intentionally NOT changed in this rebuild. Legacy source cleanup is deferred until this stable rebuild passes real-device regression.
 
 # v7.9.14.0 · Phase 3E Item Edit Finalization
 

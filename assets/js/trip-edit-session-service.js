@@ -979,12 +979,17 @@ export async function commitTripEditSession(session, { user: userInput = null } 
     }
     tx.set(tripRef, tripPatch, { merge: true });
     if (domainChanges.travellersChanged || domainChanges.flightsChanged) {
+      // v7.9.15.1 · travellers/flights are canonical aggregate fields. Using
+      // merge:true recursively merges nested map keys, so deleting one Team
+      // can leave the removed key on the server and make it reappear after a
+      // fresh app launch. mergeFields treats these top-level fields as atomic
+      // replacements while still preserving unrelated settings/general data.
       tx.set(generalRef, {
         travellers: normalizeTravellersForEdit(session.draftTravellers || {}),
         flights: normalizeFlightsForEdit(session.draftFlights || []),
         updatedAt: serverTimestamp(),
         updatedBy: user.uid
-      }, { merge: true });
+      }, { mergeFields: ["travellers", "flights", "updatedAt", "updatedBy"] });
     }
     const summaryParts = [];
     if (changes.length) summaryParts.push(`${changes.length} 個行程項目`);
