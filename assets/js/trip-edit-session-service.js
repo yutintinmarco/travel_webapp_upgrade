@@ -11,6 +11,7 @@ const PERSISTED_ITEM_FIELDS = ["time", "title", "note", "who", "icon", "detail",
 const VALID_ITEM_KINDS = new Set(["stop", "transit"]);
 const VALID_ROLES = new Set(["owner", "admin"]);
 const PERSISTED_DAY_FIELDS = ["label", "date", "isoDate", "title", "subtitle", "city", "cities", "sortOrder"];
+const SAVED_PLACE_EDITABLE_FIELDS = ["title", "icon", "area", "category", "priority", "mealType", "routeFit", "priceLevel", "queueLevel", "bestTime", "must", "note", "detail", "opening"];
 
 function clean(value) { return String(value ?? "").trim(); }
 function clonePlain(value) {
@@ -209,6 +210,42 @@ function normalizeFlightsForEdit(input = []) {
 function sameTripDetails(a = {}, b = {}) { return stableJson(normalizeTripDetails(a, a)) === stableJson(normalizeTripDetails(b, b)); }
 function sameTravellers(a = {}, b = {}) { return stableJson(normalizeTravellersForEdit(a)) === stableJson(normalizeTravellersForEdit(b)); }
 function sameFlights(a = [], b = []) { return stableJson(normalizeFlightsForEdit(a)) === stableJson(normalizeFlightsForEdit(b)); }
+function savedPlaceItemsFromTrip(trip = {}) {
+  const snacks = trip?.snacks || {};
+  return Array.isArray(snacks) ? snacks : (Array.isArray(snacks?.items) ? snacks.items : []);
+}
+function makeSavedPlaceId() {
+  try { if (globalThis.crypto?.randomUUID) return `place_${globalThis.crypto.randomUUID().replace(/-/g, "").slice(0, 12)}`; } catch (_) {}
+  return `place_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
+}
+function normalizeSavedPlace(input = {}, fallback = {}) {
+  const source = input && typeof input === "object" ? input : {};
+  const base = fallback && typeof fallback === "object" ? fallback : {};
+  const title = clean(source.title ?? base.title);
+  const location = normalizeDraftLocation(source.location || {
+    name: source.placeName || title, placeId: source.googlePlaceId || source.googleMapsPlaceId,
+    latitude: source.latitude ?? source.lat, longitude: source.longitude ?? source.lng ?? source.lon,
+    address: source.address, mapsUrl: source.maps || source.mapsUrl || source.googleMapsUrl
+  }, title);
+  const out = clonePlain({ ...base, ...source });
+  SAVED_PLACE_EDITABLE_FIELDS.forEach(field => { out[field] = clean(source[field] ?? base[field]); });
+  out.title = title || "新收藏";
+  out.icon = clean(source.icon ?? base.icon) || "📍";
+  out.priority = clean(source.priority ?? base.priority) || "route";
+  out.mealType = clean(source.mealType ?? base.mealType) || "snack";
+  out.routeFit = clean(source.routeFit ?? base.routeFit) || "any";
+  out.tags = Array.isArray(source.tags) ? source.tags.map(clean).filter(Boolean) : (Array.isArray(base.tags) ? base.tags.map(clean).filter(Boolean) : []);
+  out.gallery = Array.isArray(source.gallery) ? clonePlain(source.gallery) : (Array.isArray(base.gallery) ? clonePlain(base.gallery) : []);
+  out.images = Array.isArray(source.images) ? clonePlain(source.images) : (Array.isArray(base.images) ? clonePlain(base.images) : []);
+  out.location = location;
+  out.maps = clean(location.mapsUrl || source.maps || base.maps);
+  out.sortOrder = normalizedSortOrder(source.sortOrder, normalizedSortOrder(base.sortOrder));
+  return out;
+}
+function sameSavedPlace(a = {}, b = {}) {
+  const left = normalizeSavedPlace(a, a), right = normalizeSavedPlace(b, b);
+  return stableJson(left) === stableJson(right);
+}
 function itemKey(dayId, itemId) { return `${clean(dayId)}|${clean(itemId)}`; }
 function makeItemId() {
   try {
@@ -278,7 +315,7 @@ function newDraftRecord(dayId, kindInput, fields = {}) {
     booked: Boolean(fields.booked),
     detail: clean(fields.detail),
     maps: clean(fields.location?.mapsUrl),
-    gallery: [],
+    gallery: Array.isArray(fields.gallery) ? clonePlain(fields.gallery) : [],
     images: Array.isArray(fields.images) ? clonePlain(fields.images) : [],
     location: normalizeDraftLocation(fields.location || {}, title)
   };
@@ -419,6 +456,12 @@ export function createTripEditSession(tripDataInput) {
   const baseTripDetails = tripDetailsSnapshot(trip);
   const baseTravellers = normalizeTravellersForEdit(trip?.meta?.travellers || {});
   const baseFlights = normalizeFlightsForEdit(trip?.meta?.flights || []);
+  const baseSavedPlaces = new Map(), draftSavedPlaces = new Map();
+  savedPlaceItemsFromTrip(trip).forEach((place, index) => {
+    const placeId = clean(place?.placeId || place?.id); if (!placeId) return;
+    const snap = normalizeSavedPlace({ ...place, placeId, sortOrder: normalizedSortOrder(place?.sortOrder, index) });
+    baseSavedPlaces.set(placeId, clonePlain(snap)); draftSavedPlaces.set(placeId, clonePlain(snap));
+  });
   return {
     tripId,
     baseRevision,
@@ -435,7 +478,10 @@ export function createTripEditSession(tripDataInput) {
     baseTravellers,
     draftTravellers: clonePlain(baseTravellers),
     baseFlights,
-    draftFlights: clonePlain(baseFlights)
+    draftFlights: clonePlain(baseFlights),
+    baseSavedPlaces,
+    draftSavedPlaces,
+    deletedSavedPlaces: new Set()
   };
 }
 
@@ -496,6 +542,60 @@ export function replaceTripEditDraftTeamState(session, { travellers = {}, flight
     session.draftItems.set(key, { ...draft, who: "all" });
   });
   return getTripEditDraftTeamState(session);
+}
+
+export function getTripEditDraftSavedPlace(session, placeIdInput) {
+  if (!session) return null;
+  const placeId = clean(placeIdInput);
+  if (!placeId || session.deletedSavedPlaces?.has?.(placeId)) return null;
+  const row = session.draftSavedPlaces?.get?.(placeId);
+  return row ? clonePlain(row) : null;
+}
+
+export function addTripEditDraftSavedPlace(session, fields = {}) {
+  if (!session) return null;
+  const placeId = clean(fields?.placeId) || makeSavedPlaceId();
+  if (session.draftSavedPlaces?.has?.(placeId) || session.baseSavedPlaces?.has?.(placeId)) {
+    const error = new Error("Saved place already exists"); error.code = "edit-saved-place-duplicate"; throw error;
+  }
+  const maxSort = [...(session.draftSavedPlaces?.values?.() || [])].reduce((max, row) => Math.max(max, normalizedSortOrder(row?.sortOrder, -1)), -1);
+  const draft = normalizeSavedPlace({ ...fields, placeId, sortOrder: maxSort + 1, isNew: true });
+  draft.placeId = placeId; draft.isNew = true;
+  session.draftSavedPlaces.set(placeId, draft);
+  return getTripEditDraftSavedPlace(session, placeId);
+}
+
+export function updateTripEditDraftSavedPlace(session, placeIdInput, patchInput = {}) {
+  if (!session) return null;
+  const placeId = clean(placeIdInput), current = session.draftSavedPlaces?.get?.(placeId);
+  if (!current || session.deletedSavedPlaces?.has?.(placeId)) { const error = new Error("Saved place is not part of this edit session"); error.code = "edit-saved-place-missing"; throw error; }
+  const next = normalizeSavedPlace({ ...current, ...(patchInput || {}), placeId }, current);
+  next.placeId = placeId; if (current.isNew) next.isNew = true;
+  session.draftSavedPlaces.set(placeId, next);
+  return getTripEditDraftSavedPlace(session, placeId);
+}
+
+export function removeTripEditDraftSavedPlace(session, placeIdInput) {
+  if (!session) return { removed: false, wasNew: false };
+  const placeId = clean(placeIdInput), draft = session.draftSavedPlaces?.get?.(placeId);
+  if (!draft || session.deletedSavedPlaces?.has?.(placeId)) return { removed: false, wasNew: false };
+  const base = session.baseSavedPlaces?.get?.(placeId), wasNew = Boolean(draft?.isNew && !base);
+  session.draftSavedPlaces.delete(placeId); if (!wasNew && base) session.deletedSavedPlaces.add(placeId);
+  return { removed: true, wasNew };
+}
+
+export function tripEditSavedPlaceChanges(session) {
+  if (!session) return [];
+  const changes = [];
+  session.deletedSavedPlaces?.forEach?.(placeId => { const base = session.baseSavedPlaces?.get?.(placeId); if (base) changes.push({ operation: "delete", placeId, base: clonePlain(base) }); });
+  session.draftSavedPlaces?.forEach?.((draft, placeId) => {
+    if (session.deletedSavedPlaces?.has?.(placeId)) return;
+    const base = session.baseSavedPlaces?.get?.(placeId);
+    const data = normalizeSavedPlace(draft, draft); delete data.isNew; data.placeId = placeId;
+    if (!base) { if (draft?.isNew) changes.push({ operation: "create", placeId, data }); return; }
+    if (!sameSavedPlace(base, draft)) changes.push({ operation: "update", placeId, data });
+  });
+  return changes;
 }
 
 export function getTripEditDraftItem(session, dayIdInput, itemIdInput) {
@@ -724,12 +824,28 @@ export function tripEditMediaDelta(session) {
       seenAdd.add(id); additions.push(clonePlain(row));
     });
   });
+  session.draftSavedPlaces?.forEach?.(draft => {
+    (Array.isArray(draft?.images) ? draft.images : []).forEach(row => {
+      if (!row || typeof row !== "object" || row.editDraft !== true) return;
+      const id = mediaIdentity(row); if (!id || seenAdd.has(id)) return;
+      seenAdd.add(id); additions.push(clonePlain(row));
+    });
+  });
   session.baseItems?.forEach?.((base, key) => {
     const baseImages = Array.isArray(base?.images) ? base.images : [];
     const itemId = clean(base?.itemId), dayId = clean(base?.dayId);
     const deleted = session.deletedItems?.has?.(key);
     let draft = null;
     if (!deleted) draft = [...(session.draftItems?.values?.() || [])].find(row => clean(row?.itemId) === itemId && clean(row?.originDayId || row?.dayId) === dayId) || null;
+    const nextIds = new Set((Array.isArray(draft?.images) ? draft.images : []).map(mediaIdentity).filter(Boolean));
+    baseImages.forEach(row => {
+      const id = mediaIdentity(row); if (!id || (!deleted && nextIds.has(id)) || seenRemove.has(id)) return;
+      seenRemove.add(id); removals.push(clonePlain(row));
+    });
+  });
+  session.baseSavedPlaces?.forEach?.((base, placeId) => {
+    const baseImages = Array.isArray(base?.images) ? base.images : [], deleted = session.deletedSavedPlaces?.has?.(placeId);
+    const draft = deleted ? null : session.draftSavedPlaces?.get?.(placeId);
     const nextIds = new Set((Array.isArray(draft?.images) ? draft.images : []).map(mediaIdentity).filter(Boolean));
     baseImages.forEach(row => {
       const id = mediaIdentity(row); if (!id || (!deleted && nextIds.has(id)) || seenRemove.has(id)) return;
@@ -753,6 +869,16 @@ export function replaceTripEditDraftMediaDescriptors(session, replacementsInput 
     }).map((row, index) => ({ ...row, sortOrder: index }));
     if (changed) session.draftItems.set(key, { ...draft, images });
   });
+  session.draftSavedPlaces?.forEach?.((draft, placeId) => {
+    if (!Array.isArray(draft?.images)) return;
+    let changed = false;
+    const images = draft.images.map(row => {
+      const id = mediaIdentity(row), replacement = id ? replacements.get(id) : null;
+      if (!replacement) return row;
+      changed = true; count += 1; return clonePlain(replacement);
+    }).map((row, index) => ({ ...row, sortOrder: index }));
+    if (changed) session.draftSavedPlaces.set(placeId, { ...draft, images });
+  });
   return count;
 }
 
@@ -771,9 +897,9 @@ export function tripEditDomainChanges(session) {
 }
 
 export function tripEditChangeCount(session) {
-  const itemCount = tripEditChanges(session).length;
+  const itemCount = tripEditChanges(session).length, savedPlaceCount = tripEditSavedPlaceChanges(session).length;
   const domain = tripEditDomainChanges(session);
-  return itemCount + domain.dayChangeCount + (domain.tripDetailsChanged ? 1 : 0) + domain.teamChangeCount + (domain.flightsChanged && !domain.travellersChanged ? 1 : 0);
+  return itemCount + savedPlaceCount + domain.dayChangeCount + (domain.tripDetailsChanged ? 1 : 0) + domain.teamChangeCount + (domain.flightsChanged && !domain.travellersChanged ? 1 : 0);
 }
 
 export function applyTripEditDraftToTrip(session, tripInput, { revision = null } = {}) {
@@ -840,6 +966,10 @@ export function applyTripEditDraftToTrip(session, tripInput, { revision = null }
     });
     return day;
   });
+  const snackMeta = Array.isArray(trip.snacks) ? {} : clonePlain(trip.snacks || {});
+  const savedPlaces = [...(session.draftSavedPlaces?.values?.() || [])].map(row => { const next = normalizeSavedPlace(row, row); delete next.isNew; return next; })
+    .sort((a,b) => normalizedSortOrder(a?.sortOrder) - normalizedSortOrder(b?.sortOrder));
+  trip.snacks = { ...snackMeta, items: savedPlaces };
   if (!trip.meta || typeof trip.meta !== "object") trip.meta = {};
   const details = normalizeTripDetails(session.draftTripDetails || session.baseTripDetails || {}, tripDetailsSnapshot(trip));
   trip.meta.titleSmall = details.titleSmall;
@@ -874,11 +1004,12 @@ export async function commitTripEditSession(session, { user: userInput = null } 
     throw error;
   }
   const changes = tripEditChanges(session);
+  const savedPlaceChanges = tripEditSavedPlaceChanges(session);
   const dayChanges = tripEditDayChanges(session);
   const domainChanges = tripEditDomainChanges(session);
   const anyDomainChange = domainChanges.tripDetailsChanged || domainChanges.travellersChanged || domainChanges.flightsChanged || dayChanges.length > 0;
-  if (!changes.length && !anyDomainChange) return { revision: session.baseRevision, changedItems: 0, changedDays: 0, changedTrip: false, changedTeams: 0, noChange: true };
-  if (changes.length + dayChanges.length > 448) {
+  if (!changes.length && !savedPlaceChanges.length && !anyDomainChange) return { revision: session.baseRevision, changedItems: 0, changedSavedPlaces: 0, changedDays: 0, changedTrip: false, changedTeams: 0, noChange: true };
+  if (changes.length + savedPlaceChanges.length + dayChanges.length > 448) {
     const error = new Error("Too many itinerary changes in one edit session");
     error.code = "edit-too-large";
     throw error;
@@ -959,6 +1090,12 @@ export async function commitTripEditSession(session, { user: userInput = null } 
       }
       tx.set(ref, { ...change.patch, updatedAt: serverTimestamp(), updatedBy: user.uid }, { merge: true });
     });
+    savedPlaceChanges.forEach(change => {
+      const ref = doc(db, "trips", session.tripId, "savedPlaces", change.placeId);
+      if (change.operation === "delete") { tx.delete(ref); return; }
+      if (change.operation === "create") { tx.set(ref, { ...change.data, placeId: change.placeId, createdAt: serverTimestamp(), createdBy: user.uid, updatedAt: serverTimestamp(), updatedBy: user.uid }); return; }
+      tx.set(ref, { ...change.data, placeId: change.placeId, updatedAt: serverTimestamp(), updatedBy: user.uid });
+    });
     const tripPatch = {
       revision: nextRevision,
       contentHash: "",
@@ -993,6 +1130,7 @@ export async function commitTripEditSession(session, { user: userInput = null } 
     }
     const summaryParts = [];
     if (changes.length) summaryParts.push(`${changes.length} 個行程項目`);
+    if (savedPlaceChanges.length) summaryParts.push(`${savedPlaceChanges.length} 個收藏`);
     if (dayChanges.length) summaryParts.push(`${dayChanges.length} 個行程日`);
     if (domainChanges.tripDetailsChanged) summaryParts.push("旅程資料");
     if (domainChanges.teamChangeCount || domainChanges.flightsChanged) summaryParts.push(`${domainChanges.teamChangeCount} 個 Team`);
@@ -1006,6 +1144,7 @@ export async function commitTripEditSession(session, { user: userInput = null } 
       actorName: clean(user.displayName),
       revision: nextRevision,
       changedItems: changes.length,
+      changedSavedPlaces: savedPlaceChanges.length,
       changedDays: dayChanges.length,
       changedTrip: domainChanges.tripDetailsChanged,
       changedTeams: domainChanges.teamChangeCount,
@@ -1016,6 +1155,6 @@ export async function commitTripEditSession(session, { user: userInput = null } 
       createdAt: serverTimestamp()
     });
 
-    return { revision: nextRevision, changedItems: changes.length, changedDays: dayChanges.length, changedTrip: domainChanges.tripDetailsChanged, changedTeams: domainChanges.teamChangeCount, noChange: false };
+    return { revision: nextRevision, changedItems: changes.length, changedSavedPlaces: savedPlaceChanges.length, changedDays: dayChanges.length, changedTrip: domainChanges.tripDetailsChanged, changedTeams: domainChanges.teamChangeCount, noChange: false };
   });
 }

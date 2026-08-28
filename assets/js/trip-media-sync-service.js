@@ -1076,6 +1076,31 @@ export async function prepareTripEditItemMedia({
   return { ...plainDescriptor(prepared.record), editDraft: true };
 }
 
+export async function prepareTripEditSavedPlaceMedia({
+  tripId: tripIdInput,
+  placeId: placeIdInput,
+  file,
+  crop: cropInput = null,
+  sortOrder: sortOrderInput = 0
+} = {}) {
+  const tripId = clean(tripIdInput), placeId = clean(placeIdInput);
+  if (!tripId || !placeId) throw errorWithCode("Invalid saved place edit media target", "invalid-media-record");
+  if (!(file instanceof Blob)) throw errorWithCode("Image file is required", "invalid-media-file");
+  const prepared = await prepareTripImageLocalAsset({
+    tripId,
+    ownerType: TRIP_MEDIA_OWNER_TYPES.SAVED_PLACE,
+    ownerId: placeId,
+    slot: "gallery",
+    file
+  });
+  prepared.record.ownerType = "savedPlace";
+  prepared.record.ownerId = placeId;
+  prepared.record.slot = "gallery";
+  prepared.record.crop = normalizeItineraryCrop(cropInput);
+  prepared.record.sortOrder = Math.max(0, finiteNumber(sortOrderInput, 0));
+  return { ...plainDescriptor(prepared.record), editDraft: true };
+}
+
 export async function uploadTripEditItemMedia({ descriptors = [], user: userInput = null, onProgress = null } = {}) {
   const user = userInput || getCurrentUser() || await waitForInitialAuth();
   if (!user?.uid) throw errorWithCode("Google sign-in required", "auth-required");
