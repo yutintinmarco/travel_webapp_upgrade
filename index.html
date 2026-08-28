@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
   <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
   <link rel="dns-prefetch" href="https://api.open-meteo.com">
-  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?build=7.9.13.0">
+  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?build=7.9.14.0">
   <title id="page-title">行程</title>
   <script>
   // v7.7.5.0 · Performance Lite. Memory only: no Firebase reads/writes, no
@@ -3879,7 +3879,7 @@ body.expenses-view-active #app-version-note{
 #snacks-view::after,
 #info-view::after,
 #profile-view::after{
-  content:"v7.9.13.0" !important;
+  content:"v7.9.14.0" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3900,7 +3900,7 @@ body.expenses-view-active #app-version-note{
   display:none !important;
 }
 body.expenses-view-active .expenses-module .expenses-app::after{
-  content:"v7.9.13.0" !important;
+  content:"v7.9.14.0" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -4326,6 +4326,16 @@ html.theme-dark .trip-edit-delete-btn,html:not(.theme-light):not(.theme-dark) .t
 .trip-edit-input:focus,.trip-edit-textarea:focus{border-color:rgba(10,132,255,.56);box-shadow:0 0 0 3px rgba(10,132,255,.10);}
 .trip-edit-local-note{margin:0 0 12px;color:var(--label-secondary);font-size:11px;line-height:1.45;}
 
+/* v7.9.14.0 · Item Edit finalization: icon and cross-Day selectors reuse the existing pill grammar. */
+.trip-edit-icon-options,.trip-edit-day-options{display:flex;flex-wrap:wrap;gap:7px;}
+.trip-edit-icon-option,.trip-edit-day-option{min-height:38px;padding:8px 11px;border-radius:13px;border:1px solid rgba(60,60,67,.13);background:rgba(255,255,255,.72);color:var(--label-primary);font:inherit;font-size:12px;font-weight:700;}
+.trip-edit-icon-option{min-width:44px;font-size:20px;line-height:1;}
+.trip-edit-icon-option.is-selected,.trip-edit-day-option.is-selected{border-color:rgba(10,132,255,.42);background:rgba(10,132,255,.10);color:#1478d4;box-shadow:inset 0 0 0 1px rgba(10,132,255,.06);}
+.trip-edit-icon-custom{display:grid;grid-template-columns:auto minmax(0,1fr);gap:7px;align-items:center;}
+.trip-edit-icon-custom span{font-size:10.5px;color:var(--label-secondary);}
+.trip-edit-day-option small{display:block;margin-top:2px;font-size:9px;font-weight:600;color:var(--label-secondary);}
+html.theme-dark .trip-edit-icon-option,html:not(.theme-light):not(.theme-dark) .trip-edit-icon-option,html.theme-dark .trip-edit-day-option,html:not(.theme-light):not(.theme-dark) .trip-edit-day-option{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.12);color:#f5f5f7;}
+
 .trip-edit-info-tools{margin:0 0 12px;padding:13px;border:1px solid rgba(10,132,255,.15);border-radius:20px;background:linear-gradient(180deg,rgba(255,255,255,.88),rgba(246,249,252,.76));box-shadow:0 7px 22px rgba(31,55,79,.07);display:grid;gap:8px;}
 .trip-edit-info-tools[hidden]{display:none!important;}
 .trip-edit-info-kicker{font-size:10px;font-weight:780;letter-spacing:.08em;text-transform:uppercase;color:#1478d4;padding:0 2px;}
@@ -4368,7 +4378,7 @@ body.trip-edit-mode .container{padding-bottom:calc(var(--tabbar-h) + env(safe-ar
 </style>
             <link rel="apple-touch-icon" href="assets/icon/trip_icon.png">
   <link rel="icon" type="image/png" href="assets/icon/trip_icon.png">
-  <link rel="manifest" href="manifest.json?build=7.9.13.0">
+  <link rel="manifest" href="manifest.json?build=7.9.14.0">
   <meta name="apple-mobile-web-app-title" content="關嘉露西生日之旅">
   <!-- v7.7.1.2: expenses.css is 144KB and every rule is scoped under
        .expenses-module, yet it used to block the very first paint of the
@@ -4376,8 +4386,8 @@ body.trip-edit-mode .container{padding-bottom:calc(var(--tabbar-h) + env(safe-ar
        priority without blocking paint; ensureExpensesStylesheet() flips it to
        media="all" before the 支出 view is ever mounted, so the styling is
        byte-for-byte identical by the time anything expenses-related renders. -->
-  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?build=7.9.13.0" media="print">
-  <noscript><link rel="stylesheet" href="assets/css/expenses.css?build=7.9.13.0"></noscript>
+  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?build=7.9.14.0" media="print">
+  <noscript><link rel="stylesheet" href="assets/css/expenses.css?build=7.9.14.0"></noscript>
 </head>
 <body class="app-entry-gated app-entry-pending">
 <div class="bg-fixed"></div>
@@ -5189,7 +5199,7 @@ body.trip-edit-mode .container{padding-bottom:calc(var(--tabbar-h) + env(safe-ar
         <span class="profile-detail-spacer"></span>
       </div>
       <section class="profile-card" aria-label="App 資訊">
-        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.9.13.0</strong></div>
+        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.9.14.0</strong></div>
         <div class="profile-meta-row"><span>資料架構</span><strong>Phase 2G.2</strong></div>
         <div class="profile-meta-row"><span>主要資料來源</span><strong id="app-data-source-label">Firebase / 本機快取</strong></div>
       </section>
@@ -5445,6 +5455,11 @@ body.trip-edit-mode .container{padding-bottom:calc(var(--tabbar-h) + env(safe-ar
       <label class="trip-edit-field"><span>時間</span><span class="trip-edit-time-control"><span class="trip-edit-time-display" id="trip-edit-item-time-display">--:--</span><input id="trip-edit-item-time" type="time" step="60" aria-label="時間"></span></label>
       <label class="trip-edit-field"><span>標題</span><input class="trip-edit-input" id="trip-edit-item-title-input" type="text" autocomplete="off" maxlength="120"></label>
       <div class="trip-edit-field">
+        <span>圖示</span>
+        <div class="trip-edit-icon-options" id="trip-edit-item-icon-options" role="group" aria-label="選擇圖示"></div>
+        <label class="trip-edit-icon-custom"><span>自訂 Emoji</span><input class="trip-edit-input" id="trip-edit-item-icon-custom" type="text" autocomplete="off" maxlength="8" placeholder="例如 🍵"></label>
+      </div>
+      <div class="trip-edit-field">
         <span>預訂狀態</span>
         <button class="trip-edit-booked-toggle" id="trip-edit-item-booked" type="button" aria-pressed="false"><span>已預訂</span></button>
       </div>
@@ -5452,6 +5467,10 @@ body.trip-edit-mode .container{padding-bottom:calc(var(--tabbar-h) + env(safe-ar
         <span>Team</span>
         <div class="trip-edit-team-options" id="trip-edit-item-team-options" role="group" aria-label="選擇 Team"></div>
         <div class="trip-edit-team-note" id="trip-edit-item-team-note">「所有人」代表呢個項目唔受 Team 篩選限制。</div>
+      </div>
+      <div class="trip-edit-field" id="trip-edit-day-field">
+        <span>所屬日子</span>
+        <div class="trip-edit-day-options" id="trip-edit-item-day-options" role="group" aria-label="移動至另一日"></div>
       </div>
       <div class="trip-edit-field trip-edit-location-field" id="trip-edit-location-field">
         <span>Google Maps 地點</span>
@@ -5490,6 +5509,7 @@ body.trip-edit-mode .container{padding-bottom:calc(var(--tabbar-h) + env(safe-ar
           <div class="trip-edit-order-status" id="trip-edit-order-status"></div>
         </div>
         <label class="trip-edit-field"><span>備註</span><textarea class="trip-edit-textarea" id="trip-edit-item-note" maxlength="500"></textarea></label>
+        <label class="trip-edit-field"><span>詳細描述</span><textarea class="trip-edit-textarea" id="trip-edit-item-detail" maxlength="1200" placeholder="展開項目後顯示嘅詳細內容"></textarea></label>
         <div class="trip-edit-delete-block" id="trip-edit-delete-block" hidden>
           <button class="trip-edit-delete-btn" id="trip-edit-item-delete" type="button">刪除此項目</button>
           <div class="trip-edit-delete-note" id="trip-edit-delete-note">刪除只會先套用到今次 Local Draft；全局「取消」可以還原未儲存變更。</div>
@@ -5534,7 +5554,7 @@ body.trip-edit-mode .container{padding-bottom:calc(var(--tabbar-h) + env(safe-ar
 </div>
 
 <script>
-const APP_VERSION = "7.9.13.0";
+const APP_VERSION = "7.9.14.0";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 let tripMapServicePromise=null,transitRouteServicePromise=null,tripEditServicePromise=null,tripMapController=null,tripMapScope="day",tripMapRenderEpoch=0,tripMapSelectedPoint=null;
@@ -6115,6 +6135,7 @@ document.getElementById("trip-edit-order-up")?.addEventListener("click",()=>trip
 document.getElementById("trip-edit-order-down")?.addEventListener("click",()=>tripEditMovePendingOrder(1));
 document.getElementById("trip-edit-item-delete")?.addEventListener("click",()=>void deleteTripEditItemFromSession());
 document.getElementById("trip-edit-item-booked")?.addEventListener("click",()=>tripEditConfigureBooked(!tripEditBookedValue));
+document.getElementById("trip-edit-item-icon-custom")?.addEventListener("input",event=>{const value=String(event.target?.value||"").trim();if(value)tripEditConfigureIcon(value);});
 const tripEditTimeInput=document.getElementById("trip-edit-item-time");
 const syncTripEditTimeDisplay=()=>{const display=document.getElementById("trip-edit-item-time-display");if(display)display.textContent=String(tripEditTimeInput?.value||"").trim()||"--:--";};
 tripEditTimeInput?.addEventListener("input",syncTripEditTimeDisplay);
@@ -6578,7 +6599,7 @@ function buildItineraryGalleryBlock(item,gallery,dayId=""){
   return galleryBlock;
 }
 function appendItineraryMediaManagementActions(container,item,gallery,dayId,itemId,{includeStatus=true}={}){
-  const tripId=dataTripId(window.tripData),pending=pendingItineraryMediaOverlay(tripId,dayId,itemId),canManage=itineraryMediaCanManageRole(),canEdit=itineraryMediaCanEdit();
+  const tripId=dataTripId(window.tripData),pending=pendingItineraryMediaOverlay(tripId,dayId,itemId),canManage=Boolean(tripEditSession)&&itineraryMediaCanManageRole(),canEdit=itineraryMediaCanEdit();
   if(!canManage||!dayId||!itemId)return;
   const busy=itineraryMediaBusyKeys.has(itineraryMediaKey(dayId,itemId)),blocked=busy||pending?.blocking===true||!canEdit,selection=currentRememberedGallerySelection(dayId,itemId,gallery);
   const actions=document.createElement("div");actions.className="inline-detail-actions";
@@ -6612,7 +6633,7 @@ function appendInlineDetails(itemEl,item,gallery,dayId=""){
 
 function buildStandaloneItineraryMediaSurface(item,dayId=""){
   const itemId=String(item?.itemId||"").trim(),tripId=dataTripId(window.tripData);if(!tripId||!dayId||!itemId)return null;
-  const gallery=storageGalleryForItem(item,dayId),pending=pendingItineraryMediaOverlay(tripId,dayId,itemId),canManage=itineraryMediaCanManageRole();if(!gallery.length&&!canManage)return null;
+  const gallery=storageGalleryForItem(item,dayId),pending=pendingItineraryMediaOverlay(tripId,dayId,itemId),canManage=Boolean(tripEditSession)&&itineraryMediaCanManageRole();if(!gallery.length&&!canManage)return null;
   const selection=currentRememberedGallerySelection(dayId,itemId,gallery),thumbMedia=selection.media||gallery[0]||null;
   const accessory=document.createElement("button");accessory.type="button";accessory.className="itinerary-media-accessory";accessory.setAttribute("aria-expanded","false");accessory.setAttribute("aria-label",gallery.length?`${item.title||"行程"} 相片`:`為 ${item.title||"行程"} 加入相片`);if(pending?.blocking===true)accessory.classList.add("is-syncing");
   if(thumbMedia){const thumb=document.createElement("img");thumb.alt="";thumb.loading="lazy";bindTripMediaImageElement(thumb,thumbMedia,{variant:"thumbnail",tripId});accessory.appendChild(thumb);}else accessory.innerHTML='<svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><rect x="2.75" y="4" width="14.5" height="12" rx="2.5" stroke="currentColor" stroke-width="1.45"/><circle cx="7.1" cy="8.1" r="1.55" stroke="currentColor" stroke-width="1.35"/><path d="M4.7 14l3.1-3.2 2.25 2.15 2.35-2.55 2.9 3.6" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round"/></svg>';
@@ -7682,7 +7703,7 @@ async function ensureTransitRoutePlanner(itemEl){
 
 
 // Phase 3E · Edit Session foundation
-let tripEditSession=null,tripEditItemTarget=null,tripEditSaving=false,tripEditLocationSelection=null,tripEditOrderState=null,tripEditLocationSearchEpoch=0,tripEditLocationMapController=null,tripEditLocationMapEpoch=0,tripEditLocationReverseEpoch=0,tripEditTripTitleOriginalHtml="",tripEditTripTitleOriginalPlain="",tripEditTeamModalState=null,tripEditAuthoritativeFence=null;
+let tripEditSession=null,tripEditItemTarget=null,tripEditSaving=false,tripEditLocationSelection=null,tripEditOrderState=null,tripEditLocationSearchEpoch=0,tripEditLocationMapController=null,tripEditLocationMapEpoch=0,tripEditLocationReverseEpoch=0,tripEditTripTitleOriginalHtml="",tripEditTripTitleOriginalPlain="",tripEditTeamModalState=null,tripEditAuthoritativeFence=null,tripEditUploadedMediaForSession=[];
 window.__tripEditPreviewData=null;
 function tripEditPresentationSignature(data){
   if(!data)return"";
@@ -7697,11 +7718,13 @@ function tripEditPresentationSignature(data){
         latitude:Number.isFinite(Number(item.location.latitude??item.location.lat))?Number(item.location.latitude??item.location.lat):null,
         longitude:Number.isFinite(Number(item.location.longitude??item.location.lng??item.location.lon))?Number(item.location.longitude??item.location.lng??item.location.lon):null,
         address:String(item.location.address||""),mapsUrl:String(item.location.mapsUrl||item.location.googleMapsUrl||"")
-      }:null
+      }:null,
+      gallery:(Array.isArray(item?.gallery)?item.gallery:[]).map(row=>typeof row==="string"?row:String(row?.src||row?.url||row?.storagePath||"")),
+      images:(Array.isArray(item?.images)?item.images:[]).map((image,index)=>({mediaId:String(image?.mediaId||image?.imageId||""),storagePath:String(image?.storagePath||""),sortOrder:Number.isFinite(Number(image?.sortOrder))?Number(image.sortOrder):index,crop:image?.crop&&typeof image.crop==="object"?{focusX:Number(image.crop.focusX)||0,focusY:Number(image.crop.focusY)||0,zoom:Number(image.crop.zoom)||1,aspect:Number(image.crop.aspect)||0}:null}))
     }))
   }));
   const meta=data?.meta&&typeof data.meta==="object"?data.meta:{};
-  const travellers=Object.fromEntries(Object.entries(meta.travellers||{}).sort(([a],[b])=>a.localeCompare(b)).map(([key,cfg])=>[key,{label:String(cfg?.label||""),members:String(cfg?.members||"")}])) ;
+  const travellers=Object.fromEntries(Object.entries(meta.travellers||{}).sort(([a],[b])=>a.localeCompare(b)).map(([key,cfg])=>[key,{label:String(cfg?.label||""),members:String(cfg?.members||""),color:String(cfg?.color||"")}])) ;
   const flights=(Array.isArray(meta.flights)?meta.flights:[]).map(row=>({teamKey:String(row?.teamKey||""),flightNo:String(row?.flightNo||row?.flight||""),date:String(row?.date||""),from:String(row?.from||""),to:String(row?.to||"")}));
   const editMeta={titleSmall:String(meta.titleSmall||""),titleMain:String(meta.titleMain||""),tripStartIso:String(meta.tripStartIso||""),tripEndIso:String(meta.tripEndIso||""),dateRange:String(meta.dateRange||""),route:String(meta.route||""),status:String(meta.status||""),travellers,flights};
   return renderSignature({editMeta,days},`${dataTripId(data)}:${Math.max(0,Number(data?.revision)||0)}`);
@@ -7970,9 +7993,21 @@ async function tripEditImportMapsLink(){
   try{await tripEditSearchLocation();}
   finally{if(button){button.disabled=false;button.textContent="匯入";}}
 }
-let tripEditBookedValue=false,tripEditTeamValue="all";
+const TRIP_EDIT_ICON_PRESETS=["📍","🍵","🍜","🍽️","☕","🛍️","🏨","✈️","🚆","🚇","🚌","🚕","⛩️","🏯","🎢","🌸","🌊","📷"];
+let tripEditBookedValue=false,tripEditTeamValue="all",tripEditIconValue="📍",tripEditDayValue="";
 function tripEditConfigureBooked(value=false){
   tripEditBookedValue=Boolean(value);const button=document.getElementById("trip-edit-item-booked");if(!button)return;button.classList.toggle("is-selected",tripEditBookedValue);button.setAttribute("aria-pressed",tripEditBookedValue?"true":"false");const label=button.querySelector("span");if(label)label.textContent=tripEditBookedValue?"✓ 已預訂":"已預訂";
+}
+function tripEditConfigureIcon(value="📍"){
+  tripEditIconValue=String(value||"").trim()||"📍";
+  const container=document.getElementById("trip-edit-item-icon-options"),custom=document.getElementById("trip-edit-item-icon-custom");
+  if(container){container.innerHTML="";TRIP_EDIT_ICON_PRESETS.forEach(icon=>{const button=document.createElement("button");button.type="button";button.className="trip-edit-icon-option";button.textContent=icon;button.classList.toggle("is-selected",icon===tripEditIconValue);button.setAttribute("aria-pressed",icon===tripEditIconValue?"true":"false");button.addEventListener("click",()=>{if(custom)custom.value="";tripEditConfigureIcon(icon);});container.appendChild(button);});}
+  if(custom)custom.value=TRIP_EDIT_ICON_PRESETS.includes(tripEditIconValue)?"":tripEditIconValue;
+}
+function tripEditConfigureDay(value=""){
+  const days=Array.isArray(activeTripPresentationData()?.days)?activeTripPresentationData().days:[],container=document.getElementById("trip-edit-item-day-options");
+  let selected=String(value||"").trim();if(!days.some(day=>String(day?.dayId||"").trim()===selected))selected=String(days[0]?.dayId||"").trim();tripEditDayValue=selected;
+  if(!container)return;container.innerHTML="";days.forEach((day,index)=>{const dayId=String(day?.dayId||"").trim();if(!dayId)return;const button=document.createElement("button");button.type="button";button.className="trip-edit-day-option";button.classList.toggle("is-selected",dayId===selected);button.setAttribute("aria-pressed",dayId===selected?"true":"false");const label=document.createElement("span");label.textContent=String(day?.label||`Day ${index+1}`);button.appendChild(label);const small=document.createElement("small");small.textContent=String(day?.date||day?.isoDate||"");if(small.textContent)button.appendChild(small);button.addEventListener("click",()=>tripEditConfigureDay(dayId));container.appendChild(button);});
 }
 function tripEditConfigureTeam(value="all"){
   const travellers=activeTripPresentationData()?.meta?.travellers||window.tripData?.meta?.travellers||{},keys=orderedTravellerKeys(travellers),container=document.getElementById("trip-edit-item-team-options"),note=document.getElementById("trip-edit-item-team-note");
@@ -8001,15 +8036,17 @@ function tripEditItemHasManagedMedia(dayId,itemId){
 function tripEditConfigureDelete(dayId,itemId,{visible=false}={}){
   const block=document.getElementById("trip-edit-delete-block"),button=document.getElementById("trip-edit-item-delete"),note=document.getElementById("trip-edit-delete-note");
   if(!visible){if(block)block.hidden=true;return;}
-  if(block)block.hidden=false;const hasManagedMedia=tripEditItemHasManagedMedia(dayId,itemId);if(button)button.disabled=hasManagedMedia;
-  if(note)note.textContent=hasManagedMedia?"呢個項目仍有 Firebase 行程相片。為避免留下 Storage／Media orphan，請先保留項目；相片連動刪除會另行安全處理。":"刪除只會先套用到今次 Local Draft；全局「取消」可以還原未儲存變更。";
+  if(block)block.hidden=false;if(button)button.disabled=false;
+  if(note)note.textContent=tripEditItemHasManagedMedia(dayId,itemId)?"刪除會先留喺 Local Draft；全局『儲存』後先刪除 Firebase item，同步清理 Storage／Media Registry。取消編輯會完整保留。":"刪除只會先套用到今次 Local Draft；全局『取消』可以還原未儲存變更。";
 }
 async function deleteTripEditItemFromSession(){
   if(!tripEditSession||tripEditItemTarget?.mode!=="edit")return;
-  const {dayId,itemId}=tripEditItemTarget;if(tripEditItemHasManagedMedia(dayId,itemId)){window.alert("呢個項目仍有 Firebase 行程相片，為避免留下孤立 Storage／Media，今版暫時唔會直接刪除。 ");return;}
+  const {dayId,itemId}=tripEditItemTarget;
   const title=String(document.getElementById("trip-edit-item-title-input")?.value||"呢個行程項目").trim()||"呢個行程項目";
   if(!window.confirm(`刪除「${title}」？變更只會先留喺今次 Edit Session，未全局儲存前仍可用「取消」全部還原。`))return;
-  const service=await tripEditService(),result=service.removeTripEditDraftItem(tripEditSession,dayId,itemId);if(!result?.removed)return;
+  const service=await tripEditService(),draft=service.getTripEditDraftItem(tripEditSession,dayId,itemId);
+  const staged=(Array.isArray(draft?.images)?draft.images:[]).filter(row=>row?.editDraft===true);if(staged.length){try{const mediaService=await getTripMediaSyncService();await mediaService.discardTripEditItemMedia({descriptors:staged});}catch(error){console.warn("Discard unsaved item media",error);}}
+  const result=service.removeTripEditDraftItem(tripEditSession,dayId,itemId);if(!result?.removed)return;
   window.__tripEditPreviewData=service.applyTripEditDraftToTrip(tripEditSession,window.tripData);closeTripEditItemModal();render(window.__tripEditPreviewData,{includeSnacks:false});if(tripMapOverlayOpen()&&tripMapScope==="day")void renderTripMapScope("day");
 }
 function tripEditApplyDraftPreview(dayId,itemId,draft){
@@ -8056,20 +8093,20 @@ document.getElementById("trip-edit-location-open-maps")?.addEventListener("click
 async function beginTripEditSession(){
   if(tripEditSession||!tripEditCanStart())return;
   const service=await tripEditService();
-  try{tripEditSession=service.createTripEditSession(window.tripData);window.__tripEditPreviewData=service.applyTripEditDraftToTrip(tripEditSession,window.tripData);tripEditSyncHeader();tripEditDecorateItems();}
+  try{tripEditUploadedMediaForSession=[];tripEditSession=service.createTripEditSession(window.tripData);window.__tripEditPreviewData=service.applyTripEditDraftToTrip(tripEditSession,window.tripData);tripEditSyncHeader();tripEditDecorateItems();}
   catch(error){console.warn("Begin edit session",error);window.alert("暫時未能開始編輯，請稍後再試。");}
 }
 function closeTripEditItemModal(){
-  ++tripEditLocationSearchEpoch;++tripEditLocationReverseEpoch;tripEditDestroyLocationPreview();tripEditItemTarget=null;tripEditLocationSelection=null;tripEditOrderState=null;tripEditBookedValue=false;tripEditTeamValue="all";tripEditResetLocationResults();tripEditConfigureOrder(null,{visible:false});tripEditConfigureDelete("","",{visible:false});const backdrop=document.getElementById("trip-edit-item-backdrop");if(backdrop){backdrop.classList.remove("active");backdrop.setAttribute("aria-hidden","true");}
+  ++tripEditLocationSearchEpoch;++tripEditLocationReverseEpoch;tripEditDestroyLocationPreview();tripEditItemTarget=null;tripEditLocationSelection=null;tripEditOrderState=null;tripEditBookedValue=false;tripEditTeamValue="all";tripEditIconValue="📍";tripEditDayValue="";tripEditResetLocationResults();tripEditConfigureOrder(null,{visible:false});tripEditConfigureDelete("","",{visible:false});const backdrop=document.getElementById("trip-edit-item-backdrop");if(backdrop){backdrop.classList.remove("active");backdrop.setAttribute("aria-hidden","true");}
 }
 function openTripEditAddModal(dayId,kind){
   if(!tripEditSession)return;
   const normalized=String(kind||"")==="transit"?"transit":"stop";
   tripEditItemTarget={mode:"add",dayId:String(dayId||""),kind:normalized};
-  const modalTitle=document.getElementById("trip-edit-item-title"),time=document.getElementById("trip-edit-item-time"),title=document.getElementById("trip-edit-item-title-input"),note=document.getElementById("trip-edit-item-note"),backdrop=document.getElementById("trip-edit-item-backdrop");
+  const modalTitle=document.getElementById("trip-edit-item-title"),time=document.getElementById("trip-edit-item-time"),title=document.getElementById("trip-edit-item-title-input"),note=document.getElementById("trip-edit-item-note"),detail=document.getElementById("trip-edit-item-detail"),backdrop=document.getElementById("trip-edit-item-backdrop");
   if(modalTitle)modalTitle.textContent=normalized==="transit"?"新增交通":"新增地點";
   if(time)time.value="";const timeDisplay=document.getElementById("trip-edit-item-time-display");if(timeDisplay)timeDisplay.textContent="--:--";
-  if(title)title.value=normalized==="transit"?"Travel":"";if(note)note.value="";tripEditConfigureBooked(false);tripEditConfigureTeam("all");tripEditConfigureLocation(normalized,tripEditBlankLocation());tripEditConfigureOrder(null,{visible:false});tripEditConfigureDelete("","",{visible:false});
+  if(title)title.value=normalized==="transit"?"Travel":"";if(note)note.value="";if(detail)detail.value="";tripEditConfigureIcon(normalized==="transit"?"🚆":"📍");tripEditConfigureBooked(false);tripEditConfigureTeam("all");tripEditConfigureDay(dayId);tripEditConfigureLocation(normalized,tripEditBlankLocation());tripEditConfigureOrder(null,{visible:false});tripEditConfigureDelete("","",{visible:false});
   if(backdrop){backdrop.classList.add("active");backdrop.setAttribute("aria-hidden","false");}
 }
 async function openTripEditItemModal(dayId,itemId){
@@ -8077,35 +8114,41 @@ async function openTripEditItemModal(dayId,itemId){
   const service=await tripEditService(),draft=service.getTripEditDraftItem(tripEditSession,dayId,itemId);if(!draft)return;
   const itemKind=String(tripEditFindDomItem(dayId,itemId)?.dataset?.itemKind||"stop")==="transit"?"transit":"stop";
   tripEditItemTarget={mode:"edit",dayId:String(dayId||""),itemId:String(itemId||""),kind:itemKind};
-  const modalTitle=document.getElementById("trip-edit-item-title"),time=document.getElementById("trip-edit-item-time"),title=document.getElementById("trip-edit-item-title-input"),note=document.getElementById("trip-edit-item-note"),backdrop=document.getElementById("trip-edit-item-backdrop");
+  const modalTitle=document.getElementById("trip-edit-item-title"),time=document.getElementById("trip-edit-item-time"),title=document.getElementById("trip-edit-item-title-input"),note=document.getElementById("trip-edit-item-note"),detail=document.getElementById("trip-edit-item-detail"),backdrop=document.getElementById("trip-edit-item-backdrop");
   if(modalTitle)modalTitle.textContent="編輯行程項目";
-  if(time)time.value=draft.time||"";const timeDisplay=document.getElementById("trip-edit-item-time-display");if(timeDisplay)timeDisplay.textContent=String(draft.time||"").trim()||"--:--";if(title)title.value=draft.title||"";if(note)note.value=draft.note||"";tripEditConfigureBooked(Boolean(draft.booked));tripEditConfigureTeam(draft.who||"all");tripEditConfigureLocation(itemKind,draft.location||tripEditBlankLocation());
+  if(time)time.value=draft.time||"";const timeDisplay=document.getElementById("trip-edit-item-time-display");if(timeDisplay)timeDisplay.textContent=String(draft.time||"").trim()||"--:--";if(title)title.value=draft.title||"";if(note)note.value=draft.note||"";if(detail)detail.value=draft.detail||"";tripEditConfigureIcon(draft.icon||(itemKind==="transit"?"🚆":"📍"));tripEditConfigureBooked(Boolean(draft.booked));tripEditConfigureTeam(draft.who||"all");tripEditConfigureDay(dayId);tripEditConfigureLocation(itemKind,draft.location||tripEditBlankLocation());
   tripEditConfigureOrder(service.getTripEditDraftPosition(tripEditSession,dayId,itemId),{visible:true});tripEditConfigureDelete(dayId,itemId,{visible:true});
   if(backdrop){backdrop.classList.add("active");backdrop.setAttribute("aria-hidden","false");}
 
 }
 async function finishTripEditItemModal(){
   if(!tripEditSession||!tripEditItemTarget)return closeTripEditItemModal();
-  const service=await tripEditService(),time=document.getElementById("trip-edit-item-time")?.value||"",title=document.getElementById("trip-edit-item-title-input")?.value||"",note=document.getElementById("trip-edit-item-note")?.value||"";
+  const service=await tripEditService(),time=document.getElementById("trip-edit-item-time")?.value||"",title=document.getElementById("trip-edit-item-title-input")?.value||"",note=document.getElementById("trip-edit-item-note")?.value||"",detail=document.getElementById("trip-edit-item-detail")?.value||"";
   if(!String(title).trim()){window.alert("標題唔可以留空。");return;}
-  const patch={time,title,note,who:tripEditTeamValue||"all",booked:Boolean(tripEditBookedValue)},kind=tripEditTargetKind();if(kind==="stop")patch.location=tripEditNormalizeLocation(tripEditLocationSelection||tripEditBlankLocation());
-  if(tripEditItemTarget.mode==="add")service.addTripEditDraftItem(tripEditSession,tripEditItemTarget.dayId,tripEditItemTarget.kind,patch);
+  const patch={time,title,note,detail,icon:tripEditIconValue||"📍",who:tripEditTeamValue||"all",booked:Boolean(tripEditBookedValue)},kind=tripEditTargetKind();if(kind==="stop")patch.location=tripEditNormalizeLocation(tripEditLocationSelection||tripEditBlankLocation());
+  if(tripEditItemTarget.mode==="add")service.addTripEditDraftItem(tripEditSession,tripEditDayValue||tripEditItemTarget.dayId,tripEditItemTarget.kind,patch);
   else{
-    service.updateTripEditDraftItem(tripEditSession,tripEditItemTarget.dayId,tripEditItemTarget.itemId,patch);
-    if(tripEditOrderState?.touched)service.moveTripEditDraftItemToIndex(tripEditSession,tripEditItemTarget.dayId,tripEditItemTarget.itemId,tripEditOrderState.index);
+    const originalDayId=tripEditItemTarget.dayId,targetDayId=tripEditDayValue||originalDayId;
+    service.updateTripEditDraftItem(tripEditSession,originalDayId,tripEditItemTarget.itemId,patch);
+    if(targetDayId===originalDayId&&tripEditOrderState?.touched)service.moveTripEditDraftItemToIndex(tripEditSession,originalDayId,tripEditItemTarget.itemId,tripEditOrderState.index);
+    if(targetDayId!==originalDayId)service.moveTripEditDraftItemToDay(tripEditSession,originalDayId,tripEditItemTarget.itemId,targetDayId);
   }
   window.__tripEditPreviewData=service.applyTripEditDraftToTrip(tripEditSession,window.tripData);
   closeTripEditItemModal();render(window.__tripEditPreviewData,{includeSnacks:false});
   if(tripMapOverlayOpen()&&tripMapScope==="day")void renderTripMapScope("day");
 }
-function cancelTripEditSession(){
+async function cancelTripEditSession(){
   if(!tripEditSession)return;
-  const dirtyPromise=tripEditService().then(service=>service.tripEditChangeCount(tripEditSession)).catch(()=>0);
-  void dirtyPromise.then(count=>{
+  try{
+    const service=await tripEditService(),count=service.tripEditChangeCount(tripEditSession);
     if(count>0&&!window.confirm("取消今次編輯？所有未儲存變更會被捨棄。"))return;
-    closeTripEditItemModal();closeTripEditTripDetailsModal();closeTripEditTeamModal();tripEditSession=null;tripEditSaving=false;window.__tripEditPreviewData=null;tripEditSyncHeader();render(window.tripData);
-  });
+    const mediaDelta=service.tripEditMediaDelta?.(tripEditSession)||{additions:[]};
+    if(mediaDelta.additions?.length){try{const mediaService=await getTripMediaSyncService();await mediaService.discardTripEditItemMedia({descriptors:mediaDelta.additions});}catch(error){console.warn("Discard Edit Draft media",error);}}
+    if(tripEditUploadedMediaForSession.length){try{const mediaService=await getTripMediaSyncService(),user=window.__appAuthUser||tripLibraryCurrentUser||null;await mediaService.cleanupTripEditRemovedMedia({tripId:dataTripId(window.tripData),descriptors:tripEditUploadedMediaForSession,user});}catch(error){console.warn("Discard uploaded Edit media",error);}}
+    tripEditUploadedMediaForSession=[];closeTripEditItemModal();closeTripEditTripDetailsModal();closeTripEditTeamModal();tripEditSession=null;tripEditSaving=false;window.__tripEditPreviewData=null;tripEditSyncHeader();render(window.tripData);
+  }catch(error){console.warn("Cancel edit session",error);}
 }
+
 function tripEditFriendlyError(error){
   const code=String(error?.code||"");
   if(code==="edit-revision-conflict")return"旅程喺你開始編輯後已被其他人或另一部裝置更新。今次未有覆蓋任何資料，請取消編輯並重新載入後再改。";
@@ -8119,6 +8162,8 @@ function tripEditFriendlyError(error){
   if(code==="edit-team-label-required")return"Team 名稱唔可以留空。";
   if(code==="edit-team-label-duplicate")return"Team 名稱唔可以重複。";
   if(code==="edit-team-flight-reference")return"有航班仍然指向已刪除嘅 Team，請先指定航班轉去另一個 Team。";
+  if(code==="edit-media-not-ready")return"有相片仲未完成準備，請稍後再儲存。";
+  if(String(code).startsWith("media-")||String(code).startsWith("storage/"))return itineraryMediaFriendlyError(error);
   return error?.message||"暫時未能儲存今次編輯。";
 }
 async function saveTripEditSession(){
@@ -8126,19 +8171,42 @@ async function saveTripEditSession(){
   if(tripEditCurrentRevision()!==Math.max(1,Number(tripEditSession.baseRevision)||1)){window.alert(tripEditFriendlyError({code:"edit-revision-conflict"}));return;}
   tripEditSaving=true;tripEditSyncHeader();
   try{
-    const service=await tripEditService(),user=window.__appAuthUser||tripLibraryCurrentUser||null,result=await service.commitTripEditSession(tripEditSession,{user});
+    const service=await tripEditService(),user=window.__appAuthUser||tripLibraryCurrentUser||null;
+    const mediaDelta=service.tripEditMediaDelta?.(tripEditSession)||{additions:[],removals:[]};
+    if(mediaDelta.additions?.length){
+      const mediaService=await getTripMediaSyncService();
+      const uploaded=await mediaService.uploadTripEditItemMedia({descriptors:mediaDelta.additions,user});
+      uploaded.forEach(row=>{const id=tripEditMediaIdentity(row);if(id&&!tripEditUploadedMediaForSession.some(existing=>tripEditMediaIdentity(existing)===id))tripEditUploadedMediaForSession.push(row);});
+      const replacements=new Map();uploaded.forEach(row=>{const id=tripEditMediaIdentity(row);if(id)replacements.set(id,row);});
+      service.replaceTripEditDraftMediaDescriptors?.(tripEditSession,replacements);
+      window.__tripEditPreviewData=service.applyTripEditDraftToTrip(tripEditSession,window.tripData);
+    }
+    const finalMediaDelta=service.tripEditMediaDelta?.(tripEditSession)||{additions:[],removals:mediaDelta.removals||[]};
+    const result=await service.commitTripEditSession(tripEditSession,{user});
     const applied=service.applyTripEditDraftToTrip(tripEditSession,window.tripData,{revision:result.revision});
+    const referencedMediaIds=new Set();(applied.days||[]).forEach(day=>(day.items||[]).forEach(item=>(item.images||[]).forEach(row=>{const id=tripEditMediaIdentity(row);if(id)referencedMediaIds.add(id);}))); 
+    const uploadedToDiscard=tripEditUploadedMediaForSession.filter(row=>!referencedMediaIds.has(tripEditMediaIdentity(row)));
     tripEditAuthoritativeFence={tripId:dataTripId(applied),revision:Math.max(1,Number(result.revision)||1),signature:tripEditPresentationSignature(applied)};
     closeTripEditTripDetailsModal();closeTripEditTeamModal();tripEditSession=null;tripEditSaving=false;window.__tripEditPreviewData=null;window.tripData=applied;tripEditSyncHeader();
-    // v7.9.10.5 · A successful Edit transaction is already an accepted new
-    // revision. Align the local render baseline immediately so a later offline
-    // Firestore cache snapshot cannot split itinerary DOM and Trip Map state.
     tripRenderSignature=tripContentRenderSignature(window.tripData);
     updateTripLibrarySummaryFromData(window.tripData);
     try{await persistInstantTripCache(window.tripData);}catch(_){}
     render(window.tripData);
     if(tripMapOverlayOpen())void renderTripMapScope(tripMapScope);
-  }catch(error){console.error("Save edit session",error);tripEditSaving=false;tripEditSyncHeader();window.alert(tripEditFriendlyError(error));}
+    const cleanupRows=[...(finalMediaDelta.removals||[]),...uploadedToDiscard];tripEditUploadedMediaForSession=[];
+    if(cleanupRows.length){
+      try{const mediaService=await getTripMediaSyncService();await mediaService.cleanupTripEditRemovedMedia({tripId:dataTripId(applied),descriptors:cleanupRows,user});}
+      catch(error){console.warn("Post-save Edit media cleanup deferred",error);}
+    }
+  }catch(error){
+    const partial=Array.isArray(error?.uploadedDescriptors)?error.uploadedDescriptors:[];
+    if(partial.length&&tripEditSession){
+      try{
+        const service=await tripEditService(),replacements=new Map();partial.forEach(row=>{const id=tripEditMediaIdentity(row);if(id){replacements.set(id,row);if(!tripEditUploadedMediaForSession.some(existing=>tripEditMediaIdentity(existing)===id))tripEditUploadedMediaForSession.push(row);}});service.replaceTripEditDraftMediaDescriptors?.(tripEditSession,replacements);window.__tripEditPreviewData=service.applyTripEditDraftToTrip(tripEditSession,window.tripData);
+      }catch(recoveryError){console.warn("Preserve partially uploaded Edit media",recoveryError);}
+    }
+    console.error("Save edit session",error);tripEditSaving=false;tripEditSyncHeader();window.alert(tripEditFriendlyError(error));
+  }
 }
 
 // Main render
@@ -9823,7 +9891,8 @@ function applyFirebaseTripData(data,{source="server",tripId="",dirtySections=[]}
   const currentSessionServerConfirmed=source!=="instant-cache"&&data?.cloudMeta?.serverConfirmed===true;
   tripLoaderState={status:"ready",source,tripId:nextId,updatedAt:data?.cloudMeta?.updatedAt||"",serverConfirmed:currentSessionServerConfirmed,hasPendingWrites:data?.cloudMeta?.hasPendingWrites===true,error:null};
   window.tripData=data;
-  updateTripMapButton(data);
+  const presentationData=(tripEditSession&&sameTrip&&window.__tripEditPreviewData&&dataTripId(window.__tripEditPreviewData)===nextId)?window.__tripEditPreviewData:data;
+  updateTripMapButton(presentationData);
   if(tripMapOverlayOpen())void renderTripMapScope(tripMapScope);
   setDataSourceLabel(source==="instant-cache"?"即時旅程快取":(source==="cache"?"Firebase 快取":"Firebase"));
   if(String(appEntryTripSwitchHandoff.toTripId||"")===nextId){
@@ -9836,7 +9905,7 @@ function applyFirebaseTripData(data,{source="server",tripId="",dirtySections=[]}
   refreshFullBackupSyncGate();
 
   if(needsItinerary){
-    render(data,{includeSnacks:needsSnacks});
+    render(presentationData,{includeSnacks:needsSnacks});
     restoreRenderedDay(oldDayId);
     updateLargeHeaderForView();updateCompactHeader();
     requestAnimationFrame(()=>{
@@ -9844,14 +9913,14 @@ function applyFirebaseTripData(data,{source="server",tripId="",dirtySections=[]}
       updateBottomNavIndicator();updateCollapsingChrome();updateNowIndicator();
     });
   }else{
-    if(needsVisual)applyTripVisualTheme(data);
+    if(needsVisual)applyTripVisualTheme(presentationData);
     if(needsSnacks)runOptionalAppStep("Firebase saved places render",()=>renderSnacks(data));
   }
 
-  if(needsInfo)runOptionalAppStep("Firebase travel info render",()=>renderInfo(data));
+  if(needsInfo)runOptionalAppStep("Firebase travel info render",()=>renderInfo(presentationData));
   if(needsInfo||needsItinerary){
     const desiredTeam=needsItinerary?oldTeam:(activeTeam||"all");
-    if(desiredTeam!=="all"&&data?.meta?.travellers?.[desiredTeam])applyTeam(desiredTeam);else applyTeam("all");
+    if(desiredTeam!=="all"&&presentationData?.meta?.travellers?.[desiredTeam])applyTeam(desiredTeam);else applyTeam("all");
   }
   if(needsWeather)runOptionalAppStep("Firebase weather render",()=>renderWeather(data));
 
@@ -9860,8 +9929,8 @@ function applyFirebaseTripData(data,{source="server",tripId="",dirtySections=[]}
   // exception can never leave the whole workspace permanently hidden.
   releaseDeferredTripBoot();
 
-  if(needsDestinationTheme){try{refreshDestinationThemeInPlace(data);}catch(error){console.warn("Destination theme refresh",error);}}
-  if(needsTeamTheme){try{refreshTeamThemeInPlace(data);}catch(error){console.warn("Team theme refresh",error);}}
+  if(needsDestinationTheme){try{refreshDestinationThemeInPlace(presentationData);}catch(error){console.warn("Destination theme refresh",error);}}
+  if(needsTeamTheme){try{refreshTeamThemeInPlace(presentationData);}catch(error){console.warn("Team theme refresh",error);}}
 
   if(needsExpenses&&document.body.classList.contains("expenses-view-active"))requestAnimationFrame(()=>initExpensesViewSafe());
   const librarySummaryChanged=updateTripLibrarySummaryFromData(data);
@@ -12168,7 +12237,7 @@ function queueItineraryMediaOverlayRender(snapshot){
   lastItineraryMediaOverlaySignature=signature;
   if(itineraryMediaOverlayRenderQueued)return;
   itineraryMediaOverlayRenderQueued=true;
-  requestAnimationFrame(()=>{itineraryMediaOverlayRenderQueued=false;try{if(window.tripData&&dataTripId(window.tripData)===tripId)render(window.tripData);}catch(error){console.warn("Itinerary media overlay render",error);}});
+  requestAnimationFrame(()=>{itineraryMediaOverlayRenderQueued=false;try{if(window.tripData&&dataTripId(window.tripData)===tripId)render(activeTripPresentationData());}catch(error){console.warn("Itinerary media overlay render",error);}});
 }
 function savedPlaceMediaOverlaySignature(snapshot,tripIdInput){const tripId=String(tripIdInput||"").trim(),slots=snapshot?.overlays?.[tripId]||{};return Object.entries(slots).filter(([slot])=>String(slot).startsWith("savedPlace:")).map(([slot,overlay])=>[slot,String(overlay?.state||""),String(overlay?.descriptor?.mediaId||overlay?.descriptor?.imageId||""),overlay?.blocking===true?1:0].join("|")).sort().join(";");}
 function queueSavedPlaceMediaOverlayRender(snapshot){const tripId=dataTripId(window.tripData);if(!tripId)return;const signature=savedPlaceMediaOverlaySignature(snapshot,tripId);if(signature===lastSavedPlaceMediaOverlaySignature)return;lastSavedPlaceMediaOverlaySignature=signature;if(savedPlaceMediaOverlayRenderQueued)return;savedPlaceMediaOverlayRenderQueued=true;requestAnimationFrame(()=>{savedPlaceMediaOverlayRenderQueued=false;try{if(window.tripData&&dataTripId(window.tripData)===tripId){renderSnacks(window.tripData);refreshOpenSavedPlaceModal();}}catch(error){console.warn("Saved Place media overlay render",error);}});}
@@ -12244,10 +12313,10 @@ function itineraryMediaAccessCapabilityKey(accessInput=currentItineraryMediaAcce
   return `${tripId}|${role==="owner"||role==="admin"?"manage":"view"}`;
 }
 function itineraryMediaCanManageRole(){const role=String(currentItineraryMediaAccess()?.role||"");return role==="owner"||role==="admin";}
-function itineraryMediaCanEdit(){return itineraryMediaCanManageRole()&&!currentTripGlobalLocked();}
+function itineraryMediaCanEdit(){return Boolean(tripEditSession)&&itineraryMediaCanManageRole()&&!currentTripGlobalLocked();}
 function findItineraryItem(dayIdInput,itemIdInput){
-  const dayId=String(dayIdInput||"").trim(),itemId=String(itemIdInput||"").trim();
-  const day=(window.tripData?.days||[]).find(row=>String(row?.dayId||"").trim()===dayId);
+  const dayId=String(dayIdInput||"").trim(),itemId=String(itemIdInput||"").trim(),presentation=activeTripPresentationData();
+  const day=(presentation?.days||[]).find(row=>String(row?.dayId||"").trim()===dayId);
   const item=(day?.items||[]).find(row=>String(row?.itemId||"").trim()===itemId);
   return {day,item};
 }
@@ -12381,22 +12450,33 @@ function setupItineraryCropEditor(){
   window.addEventListener("resize",()=>{const state=itineraryCropEditorState;if(!state.active)return;requestAnimationFrame(()=>{if(itineraryCropMeasure())itineraryCropApplyNow();});},{passive:true});
 }
 setupItineraryCropEditor();
+function tripEditMediaIdentity(media){return String(media?.mediaId||media?.imageId||media?.id||media?.storagePath||"").trim();}
+async function tripEditRefreshMediaDraft(dayId,itemId,images){
+  if(!tripEditSession)return;
+  const service=await tripEditService();
+  service.updateTripEditDraftItem(tripEditSession,dayId,itemId,{gallery:[],images:(Array.isArray(images)?images:[]).map((row,index)=>({...row,sortOrder:index}))});
+  window.__tripEditPreviewData=service.applyTripEditDraftToTrip(tripEditSession,window.tripData);
+  render(window.__tripEditPreviewData,{includeSnacks:false});
+  if(tripMapOverlayOpen()&&tripMapScope==="day")void renderTripMapScope("day");
+}
 async function uploadItineraryMediaFile(file,dayId,itemId,crop=null){
   const tripId=appearanceSettingsTripId(),key=itineraryMediaKey(dayId,itemId);
-  if(!tripId||!file||itineraryMediaBusyKeys.has(key)||!itineraryMediaCanEdit())return;
-  if(pendingItineraryMediaOverlay(tripId,dayId,itemId)?.blocking===true)return;
-  itineraryMediaBusyKeys.add(key);setTripMediaMutationBusy(true);try{render(window.tripData);}catch(error){}
+  if(!tripEditSession||!tripId||!file||itineraryMediaBusyKeys.has(key)||!itineraryMediaCanEdit())return;
+  itineraryMediaBusyKeys.add(key);setTripMediaMutationBusy(true);try{render(activeTripPresentationData());}catch(error){}
   try{
-    const service=await getTripMediaSyncService(),user=window.__appAuthUser||tripLibraryCurrentUser||null,found=findItineraryItem(dayId,itemId);
-    const gallery=found?.item?storageGalleryForItem(found.item,dayId):[];
-    const result=await service.queueTripItemMedia({tripId,dayId,itemId,file,user,crop,sortOrder:gallery.length});
-    if(result?.descriptor){itineraryGallerySelectionByItem.set(itineraryGalleryStateKey(dayId,itemId),itineraryGalleryMediaIdentity(result.descriptor,gallery.length));}
-  }catch(error){console.error("Itinerary media local queue",error);window.alert(itineraryMediaFriendlyError(error));}
-  finally{itineraryMediaBusyKeys.delete(key);setTripMediaMutationBusy(false);try{render(window.tripData);}catch(error){}}
+    const mediaService=await getTripMediaSyncService(),editService=await tripEditService(),draft=editService.getTripEditDraftItem(tripEditSession,dayId,itemId);
+    if(!draft)throw Object.assign(new Error("Itinerary item not found in edit session"),{code:"edit-item-missing"});
+    const images=Array.isArray(draft.images)?draft.images.slice():[];
+    const descriptor=await mediaService.prepareTripEditItemMedia({tripId,itemId,file,crop,sortOrder:images.length});
+    images.push(descriptor);
+    itineraryGallerySelectionByItem.set(itineraryGalleryStateKey(dayId,itemId),itineraryGalleryMediaIdentity(descriptor,images.length-1));
+    await tripEditRefreshMediaDraft(dayId,itemId,images);
+  }catch(error){console.error("Itinerary media Edit Draft",error);window.alert(itineraryMediaFriendlyError(error));}
+  finally{itineraryMediaBusyKeys.delete(key);setTripMediaMutationBusy(false);try{render(activeTripPresentationData());}catch(error){}}
 }
 function openItineraryMediaPicker(dayId,itemId){
   const tripId=appearanceSettingsTripId(),key=itineraryMediaKey(dayId,itemId);
-  if(!tripId||itineraryMediaBusyKeys.has(key)||!itineraryMediaCanEdit()||pendingItineraryMediaOverlay(tripId,dayId,itemId)?.blocking===true)return;
+  if(!tripEditSession||!tripId||itineraryMediaBusyKeys.has(key)||!itineraryMediaCanEdit())return;
   const input=document.createElement("input");input.type="file";input.accept="image/*";input.hidden=true;input.setAttribute("aria-hidden","true");
   let handled=false;const cleanup=()=>{try{input.remove();}catch(error){}};
   input.addEventListener("change",()=>{handled=true;const file=input.files?.[0]||null;cleanup();if(file)openItineraryCropEditor(file,{dayId,itemId});},{once:true});
@@ -12413,34 +12493,35 @@ function selectedItineraryGalleryMedia(dayId,itemId,item=null){
 }
 async function removeItineraryMedia(dayId,itemId,mediaInput=null){
   const tripId=appearanceSettingsTripId(),key=itineraryMediaKey(dayId,itemId),found=findItineraryItem(dayId,itemId);
-  if(!tripId||itineraryMediaBusyKeys.has(key)||!itineraryMediaCanEdit()||pendingItineraryMediaOverlay(tripId,dayId,itemId)?.blocking===true||!found?.item)return;
+  if(!tripEditSession||!tripId||itineraryMediaBusyKeys.has(key)||!itineraryMediaCanEdit()||!found?.item)return;
   const selection=selectedItineraryGalleryMedia(dayId,itemId,found.item),media=mediaInput||selection.media;
   if(!itineraryMediaSelectedIsRemovable(found.item,media))return;
-  if(!window.confirm("移除目前呢張行程相片？"))return;
-  const mediaId=String(media.mediaId||media.imageId||"").trim(),storagePath=String(media.storagePath||"").trim();
-  const oldIndex=Math.max(0,selection.gallery.findIndex((candidate,index)=>itineraryGalleryMediaIdentity(candidate,index)===itineraryGalleryMediaIdentity(media,selection.index)));
-  itineraryMediaBusyKeys.add(key);setTripMediaMutationBusy(true);try{captureItineraryGallerySelectionsFromDom();render(window.tripData);}catch(error){}
+  if(!window.confirm("從今次編輯移除目前呢張行程相片？全局『取消』可以還原已存在嘅相片。"))return;
+  itineraryMediaBusyKeys.add(key);setTripMediaMutationBusy(true);
   try{
-    const service=await getTripMediaSyncService(),user=window.__appAuthUser||tripLibraryCurrentUser||null;
-    const result=await service.removeTripItemMedia({tripId,dayId,itemId,mediaId,storagePath,user});
-    if(result?.removed&&found.item){found.item.images=Array.isArray(result.images)?result.images:found.item.images;const nextGallery=storageGalleryForItem(found.item,dayId);if(nextGallery.length){const nextIndex=Math.min(oldIndex,nextGallery.length-1);itineraryGallerySelectionByItem.set(itineraryGalleryStateKey(dayId,itemId),itineraryGalleryMediaIdentity(nextGallery[nextIndex],nextIndex));}else itineraryGallerySelectionByItem.delete(itineraryGalleryStateKey(dayId,itemId));}
-    if(result?.cleanup?.cleaned===false)console.warn("Itinerary media detached; old Storage cleanup deferred");
-  }catch(error){console.error("Itinerary media remove",error);window.alert(itineraryMediaFriendlyError(error));}
-  finally{itineraryMediaBusyKeys.delete(key);setTripMediaMutationBusy(false);try{render(window.tripData);}catch(error){}}
+    const editService=await tripEditService(),draft=editService.getTripEditDraftItem(tripEditSession,dayId,itemId);if(!draft)return;
+    const wanted=tripEditMediaIdentity(media),images=Array.isArray(draft.images)?draft.images.slice():[],index=images.findIndex(row=>tripEditMediaIdentity(row)===wanted);if(index<0)return;
+    const [removed]=images.splice(index,1);
+    if(removed?.editDraft===true){const mediaService=await getTripMediaSyncService();await mediaService.discardTripEditItemMedia({descriptors:[removed]});}
+    const nextIndex=Math.min(index,Math.max(0,images.length-1));if(images.length)itineraryGallerySelectionByItem.set(itineraryGalleryStateKey(dayId,itemId),itineraryGalleryMediaIdentity(images[nextIndex],nextIndex));else itineraryGallerySelectionByItem.delete(itineraryGalleryStateKey(dayId,itemId));
+    await tripEditRefreshMediaDraft(dayId,itemId,images);
+  }catch(error){console.error("Itinerary media draft remove",error);window.alert(itineraryMediaFriendlyError(error));}
+  finally{itineraryMediaBusyKeys.delete(key);setTripMediaMutationBusy(false);}
 }
 async function moveItineraryMedia(dayId,itemId,direction){
   const tripId=appearanceSettingsTripId(),key=itineraryMediaKey(dayId,itemId),found=findItineraryItem(dayId,itemId);
-  if(!tripId||itineraryMediaBusyKeys.has(key)||!itineraryMediaCanEdit()||pendingItineraryMediaOverlay(tripId,dayId,itemId)?.blocking===true||!found?.item)return;
-  const selection=selectedItineraryGalleryMedia(dayId,itemId,found.item),media=selection.media;if(!media||selection.index<0)return;
-  const nextIndex=selection.index+(Number(direction)<0?-1:1);if(nextIndex<0||nextIndex>=selection.gallery.length)return;
-  const mediaId=String(media.mediaId||media.imageId||"").trim(),storagePath=String(media.storagePath||"").trim();if(!mediaId&&!storagePath)return;
-  itineraryMediaBusyKeys.add(key);setTripMediaMutationBusy(true);try{captureItineraryGallerySelectionsFromDom();}catch(error){}
+  if(!tripEditSession||!tripId||itineraryMediaBusyKeys.has(key)||!itineraryMediaCanEdit()||!found?.item)return;
+  const selection=selectedItineraryGalleryMedia(dayId,itemId,found.item),media=selection.media;if(!media)return;
+  itineraryMediaBusyKeys.add(key);setTripMediaMutationBusy(true);
   try{
-    const service=await getTripMediaSyncService(),user=window.__appAuthUser||tripLibraryCurrentUser||null;
-    const result=await service.moveTripItemMedia({tripId,dayId,itemId,mediaId,storagePath,direction,user});
-    if(result?.moved&&found.item){found.item.images=Array.isArray(result.images)?result.images:found.item.images;itineraryGallerySelectionByItem.set(itineraryGalleryStateKey(dayId,itemId),itineraryGalleryMediaIdentity(media,result.index));}
-  }catch(error){console.error("Itinerary media reorder",error);window.alert(itineraryMediaFriendlyError(error));}
-  finally{itineraryMediaBusyKeys.delete(key);setTripMediaMutationBusy(false);try{render(window.tripData);}catch(error){}}
+    const editService=await tripEditService(),draft=editService.getTripEditDraftItem(tripEditSession,dayId,itemId);if(!draft)return;
+    const images=Array.isArray(draft.images)?draft.images.slice():[],wanted=tripEditMediaIdentity(media),index=images.findIndex(row=>tripEditMediaIdentity(row)===wanted);if(index<0)return;
+    const target=index+(Number(direction)<0?-1:1);if(target<0||target>=images.length)return;
+    [images[index],images[target]]=[images[target],images[index]];images.forEach((row,i)=>{row.sortOrder=i;});
+    itineraryGallerySelectionByItem.set(itineraryGalleryStateKey(dayId,itemId),itineraryGalleryMediaIdentity(media,target));
+    await tripEditRefreshMediaDraft(dayId,itemId,images);
+  }catch(error){console.error("Itinerary media draft reorder",error);window.alert(itineraryMediaFriendlyError(error));}
+  finally{itineraryMediaBusyKeys.delete(key);setTripMediaMutationBusy(false);}
 }
 
 // v7.9.6.2 · Local First can paint the itinerary before the membership listener
@@ -12458,7 +12539,7 @@ window.addEventListener("app-trip-access",event=>{
   itineraryMediaAccessRenderKey=nextKey;
   requestAnimationFrame(()=>{
     if(dataTripId(window.tripData)!==currentTripId||itineraryMediaAccessCapabilityKey()!==nextKey)return;
-    try{render(window.tripData,{includeSnacks:false});refreshSavedPlaceMediaControls();}catch(error){console.warn("Itinerary media access refresh",error);}
+    try{render(activeTripPresentationData(),{includeSnacks:false});refreshSavedPlaceMediaControls();}catch(error){console.warn("Itinerary media access refresh",error);}
   });
 });
 

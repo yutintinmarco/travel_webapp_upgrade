@@ -1,3 +1,14 @@
+# v7.9.14.0 · Phase 3E Item Edit Finalization
+
+- Fixed Edit Session presentation fencing: Firebase Day/listener refreshes can continue updating the authoritative background snapshot without repainting deleted/renamed Team or other stale server values over the active Local Draft.
+- Completed itinerary item editable content with `detail` (expanded description) and editable emoji `icon`, including presets plus custom emoji.
+- Added cross-Day item movement inside the same Edit Session. Existing item payload such as booking/location/media metadata is preserved; the move is committed as one revision-checked delete+create relocation at Global Save.
+- Itinerary photo add/remove/reorder/crop now runs inside Edit Mode. New images are prepared to the existing Local First media cache and previewed immediately, but Storage/Media Registry upload is deferred until Global Save.
+- Global Cancel discards staged local media only; existing Firebase images remain untouched. Global Save uploads staged media, commits item/media references in the same Trip revision transaction, then performs managed Storage/Media Registry cleanup for removed images or deleted items. If upload or commit fails, successfully uploaded descriptors stay attached to the active Edit Session for safe retry; Global Cancel cleans any uploaded-but-uncommitted media.
+- Item deletion is now media-aware instead of being blocked when managed Firebase images exist.
+- View Mode no longer exposes itinerary media mutation controls; gallery viewing remains available.
+- Retains v7.9.13.0 Map Semantic Anchors and the >7-Day sticky Day Bar fix unchanged.
+
 # v7.9.13.0 · Phase 3E Map Semantic Anchors
 
 - Added semantic Map anchors without changing canonical itinerary data: flight/airport endpoints render as ✈️ route anchors rather than numbered itinerary stops, while actual itinerary stops keep contiguous `1, 2, 3…` numbering.
