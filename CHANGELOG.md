@@ -1,3 +1,14 @@
+## v7.9.16.3 — Saved Places taxonomy management + native sliders
+
+- Added Local Draft management for Saved Place **類型 / 細分類 / 優先度**: add, rename, reorder and delete.
+- Existing canonical values remain stable when labels are renamed; an option still used by a Saved Place cannot be deleted silently.
+- Replaced free/static taxonomy lists in the Saved Place editor with metadata-backed selectors.
+- Changed **價位** to a 5-stop slider: 未設定 / ¥ / ¥¥ / ¥¥¥ / ¥¥¥¥.
+- Changed **排隊** to a 5-stop slider: 未設定 / 不用排隊 / 少排隊 / 可能要排 / 熱門排隊.
+- Removed **回程前** from 適合時間; retained 早餐 / 上午 / 午餐 / 下午 / 下午茶 / 晚餐 / 宵夜.
+- Extended `savedPlacesMeta` import/edit persistence for taxonomy option metadata.
+- No changes to Saved Place media, Google Maps, Transit, Day Bar, Team lifecycle or legacy JSON cleanup.
+
 ## v7.9.16.2 — Saved Places Editor UX correction
 
 - Reworked Saved Place metadata editing from free-text fields into structured selectors aligned with the existing Saved Places filters.
