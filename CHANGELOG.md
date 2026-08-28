@@ -1,3 +1,14 @@
+# v7.9.16.0 — Phase 3E Saved Places Edit + Saved Place → Itinerary
+
+- Added Saved Places to the same revision-checked Global Edit Session used by Trip, Team and itinerary editing. Add, edit and delete operations now remain Local Draft changes until the single Global Save.
+- Added native Saved Place editing for title, icon, region, category, priority, type, suggested day, price, queue level, best time, must-do text, notes/detail, opening hours, tags and Google Maps location.
+- Added Edit Mode controls directly on the Saved Places screen, including `＋ 新增收藏`, `編輯收藏` and `加入行程`, while preserving the normal Saved Place detail viewer outside Edit Mode.
+- Added `收藏 → 行程` adoption by reusing the proven Add Itinerary Item editor. Title, icon, notes/detail and Google Maps location are prefilled; Day, time, Team and booked state remain explicit choices before the draft item is created.
+- Moved Saved Place photo add/remove/reorder/crop into the Local Edit Session. New photos are staged locally, Global Cancel discards staged changes, and Global Save uploads/commits first then performs managed Storage/Media Registry cleanup.
+- Legacy gallery-only Saved Places are normalized when media editing starts, so existing photos can be reordered or removed without disappearing behind the older gallery fallback.
+- Extended the post-save presentation fence and referenced-media check to Saved Places so same-revision listener composites cannot repaint stale Saved Place data or delete freshly uploaded Saved Place media as orphaned.
+- Map renderer, Transit providers/Gallery, Day Bar, Team transaction fix, `trip.json`, legacy bootstrap, Firebase Functions and security rules are unchanged. Legacy GitHub JSON/media cleanup remains deliberately deferred.
+
 # v7.9.15.2 — Editor heading + new-item Maps visibility hotfix
 
 - Restored the richer fixed item-editor heading from v7.9.15.0: item icon plus `Title · Day · Time` context remains visible while scrolling.
