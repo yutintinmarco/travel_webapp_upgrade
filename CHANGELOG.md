@@ -1,3 +1,9 @@
+# v7.9.15.2 — Editor heading + new-item Maps visibility hotfix
+
+- Restored the richer fixed item-editor heading from v7.9.15.0: item icon plus `Title · Day · Time` context remains visible while scrolling.
+- Fixed newly created stops with Google Maps/location data appearing to lose the Maps function after Save. The location payload was already persisted; the renderer now exposes inline details whenever an item has detail or Maps data instead of relying only on legacy `popup` metadata.
+- Existing item Google Maps editing, media flows, Team deletion fix, Day Bar, transit and Firebase runtime paths are otherwise unchanged from v7.9.15.1.
+
 # v7.9.15.1 · Stable Rebuild from v7.9.14.0
 
 - Discards the rejected v7.9.15.0 branch and rebuilds directly from the verified v7.9.14.0 Item Edit baseline, preserving the proven itinerary media and Google Maps edit paths unchanged.

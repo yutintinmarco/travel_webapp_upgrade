@@ -1,5 +1,5 @@
 /* Travel WebApp Service Worker
- * v7.9.15.1 · Stable rebuild from v7.9.14.0: Team delete persistence + native editor UX + Day Bar backing
+ * v7.9.15.2 · Stable rebuild from v7.9.14.0: Team delete persistence + native editor UX + Day Bar backing
  *
  * Keeps the v7.7.0.14 cold-start behaviour, while hardening installation:
  *  1. Critical shell assets are transactional. If any critical file cannot be
@@ -14,7 +14,7 @@
  *     explicit reload stays network-first.
  */
 
-const SW_VERSION = "travel-shell-v7.9.15.1";
+const SW_VERSION = "travel-shell-v7.9.15.2";
 const CORE_CACHE = SW_VERSION;
 
 // Required for a useful offline launch and remembered-Trip boot.
