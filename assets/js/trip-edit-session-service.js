@@ -214,6 +214,26 @@ function savedPlaceItemsFromTrip(trip = {}) {
   const snacks = trip?.snacks || {};
   return Array.isArray(snacks) ? snacks : (Array.isArray(snacks?.items) ? snacks.items : []);
 }
+function normalizeSavedPlaceAreaFilters(input = []) {
+  const out = [];
+  const seen = new Set();
+  (Array.isArray(input) ? input : []).forEach(value => {
+    const label = clean(value);
+    const key = label.toLocaleLowerCase();
+    if (!label || seen.has(key)) return;
+    seen.add(key); out.push(label);
+  });
+  return out.slice(0, 24);
+}
+function savedPlaceMetaSnapshot(trip = {}) {
+  const snacks = Array.isArray(trip?.snacks) ? {} : clonePlain(trip?.snacks || {});
+  delete snacks.items;
+  snacks.title = clean(snacks.title);
+  snacks.subtitle = clean(snacks.subtitle);
+  snacks.areaFilters = normalizeSavedPlaceAreaFilters(snacks.areaFilters);
+  return snacks;
+}
+function sameSavedPlaceMeta(a = {}, b = {}) { return stableJson(savedPlaceMetaSnapshot({ snacks: a })) === stableJson(savedPlaceMetaSnapshot({ snacks: b })); }
 function makeSavedPlaceId() {
   try { if (globalThis.crypto?.randomUUID) return `place_${globalThis.crypto.randomUUID().replace(/-/g, "").slice(0, 12)}`; } catch (_) {}
   return `place_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
@@ -456,6 +476,8 @@ export function createTripEditSession(tripDataInput) {
   const baseTripDetails = tripDetailsSnapshot(trip);
   const baseTravellers = normalizeTravellersForEdit(trip?.meta?.travellers || {});
   const baseFlights = normalizeFlightsForEdit(trip?.meta?.flights || []);
+  const baseSavedPlaceMeta = savedPlaceMetaSnapshot(trip);
+  const draftSavedPlaceMeta = clonePlain(baseSavedPlaceMeta);
   const baseSavedPlaces = new Map(), draftSavedPlaces = new Map();
   savedPlaceItemsFromTrip(trip).forEach((place, index) => {
     const placeId = clean(place?.placeId || place?.id); if (!placeId) return;
@@ -479,6 +501,8 @@ export function createTripEditSession(tripDataInput) {
     draftTravellers: clonePlain(baseTravellers),
     baseFlights,
     draftFlights: clonePlain(baseFlights),
+    baseSavedPlaceMeta,
+    draftSavedPlaceMeta,
     baseSavedPlaces,
     draftSavedPlaces,
     deletedSavedPlaces: new Set()
@@ -542,6 +566,17 @@ export function replaceTripEditDraftTeamState(session, { travellers = {}, flight
     session.draftItems.set(key, { ...draft, who: "all" });
   });
   return getTripEditDraftTeamState(session);
+}
+
+export function getTripEditDraftSavedPlaceMeta(session) {
+  return session?.draftSavedPlaceMeta ? clonePlain(session.draftSavedPlaceMeta) : { areaFilters: [] };
+}
+
+export function replaceTripEditDraftSavedPlaceAreaFilters(session, areaFilters = []) {
+  if (!session) return { areaFilters: [] };
+  const current = session.draftSavedPlaceMeta || session.baseSavedPlaceMeta || {};
+  session.draftSavedPlaceMeta = { ...clonePlain(current), areaFilters: normalizeSavedPlaceAreaFilters(areaFilters) };
+  return getTripEditDraftSavedPlaceMeta(session);
 }
 
 export function getTripEditDraftSavedPlace(session, placeIdInput) {
@@ -883,23 +918,24 @@ export function replaceTripEditDraftMediaDescriptors(session, replacementsInput 
 }
 
 export function tripEditDomainChanges(session) {
-  if (!session) return { tripDetailsChanged: false, travellersChanged: false, flightsChanged: false, teamChangeCount: 0, daysChanged: false, dayChangeCount: 0 };
+  if (!session) return { tripDetailsChanged: false, travellersChanged: false, flightsChanged: false, savedPlaceMetaChanged: false, teamChangeCount: 0, daysChanged: false, dayChangeCount: 0 };
   const tripDetailsChanged = !sameTripDetails(session.baseTripDetails || {}, session.draftTripDetails || {});
   const travellersChanged = !sameTravellers(session.baseTravellers || {}, session.draftTravellers || {});
   const flightsChanged = !sameFlights(session.baseFlights || [], session.draftFlights || []);
+  const savedPlaceMetaChanged = !sameSavedPlaceMeta(session.baseSavedPlaceMeta || {}, session.draftSavedPlaceMeta || {});
   const baseKeys = new Set(Object.keys(session.baseTravellers || {})), draftKeys = new Set(Object.keys(session.draftTravellers || {}));
   let teamChangeCount = 0;
   new Set([...baseKeys, ...draftKeys]).forEach(key => {
     if (stableJson(session.baseTravellers?.[key] || null) !== stableJson(session.draftTravellers?.[key] || null)) teamChangeCount += 1;
   });
   const dayChangeCount = tripEditDayChanges(session).length;
-  return { tripDetailsChanged, travellersChanged, flightsChanged, teamChangeCount, daysChanged: dayChangeCount > 0, dayChangeCount };
+  return { tripDetailsChanged, travellersChanged, flightsChanged, savedPlaceMetaChanged, teamChangeCount, daysChanged: dayChangeCount > 0, dayChangeCount };
 }
 
 export function tripEditChangeCount(session) {
   const itemCount = tripEditChanges(session).length, savedPlaceCount = tripEditSavedPlaceChanges(session).length;
   const domain = tripEditDomainChanges(session);
-  return itemCount + savedPlaceCount + domain.dayChangeCount + (domain.tripDetailsChanged ? 1 : 0) + domain.teamChangeCount + (domain.flightsChanged && !domain.travellersChanged ? 1 : 0);
+  return itemCount + savedPlaceCount + domain.dayChangeCount + (domain.tripDetailsChanged ? 1 : 0) + (domain.savedPlaceMetaChanged ? 1 : 0) + domain.teamChangeCount + (domain.flightsChanged && !domain.travellersChanged ? 1 : 0);
 }
 
 export function applyTripEditDraftToTrip(session, tripInput, { revision = null } = {}) {
@@ -966,10 +1002,10 @@ export function applyTripEditDraftToTrip(session, tripInput, { revision = null }
     });
     return day;
   });
-  const snackMeta = Array.isArray(trip.snacks) ? {} : clonePlain(trip.snacks || {});
+  const snackMeta = session.draftSavedPlaceMeta ? clonePlain(session.draftSavedPlaceMeta) : (Array.isArray(trip.snacks) ? {} : clonePlain(trip.snacks || {}));
   const savedPlaces = [...(session.draftSavedPlaces?.values?.() || [])].map(row => { const next = normalizeSavedPlace(row, row); delete next.isNew; return next; })
     .sort((a,b) => normalizedSortOrder(a?.sortOrder) - normalizedSortOrder(b?.sortOrder));
-  trip.snacks = { ...snackMeta, items: savedPlaces };
+  trip.snacks = { ...snackMeta, areaFilters: normalizeSavedPlaceAreaFilters(snackMeta.areaFilters), items: savedPlaces };
   if (!trip.meta || typeof trip.meta !== "object") trip.meta = {};
   const details = normalizeTripDetails(session.draftTripDetails || session.baseTripDetails || {}, tripDetailsSnapshot(trip));
   trip.meta.titleSmall = details.titleSmall;
@@ -1007,7 +1043,7 @@ export async function commitTripEditSession(session, { user: userInput = null } 
   const savedPlaceChanges = tripEditSavedPlaceChanges(session);
   const dayChanges = tripEditDayChanges(session);
   const domainChanges = tripEditDomainChanges(session);
-  const anyDomainChange = domainChanges.tripDetailsChanged || domainChanges.travellersChanged || domainChanges.flightsChanged || dayChanges.length > 0;
+  const anyDomainChange = domainChanges.tripDetailsChanged || domainChanges.travellersChanged || domainChanges.flightsChanged || domainChanges.savedPlaceMetaChanged || dayChanges.length > 0;
   if (!changes.length && !savedPlaceChanges.length && !anyDomainChange) return { revision: session.baseRevision, changedItems: 0, changedSavedPlaces: 0, changedDays: 0, changedTrip: false, changedTeams: 0, noChange: true };
   if (changes.length + savedPlaceChanges.length + dayChanges.length > 448) {
     const error = new Error("Too many itinerary changes in one edit session");
@@ -1115,22 +1151,27 @@ export async function commitTripEditSession(session, { user: userInput = null } 
       tripPatch.status = details.status;
     }
     tx.set(tripRef, tripPatch, { merge: true });
-    if (domainChanges.travellersChanged || domainChanges.flightsChanged) {
-      // v7.9.15.1 · travellers/flights are canonical aggregate fields. Using
-      // merge:true recursively merges nested map keys, so deleting one Team
-      // can leave the removed key on the server and make it reappear after a
-      // fresh app launch. mergeFields treats these top-level fields as atomic
-      // replacements while still preserving unrelated settings/general data.
-      tx.set(generalRef, {
-        travellers: normalizeTravellersForEdit(session.draftTravellers || {}),
-        flights: normalizeFlightsForEdit(session.draftFlights || []),
-        updatedAt: serverTimestamp(),
-        updatedBy: user.uid
-      }, { mergeFields: ["travellers", "flights", "updatedAt", "updatedBy"] });
+    if (domainChanges.travellersChanged || domainChanges.flightsChanged || domainChanges.savedPlaceMetaChanged) {
+      // Aggregate settings fields are replaced atomically. Recursive merge on
+      // travellers previously kept deleted Team keys; savedPlacesMeta follows
+      // the same explicit top-level replacement rule.
+      const generalPatch = { updatedAt: serverTimestamp(), updatedBy: user.uid };
+      const mergeFields = ["updatedAt", "updatedBy"];
+      if (domainChanges.travellersChanged || domainChanges.flightsChanged) {
+        generalPatch.travellers = normalizeTravellersForEdit(session.draftTravellers || {});
+        generalPatch.flights = normalizeFlightsForEdit(session.draftFlights || []);
+        mergeFields.push("travellers", "flights");
+      }
+      if (domainChanges.savedPlaceMetaChanged) {
+        generalPatch.savedPlacesMeta = savedPlaceMetaSnapshot({ snacks: session.draftSavedPlaceMeta || {} });
+        mergeFields.push("savedPlacesMeta");
+      }
+      tx.set(generalRef, generalPatch, { mergeFields });
     }
     const summaryParts = [];
     if (changes.length) summaryParts.push(`${changes.length} 個行程項目`);
     if (savedPlaceChanges.length) summaryParts.push(`${savedPlaceChanges.length} 個收藏`);
+    if (domainChanges.savedPlaceMetaChanged) summaryParts.push("收藏篩選設定");
     if (dayChanges.length) summaryParts.push(`${dayChanges.length} 個行程日`);
     if (domainChanges.tripDetailsChanged) summaryParts.push("旅程資料");
     if (domainChanges.teamChangeCount || domainChanges.flightsChanged) summaryParts.push(`${domainChanges.teamChangeCount} 個 Team`);
@@ -1145,6 +1186,7 @@ export async function commitTripEditSession(session, { user: userInput = null } 
       revision: nextRevision,
       changedItems: changes.length,
       changedSavedPlaces: savedPlaceChanges.length,
+      changedSavedPlaceMeta: domainChanges.savedPlaceMetaChanged,
       changedDays: dayChanges.length,
       changedTrip: domainChanges.tripDetailsChanged,
       changedTeams: domainChanges.teamChangeCount,

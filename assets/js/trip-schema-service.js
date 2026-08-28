@@ -441,7 +441,8 @@ export function buildFirestoreTripPlan(rawInput = {}, ownerUser = null) {
       galleryDefaults: clone(meta.galleryDefaults || {}),
       savedPlacesMeta: Array.isArray(trip.snacks) ? {} : {
         title: clean(trip.snacks?.title),
-        subtitle: clean(trip.snacks?.subtitle)
+        subtitle: clean(trip.snacks?.subtitle),
+        areaFilters: safeArray(trip.snacks?.areaFilters).map(clean).filter(Boolean)
       },
       featureColors: clone(meta.featureColors || {}),
       footerNote: clean(meta.footerNote)
