@@ -214,6 +214,15 @@ function savedPlaceItemsFromTrip(trip = {}) {
   const snacks = trip?.snacks || {};
   return Array.isArray(snacks) ? snacks : (Array.isArray(snacks?.items) ? snacks.items : []);
 }
+const DEFAULT_SAVED_PLACE_MEAL_TYPES = [
+  { value: "snack", label: "小食" }, { value: "dessert", label: "甜品" },
+  { value: "meal", label: "正餐" }, { value: "drink", label: "飲品" },
+  { value: "souvenir", label: "手信" }
+];
+const DEFAULT_SAVED_PLACE_PRIORITIES = [
+  { value: "must", label: "必食" }, { value: "route", label: "順路" },
+  { value: "backup", label: "後備晚餐" }, { value: "souvenir", label: "手信" }
+];
 function normalizeSavedPlaceAreaFilters(input = []) {
   const out = [];
   const seen = new Set();
@@ -225,12 +234,35 @@ function normalizeSavedPlaceAreaFilters(input = []) {
   });
   return out.slice(0, 24);
 }
+function normalizeSavedPlaceOptions(input = [], fallback = []) {
+  const source = Array.isArray(input) ? input : fallback, out = [], seen = new Set();
+  source.forEach((row) => {
+    const value = clean(row && typeof row === "object" ? row.value : row);
+    const label = clean(row && typeof row === "object" ? row.label : row) || value;
+    const key = value.toLocaleLowerCase();
+    if (!value || seen.has(key)) return;
+    seen.add(key); out.push({ value, label });
+  });
+  return out.slice(0, 40);
+}
 function savedPlaceMetaSnapshot(trip = {}) {
-  const snacks = Array.isArray(trip?.snacks) ? {} : clonePlain(trip?.snacks || {});
+  const source = Array.isArray(trip?.snacks) ? {} : clonePlain(trip?.snacks || {});
+  const snacks = clonePlain(source);
   delete snacks.items;
   snacks.title = clean(snacks.title);
   snacks.subtitle = clean(snacks.subtitle);
   snacks.areaFilters = normalizeSavedPlaceAreaFilters(snacks.areaFilters);
+  const items = savedPlaceItemsFromTrip(trip);
+  const derivedCategories = [...new Set(items.map(row => clean(row?.category)).filter(Boolean))].map(value => ({ value, label: value }));
+  snacks.mealTypeOptions = normalizeSavedPlaceOptions(
+    Object.prototype.hasOwnProperty.call(source, "mealTypeOptions") ? source.mealTypeOptions : DEFAULT_SAVED_PLACE_MEAL_TYPES
+  );
+  snacks.categoryOptions = normalizeSavedPlaceOptions(
+    Object.prototype.hasOwnProperty.call(source, "categoryOptions") ? source.categoryOptions : derivedCategories
+  );
+  snacks.priorityOptions = normalizeSavedPlaceOptions(
+    Object.prototype.hasOwnProperty.call(source, "priorityOptions") ? source.priorityOptions : DEFAULT_SAVED_PLACE_PRIORITIES
+  );
   return snacks;
 }
 function sameSavedPlaceMeta(a = {}, b = {}) { return stableJson(savedPlaceMetaSnapshot({ snacks: a })) === stableJson(savedPlaceMetaSnapshot({ snacks: b })); }
@@ -576,6 +608,16 @@ export function replaceTripEditDraftSavedPlaceAreaFilters(session, areaFilters =
   if (!session) return { areaFilters: [] };
   const current = session.draftSavedPlaceMeta || session.baseSavedPlaceMeta || {};
   session.draftSavedPlaceMeta = { ...clonePlain(current), areaFilters: normalizeSavedPlaceAreaFilters(areaFilters) };
+  return getTripEditDraftSavedPlaceMeta(session);
+}
+
+export function replaceTripEditDraftSavedPlaceOptions(session, optionField, options = []) {
+  if (!session) return {};
+  const allowed = new Set(["mealTypeOptions", "categoryOptions", "priorityOptions"]);
+  const field = clean(optionField);
+  if (!allowed.has(field)) { const error = new Error("Unsupported saved place option field"); error.code = "edit-saved-place-option-field"; throw error; }
+  const current = session.draftSavedPlaceMeta || session.baseSavedPlaceMeta || {};
+  session.draftSavedPlaceMeta = { ...clonePlain(current), [field]: normalizeSavedPlaceOptions(options) };
   return getTripEditDraftSavedPlaceMeta(session);
 }
 
@@ -1005,7 +1047,14 @@ export function applyTripEditDraftToTrip(session, tripInput, { revision = null }
   const snackMeta = session.draftSavedPlaceMeta ? clonePlain(session.draftSavedPlaceMeta) : (Array.isArray(trip.snacks) ? {} : clonePlain(trip.snacks || {}));
   const savedPlaces = [...(session.draftSavedPlaces?.values?.() || [])].map(row => { const next = normalizeSavedPlace(row, row); delete next.isNew; return next; })
     .sort((a,b) => normalizedSortOrder(a?.sortOrder) - normalizedSortOrder(b?.sortOrder));
-  trip.snacks = { ...snackMeta, areaFilters: normalizeSavedPlaceAreaFilters(snackMeta.areaFilters), items: savedPlaces };
+  trip.snacks = {
+    ...snackMeta,
+    areaFilters: normalizeSavedPlaceAreaFilters(snackMeta.areaFilters),
+    mealTypeOptions: normalizeSavedPlaceOptions(snackMeta.mealTypeOptions),
+    categoryOptions: normalizeSavedPlaceOptions(snackMeta.categoryOptions),
+    priorityOptions: normalizeSavedPlaceOptions(snackMeta.priorityOptions),
+    items: savedPlaces
+  };
   if (!trip.meta || typeof trip.meta !== "object") trip.meta = {};
   const details = normalizeTripDetails(session.draftTripDetails || session.baseTripDetails || {}, tripDetailsSnapshot(trip));
   trip.meta.titleSmall = details.titleSmall;

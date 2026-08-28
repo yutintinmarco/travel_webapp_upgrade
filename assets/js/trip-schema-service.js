@@ -442,7 +442,10 @@ export function buildFirestoreTripPlan(rawInput = {}, ownerUser = null) {
       savedPlacesMeta: Array.isArray(trip.snacks) ? {} : {
         title: clean(trip.snacks?.title),
         subtitle: clean(trip.snacks?.subtitle),
-        areaFilters: safeArray(trip.snacks?.areaFilters).map(clean).filter(Boolean)
+        areaFilters: safeArray(trip.snacks?.areaFilters).map(clean).filter(Boolean),
+        ...(Array.isArray(trip.snacks?.mealTypeOptions) ? { mealTypeOptions: clone(trip.snacks.mealTypeOptions) } : {}),
+        ...(Array.isArray(trip.snacks?.categoryOptions) ? { categoryOptions: clone(trip.snacks.categoryOptions) } : {}),
+        ...(Array.isArray(trip.snacks?.priorityOptions) ? { priorityOptions: clone(trip.snacks.priorityOptions) } : {})
       },
       featureColors: clone(meta.featureColors || {}),
       footerNote: clean(meta.footerNote)
