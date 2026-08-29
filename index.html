@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
   <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
   <link rel="dns-prefetch" href="https://api.open-meteo.com">
-  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?release=7.9.19.1">
+  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?release=7.9.19.2">
   <title id="page-title">行程</title>
   <script>
   // v7.7.5.0 · Performance Lite. Memory only: no Firebase reads/writes, no
@@ -3903,7 +3903,7 @@ body.expenses-view-active #app-version-note{
 #snacks-view::after,
 #info-view::after,
 #profile-view::after{
-  content:"v7.9.19.1" !important;
+  content:"v7.9.19.2" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3924,7 +3924,7 @@ body.expenses-view-active #app-version-note{
   display:none !important;
 }
 body.expenses-view-active .expenses-module .expenses-app::after{
-  content:"v7.9.19.1" !important;
+  content:"v7.9.19.2" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -4577,7 +4577,7 @@ html.theme-dark .snack-edit-tools,html:not(.theme-light):not(.theme-dark) .snack
 </style>
             <link rel="apple-touch-icon" href="assets/icon/trip_icon.png">
   <link rel="icon" type="image/png" href="assets/icon/trip_icon.png">
-  <link rel="manifest" href="manifest.json?release=7.9.19.1">
+  <link rel="manifest" href="manifest.json?release=7.9.19.2">
   <meta name="apple-mobile-web-app-title" content="關嘉露西生日之旅">
   <!-- v7.7.1.2: expenses.css is 144KB and every rule is scoped under
        .expenses-module, yet it used to block the very first paint of the
@@ -4585,8 +4585,8 @@ html.theme-dark .snack-edit-tools,html:not(.theme-light):not(.theme-dark) .snack
        priority without blocking paint; ensureExpensesStylesheet() flips it to
        media="all" before the 支出 view is ever mounted, so the styling is
        byte-for-byte identical by the time anything expenses-related renders. -->
-  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?release=7.9.19.1" media="print">
-  <noscript><link rel="stylesheet" href="assets/css/expenses.css?release=7.9.19.1"></noscript>
+  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?release=7.9.19.2" media="print">
+  <noscript><link rel="stylesheet" href="assets/css/expenses.css?release=7.9.19.2"></noscript>
 
 <style id="booking-documents-v79191-style">
 /* Phase 3E · Booking Documents native hierarchy / viewer hardening.
@@ -4605,9 +4605,59 @@ body.booking-document-viewer-open .scroll-shell{overflow:hidden!important}.booki
 html.theme-dark .trip-edit-document-row,html:not(.theme-light):not(.theme-dark) .trip-edit-document-row{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.08)}html.theme-dark .trip-edit-document-icon,html:not(.theme-light):not(.theme-dark) .trip-edit-document-icon{background:rgba(255,255,255,.08)}html.theme-dark .booking-doc-owner[data-booking-focus="true"],html:not(.theme-light):not(.theme-dark) .booking-doc-owner[data-booking-focus="true"]{background:rgba(10,132,255,.09)}
 @media (prefers-reduced-motion:reduce){.info-nav-page{animation:none!important}}
 </style>
+<style id="booking-documents-v79192-style">
+/* v7.9.19.2 · Booking Documents real-device stability patch.
+   1) Info subpage navigation reuses the proven 我的 snapshot handoff language.
+   2) Document Viewer is a native top-layer <dialog>, so no fixed sheet / tab bar
+      can sit above it and steal touches.
+   3) Day Bar backing is an independent viewport plane. Frozen Day pills, size,
+      sticky position, horizontal scrolling and Day switching remain unchanged. */
+.info-nav-host.is-snapshotting{visibility:hidden}
+body.info-navigation-active .scroll-shell{overflow:hidden!important}
+.profile-nav-surface .info-nav-page{display:block!important;width:100%;max-width:100%}
+.profile-nav-surface .info-nav-page[hidden]{display:block!important}
+
+/* The old pseudo-element backing was the recurring >7-Day failure point.
+   Disable it and paint the same material on a body-level fixed plane instead. */
+.day-tabs::before{display:none!important;content:none!important}
+.day-tabs-sticky-backdrop{
+  position:fixed;
+  left:0;right:0;
+  top:calc(var(--compact-header-h) + env(safe-area-inset-top,0px));
+  height:var(--day-tabs-stuck-height-global,49px);
+  z-index:1190;
+  opacity:0;
+  visibility:hidden;
+  pointer-events:none;
+  background:var(--sticky-material);
+  border-bottom:.5px solid var(--separator);
+  backdrop-filter:blur(24px) saturate(155%);
+  -webkit-backdrop-filter:blur(24px) saturate(155%);
+  transition:opacity .12s ease,visibility 0s linear .12s;
+}
+.day-tabs-sticky-backdrop.is-visible{opacity:1;visibility:visible;transition:opacity .12s ease,visibility 0s}
+
+/* Native top-layer viewer. <dialog>.showModal() outranks every normal z-index
+   layer, including bottom nav, edit sheets and other fixed glass surfaces. */
+dialog.booking-document-viewer{
+  position:fixed;inset:0;
+  width:100%;height:100%;max-width:none;max-height:none;
+  margin:0;padding:0;border:0;border-radius:0;
+  box-sizing:border-box;
+  background:transparent;color:var(--label-primary);
+  grid-template-rows:calc(env(safe-area-inset-top,0px) + 52px) minmax(0,1fr);
+  overflow:hidden;isolation:isolate;
+}
+dialog.booking-document-viewer:not([open]){display:none!important}
+dialog.booking-document-viewer[open]{display:grid!important}
+dialog.booking-document-viewer::backdrop{background:transparent}
+.booking-document-viewer-bar{pointer-events:auto}
+.booking-document-viewer-body{touch-action:pan-x pan-y}
+</style>
 </head>
 <body class="app-entry-gated app-entry-pending">
 <div class="bg-fixed"></div>
+<div class="day-tabs-sticky-backdrop" id="day-tabs-sticky-backdrop" aria-hidden="true"></div>
 <div id="portrait-lock-overlay" class="portrait-lock-overlay" role="status" aria-live="polite">
   <div class="portrait-lock-card">
     <div class="portrait-lock-icon" aria-hidden="true">↻</div>
@@ -5449,7 +5499,7 @@ html.theme-dark .trip-edit-document-row,html:not(.theme-light):not(.theme-dark) 
         <span class="profile-detail-spacer"></span>
       </div>
       <section class="profile-card" aria-label="App 資訊">
-        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.9.19.1</strong></div>
+        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.9.19.2</strong></div>
         <div class="profile-meta-row"><span>資料架構</span><strong>Phase 2G.2</strong></div>
         <div class="profile-meta-row"><span>主要資料來源</span><strong id="app-data-source-label">Firebase / 本機快取</strong></div>
       </section>
@@ -5501,14 +5551,14 @@ html.theme-dark .trip-edit-document-row,html:not(.theme-light):not(.theme-dark) 
 </div>
 </div>
 
-<div class="booking-document-viewer" id="booking-document-viewer" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="booking-document-viewer-title">
+<dialog class="booking-document-viewer" id="booking-document-viewer" aria-labelledby="booking-document-viewer-title">
   <div class="booking-document-viewer-bar">
     <button id="booking-document-viewer-close" type="button" aria-label="返回"><span class="booking-document-viewer-back-glyph" aria-hidden="true">‹</span></button>
     <div class="booking-document-viewer-title" id="booking-document-viewer-title">預訂文件</div>
     <span class="booking-document-viewer-spacer" aria-hidden="true"></span>
   </div>
   <div class="booking-document-viewer-body" id="booking-document-viewer-body"><div class="booking-document-viewer-state">正在載入…</div></div>
-</div>
+</dialog>
 
 <div class="trip-map-overlay" id="trip-map-overlay" aria-hidden="true">
   <div class="trip-map-canvas" id="trip-map-canvas" aria-label="旅程地圖"></div>
@@ -6096,7 +6146,7 @@ html.theme-dark .trip-edit-document-row,html:not(.theme-light):not(.theme-dark) 
 </div>
 
 <script>
-const APP_VERSION = "7.9.19.1";
+const APP_VERSION = "7.9.19.2";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 let tripMapServicePromise=null,transitRouteServicePromise=null,tripEditServicePromise=null,airlineLogoServicePromise=null,tripDocumentServicePromise=null,tripMapController=null,tripMapScope="day",tripMapRenderEpoch=0,tripMapSelectedPoint=null;
@@ -6690,7 +6740,8 @@ document.getElementById("trip-booking-document-input")?.addEventListener("change
 document.getElementById("booking-documents-open")?.addEventListener("click",()=>tripOpenBookingDocumentsPage());
 document.getElementById("booking-documents-back")?.addEventListener("click",()=>tripCloseBookingDocumentsPage());
 document.getElementById("booking-document-viewer-close")?.addEventListener("click",tripCloseBookingDocumentViewer);
-document.addEventListener("keydown",event=>{if(event.key==="Escape"&&document.getElementById("booking-document-viewer")?.classList.contains("is-open"))tripCloseBookingDocumentViewer();});
+document.getElementById("booking-document-viewer")?.addEventListener("cancel",event=>{event.preventDefault();tripCloseBookingDocumentViewer();});
+document.addEventListener("keydown",event=>{if(event.key==="Escape"&&document.getElementById("booking-document-viewer")?.open)tripCloseBookingDocumentViewer();});
 let bookingDocumentsSwipeStart=null;
 document.getElementById("info-page-booking-documents")?.addEventListener("touchstart",event=>{if(!infoDocumentsPageOpen||event.touches?.length!==1)return;const touch=event.touches[0];if(touch.clientX>28)return;bookingDocumentsSwipeStart={x:touch.clientX,y:touch.clientY};},{passive:true});
 document.getElementById("info-page-booking-documents")?.addEventListener("touchend",event=>{if(!bookingDocumentsSwipeStart||event.changedTouches?.length!==1)return;const touch=event.changedTouches[0],dx=touch.clientX-bookingDocumentsSwipeStart.x,dy=Math.abs(touch.clientY-bookingDocumentsSwipeStart.y);bookingDocumentsSwipeStart=null;if(dx>72&&dy<Math.abs(dx)*.72)void tripCloseBookingDocumentsPage();},{passive:true});
@@ -7236,7 +7287,7 @@ function appendInlineDetails(itemEl,item,gallery,dayId=""){
   if(body.textContent.trim())detail.appendChild(body);
   const actions=document.createElement("div");actions.className="inline-detail-actions";
   const addAction=(label,url,secondary=false)=>{if(!url)return;const a=document.createElement("a");a.className=`inline-action-btn${secondary?" secondary":""}`;a.href=url;a.target="_blank";a.rel="noopener";a.textContent=label;a.addEventListener("click",e=>e.stopPropagation());actions.appendChild(a);};
-  addAction("Google 地圖",item.maps,false);addAction("官方網頁",item.dianping,true);const bookingRows=tripDocumentsForOwner(tripAllBookingDocuments(activeTripPresentationData()),"item",galleryItemId);if(bookingRows.length){const bookingBtn=document.createElement("button");bookingBtn.type="button";bookingBtn.className="inline-action-btn secondary";bookingBtn.textContent=`預訂文件 ${bookingRows.length}`;bookingBtn.addEventListener("click",event=>{event.stopPropagation();void tripOpenBookingDocumentsPage({ownerType:"item",ownerId:galleryItemId});});actions.appendChild(bookingBtn);}if(actions.childElementCount)detail.appendChild(actions);
+  addAction("Google 地圖",item.maps,false);addAction("官方網頁",item.dianping,true);const bookingRows=tripDocumentsForOwner(tripAllBookingDocuments(activeTripPresentationData()),"item",galleryItemId);if(bookingRows.length){bookingRows.forEach((row,index)=>{const bookingBtn=document.createElement("button");bookingBtn.type="button";bookingBtn.className="inline-action-btn secondary";bookingBtn.textContent=bookingRows.length===1?"查看預訂文件":`查看 ${String(row?.title||row?.fileName||`預訂文件 ${index+1}`)}`;bookingBtn.addEventListener("click",event=>{event.stopPropagation();void tripOpenBookingDocument(row);});actions.appendChild(bookingBtn);});}if(actions.childElementCount)detail.appendChild(actions);
   appendItineraryMediaManagementActions(detail,item,gallery,dayId,galleryItemId);
   clip.appendChild(detail);shell.appendChild(clip);itemEl.appendChild(shell);
 }
@@ -8619,14 +8670,17 @@ function tripBookingDocumentOwnerTime(row={},dataInput=activeTripPresentationDat
 function tripBookingDocumentFileMeta(row={}){const bits=[];const file=String(row?.fileName||"").trim(),title=String(row?.title||"").trim();if(file&&file!==title)bits.push(file);if(Number(row?.byteSize))bits.push(`${Math.max(1,Math.round(Number(row.byteSize)/1024))} KB`);return bits.join(" · ")||"點選直接預覽";}
 function tripCloseBookingDocumentViewer(){
   bookingDocumentViewerEpoch+=1;
-  const viewer=document.getElementById("booking-document-viewer");if(viewer){viewer.classList.remove("is-open");viewer.setAttribute("aria-hidden","true");}
+  const viewer=document.getElementById("booking-document-viewer");
+  if(viewer?.open){try{viewer.close();}catch(_){viewer.removeAttribute("open");}}
   document.body.classList.remove("booking-document-viewer-open");
   if(bookingDocumentViewerObjectUrl){try{URL.revokeObjectURL(bookingDocumentViewerObjectUrl);}catch(_){}bookingDocumentViewerObjectUrl="";}
   bookingDocumentViewerCurrent=null;const body=document.getElementById("booking-document-viewer-body");if(body)body.innerHTML='<div class="booking-document-viewer-state">正在載入…</div>';
 }
 async function tripOpenBookingDocument(rowInput={}){
   const row=rowInput||{},viewer=document.getElementById("booking-document-viewer"),body=document.getElementById("booking-document-viewer-body"),title=document.getElementById("booking-document-viewer-title");if(!viewer||!body)return;
-  tripCloseBookingDocumentViewer();const epoch=++bookingDocumentViewerEpoch;bookingDocumentViewerCurrent=row;if(title)title.textContent=String(row.title||row.fileName||"預訂文件");viewer.classList.add("is-open");viewer.setAttribute("aria-hidden","false");document.body.classList.add("booking-document-viewer-open");body.innerHTML='<div class="booking-document-viewer-state">正在載入…</div>';
+  tripCloseBookingDocumentViewer();const epoch=++bookingDocumentViewerEpoch;bookingDocumentViewerCurrent=row;if(title)title.textContent=String(row.title||row.fileName||"預訂文件");
+  try{if(typeof viewer.showModal==="function")viewer.showModal();else viewer.setAttribute("open","");}catch(_){viewer.setAttribute("open","");}
+  document.body.classList.add("booking-document-viewer-open");body.innerHTML='<div class="booking-document-viewer-state">正在載入…</div>';
   try{
     let url=String(row.legacyUrl||"").trim(),contentType=String(row.contentType||"").toLowerCase(),localObjectUrl="";
     if(!url){const service=await tripDocumentService(),blob=await service.getTripDocumentBlob(row);contentType=String(blob.type||contentType).toLowerCase();localObjectUrl=URL.createObjectURL(blob);url=localObjectUrl;}
@@ -8650,24 +8704,36 @@ function tripRenderBookingDocumentsPage(dataInput=activeTripPresentationData(),{
   if(other.length)appendGroup("其他旅程文件","未指定行程日子",other,true);
   if(!rows.length){const empty=document.createElement("section");empty.className="trip-library-card booking-doc-empty";empty.textContent="未有預訂文件。你可以喺 Edit Mode 嘅航班、住宿或行程項目加入 PDF 或預訂圖片。";host.appendChild(empty);}
 }
-async function tripAnimateInfoPage(fromPage,toPage,{back=false}={}){
-  if(!fromPage||!toPage||infoNavigationTransitioning)return;infoNavigationTransitioning=true;document.body.classList.add("info-navigation-active");toPage.hidden=false;
-  const reduced=window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;if(reduced){fromPage.hidden=true;infoNavigationTransitioning=false;document.body.classList.remove("info-navigation-active");return;}
-  const fromFrames=back?[{transform:"translate3d(0,0,0)",opacity:1},{transform:"translate3d(76%,0,0)",opacity:.45}]:[{transform:"translate3d(0,0,0)",opacity:1},{transform:"translate3d(-24%,0,0)",opacity:.58}];
-  const toFrames=back?[{transform:"translate3d(-24%,0,0)",opacity:.58},{transform:"translate3d(0,0,0)",opacity:1}]:[{transform:"translate3d(76%,0,0)",opacity:.72},{transform:"translate3d(0,0,0)",opacity:1}];
-  const host=document.getElementById("info-nav-host"),fromHeight=fromPage.getBoundingClientRect().height,toHeight=toPage.getBoundingClientRect().height;if(host)host.style.minHeight=`${Math.max(fromHeight,toHeight)}px`;fromPage.style.position="absolute";fromPage.style.inset="0 0 auto 0";fromPage.style.zIndex="1";toPage.style.position="relative";toPage.style.zIndex="2";
-  try{const opts={duration:330,easing:"cubic-bezier(.32,.72,0,1)",fill:"both"};await Promise.allSettled([fromPage.animate(fromFrames,opts).finished,toPage.animate(toFrames,opts).finished]);}catch(_){}
-  fromPage.hidden=true;for(const page of [fromPage,toPage]){page.style.position="";page.style.inset="";page.style.zIndex="";page.style.transform="";page.style.opacity="";}if(host)host.style.minHeight="";infoNavigationTransitioning=false;document.body.classList.remove("info-navigation-active");
+let infoNavSurfaces=[];
+let infoNavAnimationFrame=0;
+function infoNavClearAnimation(){if(infoNavAnimationFrame){cancelAnimationFrame(infoNavAnimationFrame);infoNavAnimationFrame=0;}}
+function infoNavNextFrames(count,callback){infoNavClearAnimation();let left=Math.max(1,Number(count)||1);const step=()=>{left-=1;if(left<=0){infoNavAnimationFrame=0;callback?.();return;}infoNavAnimationFrame=requestAnimationFrame(step);};infoNavAnimationFrame=requestAnimationFrame(step);}
+function infoNavHostDocumentTop(){const host=document.getElementById("info-nav-host");if(!host)return 0;return host.getBoundingClientRect().top+Math.max(0,Number(scrollShell?.scrollTop||0));}
+function infoNavClonePage(page){const clone=page.cloneNode(true);clone.hidden=false;clone.classList.remove("is-active","is-transition-layer");[clone,...clone.querySelectorAll("[id]")].forEach(node=>node.removeAttribute?.("id"));return clone;}
+function infoNavCaptureSnapshot(page,scrollTop=0){if(!page)return null;return{scrollTop:Math.max(0,Number(scrollTop||0)),hostTop:infoNavHostDocumentTop(),pageClone:infoNavClonePage(page)};}
+function infoNavClearSurfaces(){infoNavClearAnimation();infoNavSurfaces.forEach(surface=>surface.remove());infoNavSurfaces=[];document.getElementById("info-nav-host")?.classList.remove("is-snapshotting");document.body.classList.remove("info-navigation-active");}
+function infoNavCreateSurface(snapshot,className=""){if(!snapshot)return null;const surface=document.createElement("div");surface.className=`profile-nav-surface info-nav-surface ${className}`.trim();const liveTop=snapshot.hostTop-snapshot.scrollTop,top=Math.max(0,Math.round(liveTop)),clipped=Math.min(0,liveTop);surface.style.top=`${top}px`;surface.style.height=`${Math.max(1,window.innerHeight-top)}px`;surface.style.opacity="0";const bgSource=document.querySelector(".bg-fixed");if(bgSource){const bgRect=bgSource.getBoundingClientRect(),bgStyle=getComputedStyle(bgSource),bgLayer=document.createElement("div");bgLayer.className="profile-nav-surface-bg";bgLayer.style.left=`${bgRect.left}px`;bgLayer.style.top=`${bgRect.top-top}px`;bgLayer.style.width=`${bgRect.width}px`;bgLayer.style.height=`${bgRect.height}px`;bgLayer.style.backgroundColor=bgStyle.backgroundColor;bgLayer.style.backgroundImage=bgStyle.backgroundImage;bgLayer.style.backgroundSize=bgStyle.backgroundSize;bgLayer.style.backgroundPosition=bgStyle.backgroundPosition;bgLayer.style.backgroundRepeat=bgStyle.backgroundRepeat;surface.appendChild(bgLayer);surface.__profileBgLayer=bgLayer;}const frame=document.createElement("div");frame.className="profile-nav-surface-frame";const content=document.createElement("div");content.className="profile-nav-surface-content";if(clipped<0)content.style.transform=`translate3d(0,${Math.round(clipped)}px,0)`;content.appendChild(snapshot.pageClone.cloneNode(true));frame.appendChild(content);surface.appendChild(frame);document.body.appendChild(surface);infoNavSurfaces.push(surface);return surface;}
+function infoNavSmooth01(value){const t=clamp(Number(value)||0,0,1);return t*t*t*(t*(t*6-15)+10);}
+function infoNavApplyFadeThrough(outSurface,inSurface,progress,direction,width){if(!outSurface||!inSurface)return;const p=clamp(Number(progress)||0,0,1),outT=infoNavSmooth01(p/.48),inT=infoNavSmooth01((p-.52)/.48),travel=Math.min(22,Math.max(12,width*.075)),outX=direction*travel*outT,inX=-direction*travel*(1-inT);outSurface.style.zIndex="1422";inSurface.style.zIndex="1421";outSurface.style.opacity=String(1-outT);inSurface.style.opacity=String(inT);outSurface.style.transform=`translate3d(${outX.toFixed(2)}px,0,0)`;inSurface.style.transform=`translate3d(${inX.toFixed(2)}px,0,0)`;if(outSurface.__profileBgLayer)outSurface.__profileBgLayer.style.transform=`translate3d(${(-outX).toFixed(2)}px,0,0)`;if(inSurface.__profileBgLayer)inSurface.__profileBgLayer.style.transform=`translate3d(${(-inX).toFixed(2)}px,0,0)`;}
+function infoNavAnimate({outSurface,inSurface,direction,width,duration=430,onDone}={}){infoNavClearAnimation();const reduced=window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;if(reduced){infoNavApplyFadeThrough(outSurface,inSurface,1,direction,width);onDone?.();return;}const started=performance.now();const tick=now=>{const t=clamp((now-started)/duration,0,1),eased=infoNavSmooth01(t);infoNavApplyFadeThrough(outSurface,inSurface,eased,direction,width);if(t<1){infoNavAnimationFrame=requestAnimationFrame(tick);return;}infoNavAnimationFrame=0;onDone?.();};infoNavApplyFadeThrough(outSurface,inSurface,0,direction,width);infoNavAnimationFrame=requestAnimationFrame(tick);}
+async function tripAnimateInfoPage(fromPage,toPage,{back=false,targetScroll=0}={}){
+  if(!fromPage||!toPage||infoNavigationTransitioning)return;const host=document.getElementById("info-nav-host"),currentScroll=Math.max(0,Number(scrollShell?.scrollTop||0)),target=Math.max(0,Number(targetScroll||0)),fromSnapshot=infoNavCaptureSnapshot(fromPage,currentScroll),toSnapshot=infoNavCaptureSnapshot(toPage,target);if(!host||!fromSnapshot||!toSnapshot){fromPage.hidden=true;toPage.hidden=false;if(scrollShell)scrollShell.scrollTo({top:target,behavior:"auto"});return;}
+  infoNavClearSurfaces();const outSurface=infoNavCreateSurface(fromSnapshot,"is-front"),inSurface=infoNavCreateSurface(toSnapshot,"is-previous");if(!outSurface||!inSurface){infoNavClearSurfaces();fromPage.hidden=true;toPage.hidden=false;if(scrollShell)scrollShell.scrollTo({top:target,behavior:"auto"});return;}
+  infoNavigationTransitioning=true;document.body.classList.add("info-navigation-active");const width=Math.max(1,window.innerWidth),direction=back?1:-1;outSurface.style.zIndex="1422";inSurface.style.zIndex="1421";infoNavApplyFadeThrough(outSurface,inSurface,0,direction,width);outSurface.style.opacity="0";void outSurface.offsetHeight;
+  await new Promise(resolve=>infoNavNextFrames(2,()=>{host.classList.add("is-snapshotting");outSurface.style.opacity="1";resolve();}));
+  await new Promise(resolve=>infoNavAnimate({outSurface,inSurface,direction,width,duration:430,onDone:resolve}));
+  fromPage.hidden=true;toPage.hidden=false;if(scrollShell)scrollShell.scrollTo({top:target,behavior:"auto"});inSurface.style.zIndex="1423";inSurface.style.opacity="1";inSurface.style.transform="translate3d(0,0,0)";if(inSurface.__profileBgLayer)inSurface.__profileBgLayer.style.transform="translate3d(0,0,0)";
+  await new Promise(resolve=>infoNavNextFrames(2,resolve));host.classList.remove("is-snapshotting");inSurface.style.opacity="0";await new Promise(resolve=>infoNavNextFrames(1,resolve));infoNavigationTransitioning=false;infoNavClearSurfaces();
 }
 async function tripOpenBookingDocumentsPage({ownerType="",ownerId=""}={}){
   infoDocumentFocusKey=ownerType&&ownerId?`${String(ownerType)}:${String(ownerId)}`:"";
   if(currentAppView!=="info"){setView("info",{restoreScroll:false});await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));}
   tripRenderBookingDocumentsPage(activeTripPresentationData(),{focusKey:infoDocumentFocusKey});
   const root=document.getElementById("info-page-root"),page=document.getElementById("info-page-booking-documents");if(!root||!page)return;if(infoDocumentsPageOpen){requestAnimationFrame(()=>{const target=infoDocumentFocusKey?page.querySelector(`[data-booking-owner-key="${CSS.escape(infoDocumentFocusKey)}"]`):null;target?.scrollIntoView({behavior:"smooth",block:"center"});});return;}
-  infoRootScrollTop=scrollShell?.scrollTop||0;infoDocumentsPageOpen=true;await tripAnimateInfoPage(root,page,{back:false});if(scrollShell)scrollShell.scrollTo({top:0,behavior:"auto"});requestAnimationFrame(()=>{const target=infoDocumentFocusKey?page.querySelector(`[data-booking-owner-key="${CSS.escape(infoDocumentFocusKey)}"]`):null;target?.scrollIntoView({behavior:"smooth",block:"center"});});
+  infoRootScrollTop=scrollShell?.scrollTop||0;infoDocumentsPageOpen=true;await tripAnimateInfoPage(root,page,{back:false,targetScroll:0});requestAnimationFrame(()=>{const target=infoDocumentFocusKey?page.querySelector(`[data-booking-owner-key="${CSS.escape(infoDocumentFocusKey)}"]`):null;target?.scrollIntoView({behavior:"smooth",block:"center"});});
 }
 async function tripCloseBookingDocumentsPage(){
-  if(!infoDocumentsPageOpen||infoNavigationTransitioning)return;const root=document.getElementById("info-page-root"),page=document.getElementById("info-page-booking-documents");if(!root||!page)return;infoDocumentsScrollTop=scrollShell?.scrollTop||0;root.hidden=false;await tripAnimateInfoPage(page,root,{back:true});infoDocumentsPageOpen=false;infoDocumentFocusKey="";if(scrollShell)scrollShell.scrollTo({top:infoRootScrollTop||0,behavior:"auto"});
+  if(!infoDocumentsPageOpen||infoNavigationTransitioning)return;const root=document.getElementById("info-page-root"),page=document.getElementById("info-page-booking-documents");if(!root||!page)return;infoDocumentsScrollTop=scrollShell?.scrollTop||0;await tripAnimateInfoPage(page,root,{back:true,targetScroll:infoRootScrollTop||0});infoDocumentsPageOpen=false;infoDocumentFocusKey="";
 }
 function renderBookingDocumentsCard(dataInput=activeTripPresentationData()){
   const card=document.getElementById("booking-documents-card"),count=document.getElementById("booking-documents-count"),summary=document.getElementById("booking-documents-summary");if(!card)return;const rows=tripAllBookingDocuments(dataInput);card.hidden=false;if(count)count.textContent=String(rows.length);if(summary)summary.textContent=rows.length?`${rows.length} 份文件 · 按 Day 整理`:"尚未有預訂文件";if(infoDocumentsPageOpen)tripRenderBookingDocumentsPage(dataInput,{focusKey:infoDocumentFocusKey});
@@ -9518,13 +9584,15 @@ const largeHeaderMainEl=largeHeaderEl?.querySelector(".header-title-main")||null
 const largeHeaderSmallEl=largeHeaderEl?.querySelector(".header-title-small")||null;
 const largeHeaderSubRowEl=largeHeaderEl?.querySelector(".header-sub-row")||null;
 const dayTabsChromeEl=document.getElementById("day-tabs");
+const dayTabsStickyBackdropEl=document.getElementById("day-tabs-sticky-backdrop");
 let collapseStickyTop=58;
 function refreshCollapseMetrics(){
-  if(!dayTabsChromeEl){collapseStickyTop=58;return;}
+  if(!dayTabsChromeEl){collapseStickyTop=58;dayTabsStickyBackdropEl?.classList.remove("is-visible");return;}
   const top=parseFloat(getComputedStyle(dayTabsChromeEl).top);
   collapseStickyTop=Number.isFinite(top)?top:58;
   const height=Math.max(1,Math.round(dayTabsChromeEl.getBoundingClientRect().height||49));
   dayTabsChromeEl.style.setProperty("--day-tabs-stuck-height",`${height}px`);
+  dayTabsStickyBackdropEl?.style.setProperty("--day-tabs-stuck-height-global",`${height}px`);
 }
 const viewElements={itinerary:ivw,snacks:svw,info:infvw,expenses:expvw,profile:profilevw};
 const viewButtons={itinerary:bti,snacks:bts,info:btinfo,expenses:btexp,profile:btprofile};
@@ -9703,7 +9771,7 @@ function updateCollapsingChrome(){
   const itineraryActive=currentAppView==="itinerary";
   const dayTabsRect=dayTabsChromeEl?.getBoundingClientRect?.()||null;
   const isStuck=!!(dayTabsChromeEl&&itineraryActive&&dayTabsRect&&dayTabsRect.top<=collapseStickyTop+4&&y>4);
-  if(dayTabsChromeEl&&dayTabsRect?.height)dayTabsChromeEl.style.setProperty("--day-tabs-stuck-height",`${Math.max(1,Math.round(dayTabsRect.height))}px`);
+  if(dayTabsChromeEl&&dayTabsRect?.height){const dayBarHeight=Math.max(1,Math.round(dayTabsRect.height));dayTabsChromeEl.style.setProperty("--day-tabs-stuck-height",`${dayBarHeight}px`);dayTabsStickyBackdropEl?.style.setProperty("--day-tabs-stuck-height-global",`${dayBarHeight}px`);}
   const eased=1-Math.pow(1-progress,2);
 
   // Write phase. --collapse-progress was unused anywhere in CSS, so Layer 2
@@ -9722,7 +9790,9 @@ function updateCollapsingChrome(){
   }
 
   if(dayTabsChromeEl)dayTabsChromeEl.classList.toggle("is-stuck",isStuck);
+  dayTabsStickyBackdropEl?.classList.toggle("is-visible",isStuck);
 }
+
 function scheduleCollapseUpdate(){
   if(collapseRaf) return;
   collapseRaf=requestAnimationFrame(updateCollapsingChrome);

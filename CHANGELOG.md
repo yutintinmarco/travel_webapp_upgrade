@@ -1,3 +1,12 @@
+## v7.9.19.2 — Booking Documents Real Device Stability Fix
+
+* Replaced the new Documents page cross-slide animation with the proven `我的` snapshot handoff language, eliminating iOS glass / backdrop-filter flashing when entering and returning from 預訂與文件.
+* Rebuilt the document viewer as a native top-layer `<dialog>` so bottom navigation, edit sheets and other fixed layers cannot sit above the viewer or intercept its Back control.
+* Itinerary items with one booking document now show `查看預訂文件` and open that document directly. Multiple documents expose direct per-file preview actions rather than redirecting the user into 資料.
+* Replaced the recurring >7-Day sticky Day Bar pseudo-element backing with a dedicated body-level fixed material plane. Day pills, Day switching, horizontal scrolling, sticky top, colours and sizing are unchanged.
+* Root cause note: the previous >7-Day backing lived inside the horizontally scrolling sticky element as a fixed negative-z pseudo-element. That WebKit compositor-dependent structure could disappear again even when Day Bar source was not otherwise edited.
+* No Booking Document schema, Global Save Once, Firebase lifecycle, Transit Gallery/provider, Trip Overview Map, Location Picker, Firestore Rules, Storage Rules or Functions changes.
+
 ## v7.9.19.1 — Booking Documents Native UX Fix
 
 * Moved 預訂與文件 below 旅程資料 and aligned its material, heading, spacing and information hierarchy with the established Travel Details card.
