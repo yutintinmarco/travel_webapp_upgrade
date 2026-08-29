@@ -1,3 +1,17 @@
+## v7.9.18.0 — Travel Details Edit: Flights + Accommodations
+
+- Promoted Travel Details into the Global Edit Session with dedicated **航班** and **住宿** managers. Modal `完成` updates Local Draft only; the single Global Save remains the only Firebase commit point.
+- Added an unlimited flat Flight master structure with Team assignment and `entry / internal / exit` journey roles, flight number, airline code, departure/arrival dates and times, airports/terminals, booking reference and notes.
+- Added backward-compatible migration of the legacy per-Team `outbound / inbound` flight schema. Merely entering Edit Mode does not dirty the session; the new master structure is persisted only after an actual edit and Global Save.
+- Trip Overview now uses the master Flight data but deliberately shows only journey head/tail flights (entry + exit). Travel Details shows the full chronological flight list, including internal flights.
+- Added a shared Firebase Storage airline-logo registry convention at `app-assets/airlines/{IATA}.{png|webp|jpg|jpeg|svg}`. Airline code is inferred from the flight number when possible; the UI falls back safely to legacy logos or an airline-code badge when no shared logo exists.
+- Added unlimited Accommodation master records with hotel name, city, Team, check-in/out date and time, address, Google Maps URL, booking reference and notes, plus backward-compatible migration from legacy `meta.hotels` / city windows.
+- New Flight/Accommodation master data now becomes the canonical source for Map semantic `✈️` / `🏨` anchors after promotion, so edits in Travel Details automatically flow through to the relevant itinerary days instead of being masked by old inferred hotel/flight rows.
+- Team deletion keeps Travel Details referential integrity: removed-Team accommodations safely revert to `all`; flights must be deliberately reassigned before the Team can be removed.
+- Loader, JSON import schema and Full Backup/Restore now preserve the new Accommodation master data. Legacy hotel bridge data is maintained for backward display compatibility.
+- Added a read-only signed-in Storage rule for shared airline-logo assets. No Firebase Functions or Firestore rules changes are required.
+- No changes to Transit provider selection, Transit Route Adopt semantics, Saved Places editing/media, Day Bar, or legacy `trip.json` cleanup.
+
 ## v7.9.17.1 — Historical Transit estimate + slider alignment
 
 - Past itinerary Transit searches now keep the original local clock time but move the query to the nearest future matching weekday, rather than asking providers for an already-expired historical departure.

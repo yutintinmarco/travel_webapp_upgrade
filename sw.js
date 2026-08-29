@@ -1,5 +1,5 @@
 /* Travel WebApp Service Worker
- * v7.9.17.1 · Historical Transit weekday estimate + slider alignment
+ * v7.9.18.0 · Travel Details master edit (Flights + Accommodations)
  *
  * Keeps the v7.7.0.14 cold-start behaviour, while hardening installation:
  *  1. Critical shell assets are transactional. If any critical file cannot be
@@ -14,7 +14,7 @@
  *     explicit reload stays network-first.
  */
 
-const SW_VERSION = "travel-shell-v7.9.17.1";
+const SW_VERSION = "travel-shell-v7.9.18.0";
 const CORE_CACHE = SW_VERSION;
 
 // Required for a useful offline launch and remembered-Trip boot.
@@ -60,6 +60,7 @@ const OPTIONAL_ASSETS = [
   "./assets/js/trip-media-integration-service.js",
   "./assets/js/trip-media-sync-service.js",
   "./assets/js/trip-map-service.js",
+  "./assets/js/airline-logo-service.js",
   "./assets/js/trip-edit-session-service.js",
   "./assets/js/transit-route-service.js",
   "./assets/js/transit-route-cache-service.js",

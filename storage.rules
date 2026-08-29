@@ -38,6 +38,14 @@ service firebase.storage {
       allow delete: if canWriteTripMedia(tripId);
     }
 
+    // v7.9.18.0 · Shared read-only app assets. Airline logos are uploaded by
+    // the project owner through Firebase Console / trusted deployment tooling.
+    // They are not writable by the WebApp client.
+    match /app-assets/airlines/{fileName} {
+      allow get: if signedIn();
+      allow create, update, delete, list: if false;
+    }
+
     match /{allPaths=**} {
       allow read, write: if false;
     }
