@@ -273,6 +273,7 @@ function structureToPortableTrip(structure, { snapshotId = "" } = {}) {
       weather: clone(general.weather || {}),
       hotels: clone(general.hotels || {}),
       accommodations: clone(general.accommodations || []),
+      bookingDocuments: clone(general.bookingDocuments || []),
       infoCard: clone(general.infoCard || {}),
       galleryDefaults: clone(general.galleryDefaults || {}),
       featureColors: clone(general.featureColors || {}),
@@ -378,6 +379,7 @@ function portableTripToStructure(portableInput, { expenseSettings = null } = {})
     weather: clone(meta.weather || {}),
     hotels: clone(meta.hotels || {}),
     accommodations: clone(meta.accommodations || []),
+    bookingDocuments: clone(meta.bookingDocuments || []),
     infoCard: clone(meta.infoCard || {}),
     galleryDefaults: clone(meta.galleryDefaults || {}),
     featureColors: clone(meta.featureColors || {}),
@@ -1012,6 +1014,7 @@ function normalizeFullBackupInput(rawInput) {
   normalized.tripId = tripId;
   normalized.mediaIncluded = raw.mediaIncluded === true;
   normalized.mediaManifest = safeArray(normalized.mediaManifest);
+  normalized.documentManifest = safeArray(normalized.documentManifest);
   normalized.data = normalized.data && typeof normalized.data === "object" ? normalized.data : {};
   normalized.counts = normalized.counts && typeof normalized.counts === "object"
     ? normalized.counts
@@ -1029,7 +1032,7 @@ export function inspectFullBackup(rawInput) {
     sourceRevision: Number(backup.sourceRevision) || Number(fullBackupDeserialize(backup.data.tripStructure)?.tripDoc?.revision) || 0,
     exportedAt: clean(backup.exportedAt),
     mediaIncluded: backup.mediaIncluded,
-    counts: { ...(backup.counts || {}), mediaCount: safeArray(backup.mediaManifest).length },
+    counts: { ...(backup.counts || {}), mediaCount: safeArray(backup.mediaManifest).length, documentCount: safeArray(backup.documentManifest).length },
     integrity: backup.integrity?.payloadHash ? { algorithm: clean(backup.integrity.algorithm), present: true } : { algorithm: "", present: false },
     freshness: clone(backup.freshness || {}) || {},
     auditPolicy: "append-only"
@@ -1068,6 +1071,21 @@ export async function withFullBackupMediaManifest(rawInput, mediaManifestInput =
   return attachFullBackupIntegrity(next);
 }
 
+
+export async function withFullBackupDocumentManifest(rawInput, documentManifestInput = []) {
+  const backup = normalizeFullBackupInput(rawInput);
+  await verifyFullBackupIntegrity(backup);
+  const documentManifest = safeArray(documentManifestInput).map(item => clone(item)).filter(item => clean(item?.documentId) && clean(item?.storagePath));
+  const next = clone(backup) || {};
+  next.documentIncluded = documentManifest.length > 0;
+  next.documentManifest = documentManifest;
+  next.documentNote = documentManifest.length
+    ? "Booking Documents are included in the Full Backup package."
+    : "No Firebase Booking Documents are referenced by this Trip.";
+  next.counts = { ...(next.counts || {}), documentCount: documentManifest.length };
+  delete next.integrity;
+  return attachFullBackupIntegrity(next);
+}
 
 export async function exportLocalFullBackup(localTripInput, expenseSnapshotInput, {
   user = null,
@@ -1124,6 +1142,8 @@ export async function exportLocalFullBackup(localTripInput, expenseSnapshotInput
     },
     mediaIncluded: false,
     mediaManifest: [],
+    documentIncluded: false,
+    documentManifest: [],
     mediaNote: "Data-only Full Backup v1. Phase 3A will add media files through a versioned backup package.",
     accessPolicy: "Trip membership / roles are not restored from this backup.",
     activityLogPolicy: "Activity logs are backed up for archival integrity. Existing audit logs remain append-only during in-place restore.",
@@ -1184,6 +1204,8 @@ export async function exportFullBackup(tripIdInput, { user: userInput = null } =
     },
     mediaIncluded: false,
     mediaManifest: [],
+    documentIncluded: false,
+    documentManifest: [],
     mediaNote: "Data-only Full Backup v1. Phase 3A will add media files through a versioned backup package.",
     accessPolicy: "Trip membership / roles are not restored from this backup.",
     activityLogPolicy: "Activity logs are backed up for archival integrity. Existing audit logs remain append-only during in-place restore.",
@@ -1354,8 +1376,11 @@ function retargetMediaReferences(value, oldTripId, newTripId) {
   if (Array.isArray(value)) return value.map(item => retargetMediaReferences(item, oldTripId, newTripId));
   if (!value || typeof value !== "object") {
     if (typeof value !== "string") return value;
-    const oldPrefix = `trips/${oldTripId}/media/`;
-    return value.startsWith(oldPrefix) ? `trips/${newTripId}/media/${value.slice(oldPrefix.length)}` : value;
+    const oldMediaPrefix = `trips/${oldTripId}/media/`;
+    const oldDocumentPrefix = `trips/${oldTripId}/documents/`;
+    if (value.startsWith(oldMediaPrefix)) return `trips/${newTripId}/media/${value.slice(oldMediaPrefix.length)}`;
+    if (value.startsWith(oldDocumentPrefix)) return `trips/${newTripId}/documents/${value.slice(oldDocumentPrefix.length)}`;
+    return value;
   }
   const output = {};
   Object.entries(value).forEach(([key, item]) => {

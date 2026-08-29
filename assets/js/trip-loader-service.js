@@ -113,6 +113,7 @@ function assemblePortableTrip(tripId, state) {
       weather: clonePlain(general.weather || {}) || {},
       hotels: clonePlain(general.hotels || {}) || {},
       accommodations: clonePlain(general.accommodations || []) || [],
+      bookingDocuments: clonePlain(general.bookingDocuments || []) || [],
       infoCard: clonePlain(general.infoCard || {}) || {},
       galleryDefaults: clonePlain(general.galleryDefaults || {}) || {},
       featureColors: clonePlain(general.featureColors || {}) || {},

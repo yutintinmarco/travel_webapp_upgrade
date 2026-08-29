@@ -13,6 +13,7 @@ const VALID_ITEM_KINDS = new Set(["stop", "transit"]);
 const VALID_ROLES = new Set(["owner", "admin"]);
 const PERSISTED_DAY_FIELDS = ["label", "date", "isoDate", "title", "subtitle", "city", "cities", "sortOrder"];
 const SAVED_PLACE_EDITABLE_FIELDS = ["title", "icon", "area", "category", "priority", "mealType", "routeFit", "priceLevel", "queueLevel", "bestTime", "must", "note", "detail", "opening"];
+const BOOKING_DOCUMENT_OWNER_TYPES = new Set(["flight", "accommodation", "item"]);
 
 function clean(value) { return String(value ?? "").trim(); }
 function clonePlain(value) {
@@ -638,6 +639,40 @@ function normalizeDaySortOrders(session, dayIdInput) {
   return ordered.map(row => clonePlain(row));
 }
 
+
+function normalizeBookingDocument(rowInput = {}, index = 0) {
+  const row = rowInput && typeof rowInput === "object" ? rowInput : {};
+  const documentId = clean(row.documentId || row.id);
+  const ownerType = clean(row.ownerType), ownerId = clean(row.ownerId);
+  if (!documentId || !BOOKING_DOCUMENT_OWNER_TYPES.has(ownerType) || !ownerId) return null;
+  const fileName = clean(row.fileName || row.name) || "document";
+  return {
+    documentId,
+    ownerType,
+    ownerId,
+    dayId: clean(row.dayId),
+    title: clean(row.title) || fileName.replace(/\.[^.]+$/, ""),
+    fileName,
+    contentType: clean(row.contentType),
+    byteSize: Math.max(0, Number(row.byteSize) || 0),
+    storagePath: clean(row.storagePath),
+    sortOrder: normalizedSortOrder(row.sortOrder, index),
+    uploadedAt: clean(row.uploadedAt),
+    uploadedBy: clean(row.uploadedBy),
+    editDraft: row.editDraft === true
+  };
+}
+function normalizeBookingDocuments(rowsInput = []) {
+  return (Array.isArray(rowsInput) ? rowsInput : []).map((row, index) => normalizeBookingDocument(row, index)).filter(Boolean)
+    .sort((a, b) => normalizedSortOrder(a.sortOrder) - normalizedSortOrder(b.sortOrder) || clean(a.documentId).localeCompare(clean(b.documentId)))
+    .map((row, index) => ({ ...row, sortOrder: index }));
+}
+function sameBookingDocuments(a = [], b = []) {
+  const cleanRow = row => { const next = clonePlain(row || {}); delete next.editDraft; return next; };
+  return stableJson(normalizeBookingDocuments(a).map(cleanRow)) === stableJson(normalizeBookingDocuments(b).map(cleanRow));
+}
+function bookingDocumentIdentity(row = {}) { return clean(row?.documentId); }
+
 export function createTripEditSession(tripDataInput) {
   const trip = tripDataInput && typeof tripDataInput === "object" ? tripDataInput : {};
   const tripId = clean(trip.tripId || trip.meta?.tripId);
@@ -675,6 +710,7 @@ export function createTripEditSession(tripDataInput) {
     : ((trip?.meta?.outbound || trip?.meta?.inbound) ? [{ teamKey: "all", airlineLogo: trip?.meta?.airlineLogo || "", outbound: trip?.meta?.outbound || null, inbound: trip?.meta?.inbound || null }] : []);
   const baseFlights = normalizeFlightsForEdit(legacyFlightSource, { tripStartIso: baseTripDetails.startDate, tripEndIso: baseTripDetails.endDate });
   const baseAccommodations = normalizeAccommodationsForEdit(trip?.meta?.accommodations || [], { hotels: trip?.meta?.hotels || {}, cities: trip?.meta?.cities || {} });
+  const baseBookingDocuments = normalizeBookingDocuments(trip?.meta?.bookingDocuments || []);
   const baseSavedPlaceMeta = savedPlaceMetaSnapshot(trip);
   const draftSavedPlaceMeta = clonePlain(baseSavedPlaceMeta);
   const baseSavedPlaces = new Map(), draftSavedPlaces = new Map();
@@ -702,6 +738,8 @@ export function createTripEditSession(tripDataInput) {
     draftFlights: clonePlain(baseFlights),
     baseAccommodations,
     draftAccommodations: clonePlain(baseAccommodations),
+    baseBookingDocuments,
+    draftBookingDocuments: clonePlain(baseBookingDocuments),
     baseSavedPlaceMeta,
     draftSavedPlaceMeta,
     baseSavedPlaces,
@@ -740,10 +778,11 @@ export function getTripEditDraftTeamState(session) {
 }
 
 export function getTripEditDraftTravelState(session) {
-  if (!session) return { flights: [], accommodations: [] };
+  if (!session) return { flights: [], accommodations: [], bookingDocuments: [] };
   return {
     flights: clonePlain(session.draftFlights || []),
-    accommodations: clonePlain(session.draftAccommodations || [])
+    accommodations: clonePlain(session.draftAccommodations || []),
+    bookingDocuments: clonePlain(session.draftBookingDocuments || [])
   };
 }
 
@@ -759,6 +798,8 @@ export function replaceTripEditDraftFlights(session, flights = []) {
     if (row.arrivalDate && !validIsoDate(row.arrivalDate)) { const error = new Error("Invalid flight arrival date"); error.code = "edit-flight-date-invalid"; throw error; }
   });
   session.draftFlights = next;
+  const flightIds = new Set(next.map(row => clean(row?.flightId)).filter(Boolean));
+  session.draftBookingDocuments = normalizeBookingDocuments((session.draftBookingDocuments || []).filter(row => row.ownerType !== "flight" || flightIds.has(clean(row.ownerId))));
   syncTravelItineraryDraft(session);
   return clonePlain(next);
 }
@@ -776,8 +817,45 @@ export function replaceTripEditDraftAccommodations(session, accommodations = [])
     if (row.checkInDate && row.checkOutDate && row.checkOutDate < row.checkInDate) { const error = new Error("Accommodation check-out is before check-in"); error.code = "edit-accommodation-date-order"; throw error; }
   });
   session.draftAccommodations = next;
+  const accommodationIds = new Set(next.map(row => clean(row?.accommodationId)).filter(Boolean));
+  session.draftBookingDocuments = normalizeBookingDocuments((session.draftBookingDocuments || []).filter(row => row.ownerType !== "accommodation" || accommodationIds.has(clean(row.ownerId))));
   syncTravelItineraryDraft(session);
   return clonePlain(next);
+}
+
+
+export function getTripEditDraftBookingDocuments(session) {
+  return clonePlain(session?.draftBookingDocuments || []);
+}
+export function replaceTripEditDraftBookingDocuments(session, rowsInput = []) {
+  if (!session) return [];
+  const rows = normalizeBookingDocuments(rowsInput);
+  const flights = new Set((session.draftFlights || []).map(row => clean(row?.flightId)).filter(Boolean));
+  const accommodations = new Set((session.draftAccommodations || []).map(row => clean(row?.accommodationId)).filter(Boolean));
+  const items = new Set([...session.draftItems.values()].filter(row => !session.deletedItems.has(itemKey(row.dayId, row.itemId))).map(row => clean(row?.itemId)).filter(Boolean));
+  rows.forEach(row => {
+    const validOwner = row.ownerType === "flight" ? flights.has(row.ownerId) : row.ownerType === "accommodation" ? accommodations.has(row.ownerId) : items.has(row.ownerId);
+    if (!validOwner) { const error = new Error("Booking document references an unknown record"); error.code = "edit-document-owner-invalid"; throw error; }
+  });
+  session.draftBookingDocuments = rows;
+  return clonePlain(rows);
+}
+export function tripEditDocumentDelta(session) {
+  if (!session) return { additions: [], removals: [] };
+  const base = normalizeBookingDocuments(session.baseBookingDocuments || []), draft = normalizeBookingDocuments(session.draftBookingDocuments || []);
+  const baseById = new Map(base.map(row => [bookingDocumentIdentity(row), row]));
+  const draftById = new Map(draft.map(row => [bookingDocumentIdentity(row), row]));
+  const additions = draft.filter(row => row.editDraft === true || (!baseById.has(row.documentId) && !row.storagePath));
+  const removals = base.filter(row => !draftById.has(row.documentId));
+  return { additions: clonePlain(additions), removals: clonePlain(removals) };
+}
+export function replaceTripEditDraftDocumentDescriptors(session, replacementsInput = new Map()) {
+  if (!session || !(replacementsInput instanceof Map) || !replacementsInput.size) return [];
+  session.draftBookingDocuments = normalizeBookingDocuments((session.draftBookingDocuments || []).map(row => {
+    const replacement = replacementsInput.get(clean(row?.documentId));
+    return replacement ? { ...clonePlain(row), ...clonePlain(replacement), editDraft: false } : row;
+  }));
+  return clonePlain(session.draftBookingDocuments);
 }
 
 function itineraryDayIdForIso(session, isoInput = "") {
@@ -1152,6 +1230,7 @@ export function moveTripEditDraftItemToDay(session, dayIdInput, itemIdInput, tar
   const currentLink = normalizeSourceLink(current.sourceLink || {});
   const moved = { ...current, dayId: targetDayId, originDayId, sortOrder: maxSort + 1, ...(currentLink && !preserveSourceSync ? { sourceLink: { ...currentLink, sync: false } } : {}) };
   session.draftItems.set(itemKey(targetDayId, itemId), moved);
+  session.draftBookingDocuments = normalizeBookingDocuments((session.draftBookingDocuments || []).map(row => row.ownerType === "item" && clean(row.ownerId) === itemId ? { ...row, dayId: targetDayId } : row));
   renumberPresentationSortOrders(session, dayId);
   normalizeDaySortOrders(session, targetDayId);
   return getTripEditDraftItem(session, targetDayId, itemId);
@@ -1168,6 +1247,7 @@ export function removeTripEditDraftItem(session, dayIdInput, itemIdInput) {
   const wasNew = Boolean(draft?.isNew && !base);
   session.draftItems.delete(key);
   if (!wasNew && base) session.deletedItems.add(originKey);
+  session.draftBookingDocuments = normalizeBookingDocuments((session.draftBookingDocuments || []).filter(row => !(row.ownerType === "item" && clean(row.ownerId) === itemId)));
   renumberPresentationSortOrders(session, dayId);
   return { removed: true, wasNew };
 }
@@ -1321,11 +1401,12 @@ export function replaceTripEditDraftMediaDescriptors(session, replacementsInput 
 }
 
 export function tripEditDomainChanges(session) {
-  if (!session) return { tripDetailsChanged: false, travellersChanged: false, flightsChanged: false, accommodationsChanged: false, savedPlaceMetaChanged: false, teamChangeCount: 0, daysChanged: false, dayChangeCount: 0 };
+  if (!session) return { tripDetailsChanged: false, travellersChanged: false, flightsChanged: false, accommodationsChanged: false, bookingDocumentsChanged: false, savedPlaceMetaChanged: false, teamChangeCount: 0, daysChanged: false, dayChangeCount: 0 };
   const tripDetailsChanged = !sameTripDetails(session.baseTripDetails || {}, session.draftTripDetails || {});
   const travellersChanged = !sameTravellers(session.baseTravellers || {}, session.draftTravellers || {});
   const flightsChanged = !sameFlights(session.baseFlights || [], session.draftFlights || []);
   const accommodationsChanged = !sameAccommodations(session.baseAccommodations || [], session.draftAccommodations || []);
+  const bookingDocumentsChanged = !sameBookingDocuments(session.baseBookingDocuments || [], session.draftBookingDocuments || []);
   const savedPlaceMetaChanged = !sameSavedPlaceMeta(session.baseSavedPlaceMeta || {}, session.draftSavedPlaceMeta || {});
   const baseKeys = new Set(Object.keys(session.baseTravellers || {})), draftKeys = new Set(Object.keys(session.draftTravellers || {}));
   let teamChangeCount = 0;
@@ -1333,13 +1414,13 @@ export function tripEditDomainChanges(session) {
     if (stableJson(session.baseTravellers?.[key] || null) !== stableJson(session.draftTravellers?.[key] || null)) teamChangeCount += 1;
   });
   const dayChangeCount = tripEditDayChanges(session).length;
-  return { tripDetailsChanged, travellersChanged, flightsChanged, accommodationsChanged, savedPlaceMetaChanged, teamChangeCount, daysChanged: dayChangeCount > 0, dayChangeCount };
+  return { tripDetailsChanged, travellersChanged, flightsChanged, accommodationsChanged, bookingDocumentsChanged, savedPlaceMetaChanged, teamChangeCount, daysChanged: dayChangeCount > 0, dayChangeCount };
 }
 
 export function tripEditChangeCount(session) {
   const itemCount = tripEditChanges(session).length, savedPlaceCount = tripEditSavedPlaceChanges(session).length;
   const domain = tripEditDomainChanges(session);
-  return itemCount + savedPlaceCount + domain.dayChangeCount + (domain.tripDetailsChanged ? 1 : 0) + (domain.savedPlaceMetaChanged ? 1 : 0) + domain.teamChangeCount + (domain.flightsChanged && !domain.travellersChanged ? 1 : 0) + (domain.accommodationsChanged ? 1 : 0);
+  return itemCount + savedPlaceCount + domain.dayChangeCount + (domain.tripDetailsChanged ? 1 : 0) + (domain.savedPlaceMetaChanged ? 1 : 0) + domain.teamChangeCount + (domain.flightsChanged && !domain.travellersChanged ? 1 : 0) + (domain.accommodationsChanged ? 1 : 0) + (domain.bookingDocumentsChanged ? 1 : 0);
 }
 
 export function applyTripEditDraftToTrip(session, tripInput, { revision = null } = {}) {
@@ -1436,6 +1517,7 @@ export function applyTripEditDraftToTrip(session, tripInput, { revision = null }
   trip.meta.inbound = null;
   trip.meta.airlineLogo = "";
   trip.meta.accommodations = normalizeAccommodationsForEdit(session.draftAccommodations || []);
+  trip.meta.bookingDocuments = normalizeBookingDocuments(session.draftBookingDocuments || []).map(row => { const next = clonePlain(row); delete next.editDraft; return next; });
   trip.meta.hotels = accommodationsToLegacyHotels(session.draftAccommodations || []);
   if (revision != null) trip.revision = Math.max(1, Number(revision) || Number(trip.revision) || 1);
   return trip;
@@ -1454,6 +1536,8 @@ export async function commitTripEditSession(session, { user: userInput = null } 
     throw error;
   }
   const mediaDelta = tripEditMediaDelta(session);
+  const documentDelta = tripEditDocumentDelta(session);
+  if (documentDelta.additions.length) { const error = new Error("Edit documents are not ready for commit"); error.code = "edit-document-not-ready"; throw error; }
   if (mediaDelta.additions.length) {
     const error = new Error("Edit media is not ready for commit");
     error.code = "edit-media-not-ready";
@@ -1463,7 +1547,7 @@ export async function commitTripEditSession(session, { user: userInput = null } 
   const savedPlaceChanges = tripEditSavedPlaceChanges(session);
   const dayChanges = tripEditDayChanges(session);
   const domainChanges = tripEditDomainChanges(session);
-  const anyDomainChange = domainChanges.tripDetailsChanged || domainChanges.travellersChanged || domainChanges.flightsChanged || domainChanges.accommodationsChanged || domainChanges.savedPlaceMetaChanged || dayChanges.length > 0;
+  const anyDomainChange = domainChanges.tripDetailsChanged || domainChanges.travellersChanged || domainChanges.flightsChanged || domainChanges.accommodationsChanged || domainChanges.bookingDocumentsChanged || domainChanges.savedPlaceMetaChanged || dayChanges.length > 0;
   if (!changes.length && !savedPlaceChanges.length && !anyDomainChange) return { revision: session.baseRevision, changedItems: 0, changedSavedPlaces: 0, changedDays: 0, changedTrip: false, changedTeams: 0, noChange: true };
   if (changes.length + savedPlaceChanges.length + dayChanges.length > 448) {
     const error = new Error("Too many itinerary changes in one edit session");
@@ -1573,7 +1657,7 @@ export async function commitTripEditSession(session, { user: userInput = null } 
       tripPatch.status = details.status;
     }
     tx.set(tripRef, tripPatch, { merge: true });
-    if (domainChanges.travellersChanged || domainChanges.flightsChanged || domainChanges.accommodationsChanged || domainChanges.savedPlaceMetaChanged) {
+    if (domainChanges.travellersChanged || domainChanges.flightsChanged || domainChanges.accommodationsChanged || domainChanges.bookingDocumentsChanged || domainChanges.savedPlaceMetaChanged) {
       // Aggregate settings fields are replaced atomically. Recursive merge on
       // travellers previously kept deleted Team keys; savedPlacesMeta follows
       // the same explicit top-level replacement rule.
@@ -1592,6 +1676,10 @@ export async function commitTripEditSession(session, { user: userInput = null } 
         generalPatch.hotels = accommodationsToLegacyHotels(session.draftAccommodations || []);
         mergeFields.push("accommodations", "hotels");
       }
+      if (domainChanges.bookingDocumentsChanged) {
+        generalPatch.bookingDocuments = normalizeBookingDocuments(session.draftBookingDocuments || []).map(row => { const next = clonePlain(row); delete next.editDraft; return next; });
+        mergeFields.push("bookingDocuments");
+      }
       if (domainChanges.savedPlaceMetaChanged) {
         generalPatch.savedPlacesMeta = savedPlaceMetaSnapshot({ snacks: session.draftSavedPlaceMeta || {} });
         mergeFields.push("savedPlacesMeta");
@@ -1607,6 +1695,7 @@ export async function commitTripEditSession(session, { user: userInput = null } 
     if (domainChanges.teamChangeCount) summaryParts.push(`${domainChanges.teamChangeCount} 個 Team`);
     if (domainChanges.flightsChanged) summaryParts.push("航班資料");
     if (domainChanges.accommodationsChanged) summaryParts.push("住宿資料");
+    if (domainChanges.bookingDocumentsChanged) summaryParts.push("預訂文件");
     tx.set(logRef, {
       type: "trip.edit.save",
       actionType: "trip.edit.save",
@@ -1622,6 +1711,7 @@ export async function commitTripEditSession(session, { user: userInput = null } 
       changedDays: dayChanges.length,
       changedTrip: domainChanges.tripDetailsChanged,
       changedTeams: domainChanges.teamChangeCount,
+      changedBookingDocuments: domainChanges.bookingDocumentsChanged,
       createdItems: changes.filter(change => change.operation === "create").length,
       movedItems: changes.filter(change => change.operation === "move").length,
       deletedItems: changes.filter(change => change.operation === "delete").length,

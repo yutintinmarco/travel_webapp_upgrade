@@ -19,6 +19,12 @@ import {
   listTripMediaRecordsForBackup,
   restoreTripMediaRecord
 } from "./trip-media-service.js";
+import {
+  deleteTripDocuments,
+  getTripDocumentBlob,
+  reconcileTripDocumentStorage,
+  restoreTripDocumentRecord
+} from "./trip-document-service.js";
 
 export const FULL_BACKUP_PACKAGE_FORMAT = "travel-full-backup-package";
 export const FULL_BACKUP_PACKAGE_VERSION = 1;
@@ -61,7 +67,10 @@ function extensionForMime(typeInput) {
   if (type === "image/jpeg") return "jpg";
   if (type === "image/png") return "png";
   if (type === "image/gif") return "gif";
-  return "webp";
+  if (type === "image/heic") return "heic";
+  if (type === "image/heif") return "heif";
+  if (type === "application/pdf") return "pdf";
+  return "bin";
 }
 function safeFileSegment(valueInput, fallback = "media") {
   const value = clean(valueInput).replace(/[^A-Za-z0-9._-]+/g, "_").replace(/^_+|_+$/g, "").slice(0, 120);
@@ -458,6 +467,50 @@ export function mediaManifestFromCollected(collectedInput) {
   }));
 }
 
+
+function backupDocumentRecords(backupJsonInput, tripIdInput = "") {
+  const tripId = clean(tripIdInput || backupJsonInput?.tripId);
+  const rows = safeArray(backupJsonInput?.data?.portableTrip?.meta?.bookingDocuments);
+  return rows.filter(row => clean(row?.documentId) && clean(row?.storagePath).startsWith(`trips/${tripId}/documents/`));
+}
+
+export async function collectTripDocumentsForBackup(tripIdInput, { backupJson = null, onProgress = null, signal = null } = {}) {
+  const tripId = clean(tripIdInput);
+  if (!tripId) throw errorWithCode("Missing tripId", "invalid-trip-id");
+  const records = backupDocumentRecords(backupJson || {}, tripId);
+  const collected = [];
+  let totalBytes = 0;
+  for (let index = 0; index < records.length; index += 1) {
+    throwIfAborted(signal, "document-download");
+    const record = clone(records[index]) || {};
+    if (typeof onProgress === "function") onProgress({ stage: "document-download", completed: index, total: records.length, documentId: clean(record.documentId) });
+    const blob = await getTripDocumentBlob(record);
+    const bytes = await blobBytes(blob);
+    const path = `documents/${safeFileSegment(record.documentId, "document")}/${safeFileSegment(record.fileName || `document.${extensionForMime(record.contentType || blob.type)}`, "document")}`;
+    const sha256 = await sha256HexBytes(bytes);
+    totalBytes += bytes.byteLength;
+    collected.push({
+      record: { ...record, tripId, contentType: clean(record.contentType || blob.type), byteSize: bytes.byteLength },
+      file: { bytes, packagePath: path, sha256, byteSize: bytes.byteLength, contentType: clean(record.contentType || blob.type) }
+    });
+    if (typeof onProgress === "function") onProgress({ stage: "document-download", completed: index + 1, total: records.length, documentId: clean(record.documentId) });
+    await yieldToMainThread(signal, "document-package");
+  }
+  return { tripId, records: collected, documentCount: collected.length, totalBytes };
+}
+
+export function documentManifestFromCollected(collectedInput) {
+  return safeArray(collectedInput?.records).map(item => ({
+    ...clone(item.record),
+    packageFile: {
+      path: clean(item.file?.packagePath),
+      sha256: clean(item.file?.sha256),
+      byteSize: finiteNumber(item.file?.byteSize),
+      contentType: clean(item.file?.contentType)
+    }
+  }));
+}
+
 export async function buildFullBackupPackage(backupJsonInput, collectedInput, { filename = "travel-full-backup.zip", onProgress = null, signal = null } = {}) {
   // Read-only during packaging; avoid cloning a potentially large Full Backup
   // object just before JSON.stringify, which doubled peak memory on iOS.
@@ -467,7 +520,9 @@ export async function buildFullBackupPackage(backupJsonInput, collectedInput, { 
   const backupBytes = encoder.encode(backupText);
   const backupSha256 = await sha256HexBytes(backupBytes);
   const collected = safeArray(collectedInput?.records);
+  const documentCollected = safeArray(collectedInput?.documentRecords);
   const mediaFiles = [];
+  const documentFiles = [];
   const entries = [];
   for (const item of collected) {
     for (const variant of [item.display, item.thumbnail].filter(Boolean)) {
@@ -482,6 +537,19 @@ export async function buildFullBackupPackage(backupJsonInput, collectedInput, { 
       entries.push({ name: variant.packagePath, bytes: variant.bytes, sha256: variant.sha256, contentType: variant.contentType });
     }
   }
+
+  for (const item of documentCollected) {
+    const file = item?.file;
+    if (!file?.bytes || !clean(file.packagePath)) continue;
+    documentFiles.push({
+      documentId: clean(item.record?.documentId),
+      path: clean(file.packagePath),
+      sha256: clean(file.sha256),
+      byteSize: finiteNumber(file.byteSize),
+      contentType: clean(file.contentType)
+    });
+    entries.push({ name: file.packagePath, bytes: file.bytes, sha256: file.sha256, contentType: file.contentType });
+  }
   const manifest = {
     packageFormat: FULL_BACKUP_PACKAGE_FORMAT,
     packageVersion: FULL_BACKUP_PACKAGE_VERSION,
@@ -492,8 +560,12 @@ export async function buildFullBackupPackage(backupJsonInput, collectedInput, { 
     mediaCount: collected.length,
     mediaFileCount: mediaFiles.length,
     mediaBytes: mediaFiles.reduce((sum, item) => sum + finiteNumber(item.byteSize), 0),
+    documentCount: documentCollected.length,
+    documentFileCount: documentFiles.length,
+    documentBytes: documentFiles.reduce((sum, item) => sum + finiteNumber(item.byteSize), 0),
     orphanReadySkipped: Math.max(0, finiteNumber(collectedInput?.orphanReadyCount)),
-    mediaFiles
+    mediaFiles,
+    documentFiles
   };
   const manifestText = JSON.stringify(manifest, null, 2);
   if (typeof onProgress === "function") onProgress({ stage: "zip-start", completed: 0, total: entries.length + 2 });
@@ -541,6 +613,14 @@ export async function parseFullBackupFile(file) {
     if (bytes.byteLength !== finiteNumber(item.byteSize)) throw errorWithCode("Backup package media size verification failed", "backup-package-integrity-mismatch", { path });
     const hash = await sha256HexBytes(bytes);
     if (hash !== clean(item.sha256).toLowerCase()) throw errorWithCode("Backup package media integrity verification failed", "backup-package-integrity-mismatch", { path });
+  }
+  for (const item of safeArray(manifest.documentFiles)) {
+    const path = clean(item.path);
+    const bytes = files.get(path);
+    if (!path || !bytes) throw errorWithCode("Backup package document file is missing", "backup-package-document-missing", { path });
+    if (bytes.byteLength !== finiteNumber(item.byteSize)) throw errorWithCode("Backup package document size verification failed", "backup-package-integrity-mismatch", { path });
+    const hash = await sha256HexBytes(bytes);
+    if (hash !== clean(item.sha256).toLowerCase()) throw errorWithCode("Backup package document integrity verification failed", "backup-package-integrity-mismatch", { path });
   }
   return { raw, package: { manifest, files }, kind: "package", filename: clean(file.name) };
 }
@@ -605,4 +685,48 @@ export async function restoreFullBackupPackageMedia(backupJsonInput, packageInpu
   }
   if (typeof onProgress === "function") onProgress({ stage: "media-restore", completed: targetRecords.length, total: targetRecords.length });
   return { tripId, restored: restoredRecords.length, removed, mediaRecords: restoredRecords };
+}
+
+
+function documentManifestRecords(backupJson) {
+  return safeArray(backupJson?.documentManifest).filter(record => clean(record?.documentId) && clean(record?.storagePath));
+}
+
+export async function restoreFullBackupPackageDocuments(backupJsonInput, packageInput, {
+  user = null,
+  onProgress = null,
+  reconcile = true
+} = {}) {
+  const backupJson = clone(backupJsonInput) || {};
+  const tripId = clean(backupJson.tripId);
+  if (!tripId) throw errorWithCode("Backup Trip ID is missing", "backup-invalid");
+  const packageFiles = packageInput?.files instanceof Map ? packageInput.files : null;
+  const targetRecords = documentManifestRecords(backupJson);
+  if (!packageFiles) {
+    if (backupJson.documentIncluded === true && targetRecords.length) throw errorWithCode("Booking Document Backup package is required", "backup-package-required");
+    return { tripId, restored: 0, removed: 0, documentRecords: [] };
+  }
+  const restored = [];
+  const created = [];
+  try {
+    for (let index = 0; index < targetRecords.length; index += 1) {
+      const record = targetRecords[index];
+      const info = record?.packageFile || null;
+      const bytes = packageFiles.get(clean(info?.path));
+      if (!bytes) throw errorWithCode("Backup document file is missing", "backup-package-document-missing", { documentId: clean(record.documentId) });
+      if (typeof onProgress === "function") onProgress({ stage: "document-restore", completed: index, total: targetRecords.length, documentId: clean(record.documentId) });
+      const row = await restoreTripDocumentRecord(record, new Blob([bytes], { type: clean(info?.contentType || record.contentType || "application/octet-stream") }), { tripId, user });
+      restored.push(row); created.push(row);
+    }
+  } catch (error) {
+    try { await deleteTripDocuments({ descriptors: created, user }); } catch (_) {}
+    throw error;
+  }
+  let removed = 0;
+  if (reconcile) {
+    const result = await reconcileTripDocumentStorage({ tripId, wantedPaths: restored.map(row => clean(row.storagePath)), user });
+    removed = finiteNumber(result?.removed);
+  }
+  if (typeof onProgress === "function") onProgress({ stage: "document-restore", completed: targetRecords.length, total: targetRecords.length });
+  return { tripId, restored: restored.length, removed, documentRecords: restored };
 }
