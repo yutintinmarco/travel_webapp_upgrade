@@ -369,6 +369,7 @@ function newDraftRecord(dayId, kindInput, fields = {}) {
     maps: clean(fields.location?.mapsUrl),
     gallery: Array.isArray(fields.gallery) ? clonePlain(fields.gallery) : [],
     images: Array.isArray(fields.images) ? clonePlain(fields.images) : [],
+    plannedTransit: fields.plannedTransit && typeof fields.plannedTransit === "object" ? clonePlain(fields.plannedTransit) : null,
     location: normalizeDraftLocation(fields.location || {}, title)
   };
 }
@@ -390,6 +391,7 @@ function draftToNewItem(draft = {}) {
     maps: clean(draft.location?.mapsUrl || draft.maps),
     gallery: Array.isArray(draft.gallery) ? clonePlain(draft.gallery) : [],
     images: Array.isArray(draft.images) ? clonePlain(draft.images) : [],
+    ...(draft.plannedTransit && typeof draft.plannedTransit === "object" ? { plannedTransit: clonePlain(draft.plannedTransit) } : {}),
     location: normalizeDraftLocation(draft.location || {}, title),
     sortOrder: normalizedSortOrder(draft.sortOrder)
   };
@@ -411,6 +413,7 @@ function itemSnapshot(item = {}, fallbackSortOrder = 999999) {
     sortOrder: normalizedSortOrder(item?.sortOrder, fallbackSortOrder),
     gallery: Array.isArray(item?.gallery) ? clonePlain(item.gallery) : [],
     images: Array.isArray(item?.images) ? clonePlain(item.images) : [],
+    plannedTransit: item?.plannedTransit && typeof item.plannedTransit === "object" ? clonePlain(item.plannedTransit) : null,
     location,
     maps: clean(location.mapsUrl)
   };
@@ -716,6 +719,7 @@ export function updateTripEditDraftItem(session, dayIdInput, itemIdInput, patchI
   if (Object.prototype.hasOwnProperty.call(patchInput || {}, "booked")) next.booked = Boolean(patchInput.booked);
   if (Object.prototype.hasOwnProperty.call(patchInput || {}, "gallery")) next.gallery = Array.isArray(patchInput.gallery) ? clonePlain(patchInput.gallery) : [];
   if (Object.prototype.hasOwnProperty.call(patchInput || {}, "images")) next.images = Array.isArray(patchInput.images) ? clonePlain(patchInput.images) : [];
+  if (Object.prototype.hasOwnProperty.call(patchInput || {}, "plannedTransit")) next.plannedTransit = patchInput.plannedTransit && typeof patchInput.plannedTransit === "object" ? clonePlain(patchInput.plannedTransit) : null;
   if (Object.prototype.hasOwnProperty.call(patchInput || {}, "location")) {
     next.location = normalizeDraftLocation(patchInput.location || {}, next.title);
     next.maps = clean(next.location?.mapsUrl);
@@ -842,6 +846,7 @@ export function tripEditChanges(session) {
     });
     if (stableJson(base.gallery || []) !== stableJson(draft.gallery || [])) patch.gallery = clonePlain(Array.isArray(draft.gallery) ? draft.gallery : []);
     if (stableJson(base.images || []) !== stableJson(draft.images || [])) patch.images = clonePlain(Array.isArray(draft.images) ? draft.images : []);
+    if (stableJson(base.plannedTransit || null) !== stableJson(draft.plannedTransit || null)) patch.plannedTransit = draft.plannedTransit && typeof draft.plannedTransit === "object" ? clonePlain(draft.plannedTransit) : null;
     if (!sameLocation(base.location, draft.location)) {
       patch.location = normalizeDraftLocation(draft.location || {}, draft.title);
       patch.maps = clean(patch.location.mapsUrl);
@@ -1015,6 +1020,7 @@ export function applyTripEditDraftToTrip(session, tripInput, { revision = null }
         booked: Boolean(draft.booked), sortOrder: normalizedSortOrder(draft.sortOrder, index),
         gallery: clonePlain(Array.isArray(draft.gallery) ? draft.gallery : []),
         images: clonePlain(Array.isArray(draft.images) ? draft.images : []),
+        plannedTransit: draft.plannedTransit && typeof draft.plannedTransit === "object" ? clonePlain(draft.plannedTransit) : null,
         location: normalizeDraftLocation(draft.location || {}, draft.title), maps: clean(draft.maps)
       });
     });
@@ -1034,6 +1040,7 @@ export function applyTripEditDraftToTrip(session, tripInput, { revision = null }
         booked: Boolean(draft.booked), sortOrder: normalizedSortOrder(draft.sortOrder),
         gallery: clonePlain(Array.isArray(draft.gallery) ? draft.gallery : []),
         images: clonePlain(Array.isArray(draft.images) ? draft.images : []),
+        plannedTransit: draft.plannedTransit && typeof draft.plannedTransit === "object" ? clonePlain(draft.plannedTransit) : null,
         location: normalizeDraftLocation(draft.location || {}, draft.title), maps: clean(draft.maps)
       });
     });
@@ -1164,6 +1171,7 @@ export async function commitTripEditSession(session, { user: userInput = null } 
               booked: Boolean(draft?.booked), sortOrder: normalizedSortOrder(draft?.sortOrder),
               gallery: clonePlain(Array.isArray(draft?.gallery) ? draft.gallery : []),
               images: clonePlain(Array.isArray(draft?.images) ? draft.images : []),
+              plannedTransit: draft?.plannedTransit && typeof draft.plannedTransit === "object" ? clonePlain(draft.plannedTransit) : null,
               location: normalizeDraftLocation(draft?.location || {}, draft?.title), maps: clean(draft?.maps),
               ...change.patch
             }
