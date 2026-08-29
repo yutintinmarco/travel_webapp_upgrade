@@ -1,3 +1,14 @@
+## v7.9.19.1 — Booking Documents Native UX Fix
+
+* Moved 預訂與文件 below 旅程資料 and aligned its material, heading, spacing and information hierarchy with the established Travel Details card.
+* Replaced the View Mode booking document bottom sheet with a dedicated iOS style push page using the existing 資料 navigation context.
+* Grouped documents chronologically by Trip Day and hides days with no documents; Flight and Accommodation documents resolve to their relevant Trip date, with unmatched records kept under 其他旅程文件.
+* Routed Flight, Accommodation and Itinerary document shortcuts into the same central documents page instead of opening a separate sheet.
+* Simplified document access so tapping a file row previews it immediately; removed the redundant external 開啟 action from the primary flow.
+* Hardened the full screen document viewer by moving it outside the scrolling shell, isolating the embedded PDF stage, locking the underlying scroll, and adding stale async load cleanup.
+* Matched the viewer navigation bar to the App safe area and full bleed background behaviour, with a single native back action and consistent title colour.
+* No Booking Document schema, Global Save Once, Firebase lifecycle, Map, Transit, Day Bar, Trip Overview Map or Location Picker changes.
+
 ## v7.9.19.0 — Booking Documents Foundation
 
 ### Booking documents domain

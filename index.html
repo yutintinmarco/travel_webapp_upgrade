@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
   <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
   <link rel="dns-prefetch" href="https://api.open-meteo.com">
-  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?release=7.9.19.0">
+  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?release=7.9.19.1">
   <title id="page-title">行程</title>
   <script>
   // v7.7.5.0 · Performance Lite. Memory only: no Firebase reads/writes, no
@@ -3903,7 +3903,7 @@ body.expenses-view-active #app-version-note{
 #snacks-view::after,
 #info-view::after,
 #profile-view::after{
-  content:"v7.9.19.0" !important;
+  content:"v7.9.19.1" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3924,7 +3924,7 @@ body.expenses-view-active #app-version-note{
   display:none !important;
 }
 body.expenses-view-active .expenses-module .expenses-app::after{
-  content:"v7.9.19.0" !important;
+  content:"v7.9.19.1" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -4577,7 +4577,7 @@ html.theme-dark .snack-edit-tools,html:not(.theme-light):not(.theme-dark) .snack
 </style>
             <link rel="apple-touch-icon" href="assets/icon/trip_icon.png">
   <link rel="icon" type="image/png" href="assets/icon/trip_icon.png">
-  <link rel="manifest" href="manifest.json?release=7.9.19.0">
+  <link rel="manifest" href="manifest.json?release=7.9.19.1">
   <meta name="apple-mobile-web-app-title" content="關嘉露西生日之旅">
   <!-- v7.7.1.2: expenses.css is 144KB and every rule is scoped under
        .expenses-module, yet it used to block the very first paint of the
@@ -4585,17 +4585,25 @@ html.theme-dark .snack-edit-tools,html:not(.theme-light):not(.theme-dark) .snack
        priority without blocking paint; ensureExpensesStylesheet() flips it to
        media="all" before the 支出 view is ever mounted, so the styling is
        byte-for-byte identical by the time anything expenses-related renders. -->
-  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?release=7.9.19.0" media="print">
-  <noscript><link rel="stylesheet" href="assets/css/expenses.css?release=7.9.19.0"></noscript>
+  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?release=7.9.19.1" media="print">
+  <noscript><link rel="stylesheet" href="assets/css/expenses.css?release=7.9.19.1"></noscript>
 
-<style id="booking-documents-v79190-style">
-.booking-doc-card{display:grid;gap:10px;padding:14px 15px;border-radius:18px;background:rgba(255,255,255,.62);border:1px solid rgba(60,60,67,.10);box-shadow:0 8px 22px rgba(0,0,0,.06);margin-bottom:12px}
-.booking-doc-card-head{display:flex;align-items:center;justify-content:space-between;gap:12px}.booking-doc-card-head strong{font-size:calc(15px * var(--font-scale));color:var(--label-primary)}.booking-doc-count{font-size:10px;font-weight:760;color:var(--label-secondary);padding:4px 8px;border-radius:999px;background:rgba(118,118,128,.10)}
-.booking-doc-groups{display:grid;gap:8px}.booking-doc-group-btn{appearance:none;width:100%;border:0;border-radius:14px;background:rgba(118,118,128,.07);padding:11px 12px;display:grid;grid-template-columns:34px minmax(0,1fr) auto;align-items:center;gap:10px;text-align:left;color:inherit}.booking-doc-group-btn:active{opacity:.58}.booking-doc-group-icon{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:rgba(10,132,255,.10);font-size:17px}.booking-doc-group-copy{min-width:0;display:grid;gap:2px}.booking-doc-group-copy strong{font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.booking-doc-group-copy small{font-size:9.5px;color:var(--label-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.booking-doc-chevron{font-size:22px;color:var(--label-tertiary)}
+<style id="booking-documents-v79191-style">
+/* Phase 3E · Booking Documents native hierarchy / viewer hardening.
+   View Mode follows the proven Travel Details / 我的 visual grammar. */
+.booking-doc-entry-card{margin-top:0}
+.booking-doc-entry-row{appearance:none;-webkit-appearance:none;width:100%;min-height:62px;border:0;border-top:1px solid var(--separator);background:transparent;color:var(--label-primary);padding:10px 2px 1px;display:grid;grid-template-columns:38px minmax(0,1fr) auto;align-items:center;gap:10px;text-align:left}
+.booking-doc-entry-row:active{opacity:.58}.booking-doc-entry-icon{width:36px;height:36px;border-radius:11px;display:grid;place-items:center;background:rgba(0,122,255,.11);font-size:18px}.booking-doc-entry-copy{min-width:0;display:grid;gap:2px}.booking-doc-entry-copy strong{font-size:calc(13px * var(--font-scale));font-weight:760;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.booking-doc-entry-copy small{font-size:calc(9.5px * var(--font-scale));color:var(--label-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.booking-doc-entry-side{display:flex;align-items:center;gap:7px}.booking-doc-count{min-width:24px;height:24px;padding:0 7px;border-radius:999px;display:grid;place-items:center;background:rgba(0,122,255,.10);color:#1478d4;font-size:10px;font-weight:800}.booking-doc-chevron{font-size:24px;font-weight:300;line-height:1;color:var(--label-tertiary)}
+.info-nav-host{position:relative;width:100%;min-width:0;overflow:visible}.info-nav-page{width:100%;min-width:0;transform:translate3d(0,0,0);backface-visibility:hidden;-webkit-backface-visibility:hidden}.info-nav-page[hidden]{display:none!important}body.info-navigation-active{overflow-x:hidden}.booking-documents-page .profile-detail-bar{margin-bottom:12px}.booking-documents-page-sub{margin:-4px 2px 12px;color:var(--label-secondary);font-size:calc(10px * var(--font-scale));line-height:1.4;text-align:center}
+.booking-doc-day-list{display:grid;gap:12px}.booking-doc-day-card{padding:0;overflow:hidden}.booking-doc-day-head{padding:14px 14px 11px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px}.booking-doc-day-copy{min-width:0;display:grid;gap:2px}.booking-doc-day-copy strong{font-size:calc(15px * var(--font-scale));font-weight:790;color:var(--label-primary)}.booking-doc-day-copy small{font-size:calc(9.5px * var(--font-scale));color:var(--label-secondary);line-height:1.3}.booking-doc-day-badge{flex:0 0 auto;min-width:28px;height:28px;padding:0 8px;border-radius:999px;display:grid;place-items:center;background:rgba(0,122,255,.10);color:#1478d4;font-size:10px;font-weight:800}
+.booking-doc-owner{border-top:1px solid var(--separator);padding:11px 12px 5px}.booking-doc-owner[data-booking-focus="true"]{background:rgba(0,122,255,.055)}.booking-doc-owner-head{display:grid;grid-template-columns:34px minmax(0,1fr);gap:9px;align-items:center;margin-bottom:5px}.booking-doc-owner-icon{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:rgba(0,122,255,.10);font-size:17px}.booking-doc-owner-copy{min-width:0;display:grid;gap:2px}.booking-doc-owner-copy strong{font-size:calc(12px * var(--font-scale));font-weight:770;color:var(--label-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.booking-doc-owner-copy small{font-size:calc(9px * var(--font-scale));color:var(--label-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.booking-doc-file-list{display:grid}.booking-doc-file-row{appearance:none;-webkit-appearance:none;width:100%;min-height:51px;border:0;border-top:1px solid color-mix(in srgb,var(--separator) 62%,transparent);background:transparent;color:var(--label-primary);padding:7px 2px 7px 43px;display:grid;grid-template-columns:minmax(0,1fr) 18px;gap:8px;align-items:center;text-align:left}.booking-doc-file-row:first-child{border-top:0}.booking-doc-file-row:active{opacity:.56}.booking-doc-file-copy{min-width:0;display:grid;gap:2px}.booking-doc-file-copy strong{font-size:calc(11.5px * var(--font-scale));font-weight:690;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.booking-doc-file-copy small{font-size:calc(8.8px * var(--font-scale));color:var(--label-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.booking-doc-file-chevron{font-size:21px;font-weight:300;color:var(--label-tertiary)}.booking-doc-empty{padding:18px 14px;text-align:center;color:var(--label-secondary);font-size:calc(10px * var(--font-scale));line-height:1.45}
 .trip-edit-document-block{display:grid;gap:9px;padding:2px 0}.trip-edit-document-list{display:grid;gap:7px}.trip-edit-document-empty{padding:12px;border-radius:12px;background:rgba(118,118,128,.07);color:var(--label-secondary);font-size:10px;text-align:center}.trip-edit-document-row{display:grid;grid-template-columns:34px minmax(0,1fr) auto;align-items:center;gap:9px;padding:9px 10px;border-radius:13px;background:rgba(118,118,128,.075);border:1px solid rgba(60,60,67,.08)}.trip-edit-document-icon{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;background:rgba(255,255,255,.62);font-size:17px}.trip-edit-document-copy{min-width:0;display:grid;gap:2px}.trip-edit-document-copy strong{font-size:10.8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.trip-edit-document-copy small{font-size:8.8px;color:var(--label-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.trip-edit-document-actions{display:flex;gap:5px}.trip-edit-document-actions button{appearance:none;border:0;background:transparent;color:#087ec4;font-size:10px;font-weight:760;padding:7px 5px}.trip-edit-document-actions button.is-delete{color:#ff3b30}.trip-edit-document-add{appearance:none;min-height:40px;border:1px dashed rgba(10,132,255,.34);border-radius:12px;background:rgba(10,132,255,.07);color:#087ec4;font:inherit;font-size:11px;font-weight:760}
-.booking-doc-sheet .trip-edit-manage-scroll{padding-top:10px}.booking-doc-sheet-list{display:grid;gap:8px}.booking-doc-sheet-row{appearance:none;width:100%;border:0;border-radius:15px;background:rgba(118,118,128,.075);padding:11px 12px;display:grid;grid-template-columns:38px minmax(0,1fr) 20px;gap:10px;align-items:center;text-align:left;color:inherit}.booking-doc-sheet-row-icon{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;background:rgba(10,132,255,.11);font-size:18px}.booking-doc-sheet-row-copy{min-width:0;display:grid;gap:2px}.booking-doc-sheet-row-copy strong{font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.booking-doc-sheet-row-copy small{font-size:9.5px;color:var(--label-secondary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.booking-document-viewer{position:fixed;inset:0;z-index:1400;background:rgba(242,242,247,.98);display:none;grid-template-rows:auto minmax(0,1fr);padding-top:env(safe-area-inset-top,0px)}.booking-document-viewer.is-open{display:grid}.booking-document-viewer-bar{min-height:54px;display:grid;grid-template-columns:56px minmax(0,1fr) 56px;align-items:center;border-bottom:1px solid rgba(60,60,67,.14);background:rgba(250,250,252,.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}.booking-document-viewer-bar button{appearance:none;border:0;background:transparent;color:#087ec4;font-size:12px;font-weight:760;height:48px}.booking-document-viewer-title{text-align:center;font-size:13px;font-weight:780;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0 6px}.booking-document-viewer-body{min-height:0;display:grid;place-items:center;overflow:hidden}.booking-document-viewer iframe{width:100%;height:100%;border:0;background:#fff}.booking-document-viewer img{max-width:100%;max-height:100%;object-fit:contain}.booking-document-viewer-state{color:var(--label-secondary);font-size:11px}
-html.theme-dark .booking-doc-card,html:not(.theme-light):not(.theme-dark) .booking-doc-card{background:rgba(28,28,34,.68);border-color:rgba(255,255,255,.09)}html.theme-dark .booking-doc-group-btn,html:not(.theme-light):not(.theme-dark) .booking-doc-group-btn,html.theme-dark .trip-edit-document-row,html:not(.theme-light):not(.theme-dark) .trip-edit-document-row,html.theme-dark .booking-doc-sheet-row,html:not(.theme-light):not(.theme-dark) .booking-doc-sheet-row{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.08)}html.theme-dark .trip-edit-document-icon,html:not(.theme-light):not(.theme-dark) .trip-edit-document-icon{background:rgba(255,255,255,.08)}html.theme-dark .booking-document-viewer,html:not(.theme-light):not(.theme-dark) .booking-document-viewer{background:#111116}html.theme-dark .booking-document-viewer-bar,html:not(.theme-light):not(.theme-dark) .booking-document-viewer-bar{background:rgba(28,28,32,.92);border-color:rgba(255,255,255,.12)}
+/* Viewer lives outside the scrolling shell. This avoids iOS WebKit's fixed
+   element / embedded PDF interaction trap and keeps the safe area full bleed. */
+body.booking-document-viewer-open .scroll-shell{overflow:hidden!important}.booking-document-viewer{position:fixed;inset:0;z-index:1900;display:none;grid-template-rows:calc(env(safe-area-inset-top,0px) + 52px) minmax(0,1fr);background:transparent;color:var(--label-primary);isolation:isolate}.booking-document-viewer::before{content:"";position:absolute;inset:0;z-index:0;background:var(--app-background);background-attachment:fixed;pointer-events:none}.booking-document-viewer.is-open{display:grid}.booking-document-viewer-bar{position:relative;z-index:3;padding-top:env(safe-area-inset-top,0px);box-sizing:border-box;display:grid;grid-template-columns:52px minmax(0,1fr) 52px;align-items:center;border-bottom:1px solid var(--separator);background:var(--nav-material);transform:translateZ(0);backdrop-filter:blur(24px) saturate(160%);-webkit-backdrop-filter:blur(24px) saturate(160%)}.booking-document-viewer-bar button{appearance:none;-webkit-appearance:none;width:48px;height:44px;border:0;border-radius:999px;background:transparent;color:#087ec4;display:grid;place-items:center;font:inherit;position:relative;z-index:5;pointer-events:auto;touch-action:manipulation}.booking-document-viewer-bar button:active{background:rgba(0,122,255,.09)}.booking-document-viewer-back-glyph{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",sans-serif;font-size:34px;font-weight:300;line-height:1;transform:translateY(-1px)}.booking-document-viewer-spacer{width:48px;height:44px}.booking-document-viewer-title{text-align:center;font-size:calc(13px * var(--font-scale));font-weight:780;color:var(--label-primary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0 6px}.booking-document-viewer-body{position:relative;z-index:2;min-height:0;display:grid;place-items:center;overflow:hidden;background:var(--surface-solid);contain:layout paint;isolation:isolate}.booking-document-viewer iframe,.booking-document-viewer object{position:absolute;inset:0;width:100%;height:100%;border:0;background:#fff}.booking-document-viewer img{display:block;max-width:100%;max-height:100%;object-fit:contain}.booking-document-viewer-state{color:var(--label-secondary);font-size:calc(11px * var(--font-scale))}
+html.theme-dark .trip-edit-document-row,html:not(.theme-light):not(.theme-dark) .trip-edit-document-row{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.08)}html.theme-dark .trip-edit-document-icon,html:not(.theme-light):not(.theme-dark) .trip-edit-document-icon{background:rgba(255,255,255,.08)}html.theme-dark .booking-doc-owner[data-booking-focus="true"],html:not(.theme-light):not(.theme-dark) .booking-doc-owner[data-booking-focus="true"]{background:rgba(10,132,255,.09)}
+@media (prefers-reduced-motion:reduce){.info-nav-page{animation:none!important}}
 </style>
 </head>
 <body class="app-entry-gated app-entry-pending">
@@ -4772,42 +4780,61 @@ html.theme-dark .booking-doc-card,html:not(.theme-light):not(.theme-dark) .booki
 </div>
 
 <div id="info-view" class="app-view" style="display:none;">
-  <div class="team-bar" id="info-team-bar" style="display:none;"></div>
-  <div class="trip-library-shell">
-    <section class="trip-edit-info-tools" id="trip-edit-info-tools" hidden aria-label="Edit Mode 旅程設定">
-      <div class="trip-edit-info-kicker">Edit Mode</div>
-      <button class="trip-edit-info-row" id="trip-edit-trip-details-btn" type="button">
-        <span class="trip-edit-info-row-icon" aria-hidden="true">🧳</span>
-        <span class="trip-edit-info-row-copy"><strong>旅程基本資料</strong><small id="trip-edit-trip-details-summary">旅程名稱、日期及路線</small></span>
-        <span class="trip-edit-info-chevron" aria-hidden="true">›</span>
-      </button>
-      <button class="trip-edit-info-row" id="trip-edit-team-manage-btn" type="button">
-        <span class="trip-edit-info-row-icon" aria-hidden="true">👥</span>
-        <span class="trip-edit-info-row-copy"><strong>Team 管理</strong><small id="trip-edit-team-manage-summary">新增、改名、成員、顏色及安全刪除 Team</small></span>
-        <span class="trip-edit-info-chevron" aria-hidden="true">›</span>
-      </button>
-      <button class="trip-edit-info-row" id="trip-edit-flight-manage-btn" type="button">
-        <span class="trip-edit-info-row-icon" aria-hidden="true">✈️</span>
-        <span class="trip-edit-info-row-copy"><strong>航班管理</strong><small id="trip-edit-flight-manage-summary">新增、修改及管理所有航班</small></span>
-        <span class="trip-edit-info-chevron" aria-hidden="true">›</span>
-      </button>
-      <button class="trip-edit-info-row" id="trip-edit-accommodation-manage-btn" type="button">
-        <span class="trip-edit-info-row-icon" aria-hidden="true">🏨</span>
-        <span class="trip-edit-info-row-copy"><strong>住宿管理</strong><small id="trip-edit-accommodation-manage-summary">新增、修改酒店及入住安排</small></span>
-        <span class="trip-edit-info-chevron" aria-hidden="true">›</span>
-      </button>
-    </section>
-    <section class="booking-doc-card" id="booking-documents-card" hidden aria-label="預訂與文件">
-      <div class="booking-doc-card-head"><strong>📄 預訂與文件</strong><span class="booking-doc-count" id="booking-documents-count">0</span></div>
-      <div class="booking-doc-groups" id="booking-documents-groups"></div>
-    </section>
-    <section class="trip-library-card trip-info-only-card" id="trip-info-card">
-      <div class="trip-library-eyebrow">Travel Details</div>
-      <h2 class="trip-info-heading">旅程資料</h2>
-      <p class="trip-info-sub">集中保存 Visit Japan Web、簽證、航班、住宿及同行旅客資料，方便出發前快速查閱及填表。</p>
-      <div id="info-content"></div>
-      <div class="info-hint" id="info-hint">以上資料可用於填寫 Visit Japan Web / 電子簽證申請<br>請按實際情況核實所有資料</div>
-    </section>
+  <div class="info-nav-host" id="info-nav-host">
+    <div class="info-nav-page" id="info-page-root" data-info-page="root">
+      <div class="team-bar" id="info-team-bar" style="display:none;"></div>
+      <div class="trip-library-shell">
+        <section class="trip-edit-info-tools" id="trip-edit-info-tools" hidden aria-label="Edit Mode 旅程設定">
+          <div class="trip-edit-info-kicker">Edit Mode</div>
+          <button class="trip-edit-info-row" id="trip-edit-trip-details-btn" type="button">
+            <span class="trip-edit-info-row-icon" aria-hidden="true">🧳</span>
+            <span class="trip-edit-info-row-copy"><strong>旅程基本資料</strong><small id="trip-edit-trip-details-summary">旅程名稱、日期及路線</small></span>
+            <span class="trip-edit-info-chevron" aria-hidden="true">›</span>
+          </button>
+          <button class="trip-edit-info-row" id="trip-edit-team-manage-btn" type="button">
+            <span class="trip-edit-info-row-icon" aria-hidden="true">👥</span>
+            <span class="trip-edit-info-row-copy"><strong>Team 管理</strong><small id="trip-edit-team-manage-summary">新增、改名、成員、顏色及安全刪除 Team</small></span>
+            <span class="trip-edit-info-chevron" aria-hidden="true">›</span>
+          </button>
+          <button class="trip-edit-info-row" id="trip-edit-flight-manage-btn" type="button">
+            <span class="trip-edit-info-row-icon" aria-hidden="true">✈️</span>
+            <span class="trip-edit-info-row-copy"><strong>航班管理</strong><small id="trip-edit-flight-manage-summary">新增、修改及管理所有航班</small></span>
+            <span class="trip-edit-info-chevron" aria-hidden="true">›</span>
+          </button>
+          <button class="trip-edit-info-row" id="trip-edit-accommodation-manage-btn" type="button">
+            <span class="trip-edit-info-row-icon" aria-hidden="true">🏨</span>
+            <span class="trip-edit-info-row-copy"><strong>住宿管理</strong><small id="trip-edit-accommodation-manage-summary">新增、修改酒店及入住安排</small></span>
+            <span class="trip-edit-info-chevron" aria-hidden="true">›</span>
+          </button>
+        </section>
+        <section class="trip-library-card trip-info-only-card" id="trip-info-card">
+          <div class="trip-library-eyebrow">Travel Details</div>
+          <h2 class="trip-info-heading">旅程資料</h2>
+          <p class="trip-info-sub">集中保存 Visit Japan Web、簽證、航班、住宿及同行旅客資料，方便出發前快速查閱及填表。</p>
+          <div id="info-content"></div>
+          <div class="info-hint" id="info-hint">以上資料可用於填寫 Visit Japan Web / 電子簽證申請<br>請按實際情況核實所有資料</div>
+        </section>
+        <section class="trip-library-card trip-info-only-card booking-doc-entry-card" id="booking-documents-card" aria-label="預訂與文件">
+          <div class="trip-library-eyebrow">Travel Documents</div>
+          <h2 class="trip-info-heading">預訂與文件</h2>
+          <p class="trip-info-sub">按旅程日子集中查看航班、住宿及行程預訂文件，點選文件即可直接預覽。</p>
+          <button class="booking-doc-entry-row" id="booking-documents-open" type="button">
+            <span class="booking-doc-entry-icon" aria-hidden="true">📄</span>
+            <span class="booking-doc-entry-copy"><strong>查看預訂文件</strong><small id="booking-documents-summary">尚未有預訂文件</small></span>
+            <span class="booking-doc-entry-side"><span class="booking-doc-count" id="booking-documents-count">0</span><span class="booking-doc-chevron" aria-hidden="true">›</span></span>
+          </button>
+        </section>
+      </div>
+    </div>
+    <div class="info-nav-page booking-documents-page" id="info-page-booking-documents" data-info-page="booking-documents" hidden>
+      <div class="profile-detail-bar">
+        <button class="profile-detail-back" id="booking-documents-back" type="button" aria-label="返回資料"><span class="profile-back-glyph">‹</span></button>
+        <h2>預訂與文件</h2>
+        <span class="profile-detail-spacer" aria-hidden="true"></span>
+      </div>
+      <div class="booking-documents-page-sub" id="booking-documents-page-sub">按旅程日子整理</div>
+      <div class="booking-doc-day-list" id="booking-documents-day-list"></div>
+    </div>
   </div>
 </div>
 
@@ -5422,7 +5449,7 @@ html.theme-dark .booking-doc-card,html:not(.theme-light):not(.theme-dark) .booki
         <span class="profile-detail-spacer"></span>
       </div>
       <section class="profile-card" aria-label="App 資訊">
-        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.9.19.0</strong></div>
+        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.9.19.1</strong></div>
         <div class="profile-meta-row"><span>資料架構</span><strong>Phase 2G.2</strong></div>
         <div class="profile-meta-row"><span>主要資料來源</span><strong id="app-data-source-label">Firebase / 本機快取</strong></div>
       </section>
@@ -5472,6 +5499,15 @@ html.theme-dark .booking-doc-card,html:not(.theme-light):not(.theme-dark) .booki
   </div>
 </div>
 </div>
+</div>
+
+<div class="booking-document-viewer" id="booking-document-viewer" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="booking-document-viewer-title">
+  <div class="booking-document-viewer-bar">
+    <button id="booking-document-viewer-close" type="button" aria-label="返回"><span class="booking-document-viewer-back-glyph" aria-hidden="true">‹</span></button>
+    <div class="booking-document-viewer-title" id="booking-document-viewer-title">預訂文件</div>
+    <span class="booking-document-viewer-spacer" aria-hidden="true"></span>
+  </div>
+  <div class="booking-document-viewer-body" id="booking-document-viewer-body"><div class="booking-document-viewer-state">正在載入…</div></div>
 </div>
 
 <div class="trip-map-overlay" id="trip-map-overlay" aria-hidden="true">
@@ -6028,17 +6064,6 @@ html.theme-dark .booking-doc-card,html:not(.theme-light):not(.theme-dark) .booki
 
 <input id="trip-booking-document-input" type="file" accept="application/pdf,image/jpeg,image/png,image/webp,image/heic,image/heif" multiple hidden>
 
-<div class="modal-backdrop" id="booking-document-list-backdrop" aria-hidden="true">
-  <div class="modal trip-edit-manage-modal booking-doc-sheet" role="dialog" aria-modal="true" aria-labelledby="booking-document-list-title">
-    <div class="trip-edit-travel-heading"><h3><span class="trip-edit-title-icon">📄</span><span id="booking-document-list-title">預訂文件</span></h3><div class="trip-edit-travel-heading-meta" id="booking-document-list-meta">文件</div></div>
-    <div class="trip-edit-manage-scroll"><div class="booking-doc-sheet-list" id="booking-document-list"></div></div>
-    <div class="trip-edit-manage-actions"><button class="is-done" id="booking-document-list-close" type="button">完成</button></div>
-  </div>
-</div>
-<div class="booking-document-viewer" id="booking-document-viewer" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="booking-document-viewer-title">
-  <div class="booking-document-viewer-bar"><button id="booking-document-viewer-close" type="button">完成</button><div class="booking-document-viewer-title" id="booking-document-viewer-title">預訂文件</div><button id="booking-document-viewer-open" type="button">開啟</button></div>
-  <div class="booking-document-viewer-body" id="booking-document-viewer-body"><div class="booking-document-viewer-state">正在載入…</div></div>
-</div>
 
 <div class="itinerary-photo-viewer" id="itinerary-photo-viewer" aria-hidden="true" role="dialog" aria-modal="true" aria-label="相片檢視器">
   <div class="itinerary-photo-viewer-stage" id="itinerary-photo-viewer-stage">
@@ -6071,7 +6096,7 @@ html.theme-dark .booking-doc-card,html:not(.theme-light):not(.theme-dark) .booki
 </div>
 
 <script>
-const APP_VERSION = "7.9.19.0";
+const APP_VERSION = "7.9.19.1";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 let tripMapServicePromise=null,transitRouteServicePromise=null,tripEditServicePromise=null,airlineLogoServicePromise=null,tripDocumentServicePromise=null,tripMapController=null,tripMapScope="day",tripMapRenderEpoch=0,tripMapSelectedPoint=null;
@@ -6662,10 +6687,13 @@ document.getElementById("trip-edit-flight-document-add")?.addEventListener("clic
 document.getElementById("trip-edit-accommodation-document-add")?.addEventListener("click",tripEditRequestDocumentFiles);
 document.getElementById("trip-edit-item-document-add")?.addEventListener("click",tripEditRequestDocumentFiles);
 document.getElementById("trip-booking-document-input")?.addEventListener("change",event=>void tripEditStageDocumentFiles(event.target?.files));
-document.getElementById("booking-document-list-close")?.addEventListener("click",tripCloseBookingDocumentList);
-document.getElementById("booking-document-list-backdrop")?.addEventListener("click",event=>{if(event.target===event.currentTarget)tripCloseBookingDocumentList();});
+document.getElementById("booking-documents-open")?.addEventListener("click",()=>tripOpenBookingDocumentsPage());
+document.getElementById("booking-documents-back")?.addEventListener("click",()=>tripCloseBookingDocumentsPage());
 document.getElementById("booking-document-viewer-close")?.addEventListener("click",tripCloseBookingDocumentViewer);
-document.getElementById("booking-document-viewer-open")?.addEventListener("click",()=>{const row=bookingDocumentViewerCurrent;if(row?.legacyUrl)window.open(row.legacyUrl,"_blank","noopener");else if(bookingDocumentViewerObjectUrl)window.open(bookingDocumentViewerObjectUrl,"_blank","noopener");});
+document.addEventListener("keydown",event=>{if(event.key==="Escape"&&document.getElementById("booking-document-viewer")?.classList.contains("is-open"))tripCloseBookingDocumentViewer();});
+let bookingDocumentsSwipeStart=null;
+document.getElementById("info-page-booking-documents")?.addEventListener("touchstart",event=>{if(!infoDocumentsPageOpen||event.touches?.length!==1)return;const touch=event.touches[0];if(touch.clientX>28)return;bookingDocumentsSwipeStart={x:touch.clientX,y:touch.clientY};},{passive:true});
+document.getElementById("info-page-booking-documents")?.addEventListener("touchend",event=>{if(!bookingDocumentsSwipeStart||event.changedTouches?.length!==1)return;const touch=event.changedTouches[0],dx=touch.clientX-bookingDocumentsSwipeStart.x,dy=Math.abs(touch.clientY-bookingDocumentsSwipeStart.y);bookingDocumentsSwipeStart=null;if(dx>72&&dy<Math.abs(dx)*.72)void tripCloseBookingDocumentsPage();},{passive:true});
 document.getElementById("trip-edit-order-up")?.addEventListener("click",()=>tripEditMovePendingOrder(-1));
 document.getElementById("trip-edit-order-down")?.addEventListener("click",()=>tripEditMovePendingOrder(1));
 document.getElementById("trip-edit-item-delete")?.addEventListener("click",()=>void deleteTripEditItemFromSession());
@@ -7208,7 +7236,7 @@ function appendInlineDetails(itemEl,item,gallery,dayId=""){
   if(body.textContent.trim())detail.appendChild(body);
   const actions=document.createElement("div");actions.className="inline-detail-actions";
   const addAction=(label,url,secondary=false)=>{if(!url)return;const a=document.createElement("a");a.className=`inline-action-btn${secondary?" secondary":""}`;a.href=url;a.target="_blank";a.rel="noopener";a.textContent=label;a.addEventListener("click",e=>e.stopPropagation());actions.appendChild(a);};
-  addAction("Google 地圖",item.maps,false);addAction("官方網頁",item.dianping,true);const bookingRows=tripDocumentsForOwner(tripAllBookingDocuments(activeTripPresentationData()),"item",galleryItemId);if(bookingRows.length){const bookingBtn=document.createElement("button");bookingBtn.type="button";bookingBtn.className="inline-action-btn secondary";bookingBtn.textContent=`預訂文件 ${bookingRows.length}`;bookingBtn.addEventListener("click",event=>{event.stopPropagation();tripOpenBookingDocumentList(item.title||"預訂文件",bookingRows);});actions.appendChild(bookingBtn);}if(actions.childElementCount)detail.appendChild(actions);
+  addAction("Google 地圖",item.maps,false);addAction("官方網頁",item.dianping,true);const bookingRows=tripDocumentsForOwner(tripAllBookingDocuments(activeTripPresentationData()),"item",galleryItemId);if(bookingRows.length){const bookingBtn=document.createElement("button");bookingBtn.type="button";bookingBtn.className="inline-action-btn secondary";bookingBtn.textContent=`預訂文件 ${bookingRows.length}`;bookingBtn.addEventListener("click",event=>{event.stopPropagation();void tripOpenBookingDocumentsPage({ownerType:"item",ownerId:galleryItemId});});actions.appendChild(bookingBtn);}if(actions.childElementCount)detail.appendChild(actions);
   appendItineraryMediaManagementActions(detail,item,gallery,dayId,galleryItemId);
   clip.appendChild(detail);shell.appendChild(clip);itemEl.appendChild(shell);
 }
@@ -8365,7 +8393,7 @@ async function ensureTransitRoutePlanner(itemEl){
 
 
 // Phase 3E · Edit Session foundation
-let tripEditSession=null,tripEditItemTarget=null,tripEditItemPrefill=null,tripEditSaving=false,tripEditLocationSelection=null,tripEditOrderState=null,tripEditLocationSearchEpoch=0,tripEditLocationMapController=null,tripEditLocationMapEpoch=0,tripEditLocationReverseEpoch=0,tripEditTripTitleOriginalHtml="",tripEditTripTitleOriginalPlain="",tripEditTeamModalState=null,tripEditFlightModalState=null,tripEditFlightEditorId="",tripEditAccommodationModalState=null,tripEditAccommodationEditorId="",tripEditAccommodationLocationSelection=null,tripEditAccommodationLocationSearchEpoch=0,tripEditAccommodationLocationMapController=null,tripEditAccommodationLocationMapEpoch=0,tripEditAccommodationLocationReverseEpoch=0,tripEditAuthoritativeFence=null,tripEditUploadedMediaForSession=[],tripEditTravelDocumentModalState=null,tripEditOwnerDocumentState=null,tripEditUploadedDocumentsForSession=[],bookingDocumentViewerObjectUrl="",bookingDocumentViewerCurrent=null;
+let tripEditSession=null,tripEditItemTarget=null,tripEditItemPrefill=null,tripEditSaving=false,tripEditLocationSelection=null,tripEditOrderState=null,tripEditLocationSearchEpoch=0,tripEditLocationMapController=null,tripEditLocationMapEpoch=0,tripEditLocationReverseEpoch=0,tripEditTripTitleOriginalHtml="",tripEditTripTitleOriginalPlain="",tripEditTeamModalState=null,tripEditFlightModalState=null,tripEditFlightEditorId="",tripEditAccommodationModalState=null,tripEditAccommodationEditorId="",tripEditAccommodationLocationSelection=null,tripEditAccommodationLocationSearchEpoch=0,tripEditAccommodationLocationMapController=null,tripEditAccommodationLocationMapEpoch=0,tripEditAccommodationLocationReverseEpoch=0,tripEditAuthoritativeFence=null,tripEditUploadedMediaForSession=[],tripEditTravelDocumentModalState=null,tripEditOwnerDocumentState=null,tripEditUploadedDocumentsForSession=[],bookingDocumentViewerObjectUrl="",bookingDocumentViewerCurrent=null,bookingDocumentViewerEpoch=0,infoDocumentsPageOpen=false,infoNavigationTransitioning=false,infoRootScrollTop=0,infoDocumentsScrollTop=0,infoDocumentFocusKey="";
 window.__tripEditPreviewData=null;
 function tripEditPresentationSignature(data){
   if(!data)return"";
@@ -8540,27 +8568,112 @@ function tripBookingDocumentOwnerLabel(row={},dataInput=activeTripPresentationDa
   if(type==="flight"){const f=tripPresentationFlights(data?.meta||{}).find(item=>String(item?.flightId||"")===id);return f?.flightNumber||"航班";}
   if(type==="accommodation"){const stay=tripPresentationAccommodations(data?.meta||{}).find(item=>String(item?.accommodationId||"")===id);return stay?.name||"住宿";}
   if(type==="item"){for(const day of Array.isArray(data?.days)?data.days:[]){const item=(Array.isArray(day?.items)?day.items:[]).find(entry=>String(entry?.itemId||"")===id);if(item)return item.title||day.label||"行程預訂";}return "行程預訂";}
-  return "預訂文件";
+  return "旅程文件";
 }
-function tripBookingDocumentOwnerIcon(type=""){return type==="flight"?"✈️":type==="accommodation"?"🏨":"🎟️";}
-function tripCloseBookingDocumentViewer(){const viewer=document.getElementById("booking-document-viewer");if(viewer){viewer.classList.remove("is-open");viewer.setAttribute("aria-hidden","true");}if(bookingDocumentViewerObjectUrl){try{URL.revokeObjectURL(bookingDocumentViewerObjectUrl);}catch(_){}bookingDocumentViewerObjectUrl="";}bookingDocumentViewerCurrent=null;const body=document.getElementById("booking-document-viewer-body");if(body)body.innerHTML='<div class="booking-document-viewer-state">正在載入…</div>';}
+function tripBookingDocumentOwnerIcon(type=""){return type==="flight"?"✈️":type==="accommodation"?"🏨":type==="item"?"🎟️":"📄";}
+function tripBookingDocumentOwnerKey(row={}){return `${String(row?.ownerType||"other")}:${String(row?.ownerId||row?.documentId||"")}`;}
+function tripBookingDocumentOwnerContext(row={},dataInput=activeTripPresentationData()){
+  const data=dataInput||{},type=String(row?.ownerType||""),id=String(row?.ownerId||"");
+  if(type==="flight"){
+    const f=tripPresentationFlights(data?.meta||{}).find(item=>String(item?.flightId||"")===id);
+    if(!f)return "航班文件";
+    const route=[f.departureAirport,f.arrivalAirport].filter(Boolean).join(" → "),time=String(f.departureTime||"").trim();
+    return [route,time].filter(Boolean).join(" · ")||"航班文件";
+  }
+  if(type==="accommodation"){
+    const stay=tripPresentationAccommodations(data?.meta||{}).find(item=>String(item?.accommodationId||"")===id);
+    if(!stay)return "住宿文件";
+    const dates=[stay.checkInDate,stay.checkOutDate].filter(Boolean).join(" → ");
+    const city=data?.meta?.cities?.[stay.cityKey]?.label||stay.cityKey||"";return [dates,city].filter(Boolean).join(" · ")||"住宿文件";
+  }
+  if(type==="item"){
+    for(const day of Array.isArray(data?.days)?data.days:[]){const item=(Array.isArray(day?.items)?day.items:[]).find(entry=>String(entry?.itemId||"")===id);if(item)return [String(item.time||"").trim(),String(day.title||"").trim()].filter(Boolean).join(" · ")||"行程預訂";}
+  }
+  return "旅程文件";
+}
+function tripBookingDocumentDayId(row={},dataInput=activeTripPresentationData()){
+  const data=dataInput||{},days=Array.isArray(data?.days)?data.days:[],valid=new Set(days.map(day=>String(day?.dayId||""))),direct=String(row?.dayId||"").trim();
+  if(direct&&valid.has(direct))return direct;
+  const byDate=new Map(days.map(day=>[String(day?.isoDate||""),String(day?.dayId||"")]));
+  const type=String(row?.ownerType||""),id=String(row?.ownerId||"");
+  if(type==="flight"){
+    const f=tripPresentationFlights(data?.meta||{}).find(item=>String(item?.flightId||"")===id);
+    for(const date of [f?.departureDate,f?.arrivalDate]){const dayId=byDate.get(String(date||""));if(dayId)return dayId;}
+  }
+  if(type==="accommodation"){
+    const stay=tripPresentationAccommodations(data?.meta||{}).find(item=>String(item?.accommodationId||"")===id);
+    for(const date of [stay?.checkInDate,stay?.checkOutDate]){const dayId=byDate.get(String(date||""));if(dayId)return dayId;}
+  }
+  if(type==="item"){
+    for(const day of days){if((Array.isArray(day?.items)?day.items:[]).some(item=>String(item?.itemId||"")===id))return String(day?.dayId||"");}
+  }
+  return "";
+}
+function tripBookingDocumentOwnerTime(row={},dataInput=activeTripPresentationData()){
+  const data=dataInput||{},type=String(row?.ownerType||""),id=String(row?.ownerId||"");
+  if(type==="flight"){const f=tripPresentationFlights(data?.meta||{}).find(item=>String(item?.flightId||"")===id);return String(f?.departureTime||f?.arrivalTime||"99:99");}
+  if(type==="accommodation"){const stay=tripPresentationAccommodations(data?.meta||{}).find(item=>String(item?.accommodationId||"")===id);return String(stay?.checkInTime||"99:99");}
+  if(type==="item"){for(const day of Array.isArray(data?.days)?data.days:[]){const item=(Array.isArray(day?.items)?day.items:[]).find(entry=>String(entry?.itemId||"")===id);if(item)return String(item.time||"99:99");}}
+  return "99:99";
+}
+function tripBookingDocumentFileMeta(row={}){const bits=[];const file=String(row?.fileName||"").trim(),title=String(row?.title||"").trim();if(file&&file!==title)bits.push(file);if(Number(row?.byteSize))bits.push(`${Math.max(1,Math.round(Number(row.byteSize)/1024))} KB`);return bits.join(" · ")||"點選直接預覽";}
+function tripCloseBookingDocumentViewer(){
+  bookingDocumentViewerEpoch+=1;
+  const viewer=document.getElementById("booking-document-viewer");if(viewer){viewer.classList.remove("is-open");viewer.setAttribute("aria-hidden","true");}
+  document.body.classList.remove("booking-document-viewer-open");
+  if(bookingDocumentViewerObjectUrl){try{URL.revokeObjectURL(bookingDocumentViewerObjectUrl);}catch(_){}bookingDocumentViewerObjectUrl="";}
+  bookingDocumentViewerCurrent=null;const body=document.getElementById("booking-document-viewer-body");if(body)body.innerHTML='<div class="booking-document-viewer-state">正在載入…</div>';
+}
 async function tripOpenBookingDocument(rowInput={}){
   const row=rowInput||{},viewer=document.getElementById("booking-document-viewer"),body=document.getElementById("booking-document-viewer-body"),title=document.getElementById("booking-document-viewer-title");if(!viewer||!body)return;
-  tripCloseBookingDocumentViewer();bookingDocumentViewerCurrent=row;if(title)title.textContent=String(row.title||row.fileName||"預訂文件");viewer.classList.add("is-open");viewer.setAttribute("aria-hidden","false");body.innerHTML='<div class="booking-document-viewer-state">正在載入…</div>';
+  tripCloseBookingDocumentViewer();const epoch=++bookingDocumentViewerEpoch;bookingDocumentViewerCurrent=row;if(title)title.textContent=String(row.title||row.fileName||"預訂文件");viewer.classList.add("is-open");viewer.setAttribute("aria-hidden","false");document.body.classList.add("booking-document-viewer-open");body.innerHTML='<div class="booking-document-viewer-state">正在載入…</div>';
   try{
-    let url=String(row.legacyUrl||"").trim(),contentType=String(row.contentType||"").toLowerCase();
-    if(!url){const service=await tripDocumentService(),blob=await service.getTripDocumentBlob(row);contentType=String(blob.type||contentType).toLowerCase();bookingDocumentViewerObjectUrl=URL.createObjectURL(blob);url=bookingDocumentViewerObjectUrl;}
-    if(!url)throw new Error("文件網址不存在");body.innerHTML="";
-    if(contentType.includes("pdf")||/\.pdf(?:$|\?)/i.test(String(row.fileName||url))){const frame=document.createElement("iframe");frame.src=url;frame.title=String(row.title||"PDF");body.appendChild(frame);}else{const img=document.createElement("img");img.src=url;img.alt=String(row.title||"預訂圖片");body.appendChild(img);}
-  }catch(error){console.warn("Open booking document",error);body.innerHTML='<div class="booking-document-viewer-state">暫時未能載入文件。</div>';}
+    let url=String(row.legacyUrl||"").trim(),contentType=String(row.contentType||"").toLowerCase(),localObjectUrl="";
+    if(!url){const service=await tripDocumentService(),blob=await service.getTripDocumentBlob(row);contentType=String(blob.type||contentType).toLowerCase();localObjectUrl=URL.createObjectURL(blob);url=localObjectUrl;}
+    if(epoch!==bookingDocumentViewerEpoch){if(localObjectUrl)try{URL.revokeObjectURL(localObjectUrl);}catch(_){}return;}
+    if(localObjectUrl)bookingDocumentViewerObjectUrl=localObjectUrl;if(!url)throw new Error("文件網址不存在");body.innerHTML="";
+    if(contentType.includes("pdf")||/\.pdf(?:$|\?)/i.test(String(row.fileName||url))){const frame=document.createElement("iframe");frame.src=url;frame.title=String(row.title||"PDF");frame.setAttribute("loading","eager");body.appendChild(frame);}else{const img=document.createElement("img");img.src=url;img.alt=String(row.title||"預訂圖片");body.appendChild(img);}
+  }catch(error){if(epoch!==bookingDocumentViewerEpoch)return;console.warn("Open booking document",error);body.innerHTML='<div class="booking-document-viewer-state">暫時未能載入文件。</div>';}
 }
-function tripCloseBookingDocumentList(){tripEditCloseBackdrop("booking-document-list-backdrop");}
-function tripOpenBookingDocumentList(titleInput="預訂文件",rowsInput=[]){const rows=Array.isArray(rowsInput)?rowsInput:[],title=document.getElementById("booking-document-list-title"),meta=document.getElementById("booking-document-list-meta"),host=document.getElementById("booking-document-list");if(title)title.textContent=String(titleInput||"預訂文件");if(meta)meta.textContent=`${rows.length} 份文件`;if(host){host.replaceChildren();if(!rows.length){const empty=document.createElement("div");empty.className="trip-edit-document-empty";empty.textContent="未有預訂文件。";host.appendChild(empty);}rows.forEach(row=>{const button=document.createElement("button");button.type="button";button.className="booking-doc-sheet-row";const icon=document.createElement("span");icon.className="booking-doc-sheet-row-icon";icon.textContent=tripDocumentIcon(row);const copy=document.createElement("span");copy.className="booking-doc-sheet-row-copy";const strong=document.createElement("strong");strong.textContent=String(row.title||row.fileName||"預訂文件");const small=document.createElement("small");small.textContent=[String(row.fileName||""),Number(row.byteSize)?`${Math.max(1,Math.round(Number(row.byteSize)/1024))} KB`:""].filter(Boolean).join(" · ");copy.append(strong,small);const chevron=document.createElement("span");chevron.className="booking-doc-chevron";chevron.textContent="›";button.append(icon,copy,chevron);button.addEventListener("click",()=>void tripOpenBookingDocument(row));host.appendChild(button);});}tripEditOpenBackdrop("booking-document-list-backdrop");}
+function tripRenderBookingDocumentsPage(dataInput=activeTripPresentationData(),{focusKey=infoDocumentFocusKey}={}){
+  const data=dataInput||{},host=document.getElementById("booking-documents-day-list"),sub=document.getElementById("booking-documents-page-sub");if(!host)return;
+  const rows=tripAllBookingDocuments(data),days=Array.isArray(data?.days)?data.days:[],dayGroups=new Map(days.map(day=>[String(day?.dayId||""),[]])),other=[];
+  rows.forEach(row=>{const dayId=tripBookingDocumentDayId(row,data);if(dayId&&dayGroups.has(dayId))dayGroups.get(dayId).push(row);else other.push(row);});
+  host.replaceChildren();if(sub)sub.textContent=rows.length?`共 ${rows.length} 份文件 · 只顯示有預訂文件嘅日子`:"尚未有預訂文件";
+  const appendGroup=(label,dateText,dayRows,otherGroup=false)=>{
+    if(!dayRows.length)return;const card=document.createElement("section");card.className="trip-library-card booking-doc-day-card";const head=document.createElement("div");head.className="booking-doc-day-head";const copy=document.createElement("div");copy.className="booking-doc-day-copy";const strong=document.createElement("strong");strong.textContent=label;const small=document.createElement("small");small.textContent=dateText||"旅程文件";copy.append(strong,small);const badge=document.createElement("span");badge.className="booking-doc-day-badge";badge.textContent=String(dayRows.length);head.append(copy,badge);card.appendChild(head);
+    const owners=new Map();dayRows.forEach(row=>{const key=tripBookingDocumentOwnerKey(row);if(!owners.has(key))owners.set(key,[]);owners.get(key).push(row);});
+    const ownerGroups=[...owners.entries()].sort((a,b)=>tripBookingDocumentOwnerTime(a[1][0],data).localeCompare(tripBookingDocumentOwnerTime(b[1][0],data))||tripBookingDocumentOwnerLabel(a[1][0],data).localeCompare(tripBookingDocumentOwnerLabel(b[1][0],data)));
+    ownerGroups.forEach(([key,group])=>{const first=group[0]||{},owner=document.createElement("div");owner.className="booking-doc-owner";owner.dataset.bookingOwnerKey=key;if(focusKey&&key===focusKey)owner.dataset.bookingFocus="true";const ownerHead=document.createElement("div");ownerHead.className="booking-doc-owner-head";const icon=document.createElement("span");icon.className="booking-doc-owner-icon";icon.textContent=tripBookingDocumentOwnerIcon(first.ownerType);const ownerCopy=document.createElement("span");ownerCopy.className="booking-doc-owner-copy";const ownerTitle=document.createElement("strong");ownerTitle.textContent=tripBookingDocumentOwnerLabel(first,data);const ownerMeta=document.createElement("small");ownerMeta.textContent=tripBookingDocumentOwnerContext(first,data);ownerCopy.append(ownerTitle,ownerMeta);ownerHead.append(icon,ownerCopy);owner.appendChild(ownerHead);const fileList=document.createElement("div");fileList.className="booking-doc-file-list";[...group].sort((a,b)=>(Number(a?.sortOrder)||0)-(Number(b?.sortOrder)||0)).forEach(row=>{const button=document.createElement("button");button.type="button";button.className="booking-doc-file-row";const fileCopy=document.createElement("span");fileCopy.className="booking-doc-file-copy";const fileTitle=document.createElement("strong");fileTitle.textContent=String(row.title||row.fileName||"預訂文件");const fileMeta=document.createElement("small");fileMeta.textContent=tripBookingDocumentFileMeta(row);fileCopy.append(fileTitle,fileMeta);const chevron=document.createElement("span");chevron.className="booking-doc-file-chevron";chevron.textContent="›";button.append(fileCopy,chevron);button.addEventListener("click",()=>void tripOpenBookingDocument(row));fileList.appendChild(button);});owner.appendChild(fileList);card.appendChild(owner);});host.appendChild(card);
+  };
+  days.forEach((day,index)=>{const rowsForDay=dayGroups.get(String(day?.dayId||""))||[];if(rowsForDay.length)appendGroup(String(day?.label||`Day ${index+1}`),[String(day?.date||day?.isoDate||"").trim(),String(day?.title||"").trim()].filter(Boolean).join(" · "),rowsForDay);});
+  if(other.length)appendGroup("其他旅程文件","未指定行程日子",other,true);
+  if(!rows.length){const empty=document.createElement("section");empty.className="trip-library-card booking-doc-empty";empty.textContent="未有預訂文件。你可以喺 Edit Mode 嘅航班、住宿或行程項目加入 PDF 或預訂圖片。";host.appendChild(empty);}
+}
+async function tripAnimateInfoPage(fromPage,toPage,{back=false}={}){
+  if(!fromPage||!toPage||infoNavigationTransitioning)return;infoNavigationTransitioning=true;document.body.classList.add("info-navigation-active");toPage.hidden=false;
+  const reduced=window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;if(reduced){fromPage.hidden=true;infoNavigationTransitioning=false;document.body.classList.remove("info-navigation-active");return;}
+  const fromFrames=back?[{transform:"translate3d(0,0,0)",opacity:1},{transform:"translate3d(76%,0,0)",opacity:.45}]:[{transform:"translate3d(0,0,0)",opacity:1},{transform:"translate3d(-24%,0,0)",opacity:.58}];
+  const toFrames=back?[{transform:"translate3d(-24%,0,0)",opacity:.58},{transform:"translate3d(0,0,0)",opacity:1}]:[{transform:"translate3d(76%,0,0)",opacity:.72},{transform:"translate3d(0,0,0)",opacity:1}];
+  const host=document.getElementById("info-nav-host"),fromHeight=fromPage.getBoundingClientRect().height,toHeight=toPage.getBoundingClientRect().height;if(host)host.style.minHeight=`${Math.max(fromHeight,toHeight)}px`;fromPage.style.position="absolute";fromPage.style.inset="0 0 auto 0";fromPage.style.zIndex="1";toPage.style.position="relative";toPage.style.zIndex="2";
+  try{const opts={duration:330,easing:"cubic-bezier(.32,.72,0,1)",fill:"both"};await Promise.allSettled([fromPage.animate(fromFrames,opts).finished,toPage.animate(toFrames,opts).finished]);}catch(_){}
+  fromPage.hidden=true;for(const page of [fromPage,toPage]){page.style.position="";page.style.inset="";page.style.zIndex="";page.style.transform="";page.style.opacity="";}if(host)host.style.minHeight="";infoNavigationTransitioning=false;document.body.classList.remove("info-navigation-active");
+}
+async function tripOpenBookingDocumentsPage({ownerType="",ownerId=""}={}){
+  infoDocumentFocusKey=ownerType&&ownerId?`${String(ownerType)}:${String(ownerId)}`:"";
+  if(currentAppView!=="info"){setView("info",{restoreScroll:false});await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));}
+  tripRenderBookingDocumentsPage(activeTripPresentationData(),{focusKey:infoDocumentFocusKey});
+  const root=document.getElementById("info-page-root"),page=document.getElementById("info-page-booking-documents");if(!root||!page)return;if(infoDocumentsPageOpen){requestAnimationFrame(()=>{const target=infoDocumentFocusKey?page.querySelector(`[data-booking-owner-key="${CSS.escape(infoDocumentFocusKey)}"]`):null;target?.scrollIntoView({behavior:"smooth",block:"center"});});return;}
+  infoRootScrollTop=scrollShell?.scrollTop||0;infoDocumentsPageOpen=true;await tripAnimateInfoPage(root,page,{back:false});if(scrollShell)scrollShell.scrollTo({top:0,behavior:"auto"});requestAnimationFrame(()=>{const target=infoDocumentFocusKey?page.querySelector(`[data-booking-owner-key="${CSS.escape(infoDocumentFocusKey)}"]`):null;target?.scrollIntoView({behavior:"smooth",block:"center"});});
+}
+async function tripCloseBookingDocumentsPage(){
+  if(!infoDocumentsPageOpen||infoNavigationTransitioning)return;const root=document.getElementById("info-page-root"),page=document.getElementById("info-page-booking-documents");if(!root||!page)return;infoDocumentsScrollTop=scrollShell?.scrollTop||0;root.hidden=false;await tripAnimateInfoPage(page,root,{back:true});infoDocumentsPageOpen=false;infoDocumentFocusKey="";if(scrollShell)scrollShell.scrollTo({top:infoRootScrollTop||0,behavior:"auto"});
+}
 function renderBookingDocumentsCard(dataInput=activeTripPresentationData()){
-  const card=document.getElementById("booking-documents-card"),count=document.getElementById("booking-documents-count"),host=document.getElementById("booking-documents-groups");if(!card||!host)return;const rows=tripAllBookingDocuments(dataInput),groups=new Map();rows.forEach(row=>{const key=`${row.ownerType}:${row.ownerId}`;if(!groups.has(key))groups.set(key,[]);groups.get(key).push(row);});host.replaceChildren();if(count)count.textContent=String(rows.length);card.hidden=!rows.length;if(!rows.length)return;[...groups.values()].forEach(group=>{const first=group[0]||{},button=document.createElement("button");button.type="button";button.className="booking-doc-group-btn";const icon=document.createElement("span");icon.className="booking-doc-group-icon";icon.textContent=tripBookingDocumentOwnerIcon(first.ownerType);const copy=document.createElement("span");copy.className="booking-doc-group-copy";const strong=document.createElement("strong");strong.textContent=tripBookingDocumentOwnerLabel(first,dataInput);const small=document.createElement("small");small.textContent=`${group.length} 份文件`;copy.append(strong,small);const chevron=document.createElement("span");chevron.className="booking-doc-chevron";chevron.textContent="›";button.append(icon,copy,chevron);button.addEventListener("click",()=>tripOpenBookingDocumentList(strong.textContent,group));host.appendChild(button);});
+  const card=document.getElementById("booking-documents-card"),count=document.getElementById("booking-documents-count"),summary=document.getElementById("booking-documents-summary");if(!card)return;const rows=tripAllBookingDocuments(dataInput);card.hidden=false;if(count)count.textContent=String(rows.length);if(summary)summary.textContent=rows.length?`${rows.length} 份文件 · 按 Day 整理`:"尚未有預訂文件";if(infoDocumentsPageOpen)tripRenderBookingDocumentsPage(dataInput,{focusKey:infoDocumentFocusKey});
 }
 function appendInfoBookingDocumentButton(container,ownerType,ownerId,dataInput=activeTripPresentationData()){
-  const rows=tripDocumentsForOwner(tripAllBookingDocuments(dataInput),ownerType,ownerId);if(!rows.length)return;const button=document.createElement("button");button.type="button";button.className="info-copy-btn";button.textContent=`📄 預訂文件 ${rows.length}`;button.addEventListener("click",()=>tripOpenBookingDocumentList(tripBookingDocumentOwnerLabel(rows[0],dataInput),rows));container.appendChild(button);
+  const rows=tripDocumentsForOwner(tripAllBookingDocuments(dataInput),ownerType,ownerId);if(!rows.length)return;const button=document.createElement("button");button.type="button";button.className="info-copy-btn";button.textContent=`📄 預訂文件 ${rows.length}`;button.addEventListener("click",()=>void tripOpenBookingDocumentsPage({ownerType,ownerId}));container.appendChild(button);
 }
 function tripEditMergeOwnerDocumentRows(baseRows=[],ownerType="",ownerId="",ownerRows=[]){return [...(Array.isArray(baseRows)?baseRows:[]).filter(row=>!(String(row?.ownerType||"")===String(ownerType)&&String(row?.ownerId||"")===String(ownerId))),...(Array.isArray(ownerRows)?ownerRows:[])];}
 function tripEditBeginDocumentOwner({ownerType="",ownerId="",dayId="",rows=[],hostId=""}={}){const ownerRows=tripDocumentsForOwner(rows,ownerType,ownerId).map(row=>tripEditClonePlain(row));tripEditOwnerDocumentState={ownerType:String(ownerType),ownerId:String(ownerId),dayId:String(dayId||""),hostId:String(hostId||""),rows:ownerRows,snapshot:ownerRows.map(row=>tripEditClonePlain(row)),createdIds:new Set()};tripEditRenderOwnerDocuments();}
