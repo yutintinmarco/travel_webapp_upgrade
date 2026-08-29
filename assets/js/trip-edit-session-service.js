@@ -8,6 +8,7 @@ import {
 
 const USER_EDITABLE_ITEM_FIELDS = ["time", "title", "note", "who", "icon", "detail"];
 const PERSISTED_ITEM_FIELDS = ["time", "title", "note", "who", "icon", "detail", "booked", "sortOrder"];
+const TRAVEL_SOURCE_LINK_TYPES = new Set(["flight", "accommodation-checkin", "accommodation-checkout"]);
 const VALID_ITEM_KINDS = new Set(["stop", "transit"]);
 const VALID_ROLES = new Set(["owner", "admin"]);
 const PERSISTED_DAY_FIELDS = ["label", "date", "isoDate", "title", "subtitle", "city", "cities", "sortOrder"];
@@ -262,6 +263,7 @@ function normalizeFlightRecord(input = {}, fallback = {}, context = {}) {
     bookingReference: clean(source.bookingReference ?? source.pnr ?? base.bookingReference ?? base.pnr),
     note: clean(source.note ?? base.note),
     airlineLogo: clean(source.airlineLogo ?? base.airlineLogo),
+    itineraryEnabled: Boolean(source.itineraryEnabled ?? base.itineraryEnabled),
     sortOrder: normalizedSortOrder(source.sortOrder, normalizedSortOrder(base.sortOrder))
   };
   delete record.flight; delete record.date; delete record.route; delete record.time; delete record.from; delete record.to; delete record.pnr; delete record.outbound; delete record.inbound;
@@ -316,6 +318,8 @@ function normalizeAccommodationRecord(input = {}, fallback = {}) {
     checkInDate: clean(source.checkInDate ?? base.checkInDate), checkInTime: clean(source.checkInTime ?? base.checkInTime),
     checkOutDate: clean(source.checkOutDate ?? base.checkOutDate), checkOutTime: clean(source.checkOutTime ?? base.checkOutTime),
     address, mapsUrl, bookingReference: clean(source.bookingReference ?? base.bookingReference), note: clean(source.note ?? base.note),
+    itineraryCheckInEnabled: Boolean(source.itineraryCheckInEnabled ?? base.itineraryCheckInEnabled),
+    itineraryCheckOutEnabled: Boolean(source.itineraryCheckOutEnabled ?? base.itineraryCheckOutEnabled),
     location, sortOrder: normalizedSortOrder(source.sortOrder, normalizedSortOrder(base.sortOrder))
   };
 }
@@ -487,6 +491,19 @@ function sameLocation(a = {}, b = {}) {
     && clean(left.address) === clean(right.address)
     && clean(left.mapsUrl) === clean(right.mapsUrl);
 }
+function normalizeSourceLink(value = {}) {
+  const source = value && typeof value === "object" && !Array.isArray(value) ? value : {};
+  const type = clean(source.type);
+  const sourceId = clean(source.sourceId);
+  if (!TRAVEL_SOURCE_LINK_TYPES.has(type) || !sourceId) return null;
+  return {
+    type,
+    sourceId,
+    sync: source.sync !== false,
+    generatedSignature: clean(source.generatedSignature)
+  };
+}
+function sameSourceLink(a = {}, b = {}) { return stableJson(normalizeSourceLink(a) || null) === stableJson(normalizeSourceLink(b) || null); }
 function newDraftRecord(dayId, kindInput, fields = {}) {
   const kind = normalizedKind(kindInput);
   const title = clean(fields.title) || (kind === "transit" ? "Travel" : "新地點");
@@ -510,6 +527,7 @@ function newDraftRecord(dayId, kindInput, fields = {}) {
     gallery: Array.isArray(fields.gallery) ? clonePlain(fields.gallery) : [],
     images: Array.isArray(fields.images) ? clonePlain(fields.images) : [],
     plannedTransit: fields.plannedTransit && typeof fields.plannedTransit === "object" ? clonePlain(fields.plannedTransit) : null,
+    sourceLink: normalizeSourceLink(fields.sourceLink || {}),
     location: normalizeDraftLocation(fields.location || {}, title)
   };
 }
@@ -532,6 +550,7 @@ function draftToNewItem(draft = {}) {
     gallery: Array.isArray(draft.gallery) ? clonePlain(draft.gallery) : [],
     images: Array.isArray(draft.images) ? clonePlain(draft.images) : [],
     ...(draft.plannedTransit && typeof draft.plannedTransit === "object" ? { plannedTransit: clonePlain(draft.plannedTransit) } : {}),
+    ...(normalizeSourceLink(draft.sourceLink || {}) ? { sourceLink: normalizeSourceLink(draft.sourceLink || {}) } : {}),
     location: normalizeDraftLocation(draft.location || {}, title),
     sortOrder: normalizedSortOrder(draft.sortOrder)
   };
@@ -554,6 +573,7 @@ function itemSnapshot(item = {}, fallbackSortOrder = 999999) {
     gallery: Array.isArray(item?.gallery) ? clonePlain(item.gallery) : [],
     images: Array.isArray(item?.images) ? clonePlain(item.images) : [],
     plannedTransit: item?.plannedTransit && typeof item.plannedTransit === "object" ? clonePlain(item.plannedTransit) : null,
+    sourceLink: normalizeSourceLink(item?.sourceLink || {}),
     location,
     maps: clean(location.mapsUrl)
   };
@@ -739,6 +759,7 @@ export function replaceTripEditDraftFlights(session, flights = []) {
     if (row.arrivalDate && !validIsoDate(row.arrivalDate)) { const error = new Error("Invalid flight arrival date"); error.code = "edit-flight-date-invalid"; throw error; }
   });
   session.draftFlights = next;
+  syncTravelItineraryDraft(session);
   return clonePlain(next);
 }
 
@@ -755,7 +776,142 @@ export function replaceTripEditDraftAccommodations(session, accommodations = [])
     if (row.checkInDate && row.checkOutDate && row.checkOutDate < row.checkInDate) { const error = new Error("Accommodation check-out is before check-in"); error.code = "edit-accommodation-date-order"; throw error; }
   });
   session.draftAccommodations = next;
+  syncTravelItineraryDraft(session);
   return clonePlain(next);
+}
+
+function itineraryDayIdForIso(session, isoInput = "") {
+  const iso = clean(isoInput);
+  if (!validIsoDate(iso)) return "";
+  for (const day of session?.draftDays?.values?.() || []) if (clean(day?.isoDate) === iso) return clean(day?.dayId);
+  return "";
+}
+function airportLocation(nameInput = "") {
+  const name = clean(nameInput);
+  return normalizeDraftLocation({ name, mapsUrl: name ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(name)}` : "" }, name);
+}
+function travelGeneratedSpecFromFlight(row = {}) {
+  const role = clean(row.journeyRole) || "internal";
+  const isEntry = role === "entry";
+  const dayIso = isEntry ? (clean(row.arrivalDate) || clean(row.departureDate)) : clean(row.departureDate);
+  const time = isEntry ? (clean(row.arrivalTime) || clean(row.departureTime)) : clean(row.departureTime);
+  const flightNumber = clean(row.flightNumber).toUpperCase();
+  const from = clean(row.departureAirport), to = clean(row.arrivalAirport);
+  const title = isEntry
+    ? [flightNumber, to ? `抵達 ${to}` : "抵達目的地"].filter(Boolean).join(" · ")
+    : role === "exit"
+      ? [flightNumber, to ? `前往 ${to}` : "回程航班"].filter(Boolean).join(" · ")
+      : [flightNumber, [from, to].filter(Boolean).join(" → ")].filter(Boolean).join(" · ");
+  const timeRange = [clean(row.departureTime), clean(row.arrivalTime)].filter(Boolean).join(" → ");
+  const route = [from, to].filter(Boolean).join(" → ");
+  const note = [route, timeRange].filter(Boolean).join(" · ");
+  const targetAirport = isEntry ? to : from;
+  const fields = {
+    time,
+    title: title || flightNumber || "航班",
+    note,
+    detail: clean(row.note),
+    icon: "✈️",
+    who: clean(row.teamKey) || "all",
+    booked: Boolean(clean(row.bookingReference)),
+    location: airportLocation(targetAirport)
+  };
+  return { type: "flight", sourceId: clean(row.flightId), enabled: Boolean(row.itineraryEnabled), dayIso, fields };
+}
+function travelGeneratedSpecFromAccommodation(row = {}, event = "checkin") {
+  const isCheckIn = event === "checkin";
+  const dayIso = clean(isCheckIn ? row.checkInDate : row.checkOutDate);
+  const time = clean(isCheckIn ? row.checkInTime : row.checkOutTime);
+  const type = isCheckIn ? "accommodation-checkin" : "accommodation-checkout";
+  const enabled = Boolean(isCheckIn ? row.itineraryCheckInEnabled : row.itineraryCheckOutEnabled);
+  const name = clean(row.name) || "住宿";
+  const fields = {
+    time,
+    title: `${isCheckIn ? "入住" : "退房"} ${name}`,
+    note: clean(row.bookingReference) ? `Booking Ref: ${clean(row.bookingReference)}` : "",
+    detail: clean(row.note),
+    icon: "🏨",
+    who: clean(row.teamKey) || "all",
+    booked: Boolean(clean(row.bookingReference)),
+    location: normalizeDraftLocation(row.location || { name, address: row.address, mapsUrl: row.mapsUrl }, name)
+  };
+  return { type, sourceId: clean(row.accommodationId), enabled, dayIso, fields };
+}
+function travelSpecSignature(spec = {}) {
+  return stableJson({ dayIso: clean(spec.dayIso), fields: { ...clonePlain(spec.fields || {}), location: normalizeDraftLocation(spec.fields?.location || {}, spec.fields?.title || "") } });
+}
+function linkedDraftRows(session, type, sourceId) {
+  const rows = [];
+  session?.draftItems?.forEach?.((draft, key) => {
+    if (session?.deletedItems?.has?.(key)) return;
+    const link = normalizeSourceLink(draft?.sourceLink || {});
+    if (link?.type === type && link?.sourceId === sourceId) rows.push(draft);
+  });
+  return rows;
+}
+function removeLinkedDraftRows(session, rows = []) {
+  rows.slice().forEach(draft => removeTripEditDraftItem(session, draft.dayId, draft.itemId));
+}
+function applyTravelSpecToLinkedDraft(session, spec = {}) {
+  const sourceId = clean(spec.sourceId), type = clean(spec.type);
+  if (!sourceId || !TRAVEL_SOURCE_LINK_TYPES.has(type)) return { status: "ignored" };
+  const linked = linkedDraftRows(session, type, sourceId);
+  if (!spec.enabled) { removeLinkedDraftRows(session, linked); return { status: linked.length ? "removed" : "disabled" }; }
+  const dayId = itineraryDayIdForIso(session, spec.dayIso);
+  if (!dayId) return { status: "skipped", reason: "date-outside-trip" };
+  const signature = travelSpecSignature(spec);
+  let draft = linked[0] || null;
+  if (linked.length > 1) removeLinkedDraftRows(session, linked.slice(1));
+  if (!draft) {
+    const created = addTripEditDraftItem(session, dayId, "stop", { ...(spec.fields || {}), sourceLink: { type, sourceId, sync: true, generatedSignature: signature } });
+    return { status: "created", item: created };
+  }
+  const link = normalizeSourceLink(draft.sourceLink || {});
+  if (link?.sync === false) return { status: "detached", item: clonePlain(draft) };
+  if (clean(draft.dayId) !== dayId) draft = moveTripEditDraftItemToDay(session, draft.dayId, draft.itemId, dayId, { preserveSourceSync: true }) || draft;
+  const key = itemKey(dayId, draft.itemId), current = session.draftItems.get(key);
+  if (!current) return { status: "missing" };
+  const next = {
+    ...current,
+    ...clonePlain(spec.fields || {}),
+    location: normalizeDraftLocation(spec.fields?.location || {}, spec.fields?.title || current.title),
+    maps: clean(spec.fields?.location?.mapsUrl),
+    sourceLink: { type, sourceId, sync: true, generatedSignature: signature }
+  };
+  session.draftItems.set(key, next);
+  normalizeDaySortOrders(session, dayId);
+  return { status: "updated", item: clonePlain(next) };
+}
+export function syncTravelItineraryDraft(session) {
+  if (!session) return { created: 0, updated: 0, removed: 0, detached: 0, skipped: [] };
+  const specs = [];
+  (session.draftFlights || []).forEach(row => specs.push(travelGeneratedSpecFromFlight(row)));
+  (session.draftAccommodations || []).forEach(row => {
+    specs.push(travelGeneratedSpecFromAccommodation(row, "checkin"));
+    specs.push(travelGeneratedSpecFromAccommodation(row, "checkout"));
+  });
+  const desiredKeys = new Set(specs.map(spec => `${spec.type}:${spec.sourceId}`));
+  const orphanGroups = new Map();
+  session.draftItems?.forEach?.((draft, key) => {
+    if (session.deletedItems?.has?.(key)) return;
+    const link = normalizeSourceLink(draft?.sourceLink || {});
+    if (!link || desiredKeys.has(`${link.type}:${link.sourceId}`)) return;
+    const groupKey = `${link.type}:${link.sourceId}`;
+    if (!orphanGroups.has(groupKey)) orphanGroups.set(groupKey, []);
+    orphanGroups.get(groupKey).push(draft);
+  });
+  let created = 0, updated = 0, removed = 0, detached = 0;
+  const skipped = [];
+  orphanGroups.forEach(rows => { removed += rows.length; removeLinkedDraftRows(session, rows); });
+  specs.forEach(spec => {
+    const result = applyTravelSpecToLinkedDraft(session, spec);
+    if (result.status === "created") created += 1;
+    else if (result.status === "updated") updated += 1;
+    else if (result.status === "removed") removed += 1;
+    else if (result.status === "detached") detached += 1;
+    else if (result.status === "skipped") skipped.push({ type: spec.type, sourceId: spec.sourceId, reason: result.reason, dayIso: spec.dayIso });
+  });
+  return { created, updated, removed, detached, skipped };
 }
 
 export function replaceTripEditDraftTeamState(session, { travellers = {}, flights = [] } = {}) {
@@ -789,6 +945,7 @@ export function replaceTripEditDraftTeamState(session, { travellers = {}, flight
     if (who === "all" || nextTravellers[who]) return;
     session.draftItems.set(key, { ...draft, who: "all" });
   });
+  syncTravelItineraryDraft(session);
   return getTripEditDraftTeamState(session);
 }
 
@@ -909,6 +1066,14 @@ export function updateTripEditDraftItem(session, dayIdInput, itemIdInput, patchI
   if (Object.prototype.hasOwnProperty.call(patchInput || {}, "gallery")) next.gallery = Array.isArray(patchInput.gallery) ? clonePlain(patchInput.gallery) : [];
   if (Object.prototype.hasOwnProperty.call(patchInput || {}, "images")) next.images = Array.isArray(patchInput.images) ? clonePlain(patchInput.images) : [];
   if (Object.prototype.hasOwnProperty.call(patchInput || {}, "plannedTransit")) next.plannedTransit = patchInput.plannedTransit && typeof patchInput.plannedTransit === "object" ? clonePlain(patchInput.plannedTransit) : null;
+  if (Object.prototype.hasOwnProperty.call(patchInput || {}, "sourceLink")) next.sourceLink = normalizeSourceLink(patchInput.sourceLink || {});
+  const userTouchedLinkedItem = Boolean(normalizeSourceLink(current.sourceLink || {})) && ["time","title","note","who","icon","detail","booked","location"].some(field => {
+    if (!Object.prototype.hasOwnProperty.call(patchInput || {}, field)) return false;
+    if (field === "location") return !sameLocation(current.location, patchInput.location);
+    if (field === "booked") return Boolean(current.booked) !== Boolean(patchInput.booked);
+    return clean(current[field]) !== clean(patchInput[field]);
+  });
+  if (userTouchedLinkedItem && !Object.prototype.hasOwnProperty.call(patchInput || {}, "sourceLink")) next.sourceLink = { ...normalizeSourceLink(current.sourceLink || {}), sync: false };
   if (Object.prototype.hasOwnProperty.call(patchInput || {}, "location")) {
     next.location = normalizeDraftLocation(patchInput.location || {}, next.title);
     next.maps = clean(next.location?.mapsUrl);
@@ -965,7 +1130,7 @@ export function moveTripEditDraftItemToIndex(session, dayIdInput, itemIdInput, t
   return getTripEditDraftItem(session, dayId, itemId);
 }
 
-export function moveTripEditDraftItemToDay(session, dayIdInput, itemIdInput, targetDayIdInput) {
+export function moveTripEditDraftItemToDay(session, dayIdInput, itemIdInput, targetDayIdInput, { preserveSourceSync = false } = {}) {
   if (!session) return null;
   const dayId = clean(dayIdInput), itemId = clean(itemIdInput), targetDayId = clean(targetDayIdInput);
   if (!targetDayId || !session.dayIds?.has?.(targetDayId)) {
@@ -984,7 +1149,8 @@ export function moveTripEditDraftItemToDay(session, dayIdInput, itemIdInput, tar
   const originDayId = clean(current.originDayId || current.dayId);
   session.draftItems.delete(currentKey);
   const maxSort = dayDraftRows(session, targetDayId).reduce((max, row) => Math.max(max, normalizedSortOrder(row?.sortOrder, -1)), -1);
-  const moved = { ...current, dayId: targetDayId, originDayId, sortOrder: maxSort + 1 };
+  const currentLink = normalizeSourceLink(current.sourceLink || {});
+  const moved = { ...current, dayId: targetDayId, originDayId, sortOrder: maxSort + 1, ...(currentLink && !preserveSourceSync ? { sourceLink: { ...currentLink, sync: false } } : {}) };
   session.draftItems.set(itemKey(targetDayId, itemId), moved);
   renumberPresentationSortOrders(session, dayId);
   normalizeDaySortOrders(session, targetDayId);
@@ -1036,6 +1202,7 @@ export function tripEditChanges(session) {
     if (stableJson(base.gallery || []) !== stableJson(draft.gallery || [])) patch.gallery = clonePlain(Array.isArray(draft.gallery) ? draft.gallery : []);
     if (stableJson(base.images || []) !== stableJson(draft.images || [])) patch.images = clonePlain(Array.isArray(draft.images) ? draft.images : []);
     if (stableJson(base.plannedTransit || null) !== stableJson(draft.plannedTransit || null)) patch.plannedTransit = draft.plannedTransit && typeof draft.plannedTransit === "object" ? clonePlain(draft.plannedTransit) : null;
+    if (!sameSourceLink(base.sourceLink, draft.sourceLink)) patch.sourceLink = normalizeSourceLink(draft.sourceLink || {});
     if (!sameLocation(base.location, draft.location)) {
       patch.location = normalizeDraftLocation(draft.location || {}, draft.title);
       patch.maps = clean(patch.location.mapsUrl);
@@ -1211,6 +1378,7 @@ export function applyTripEditDraftToTrip(session, tripInput, { revision = null }
         gallery: clonePlain(Array.isArray(draft.gallery) ? draft.gallery : []),
         images: clonePlain(Array.isArray(draft.images) ? draft.images : []),
         plannedTransit: draft.plannedTransit && typeof draft.plannedTransit === "object" ? clonePlain(draft.plannedTransit) : null,
+        ...(normalizeSourceLink(draft.sourceLink || {}) ? { sourceLink: normalizeSourceLink(draft.sourceLink || {}) } : { sourceLink: null }),
         location: normalizeDraftLocation(draft.location || {}, draft.title), maps: clean(draft.maps)
       });
     });
@@ -1231,6 +1399,7 @@ export function applyTripEditDraftToTrip(session, tripInput, { revision = null }
         gallery: clonePlain(Array.isArray(draft.gallery) ? draft.gallery : []),
         images: clonePlain(Array.isArray(draft.images) ? draft.images : []),
         plannedTransit: draft.plannedTransit && typeof draft.plannedTransit === "object" ? clonePlain(draft.plannedTransit) : null,
+        ...(normalizeSourceLink(draft.sourceLink || {}) ? { sourceLink: normalizeSourceLink(draft.sourceLink || {}) } : { sourceLink: null }),
         location: normalizeDraftLocation(draft.location || {}, draft.title), maps: clean(draft.maps)
       });
     });
@@ -1367,6 +1536,7 @@ export async function commitTripEditSession(session, { user: userInput = null } 
               gallery: clonePlain(Array.isArray(draft?.gallery) ? draft.gallery : []),
               images: clonePlain(Array.isArray(draft?.images) ? draft.images : []),
               plannedTransit: draft?.plannedTransit && typeof draft.plannedTransit === "object" ? clonePlain(draft.plannedTransit) : null,
+              ...(normalizeSourceLink(draft?.sourceLink || {}) ? { sourceLink: normalizeSourceLink(draft.sourceLink || {}) } : { sourceLink: null }),
               location: normalizeDraftLocation(draft?.location || {}, draft?.title), maps: clean(draft?.maps),
               ...change.patch
             }

@@ -1,5 +1,5 @@
 /*
- * v7.9.18.1 · Shared Airline Logo Registry + searchable directory
+ * v7.9.18.2 · Shared Airline Logo Registry + flicker-safe warm cache
  *
  * Airline logos are shared app assets rather than Trip media. Upload a logo to
  * Firebase Storage at app-assets/airlines/{IATA}.png (for example CX.png).
@@ -11,6 +11,7 @@ import { getBlob, getStorage, ref } from "https://www.gstatic.com/firebasejs/11.
 
 const storage = getStorage(firebaseApp);
 const promiseCache = new Map();
+const resolvedCache = new Map();
 const objectUrls = new Set();
 const EXTENSIONS = ["png", "webp", "jpg", "jpeg", "svg"];
 
@@ -80,19 +81,28 @@ async function fetchLogoObjectUrl(code) {
   return "";
 }
 
-export async function resolveAirlineLogo({ airlineCode = "", flightNumber = "", fallbackUrl = "" } = {}) {
+export function immediateAirlineLogo({ airlineCode = "", flightNumber = "", fallbackUrl = "" } = {}) {
   const code = normalizeAirlineCode(airlineCode, flightNumber);
-  if (!code) return clean(fallbackUrl);
-  if (!promiseCache.has(code)) promiseCache.set(code, fetchLogoObjectUrl(code).catch(() => ""));
-  const firebaseUrl = await promiseCache.get(code);
-  if (firebaseUrl) return firebaseUrl;
+  if (code && resolvedCache.has(code)) return resolvedCache.get(code) || "";
   if (clean(fallbackUrl)) return clean(fallbackUrl);
   if (code === "CX") return "assets/icon/cx_logo.png";
   return "";
+}
+
+export async function resolveAirlineLogo({ airlineCode = "", flightNumber = "", fallbackUrl = "" } = {}) {
+  const code = normalizeAirlineCode(airlineCode, flightNumber);
+  if (!code) return clean(fallbackUrl);
+  if (resolvedCache.has(code)) return resolvedCache.get(code) || immediateAirlineLogo({ airlineCode: code, fallbackUrl });
+  if (!promiseCache.has(code)) promiseCache.set(code, fetchLogoObjectUrl(code).catch(() => ""));
+  const firebaseUrl = await promiseCache.get(code);
+  const resolved = firebaseUrl || clean(fallbackUrl) || (code === "CX" ? "assets/icon/cx_logo.png" : "");
+  resolvedCache.set(code, resolved);
+  return resolved;
 }
 
 export function clearAirlineLogoSessionCache() {
   objectUrls.forEach(url => { try { URL.revokeObjectURL(url); } catch (_) {} });
   objectUrls.clear();
   promiseCache.clear();
+  resolvedCache.clear();
 }
