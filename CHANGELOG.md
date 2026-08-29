@@ -1,3 +1,14 @@
+## v7.9.18.2 — Travel Details consistency + soft itinerary automation
+
+- Added fixed native-style headers and live subtitles to **旅程基本資料** and **Team 管理**, completing the same header grammar already used by Item, Flight and Accommodation editors.
+- Eliminated the visible `CX → logo` regression during Overview rerenders: resolved airline artwork is reused from an in-memory visual cache, and Cathay can paint the existing local logo immediately while Firebase Registry resolution continues in the background.
+- Added optional **soft-link itinerary automation** to Flight and Accommodation editors. A checked Flight can create/update one itinerary item; Accommodation can independently add Check-in and Check-out items.
+- Existing migrated Flight/Accommodation records stay opt-out by default to avoid duplicating an established itinerary; newly created records default to Flight/Check-in automation enabled and Accommodation Check-out disabled.
+- Auto-created itinerary items remain normal editable itinerary items. Manual edits detach the item from future master-data overwrites, while the master checkbox can still be cleared later to remove the source-generated itinerary item.
+- Flight entry items use arrival day/time; exit/internal flights use departure day/time. Accommodation items use their Check-in/Check-out day/time and inherit the stored Google Maps location.
+- Added small `✓ 已加入行程` context in Flight/Accommodation manager rows when automation is enabled.
+- No changes to Flight/Accommodation master schema semantics, Transit providers, Saved Places, media lifecycle, Team deletion rules, Firebase Functions/Rules, or legacy cleanup.
+
 ## v7.9.18.1 — Travel Details Editor UI correction
 
 - Reused the proven iOS-safe date/time picker shell for Flight and Accommodation editors, eliminating Safari intrinsic-width overflow without changing the underlying stored date/time values.
