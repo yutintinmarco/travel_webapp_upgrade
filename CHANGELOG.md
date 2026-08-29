@@ -1,3 +1,24 @@
+## v7.9.18.4 — Travel Details Native Controls Polish
+
+### iOS switch regression fix
+
+- Removed the stale v7.9.18.2 checkbox CSS override that was overriding the newer native-style switch component.
+- Flight / accommodation itinerary automation controls now use one definitive 42×24 iOS-style switch layout with the control fixed at the trailing edge of the row.
+
+### Clear editable field surfaces
+
+- Text-entry rows in Flight / Accommodation editors now use a subtle rounded input surface so editable text is visually distinct from read-only or selection rows.
+- Focus state uses a restrained iOS-blue ring without changing the existing save/data bindings.
+
+### Team colour identity
+
+- Flight and accommodation Team selectors now render as compact pill controls using each Team's actual configured colour.
+- Manager cards now use the same Team colour on their Team chips, including custom Team colours; `所有人` remains neutral.
+
+### Scope
+
+- Presentation-only correction. No changes to Flight / Accommodation master schema, map sync, itinerary automation semantics, Transit, Saved Places, media, Firebase rules or Functions.
+
 ## v7.9.18.3 — Travel Details UI Harmony
 
 ### Travel Details manager clarity

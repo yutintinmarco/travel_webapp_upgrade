@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
   <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
   <link rel="dns-prefetch" href="https://api.open-meteo.com">
-  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?release=7.9.18.3">
+  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?release=7.9.18.4">
   <title id="page-title">行程</title>
   <script>
   // v7.7.5.0 · Performance Lite. Memory only: no Firebase reads/writes, no
@@ -3903,7 +3903,7 @@ body.expenses-view-active #app-version-note{
 #snacks-view::after,
 #info-view::after,
 #profile-view::after{
-  content:"v7.9.18.3" !important;
+  content:"v7.9.18.4" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3924,7 +3924,7 @@ body.expenses-view-active #app-version-note{
   display:none !important;
 }
 body.expenses-view-active .expenses-module .expenses-app::after{
-  content:"v7.9.18.3" !important;
+  content:"v7.9.18.4" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -4416,22 +4416,24 @@ html.theme-dark .trip-edit-icon-option,html:not(.theme-light):not(.theme-dark) .
 .trip-edit-airline-option strong{font-size:12px;font-weight:800;color:#1478d4;}
 .trip-edit-airline-option span{font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .trip-edit-airline-hint{font-size:9.5px;line-height:1.35;color:var(--label-secondary);margin-top:4px;}
-/* v7.9.18.3 · Travel Details UI Harmony */
+/* v7.9.18.4 · Travel Details Native Controls Polish */
 .trip-edit-native-group{border:1px solid rgba(118,118,128,.12);border-radius:17px;background:rgba(255,255,255,.72);overflow:hidden;display:grid;}
 .trip-edit-native-row{min-height:52px;display:grid;grid-template-columns:minmax(92px,.38fr) minmax(0,1fr) auto;gap:10px;align-items:center;padding:0 13px;border:0;border-bottom:1px solid rgba(118,118,128,.12);background:transparent;color:var(--label-primary);font:inherit;text-align:left;box-sizing:border-box;}
 .trip-edit-native-row:last-child{border-bottom:0;}
 .trip-edit-native-row-label{font-size:11.5px;font-weight:680;color:var(--label-primary);white-space:nowrap;}
 .trip-edit-native-row-value{min-width:0;font-size:12.5px;font-weight:650;color:var(--label-secondary);text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .trip-edit-native-row-chevron{font-size:20px;line-height:1;color:#a0a0a6;margin-left:-2px;}
-.trip-edit-native-row input.trip-edit-native-input,.trip-edit-native-row select.trip-edit-native-select{width:100%;min-width:0;border:0!important;background:transparent!important;box-shadow:none!important;padding:12px 0!important;min-height:48px!important;text-align:right;font:inherit;font-size:12.5px;font-weight:650;color:var(--label-primary);outline:none;}
-.trip-edit-native-row select.trip-edit-native-select{appearance:auto;-webkit-appearance:menulist;text-align-last:right;}
+.trip-edit-native-row input.trip-edit-native-input{width:100%;min-width:0;box-sizing:border-box;border:1px solid rgba(60,60,67,.11)!important;background:rgba(118,118,128,.065)!important;box-shadow:none!important;padding:9px 11px!important;min-height:38px!important;border-radius:12px!important;text-align:right;font:inherit;font-size:12.5px;font-weight:650;color:var(--label-primary);outline:none;transition:border-color .16s ease,background .16s ease,box-shadow .16s ease;}
+.trip-edit-native-row input.trip-edit-native-input:focus{border-color:rgba(10,132,255,.42)!important;background:rgba(255,255,255,.92)!important;box-shadow:0 0 0 3px rgba(10,132,255,.09)!important;}
+.trip-edit-native-row select.trip-edit-native-select{width:100%;min-width:0;border:0!important;background:transparent!important;box-shadow:none!important;padding:12px 0!important;min-height:48px!important;text-align:right;font:inherit;font-size:12.5px;font-weight:650;color:var(--label-primary);outline:none;appearance:auto;-webkit-appearance:menulist;text-align-last:right;}
+.trip-edit-native-row select.trip-edit-native-select.trip-edit-team-native-select{justify-self:end;width:auto;max-width:100%;min-height:34px!important;padding:6px 28px 6px 11px!important;border:1px solid color-mix(in srgb,var(--trip-edit-team-accent,#8e8e93) 38%,rgba(60,60,67,.12))!important;border-radius:999px!important;background-color:color-mix(in srgb,var(--trip-edit-team-accent,#8e8e93) 13%,rgba(255,255,255,.96))!important;color:color-mix(in srgb,var(--trip-edit-team-accent,#8e8e93) 78%,#111)!important;font-weight:760;}
 .trip-edit-native-row .trip-edit-date-control,.trip-edit-native-row .trip-edit-time-control{width:100%;min-width:0;border:0;background:transparent;box-shadow:none;min-height:48px;border-radius:0;}
 .trip-edit-native-row .trip-edit-date-display,.trip-edit-native-row .trip-edit-time-display{font-size:12.5px;font-weight:650;text-align:right;padding-right:0;}
 .trip-edit-native-section{display:grid;gap:7px;}
 .trip-edit-native-section-title{font-size:10.5px;font-weight:760;color:var(--label-secondary);padding:0 3px;}
 .trip-edit-travel-card-teamline{display:flex;align-items:center;gap:6px;margin-top:3px;min-width:0;}
-.trip-edit-travel-team-chip{display:inline-flex;align-items:center;max-width:100%;min-height:22px;padding:3px 8px;border-radius:999px;background:rgba(118,118,128,.09);color:var(--label-secondary);font-size:9.5px;font-weight:720;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.trip-edit-travel-card.is-team-specific .trip-edit-travel-team-chip{background:rgba(10,132,255,.09);color:#1478d4;}
+.trip-edit-travel-team-chip{display:inline-flex;align-items:center;max-width:100%;min-height:22px;padding:3px 8px;border-radius:999px;border:1px solid color-mix(in srgb,var(--trip-edit-team-accent,#8e8e93) 32%,transparent);background:color-mix(in srgb,var(--trip-edit-team-accent,#8e8e93) 12%,rgba(255,255,255,.92));color:color-mix(in srgb,var(--trip-edit-team-accent,#8e8e93) 80%,#111);font-size:9.5px;font-weight:760;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.trip-edit-travel-team-chip::before{content:"";width:6px;height:6px;border-radius:999px;background:var(--trip-edit-team-accent,#8e8e93);flex:0 0 auto;}
 .trip-edit-airline-picker-row{cursor:pointer;}
 .trip-edit-airline-picker-logo{width:28px;height:24px;display:inline-flex;align-items:center;justify-content:center;overflow:hidden;border-radius:7px;justify-self:end;}
 .trip-edit-airline-picker-logo .trip-logo-img{width:100%;height:100%;object-fit:contain;}
@@ -4444,7 +4446,7 @@ html.theme-dark .trip-edit-icon-option,html:not(.theme-light):not(.theme-dark) .
 .trip-edit-airline-sheet-empty{padding:18px 4px;text-align:center;color:var(--label-secondary);font-size:11px;}
 .trip-edit-travel-sync{border-color:rgba(118,118,128,.12);background:rgba(255,255,255,.72);border-radius:17px;padding:0;overflow:hidden;gap:0;}
 .trip-edit-travel-sync-title{padding:11px 13px 7px;font-size:10.5px;color:var(--label-secondary);}
-.trip-edit-travel-sync-row{min-height:58px;padding:9px 13px;border-top:1px solid rgba(118,118,128,.11);grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:12px;}
+.trip-edit-travel-sync-row{min-height:58px;padding:9px 13px;border-top:1px solid rgba(118,118,128,.11);display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:12px;}
 .trip-edit-travel-sync-row input{grid-column:2;grid-row:1;width:42px;height:24px;margin:0;appearance:none;-webkit-appearance:none;border:0;border-radius:999px;background:#d1d1d6;position:relative;transition:background .18s ease;}
 .trip-edit-travel-sync-row input::before{content:"";position:absolute;width:20px;height:20px;left:2px;top:2px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.22);transition:transform .18s ease;}
 .trip-edit-travel-sync-row input:checked{background:#34c759;}
@@ -4455,6 +4457,9 @@ html.theme-dark .trip-edit-icon-option,html:not(.theme-light):not(.theme-dark) .
 html.theme-dark .trip-edit-travel-sync,html:not(.theme-light):not(.theme-dark) .trip-edit-travel-sync{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.10);}
 html.theme-dark .trip-edit-native-group,html:not(.theme-light):not(.theme-dark) .trip-edit-native-group{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.10);}
 html.theme-dark .trip-edit-native-row,html:not(.theme-light):not(.theme-dark) .trip-edit-native-row{border-bottom-color:rgba(255,255,255,.09);}
+html.theme-dark .trip-edit-native-row input.trip-edit-native-input,html:not(.theme-light):not(.theme-dark) .trip-edit-native-row input.trip-edit-native-input{background:rgba(255,255,255,.075)!important;border-color:rgba(255,255,255,.10)!important;color:#f5f5f7;}
+html.theme-dark .trip-edit-native-row input.trip-edit-native-input:focus,html:not(.theme-light):not(.theme-dark) .trip-edit-native-row input.trip-edit-native-input:focus{background:rgba(255,255,255,.105)!important;border-color:rgba(10,132,255,.55)!important;}
+html.theme-dark .trip-edit-native-row select.trip-edit-native-select.trip-edit-team-native-select,html:not(.theme-light):not(.theme-dark) .trip-edit-native-row select.trip-edit-native-select.trip-edit-team-native-select{background-color:color-mix(in srgb,var(--trip-edit-team-accent,#8e8e93) 23%,rgba(28,28,32,.92))!important;color:#fff!important;border-color:color-mix(in srgb,var(--trip-edit-team-accent,#8e8e93) 48%,rgba(255,255,255,.12))!important;}
 html.theme-dark .trip-edit-travel-team-chip,html:not(.theme-light):not(.theme-dark) .trip-edit-travel-team-chip{background:rgba(255,255,255,.08);color:#c7c7cc;}
 .trip-airline-logo-host .trip-logo-img{display:block;width:100%;height:100%;object-fit:contain;object-position:center;}
 .trip-airline-logo-mini{overflow:hidden;border-radius:9px;}
@@ -4465,13 +4470,6 @@ html.theme-dark .trip-edit-travel-heading,html:not(.theme-light):not(.theme-dark
 html.theme-dark .trip-edit-airline-results,html:not(.theme-light):not(.theme-dark) .trip-edit-airline-results{background:rgba(36,36,40,.98);border-color:rgba(255,255,255,.12);}
 
 .trip-edit-travel-section-label{font-size:10px;font-weight:780;letter-spacing:.065em;text-transform:uppercase;color:var(--label-secondary);margin:3px 2px 0;}
-.trip-edit-travel-sync{border:1px solid rgba(10,132,255,.14);border-radius:15px;background:rgba(10,132,255,.045);padding:10px 11px;display:grid;gap:9px;}
-.trip-edit-travel-sync-title{font-size:11.5px;font-weight:780;color:var(--label-primary);}
-.trip-edit-travel-sync-row{display:grid;grid-template-columns:auto minmax(0,1fr);gap:9px;align-items:start;}
-.trip-edit-travel-sync-row input{width:20px;height:20px;margin:1px 0 0;accent-color:#0a84ff;}
-.trip-edit-travel-sync-copy{display:grid;gap:2px;}
-.trip-edit-travel-sync-copy strong{font-size:11.5px;font-weight:740;}
-.trip-edit-travel-sync-copy small{font-size:9.5px;line-height:1.4;color:var(--label-secondary);}
 
 .trip-airline-logo-host{display:inline-flex;align-items:center;justify-content:center;position:relative;overflow:hidden;}
 .trip-airline-logo-fallback{display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:28px;padding:0 5px;border-radius:9px;background:rgba(118,118,128,.10);color:var(--label-secondary);font-size:9px;font-weight:800;letter-spacing:.02em;}
@@ -4571,7 +4569,7 @@ html.theme-dark .snack-edit-tools,html:not(.theme-light):not(.theme-dark) .snack
 </style>
             <link rel="apple-touch-icon" href="assets/icon/trip_icon.png">
   <link rel="icon" type="image/png" href="assets/icon/trip_icon.png">
-  <link rel="manifest" href="manifest.json?release=7.9.18.3">
+  <link rel="manifest" href="manifest.json?release=7.9.18.4">
   <meta name="apple-mobile-web-app-title" content="關嘉露西生日之旅">
   <!-- v7.7.1.2: expenses.css is 144KB and every rule is scoped under
        .expenses-module, yet it used to block the very first paint of the
@@ -4579,8 +4577,8 @@ html.theme-dark .snack-edit-tools,html:not(.theme-light):not(.theme-dark) .snack
        priority without blocking paint; ensureExpensesStylesheet() flips it to
        media="all" before the 支出 view is ever mounted, so the styling is
        byte-for-byte identical by the time anything expenses-related renders. -->
-  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?release=7.9.18.3" media="print">
-  <noscript><link rel="stylesheet" href="assets/css/expenses.css?release=7.9.18.3"></noscript>
+  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?release=7.9.18.4" media="print">
+  <noscript><link rel="stylesheet" href="assets/css/expenses.css?release=7.9.18.4"></noscript>
 </head>
 <body class="app-entry-gated app-entry-pending">
 <div class="bg-fixed"></div>
@@ -5402,7 +5400,7 @@ html.theme-dark .snack-edit-tools,html:not(.theme-light):not(.theme-dark) .snack
         <span class="profile-detail-spacer"></span>
       </div>
       <section class="profile-card" aria-label="App 資訊">
-        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.9.18.3</strong></div>
+        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.9.18.4</strong></div>
         <div class="profile-meta-row"><span>資料架構</span><strong>Phase 2G.2</strong></div>
         <div class="profile-meta-row"><span>主要資料來源</span><strong id="app-data-source-label">Firebase / 本機快取</strong></div>
       </section>
@@ -5688,7 +5686,7 @@ html.theme-dark .snack-edit-tools,html:not(.theme-light):not(.theme-dark) .snack
             <button class="trip-edit-native-row trip-edit-airline-picker-row" id="trip-edit-flight-airline-picker" type="button"><span class="trip-edit-native-row-label">航空公司</span><span class="trip-edit-native-row-value" id="trip-edit-flight-airline-picker-value">未設定</span><span class="trip-edit-native-row-chevron">›</span></button>
             <input id="trip-edit-flight-airline-code" type="hidden">
             <label class="trip-edit-native-row"><span class="trip-edit-native-row-label">航班角色</span><select class="trip-edit-native-select" id="trip-edit-flight-role"><option value="entry">旅程去程</option><option value="internal">中途航班</option><option value="exit">旅程回程</option></select><span></span></label>
-            <label class="trip-edit-native-row"><span class="trip-edit-native-row-label">所屬 Team</span><select class="trip-edit-native-select" id="trip-edit-flight-team"></select><span></span></label>
+            <label class="trip-edit-native-row"><span class="trip-edit-native-row-label">所屬 Team</span><select class="trip-edit-native-select trip-edit-team-native-select" id="trip-edit-flight-team"></select><span></span></label>
           </div>
         </div>
         <div class="trip-edit-native-section">
@@ -5772,7 +5770,7 @@ html.theme-dark .snack-edit-tools,html:not(.theme-light):not(.theme-dark) .snack
           <div class="trip-edit-native-group">
             <label class="trip-edit-native-row"><span class="trip-edit-native-row-label">住宿名稱</span><input class="trip-edit-native-input" id="trip-edit-accommodation-name" type="text" maxlength="160" autocomplete="off"><span></span></label>
             <label class="trip-edit-native-row"><span class="trip-edit-native-row-label">城市 / 地區</span><select class="trip-edit-native-select" id="trip-edit-accommodation-city"></select><span></span></label>
-            <label class="trip-edit-native-row"><span class="trip-edit-native-row-label">所屬 Team</span><select class="trip-edit-native-select" id="trip-edit-accommodation-team"></select><span></span></label>
+            <label class="trip-edit-native-row"><span class="trip-edit-native-row-label">所屬 Team</span><select class="trip-edit-native-select trip-edit-team-native-select" id="trip-edit-accommodation-team"></select><span></span></label>
           </div>
         </div>
         <div class="trip-edit-native-section">
@@ -6034,7 +6032,7 @@ html.theme-dark .snack-edit-tools,html:not(.theme-light):not(.theme-dark) .snack
 </div>
 
 <script>
-const APP_VERSION = "7.9.18.3";
+const APP_VERSION = "7.9.18.4";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 let tripMapServicePromise=null,transitRouteServicePromise=null,tripEditServicePromise=null,airlineLogoServicePromise=null,tripMapController=null,tripMapScope="day",tripMapRenderEpoch=0,tripMapSelectedPoint=null;
@@ -8473,9 +8471,12 @@ function tripEditDeleteTeamModalRow(teamKey){
 async function finishTripEditTeamModal(){if(!tripEditSession||!tripEditTeamModalState)return closeTripEditTeamModal();tripEditCaptureTeamModalInputs();try{const service=await tripEditService();service.replaceTripEditDraftTeamState(tripEditSession,tripEditTeamModalState);window.__tripEditPreviewData=service.applyTripEditDraftToTrip(tripEditSession,window.tripData);closeTripEditTeamModal();tripEditSyncInfoTools();render(window.__tripEditPreviewData,{includeSnacks:false});setView("info",{restoreScroll:true});if(tripMapOverlayOpen())void renderTripMapScope(tripMapScope);}catch(error){window.alert(tripEditFriendlyError(error));}}
 
 function tripEditTravelId(prefix){try{return `${prefix}_${crypto.randomUUID().replace(/-/g,"").slice(0,12)}`;}catch(_){return `${prefix}_${Date.now().toString(36)}${Math.random().toString(36).slice(2,7)}`;}}
+function tripEditApplyTeamSelectAccent(select){
+  if(!select)return;const key=String(select.value||"all"),cfg=tripEditSession?.draftTravellers?.[key]||{},color=key==="all"?"#8E8E93":teamDisplayColour(key,cfg);select.style.setProperty("--trip-edit-team-accent",color);
+}
 function tripEditFillTeamSelect(id,value="all"){
   const select=document.getElementById(id);if(!select)return;const travellers=tripEditSession?.draftTravellers||{},wanted=String(value||"all");select.innerHTML="";
-  const all=document.createElement("option");all.value="all";all.textContent="所有人";select.appendChild(all);orderedTravellerKeys(travellers).forEach(key=>{const option=document.createElement("option");option.value=key;option.textContent=String(travellers[key]?.label||key);select.appendChild(option);});select.value=[...select.options].some(o=>o.value===wanted)?wanted:"all";
+  const all=document.createElement("option");all.value="all";all.textContent="所有人";select.appendChild(all);orderedTravellerKeys(travellers).forEach(key=>{const option=document.createElement("option");option.value=key;option.textContent=String(travellers[key]?.label||key);select.appendChild(option);});select.value=[...select.options].some(o=>o.value===wanted)?wanted:"all";tripEditApplyTeamSelectAccent(select);if(!select.dataset.teamAccentBound){select.dataset.teamAccentBound="1";select.addEventListener("change",()=>tripEditApplyTeamSelectAccent(select));}
 }
 function tripEditFillCitySelect(id,value=""){
   const select=document.getElementById(id);if(!select)return;const cities=activeTripPresentationData()?.meta?.cities||{},wanted=String(value||"");select.innerHTML="";const blank=document.createElement("option");blank.value="";blank.textContent="未指定";select.appendChild(blank);orderedCityKeys(activeTripPresentationData(),cities).forEach(key=>{const option=document.createElement("option");option.value=key;option.textContent=String(cities[key]?.label||key);select.appendChild(option);});select.value=[...select.options].some(o=>o.value===wanted)?wanted:"";
@@ -8500,7 +8501,7 @@ async function tripEditRenderAirlineResults(query=""){return tripEditRenderAirli
 function closeTripEditFlightManager(){tripEditFlightModalState=null;tripEditFlightEditorId="";tripEditCloseBackdrop("trip-edit-flight-manager-backdrop");tripEditCloseBackdrop("trip-edit-flight-editor-backdrop");}
 async function openTripEditFlightManager(){if(!tripEditSession)return;const service=await tripEditService(),state=service.getTripEditDraftTravelState(tripEditSession);tripEditFlightModalState=tripEditClonePlain(state.flights||[]);tripEditRenderFlightManager();tripEditOpenBackdrop("trip-edit-flight-manager-backdrop");}
 function tripEditRenderFlightManager(){const host=document.getElementById("trip-edit-flight-list");if(!host||!Array.isArray(tripEditFlightModalState))return;host.innerHTML="";const rows=tripEditFlightSort(tripEditFlightModalState),managerMeta=document.getElementById("trip-edit-flight-manager-meta");if(managerMeta)managerMeta.textContent=`${rows.length} 班航班 · 按日期排列`;if(!rows.length){const empty=document.createElement("div");empty.className="trip-edit-team-note";empty.textContent="未有航班。可新增第一班航班。";host.appendChild(empty);return;}
-  rows.forEach(f=>{const teamKey=String(f.teamKey||"all"),card=document.createElement("div");card.className=`trip-edit-travel-card${teamKey!=="all"?" is-team-specific":""}`;const head=document.createElement("div");head.className="trip-edit-travel-card-head";const logo=document.createElement("span");logo.className="trip-airline-logo-mini";void tripApplyAirlineLogo(logo,f,"is-manager");const main=document.createElement("span");main.className="trip-edit-travel-card-main";const strong=document.createElement("strong");strong.textContent=f.flightNumber||"未命名航班";const small=document.createElement("small");small.textContent=[tripFlightDateLabel(f.departureDate),tripFlightRouteLabel(f),tripFlightTimeLabel(f),f.itineraryEnabled?"✓ 已加入行程":""].filter(Boolean).join(" · ")||"未設定時間／路線";const teamLine=document.createElement("span");teamLine.className="trip-edit-travel-card-teamline";const teamChip=document.createElement("span");teamChip.className="trip-edit-travel-team-chip";teamChip.textContent=tripEditTeamLabel(teamKey);teamLine.appendChild(teamChip);main.append(strong,small,teamLine);const role=document.createElement("span");role.className="trip-edit-travel-card-role";role.textContent=tripFlightRoleLabel(f.journeyRole);head.append(logo,main,role);const actions=document.createElement("div");actions.className="trip-edit-travel-card-actions";const edit=document.createElement("button");edit.type="button";edit.className="trip-edit-travel-edit";edit.textContent="編輯";edit.addEventListener("click",()=>openTripEditFlightEditor(f.flightId));const del=document.createElement("button");del.type="button";del.className="trip-edit-travel-delete";del.textContent="刪除";del.addEventListener("click",()=>{if(!confirm(`刪除 ${f.flightNumber||"呢班航班"}？`))return;tripEditFlightModalState=tripEditFlightModalState.filter(row=>String(row.flightId)!==String(f.flightId));tripEditRenderFlightManager();});actions.append(edit,del);card.append(head,actions);host.appendChild(card);});
+  rows.forEach(f=>{const teamKey=String(f.teamKey||"all"),card=document.createElement("div");card.className=`trip-edit-travel-card${teamKey!=="all"?" is-team-specific":""}`;const head=document.createElement("div");head.className="trip-edit-travel-card-head";const logo=document.createElement("span");logo.className="trip-airline-logo-mini";void tripApplyAirlineLogo(logo,f,"is-manager");const main=document.createElement("span");main.className="trip-edit-travel-card-main";const strong=document.createElement("strong");strong.textContent=f.flightNumber||"未命名航班";const small=document.createElement("small");small.textContent=[tripFlightDateLabel(f.departureDate),tripFlightRouteLabel(f),tripFlightTimeLabel(f),f.itineraryEnabled?"✓ 已加入行程":""].filter(Boolean).join(" · ")||"未設定時間／路線";const teamLine=document.createElement("span");teamLine.className="trip-edit-travel-card-teamline";const teamChip=document.createElement("span");teamChip.className="trip-edit-travel-team-chip";teamChip.textContent=tripEditTeamLabel(teamKey);teamChip.style.setProperty("--trip-edit-team-accent",teamKey==="all"?"#8E8E93":teamDisplayColour(teamKey,tripEditSession?.draftTravellers?.[teamKey]||{}));teamLine.appendChild(teamChip);main.append(strong,small,teamLine);const role=document.createElement("span");role.className="trip-edit-travel-card-role";role.textContent=tripFlightRoleLabel(f.journeyRole);head.append(logo,main,role);const actions=document.createElement("div");actions.className="trip-edit-travel-card-actions";const edit=document.createElement("button");edit.type="button";edit.className="trip-edit-travel-edit";edit.textContent="編輯";edit.addEventListener("click",()=>openTripEditFlightEditor(f.flightId));const del=document.createElement("button");del.type="button";del.className="trip-edit-travel-delete";del.textContent="刪除";del.addEventListener("click",()=>{if(!confirm(`刪除 ${f.flightNumber||"呢班航班"}？`))return;tripEditFlightModalState=tripEditFlightModalState.filter(row=>String(row.flightId)!==String(f.flightId));tripEditRenderFlightManager();});actions.append(edit,del);card.append(head,actions);host.appendChild(card);});
 }
 function openTripEditFlightEditor(flightId=""){
   if(!Array.isArray(tripEditFlightModalState))return;let row=tripEditFlightModalState.find(f=>String(f.flightId)===String(flightId));if(!row){row={flightId:tripEditTravelId("flight"),teamKey:"all",journeyRole:"internal",airlineCode:"",flightNumber:"",departureDate:"",departureTime:"",departureAirport:"",departureTerminal:"",arrivalDate:"",arrivalTime:"",arrivalAirport:"",arrivalTerminal:"",bookingReference:"",note:"",airlineLogo:"",itineraryEnabled:true};tripEditFlightModalState.push(row);}tripEditFlightEditorId=String(row.flightId);document.getElementById("trip-edit-flight-editor-title").textContent=flightId?"編輯航班":"新增航班";
@@ -8514,7 +8515,7 @@ function tripEditAccommodationSort(rows=[]){return [...rows].sort((a,b)=>String(
 function closeTripEditAccommodationManager(){tripEditAccommodationModalState=null;tripEditAccommodationEditorId="";tripEditCloseBackdrop("trip-edit-accommodation-manager-backdrop");tripEditCloseBackdrop("trip-edit-accommodation-editor-backdrop");}
 async function openTripEditAccommodationManager(){if(!tripEditSession)return;const service=await tripEditService(),state=service.getTripEditDraftTravelState(tripEditSession);tripEditAccommodationModalState=tripEditClonePlain(state.accommodations||[]);tripEditRenderAccommodationManager();tripEditOpenBackdrop("trip-edit-accommodation-manager-backdrop");}
 function tripEditRenderAccommodationManager(){const host=document.getElementById("trip-edit-accommodation-list");if(!host||!Array.isArray(tripEditAccommodationModalState))return;host.innerHTML="";const rows=tripEditAccommodationSort(tripEditAccommodationModalState),cities=activeTripPresentationData()?.meta?.cities||{},managerMeta=document.getElementById("trip-edit-accommodation-manager-meta");if(managerMeta)managerMeta.textContent=`${rows.length} 間住宿 · 按入住日期排列`;if(!rows.length){const empty=document.createElement("div");empty.className="trip-edit-team-note";empty.textContent="未有住宿。可新增第一間酒店或住宿。";host.appendChild(empty);return;}
-  rows.forEach(stay=>{const teamKey=String(stay.teamKey||"all"),card=document.createElement("div");card.className=`trip-edit-travel-card${teamKey!=="all"?" is-team-specific":""}`;const head=document.createElement("div");head.className="trip-edit-travel-card-head";const icon=document.createElement("span");icon.className="trip-airline-logo-fallback";icon.textContent="🏨";const main=document.createElement("span");main.className="trip-edit-travel-card-main";const strong=document.createElement("strong");strong.textContent=stay.name||"未命名住宿";const small=document.createElement("small");small.textContent=[[stay.checkInDate,stay.checkOutDate].filter(Boolean).join(" → "),cities?.[stay.cityKey]?.label||stay.cityKey||"",stay.address,(stay.itineraryCheckInEnabled||stay.itineraryCheckOutEnabled)?"✓ 已加入行程":""].filter(Boolean).join(" · ")||"未設定日期／地址";const teamLine=document.createElement("span");teamLine.className="trip-edit-travel-card-teamline";const teamChip=document.createElement("span");teamChip.className="trip-edit-travel-team-chip";teamChip.textContent=tripEditTeamLabel(teamKey);teamLine.appendChild(teamChip);main.append(strong,small,teamLine);head.append(icon,main);const actions=document.createElement("div");actions.className="trip-edit-travel-card-actions";const edit=document.createElement("button");edit.type="button";edit.className="trip-edit-travel-edit";edit.textContent="編輯";edit.addEventListener("click",()=>openTripEditAccommodationEditor(stay.accommodationId));const del=document.createElement("button");del.type="button";del.className="trip-edit-travel-delete";del.textContent="刪除";del.addEventListener("click",()=>{if(!confirm(`刪除 ${stay.name||"呢個住宿"}？`))return;tripEditAccommodationModalState=tripEditAccommodationModalState.filter(row=>String(row.accommodationId)!==String(stay.accommodationId));tripEditRenderAccommodationManager();});actions.append(edit,del);card.append(head,actions);host.appendChild(card);});
+  rows.forEach(stay=>{const teamKey=String(stay.teamKey||"all"),card=document.createElement("div");card.className=`trip-edit-travel-card${teamKey!=="all"?" is-team-specific":""}`;const head=document.createElement("div");head.className="trip-edit-travel-card-head";const icon=document.createElement("span");icon.className="trip-airline-logo-fallback";icon.textContent="🏨";const main=document.createElement("span");main.className="trip-edit-travel-card-main";const strong=document.createElement("strong");strong.textContent=stay.name||"未命名住宿";const small=document.createElement("small");small.textContent=[[stay.checkInDate,stay.checkOutDate].filter(Boolean).join(" → "),cities?.[stay.cityKey]?.label||stay.cityKey||"",stay.address,(stay.itineraryCheckInEnabled||stay.itineraryCheckOutEnabled)?"✓ 已加入行程":""].filter(Boolean).join(" · ")||"未設定日期／地址";const teamLine=document.createElement("span");teamLine.className="trip-edit-travel-card-teamline";const teamChip=document.createElement("span");teamChip.className="trip-edit-travel-team-chip";teamChip.textContent=tripEditTeamLabel(teamKey);teamChip.style.setProperty("--trip-edit-team-accent",teamKey==="all"?"#8E8E93":teamDisplayColour(teamKey,tripEditSession?.draftTravellers?.[teamKey]||{}));teamLine.appendChild(teamChip);main.append(strong,small,teamLine);head.append(icon,main);const actions=document.createElement("div");actions.className="trip-edit-travel-card-actions";const edit=document.createElement("button");edit.type="button";edit.className="trip-edit-travel-edit";edit.textContent="編輯";edit.addEventListener("click",()=>openTripEditAccommodationEditor(stay.accommodationId));const del=document.createElement("button");del.type="button";del.className="trip-edit-travel-delete";del.textContent="刪除";del.addEventListener("click",()=>{if(!confirm(`刪除 ${stay.name||"呢個住宿"}？`))return;tripEditAccommodationModalState=tripEditAccommodationModalState.filter(row=>String(row.accommodationId)!==String(stay.accommodationId));tripEditRenderAccommodationManager();});actions.append(edit,del);card.append(head,actions);host.appendChild(card);});
 }
 function openTripEditAccommodationEditor(id=""){
   if(!Array.isArray(tripEditAccommodationModalState))return;let row=tripEditAccommodationModalState.find(stay=>String(stay.accommodationId)===String(id));if(!row){row={accommodationId:tripEditTravelId("stay"),name:"",cityKey:"",teamKey:"all",checkInDate:"",checkInTime:"",checkOutDate:"",checkOutTime:"",address:"",mapsUrl:"",location:null,bookingReference:"",note:"",itineraryCheckInEnabled:true,itineraryCheckOutEnabled:false};tripEditAccommodationModalState.push(row);}tripEditAccommodationEditorId=String(row.accommodationId);document.getElementById("trip-edit-accommodation-editor-title").textContent=id?"編輯住宿":"新增住宿";
