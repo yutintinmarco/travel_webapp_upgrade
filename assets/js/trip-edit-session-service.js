@@ -204,12 +204,149 @@ function normalizeTravellersForEdit(input = {}) {
   });
   return out;
 }
-function normalizeFlightsForEdit(input = []) {
-  return Array.isArray(input) ? input.map(row => clonePlain(row || {})) : [];
+function makeStableRecordId(prefix, parts = []) {
+  const body = parts.map(clean).filter(Boolean).join("-").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 72);
+  return `${prefix}_${body || Math.random().toString(36).slice(2, 10)}`;
+}
+function makeFlightId() {
+  try { if (globalThis.crypto?.randomUUID) return `flight_${globalThis.crypto.randomUUID().replace(/-/g, "").slice(0, 12)}`; } catch (_) {}
+  return `flight_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
+}
+function makeAccommodationId() {
+  try { if (globalThis.crypto?.randomUUID) return `stay_${globalThis.crypto.randomUUID().replace(/-/g, "").slice(0, 12)}`; } catch (_) {}
+  return `stay_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
+}
+function inferAirlineCode(value = "") {
+  const match = clean(value).toUpperCase().match(/^([A-Z0-9]{2})(?=\s*\d)/);
+  return match ? match[1] : "";
+}
+function legacyDateToIso(value = "", referenceIso = "") {
+  const raw = clean(value);
+  if (validIsoDate(raw)) return raw;
+  const match = raw.match(/^(\d{1,2})[\/-](\d{1,2})(?:[\/-](\d{2,4}))?$/);
+  if (!match) return "";
+  let year = Number(match[3] || clean(referenceIso).slice(0, 4));
+  if (year > 0 && year < 100) year += 2000;
+  const month = Number(match[2]), day = Number(match[1]);
+  if (!year || month < 1 || month > 12 || day < 1 || day > 31) return "";
+  return `${String(year).padStart(4, "0")}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+}
+function splitLegacyTimeRange(value = "") {
+  const raw = clean(value);
+  const match = raw.match(/(\d{1,2}:\d{2})\s*(?:-|–|—|→|至)\s*(\d{1,2}:\d{2})/);
+  return match ? [match[1], match[2]] : [raw, ""];
+}
+function splitLegacyRoute(value = "") {
+  const raw = clean(value);
+  const parts = raw.split(/\s*(?:→|至|->| to )\s*/i).map(clean).filter(Boolean);
+  return parts.length >= 2 ? [parts[0], parts.slice(1).join(" → ")] : [raw, ""];
+}
+function normalizeFlightRecord(input = {}, fallback = {}, context = {}) {
+  const source = input && typeof input === "object" ? input : {};
+  const base = fallback && typeof fallback === "object" ? fallback : {};
+  const flightNumber = clean(source.flightNumber ?? source.flight ?? base.flightNumber ?? base.flight).toUpperCase();
+  const departureDate = legacyDateToIso(source.departureDate ?? source.date ?? base.departureDate ?? base.date, context.tripStartIso);
+  const arrivalDate = legacyDateToIso(source.arrivalDate ?? base.arrivalDate, departureDate || context.tripEndIso) || departureDate;
+  const departureTime = clean(source.departureTime ?? base.departureTime);
+  const arrivalTime = clean(source.arrivalTime ?? base.arrivalTime);
+  const airlineCode = clean(source.airlineCode ?? base.airlineCode).toUpperCase() || inferAirlineCode(flightNumber);
+  const journeyRoleRaw = clean(source.journeyRole ?? base.journeyRole).toLowerCase();
+  const journeyRole = ["entry", "internal", "exit"].includes(journeyRoleRaw) ? journeyRoleRaw : "internal";
+  const record = {
+    ...clonePlain(base), ...clonePlain(source),
+    flightId: clean(source.flightId ?? base.flightId) || makeFlightId(),
+    teamKey: clean(source.teamKey ?? base.teamKey) || "all",
+    journeyRole, airlineCode, flightNumber,
+    departureDate, departureTime, departureAirport: clean(source.departureAirport ?? source.from ?? base.departureAirport ?? base.from), departureTerminal: clean(source.departureTerminal ?? base.departureTerminal),
+    arrivalDate, arrivalTime, arrivalAirport: clean(source.arrivalAirport ?? source.to ?? base.arrivalAirport ?? base.to), arrivalTerminal: clean(source.arrivalTerminal ?? base.arrivalTerminal),
+    bookingReference: clean(source.bookingReference ?? source.pnr ?? base.bookingReference ?? base.pnr),
+    note: clean(source.note ?? base.note),
+    airlineLogo: clean(source.airlineLogo ?? base.airlineLogo),
+    sortOrder: normalizedSortOrder(source.sortOrder, normalizedSortOrder(base.sortOrder))
+  };
+  delete record.flight; delete record.date; delete record.route; delete record.time; delete record.from; delete record.to; delete record.pnr; delete record.outbound; delete record.inbound;
+  return record;
+}
+function normalizeFlightsForEdit(input = [], context = {}) {
+  const rows = Array.isArray(input) ? input : [];
+  const out = [];
+  rows.forEach((row, rowIndex) => {
+    if (row && typeof row === "object" && (row.outbound || row.inbound)) {
+      [[row.outbound, "entry", 0], [row.inbound, "exit", 1]].forEach(([legacy, role, partIndex]) => {
+        if (!legacy || typeof legacy !== "object") return;
+        const [from, to] = splitLegacyRoute(legacy.route);
+        const [departureTime, arrivalTime] = splitLegacyTimeRange(legacy.time);
+        const flightNumber = clean(legacy.flight).toUpperCase();
+        const departureDate = legacyDateToIso(legacy.date, context.tripStartIso);
+        out.push(normalizeFlightRecord({
+          flightId: makeStableRecordId("flight", [row.teamKey || "all", role, flightNumber || `${rowIndex}-${partIndex}`, departureDate || legacy.date]),
+          teamKey: row.teamKey || "all", journeyRole: role, airlineCode: row.airlineCode || inferAirlineCode(flightNumber), airlineLogo: row.airlineLogo || "",
+          flightNumber, departureDate, arrivalDate: departureDate, departureTime, arrivalTime, departureAirport: from, arrivalAirport: to, sortOrder: rowIndex * 2 + partIndex
+        }, {}, context));
+      });
+      return;
+    }
+    out.push(normalizeFlightRecord(row || {}, {}, context));
+  });
+  const seen = new Set();
+  return out.map((row, index) => {
+    let id = clean(row.flightId) || makeFlightId();
+    if (seen.has(id)) id = `${id}_${index + 1}`;
+    seen.add(id);
+    return { ...row, flightId: id, sortOrder: normalizedSortOrder(row.sortOrder, index) };
+  }).sort((a, b) => clean(a.departureDate).localeCompare(clean(b.departureDate)) || clean(a.departureTime).localeCompare(clean(b.departureTime)) || normalizedSortOrder(a.sortOrder) - normalizedSortOrder(b.sortOrder));
+}
+function accommodationMapsUrl(name = "", address = "") {
+  const query = [clean(name), clean(address)].filter(Boolean).join(" ");
+  return query ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}` : "";
+}
+function normalizeAccommodationRecord(input = {}, fallback = {}) {
+  const source = input && typeof input === "object" ? input : {};
+  const base = fallback && typeof fallback === "object" ? fallback : {};
+  const name = clean(source.name ?? source.title ?? base.name ?? base.title);
+  const address = clean(source.address ?? source.location?.address ?? base.address ?? base.location?.address);
+  const mapsUrl = clean(source.mapsUrl ?? source.maps ?? source.location?.mapsUrl ?? base.mapsUrl ?? base.maps ?? base.location?.mapsUrl) || accommodationMapsUrl(name, address);
+  return {
+    ...clonePlain(base), ...clonePlain(source),
+    accommodationId: clean(source.accommodationId ?? base.accommodationId) || makeAccommodationId(),
+    name, cityKey: clean(source.cityKey ?? base.cityKey), teamKey: clean(source.teamKey ?? base.teamKey) || "all",
+    checkInDate: clean(source.checkInDate ?? base.checkInDate), checkInTime: clean(source.checkInTime ?? base.checkInTime),
+    checkOutDate: clean(source.checkOutDate ?? base.checkOutDate), checkOutTime: clean(source.checkOutTime ?? base.checkOutTime),
+    address, mapsUrl, bookingReference: clean(source.bookingReference ?? base.bookingReference), note: clean(source.note ?? base.note),
+    location: { name, address, mapsUrl }, sortOrder: normalizedSortOrder(source.sortOrder, normalizedSortOrder(base.sortOrder))
+  };
+}
+function normalizeAccommodationsForEdit(input = [], { hotels = {}, cities = {} } = {}) {
+  const source = Array.isArray(input) ? input : [];
+  const rows = source.length ? source.map((row, index) => normalizeAccommodationRecord(row || {}, { sortOrder: index })) : Object.entries(hotels && typeof hotels === "object" ? hotels : {}).map(([cityKey, raw], index) => {
+    const hotel = typeof raw === "string" ? { name: raw } : (raw || {});
+    const city = cities?.[cityKey] || {};
+    return normalizeAccommodationRecord({
+      accommodationId: makeStableRecordId("stay", [cityKey, hotel.name || index]), name: hotel.name || hotel.label || "", address: hotel.address || "", cityKey, teamKey: "all",
+      checkInDate: clean(city.startIso), checkOutDate: clean(city.endIso), mapsUrl: hotel.mapsUrl || hotel.maps || "", sortOrder: index
+    });
+  });
+  const seen = new Set();
+  return rows.map((row, index) => {
+    let id = clean(row.accommodationId) || makeAccommodationId();
+    if (seen.has(id)) id = `${id}_${index + 1}`;
+    seen.add(id);
+    return { ...row, accommodationId: id, sortOrder: normalizedSortOrder(row.sortOrder, index) };
+  }).sort((a, b) => clean(a.checkInDate).localeCompare(clean(b.checkInDate)) || clean(a.checkInTime).localeCompare(clean(b.checkInTime)) || normalizedSortOrder(a.sortOrder) - normalizedSortOrder(b.sortOrder));
+}
+function accommodationsToLegacyHotels(input = []) {
+  const out = {};
+  normalizeAccommodationsForEdit(input).forEach((stay) => {
+    const key = clean(stay.cityKey);
+    if (!key || out[key]) return;
+    out[key] = { name: clean(stay.name), address: clean(stay.address), ...(clean(stay.mapsUrl) ? { mapsUrl: clean(stay.mapsUrl) } : {}) };
+  });
+  return out;
 }
 function sameTripDetails(a = {}, b = {}) { return stableJson(normalizeTripDetails(a, a)) === stableJson(normalizeTripDetails(b, b)); }
 function sameTravellers(a = {}, b = {}) { return stableJson(normalizeTravellersForEdit(a)) === stableJson(normalizeTravellersForEdit(b)); }
 function sameFlights(a = [], b = []) { return stableJson(normalizeFlightsForEdit(a)) === stableJson(normalizeFlightsForEdit(b)); }
+function sameAccommodations(a = [], b = []) { return stableJson(normalizeAccommodationsForEdit(a)) === stableJson(normalizeAccommodationsForEdit(b)); }
 function savedPlaceItemsFromTrip(trip = {}) {
   const snacks = trip?.snacks || {};
   return Array.isArray(snacks) ? snacks : (Array.isArray(snacks?.items) ? snacks.items : []);
@@ -510,7 +647,11 @@ export function createTripEditSession(tripDataInput) {
   });
   const baseTripDetails = tripDetailsSnapshot(trip);
   const baseTravellers = normalizeTravellersForEdit(trip?.meta?.travellers || {});
-  const baseFlights = normalizeFlightsForEdit(trip?.meta?.flights || []);
+  const legacyFlightSource = Array.isArray(trip?.meta?.flights) && trip.meta.flights.length
+    ? trip.meta.flights
+    : ((trip?.meta?.outbound || trip?.meta?.inbound) ? [{ teamKey: "all", airlineLogo: trip?.meta?.airlineLogo || "", outbound: trip?.meta?.outbound || null, inbound: trip?.meta?.inbound || null }] : []);
+  const baseFlights = normalizeFlightsForEdit(legacyFlightSource, { tripStartIso: baseTripDetails.startDate, tripEndIso: baseTripDetails.endDate });
+  const baseAccommodations = normalizeAccommodationsForEdit(trip?.meta?.accommodations || [], { hotels: trip?.meta?.hotels || {}, cities: trip?.meta?.cities || {} });
   const baseSavedPlaceMeta = savedPlaceMetaSnapshot(trip);
   const draftSavedPlaceMeta = clonePlain(baseSavedPlaceMeta);
   const baseSavedPlaces = new Map(), draftSavedPlaces = new Map();
@@ -536,6 +677,8 @@ export function createTripEditSession(tripDataInput) {
     draftTravellers: clonePlain(baseTravellers),
     baseFlights,
     draftFlights: clonePlain(baseFlights),
+    baseAccommodations,
+    draftAccommodations: clonePlain(baseAccommodations),
     baseSavedPlaceMeta,
     draftSavedPlaceMeta,
     baseSavedPlaces,
@@ -573,6 +716,45 @@ export function getTripEditDraftTeamState(session) {
   };
 }
 
+export function getTripEditDraftTravelState(session) {
+  if (!session) return { flights: [], accommodations: [] };
+  return {
+    flights: clonePlain(session.draftFlights || []),
+    accommodations: clonePlain(session.draftAccommodations || [])
+  };
+}
+
+export function replaceTripEditDraftFlights(session, flights = []) {
+  if (!session) return [];
+  const next = normalizeFlightsForEdit(flights);
+  const travellers = session.draftTravellers || {};
+  next.forEach((row) => {
+    const teamKey = clean(row.teamKey) || "all";
+    if (teamKey !== "all" && !travellers[teamKey]) { const error = new Error("Flight references an unknown Team"); error.code = "edit-flight-team-invalid"; throw error; }
+    if (!clean(row.flightNumber)) { const error = new Error("Flight number is required"); error.code = "edit-flight-number-required"; throw error; }
+    if (row.departureDate && !validIsoDate(row.departureDate)) { const error = new Error("Invalid flight departure date"); error.code = "edit-flight-date-invalid"; throw error; }
+    if (row.arrivalDate && !validIsoDate(row.arrivalDate)) { const error = new Error("Invalid flight arrival date"); error.code = "edit-flight-date-invalid"; throw error; }
+  });
+  session.draftFlights = next;
+  return clonePlain(next);
+}
+
+export function replaceTripEditDraftAccommodations(session, accommodations = []) {
+  if (!session) return [];
+  const next = normalizeAccommodationsForEdit(accommodations);
+  const travellers = session.draftTravellers || {};
+  next.forEach((row) => {
+    const teamKey = clean(row.teamKey) || "all";
+    if (teamKey !== "all" && !travellers[teamKey]) { const error = new Error("Accommodation references an unknown Team"); error.code = "edit-accommodation-team-invalid"; throw error; }
+    if (!clean(row.name)) { const error = new Error("Accommodation name is required"); error.code = "edit-accommodation-name-required"; throw error; }
+    if (row.checkInDate && !validIsoDate(row.checkInDate)) { const error = new Error("Invalid accommodation check-in date"); error.code = "edit-accommodation-date-invalid"; throw error; }
+    if (row.checkOutDate && !validIsoDate(row.checkOutDate)) { const error = new Error("Invalid accommodation check-out date"); error.code = "edit-accommodation-date-invalid"; throw error; }
+    if (row.checkInDate && row.checkOutDate && row.checkOutDate < row.checkInDate) { const error = new Error("Accommodation check-out is before check-in"); error.code = "edit-accommodation-date-order"; throw error; }
+  });
+  session.draftAccommodations = next;
+  return clonePlain(next);
+}
+
 export function replaceTripEditDraftTeamState(session, { travellers = {}, flights = [] } = {}) {
   if (!session) return { travellers: {}, flights: [] };
   const nextTravellers = normalizeTravellersForEdit(travellers);
@@ -595,6 +777,10 @@ export function replaceTripEditDraftTeamState(session, { travellers = {}, flight
   });
   session.draftTravellers = nextTravellers;
   session.draftFlights = nextFlights;
+  session.draftAccommodations = normalizeAccommodationsForEdit(session.draftAccommodations || []).map(row => {
+    const teamKey = clean(row?.teamKey) || "all";
+    return teamKey === "all" || nextTravellers[teamKey] ? row : { ...row, teamKey: "all" };
+  });
   session.draftItems?.forEach?.((draft, key) => {
     const who = clean(draft?.who) || "all";
     if (who === "all" || nextTravellers[who]) return;
@@ -965,10 +1151,11 @@ export function replaceTripEditDraftMediaDescriptors(session, replacementsInput 
 }
 
 export function tripEditDomainChanges(session) {
-  if (!session) return { tripDetailsChanged: false, travellersChanged: false, flightsChanged: false, savedPlaceMetaChanged: false, teamChangeCount: 0, daysChanged: false, dayChangeCount: 0 };
+  if (!session) return { tripDetailsChanged: false, travellersChanged: false, flightsChanged: false, accommodationsChanged: false, savedPlaceMetaChanged: false, teamChangeCount: 0, daysChanged: false, dayChangeCount: 0 };
   const tripDetailsChanged = !sameTripDetails(session.baseTripDetails || {}, session.draftTripDetails || {});
   const travellersChanged = !sameTravellers(session.baseTravellers || {}, session.draftTravellers || {});
   const flightsChanged = !sameFlights(session.baseFlights || [], session.draftFlights || []);
+  const accommodationsChanged = !sameAccommodations(session.baseAccommodations || [], session.draftAccommodations || []);
   const savedPlaceMetaChanged = !sameSavedPlaceMeta(session.baseSavedPlaceMeta || {}, session.draftSavedPlaceMeta || {});
   const baseKeys = new Set(Object.keys(session.baseTravellers || {})), draftKeys = new Set(Object.keys(session.draftTravellers || {}));
   let teamChangeCount = 0;
@@ -976,13 +1163,13 @@ export function tripEditDomainChanges(session) {
     if (stableJson(session.baseTravellers?.[key] || null) !== stableJson(session.draftTravellers?.[key] || null)) teamChangeCount += 1;
   });
   const dayChangeCount = tripEditDayChanges(session).length;
-  return { tripDetailsChanged, travellersChanged, flightsChanged, savedPlaceMetaChanged, teamChangeCount, daysChanged: dayChangeCount > 0, dayChangeCount };
+  return { tripDetailsChanged, travellersChanged, flightsChanged, accommodationsChanged, savedPlaceMetaChanged, teamChangeCount, daysChanged: dayChangeCount > 0, dayChangeCount };
 }
 
 export function tripEditChangeCount(session) {
   const itemCount = tripEditChanges(session).length, savedPlaceCount = tripEditSavedPlaceChanges(session).length;
   const domain = tripEditDomainChanges(session);
-  return itemCount + savedPlaceCount + domain.dayChangeCount + (domain.tripDetailsChanged ? 1 : 0) + (domain.savedPlaceMetaChanged ? 1 : 0) + domain.teamChangeCount + (domain.flightsChanged && !domain.travellersChanged ? 1 : 0);
+  return itemCount + savedPlaceCount + domain.dayChangeCount + (domain.tripDetailsChanged ? 1 : 0) + (domain.savedPlaceMetaChanged ? 1 : 0) + domain.teamChangeCount + (domain.flightsChanged && !domain.travellersChanged ? 1 : 0) + (domain.accommodationsChanged ? 1 : 0);
 }
 
 export function applyTripEditDraftToTrip(session, tripInput, { revision = null } = {}) {
@@ -1073,6 +1260,11 @@ export function applyTripEditDraftToTrip(session, tripInput, { revision = null }
   trip.meta.status = details.status;
   trip.meta.travellers = normalizeTravellersForEdit(session.draftTravellers || {});
   trip.meta.flights = normalizeFlightsForEdit(session.draftFlights || []);
+  trip.meta.outbound = null;
+  trip.meta.inbound = null;
+  trip.meta.airlineLogo = "";
+  trip.meta.accommodations = normalizeAccommodationsForEdit(session.draftAccommodations || []);
+  trip.meta.hotels = accommodationsToLegacyHotels(session.draftAccommodations || []);
   if (revision != null) trip.revision = Math.max(1, Number(revision) || Number(trip.revision) || 1);
   return trip;
 }
@@ -1099,7 +1291,7 @@ export async function commitTripEditSession(session, { user: userInput = null } 
   const savedPlaceChanges = tripEditSavedPlaceChanges(session);
   const dayChanges = tripEditDayChanges(session);
   const domainChanges = tripEditDomainChanges(session);
-  const anyDomainChange = domainChanges.tripDetailsChanged || domainChanges.travellersChanged || domainChanges.flightsChanged || domainChanges.savedPlaceMetaChanged || dayChanges.length > 0;
+  const anyDomainChange = domainChanges.tripDetailsChanged || domainChanges.travellersChanged || domainChanges.flightsChanged || domainChanges.accommodationsChanged || domainChanges.savedPlaceMetaChanged || dayChanges.length > 0;
   if (!changes.length && !savedPlaceChanges.length && !anyDomainChange) return { revision: session.baseRevision, changedItems: 0, changedSavedPlaces: 0, changedDays: 0, changedTrip: false, changedTeams: 0, noChange: true };
   if (changes.length + savedPlaceChanges.length + dayChanges.length > 448) {
     const error = new Error("Too many itinerary changes in one edit session");
@@ -1208,7 +1400,7 @@ export async function commitTripEditSession(session, { user: userInput = null } 
       tripPatch.status = details.status;
     }
     tx.set(tripRef, tripPatch, { merge: true });
-    if (domainChanges.travellersChanged || domainChanges.flightsChanged || domainChanges.savedPlaceMetaChanged) {
+    if (domainChanges.travellersChanged || domainChanges.flightsChanged || domainChanges.accommodationsChanged || domainChanges.savedPlaceMetaChanged) {
       // Aggregate settings fields are replaced atomically. Recursive merge on
       // travellers previously kept deleted Team keys; savedPlacesMeta follows
       // the same explicit top-level replacement rule.
@@ -1217,7 +1409,15 @@ export async function commitTripEditSession(session, { user: userInput = null } 
       if (domainChanges.travellersChanged || domainChanges.flightsChanged) {
         generalPatch.travellers = normalizeTravellersForEdit(session.draftTravellers || {});
         generalPatch.flights = normalizeFlightsForEdit(session.draftFlights || []);
-        mergeFields.push("travellers", "flights");
+        generalPatch.outbound = null;
+        generalPatch.inbound = null;
+        generalPatch.airlineLogo = "";
+        mergeFields.push("travellers", "flights", "outbound", "inbound", "airlineLogo");
+      }
+      if (domainChanges.accommodationsChanged) {
+        generalPatch.accommodations = normalizeAccommodationsForEdit(session.draftAccommodations || []);
+        generalPatch.hotels = accommodationsToLegacyHotels(session.draftAccommodations || []);
+        mergeFields.push("accommodations", "hotels");
       }
       if (domainChanges.savedPlaceMetaChanged) {
         generalPatch.savedPlacesMeta = savedPlaceMetaSnapshot({ snacks: session.draftSavedPlaceMeta || {} });
@@ -1231,7 +1431,9 @@ export async function commitTripEditSession(session, { user: userInput = null } 
     if (domainChanges.savedPlaceMetaChanged) summaryParts.push("收藏篩選設定");
     if (dayChanges.length) summaryParts.push(`${dayChanges.length} 個行程日`);
     if (domainChanges.tripDetailsChanged) summaryParts.push("旅程資料");
-    if (domainChanges.teamChangeCount || domainChanges.flightsChanged) summaryParts.push(`${domainChanges.teamChangeCount} 個 Team`);
+    if (domainChanges.teamChangeCount) summaryParts.push(`${domainChanges.teamChangeCount} 個 Team`);
+    if (domainChanges.flightsChanged) summaryParts.push("航班資料");
+    if (domainChanges.accommodationsChanged) summaryParts.push("住宿資料");
     tx.set(logRef, {
       type: "trip.edit.save",
       actionType: "trip.edit.save",

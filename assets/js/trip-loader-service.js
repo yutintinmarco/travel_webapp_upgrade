@@ -112,6 +112,7 @@ function assemblePortableTrip(tripId, state) {
       airlineLogo: clean(general.airlineLogo),
       weather: clonePlain(general.weather || {}) || {},
       hotels: clonePlain(general.hotels || {}) || {},
+      accommodations: clonePlain(general.accommodations || []) || [],
       infoCard: clonePlain(general.infoCard || {}) || {},
       galleryDefaults: clonePlain(general.galleryDefaults || {}) || {},
       featureColors: clonePlain(general.featureColors || {}) || {},

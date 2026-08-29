@@ -437,6 +437,7 @@ export function buildFirestoreTripPlan(rawInput = {}, ownerUser = null) {
       ...(meta.backgroundImageMedia ? { backgroundImageMedia: clone(meta.backgroundImageMedia) } : {}),
       ...(meta.coverImageMedia ? { coverImageMedia: clone(meta.coverImageMedia) } : {}),
       hotels: clone(meta.hotels || {}),
+      accommodations: clone(meta.accommodations || []),
       infoCard: clone(meta.infoCard || {}),
       galleryDefaults: clone(meta.galleryDefaults || {}),
       savedPlacesMeta: Array.isArray(trip.snacks) ? {} : {

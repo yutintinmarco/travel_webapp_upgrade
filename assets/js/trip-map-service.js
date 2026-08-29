@@ -355,59 +355,83 @@ function isoDayValue(day = {}) {
   return idMatch ? `${idMatch[1]}-${idMatch[2]}-${idMatch[3]}` : "";
 }
 function hotelPlain(value) {
-  if (!value) return { name: "", address: "" };
-  if (typeof value === "string") return { name: clean(value), address: "" };
-  return { name: clean(value?.name || value?.label), address: clean(value?.address) };
+  if (!value) return { name: "", address: "", mapsUrl: "" };
+  if (typeof value === "string") return { name: clean(value), address: "", mapsUrl: "" };
+  return { name: clean(value?.name || value?.label), address: clean(value?.address), mapsUrl: clean(value?.mapsUrl || value?.maps) };
 }
-function lodgingAnchorForDay(trip = {}, day = {}) {
+function flightRowsForMap(meta = {}) {
+  const source = Array.isArray(meta?.flights) ? meta.flights : [], out = [];
+  source.forEach((row, index) => {
+    if (row?.outbound || row?.inbound) {
+      [[row.outbound, "entry", 0], [row.inbound, "exit", 1]].forEach(([legacy, role, part]) => {
+        if (!legacy) return;
+        const route = clean(legacy.route).split(/\s*(?:→|至|->| to )\s*/i).map(clean).filter(Boolean);
+        const times = clean(legacy.time).match(/(\d{1,2}:\d{2})\s*(?:-|–|—|→|至)\s*(\d{1,2}:\d{2})/);
+        const dateRaw = clean(legacy.date), year = clean(meta?.tripStartIso).slice(0,4), dm = dateRaw.match(/^(\d{1,2})[\/-](\d{1,2})$/);
+        const date = /^\d{4}-\d{2}-\d{2}$/.test(dateRaw) ? dateRaw : (dm && year ? `${year}-${String(Number(dm[2])).padStart(2,"0")}-${String(Number(dm[1])).padStart(2,"0")}` : "");
+        out.push({ flightId: `legacy_${index}_${part}`, teamKey: clean(row.teamKey) || "all", journeyRole: role, flightNumber: clean(legacy.flight), departureDate: date, arrivalDate: date, departureTime: times?.[1] || "", arrivalTime: times?.[2] || "", departureAirport: route[0] || "", arrivalAirport: route[1] || "" });
+      });
+      return;
+    }
+    out.push({ ...row, flightId: clean(row?.flightId) || `flight_${index}`, teamKey: clean(row?.teamKey) || "all", journeyRole: clean(row?.journeyRole) || "internal", flightNumber: clean(row?.flightNumber || row?.flight), departureDate: clean(row?.departureDate || row?.date), arrivalDate: clean(row?.arrivalDate || row?.departureDate || row?.date), departureTime: clean(row?.departureTime), arrivalTime: clean(row?.arrivalTime), departureAirport: clean(row?.departureAirport || row?.from), arrivalAirport: clean(row?.arrivalAirport || row?.to) });
+  });
+  return out;
+}
+function lodgingAnchorsForDay(trip = {}, day = {}) {
   const meta = trip?.meta && typeof trip.meta === "object" ? trip.meta : {};
-  const hotels = meta?.hotels && typeof meta.hotels === "object" ? meta.hotels : {};
-  const cities = meta?.cities && typeof meta.cities === "object" ? meta.cities : {};
-  const dateIso = isoDayValue(day);
-  const rows = Object.entries(hotels).map(([cityKey, raw]) => {
-    const hotel = hotelPlain(raw), city = cities?.[cityKey] || {};
-    return { cityKey, hotel, city, startIso: clean(city?.startIso), endIso: clean(city?.endIso) };
-  }).filter(row => row.hotel.name || row.hotel.address);
-  if (!rows.length) return null;
-  let candidates = rows;
-  if (dateIso) {
-    const dated = rows.filter(row => (!row.startIso || row.startIso <= dateIso) && (!row.endIso || row.endIso >= dateIso));
-    if (dated.length) candidates = dated;
+  const dateIso = isoDayValue(day), cities = meta?.cities && typeof meta.cities === "object" ? meta.cities : {};
+  const accommodations = Array.isArray(meta?.accommodations) ? meta.accommodations : [];
+  let rows = [];
+  if (accommodations.length) {
+    rows = accommodations.map((raw, index) => ({
+      accommodationId: clean(raw?.accommodationId) || `stay_${index}`,
+      name: clean(raw?.name || raw?.title), address: clean(raw?.address || raw?.location?.address), mapsUrl: clean(raw?.mapsUrl || raw?.maps || raw?.location?.mapsUrl),
+      cityKey: clean(raw?.cityKey), teamKey: clean(raw?.teamKey) || "all", checkInDate: clean(raw?.checkInDate), checkOutDate: clean(raw?.checkOutDate)
+    })).filter(row => row.name || row.address);
+    if (dateIso) {
+      let dated = rows.filter(row => (!row.checkInDate || row.checkInDate <= dateIso) && (!row.checkOutDate || dateIso < row.checkOutDate));
+      if (!dated.length) dated = rows.filter(row => row.checkOutDate === dateIso);
+      if (dated.length) rows = dated; else rows = [];
+    }
+  } else {
+    const hotels = meta?.hotels && typeof meta.hotels === "object" ? meta.hotels : {};
+    rows = Object.entries(hotels).map(([cityKey, raw], index) => {
+      const hotel = hotelPlain(raw), city = cities?.[cityKey] || {};
+      return { accommodationId: `legacy_${cityKey}_${index}`, name: hotel.name, address: hotel.address, mapsUrl: hotel.mapsUrl, cityKey, teamKey: "all", checkInDate: clean(city?.startIso), checkOutDate: clean(city?.endIso) };
+    }).filter(row => row.name || row.address);
+    if (dateIso) {
+      const dated = rows.filter(row => (!row.checkInDate || row.checkInDate <= dateIso) && (!row.checkOutDate || row.checkOutDate >= dateIso));
+      if (dated.length) rows = dated.sort((a,b)=>clean(b.checkInDate).localeCompare(clean(a.checkInDate))).slice(0,1);
+    }
   }
-  // Transition dates can belong to both old and new city windows. The lodging
-  // whose stay starts latest is the one relevant to that night's route.
-  candidates.sort((a, b) => clean(b.startIso).localeCompare(clean(a.startIso)) || a.cityKey.localeCompare(b.cityKey));
-  const selected = candidates[0];
-  if (!selected) return null;
-  const title = selected.hotel.name || `${clean(selected.city?.label) || selected.cityKey}住宿`;
-  const mapsUrl = editableMapsUrl({ address: selected.hotel.address, name: title });
-  const record = { location: { name: title, address: selected.hotel.address, mapsUrl } };
-  const resolve = pointResolveSpec(record);
-  if (resolve.type === "none") return null;
-  return {
-    kind: "itinerary",
-    itemKind: ITINERARY_ITEM_KIND.STOP,
-    mapRole: "anchor",
-    anchorType: "hotel",
-    routeEligible: true,
-    routeMode: MAP_ROUTE_MODE.UNKNOWN,
-    identity: `anchor:hotel:${clean(day?.dayId)}:${selected.cityKey}`,
-    dayId: clean(day?.dayId),
-    itemId: "",
-    order: 0,
-    displayOrder: null,
-    who: "all",
-    icon: "🏨",
-    title,
-    subtitle: [clean(selected.city?.label), selected.hotel.address].filter(Boolean).join(" · "),
-    meta: "住宿 · 行程起終點",
-    detail: selected.hotel.address,
-    previewImages: [],
-    previewImage: null,
-    mapsUrl,
-    resolve,
-    syntheticAnchor: true
-  };
+  return rows.map((selected, index) => {
+    const title = selected.name || `${clean(cities?.[selected.cityKey]?.label) || selected.cityKey || ""}住宿` || "住宿";
+    const mapsUrl = selected.mapsUrl || editableMapsUrl({ address: selected.address, name: title });
+    const record = { location: { name: title, address: selected.address, mapsUrl } }, resolve = pointResolveSpec(record);
+    if (resolve.type === "none") return null;
+    return { kind: "itinerary", itemKind: ITINERARY_ITEM_KIND.STOP, mapRole: "anchor", anchorType: "hotel", routeEligible: true, routeMode: MAP_ROUTE_MODE.UNKNOWN,
+      identity: `anchor:hotel:${clean(day?.dayId)}:${selected.accommodationId}`, dayId: clean(day?.dayId), itemId: "", order: 0, displayOrder: null, who: selected.teamKey || "all", icon: "🏨", title,
+      subtitle: [clean(cities?.[selected.cityKey]?.label), selected.address].filter(Boolean).join(" · "), meta: "住宿 · 行程起終點", detail: selected.address, previewImages: [], previewImage: null, mapsUrl, resolve, syntheticAnchor: true };
+  }).filter(Boolean);
+}
+function flightAnchorsForDay(trip = {}, day = {}) {
+  const meta = trip?.meta && typeof trip.meta === "object" ? trip.meta : {}, dateIso = isoDayValue(day);
+  if (!dateIso) return [];
+  const anchors = [];
+  flightRowsForMap(meta).forEach((flight) => {
+    const role = clean(flight.journeyRole).toLowerCase();
+    let airport = "", time = "", order = 0, label = "";
+    if (role === "entry" && clean(flight.arrivalDate || flight.departureDate) === dateIso) { airport = clean(flight.arrivalAirport); time = clean(flight.arrivalTime); order = -100; label = "抵達"; }
+    else if (role === "exit" && clean(flight.departureDate) === dateIso) { airport = clean(flight.departureAirport); time = clean(flight.departureTime); order = 100000; label = "出發"; }
+    else return;
+    if (!airport) return;
+    const mapsUrl = editableMapsUrl({ address: airport, name: airport }), record = { location: { name: airport, address: airport, mapsUrl } }, resolve = pointResolveSpec(record);
+    if (resolve.type === "none") return;
+    anchors.push({ kind: "itinerary", itemKind: ITINERARY_ITEM_KIND.TRANSIT, mapRole: "anchor", anchorType: "flight", routeEligible: true, routeMode: MAP_ROUTE_MODE.FLIGHT,
+      identity: `anchor:flight:${clean(day?.dayId)}:${clean(flight.flightId)}:${role}`, dayId: clean(day?.dayId), itemId: "", order, displayOrder: null, who: clean(flight.teamKey) || "all", icon: "✈️",
+      title: clean(flight.flightNumber) || "航班", subtitle: [label, airport, time].filter(Boolean).join(" · "), meta: "航班 · 行程起終點", detail: [clean(flight.departureAirport), clean(flight.arrivalAirport)].filter(Boolean).join(" → "), previewImages: [], previewImage: null, mapsUrl, resolve, syntheticAnchor: true });
+  });
+  return anchors;
 }
 
 export function itineraryMapPoints(trip, activeDayId = "") {
@@ -416,7 +440,7 @@ export function itineraryMapPoints(trip, activeDayId = "") {
   const day = days.find(row => clean(row?.dayId) === wanted) || days[0] || null;
   if (!day) return [];
 
-  const candidates = (Array.isArray(day.items) ? day.items : []).map((item, index) => {
+  let candidates = (Array.isArray(day.items) ? day.items : []).map((item, index) => {
     const spec = pointResolveSpec(item);
     const time = clean(item?.time);
     const note = clean(item?.note);
@@ -452,11 +476,25 @@ export function itineraryMapPoints(trip, activeDayId = "") {
     };
   }).filter(point => point.resolve.type !== "none");
 
-  // A real itinerary hotel-return row wins so the marker keeps its own card.
-  // Otherwise derive the day's lodging from Trip metadata as route context.
-  if (!candidates.some(point => point.anchorType === "hotel")) {
-    const lodging = lodgingAnchorForDay(trip, day);
-    if (lodging) candidates.unshift(lodging);
+  // Once Travel Details have been promoted to the new master structures, they
+  // become the canonical source for hotel / entry-exit flight anchors. This
+  // prevents legacy itinerary rows such as “返回酒店” or old flight markers
+  // from masking an edited master record. Legacy trips keep the previous
+  // explicit-anchor precedence until they are promoted by Edit + Global Save.
+  const meta = trip?.meta && typeof trip.meta === "object" ? trip.meta : {};
+  const hasAccommodationMaster = Array.isArray(meta?.accommodations) && meta.accommodations.length > 0;
+  const hasFlightMaster = Array.isArray(meta?.flights) && meta.flights.some(row => row && typeof row === "object" && !(row.outbound || row.inbound) && (row.flightId || row.flightNumber || row.journeyRole));
+  if (hasAccommodationMaster) {
+    candidates = candidates.filter(point => point.anchorType !== "hotel");
+    candidates.unshift(...lodgingAnchorsForDay(trip, day));
+  } else if (!candidates.some(point => point.anchorType === "hotel")) {
+    candidates.unshift(...lodgingAnchorsForDay(trip, day));
+  }
+  if (hasFlightMaster) {
+    candidates = candidates.filter(point => point.anchorType !== "flight");
+    candidates.push(...flightAnchorsForDay(trip, day));
+  } else if (!candidates.some(point => point.anchorType === "flight")) {
+    candidates.push(...flightAnchorsForDay(trip, day));
   }
 
   let stopOrder = 0;
