@@ -1,3 +1,12 @@
+## v7.9.17.0 — Smooth sliders + Transit Route Adopt
+
+- Polished Saved Places price/queue sliders so the thumb follows the finger continuously; the displayed semantic value updates while dragging and the control eases to the nearest canonical stop only on release. Existing stored values remain unchanged.
+- Added Edit Mode **採用此路線** actions to live Transit Gallery options. Adoption stays inside the Local Edit Session and only persists on the single Global Save.
+- Added canonical `plannedTransit` snapshots to Transit itinerary items. The snapshot stores normalized provider-independent route details (times, modes, steps, fare/warnings and bounded map geometry) rather than provider raw responses.
+- An adopted route now renders independently as **已採用路線**, so later provider searches can change without rewriting the traveller's saved plan. Edit Mode can replace or remove the adopted route; Global Cancel restores the previous state.
+- Entering Edit Mode refreshes an already-loaded Transit planner so adoption controls cannot be missing merely because the live options were opened before Edit Mode.
+- No Transit provider selection/request logic, Day Bar behaviour, Map foundation, Saved Places media, Team lifecycle, Firebase rules/Functions or legacy JSON cleanup changed.
+
 ## v7.9.16.3 — Saved Places taxonomy management + native sliders
 
 - Added Local Draft management for Saved Place **類型 / 細分類 / 優先度**: add, rename, reorder and delete.
