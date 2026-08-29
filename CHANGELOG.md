@@ -1,3 +1,10 @@
+## v7.9.18.5 — Travel Details Centered Value Polish
+
+- Removed the decorative dot from Flight / Accommodation Team pills while retaining each Team's configured colour treatment.
+- Unified compact Flight / Accommodation editor values to centred alignment: flight number, airline, journey role, Team, dates, times, airports, terminals, accommodation name and region.
+- Kept long-form content such as notes, addresses and Google Maps text naturally left-aligned for readability.
+- Presentation-only release; no Travel Details schema, soft-link automation, Map, Transit, Saved Places or Firebase lifecycle changes.
+
 ## v7.9.18.4 — Travel Details Native Controls Polish
 
 ### iOS switch regression fix
