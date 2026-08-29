@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
   <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
   <link rel="dns-prefetch" href="https://api.open-meteo.com">
-  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?release=7.9.18.2">
+  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?release=7.9.18.3">
   <title id="page-title">行程</title>
   <script>
   // v7.7.5.0 · Performance Lite. Memory only: no Firebase reads/writes, no
@@ -3903,7 +3903,7 @@ body.expenses-view-active #app-version-note{
 #snacks-view::after,
 #info-view::after,
 #profile-view::after{
-  content:"v7.9.18.2" !important;
+  content:"v7.9.18.3" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3924,7 +3924,7 @@ body.expenses-view-active #app-version-note{
   display:none !important;
 }
 body.expenses-view-active .expenses-module .expenses-app::after{
-  content:"v7.9.18.2" !important;
+  content:"v7.9.18.3" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -4416,6 +4416,46 @@ html.theme-dark .trip-edit-icon-option,html:not(.theme-light):not(.theme-dark) .
 .trip-edit-airline-option strong{font-size:12px;font-weight:800;color:#1478d4;}
 .trip-edit-airline-option span{font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .trip-edit-airline-hint{font-size:9.5px;line-height:1.35;color:var(--label-secondary);margin-top:4px;}
+/* v7.9.18.3 · Travel Details UI Harmony */
+.trip-edit-native-group{border:1px solid rgba(118,118,128,.12);border-radius:17px;background:rgba(255,255,255,.72);overflow:hidden;display:grid;}
+.trip-edit-native-row{min-height:52px;display:grid;grid-template-columns:minmax(92px,.38fr) minmax(0,1fr) auto;gap:10px;align-items:center;padding:0 13px;border:0;border-bottom:1px solid rgba(118,118,128,.12);background:transparent;color:var(--label-primary);font:inherit;text-align:left;box-sizing:border-box;}
+.trip-edit-native-row:last-child{border-bottom:0;}
+.trip-edit-native-row-label{font-size:11.5px;font-weight:680;color:var(--label-primary);white-space:nowrap;}
+.trip-edit-native-row-value{min-width:0;font-size:12.5px;font-weight:650;color:var(--label-secondary);text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.trip-edit-native-row-chevron{font-size:20px;line-height:1;color:#a0a0a6;margin-left:-2px;}
+.trip-edit-native-row input.trip-edit-native-input,.trip-edit-native-row select.trip-edit-native-select{width:100%;min-width:0;border:0!important;background:transparent!important;box-shadow:none!important;padding:12px 0!important;min-height:48px!important;text-align:right;font:inherit;font-size:12.5px;font-weight:650;color:var(--label-primary);outline:none;}
+.trip-edit-native-row select.trip-edit-native-select{appearance:auto;-webkit-appearance:menulist;text-align-last:right;}
+.trip-edit-native-row .trip-edit-date-control,.trip-edit-native-row .trip-edit-time-control{width:100%;min-width:0;border:0;background:transparent;box-shadow:none;min-height:48px;border-radius:0;}
+.trip-edit-native-row .trip-edit-date-display,.trip-edit-native-row .trip-edit-time-display{font-size:12.5px;font-weight:650;text-align:right;padding-right:0;}
+.trip-edit-native-section{display:grid;gap:7px;}
+.trip-edit-native-section-title{font-size:10.5px;font-weight:760;color:var(--label-secondary);padding:0 3px;}
+.trip-edit-travel-card-teamline{display:flex;align-items:center;gap:6px;margin-top:3px;min-width:0;}
+.trip-edit-travel-team-chip{display:inline-flex;align-items:center;max-width:100%;min-height:22px;padding:3px 8px;border-radius:999px;background:rgba(118,118,128,.09);color:var(--label-secondary);font-size:9.5px;font-weight:720;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.trip-edit-travel-card.is-team-specific .trip-edit-travel-team-chip{background:rgba(10,132,255,.09);color:#1478d4;}
+.trip-edit-airline-picker-row{cursor:pointer;}
+.trip-edit-airline-picker-logo{width:28px;height:24px;display:inline-flex;align-items:center;justify-content:center;overflow:hidden;border-radius:7px;justify-self:end;}
+.trip-edit-airline-picker-logo .trip-logo-img{width:100%;height:100%;object-fit:contain;}
+.trip-edit-airline-sheet-search{padding:0 16px 10px;}
+.trip-edit-airline-sheet-search input{width:100%;box-sizing:border-box;}
+.trip-edit-airline-sheet-list{display:grid;gap:5px;padding:0 16px 14px;overflow:auto;}
+.trip-edit-airline-sheet-list .trip-edit-airline-option{min-height:48px;border-radius:13px;background:rgba(118,118,128,.055);padding:10px 12px;grid-template-columns:44px minmax(0,1fr);}
+.trip-edit-airline-sheet-list .trip-edit-airline-option strong{font-size:13px;}
+.trip-edit-airline-sheet-list .trip-edit-airline-option span{font-size:11.5px;}
+.trip-edit-airline-sheet-empty{padding:18px 4px;text-align:center;color:var(--label-secondary);font-size:11px;}
+.trip-edit-travel-sync{border-color:rgba(118,118,128,.12);background:rgba(255,255,255,.72);border-radius:17px;padding:0;overflow:hidden;gap:0;}
+.trip-edit-travel-sync-title{padding:11px 13px 7px;font-size:10.5px;color:var(--label-secondary);}
+.trip-edit-travel-sync-row{min-height:58px;padding:9px 13px;border-top:1px solid rgba(118,118,128,.11);grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:12px;}
+.trip-edit-travel-sync-row input{grid-column:2;grid-row:1;width:42px;height:24px;margin:0;appearance:none;-webkit-appearance:none;border:0;border-radius:999px;background:#d1d1d6;position:relative;transition:background .18s ease;}
+.trip-edit-travel-sync-row input::before{content:"";position:absolute;width:20px;height:20px;left:2px;top:2px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.22);transition:transform .18s ease;}
+.trip-edit-travel-sync-row input:checked{background:#34c759;}
+.trip-edit-travel-sync-row input:checked::before{transform:translateX(18px);}
+.trip-edit-travel-sync-copy{grid-column:1;grid-row:1;gap:2px;}
+.trip-edit-travel-sync-copy strong{font-size:12px;}
+.trip-edit-travel-sync-copy small{font-size:9.5px;line-height:1.35;}
+html.theme-dark .trip-edit-travel-sync,html:not(.theme-light):not(.theme-dark) .trip-edit-travel-sync{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.10);}
+html.theme-dark .trip-edit-native-group,html:not(.theme-light):not(.theme-dark) .trip-edit-native-group{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.10);}
+html.theme-dark .trip-edit-native-row,html:not(.theme-light):not(.theme-dark) .trip-edit-native-row{border-bottom-color:rgba(255,255,255,.09);}
+html.theme-dark .trip-edit-travel-team-chip,html:not(.theme-light):not(.theme-dark) .trip-edit-travel-team-chip{background:rgba(255,255,255,.08);color:#c7c7cc;}
 .trip-airline-logo-host .trip-logo-img{display:block;width:100%;height:100%;object-fit:contain;object-position:center;}
 .trip-airline-logo-mini{overflow:hidden;border-radius:9px;}
 .trip-edit-accommodation-location{display:grid;gap:9px;}
@@ -4531,7 +4571,7 @@ html.theme-dark .snack-edit-tools,html:not(.theme-light):not(.theme-dark) .snack
 </style>
             <link rel="apple-touch-icon" href="assets/icon/trip_icon.png">
   <link rel="icon" type="image/png" href="assets/icon/trip_icon.png">
-  <link rel="manifest" href="manifest.json?release=7.9.18.2">
+  <link rel="manifest" href="manifest.json?release=7.9.18.3">
   <meta name="apple-mobile-web-app-title" content="關嘉露西生日之旅">
   <!-- v7.7.1.2: expenses.css is 144KB and every rule is scoped under
        .expenses-module, yet it used to block the very first paint of the
@@ -4539,8 +4579,8 @@ html.theme-dark .snack-edit-tools,html:not(.theme-light):not(.theme-dark) .snack
        priority without blocking paint; ensureExpensesStylesheet() flips it to
        media="all" before the 支出 view is ever mounted, so the styling is
        byte-for-byte identical by the time anything expenses-related renders. -->
-  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?release=7.9.18.2" media="print">
-  <noscript><link rel="stylesheet" href="assets/css/expenses.css?release=7.9.18.2"></noscript>
+  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?release=7.9.18.3" media="print">
+  <noscript><link rel="stylesheet" href="assets/css/expenses.css?release=7.9.18.3"></noscript>
 </head>
 <body class="app-entry-gated app-entry-pending">
 <div class="bg-fixed"></div>
@@ -5362,7 +5402,7 @@ html.theme-dark .snack-edit-tools,html:not(.theme-light):not(.theme-dark) .snack
         <span class="profile-detail-spacer"></span>
       </div>
       <section class="profile-card" aria-label="App 資訊">
-        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.9.18.2</strong></div>
+        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.9.18.3</strong></div>
         <div class="profile-meta-row"><span>資料架構</span><strong>Phase 2G.2</strong></div>
         <div class="profile-meta-row"><span>主要資料來源</span><strong id="app-data-source-label">Firebase / 本機快取</strong></div>
       </section>
@@ -5640,30 +5680,35 @@ html.theme-dark .snack-edit-tools,html:not(.theme-light):not(.theme-dark) .snack
       <div class="trip-edit-travel-heading-meta" id="trip-edit-flight-editor-meta">未設定航班 · 所有人 · 中途航班</div>
     </div>
     <div class="trip-edit-manage-scroll">
-      <p class="trip-edit-travel-editor-note">輸入航班號會自動推斷航空公司；航空公司代碼亦可搜尋清單揀選。Logo 會優先由 Firebase 共用 Airline Registry 載入。</p>
       <div class="trip-edit-form">
-        <div class="trip-edit-travel-grid">
-          <label class="trip-edit-field"><span>航班號碼</span><input class="trip-edit-input" id="trip-edit-flight-number" type="text" maxlength="16" autocomplete="off" placeholder="CX595"></label>
-          <label class="trip-edit-field"><span>航空公司代碼</span><div class="trip-edit-airline-combobox"><input class="trip-edit-input" id="trip-edit-flight-airline-code" type="text" maxlength="3" autocomplete="off" autocapitalize="characters" placeholder="輸入 C、U…"><div class="trip-edit-airline-results" id="trip-edit-flight-airline-results" hidden></div></div><small class="trip-edit-airline-hint">可輸入代碼或首字母搜尋，例如 C → CX、U → UO。</small></label>
+        <div class="trip-edit-native-section">
+          <div class="trip-edit-native-section-title">航班資料</div>
+          <div class="trip-edit-native-group">
+            <label class="trip-edit-native-row"><span class="trip-edit-native-row-label">航班號碼</span><input class="trip-edit-native-input" id="trip-edit-flight-number" type="text" maxlength="16" autocomplete="off" placeholder="CX595"><span></span></label>
+            <button class="trip-edit-native-row trip-edit-airline-picker-row" id="trip-edit-flight-airline-picker" type="button"><span class="trip-edit-native-row-label">航空公司</span><span class="trip-edit-native-row-value" id="trip-edit-flight-airline-picker-value">未設定</span><span class="trip-edit-native-row-chevron">›</span></button>
+            <input id="trip-edit-flight-airline-code" type="hidden">
+            <label class="trip-edit-native-row"><span class="trip-edit-native-row-label">航班角色</span><select class="trip-edit-native-select" id="trip-edit-flight-role"><option value="entry">旅程去程</option><option value="internal">中途航班</option><option value="exit">旅程回程</option></select><span></span></label>
+            <label class="trip-edit-native-row"><span class="trip-edit-native-row-label">所屬 Team</span><select class="trip-edit-native-select" id="trip-edit-flight-team"></select><span></span></label>
+          </div>
         </div>
-        <div class="trip-edit-travel-grid">
-          <label class="trip-edit-field"><span>航班角色</span><select class="trip-edit-select" id="trip-edit-flight-role"><option value="entry">旅程去程</option><option value="internal">中途航班</option><option value="exit">旅程回程</option></select></label>
-          <label class="trip-edit-field"><span>所屬 Team</span><select class="trip-edit-select" id="trip-edit-flight-team"></select></label>
+        <div class="trip-edit-native-section">
+          <div class="trip-edit-native-section-title">出發</div>
+          <div class="trip-edit-native-group">
+            <label class="trip-edit-native-row"><span class="trip-edit-native-row-label">日期</span><span class="trip-edit-date-control"><span class="trip-edit-date-display" id="trip-edit-flight-departure-date-display">未設定</span><input id="trip-edit-flight-departure-date" type="date" aria-label="出發日期"></span><span></span></label>
+            <label class="trip-edit-native-row"><span class="trip-edit-native-row-label">時間</span><span class="trip-edit-time-control"><span class="trip-edit-time-display" id="trip-edit-flight-departure-time-display">--:--</span><input id="trip-edit-flight-departure-time" type="time" step="60" aria-label="出發時間"></span><span></span></label>
+            <label class="trip-edit-native-row"><span class="trip-edit-native-row-label">機場</span><input class="trip-edit-native-input" id="trip-edit-flight-departure-airport" type="text" maxlength="100" autocomplete="off" placeholder="HKG 香港國際機場"><span></span></label>
+            <label class="trip-edit-native-row"><span class="trip-edit-native-row-label">Terminal</span><input class="trip-edit-native-input" id="trip-edit-flight-departure-terminal" type="text" maxlength="40" autocomplete="off" placeholder="Terminal 1"><span></span></label>
+          </div>
         </div>
-        <div class="trip-edit-travel-section-label">出發</div>
-        <div class="trip-edit-travel-grid">
-          <label class="trip-edit-field"><span>日期</span><span class="trip-edit-date-control"><span class="trip-edit-date-display" id="trip-edit-flight-departure-date-display">未設定</span><input id="trip-edit-flight-departure-date" type="date" aria-label="出發日期"></span></label>
-          <label class="trip-edit-field"><span>時間</span><span class="trip-edit-time-control"><span class="trip-edit-time-display" id="trip-edit-flight-departure-time-display">--:--</span><input id="trip-edit-flight-departure-time" type="time" step="60" aria-label="出發時間"></span></label>
+        <div class="trip-edit-native-section">
+          <div class="trip-edit-native-section-title">抵達</div>
+          <div class="trip-edit-native-group">
+            <label class="trip-edit-native-row"><span class="trip-edit-native-row-label">日期</span><span class="trip-edit-date-control"><span class="trip-edit-date-display" id="trip-edit-flight-arrival-date-display">未設定</span><input id="trip-edit-flight-arrival-date" type="date" aria-label="抵達日期"></span><span></span></label>
+            <label class="trip-edit-native-row"><span class="trip-edit-native-row-label">時間</span><span class="trip-edit-time-control"><span class="trip-edit-time-display" id="trip-edit-flight-arrival-time-display">--:--</span><input id="trip-edit-flight-arrival-time" type="time" step="60" aria-label="抵達時間"></span><span></span></label>
+            <label class="trip-edit-native-row"><span class="trip-edit-native-row-label">機場</span><input class="trip-edit-native-input" id="trip-edit-flight-arrival-airport" type="text" maxlength="100" autocomplete="off" placeholder="KIX 關西國際機場"><span></span></label>
+            <label class="trip-edit-native-row"><span class="trip-edit-native-row-label">Terminal</span><input class="trip-edit-native-input" id="trip-edit-flight-arrival-terminal" type="text" maxlength="40" autocomplete="off"><span></span></label>
+          </div>
         </div>
-        <label class="trip-edit-field"><span>出發機場</span><input class="trip-edit-input" id="trip-edit-flight-departure-airport" type="text" maxlength="100" autocomplete="off" placeholder="HKG 香港國際機場"></label>
-        <label class="trip-edit-field"><span>出發 Terminal</span><input class="trip-edit-input" id="trip-edit-flight-departure-terminal" type="text" maxlength="40" autocomplete="off" placeholder="Terminal 1"></label>
-        <div class="trip-edit-travel-section-label">抵達</div>
-        <div class="trip-edit-travel-grid">
-          <label class="trip-edit-field"><span>日期</span><span class="trip-edit-date-control"><span class="trip-edit-date-display" id="trip-edit-flight-arrival-date-display">未設定</span><input id="trip-edit-flight-arrival-date" type="date" aria-label="抵達日期"></span></label>
-          <label class="trip-edit-field"><span>時間</span><span class="trip-edit-time-control"><span class="trip-edit-time-display" id="trip-edit-flight-arrival-time-display">--:--</span><input id="trip-edit-flight-arrival-time" type="time" step="60" aria-label="抵達時間"></span></label>
-        </div>
-        <label class="trip-edit-field"><span>抵達機場</span><input class="trip-edit-input" id="trip-edit-flight-arrival-airport" type="text" maxlength="100" autocomplete="off" placeholder="KIX 關西國際機場"></label>
-        <label class="trip-edit-field"><span>抵達 Terminal</span><input class="trip-edit-input" id="trip-edit-flight-arrival-terminal" type="text" maxlength="40" autocomplete="off"></label>
         <div class="trip-edit-travel-sync">
           <div class="trip-edit-travel-sync-title">行程自動化</div>
           <label class="trip-edit-travel-sync-row"><input id="trip-edit-flight-itinerary-enabled" type="checkbox"><span class="trip-edit-travel-sync-copy"><strong>將此航班加入行程</strong><small>會按航班角色自動放到合適日子。行程項目可自行修改；手動修改後不會再被航班資料強行覆蓋。取消剔選可移除由此航班產生嘅項目。</small></span></label>
@@ -5675,6 +5720,23 @@ html.theme-dark .snack-edit-tools,html:not(.theme-light):not(.theme-dark) .snack
     <div class="trip-edit-manage-actions">
       <button class="is-cancel" id="trip-edit-flight-editor-cancel" type="button">取消</button>
       <button class="is-done" id="trip-edit-flight-editor-done" type="button">完成</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="trip-edit-airline-picker-backdrop" aria-hidden="true">
+  <div class="modal trip-edit-manage-modal" role="dialog" aria-modal="true" aria-labelledby="trip-edit-airline-picker-title">
+    <div class="trip-edit-travel-heading">
+      <h3><span class="trip-edit-title-icon">✈️</span><span id="trip-edit-airline-picker-title">選擇航空公司</span></h3>
+      <div class="trip-edit-travel-heading-meta">搜尋代碼或航空公司名稱</div>
+    </div>
+    <div class="trip-edit-manage-scroll">
+      <div class="trip-edit-airline-sheet-search"><input class="trip-edit-input" id="trip-edit-airline-search" type="search" autocomplete="off" autocapitalize="characters" placeholder="例如 CX、Cathay、UO"></div>
+      <div class="trip-edit-airline-sheet-list" id="trip-edit-airline-sheet-results"></div>
+    </div>
+    <div class="trip-edit-manage-actions">
+      <button class="is-cancel" id="trip-edit-airline-picker-cancel" type="button">取消</button>
+      <button class="is-done" id="trip-edit-airline-picker-clear" type="button">清除</button>
     </div>
   </div>
 </div>
@@ -5704,22 +5766,28 @@ html.theme-dark .snack-edit-tools,html:not(.theme-light):not(.theme-dark) .snack
       <div class="trip-edit-travel-heading-meta" id="trip-edit-accommodation-editor-meta">未命名住宿 · 未設定日期</div>
     </div>
     <div class="trip-edit-manage-scroll">
-      <p class="trip-edit-travel-editor-note">住宿定位直接沿用行程項目嘅 Google Places / Maps picker；Check-in / Check-out 決定每日 Map 使用邊間住宿。</p>
       <div class="trip-edit-form">
-        <label class="trip-edit-field"><span>住宿名稱</span><input class="trip-edit-input" id="trip-edit-accommodation-name" type="text" maxlength="160" autocomplete="off"></label>
-        <div class="trip-edit-travel-grid">
-          <label class="trip-edit-field"><span>城市 / 地區</span><select class="trip-edit-select" id="trip-edit-accommodation-city"></select></label>
-          <label class="trip-edit-field"><span>所屬 Team</span><select class="trip-edit-select" id="trip-edit-accommodation-team"></select></label>
+        <div class="trip-edit-native-section">
+          <div class="trip-edit-native-section-title">住宿資料</div>
+          <div class="trip-edit-native-group">
+            <label class="trip-edit-native-row"><span class="trip-edit-native-row-label">住宿名稱</span><input class="trip-edit-native-input" id="trip-edit-accommodation-name" type="text" maxlength="160" autocomplete="off"><span></span></label>
+            <label class="trip-edit-native-row"><span class="trip-edit-native-row-label">城市 / 地區</span><select class="trip-edit-native-select" id="trip-edit-accommodation-city"></select><span></span></label>
+            <label class="trip-edit-native-row"><span class="trip-edit-native-row-label">所屬 Team</span><select class="trip-edit-native-select" id="trip-edit-accommodation-team"></select><span></span></label>
+          </div>
         </div>
-        <div class="trip-edit-travel-section-label">入住</div>
-        <div class="trip-edit-travel-grid">
-          <label class="trip-edit-field"><span>日期</span><span class="trip-edit-date-control"><span class="trip-edit-date-display" id="trip-edit-accommodation-checkin-date-display">未設定</span><input id="trip-edit-accommodation-checkin-date" type="date" aria-label="入住日期"></span></label>
-          <label class="trip-edit-field"><span>時間</span><span class="trip-edit-time-control"><span class="trip-edit-time-display" id="trip-edit-accommodation-checkin-time-display">--:--</span><input id="trip-edit-accommodation-checkin-time" type="time" step="60" aria-label="入住時間"></span></label>
+        <div class="trip-edit-native-section">
+          <div class="trip-edit-native-section-title">入住</div>
+          <div class="trip-edit-native-group">
+            <label class="trip-edit-native-row"><span class="trip-edit-native-row-label">日期</span><span class="trip-edit-date-control"><span class="trip-edit-date-display" id="trip-edit-accommodation-checkin-date-display">未設定</span><input id="trip-edit-accommodation-checkin-date" type="date" aria-label="入住日期"></span><span></span></label>
+            <label class="trip-edit-native-row"><span class="trip-edit-native-row-label">時間</span><span class="trip-edit-time-control"><span class="trip-edit-time-display" id="trip-edit-accommodation-checkin-time-display">--:--</span><input id="trip-edit-accommodation-checkin-time" type="time" step="60" aria-label="入住時間"></span><span></span></label>
+          </div>
         </div>
-        <div class="trip-edit-travel-section-label">退房</div>
-        <div class="trip-edit-travel-grid">
-          <label class="trip-edit-field"><span>日期</span><span class="trip-edit-date-control"><span class="trip-edit-date-display" id="trip-edit-accommodation-checkout-date-display">未設定</span><input id="trip-edit-accommodation-checkout-date" type="date" aria-label="退房日期"></span></label>
-          <label class="trip-edit-field"><span>時間</span><span class="trip-edit-time-control"><span class="trip-edit-time-display" id="trip-edit-accommodation-checkout-time-display">--:--</span><input id="trip-edit-accommodation-checkout-time" type="time" step="60" aria-label="退房時間"></span></label>
+        <div class="trip-edit-native-section">
+          <div class="trip-edit-native-section-title">退房</div>
+          <div class="trip-edit-native-group">
+            <label class="trip-edit-native-row"><span class="trip-edit-native-row-label">日期</span><span class="trip-edit-date-control"><span class="trip-edit-date-display" id="trip-edit-accommodation-checkout-date-display">未設定</span><input id="trip-edit-accommodation-checkout-date" type="date" aria-label="退房日期"></span><span></span></label>
+            <label class="trip-edit-native-row"><span class="trip-edit-native-row-label">時間</span><span class="trip-edit-time-control"><span class="trip-edit-time-display" id="trip-edit-accommodation-checkout-time-display">--:--</span><input id="trip-edit-accommodation-checkout-time" type="time" step="60" aria-label="退房時間"></span><span></span></label>
+          </div>
         </div>
         <div class="trip-edit-travel-section-label">Google Maps 地點</div>
         <div class="trip-edit-accommodation-location">
@@ -5966,7 +6034,7 @@ html.theme-dark .snack-edit-tools,html:not(.theme-light):not(.theme-dark) .snack
 </div>
 
 <script>
-const APP_VERSION = "7.9.18.2";
+const APP_VERSION = "7.9.18.3";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 let tripMapServicePromise=null,transitRouteServicePromise=null,tripEditServicePromise=null,airlineLogoServicePromise=null,tripMapController=null,tripMapScope="day",tripMapRenderEpoch=0,tripMapSelectedPoint=null;
@@ -6594,11 +6662,11 @@ document.getElementById("trip-edit-flight-manager-done")?.addEventListener("clic
 document.getElementById("trip-edit-flight-add")?.addEventListener("click",()=>openTripEditFlightEditor(""));
 document.getElementById("trip-edit-flight-editor-cancel")?.addEventListener("click",()=>closeTripEditFlightEditor({discardNew:true}));
 document.getElementById("trip-edit-flight-editor-done")?.addEventListener("click",finishTripEditFlightEditor);
-document.getElementById("trip-edit-flight-number")?.addEventListener("input",event=>{const code=document.getElementById("trip-edit-flight-airline-code"),match=String(event.target?.value||"").trim().toUpperCase().match(/^([A-Z0-9]{2})(?=\s*\d)/);if(code&&!String(code.value||"").trim()&&match)code.value=match[1];tripEditRefreshFlightEditorHeading();});
-const tripEditAirlineCodeInput=document.getElementById("trip-edit-flight-airline-code");
-tripEditAirlineCodeInput?.addEventListener("focus",()=>void tripEditRenderAirlineResults(tripEditAirlineCodeInput.value));
-tripEditAirlineCodeInput?.addEventListener("input",event=>{event.target.value=String(event.target.value||"").toUpperCase().replace(/[^A-Z0-9]/g,"").slice(0,3);tripEditRefreshFlightEditorHeading();void tripEditRenderAirlineResults(event.target.value);});
-tripEditAirlineCodeInput?.addEventListener("blur",()=>setTimeout(tripEditHideAirlineResults,140));
+document.getElementById("trip-edit-flight-number")?.addEventListener("input",event=>{const code=document.getElementById("trip-edit-flight-airline-code"),match=String(event.target?.value||"").trim().toUpperCase().match(/^([A-Z0-9]{2})(?=\s*\d)/);if(code&&!String(code.value||"").trim()&&match)code.value=match[1];tripEditRefreshFlightEditorHeading();void tripEditRefreshAirlinePickerValue();});
+document.getElementById("trip-edit-flight-airline-picker")?.addEventListener("click",()=>void openTripEditAirlinePicker());
+document.getElementById("trip-edit-airline-picker-cancel")?.addEventListener("click",closeTripEditAirlinePicker);
+document.getElementById("trip-edit-airline-picker-clear")?.addEventListener("click",()=>{const input=document.getElementById("trip-edit-flight-airline-code");if(input)input.value="";closeTripEditAirlinePicker();tripEditRefreshFlightEditorHeading();void tripEditRefreshAirlinePickerValue();});
+document.getElementById("trip-edit-airline-search")?.addEventListener("input",event=>void tripEditRenderAirlineSheet(event.target?.value||""));
 ["trip-edit-flight-role","trip-edit-flight-team"].forEach(id=>document.getElementById(id)?.addEventListener("change",tripEditRefreshFlightEditorHeading));
 [["trip-edit-flight-departure-date","trip-edit-flight-departure-date-display"],["trip-edit-flight-arrival-date","trip-edit-flight-arrival-date-display"]].forEach(([inputId,displayId])=>["input","change"].forEach(type=>document.getElementById(inputId)?.addEventListener(type,()=>{tripEditSyncDateDisplay(inputId,displayId);tripEditRefreshFlightEditorHeading();})));
 [["trip-edit-flight-departure-time","trip-edit-flight-departure-time-display"],["trip-edit-flight-arrival-time","trip-edit-flight-arrival-time-display"]].forEach(([inputId,displayId])=>["input","change"].forEach(type=>document.getElementById(inputId)?.addEventListener(type,()=>tripEditSyncTimeDisplay(inputId,displayId))));
@@ -6617,7 +6685,7 @@ document.getElementById("trip-edit-accommodation-location-link-btn")?.addEventLi
 document.getElementById("trip-edit-accommodation-location-link")?.addEventListener("keydown",event=>{if(event.key==="Enter"){event.preventDefault();void tripEditImportAccommodationMapsLink();}});
 document.getElementById("trip-edit-accommodation-location-clear")?.addEventListener("click",()=>{tripEditAccommodationLocationSelection=tripEditBlankLocation();tripEditRenderAccommodationLocationSelection(tripEditAccommodationLocationSelection);tripEditResetAccommodationLocationResults();const query=document.getElementById("trip-edit-accommodation-location-query"),link=document.getElementById("trip-edit-accommodation-location-link"),address=document.getElementById("trip-edit-accommodation-address");if(query)query.value="";if(link)link.value="";if(address)address.value="";const status=document.getElementById("trip-edit-accommodation-location-status");if(status)status.textContent="住宿定位已清除。";});
 document.getElementById("trip-edit-accommodation-location-open-maps")?.addEventListener("click",()=>{const url=String(tripEditAccommodationLocationSelection?.mapsUrl||"").trim();if(url)window.open(url,"_blank","noopener");});
-["trip-edit-flight-manager-backdrop","trip-edit-flight-editor-backdrop","trip-edit-accommodation-manager-backdrop","trip-edit-accommodation-editor-backdrop"].forEach(id=>document.getElementById(id)?.addEventListener("click",event=>{if(event.target!==event.currentTarget)return;if(id.includes("flight-editor"))closeTripEditFlightEditor({discardNew:true});else if(id.includes("flight-manager"))closeTripEditFlightManager();else if(id.includes("accommodation-editor"))closeTripEditAccommodationEditor({discardNew:true});else closeTripEditAccommodationManager();}));
+["trip-edit-flight-manager-backdrop","trip-edit-flight-editor-backdrop","trip-edit-airline-picker-backdrop","trip-edit-accommodation-manager-backdrop","trip-edit-accommodation-editor-backdrop"].forEach(id=>document.getElementById(id)?.addEventListener("click",event=>{if(event.target!==event.currentTarget)return;if(id.includes("airline-picker"))closeTripEditAirlinePicker();else if(id.includes("flight-editor"))closeTripEditFlightEditor({discardNew:true});else if(id.includes("flight-manager"))closeTripEditFlightManager();else if(id.includes("accommodation-editor"))closeTripEditAccommodationEditor({discardNew:true});else closeTripEditAccommodationManager();}));
 document.getElementById("trip-edit-mode-entry")?.addEventListener("click",()=>{
   if(!tripEditHasPermission()||tripEditIsActive())return;
   setView("itinerary",{restoreScroll:true});
@@ -8414,24 +8482,31 @@ function tripEditFillCitySelect(id,value=""){
 }
 function tripEditFlightSort(rows=[]){return [...rows].sort((a,b)=>String(a?.departureDate||"").localeCompare(String(b?.departureDate||""))||String(a?.departureTime||"").localeCompare(String(b?.departureTime||""))||String(a?.flightNumber||"").localeCompare(String(b?.flightNumber||"")));}
 function tripEditHideAirlineResults(){const host=document.getElementById("trip-edit-flight-airline-results");if(host)host.hidden=true;}
-async function tripEditRenderAirlineResults(query=""){
-  const host=document.getElementById("trip-edit-flight-airline-results");if(!host)return;const input=document.getElementById("trip-edit-flight-airline-code"),needle=String(query ?? input?.value ?? "").trim().toUpperCase();
-  try{
-    const service=await airlineLogoService(),base=service.airlineDirectory?.(needle)||[],seen=new Set(base.map(row=>String(row.code||"").toUpperCase())),tripRows=(tripEditFlightModalState||[]).map(row=>String(row?.airlineCode||String(row?.flightNumber||"").match(/^([A-Z0-9]{2})/)?.[1]||"").toUpperCase()).filter(Boolean).filter(code=>(!needle||code.includes(needle))&&!seen.has(code)).map(code=>({code,name:"今次旅程已使用"}));
-    const rows=[...tripRows,...base].slice(0,12);host.replaceChildren();if(!rows.length){host.hidden=true;return;}
-    rows.forEach(row=>{const button=document.createElement("button");button.type="button";button.className="trip-edit-airline-option";const code=document.createElement("strong");code.textContent=String(row.code||"");const name=document.createElement("span");name.textContent=String(row.name||"");button.append(code,name);button.addEventListener("click",()=>{if(input)input.value=String(row.code||"");tripEditHideAirlineResults();tripEditRefreshFlightEditorHeading();});host.appendChild(button);});host.hidden=false;
-  }catch(_){host.hidden=true;}
+async function tripEditAirlineDirectoryRows(query=""){
+  const needle=String(query||"").trim().toUpperCase();
+  try{const service=await airlineLogoService(),base=service.airlineDirectory?.(needle)||[],seen=new Set(base.map(row=>String(row.code||"").toUpperCase())),tripRows=(tripEditFlightModalState||[]).map(row=>String(row?.airlineCode||String(row?.flightNumber||"").match(/^([A-Z0-9]{2})/)?.[1]||"").toUpperCase()).filter(Boolean).filter(code=>(!needle||code.includes(needle))&&!seen.has(code)).map(code=>({code,name:"今次旅程已使用"}));return [...tripRows,...base].slice(0,40);}catch(_){return [];}
 }
+async function tripEditRefreshAirlinePickerValue(){
+  const value=document.getElementById("trip-edit-flight-airline-picker-value"),code=String(document.getElementById("trip-edit-flight-airline-code")?.value||"").trim().toUpperCase();if(!value)return;if(!code){value.textContent="未設定";return;}const rows=await tripEditAirlineDirectoryRows(code),exact=rows.find(row=>String(row.code||"").toUpperCase()===code);value.textContent=exact?.name?`${code} · ${exact.name}`:code;
+}
+function closeTripEditAirlinePicker(){tripEditCloseBackdrop("trip-edit-airline-picker-backdrop");}
+async function openTripEditAirlinePicker(){
+  const search=document.getElementById("trip-edit-airline-search"),code=String(document.getElementById("trip-edit-flight-airline-code")?.value||"").trim().toUpperCase();if(search)search.value=code;tripEditOpenBackdrop("trip-edit-airline-picker-backdrop");await tripEditRenderAirlineSheet(code);requestAnimationFrame(()=>search?.focus());
+}
+async function tripEditRenderAirlineSheet(query=""){
+  const host=document.getElementById("trip-edit-airline-sheet-results");if(!host)return;const needle=String(query||"").trim().toUpperCase(),rows=await tripEditAirlineDirectoryRows(needle);host.replaceChildren();const exact=rows.some(row=>String(row.code||"").toUpperCase()===needle),custom=/^[A-Z0-9]{2,3}$/.test(needle)&&!exact?[{code:needle,name:"使用自訂航空公司代碼"}]:[];const all=[...custom,...rows];if(!all.length){const empty=document.createElement("div");empty.className="trip-edit-airline-sheet-empty";empty.textContent="搵唔到航空公司。可輸入2–3位代碼使用自訂值。";host.appendChild(empty);return;}all.forEach(row=>{const button=document.createElement("button");button.type="button";button.className="trip-edit-airline-option";const code=document.createElement("strong");code.textContent=String(row.code||"");const name=document.createElement("span");name.textContent=String(row.name||"");button.append(code,name);button.addEventListener("click",()=>{const input=document.getElementById("trip-edit-flight-airline-code");if(input)input.value=String(row.code||"").toUpperCase();closeTripEditAirlinePicker();tripEditRefreshFlightEditorHeading();void tripEditRefreshAirlinePickerValue();});host.appendChild(button);});
+}
+async function tripEditRenderAirlineResults(query=""){return tripEditRenderAirlineSheet(query);}
 function closeTripEditFlightManager(){tripEditFlightModalState=null;tripEditFlightEditorId="";tripEditCloseBackdrop("trip-edit-flight-manager-backdrop");tripEditCloseBackdrop("trip-edit-flight-editor-backdrop");}
 async function openTripEditFlightManager(){if(!tripEditSession)return;const service=await tripEditService(),state=service.getTripEditDraftTravelState(tripEditSession);tripEditFlightModalState=tripEditClonePlain(state.flights||[]);tripEditRenderFlightManager();tripEditOpenBackdrop("trip-edit-flight-manager-backdrop");}
 function tripEditRenderFlightManager(){const host=document.getElementById("trip-edit-flight-list");if(!host||!Array.isArray(tripEditFlightModalState))return;host.innerHTML="";const rows=tripEditFlightSort(tripEditFlightModalState),managerMeta=document.getElementById("trip-edit-flight-manager-meta");if(managerMeta)managerMeta.textContent=`${rows.length} 班航班 · 按日期排列`;if(!rows.length){const empty=document.createElement("div");empty.className="trip-edit-team-note";empty.textContent="未有航班。可新增第一班航班。";host.appendChild(empty);return;}
-  rows.forEach(f=>{const card=document.createElement("div");card.className="trip-edit-travel-card";const head=document.createElement("div");head.className="trip-edit-travel-card-head";const logo=document.createElement("span");logo.className="trip-airline-logo-mini";void tripApplyAirlineLogo(logo,f,"is-manager");const main=document.createElement("span");main.className="trip-edit-travel-card-main";const strong=document.createElement("strong");strong.textContent=f.flightNumber||"未命名航班";const small=document.createElement("small");small.textContent=[tripFlightDateLabel(f.departureDate),tripFlightRouteLabel(f),tripFlightTimeLabel(f),f.itineraryEnabled?"✓ 已加入行程":""].filter(Boolean).join(" · ")||"未設定時間／路線";main.append(strong,small);const role=document.createElement("span");role.className="trip-edit-travel-card-role";role.textContent=tripFlightRoleLabel(f.journeyRole);head.append(logo,main,role);const actions=document.createElement("div");actions.className="trip-edit-travel-card-actions";const edit=document.createElement("button");edit.type="button";edit.className="trip-edit-travel-edit";edit.textContent="編輯";edit.addEventListener("click",()=>openTripEditFlightEditor(f.flightId));const del=document.createElement("button");del.type="button";del.className="trip-edit-travel-delete";del.textContent="刪除";del.addEventListener("click",()=>{if(!confirm(`刪除 ${f.flightNumber||"呢班航班"}？`))return;tripEditFlightModalState=tripEditFlightModalState.filter(row=>String(row.flightId)!==String(f.flightId));tripEditRenderFlightManager();});actions.append(edit,del);card.append(head,actions);host.appendChild(card);});
+  rows.forEach(f=>{const teamKey=String(f.teamKey||"all"),card=document.createElement("div");card.className=`trip-edit-travel-card${teamKey!=="all"?" is-team-specific":""}`;const head=document.createElement("div");head.className="trip-edit-travel-card-head";const logo=document.createElement("span");logo.className="trip-airline-logo-mini";void tripApplyAirlineLogo(logo,f,"is-manager");const main=document.createElement("span");main.className="trip-edit-travel-card-main";const strong=document.createElement("strong");strong.textContent=f.flightNumber||"未命名航班";const small=document.createElement("small");small.textContent=[tripFlightDateLabel(f.departureDate),tripFlightRouteLabel(f),tripFlightTimeLabel(f),f.itineraryEnabled?"✓ 已加入行程":""].filter(Boolean).join(" · ")||"未設定時間／路線";const teamLine=document.createElement("span");teamLine.className="trip-edit-travel-card-teamline";const teamChip=document.createElement("span");teamChip.className="trip-edit-travel-team-chip";teamChip.textContent=tripEditTeamLabel(teamKey);teamLine.appendChild(teamChip);main.append(strong,small,teamLine);const role=document.createElement("span");role.className="trip-edit-travel-card-role";role.textContent=tripFlightRoleLabel(f.journeyRole);head.append(logo,main,role);const actions=document.createElement("div");actions.className="trip-edit-travel-card-actions";const edit=document.createElement("button");edit.type="button";edit.className="trip-edit-travel-edit";edit.textContent="編輯";edit.addEventListener("click",()=>openTripEditFlightEditor(f.flightId));const del=document.createElement("button");del.type="button";del.className="trip-edit-travel-delete";del.textContent="刪除";del.addEventListener("click",()=>{if(!confirm(`刪除 ${f.flightNumber||"呢班航班"}？`))return;tripEditFlightModalState=tripEditFlightModalState.filter(row=>String(row.flightId)!==String(f.flightId));tripEditRenderFlightManager();});actions.append(edit,del);card.append(head,actions);host.appendChild(card);});
 }
 function openTripEditFlightEditor(flightId=""){
   if(!Array.isArray(tripEditFlightModalState))return;let row=tripEditFlightModalState.find(f=>String(f.flightId)===String(flightId));if(!row){row={flightId:tripEditTravelId("flight"),teamKey:"all",journeyRole:"internal",airlineCode:"",flightNumber:"",departureDate:"",departureTime:"",departureAirport:"",departureTerminal:"",arrivalDate:"",arrivalTime:"",arrivalAirport:"",arrivalTerminal:"",bookingReference:"",note:"",airlineLogo:"",itineraryEnabled:true};tripEditFlightModalState.push(row);}tripEditFlightEditorId=String(row.flightId);document.getElementById("trip-edit-flight-editor-title").textContent=flightId?"編輯航班":"新增航班";
-  const fields={"trip-edit-flight-number":row.flightNumber,"trip-edit-flight-airline-code":row.airlineCode,"trip-edit-flight-role":row.journeyRole,"trip-edit-flight-departure-date":row.departureDate,"trip-edit-flight-departure-time":row.departureTime,"trip-edit-flight-departure-airport":row.departureAirport,"trip-edit-flight-departure-terminal":row.departureTerminal,"trip-edit-flight-arrival-date":row.arrivalDate,"trip-edit-flight-arrival-time":row.arrivalTime,"trip-edit-flight-arrival-airport":row.arrivalAirport,"trip-edit-flight-arrival-terminal":row.arrivalTerminal,"trip-edit-flight-booking-reference":row.bookingReference,"trip-edit-flight-note":row.note};Object.entries(fields).forEach(([id,value])=>{const el=document.getElementById(id);if(el)el.value=String(value||"");});const itineraryToggle=document.getElementById("trip-edit-flight-itinerary-enabled");if(itineraryToggle)itineraryToggle.checked=Boolean(row.itineraryEnabled);tripEditFillTeamSelect("trip-edit-flight-team",row.teamKey);tripEditSyncTravelDateTimeDisplays();tripEditRefreshFlightEditorHeading();tripEditHideAirlineResults();tripEditOpenBackdrop("trip-edit-flight-editor-backdrop");
+  const fields={"trip-edit-flight-number":row.flightNumber,"trip-edit-flight-airline-code":row.airlineCode,"trip-edit-flight-role":row.journeyRole,"trip-edit-flight-departure-date":row.departureDate,"trip-edit-flight-departure-time":row.departureTime,"trip-edit-flight-departure-airport":row.departureAirport,"trip-edit-flight-departure-terminal":row.departureTerminal,"trip-edit-flight-arrival-date":row.arrivalDate,"trip-edit-flight-arrival-time":row.arrivalTime,"trip-edit-flight-arrival-airport":row.arrivalAirport,"trip-edit-flight-arrival-terminal":row.arrivalTerminal,"trip-edit-flight-booking-reference":row.bookingReference,"trip-edit-flight-note":row.note};Object.entries(fields).forEach(([id,value])=>{const el=document.getElementById(id);if(el)el.value=String(value||"");});const itineraryToggle=document.getElementById("trip-edit-flight-itinerary-enabled");if(itineraryToggle)itineraryToggle.checked=Boolean(row.itineraryEnabled);tripEditFillTeamSelect("trip-edit-flight-team",row.teamKey);tripEditSyncTravelDateTimeDisplays();tripEditRefreshFlightEditorHeading();void tripEditRefreshAirlinePickerValue();tripEditHideAirlineResults();tripEditOpenBackdrop("trip-edit-flight-editor-backdrop");
 }
-function closeTripEditFlightEditor({discardNew=false}={}){tripEditHideAirlineResults();if(discardNew&&tripEditFlightEditorId){const row=tripEditFlightModalState?.find(f=>String(f.flightId)===tripEditFlightEditorId);if(row&&!String(row.flightNumber||"").trim())tripEditFlightModalState=tripEditFlightModalState.filter(f=>String(f.flightId)!==tripEditFlightEditorId);}tripEditFlightEditorId="";tripEditCloseBackdrop("trip-edit-flight-editor-backdrop");tripEditRenderFlightManager();}
+function closeTripEditFlightEditor({discardNew=false}={}){closeTripEditAirlinePicker();tripEditHideAirlineResults();if(discardNew&&tripEditFlightEditorId){const row=tripEditFlightModalState?.find(f=>String(f.flightId)===tripEditFlightEditorId);if(row&&!String(row.flightNumber||"").trim())tripEditFlightModalState=tripEditFlightModalState.filter(f=>String(f.flightId)!==tripEditFlightEditorId);}tripEditFlightEditorId="";tripEditCloseBackdrop("trip-edit-flight-editor-backdrop");tripEditRenderFlightManager();}
 function finishTripEditFlightEditor(){if(!tripEditFlightEditorId||!Array.isArray(tripEditFlightModalState))return closeTripEditFlightEditor();const index=tripEditFlightModalState.findIndex(f=>String(f.flightId)===tripEditFlightEditorId);if(index<0)return closeTripEditFlightEditor();const flightNumber=String(document.getElementById("trip-edit-flight-number")?.value||"").trim().toUpperCase();if(!flightNumber){alert("請輸入航班號碼。");return;}const airlineCode=String(document.getElementById("trip-edit-flight-airline-code")?.value||"").trim().toUpperCase()||flightNumber.match(/^([A-Z0-9]{2})/)?.[1]||"";const row={...tripEditFlightModalState[index],flightNumber,airlineCode,journeyRole:String(document.getElementById("trip-edit-flight-role")?.value||"internal"),teamKey:String(document.getElementById("trip-edit-flight-team")?.value||"all"),departureDate:String(document.getElementById("trip-edit-flight-departure-date")?.value||""),departureTime:String(document.getElementById("trip-edit-flight-departure-time")?.value||""),departureAirport:String(document.getElementById("trip-edit-flight-departure-airport")?.value||"").trim(),departureTerminal:String(document.getElementById("trip-edit-flight-departure-terminal")?.value||"").trim(),arrivalDate:String(document.getElementById("trip-edit-flight-arrival-date")?.value||""),arrivalTime:String(document.getElementById("trip-edit-flight-arrival-time")?.value||""),arrivalAirport:String(document.getElementById("trip-edit-flight-arrival-airport")?.value||"").trim(),arrivalTerminal:String(document.getElementById("trip-edit-flight-arrival-terminal")?.value||"").trim(),bookingReference:String(document.getElementById("trip-edit-flight-booking-reference")?.value||"").trim(),note:String(document.getElementById("trip-edit-flight-note")?.value||"").trim(),itineraryEnabled:Boolean(document.getElementById("trip-edit-flight-itinerary-enabled")?.checked)};if(!row.arrivalDate)row.arrivalDate=row.departureDate;tripEditFlightModalState[index]=row;closeTripEditFlightEditor();}
 async function finishTripEditFlightManager(){if(!tripEditSession||!Array.isArray(tripEditFlightModalState))return closeTripEditFlightManager();try{const service=await tripEditService();service.replaceTripEditDraftFlights(tripEditSession,tripEditFlightModalState);window.__tripEditPreviewData=service.applyTripEditDraftToTrip(tripEditSession,window.tripData);closeTripEditFlightManager();tripEditSyncInfoTools();render(window.__tripEditPreviewData,{includeSnacks:false});setView("info",{restoreScroll:true});if(tripMapOverlayOpen())void renderTripMapScope(tripMapScope);}catch(error){alert(tripEditFriendlyError(error));}}
 
@@ -8439,7 +8514,7 @@ function tripEditAccommodationSort(rows=[]){return [...rows].sort((a,b)=>String(
 function closeTripEditAccommodationManager(){tripEditAccommodationModalState=null;tripEditAccommodationEditorId="";tripEditCloseBackdrop("trip-edit-accommodation-manager-backdrop");tripEditCloseBackdrop("trip-edit-accommodation-editor-backdrop");}
 async function openTripEditAccommodationManager(){if(!tripEditSession)return;const service=await tripEditService(),state=service.getTripEditDraftTravelState(tripEditSession);tripEditAccommodationModalState=tripEditClonePlain(state.accommodations||[]);tripEditRenderAccommodationManager();tripEditOpenBackdrop("trip-edit-accommodation-manager-backdrop");}
 function tripEditRenderAccommodationManager(){const host=document.getElementById("trip-edit-accommodation-list");if(!host||!Array.isArray(tripEditAccommodationModalState))return;host.innerHTML="";const rows=tripEditAccommodationSort(tripEditAccommodationModalState),cities=activeTripPresentationData()?.meta?.cities||{},managerMeta=document.getElementById("trip-edit-accommodation-manager-meta");if(managerMeta)managerMeta.textContent=`${rows.length} 間住宿 · 按入住日期排列`;if(!rows.length){const empty=document.createElement("div");empty.className="trip-edit-team-note";empty.textContent="未有住宿。可新增第一間酒店或住宿。";host.appendChild(empty);return;}
-  rows.forEach(stay=>{const card=document.createElement("div");card.className="trip-edit-travel-card";const head=document.createElement("div");head.className="trip-edit-travel-card-head";const icon=document.createElement("span");icon.className="trip-airline-logo-fallback";icon.textContent="🏨";const main=document.createElement("span");main.className="trip-edit-travel-card-main";const strong=document.createElement("strong");strong.textContent=stay.name||"未命名住宿";const small=document.createElement("small");small.textContent=[[stay.checkInDate,stay.checkOutDate].filter(Boolean).join(" → "),cities?.[stay.cityKey]?.label||stay.cityKey||"",stay.address,(stay.itineraryCheckInEnabled||stay.itineraryCheckOutEnabled)?"✓ 已加入行程":""].filter(Boolean).join(" · ")||"未設定日期／地址";main.append(strong,small);head.append(icon,main);const actions=document.createElement("div");actions.className="trip-edit-travel-card-actions";const edit=document.createElement("button");edit.type="button";edit.className="trip-edit-travel-edit";edit.textContent="編輯";edit.addEventListener("click",()=>openTripEditAccommodationEditor(stay.accommodationId));const del=document.createElement("button");del.type="button";del.className="trip-edit-travel-delete";del.textContent="刪除";del.addEventListener("click",()=>{if(!confirm(`刪除 ${stay.name||"呢個住宿"}？`))return;tripEditAccommodationModalState=tripEditAccommodationModalState.filter(row=>String(row.accommodationId)!==String(stay.accommodationId));tripEditRenderAccommodationManager();});actions.append(edit,del);card.append(head,actions);host.appendChild(card);});
+  rows.forEach(stay=>{const teamKey=String(stay.teamKey||"all"),card=document.createElement("div");card.className=`trip-edit-travel-card${teamKey!=="all"?" is-team-specific":""}`;const head=document.createElement("div");head.className="trip-edit-travel-card-head";const icon=document.createElement("span");icon.className="trip-airline-logo-fallback";icon.textContent="🏨";const main=document.createElement("span");main.className="trip-edit-travel-card-main";const strong=document.createElement("strong");strong.textContent=stay.name||"未命名住宿";const small=document.createElement("small");small.textContent=[[stay.checkInDate,stay.checkOutDate].filter(Boolean).join(" → "),cities?.[stay.cityKey]?.label||stay.cityKey||"",stay.address,(stay.itineraryCheckInEnabled||stay.itineraryCheckOutEnabled)?"✓ 已加入行程":""].filter(Boolean).join(" · ")||"未設定日期／地址";const teamLine=document.createElement("span");teamLine.className="trip-edit-travel-card-teamline";const teamChip=document.createElement("span");teamChip.className="trip-edit-travel-team-chip";teamChip.textContent=tripEditTeamLabel(teamKey);teamLine.appendChild(teamChip);main.append(strong,small,teamLine);head.append(icon,main);const actions=document.createElement("div");actions.className="trip-edit-travel-card-actions";const edit=document.createElement("button");edit.type="button";edit.className="trip-edit-travel-edit";edit.textContent="編輯";edit.addEventListener("click",()=>openTripEditAccommodationEditor(stay.accommodationId));const del=document.createElement("button");del.type="button";del.className="trip-edit-travel-delete";del.textContent="刪除";del.addEventListener("click",()=>{if(!confirm(`刪除 ${stay.name||"呢個住宿"}？`))return;tripEditAccommodationModalState=tripEditAccommodationModalState.filter(row=>String(row.accommodationId)!==String(stay.accommodationId));tripEditRenderAccommodationManager();});actions.append(edit,del);card.append(head,actions);host.appendChild(card);});
 }
 function openTripEditAccommodationEditor(id=""){
   if(!Array.isArray(tripEditAccommodationModalState))return;let row=tripEditAccommodationModalState.find(stay=>String(stay.accommodationId)===String(id));if(!row){row={accommodationId:tripEditTravelId("stay"),name:"",cityKey:"",teamKey:"all",checkInDate:"",checkInTime:"",checkOutDate:"",checkOutTime:"",address:"",mapsUrl:"",location:null,bookingReference:"",note:"",itineraryCheckInEnabled:true,itineraryCheckOutEnabled:false};tripEditAccommodationModalState.push(row);}tripEditAccommodationEditorId=String(row.accommodationId);document.getElementById("trip-edit-accommodation-editor-title").textContent=id?"編輯住宿":"新增住宿";

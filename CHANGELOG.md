@@ -1,3 +1,42 @@
+## v7.9.18.3 — Travel Details UI Harmony
+
+### Travel Details manager clarity
+
+- Flight manager cards now show the assigned Team directly below the route/time summary.
+- Accommodation manager cards now show `所有人` or the assigned Team, so multi-Team travel records can be identified without opening each editor.
+
+### Native-style Flight editor
+
+- Reworked the Flight editor from wide form fields into iOS-style grouped setting rows.
+- Flight number, airline, journey role and Team now read as one compact settings group.
+- Departure and arrival details use grouped rows while retaining the proven iOS-safe date/time picker shells.
+- Removed the large airline-code input and explanatory helper copy.
+- Airline selection now opens a dedicated searchable sheet. Typing `C`, `CX`, `Cathay`, `U`, `UO`, etc. filters the shared airline directory; 2–3 character custom codes remain supported.
+
+### Native-style Accommodation editor
+
+- Accommodation name, city and Team now use the same grouped-row visual language.
+- Check-in and check-out dates/times now sit in compact native-style groups while preserving the existing safe picker implementation.
+- Existing Google Maps search/import/preview logic is unchanged.
+
+### Automation control polish
+
+- Flight and accommodation itinerary automation toggles now render as iOS-style switches instead of raw checkboxes.
+- Underlying soft-link itinerary automation semantics are unchanged.
+
+### Scope / safety
+
+- No Flight / Accommodation schema changes.
+- No Map sync, Transit, Saved Places, Team transaction, media, Firebase rules or Functions changes.
+- No Firebase redeploy is required.
+
+### Files changed
+
+- `index.html`
+- `manifest.json`
+- `CHANGELOG.md`
+- `sw.js`
+
 ## v7.9.18.2 — Travel Details consistency + soft itinerary automation
 
 - Added fixed native-style headers and live subtitles to **旅程基本資料** and **Team 管理**, completing the same header grammar already used by Item, Flight and Accommodation editors.
