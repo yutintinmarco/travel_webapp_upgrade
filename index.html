@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
   <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
   <link rel="dns-prefetch" href="https://api.open-meteo.com">
-  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?release=7.9.17.0">
+  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?release=7.9.17.1">
   <title id="page-title">行程</title>
   <script>
   // v7.7.5.0 · Performance Lite. Memory only: no Firebase reads/writes, no
@@ -3903,7 +3903,7 @@ body.expenses-view-active #app-version-note{
 #snacks-view::after,
 #info-view::after,
 #profile-view::after{
-  content:"v7.9.17.0" !important;
+  content:"v7.9.17.1" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3924,7 +3924,7 @@ body.expenses-view-active #app-version-note{
   display:none !important;
 }
 body.expenses-view-active .expenses-module .expenses-app::after{
-  content:"v7.9.17.0" !important;
+  content:"v7.9.17.1" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -4437,7 +4437,7 @@ html.theme-dark .trip-edit-title-icon,html:not(.theme-light):not(.theme-dark) .t
 .trip-edit-saved-range-wrap{display:grid;gap:7px;width:100%;padding-top:2px;}
 .trip-edit-saved-range-head{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:11px;color:var(--label-secondary);}
 .trip-edit-saved-range-head output{font-size:12px;font-weight:780;color:var(--label-primary);}
-.trip-edit-saved-range{--range-progress:0%;width:100%;height:30px;margin:0;-webkit-appearance:none;appearance:none;background:linear-gradient(90deg,#0a84ff 0 var(--range-progress),rgba(120,120,128,.20) var(--range-progress) 100%);background-size:100% 4px;background-position:center;background-repeat:no-repeat;border-radius:999px;}
+.trip-edit-saved-range{--range-progress:0%;width:80%;height:30px;margin:0 10%;-webkit-appearance:none;appearance:none;background:linear-gradient(90deg,#0a84ff 0 var(--range-progress),rgba(120,120,128,.20) var(--range-progress) 100%);background-size:100% 4px;background-position:center;background-repeat:no-repeat;border-radius:999px;}
 .trip-edit-saved-range::-webkit-slider-runnable-track{height:4px;background:transparent;border:0;border-radius:999px;}
 .trip-edit-saved-range::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:28px;height:28px;margin-top:-12px;border-radius:999px;border:.5px solid rgba(0,0,0,.12);background:#fff;box-shadow:0 2px 7px rgba(0,0,0,.18),0 .5px 1px rgba(0,0,0,.10);}
 .trip-edit-saved-range::-moz-range-track{height:4px;background:rgba(120,120,128,.20);border:0;border-radius:999px;}
@@ -4479,7 +4479,7 @@ html.theme-dark .snack-edit-tools,html:not(.theme-light):not(.theme-dark) .snack
 </style>
             <link rel="apple-touch-icon" href="assets/icon/trip_icon.png">
   <link rel="icon" type="image/png" href="assets/icon/trip_icon.png">
-  <link rel="manifest" href="manifest.json?release=7.9.17.0">
+  <link rel="manifest" href="manifest.json?release=7.9.17.1">
   <meta name="apple-mobile-web-app-title" content="關嘉露西生日之旅">
   <!-- v7.7.1.2: expenses.css is 144KB and every rule is scoped under
        .expenses-module, yet it used to block the very first paint of the
@@ -4487,8 +4487,8 @@ html.theme-dark .snack-edit-tools,html:not(.theme-light):not(.theme-dark) .snack
        priority without blocking paint; ensureExpensesStylesheet() flips it to
        media="all" before the 支出 view is ever mounted, so the styling is
        byte-for-byte identical by the time anything expenses-related renders. -->
-  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?release=7.9.17.0" media="print">
-  <noscript><link rel="stylesheet" href="assets/css/expenses.css?release=7.9.17.0"></noscript>
+  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?release=7.9.17.1" media="print">
+  <noscript><link rel="stylesheet" href="assets/css/expenses.css?release=7.9.17.1"></noscript>
 </head>
 <body class="app-entry-gated app-entry-pending">
 <div class="bg-fixed"></div>
@@ -5300,7 +5300,7 @@ html.theme-dark .snack-edit-tools,html:not(.theme-light):not(.theme-dark) .snack
         <span class="profile-detail-spacer"></span>
       </div>
       <section class="profile-card" aria-label="App 資訊">
-        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.9.17.0</strong></div>
+        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.9.17.1</strong></div>
         <div class="profile-meta-row"><span>資料架構</span><strong>Phase 2G.2</strong></div>
         <div class="profile-meta-row"><span>主要資料來源</span><strong id="app-data-source-label">Firebase / 本機快取</strong></div>
       </section>
@@ -5746,7 +5746,7 @@ html.theme-dark .snack-edit-tools,html:not(.theme-light):not(.theme-dark) .snack
 </div>
 
 <script>
-const APP_VERSION = "7.9.17.0";
+const APP_VERSION = "7.9.17.1";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 let tripMapServicePromise=null,transitRouteServicePromise=null,tripEditServicePromise=null,tripMapController=null,tripMapScope="day",tripMapRenderEpoch=0,tripMapSelectedPoint=null;
@@ -7793,6 +7793,21 @@ function zonedDateFromTripParts(isoDate,timeText,timeZone){
   try{const fmt=new Intl.DateTimeFormat("en-CA",{timeZone:timeZone||"UTC",year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",second:"2-digit",hourCycle:"h23"});for(let pass=0;pass<2;pass++){const parts=Object.fromEntries(fmt.formatToParts(new Date(guess)).filter(p=>p.type!=="literal").map(p=>[p.type,p.value]));const represented=Date.UTC(+parts.year,+parts.month-1,+parts.day,+parts.hour,+parts.minute,+(parts.second||0));guess-=represented-target;}}catch(_){return new Date(target);}const out=new Date(guess);return Number.isFinite(out.getTime())?out:null;
 }
 function transitDepartureDate(day,item){return zonedDateFromTripParts(String(day?.isoDate||day?.dateIso||""),String(item?.time||""),transitDayTimeZone(day));}
+function transitZonedDateParts(date,timeZone){
+  try{const fmt=new Intl.DateTimeFormat("en-CA",{timeZone:timeZone||"UTC",year:"numeric",month:"2-digit",day:"2-digit"}),parts=Object.fromEntries(fmt.formatToParts(date).filter(p=>p.type!=="literal").map(p=>[p.type,p.value]));const y=Number(parts.year),m=Number(parts.month),d=Number(parts.day);return Number.isFinite(y)&&Number.isFinite(m)&&Number.isFinite(d)?{year:y,month:m,day:d}:null;}catch(_){return null;}
+}
+function transitIsoDateFromUtcDate(date){return `${date.getUTCFullYear()}-${String(date.getUTCMonth()+1).padStart(2,"0")}-${String(date.getUTCDate()).padStart(2,"0")}`;}
+function transitEffectiveDeparture(day,item){
+  const timeZone=transitDayTimeZone(day),isoDate=String(day?.isoDate||day?.dateIso||"").trim(),timeText=String(item?.time||"").trim(),original=transitDepartureDate(day,item);if(!original||!Number.isFinite(original.getTime()))return {departureTime:original,estimated:false,originalDepartureTime:original,estimatedIsoDate:""};
+  const now=new Date();if(original.getTime()>now.getTime())return {departureTime:original,estimated:false,originalDepartureTime:original,estimatedIsoDate:isoDate};
+  const match=isoDate.match(/^(\d{4})-(\d{2})-(\d{2})$/),today=transitZonedDateParts(now,timeZone);if(!match||!today)return {departureTime:original,estimated:false,originalDepartureTime:original,estimatedIsoDate:isoDate};
+  const originalWeekday=new Date(Date.UTC(Number(match[1]),Number(match[2])-1,Number(match[3]))).getUTCDay(),todayUtc=new Date(Date.UTC(today.year,today.month-1,today.day));let delta=(originalWeekday-todayUtc.getUTCDay()+7)%7,targetUtc=new Date(todayUtc.getTime()+delta*86400000),targetIso=transitIsoDateFromUtcDate(targetUtc),candidate=zonedDateFromTripParts(targetIso,timeText,timeZone);
+  if(!candidate||candidate.getTime()<=now.getTime()){targetUtc=new Date(targetUtc.getTime()+7*86400000);targetIso=transitIsoDateFromUtcDate(targetUtc);candidate=zonedDateFromTripParts(targetIso,timeText,timeZone);}
+  return candidate&&Number.isFinite(candidate.getTime())?{departureTime:candidate,estimated:true,originalDepartureTime:original,estimatedIsoDate:targetIso}:{departureTime:original,estimated:false,originalDepartureTime:original,estimatedIsoDate:isoDate};
+}
+function transitEstimateWeekdayLabel(isoDate=""){
+  const match=String(isoDate||"").match(/^(\d{4})-(\d{2})-(\d{2})$/);if(!match)return"";const labels=["星期日","星期一","星期二","星期三","星期四","星期五","星期六"],weekday=new Date(Date.UTC(Number(match[1]),Number(match[2])-1,Number(match[3]))).getUTCDay();return labels[weekday]||"";
+}
 function transitRouteContext(dayIdInput,itemIdInput){
   const routeData=activeTripPresentationData();
   const dayId=String(dayIdInput||"").trim(),itemId=String(itemIdInput||"").trim(),day=(routeData?.days||[]).find(row=>String(row?.dayId||"").trim()===dayId);if(!day)return null;
@@ -7806,7 +7821,8 @@ function transitRouteContext(dayIdInput,itemIdInput){
   // across it and silently use an older origin.
   if(!origin&&!originBlocked){const dayIndex=(routeData?.days||[]).findIndex(row=>String(row?.dayId||"").trim()===dayId);for(let d=dayIndex-1;d>=0&&!origin;d--){const priorItems=Array.isArray(routeData?.days?.[d]?.items)?routeData.days[d].items:[];for(let i=priorItems.length-1;i>=0;i--){const row=priorItems[i];if(!transitNeighbourCompatible(row,who))continue;if(itineraryPresentationKind(row)!=="stop")continue;if(!itineraryRecordHasLocation(row))break;origin=row;break;}}}
   if(!destination){for(let i=index+1;i<items.length;i++){const row=items[i];if(!transitNeighbourCompatible(row,who))continue;if(itineraryPresentationKind(row)!=="stop")continue;if(!itineraryRecordHasLocation(row))break;destination=row;break;}}
-  return {day,item,origin,destination,timeZone:transitDayTimeZone(day),locationContext:transitLocationContext(day),departureTime:transitDepartureDate(day,item)};
+  const effectiveDeparture=transitEffectiveDeparture(day,item);
+  return {day,item,origin,destination,timeZone:transitDayTimeZone(day),locationContext:transitLocationContext(day),departureTime:effectiveDeparture.departureTime,departureEstimate:effectiveDeparture.estimated?{estimated:true,originalDepartureTime:effectiveDeparture.originalDepartureTime?.toISOString?.()||"",estimatedDepartureTime:effectiveDeparture.departureTime?.toISOString?.()||"",estimatedIsoDate:effectiveDeparture.estimatedIsoDate,weekdayLabel:transitEstimateWeekdayLabel(effectiveDeparture.estimatedIsoDate)}:null};
 }
 function transitRouteTimeText(iso,timeZone){if(!iso)return"";try{return new Intl.DateTimeFormat("zh-HK",{timeZone:timeZone||undefined,hour:"2-digit",minute:"2-digit",hour12:false}).format(new Date(iso));}catch(_){return"";}}
 function transitRouteStepTitle(step={}){if(step?.transit){const t=step.transit,line=String(t.lineName||t.vehicleType||"公共交通").trim()||"公共交通";return t.headsign?`${line} · 往 ${t.headsign}`:line;}return String(step?.instruction||step?.mode||"步行").replace(/<[^>]*>/g,"").trim()||"步行";}
@@ -7861,7 +7877,7 @@ function renderTransitPlannedRoute(planner,planned,context={},routeService=null)
 }
 function renderTransitRoutePlannerOptions(planner,result,context={},service=null,routeService=null){
   const gallery=planner.querySelector(".transit-route-gallery"),status=planner.querySelector(".transit-route-planner-head small"),basis=planner.querySelector(".transit-route-basis-note");if(!gallery)return;planner.__transitResult=result;planner.__transitRouteService=routeService;const options=Array.isArray(result?.options)?result.options:[],timeZone=context?.timeZone||"";
-  if(basis){basis.hidden=result?.basis!=="now-fallback";basis.textContent=result?.basis==="now-fallback"?(result?.provider==="google-routes-transit"?"原行程時間超出 Google 班次查詢範圍，以下按目前時間提供示例方案。":"未能使用原行程時間，以下按目前可查時間提供示例方案。") : "";}
+  if(basis){const estimated=!!context?.departureEstimate?.estimated;if(result?.basis==="now-fallback"){basis.hidden=false;basis.textContent=result?.provider==="google-routes-transit"?"原行程時間超出 Google 班次查詢範圍，以下按目前時間提供示例方案。":"未能使用估算時段，以下按目前可查時間提供示例方案。";}else if(estimated){basis.hidden=false;basis.textContent=`此行程日期已過，路線按近期${context.departureEstimate.weekdayLabel||"同一星期"}相同時段估算。`;}else{basis.hidden=true;basis.textContent="";}}
   if(!options.length){renderTransitRoutePlannerState(gallery,"暫時搵唔到合適嘅公共交通方案。");if(status)status.textContent="未有方案";return;}
   if(status)status.textContent=`${options.length} 個方案`;
   gallery.replaceChildren();

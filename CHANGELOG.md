@@ -1,3 +1,10 @@
+## v7.9.17.1 — Historical Transit estimate + slider alignment
+
+- Past itinerary Transit searches now keep the original local clock time but move the query to the nearest future matching weekday, rather than asking providers for an already-expired historical departure.
+- Transit Gallery clearly labels these routes as estimates based on a recent matching weekday/time; Google Maps Directions remains the latest-route fallback.
+- Japan/Non-Japan provider selection is unchanged: Japan continues to use ls8h and other regions continue to use Google Routes Transit.
+- Saved Places price/queue slider tracks now use the inner 80% width so their five snap positions align with the centers of the five scale labels while preserving smooth-drag/release-snap behavior.
+
 ## v7.9.17.0 — Smooth sliders + Transit Route Adopt
 
 - Polished Saved Places price/queue sliders so the thumb follows the finger continuously; the displayed semantic value updates while dragging and the control eases to the nearest canonical stop only on release. Existing stored values remain unchanged.

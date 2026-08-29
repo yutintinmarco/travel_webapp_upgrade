@@ -1,5 +1,5 @@
 /* Travel WebApp Service Worker
- * v7.9.17.0 · Smooth Saved Places sliders + Transit Route Adopt
+ * v7.9.17.1 · Historical Transit weekday estimate + slider alignment
  *
  * Keeps the v7.7.0.14 cold-start behaviour, while hardening installation:
  *  1. Critical shell assets are transactional. If any critical file cannot be
@@ -14,7 +14,7 @@
  *     explicit reload stays network-first.
  */
 
-const SW_VERSION = "travel-shell-v7.9.17.0";
+const SW_VERSION = "travel-shell-v7.9.17.1";
 const CORE_CACHE = SW_VERSION;
 
 // Required for a useful offline launch and remembered-Trip boot.
