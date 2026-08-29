@@ -1,3 +1,13 @@
+## v7.9.18.1 — Travel Details Editor UI correction
+
+- Reused the proven iOS-safe date/time picker shell for Flight and Accommodation editors, eliminating Safari intrinsic-width overflow without changing the underlying stored date/time values.
+- Added fixed native-style headers to Flight/Accommodation managers and editors, with live subtitles such as `CX566 · Team Ian · 旅程去程` and hotel/date context.
+- Fixed Airline Logo rendering so the fallback airline-code badge and the resolved Firebase logo can never occupy the same logo host at once; successful logo load atomically replaces the fallback.
+- Added a searchable airline-code chooser with common airline codes plus codes already used by the current Trip; free typing remains supported.
+- Replaced raw Accommodation Maps URL editing with the existing Google Places / Maps interaction pattern: place search, short/full link import, selected-place details, map preview and map-point adjustment.
+- Accommodation location records now preserve Place ID and coordinates inside the existing `location` object when available, while remaining backward-compatible with address/mapsUrl-only records.
+- No changes to Flight/Accommodation master semantics, Map anchor precedence, Transit, Saved Places, Team lifecycle, Firebase Functions, Firestore rules or legacy `trip.json` cleanup.
+
 ## v7.9.18.0 — Travel Details Edit: Flights + Accommodations
 
 - Promoted Travel Details into the Global Edit Session with dedicated **航班** and **住宿** managers. Modal `完成` updates Local Draft only; the single Global Save remains the only Firebase commit point.

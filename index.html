@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
   <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
   <link rel="dns-prefetch" href="https://api.open-meteo.com">
-  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?release=7.9.18.0">
+  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?release=7.9.18.1">
   <title id="page-title">行程</title>
   <script>
   // v7.7.5.0 · Performance Lite. Memory only: no Firebase reads/writes, no
@@ -3903,7 +3903,7 @@ body.expenses-view-active #app-version-note{
 #snacks-view::after,
 #info-view::after,
 #profile-view::after{
-  content:"v7.9.18.0" !important;
+  content:"v7.9.18.1" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3924,7 +3924,7 @@ body.expenses-view-active #app-version-note{
   display:none !important;
 }
 body.expenses-view-active .expenses-module .expenses-app::after{
-  content:"v7.9.18.0" !important;
+  content:"v7.9.18.1" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -4270,7 +4270,7 @@ body.trip-edit-mode .itinerary-edit-accessory{display:flex;}
 .trip-edit-textarea{min-height:92px;resize:vertical;line-height:1.45;}
 .trip-edit-time-control{position:relative;display:block;width:100%;min-width:0;max-width:100%;overflow:hidden;border-radius:14px;}
 .trip-edit-time-display{display:flex;width:100%;min-width:0;min-height:46px;box-sizing:border-box;align-items:center;justify-content:center;border:1px solid rgba(15,23,42,.10);border-radius:14px;background:rgba(245,245,248,.88);color:var(--label-primary);font:inherit;font-size:15px;padding:11px 12px;}
-#trip-edit-item-time{position:absolute;inset:0;width:100%;height:100%;min-width:0;max-width:100%;margin:0;padding:0;border:0;opacity:0;appearance:none;-webkit-appearance:none;cursor:pointer;}
+.trip-edit-time-control input[type="time"]{position:absolute;inset:0;width:100%;height:100%;min-width:0;max-width:100%;margin:0;padding:0;border:0;opacity:0;appearance:none;-webkit-appearance:none;cursor:pointer;}
 .trip-edit-time-control:focus-within .trip-edit-time-display{border-color:rgba(10,132,255,.56);box-shadow:0 0 0 3px rgba(10,132,255,.10);}
 html.theme-dark .trip-edit-time-display,html:not(.theme-light):not(.theme-dark) .trip-edit-time-display{background:rgba(34,34,42,.88);border-color:rgba(255,255,255,.11);color:#f2f2f7;}
 /* v7.9.13.0 · iOS date inputs use the same overflow-safe shell as the proven time control. */
@@ -4405,6 +4405,25 @@ html.theme-dark .trip-edit-icon-option,html:not(.theme-light):not(.theme-dark) .
 .trip-edit-travel-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
 .trip-edit-travel-grid .trip-edit-field{min-width:0;}
 .trip-edit-travel-editor-note{font-size:10px;line-height:1.45;color:var(--label-secondary);margin:0 2px 4px;}
+.trip-edit-travel-heading{flex:0 0 auto;padding:14px 18px 11px;border-bottom:1px solid rgba(60,60,67,.10);background:rgba(249,249,251,.96);backdrop-filter:blur(24px) saturate(160%);-webkit-backdrop-filter:blur(24px) saturate(160%);z-index:3;}
+.trip-edit-travel-heading h3{display:flex;align-items:center;gap:9px;margin:0;font-size:calc(18px * var(--font-scale));line-height:1.25;font-weight:800;letter-spacing:-.2px;}
+.trip-edit-travel-heading-meta{margin:4px 0 0 37px;color:var(--label-secondary);font-size:10.5px;font-weight:600;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.trip-edit-airline-combobox{position:relative;min-width:0;}
+.trip-edit-airline-results{position:absolute;z-index:8;left:0;right:0;top:calc(100% + 5px);max-height:210px;overflow:auto;padding:5px;border:1px solid rgba(60,60,67,.12);border-radius:14px;background:rgba(252,252,254,.98);box-shadow:0 12px 32px rgba(20,39,55,.16);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);}
+.trip-edit-airline-results[hidden]{display:none!important;}
+.trip-edit-airline-option{width:100%;border:0;border-radius:10px;background:transparent;padding:9px 10px;display:grid;grid-template-columns:38px minmax(0,1fr);gap:8px;align-items:center;text-align:left;color:var(--label-primary);font:inherit;}
+.trip-edit-airline-option:active,.trip-edit-airline-option.is-focused{background:rgba(10,132,255,.09);}
+.trip-edit-airline-option strong{font-size:12px;font-weight:800;color:#1478d4;}
+.trip-edit-airline-option span{font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.trip-edit-airline-hint{font-size:9.5px;line-height:1.35;color:var(--label-secondary);margin-top:4px;}
+.trip-airline-logo-host .trip-logo-img{display:block;width:100%;height:100%;object-fit:contain;object-position:center;}
+.trip-airline-logo-mini{overflow:hidden;border-radius:9px;}
+.trip-edit-accommodation-location{display:grid;gap:9px;}
+.trip-edit-accommodation-location .trip-edit-location-preview{margin-top:0;}
+.trip-edit-accommodation-location .trip-edit-location-selected{margin-top:0;}
+html.theme-dark .trip-edit-travel-heading,html:not(.theme-light):not(.theme-dark) .trip-edit-travel-heading{background:rgba(29,29,33,.96);border-bottom-color:rgba(255,255,255,.10);}
+html.theme-dark .trip-edit-airline-results,html:not(.theme-light):not(.theme-dark) .trip-edit-airline-results{background:rgba(36,36,40,.98);border-color:rgba(255,255,255,.12);}
+
 .trip-edit-travel-section-label{font-size:10px;font-weight:780;letter-spacing:.065em;text-transform:uppercase;color:var(--label-secondary);margin:3px 2px 0;}
 .trip-airline-logo-host{display:inline-flex;align-items:center;justify-content:center;position:relative;overflow:hidden;}
 .trip-airline-logo-fallback{display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:28px;padding:0 5px;border-radius:9px;background:rgba(118,118,128,.10);color:var(--label-secondary);font-size:9px;font-weight:800;letter-spacing:.02em;}
@@ -4504,7 +4523,7 @@ html.theme-dark .snack-edit-tools,html:not(.theme-light):not(.theme-dark) .snack
 </style>
             <link rel="apple-touch-icon" href="assets/icon/trip_icon.png">
   <link rel="icon" type="image/png" href="assets/icon/trip_icon.png">
-  <link rel="manifest" href="manifest.json?release=7.9.18.0">
+  <link rel="manifest" href="manifest.json?release=7.9.18.1">
   <meta name="apple-mobile-web-app-title" content="關嘉露西生日之旅">
   <!-- v7.7.1.2: expenses.css is 144KB and every rule is scoped under
        .expenses-module, yet it used to block the very first paint of the
@@ -4512,8 +4531,8 @@ html.theme-dark .snack-edit-tools,html:not(.theme-light):not(.theme-dark) .snack
        priority without blocking paint; ensureExpensesStylesheet() flips it to
        media="all" before the 支出 view is ever mounted, so the styling is
        byte-for-byte identical by the time anything expenses-related renders. -->
-  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?release=7.9.18.0" media="print">
-  <noscript><link rel="stylesheet" href="assets/css/expenses.css?release=7.9.18.0"></noscript>
+  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?release=7.9.18.1" media="print">
+  <noscript><link rel="stylesheet" href="assets/css/expenses.css?release=7.9.18.1"></noscript>
 </head>
 <body class="app-entry-gated app-entry-pending">
 <div class="bg-fixed"></div>
@@ -5335,7 +5354,7 @@ html.theme-dark .snack-edit-tools,html:not(.theme-light):not(.theme-dark) .snack
         <span class="profile-detail-spacer"></span>
       </div>
       <section class="profile-card" aria-label="App 資訊">
-        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.9.18.0</strong></div>
+        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.9.18.1</strong></div>
         <div class="profile-meta-row"><span>資料架構</span><strong>Phase 2G.2</strong></div>
         <div class="profile-meta-row"><span>主要資料來源</span><strong id="app-data-source-label">Firebase / 本機快取</strong></div>
       </section>
@@ -5584,8 +5603,11 @@ html.theme-dark .snack-edit-tools,html:not(.theme-light):not(.theme-dark) .snack
 
 <div class="modal-backdrop" id="trip-edit-flight-manager-backdrop" aria-hidden="true">
   <div class="modal trip-edit-manage-modal" role="dialog" aria-modal="true" aria-labelledby="trip-edit-flight-manager-title">
+    <div class="trip-edit-travel-heading">
+      <h3><span class="trip-edit-title-icon">✈️</span><span id="trip-edit-flight-manager-title">航班管理</span></h3>
+      <div class="trip-edit-travel-heading-meta" id="trip-edit-flight-manager-meta">所有航班 · 按日期排列</div>
+    </div>
     <div class="trip-edit-manage-scroll">
-      <div class="modal-title" id="trip-edit-flight-manager-title">航班管理</div>
       <p class="trip-edit-local-note">所有航班會按日期自動排序。首頁只顯示每個 Team 嘅旅程去程及回程；中途航班會保留喺旅程資料。</p>
       <div class="trip-edit-travel-list" id="trip-edit-flight-list"></div>
       <button class="trip-edit-travel-add" id="trip-edit-flight-add" type="button">＋ 新增航班</button>
@@ -5599,13 +5621,16 @@ html.theme-dark .snack-edit-tools,html:not(.theme-light):not(.theme-dark) .snack
 
 <div class="modal-backdrop" id="trip-edit-flight-editor-backdrop" aria-hidden="true">
   <div class="modal trip-edit-manage-modal" role="dialog" aria-modal="true" aria-labelledby="trip-edit-flight-editor-title">
+    <div class="trip-edit-travel-heading">
+      <h3><span class="trip-edit-title-icon">✈️</span><span id="trip-edit-flight-editor-title">編輯航班</span></h3>
+      <div class="trip-edit-travel-heading-meta" id="trip-edit-flight-editor-meta">未設定航班 · 所有人 · 中途航班</div>
+    </div>
     <div class="trip-edit-manage-scroll">
-      <div class="modal-title" id="trip-edit-flight-editor-title">編輯航班</div>
-      <p class="trip-edit-travel-editor-note">輸入航班號後會自動推斷航空公司代碼；Logo 會優先由 Firebase 共用 Airline Registry 載入。</p>
+      <p class="trip-edit-travel-editor-note">輸入航班號會自動推斷航空公司；航空公司代碼亦可搜尋清單揀選。Logo 會優先由 Firebase 共用 Airline Registry 載入。</p>
       <div class="trip-edit-form">
         <div class="trip-edit-travel-grid">
           <label class="trip-edit-field"><span>航班號碼</span><input class="trip-edit-input" id="trip-edit-flight-number" type="text" maxlength="16" autocomplete="off" placeholder="CX595"></label>
-          <label class="trip-edit-field"><span>航空公司代碼</span><input class="trip-edit-input" id="trip-edit-flight-airline-code" type="text" maxlength="3" autocomplete="off" placeholder="CX"></label>
+          <label class="trip-edit-field"><span>航空公司代碼</span><div class="trip-edit-airline-combobox"><input class="trip-edit-input" id="trip-edit-flight-airline-code" type="text" maxlength="3" autocomplete="off" autocapitalize="characters" placeholder="輸入 C、U…"><div class="trip-edit-airline-results" id="trip-edit-flight-airline-results" hidden></div></div><small class="trip-edit-airline-hint">可輸入代碼或首字母搜尋，例如 C → CX、U → UO。</small></label>
         </div>
         <div class="trip-edit-travel-grid">
           <label class="trip-edit-field"><span>航班角色</span><select class="trip-edit-select" id="trip-edit-flight-role"><option value="entry">旅程去程</option><option value="internal">中途航班</option><option value="exit">旅程回程</option></select></label>
@@ -5613,15 +5638,15 @@ html.theme-dark .snack-edit-tools,html:not(.theme-light):not(.theme-dark) .snack
         </div>
         <div class="trip-edit-travel-section-label">出發</div>
         <div class="trip-edit-travel-grid">
-          <label class="trip-edit-field"><span>日期</span><input class="trip-edit-input" id="trip-edit-flight-departure-date" type="date"></label>
-          <label class="trip-edit-field"><span>時間</span><input class="trip-edit-input" id="trip-edit-flight-departure-time" type="time"></label>
+          <label class="trip-edit-field"><span>日期</span><span class="trip-edit-date-control"><span class="trip-edit-date-display" id="trip-edit-flight-departure-date-display">未設定</span><input id="trip-edit-flight-departure-date" type="date" aria-label="出發日期"></span></label>
+          <label class="trip-edit-field"><span>時間</span><span class="trip-edit-time-control"><span class="trip-edit-time-display" id="trip-edit-flight-departure-time-display">--:--</span><input id="trip-edit-flight-departure-time" type="time" step="60" aria-label="出發時間"></span></label>
         </div>
         <label class="trip-edit-field"><span>出發機場</span><input class="trip-edit-input" id="trip-edit-flight-departure-airport" type="text" maxlength="100" autocomplete="off" placeholder="HKG 香港國際機場"></label>
         <label class="trip-edit-field"><span>出發 Terminal</span><input class="trip-edit-input" id="trip-edit-flight-departure-terminal" type="text" maxlength="40" autocomplete="off" placeholder="Terminal 1"></label>
         <div class="trip-edit-travel-section-label">抵達</div>
         <div class="trip-edit-travel-grid">
-          <label class="trip-edit-field"><span>日期</span><input class="trip-edit-input" id="trip-edit-flight-arrival-date" type="date"></label>
-          <label class="trip-edit-field"><span>時間</span><input class="trip-edit-input" id="trip-edit-flight-arrival-time" type="time"></label>
+          <label class="trip-edit-field"><span>日期</span><span class="trip-edit-date-control"><span class="trip-edit-date-display" id="trip-edit-flight-arrival-date-display">未設定</span><input id="trip-edit-flight-arrival-date" type="date" aria-label="抵達日期"></span></label>
+          <label class="trip-edit-field"><span>時間</span><span class="trip-edit-time-control"><span class="trip-edit-time-display" id="trip-edit-flight-arrival-time-display">--:--</span><input id="trip-edit-flight-arrival-time" type="time" step="60" aria-label="抵達時間"></span></label>
         </div>
         <label class="trip-edit-field"><span>抵達機場</span><input class="trip-edit-input" id="trip-edit-flight-arrival-airport" type="text" maxlength="100" autocomplete="off" placeholder="KIX 關西國際機場"></label>
         <label class="trip-edit-field"><span>抵達 Terminal</span><input class="trip-edit-input" id="trip-edit-flight-arrival-terminal" type="text" maxlength="40" autocomplete="off"></label>
@@ -5638,8 +5663,11 @@ html.theme-dark .snack-edit-tools,html:not(.theme-light):not(.theme-dark) .snack
 
 <div class="modal-backdrop" id="trip-edit-accommodation-manager-backdrop" aria-hidden="true">
   <div class="modal trip-edit-manage-modal" role="dialog" aria-modal="true" aria-labelledby="trip-edit-accommodation-manager-title">
+    <div class="trip-edit-travel-heading">
+      <h3><span class="trip-edit-title-icon">🏨</span><span id="trip-edit-accommodation-manager-title">住宿管理</span></h3>
+      <div class="trip-edit-travel-heading-meta" id="trip-edit-accommodation-manager-meta">所有住宿 · 按入住日期排列</div>
+    </div>
     <div class="trip-edit-manage-scroll">
-      <div class="modal-title" id="trip-edit-accommodation-manager-title">住宿管理</div>
       <p class="trip-edit-local-note">可加入多間酒店／住宿。住宿會按 Check-in 日期排序，並成為旅程資料及每日 Map 住宿 anchor 嘅 master data。</p>
       <div class="trip-edit-travel-list" id="trip-edit-accommodation-list"></div>
       <button class="trip-edit-travel-add" id="trip-edit-accommodation-add" type="button">＋ 新增住宿</button>
@@ -5653,9 +5681,12 @@ html.theme-dark .snack-edit-tools,html:not(.theme-light):not(.theme-dark) .snack
 
 <div class="modal-backdrop" id="trip-edit-accommodation-editor-backdrop" aria-hidden="true">
   <div class="modal trip-edit-manage-modal" role="dialog" aria-modal="true" aria-labelledby="trip-edit-accommodation-editor-title">
+    <div class="trip-edit-travel-heading">
+      <h3><span class="trip-edit-title-icon">🏨</span><span id="trip-edit-accommodation-editor-title">編輯住宿</span></h3>
+      <div class="trip-edit-travel-heading-meta" id="trip-edit-accommodation-editor-meta">未命名住宿 · 未設定日期</div>
+    </div>
     <div class="trip-edit-manage-scroll">
-      <div class="modal-title" id="trip-edit-accommodation-editor-title">編輯住宿</div>
-      <p class="trip-edit-travel-editor-note">地址或 Google Maps 連結會用作每日住宿 Map anchor；Check-in / Check-out 決定邊一日使用邊間住宿。</p>
+      <p class="trip-edit-travel-editor-note">住宿定位直接沿用行程項目嘅 Google Places / Maps picker；Check-in / Check-out 決定每日 Map 使用邊間住宿。</p>
       <div class="trip-edit-form">
         <label class="trip-edit-field"><span>住宿名稱</span><input class="trip-edit-input" id="trip-edit-accommodation-name" type="text" maxlength="160" autocomplete="off"></label>
         <div class="trip-edit-travel-grid">
@@ -5664,16 +5695,44 @@ html.theme-dark .snack-edit-tools,html:not(.theme-light):not(.theme-dark) .snack
         </div>
         <div class="trip-edit-travel-section-label">入住</div>
         <div class="trip-edit-travel-grid">
-          <label class="trip-edit-field"><span>日期</span><input class="trip-edit-input" id="trip-edit-accommodation-checkin-date" type="date"></label>
-          <label class="trip-edit-field"><span>時間</span><input class="trip-edit-input" id="trip-edit-accommodation-checkin-time" type="time"></label>
+          <label class="trip-edit-field"><span>日期</span><span class="trip-edit-date-control"><span class="trip-edit-date-display" id="trip-edit-accommodation-checkin-date-display">未設定</span><input id="trip-edit-accommodation-checkin-date" type="date" aria-label="入住日期"></span></label>
+          <label class="trip-edit-field"><span>時間</span><span class="trip-edit-time-control"><span class="trip-edit-time-display" id="trip-edit-accommodation-checkin-time-display">--:--</span><input id="trip-edit-accommodation-checkin-time" type="time" step="60" aria-label="入住時間"></span></label>
         </div>
         <div class="trip-edit-travel-section-label">退房</div>
         <div class="trip-edit-travel-grid">
-          <label class="trip-edit-field"><span>日期</span><input class="trip-edit-input" id="trip-edit-accommodation-checkout-date" type="date"></label>
-          <label class="trip-edit-field"><span>時間</span><input class="trip-edit-input" id="trip-edit-accommodation-checkout-time" type="time"></label>
+          <label class="trip-edit-field"><span>日期</span><span class="trip-edit-date-control"><span class="trip-edit-date-display" id="trip-edit-accommodation-checkout-date-display">未設定</span><input id="trip-edit-accommodation-checkout-date" type="date" aria-label="退房日期"></span></label>
+          <label class="trip-edit-field"><span>時間</span><span class="trip-edit-time-control"><span class="trip-edit-time-display" id="trip-edit-accommodation-checkout-time-display">--:--</span><input id="trip-edit-accommodation-checkout-time" type="time" step="60" aria-label="退房時間"></span></label>
+        </div>
+        <div class="trip-edit-travel-section-label">Google Maps 地點</div>
+        <div class="trip-edit-accommodation-location">
+          <div class="trip-edit-location-search">
+            <input class="trip-edit-input" id="trip-edit-accommodation-location-query" type="text" autocomplete="off" maxlength="240" placeholder="輸入酒店、住宿或地址">
+            <button class="trip-edit-location-search-btn" id="trip-edit-accommodation-location-search-btn" type="button">搜尋</button>
+          </div>
+          <div class="trip-edit-location-link-separator"><span>或貼上 Google Maps 連結</span></div>
+          <div class="trip-edit-location-search trip-edit-location-link-row">
+            <input class="trip-edit-input" id="trip-edit-accommodation-location-link" type="url" inputmode="url" autocomplete="off" maxlength="900" placeholder="https://maps.app.goo.gl/…">
+            <button class="trip-edit-location-search-btn" id="trip-edit-accommodation-location-link-btn" type="button">匯入</button>
+          </div>
+          <div class="trip-edit-location-link-note">支援 Google Maps 分享短連結及完整網址；揀選後會自動更新地址、Place ID、座標同 Map anchor。</div>
+          <div class="trip-edit-location-status" id="trip-edit-accommodation-location-status">可搜尋酒店名稱或貼上 Google Maps 連結。</div>
+          <div class="trip-edit-location-results" id="trip-edit-accommodation-location-results" hidden></div>
+          <div class="trip-edit-location-attribution" id="trip-edit-accommodation-location-attribution" hidden>Google Maps</div>
+          <div class="trip-edit-location-preview" id="trip-edit-accommodation-location-preview" hidden>
+            <div class="trip-edit-location-map" id="trip-edit-accommodation-location-map" aria-label="住宿位置地圖預覽"></div>
+            <div class="trip-edit-location-map-note">可直接點地圖微調住宿位置。</div>
+          </div>
+          <div class="trip-edit-location-selected" id="trip-edit-accommodation-location-selected" hidden>
+            <strong id="trip-edit-accommodation-location-selected-title">已選定位</strong>
+            <small id="trip-edit-accommodation-location-selected-address"></small>
+            <div class="trip-edit-location-actions">
+              <button class="trip-edit-location-action" id="trip-edit-accommodation-location-open-maps" type="button">Google Maps</button>
+              <button class="trip-edit-location-action" id="trip-edit-accommodation-location-clear" type="button">清除定位</button>
+            </div>
+          </div>
         </div>
         <label class="trip-edit-field"><span>地址</span><textarea class="trip-edit-textarea" id="trip-edit-accommodation-address" rows="2" maxlength="300"></textarea></label>
-        <label class="trip-edit-field"><span>Google Maps 連結</span><input class="trip-edit-input" id="trip-edit-accommodation-maps" type="url" inputmode="url" maxlength="900" autocomplete="off" placeholder="https://maps.app.goo.gl/…"></label>
+        <input id="trip-edit-accommodation-maps" type="hidden">
         <label class="trip-edit-field"><span>Booking Ref</span><input class="trip-edit-input" id="trip-edit-accommodation-booking-reference" type="text" maxlength="100" autocomplete="off"></label>
         <label class="trip-edit-field"><span>備註</span><textarea class="trip-edit-textarea" id="trip-edit-accommodation-note" rows="3" maxlength="500"></textarea></label>
       </div>
@@ -5884,7 +5943,7 @@ html.theme-dark .snack-edit-tools,html:not(.theme-light):not(.theme-dark) .snack
 </div>
 
 <script>
-const APP_VERSION = "7.9.18.0";
+const APP_VERSION = "7.9.18.1";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 let tripMapServicePromise=null,transitRouteServicePromise=null,tripEditServicePromise=null,airlineLogoServicePromise=null,tripMapController=null,tripMapScope="day",tripMapRenderEpoch=0,tripMapSelectedPoint=null;
@@ -6510,13 +6569,29 @@ document.getElementById("trip-edit-flight-manager-done")?.addEventListener("clic
 document.getElementById("trip-edit-flight-add")?.addEventListener("click",()=>openTripEditFlightEditor(""));
 document.getElementById("trip-edit-flight-editor-cancel")?.addEventListener("click",()=>closeTripEditFlightEditor({discardNew:true}));
 document.getElementById("trip-edit-flight-editor-done")?.addEventListener("click",finishTripEditFlightEditor);
-document.getElementById("trip-edit-flight-number")?.addEventListener("input",event=>{const code=document.getElementById("trip-edit-flight-airline-code");if(!code||String(code.value||"").trim())return;const match=String(event.target?.value||"").trim().toUpperCase().match(/^([A-Z0-9]{2})(?=\s*\d)/);if(match)code.value=match[1];});
+document.getElementById("trip-edit-flight-number")?.addEventListener("input",event=>{const code=document.getElementById("trip-edit-flight-airline-code"),match=String(event.target?.value||"").trim().toUpperCase().match(/^([A-Z0-9]{2})(?=\s*\d)/);if(code&&!String(code.value||"").trim()&&match)code.value=match[1];tripEditRefreshFlightEditorHeading();});
+const tripEditAirlineCodeInput=document.getElementById("trip-edit-flight-airline-code");
+tripEditAirlineCodeInput?.addEventListener("focus",()=>void tripEditRenderAirlineResults(tripEditAirlineCodeInput.value));
+tripEditAirlineCodeInput?.addEventListener("input",event=>{event.target.value=String(event.target.value||"").toUpperCase().replace(/[^A-Z0-9]/g,"").slice(0,3);tripEditRefreshFlightEditorHeading();void tripEditRenderAirlineResults(event.target.value);});
+tripEditAirlineCodeInput?.addEventListener("blur",()=>setTimeout(tripEditHideAirlineResults,140));
+["trip-edit-flight-role","trip-edit-flight-team"].forEach(id=>document.getElementById(id)?.addEventListener("change",tripEditRefreshFlightEditorHeading));
+[["trip-edit-flight-departure-date","trip-edit-flight-departure-date-display"],["trip-edit-flight-arrival-date","trip-edit-flight-arrival-date-display"]].forEach(([inputId,displayId])=>["input","change"].forEach(type=>document.getElementById(inputId)?.addEventListener(type,()=>{tripEditSyncDateDisplay(inputId,displayId);tripEditRefreshFlightEditorHeading();})));
+[["trip-edit-flight-departure-time","trip-edit-flight-departure-time-display"],["trip-edit-flight-arrival-time","trip-edit-flight-arrival-time-display"]].forEach(([inputId,displayId])=>["input","change"].forEach(type=>document.getElementById(inputId)?.addEventListener(type,()=>tripEditSyncTimeDisplay(inputId,displayId))));
 document.getElementById("trip-edit-accommodation-manage-btn")?.addEventListener("click",()=>void openTripEditAccommodationManager());
 document.getElementById("trip-edit-accommodation-manager-cancel")?.addEventListener("click",closeTripEditAccommodationManager);
 document.getElementById("trip-edit-accommodation-manager-done")?.addEventListener("click",()=>void finishTripEditAccommodationManager());
 document.getElementById("trip-edit-accommodation-add")?.addEventListener("click",()=>openTripEditAccommodationEditor(""));
 document.getElementById("trip-edit-accommodation-editor-cancel")?.addEventListener("click",()=>closeTripEditAccommodationEditor({discardNew:true}));
 document.getElementById("trip-edit-accommodation-editor-done")?.addEventListener("click",finishTripEditAccommodationEditor);
+["trip-edit-accommodation-name","trip-edit-accommodation-city"].forEach(id=>{document.getElementById(id)?.addEventListener(id.endsWith("city")?"change":"input",tripEditRefreshAccommodationEditorHeading);});
+[["trip-edit-accommodation-checkin-date","trip-edit-accommodation-checkin-date-display"],["trip-edit-accommodation-checkout-date","trip-edit-accommodation-checkout-date-display"]].forEach(([inputId,displayId])=>["input","change"].forEach(type=>document.getElementById(inputId)?.addEventListener(type,()=>{tripEditSyncDateDisplay(inputId,displayId);tripEditRefreshAccommodationEditorHeading();})));
+[["trip-edit-accommodation-checkin-time","trip-edit-accommodation-checkin-time-display"],["trip-edit-accommodation-checkout-time","trip-edit-accommodation-checkout-time-display"]].forEach(([inputId,displayId])=>["input","change"].forEach(type=>document.getElementById(inputId)?.addEventListener(type,()=>tripEditSyncTimeDisplay(inputId,displayId))));
+document.getElementById("trip-edit-accommodation-location-search-btn")?.addEventListener("click",()=>void tripEditSearchAccommodationLocation());
+document.getElementById("trip-edit-accommodation-location-query")?.addEventListener("keydown",event=>{if(event.key==="Enter"){event.preventDefault();void tripEditSearchAccommodationLocation();}});
+document.getElementById("trip-edit-accommodation-location-link-btn")?.addEventListener("click",()=>void tripEditImportAccommodationMapsLink());
+document.getElementById("trip-edit-accommodation-location-link")?.addEventListener("keydown",event=>{if(event.key==="Enter"){event.preventDefault();void tripEditImportAccommodationMapsLink();}});
+document.getElementById("trip-edit-accommodation-location-clear")?.addEventListener("click",()=>{tripEditAccommodationLocationSelection=tripEditBlankLocation();tripEditRenderAccommodationLocationSelection(tripEditAccommodationLocationSelection);tripEditResetAccommodationLocationResults();const query=document.getElementById("trip-edit-accommodation-location-query"),link=document.getElementById("trip-edit-accommodation-location-link"),address=document.getElementById("trip-edit-accommodation-address");if(query)query.value="";if(link)link.value="";if(address)address.value="";const status=document.getElementById("trip-edit-accommodation-location-status");if(status)status.textContent="住宿定位已清除。";});
+document.getElementById("trip-edit-accommodation-location-open-maps")?.addEventListener("click",()=>{const url=String(tripEditAccommodationLocationSelection?.mapsUrl||"").trim();if(url)window.open(url,"_blank","noopener");});
 ["trip-edit-flight-manager-backdrop","trip-edit-flight-editor-backdrop","trip-edit-accommodation-manager-backdrop","trip-edit-accommodation-editor-backdrop"].forEach(id=>document.getElementById(id)?.addEventListener("click",event=>{if(event.target!==event.currentTarget)return;if(id.includes("flight-editor"))closeTripEditFlightEditor({discardNew:true});else if(id.includes("flight-manager"))closeTripEditFlightManager();else if(id.includes("accommodation-editor"))closeTripEditAccommodationEditor({discardNew:true});else closeTripEditAccommodationManager();}));
 document.getElementById("trip-edit-mode-entry")?.addEventListener("click",()=>{
   if(!tripEditHasPermission()||tripEditIsActive())return;
@@ -7556,9 +7631,15 @@ function tripPresentationAccommodations(meta={}){
   return Object.entries(hotels).map(([cityKey,raw],index)=>{const hotel=typeof raw==="string"?{name:raw}:raw||{},city=cities?.[cityKey]||{};return {accommodationId:`legacy_${cityKey}_${index}`,name:hotel.name||hotel.label||"",address:hotel.address||"",mapsUrl:hotel.mapsUrl||hotel.maps||"",cityKey,teamKey:"all",checkInDate:city.startIso||"",checkOutDate:city.endIso||"",checkInTime:"",checkOutTime:"",bookingReference:"",note:"",sortOrder:index};});
 }
 async function tripApplyAirlineLogo(host,flight,sizeClass=""){
-  if(!host||!flight)return;const code=String(flight.airlineCode||String(flight.flightNumber||"").match(/^([A-Z0-9]{2})/)?.[1]||"").toUpperCase();host.replaceChildren();host.classList.add("trip-airline-logo-host");if(sizeClass)host.classList.add(sizeClass);
+  if(!host||!flight)return;const code=String(flight.airlineCode||String(flight.flightNumber||"").match(/^([A-Z0-9]{2})/)?.[1]||"").toUpperCase();const requestKey=`${code}:${String(flight.flightNumber||"")}:${Date.now()}:${Math.random()}`;host.dataset.airlineLogoRequest=requestKey;host.replaceChildren();host.classList.add("trip-airline-logo-host");if(sizeClass)host.classList.add(sizeClass);
   const fallback=document.createElement("span");fallback.className="trip-airline-logo-fallback";fallback.textContent=code||"✈️";host.appendChild(fallback);
-  try{const service=await airlineLogoService(),url=await service.resolveAirlineLogo({airlineCode:code,flightNumber:flight.flightNumber,fallbackUrl:flight.airlineLogo||""});if(!url||!host.isConnected)return;const img=document.createElement("img");img.src=url;img.alt=code?`${code} airline logo`:"航空公司 Logo";img.className="trip-logo-img";img.addEventListener("error",()=>{img.remove();fallback.hidden=false;},{once:true});img.addEventListener("load",()=>{fallback.hidden=true;},{once:true});host.appendChild(img);}catch(_){ }
+  try{
+    const service=await airlineLogoService(),url=await service.resolveAirlineLogo({airlineCode:code,flightNumber:flight.flightNumber,fallbackUrl:flight.airlineLogo||""});if(!url||!host.isConnected||host.dataset.airlineLogoRequest!==requestKey)return;
+    const img=document.createElement("img");img.alt=code?`${code} airline logo`:"航空公司 Logo";img.className="trip-logo-img";
+    img.addEventListener("error",()=>{}, {once:true});
+    img.addEventListener("load",()=>{if(!host.isConnected||host.dataset.airlineLogoRequest!==requestKey)return;host.replaceChildren(img);},{once:true});
+    img.src=url;
+  }catch(_){ }
 }
 
 // Info View
@@ -8133,7 +8214,7 @@ async function ensureTransitRoutePlanner(itemEl){
 
 
 // Phase 3E · Edit Session foundation
-let tripEditSession=null,tripEditItemTarget=null,tripEditItemPrefill=null,tripEditSaving=false,tripEditLocationSelection=null,tripEditOrderState=null,tripEditLocationSearchEpoch=0,tripEditLocationMapController=null,tripEditLocationMapEpoch=0,tripEditLocationReverseEpoch=0,tripEditTripTitleOriginalHtml="",tripEditTripTitleOriginalPlain="",tripEditTeamModalState=null,tripEditFlightModalState=null,tripEditFlightEditorId="",tripEditAccommodationModalState=null,tripEditAccommodationEditorId="",tripEditAuthoritativeFence=null,tripEditUploadedMediaForSession=[];
+let tripEditSession=null,tripEditItemTarget=null,tripEditItemPrefill=null,tripEditSaving=false,tripEditLocationSelection=null,tripEditOrderState=null,tripEditLocationSearchEpoch=0,tripEditLocationMapController=null,tripEditLocationMapEpoch=0,tripEditLocationReverseEpoch=0,tripEditTripTitleOriginalHtml="",tripEditTripTitleOriginalPlain="",tripEditTeamModalState=null,tripEditFlightModalState=null,tripEditFlightEditorId="",tripEditAccommodationModalState=null,tripEditAccommodationEditorId="",tripEditAccommodationLocationSelection=null,tripEditAccommodationLocationSearchEpoch=0,tripEditAccommodationLocationMapController=null,tripEditAccommodationLocationMapEpoch=0,tripEditAccommodationLocationReverseEpoch=0,tripEditAuthoritativeFence=null,tripEditUploadedMediaForSession=[];
 window.__tripEditPreviewData=null;
 function tripEditPresentationSignature(data){
   if(!data)return"";
@@ -8157,7 +8238,7 @@ function tripEditPresentationSignature(data){
   const meta=data?.meta&&typeof data.meta==="object"?data.meta:{};
   const travellers=Object.fromEntries(Object.entries(meta.travellers||{}).sort(([a],[b])=>a.localeCompare(b)).map(([key,cfg])=>[key,{label:String(cfg?.label||""),members:String(cfg?.members||""),color:String(cfg?.color||"")}])) ;
   const flights=tripPresentationFlights(meta).map(row=>({flightId:String(row?.flightId||""),teamKey:String(row?.teamKey||""),journeyRole:String(row?.journeyRole||""),airlineCode:String(row?.airlineCode||""),flightNumber:String(row?.flightNumber||""),departureDate:String(row?.departureDate||""),departureTime:String(row?.departureTime||""),departureAirport:String(row?.departureAirport||""),arrivalDate:String(row?.arrivalDate||""),arrivalTime:String(row?.arrivalTime||""),arrivalAirport:String(row?.arrivalAirport||""),bookingReference:String(row?.bookingReference||"")}));
-  const accommodations=tripPresentationAccommodations(meta).map(row=>({accommodationId:String(row?.accommodationId||""),name:String(row?.name||""),cityKey:String(row?.cityKey||""),teamKey:String(row?.teamKey||""),checkInDate:String(row?.checkInDate||""),checkInTime:String(row?.checkInTime||""),checkOutDate:String(row?.checkOutDate||""),checkOutTime:String(row?.checkOutTime||""),address:String(row?.address||""),mapsUrl:String(row?.mapsUrl||"")}));
+  const accommodations=tripPresentationAccommodations(meta).map(row=>({accommodationId:String(row?.accommodationId||""),name:String(row?.name||""),cityKey:String(row?.cityKey||""),teamKey:String(row?.teamKey||""),checkInDate:String(row?.checkInDate||""),checkInTime:String(row?.checkInTime||""),checkOutDate:String(row?.checkOutDate||""),checkOutTime:String(row?.checkOutTime||""),address:String(row?.address||""),mapsUrl:String(row?.mapsUrl||""),location:row?.location&&typeof row.location==="object"?{placeId:String(row.location.placeId||""),latitude:Number.isFinite(Number(row.location.latitude))?Number(row.location.latitude):null,longitude:Number.isFinite(Number(row.location.longitude))?Number(row.location.longitude):null}:null}));
   const editMeta={titleSmall:String(meta.titleSmall||""),titleMain:String(meta.titleMain||""),tripStartIso:String(meta.tripStartIso||""),tripEndIso:String(meta.tripEndIso||""),dateRange:String(meta.dateRange||""),route:String(meta.route||""),status:String(meta.status||""),travellers,flights,accommodations};
   const savedPlaces=savedPlaceItemsFromTrip(data).map(place=>({placeId:String(place?.placeId||place?.id||""),title:String(place?.title||""),icon:String(place?.icon||""),area:String(place?.area||""),category:String(place?.category||""),priority:String(place?.priority||""),mealType:String(place?.mealType||""),routeFit:String(place?.routeFit||""),note:String(place?.note||""),detail:String(place?.detail||""),maps:String(place?.maps||place?.location?.mapsUrl||""),images:(Array.isArray(place?.images)?place.images:[]).map((image,index)=>({mediaId:String(image?.mediaId||image?.imageId||""),storagePath:String(image?.storagePath||""),sortOrder:Number.isFinite(Number(image?.sortOrder))?Number(image.sortOrder):index}))}));
   return renderSignature({editMeta,days,savedPlaces},`${dataTripId(data)}:${Math.max(0,Number(data?.revision)||0)}`);
@@ -8236,6 +8317,15 @@ function tripEditCloseBackdrop(id){const el=document.getElementById(id);if(el){e
 function tripEditFormatDateDisplay(value){const match=String(value||"").match(/^(\d{4})-(\d{2})-(\d{2})$/);if(!match)return"未設定";return `${Number(match[1])}年${Number(match[2])}月${Number(match[3])}日`;}
 function tripEditSyncDateDisplay(inputId,displayId){const input=document.getElementById(inputId),display=document.getElementById(displayId);if(display)display.textContent=tripEditFormatDateDisplay(input?.value||"");}
 function tripEditSyncTripDateDisplays(){tripEditSyncDateDisplay("trip-edit-trip-start-date","trip-edit-trip-start-date-display");tripEditSyncDateDisplay("trip-edit-trip-end-date","trip-edit-trip-end-date-display");}
+function tripEditSyncTimeDisplay(inputId,displayId){const input=document.getElementById(inputId),display=document.getElementById(displayId);if(display)display.textContent=String(input?.value||"").trim()||"--:--";}
+function tripEditSyncTravelDateTimeDisplays(){
+  [["trip-edit-flight-departure-date","trip-edit-flight-departure-date-display"],["trip-edit-flight-arrival-date","trip-edit-flight-arrival-date-display"],["trip-edit-accommodation-checkin-date","trip-edit-accommodation-checkin-date-display"],["trip-edit-accommodation-checkout-date","trip-edit-accommodation-checkout-date-display"]].forEach(([input,display])=>tripEditSyncDateDisplay(input,display));
+  [["trip-edit-flight-departure-time","trip-edit-flight-departure-time-display"],["trip-edit-flight-arrival-time","trip-edit-flight-arrival-time-display"],["trip-edit-accommodation-checkin-time","trip-edit-accommodation-checkin-time-display"],["trip-edit-accommodation-checkout-time","trip-edit-accommodation-checkout-time-display"]].forEach(([input,display])=>tripEditSyncTimeDisplay(input,display));
+}
+function tripEditTeamLabel(teamKey="all"){if(String(teamKey||"all")==="all")return"所有人";return String(tripEditSession?.draftTravellers?.[teamKey]?.label||teamKey||"所有人");}
+function tripEditCurrentCityLabel(cityKey=""){const cities=activeTripPresentationData()?.meta?.cities||{};return String(cities?.[cityKey]?.label||cityKey||"未指定地區");}
+function tripEditRefreshFlightEditorHeading(){const meta=document.getElementById("trip-edit-flight-editor-meta");if(!meta)return;const number=String(document.getElementById("trip-edit-flight-number")?.value||"").trim().toUpperCase()||"未設定航班",team=tripEditTeamLabel(document.getElementById("trip-edit-flight-team")?.value||"all"),role=tripFlightRoleLabel(String(document.getElementById("trip-edit-flight-role")?.value||"internal"));meta.textContent=[number,team,role].join(" · ");}
+function tripEditRefreshAccommodationEditorHeading(){const meta=document.getElementById("trip-edit-accommodation-editor-meta");if(!meta)return;const name=String(document.getElementById("trip-edit-accommodation-name")?.value||"").trim()||"未命名住宿",city=tripEditCurrentCityLabel(document.getElementById("trip-edit-accommodation-city")?.value||""),start=tripFlightDateLabel(document.getElementById("trip-edit-accommodation-checkin-date")?.value||""),end=tripFlightDateLabel(document.getElementById("trip-edit-accommodation-checkout-date")?.value||"");meta.textContent=[name,city,[start,end].filter(Boolean).join("–")||"未設定日期"].join(" · ");}
 function closeTripEditTripDetailsModal(){tripEditCloseBackdrop("trip-edit-trip-details-backdrop");tripEditTripTitleOriginalHtml="";tripEditTripTitleOriginalPlain="";}
 async function openTripEditTripDetailsModal(){
   if(!tripEditSession)return;const service=await tripEditService(),draft=service.getTripEditDraftTripDetails(tripEditSession)||{};
@@ -8289,30 +8379,40 @@ function tripEditFillCitySelect(id,value=""){
   const select=document.getElementById(id);if(!select)return;const cities=activeTripPresentationData()?.meta?.cities||{},wanted=String(value||"");select.innerHTML="";const blank=document.createElement("option");blank.value="";blank.textContent="未指定";select.appendChild(blank);orderedCityKeys(activeTripPresentationData(),cities).forEach(key=>{const option=document.createElement("option");option.value=key;option.textContent=String(cities[key]?.label||key);select.appendChild(option);});select.value=[...select.options].some(o=>o.value===wanted)?wanted:"";
 }
 function tripEditFlightSort(rows=[]){return [...rows].sort((a,b)=>String(a?.departureDate||"").localeCompare(String(b?.departureDate||""))||String(a?.departureTime||"").localeCompare(String(b?.departureTime||""))||String(a?.flightNumber||"").localeCompare(String(b?.flightNumber||"")));}
+function tripEditHideAirlineResults(){const host=document.getElementById("trip-edit-flight-airline-results");if(host)host.hidden=true;}
+async function tripEditRenderAirlineResults(query=""){
+  const host=document.getElementById("trip-edit-flight-airline-results");if(!host)return;const input=document.getElementById("trip-edit-flight-airline-code"),needle=String(query ?? input?.value ?? "").trim().toUpperCase();
+  try{
+    const service=await airlineLogoService(),base=service.airlineDirectory?.(needle)||[],seen=new Set(base.map(row=>String(row.code||"").toUpperCase())),tripRows=(tripEditFlightModalState||[]).map(row=>String(row?.airlineCode||String(row?.flightNumber||"").match(/^([A-Z0-9]{2})/)?.[1]||"").toUpperCase()).filter(Boolean).filter(code=>(!needle||code.includes(needle))&&!seen.has(code)).map(code=>({code,name:"今次旅程已使用"}));
+    const rows=[...tripRows,...base].slice(0,12);host.replaceChildren();if(!rows.length){host.hidden=true;return;}
+    rows.forEach(row=>{const button=document.createElement("button");button.type="button";button.className="trip-edit-airline-option";const code=document.createElement("strong");code.textContent=String(row.code||"");const name=document.createElement("span");name.textContent=String(row.name||"");button.append(code,name);button.addEventListener("click",()=>{if(input)input.value=String(row.code||"");tripEditHideAirlineResults();tripEditRefreshFlightEditorHeading();});host.appendChild(button);});host.hidden=false;
+  }catch(_){host.hidden=true;}
+}
 function closeTripEditFlightManager(){tripEditFlightModalState=null;tripEditFlightEditorId="";tripEditCloseBackdrop("trip-edit-flight-manager-backdrop");tripEditCloseBackdrop("trip-edit-flight-editor-backdrop");}
 async function openTripEditFlightManager(){if(!tripEditSession)return;const service=await tripEditService(),state=service.getTripEditDraftTravelState(tripEditSession);tripEditFlightModalState=tripEditClonePlain(state.flights||[]);tripEditRenderFlightManager();tripEditOpenBackdrop("trip-edit-flight-manager-backdrop");}
-function tripEditRenderFlightManager(){const host=document.getElementById("trip-edit-flight-list");if(!host||!Array.isArray(tripEditFlightModalState))return;host.innerHTML="";const rows=tripEditFlightSort(tripEditFlightModalState);if(!rows.length){const empty=document.createElement("div");empty.className="trip-edit-team-note";empty.textContent="未有航班。可新增第一班航班。";host.appendChild(empty);return;}
+function tripEditRenderFlightManager(){const host=document.getElementById("trip-edit-flight-list");if(!host||!Array.isArray(tripEditFlightModalState))return;host.innerHTML="";const rows=tripEditFlightSort(tripEditFlightModalState),managerMeta=document.getElementById("trip-edit-flight-manager-meta");if(managerMeta)managerMeta.textContent=`${rows.length} 班航班 · 按日期排列`;if(!rows.length){const empty=document.createElement("div");empty.className="trip-edit-team-note";empty.textContent="未有航班。可新增第一班航班。";host.appendChild(empty);return;}
   rows.forEach(f=>{const card=document.createElement("div");card.className="trip-edit-travel-card";const head=document.createElement("div");head.className="trip-edit-travel-card-head";const logo=document.createElement("span");logo.className="trip-airline-logo-mini";void tripApplyAirlineLogo(logo,f,"is-manager");const main=document.createElement("span");main.className="trip-edit-travel-card-main";const strong=document.createElement("strong");strong.textContent=f.flightNumber||"未命名航班";const small=document.createElement("small");small.textContent=[tripFlightDateLabel(f.departureDate),tripFlightRouteLabel(f),tripFlightTimeLabel(f)].filter(Boolean).join(" · ")||"未設定時間／路線";main.append(strong,small);const role=document.createElement("span");role.className="trip-edit-travel-card-role";role.textContent=tripFlightRoleLabel(f.journeyRole);head.append(logo,main,role);const actions=document.createElement("div");actions.className="trip-edit-travel-card-actions";const edit=document.createElement("button");edit.type="button";edit.className="trip-edit-travel-edit";edit.textContent="編輯";edit.addEventListener("click",()=>openTripEditFlightEditor(f.flightId));const del=document.createElement("button");del.type="button";del.className="trip-edit-travel-delete";del.textContent="刪除";del.addEventListener("click",()=>{if(!confirm(`刪除 ${f.flightNumber||"呢班航班"}？`))return;tripEditFlightModalState=tripEditFlightModalState.filter(row=>String(row.flightId)!==String(f.flightId));tripEditRenderFlightManager();});actions.append(edit,del);card.append(head,actions);host.appendChild(card);});
 }
 function openTripEditFlightEditor(flightId=""){
   if(!Array.isArray(tripEditFlightModalState))return;let row=tripEditFlightModalState.find(f=>String(f.flightId)===String(flightId));if(!row){row={flightId:tripEditTravelId("flight"),teamKey:"all",journeyRole:"internal",airlineCode:"",flightNumber:"",departureDate:"",departureTime:"",departureAirport:"",departureTerminal:"",arrivalDate:"",arrivalTime:"",arrivalAirport:"",arrivalTerminal:"",bookingReference:"",note:"",airlineLogo:""};tripEditFlightModalState.push(row);}tripEditFlightEditorId=String(row.flightId);document.getElementById("trip-edit-flight-editor-title").textContent=flightId?"編輯航班":"新增航班";
-  const fields={"trip-edit-flight-number":row.flightNumber,"trip-edit-flight-airline-code":row.airlineCode,"trip-edit-flight-role":row.journeyRole,"trip-edit-flight-departure-date":row.departureDate,"trip-edit-flight-departure-time":row.departureTime,"trip-edit-flight-departure-airport":row.departureAirport,"trip-edit-flight-departure-terminal":row.departureTerminal,"trip-edit-flight-arrival-date":row.arrivalDate,"trip-edit-flight-arrival-time":row.arrivalTime,"trip-edit-flight-arrival-airport":row.arrivalAirport,"trip-edit-flight-arrival-terminal":row.arrivalTerminal,"trip-edit-flight-booking-reference":row.bookingReference,"trip-edit-flight-note":row.note};Object.entries(fields).forEach(([id,value])=>{const el=document.getElementById(id);if(el)el.value=String(value||"");});tripEditFillTeamSelect("trip-edit-flight-team",row.teamKey);tripEditOpenBackdrop("trip-edit-flight-editor-backdrop");
+  const fields={"trip-edit-flight-number":row.flightNumber,"trip-edit-flight-airline-code":row.airlineCode,"trip-edit-flight-role":row.journeyRole,"trip-edit-flight-departure-date":row.departureDate,"trip-edit-flight-departure-time":row.departureTime,"trip-edit-flight-departure-airport":row.departureAirport,"trip-edit-flight-departure-terminal":row.departureTerminal,"trip-edit-flight-arrival-date":row.arrivalDate,"trip-edit-flight-arrival-time":row.arrivalTime,"trip-edit-flight-arrival-airport":row.arrivalAirport,"trip-edit-flight-arrival-terminal":row.arrivalTerminal,"trip-edit-flight-booking-reference":row.bookingReference,"trip-edit-flight-note":row.note};Object.entries(fields).forEach(([id,value])=>{const el=document.getElementById(id);if(el)el.value=String(value||"");});tripEditFillTeamSelect("trip-edit-flight-team",row.teamKey);tripEditSyncTravelDateTimeDisplays();tripEditRefreshFlightEditorHeading();tripEditHideAirlineResults();tripEditOpenBackdrop("trip-edit-flight-editor-backdrop");
 }
-function closeTripEditFlightEditor({discardNew=false}={}){if(discardNew&&tripEditFlightEditorId){const row=tripEditFlightModalState?.find(f=>String(f.flightId)===tripEditFlightEditorId);if(row&&!String(row.flightNumber||"").trim())tripEditFlightModalState=tripEditFlightModalState.filter(f=>String(f.flightId)!==tripEditFlightEditorId);}tripEditFlightEditorId="";tripEditCloseBackdrop("trip-edit-flight-editor-backdrop");tripEditRenderFlightManager();}
+function closeTripEditFlightEditor({discardNew=false}={}){tripEditHideAirlineResults();if(discardNew&&tripEditFlightEditorId){const row=tripEditFlightModalState?.find(f=>String(f.flightId)===tripEditFlightEditorId);if(row&&!String(row.flightNumber||"").trim())tripEditFlightModalState=tripEditFlightModalState.filter(f=>String(f.flightId)!==tripEditFlightEditorId);}tripEditFlightEditorId="";tripEditCloseBackdrop("trip-edit-flight-editor-backdrop");tripEditRenderFlightManager();}
 function finishTripEditFlightEditor(){if(!tripEditFlightEditorId||!Array.isArray(tripEditFlightModalState))return closeTripEditFlightEditor();const index=tripEditFlightModalState.findIndex(f=>String(f.flightId)===tripEditFlightEditorId);if(index<0)return closeTripEditFlightEditor();const flightNumber=String(document.getElementById("trip-edit-flight-number")?.value||"").trim().toUpperCase();if(!flightNumber){alert("請輸入航班號碼。");return;}const airlineCode=String(document.getElementById("trip-edit-flight-airline-code")?.value||"").trim().toUpperCase()||flightNumber.match(/^([A-Z0-9]{2})/)?.[1]||"";const row={...tripEditFlightModalState[index],flightNumber,airlineCode,journeyRole:String(document.getElementById("trip-edit-flight-role")?.value||"internal"),teamKey:String(document.getElementById("trip-edit-flight-team")?.value||"all"),departureDate:String(document.getElementById("trip-edit-flight-departure-date")?.value||""),departureTime:String(document.getElementById("trip-edit-flight-departure-time")?.value||""),departureAirport:String(document.getElementById("trip-edit-flight-departure-airport")?.value||"").trim(),departureTerminal:String(document.getElementById("trip-edit-flight-departure-terminal")?.value||"").trim(),arrivalDate:String(document.getElementById("trip-edit-flight-arrival-date")?.value||""),arrivalTime:String(document.getElementById("trip-edit-flight-arrival-time")?.value||""),arrivalAirport:String(document.getElementById("trip-edit-flight-arrival-airport")?.value||"").trim(),arrivalTerminal:String(document.getElementById("trip-edit-flight-arrival-terminal")?.value||"").trim(),bookingReference:String(document.getElementById("trip-edit-flight-booking-reference")?.value||"").trim(),note:String(document.getElementById("trip-edit-flight-note")?.value||"").trim()};if(!row.arrivalDate)row.arrivalDate=row.departureDate;tripEditFlightModalState[index]=row;closeTripEditFlightEditor();}
 async function finishTripEditFlightManager(){if(!tripEditSession||!Array.isArray(tripEditFlightModalState))return closeTripEditFlightManager();try{const service=await tripEditService();service.replaceTripEditDraftFlights(tripEditSession,tripEditFlightModalState);window.__tripEditPreviewData=service.applyTripEditDraftToTrip(tripEditSession,window.tripData);closeTripEditFlightManager();tripEditSyncInfoTools();render(window.__tripEditPreviewData,{includeSnacks:false});setView("info",{restoreScroll:true});if(tripMapOverlayOpen())void renderTripMapScope(tripMapScope);}catch(error){alert(tripEditFriendlyError(error));}}
 
 function tripEditAccommodationSort(rows=[]){return [...rows].sort((a,b)=>String(a?.checkInDate||"").localeCompare(String(b?.checkInDate||""))||String(a?.checkInTime||"").localeCompare(String(b?.checkInTime||""))||String(a?.name||"").localeCompare(String(b?.name||"")));}
 function closeTripEditAccommodationManager(){tripEditAccommodationModalState=null;tripEditAccommodationEditorId="";tripEditCloseBackdrop("trip-edit-accommodation-manager-backdrop");tripEditCloseBackdrop("trip-edit-accommodation-editor-backdrop");}
 async function openTripEditAccommodationManager(){if(!tripEditSession)return;const service=await tripEditService(),state=service.getTripEditDraftTravelState(tripEditSession);tripEditAccommodationModalState=tripEditClonePlain(state.accommodations||[]);tripEditRenderAccommodationManager();tripEditOpenBackdrop("trip-edit-accommodation-manager-backdrop");}
-function tripEditRenderAccommodationManager(){const host=document.getElementById("trip-edit-accommodation-list");if(!host||!Array.isArray(tripEditAccommodationModalState))return;host.innerHTML="";const rows=tripEditAccommodationSort(tripEditAccommodationModalState),cities=activeTripPresentationData()?.meta?.cities||{};if(!rows.length){const empty=document.createElement("div");empty.className="trip-edit-team-note";empty.textContent="未有住宿。可新增第一間酒店或住宿。";host.appendChild(empty);return;}
+function tripEditRenderAccommodationManager(){const host=document.getElementById("trip-edit-accommodation-list");if(!host||!Array.isArray(tripEditAccommodationModalState))return;host.innerHTML="";const rows=tripEditAccommodationSort(tripEditAccommodationModalState),cities=activeTripPresentationData()?.meta?.cities||{},managerMeta=document.getElementById("trip-edit-accommodation-manager-meta");if(managerMeta)managerMeta.textContent=`${rows.length} 間住宿 · 按入住日期排列`;if(!rows.length){const empty=document.createElement("div");empty.className="trip-edit-team-note";empty.textContent="未有住宿。可新增第一間酒店或住宿。";host.appendChild(empty);return;}
   rows.forEach(stay=>{const card=document.createElement("div");card.className="trip-edit-travel-card";const head=document.createElement("div");head.className="trip-edit-travel-card-head";const icon=document.createElement("span");icon.className="trip-airline-logo-fallback";icon.textContent="🏨";const main=document.createElement("span");main.className="trip-edit-travel-card-main";const strong=document.createElement("strong");strong.textContent=stay.name||"未命名住宿";const small=document.createElement("small");small.textContent=[[stay.checkInDate,stay.checkOutDate].filter(Boolean).join(" → "),cities?.[stay.cityKey]?.label||stay.cityKey||"",stay.address].filter(Boolean).join(" · ")||"未設定日期／地址";main.append(strong,small);head.append(icon,main);const actions=document.createElement("div");actions.className="trip-edit-travel-card-actions";const edit=document.createElement("button");edit.type="button";edit.className="trip-edit-travel-edit";edit.textContent="編輯";edit.addEventListener("click",()=>openTripEditAccommodationEditor(stay.accommodationId));const del=document.createElement("button");del.type="button";del.className="trip-edit-travel-delete";del.textContent="刪除";del.addEventListener("click",()=>{if(!confirm(`刪除 ${stay.name||"呢個住宿"}？`))return;tripEditAccommodationModalState=tripEditAccommodationModalState.filter(row=>String(row.accommodationId)!==String(stay.accommodationId));tripEditRenderAccommodationManager();});actions.append(edit,del);card.append(head,actions);host.appendChild(card);});
 }
 function openTripEditAccommodationEditor(id=""){
-  if(!Array.isArray(tripEditAccommodationModalState))return;let row=tripEditAccommodationModalState.find(stay=>String(stay.accommodationId)===String(id));if(!row){row={accommodationId:tripEditTravelId("stay"),name:"",cityKey:"",teamKey:"all",checkInDate:"",checkInTime:"",checkOutDate:"",checkOutTime:"",address:"",mapsUrl:"",bookingReference:"",note:""};tripEditAccommodationModalState.push(row);}tripEditAccommodationEditorId=String(row.accommodationId);document.getElementById("trip-edit-accommodation-editor-title").textContent=id?"編輯住宿":"新增住宿";const fields={"trip-edit-accommodation-name":row.name,"trip-edit-accommodation-checkin-date":row.checkInDate,"trip-edit-accommodation-checkin-time":row.checkInTime,"trip-edit-accommodation-checkout-date":row.checkOutDate,"trip-edit-accommodation-checkout-time":row.checkOutTime,"trip-edit-accommodation-address":row.address,"trip-edit-accommodation-maps":row.mapsUrl,"trip-edit-accommodation-booking-reference":row.bookingReference,"trip-edit-accommodation-note":row.note};Object.entries(fields).forEach(([fieldId,value])=>{const el=document.getElementById(fieldId);if(el)el.value=String(value||"");});tripEditFillCitySelect("trip-edit-accommodation-city",row.cityKey);tripEditFillTeamSelect("trip-edit-accommodation-team",row.teamKey);tripEditOpenBackdrop("trip-edit-accommodation-editor-backdrop");
+  if(!Array.isArray(tripEditAccommodationModalState))return;let row=tripEditAccommodationModalState.find(stay=>String(stay.accommodationId)===String(id));if(!row){row={accommodationId:tripEditTravelId("stay"),name:"",cityKey:"",teamKey:"all",checkInDate:"",checkInTime:"",checkOutDate:"",checkOutTime:"",address:"",mapsUrl:"",location:null,bookingReference:"",note:""};tripEditAccommodationModalState.push(row);}tripEditAccommodationEditorId=String(row.accommodationId);document.getElementById("trip-edit-accommodation-editor-title").textContent=id?"編輯住宿":"新增住宿";
+  const fields={"trip-edit-accommodation-name":row.name,"trip-edit-accommodation-checkin-date":row.checkInDate,"trip-edit-accommodation-checkin-time":row.checkInTime,"trip-edit-accommodation-checkout-date":row.checkOutDate,"trip-edit-accommodation-checkout-time":row.checkOutTime,"trip-edit-accommodation-address":row.address,"trip-edit-accommodation-maps":row.mapsUrl,"trip-edit-accommodation-booking-reference":row.bookingReference,"trip-edit-accommodation-note":row.note};Object.entries(fields).forEach(([fieldId,value])=>{const el=document.getElementById(fieldId);if(el)el.value=String(value||"");});tripEditFillCitySelect("trip-edit-accommodation-city",row.cityKey);tripEditFillTeamSelect("trip-edit-accommodation-team",row.teamKey);tripEditSyncTravelDateTimeDisplays();tripEditRefreshAccommodationEditorHeading();tripEditOpenBackdrop("trip-edit-accommodation-editor-backdrop");void tripEditConfigureAccommodationLocation(row);
 }
-function closeTripEditAccommodationEditor({discardNew=false}={}){if(discardNew&&tripEditAccommodationEditorId){const row=tripEditAccommodationModalState?.find(stay=>String(stay.accommodationId)===tripEditAccommodationEditorId);if(row&&!String(row.name||"").trim())tripEditAccommodationModalState=tripEditAccommodationModalState.filter(stay=>String(stay.accommodationId)!==tripEditAccommodationEditorId);}tripEditAccommodationEditorId="";tripEditCloseBackdrop("trip-edit-accommodation-editor-backdrop");tripEditRenderAccommodationManager();}
-function finishTripEditAccommodationEditor(){if(!tripEditAccommodationEditorId||!Array.isArray(tripEditAccommodationModalState))return closeTripEditAccommodationEditor();const index=tripEditAccommodationModalState.findIndex(stay=>String(stay.accommodationId)===tripEditAccommodationEditorId);if(index<0)return closeTripEditAccommodationEditor();const name=String(document.getElementById("trip-edit-accommodation-name")?.value||"").trim();if(!name){alert("請輸入住宿名稱。");return;}const checkInDate=String(document.getElementById("trip-edit-accommodation-checkin-date")?.value||""),checkOutDate=String(document.getElementById("trip-edit-accommodation-checkout-date")?.value||"");if(checkInDate&&checkOutDate&&checkOutDate<checkInDate){alert("退房日期唔可以早過入住日期。");return;}const address=String(document.getElementById("trip-edit-accommodation-address")?.value||"").trim(),mapsInput=String(document.getElementById("trip-edit-accommodation-maps")?.value||"").trim();const mapsUrl=mapsInput||([name,address].filter(Boolean).length?`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent([name,address].filter(Boolean).join(" "))}`:"");tripEditAccommodationModalState[index]={...tripEditAccommodationModalState[index],name,cityKey:String(document.getElementById("trip-edit-accommodation-city")?.value||""),teamKey:String(document.getElementById("trip-edit-accommodation-team")?.value||"all"),checkInDate,checkInTime:String(document.getElementById("trip-edit-accommodation-checkin-time")?.value||""),checkOutDate,checkOutTime:String(document.getElementById("trip-edit-accommodation-checkout-time")?.value||""),address,mapsUrl,location:{name,address,mapsUrl},bookingReference:String(document.getElementById("trip-edit-accommodation-booking-reference")?.value||"").trim(),note:String(document.getElementById("trip-edit-accommodation-note")?.value||"").trim()};closeTripEditAccommodationEditor();}
+function closeTripEditAccommodationEditor({discardNew=false}={}){++tripEditAccommodationLocationSearchEpoch;tripEditDestroyAccommodationLocationPreview();tripEditResetAccommodationLocationResults();tripEditAccommodationLocationSelection=null;if(discardNew&&tripEditAccommodationEditorId){const row=tripEditAccommodationModalState?.find(stay=>String(stay.accommodationId)===tripEditAccommodationEditorId);if(row&&!String(row.name||"").trim())tripEditAccommodationModalState=tripEditAccommodationModalState.filter(stay=>String(stay.accommodationId)!==tripEditAccommodationEditorId);}tripEditAccommodationEditorId="";tripEditCloseBackdrop("trip-edit-accommodation-editor-backdrop");tripEditRenderAccommodationManager();}
+function finishTripEditAccommodationEditor(){if(!tripEditAccommodationEditorId||!Array.isArray(tripEditAccommodationModalState))return closeTripEditAccommodationEditor();const index=tripEditAccommodationModalState.findIndex(stay=>String(stay.accommodationId)===tripEditAccommodationEditorId);if(index<0)return closeTripEditAccommodationEditor();const name=String(document.getElementById("trip-edit-accommodation-name")?.value||"").trim();if(!name){alert("請輸入住宿名稱。");return;}const checkInDate=String(document.getElementById("trip-edit-accommodation-checkin-date")?.value||""),checkOutDate=String(document.getElementById("trip-edit-accommodation-checkout-date")?.value||"");if(checkInDate&&checkOutDate&&checkOutDate<checkInDate){alert("退房日期唔可以早過入住日期。");return;}const address=String(document.getElementById("trip-edit-accommodation-address")?.value||"").trim(),selected=tripEditNormalizeLocation(tripEditAccommodationLocationSelection||{}),mapsInput=String(document.getElementById("trip-edit-accommodation-maps")?.value||selected.mapsUrl||"").trim(),mapsUrl=mapsInput||([name,address].filter(Boolean).length?`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent([name,address].filter(Boolean).join(" "))}`:"");const location={...selected,name:selected.name||name,address:address||selected.address,mapsUrl};tripEditAccommodationModalState[index]={...tripEditAccommodationModalState[index],name,cityKey:String(document.getElementById("trip-edit-accommodation-city")?.value||""),teamKey:String(document.getElementById("trip-edit-accommodation-team")?.value||"all"),checkInDate,checkInTime:String(document.getElementById("trip-edit-accommodation-checkin-time")?.value||""),checkOutDate,checkOutTime:String(document.getElementById("trip-edit-accommodation-checkout-time")?.value||""),address:location.address,mapsUrl,location,bookingReference:String(document.getElementById("trip-edit-accommodation-booking-reference")?.value||"").trim(),note:String(document.getElementById("trip-edit-accommodation-note")?.value||"").trim()};closeTripEditAccommodationEditor();}
 async function finishTripEditAccommodationManager(){if(!tripEditSession||!Array.isArray(tripEditAccommodationModalState))return closeTripEditAccommodationManager();try{const service=await tripEditService();service.replaceTripEditDraftAccommodations(tripEditSession,tripEditAccommodationModalState);window.__tripEditPreviewData=service.applyTripEditDraftToTrip(tripEditSession,window.tripData);closeTripEditAccommodationManager();tripEditSyncInfoTools();render(window.__tripEditPreviewData,{includeSnacks:false});setView("info",{restoreScroll:true});if(tripMapOverlayOpen())void renderTripMapScope(tripMapScope);}catch(error){alert(tripEditFriendlyError(error));}}
 function tripEditFindDomItem(dayId,itemId){
   return [...document.querySelectorAll(".itinerary-item")].find(node=>String(node.dataset.dayId||"")===String(dayId||"")&&String(node.dataset.itemId||"")===String(itemId||""))||null;
@@ -8333,6 +8433,44 @@ function tripEditLocationHasValue(value={}){
   const loc=tripEditNormalizeLocation(value);
   return !!(loc.placeId||loc.address||loc.mapsUrl||(loc.latitude!=null&&loc.longitude!=null));
 }
+function tripEditDestroyAccommodationLocationPreview(){
+  ++tripEditAccommodationLocationMapEpoch;++tripEditAccommodationLocationReverseEpoch;
+  try{tripEditAccommodationLocationMapController?.destroy?.();}catch(_){}
+  tripEditAccommodationLocationMapController=null;
+  const preview=document.getElementById("trip-edit-accommodation-location-preview");if(preview)preview.hidden=true;
+}
+function tripEditResetAccommodationLocationResults(){const results=document.getElementById("trip-edit-accommodation-location-results"),attribution=document.getElementById("trip-edit-accommodation-location-attribution");if(results){results.replaceChildren();results.hidden=true;}if(attribution)attribution.hidden=true;}
+async function tripEditAccommodationHandleMapPick(coords={}){
+  if(!tripEditAccommodationEditorId)return;const lat=Number(coords?.latitude??coords?.lat),lng=Number(coords?.longitude??coords?.lng);if(!Number.isFinite(lat)||!Number.isFinite(lng))return;
+  const epoch=++tripEditAccommodationLocationReverseEpoch,status=document.getElementById("trip-edit-accommodation-location-status"),nameInput=document.getElementById("trip-edit-accommodation-name");if(status)status.textContent="正在確認你點選嘅住宿位置…";
+  try{const service=await tripMapService(),manual=await service.reverseGeocodeEditableLocation({latitude:lat,longitude:lng,name:String(tripEditAccommodationLocationSelection?.name||nameInput?.value||"住宿").trim()});if(epoch!==tripEditAccommodationLocationReverseEpoch||!tripEditAccommodationEditorId)return;tripEditRenderAccommodationLocationSelection(manual);if(status)status.textContent="已更新住宿定位。";}
+  catch(error){console.warn("Accommodation reverse geocode",error);if(epoch!==tripEditAccommodationLocationReverseEpoch)return;tripEditRenderAccommodationLocationSelection({name:String(nameInput?.value||"住宿").trim()||"住宿",latitude:lat,longitude:lng,address:"",mapsUrl:`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${lat},${lng}`)}`});if(status)status.textContent="已使用你點選嘅座標；地址暫時未能確認。";}
+}
+async function tripEditSyncAccommodationLocationPreview(value={}){
+  const loc=tripEditNormalizeLocation(value),preview=document.getElementById("trip-edit-accommodation-location-preview"),mapEl=document.getElementById("trip-edit-accommodation-location-map");if(!preview||!mapEl)return;
+  if(loc.latitude==null||loc.longitude==null){preview.hidden=true;return;}
+  preview.hidden=false;const epoch=++tripEditAccommodationLocationMapEpoch;
+  try{const service=await tripMapService();if(epoch!==tripEditAccommodationLocationMapEpoch||!tripEditAccommodationEditorId)return;if(!tripEditAccommodationLocationMapController){tripEditAccommodationLocationMapController=await service.createEditableLocationPreview(mapEl,{location:loc,onPick:coords=>void tripEditAccommodationHandleMapPick(coords)});if(epoch!==tripEditAccommodationLocationMapEpoch){try{tripEditAccommodationLocationMapController?.destroy?.();}catch(_){}tripEditAccommodationLocationMapController=null;return;}}else tripEditAccommodationLocationMapController.setLocation(loc,{focus:true});}
+  catch(error){console.warn("Accommodation location preview",error);if(epoch===tripEditAccommodationLocationMapEpoch)preview.hidden=true;}
+}
+function tripEditRenderAccommodationLocationSelection(value={}, {syncFields=true}={}){
+  tripEditAccommodationLocationSelection=tripEditNormalizeLocation(value);const selected=document.getElementById("trip-edit-accommodation-location-selected"),title=document.getElementById("trip-edit-accommodation-location-selected-title"),address=document.getElementById("trip-edit-accommodation-location-selected-address"),open=document.getElementById("trip-edit-accommodation-location-open-maps"),has=tripEditLocationHasValue(tripEditAccommodationLocationSelection);
+  if(selected)selected.hidden=!has;if(title)title.textContent=tripEditAccommodationLocationSelection.name||"已選定位";if(address){const coords=tripEditAccommodationLocationSelection.latitude!=null&&tripEditAccommodationLocationSelection.longitude!=null?`${tripEditAccommodationLocationSelection.latitude.toFixed(5)}, ${tripEditAccommodationLocationSelection.longitude.toFixed(5)}`:"";address.textContent=[tripEditAccommodationLocationSelection.address,coords].filter(Boolean).join(" · ")||tripEditAccommodationLocationSelection.mapsUrl||"";}if(open)open.disabled=!tripEditAccommodationLocationSelection.mapsUrl;
+  if(syncFields){const addressInput=document.getElementById("trip-edit-accommodation-address"),mapsInput=document.getElementById("trip-edit-accommodation-maps"),nameInput=document.getElementById("trip-edit-accommodation-name");if(addressInput&&tripEditAccommodationLocationSelection.address)addressInput.value=tripEditAccommodationLocationSelection.address;if(mapsInput)mapsInput.value=tripEditAccommodationLocationSelection.mapsUrl||"";if(nameInput&&!String(nameInput.value||"").trim()&&tripEditAccommodationLocationSelection.name)nameInput.value=tripEditAccommodationLocationSelection.name;tripEditRefreshAccommodationEditorHeading();}
+  if(has)void tripEditSyncAccommodationLocationPreview(tripEditAccommodationLocationSelection);else tripEditDestroyAccommodationLocationPreview();
+}
+async function tripEditConfigureAccommodationLocation(row={}){
+  const editorId=String(tripEditAccommodationEditorId||"");++tripEditAccommodationLocationSearchEpoch;tripEditResetAccommodationLocationResults();tripEditDestroyAccommodationLocationPreview();const query=document.getElementById("trip-edit-accommodation-location-query"),link=document.getElementById("trip-edit-accommodation-location-link"),status=document.getElementById("trip-edit-accommodation-location-status"),base=tripEditNormalizeLocation(row?.location||{name:row?.name||"",address:row?.address||"",mapsUrl:row?.mapsUrl||""});if(query)query.value=String(row?.name||base.name||"");if(link)link.value=String(row?.mapsUrl||base.mapsUrl||"");tripEditRenderAccommodationLocationSelection(base,{syncFields:false});if(status)status.textContent=tripEditLocationHasValue(base)?"已載入住宿定位；可重新搜尋或用地圖微調。":"可搜尋酒店名稱或貼上 Google Maps 連結。";
+  if((base.latitude==null||base.longitude==null)&&base.mapsUrl){try{const service=await tripMapService(),rows=await service.searchEditableLocations(base.mapsUrl,{limit:1});if(String(tripEditAccommodationEditorId||"")!==editorId||!rows.length)return;const resolved=await service.resolveEditableLocationCandidate(rows[0]);if(String(tripEditAccommodationEditorId||"")===editorId)tripEditRenderAccommodationLocationSelection(resolved,{syncFields:false});}catch(_){}}
+}
+async function tripEditSearchAccommodationLocation(){
+  if(!tripEditAccommodationEditorId)return;const queryEl=document.getElementById("trip-edit-accommodation-location-query"),button=document.getElementById("trip-edit-accommodation-location-search-btn"),status=document.getElementById("trip-edit-accommodation-location-status"),results=document.getElementById("trip-edit-accommodation-location-results"),query=String(queryEl?.value||"").trim();if(!query){if(status)status.textContent="請先輸入酒店名稱或地址。";queryEl?.focus();return;}
+  const epoch=++tripEditAccommodationLocationSearchEpoch;if(button){button.disabled=true;button.textContent="搜尋中…";}if(status)status.textContent="正在用 Google Places 搜尋住宿…";tripEditResetAccommodationLocationResults();
+  try{const service=await tripMapService(),rows=await service.searchEditableLocations(query,{limit:5});if(epoch!==tripEditAccommodationLocationSearchEpoch||!tripEditAccommodationEditorId)return;if(!rows.length){if(status)status.textContent="搵唔到合適住宿；可加入城市或完整酒店名稱再試。";return;}rows.forEach(row=>{const btn=document.createElement("button");btn.type="button";btn.className="trip-edit-location-result";const strong=document.createElement("strong");strong.textContent=String(row.name||row.address||query).trim();const small=document.createElement("small");small.textContent=String(row.addressHint||row.address||"").trim();btn.append(strong,small);btn.addEventListener("click",async()=>{if(epoch!==tripEditAccommodationLocationSearchEpoch)return;results?.querySelectorAll(".trip-edit-location-result").forEach(node=>node.classList.remove("is-selected"));btn.classList.add("is-selected");btn.disabled=true;if(status)status.textContent="正在載入住宿詳細定位…";try{const resolved=await service.resolveEditableLocationCandidate(row);if(epoch!==tripEditAccommodationLocationSearchEpoch||!tripEditAccommodationEditorId)return;tripEditRenderAccommodationLocationSelection(resolved);if(queryEl)queryEl.value=String(resolved.name||query).trim();const link=document.getElementById("trip-edit-accommodation-location-link");if(link)link.value=String(resolved.mapsUrl||"");if(status)status.textContent="已選住宿；可再揀其他結果或點地圖微調。";}catch(error){console.warn("Accommodation place selection",error);if(status)status.textContent="暫時未能載入呢個地點，請試另一個結果。";}finally{btn.disabled=false;}});results?.appendChild(btn);});if(results)results.hidden=false;const attribution=document.getElementById("trip-edit-accommodation-location-attribution");if(attribution)attribution.hidden=false;if(status)status.textContent="請揀一個 Google Maps 搜尋結果。";}
+  catch(error){console.warn("Accommodation location search",error);if(epoch!==tripEditAccommodationLocationSearchEpoch)return;if(status){if(String(error?.code||"").startsWith("maps-short-link-"))status.textContent="Google Maps 短連結暫時未能展開；可改用酒店名稱搜尋。";else if(error?.code==="maps-link-unresolved")status.textContent="呢條 Google Maps 連結未能識別正式地點；請改用酒店名稱搜尋。";else status.textContent="Google 地點搜尋暫時未能使用，請稍後再試。";}}
+  finally{if(epoch===tripEditAccommodationLocationSearchEpoch&&button){button.disabled=false;button.textContent="搜尋";}}
+}
+async function tripEditImportAccommodationMapsLink(){const link=document.getElementById("trip-edit-accommodation-location-link"),query=document.getElementById("trip-edit-accommodation-location-query"),button=document.getElementById("trip-edit-accommodation-location-link-btn"),status=document.getElementById("trip-edit-accommodation-location-status"),value=String(link?.value||"").trim();if(!value){if(status)status.textContent="請先貼上 Google Maps 連結。";link?.focus();return;}let parsed;try{parsed=new URL(value);}catch(_){if(status)status.textContent="呢個唔似有效網址。";return;}const host=String(parsed.hostname||"").toLowerCase(),isGoogle=host==="maps.app.goo.gl"||host==="goo.gl"||host.endsWith(".google.com")||host==="google.com"||host.endsWith(".google.co.jp")||host==="google.co.jp";if(!isGoogle){if(status)status.textContent="暫時只支援 Google Maps 連結。";return;}if(query)query.value=value;if(button){button.disabled=true;button.textContent="匯入中…";}try{await tripEditSearchAccommodationLocation();}finally{if(button){button.disabled=false;button.textContent="匯入";}}}
 function tripEditTargetKind(){
   const explicit=String(tripEditItemTarget?.kind||"").trim();
   if(explicit==="savedPlace")return "savedPlace";
