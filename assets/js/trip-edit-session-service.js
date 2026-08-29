@@ -304,8 +304,11 @@ function normalizeAccommodationRecord(input = {}, fallback = {}) {
   const source = input && typeof input === "object" ? input : {};
   const base = fallback && typeof fallback === "object" ? fallback : {};
   const name = clean(source.name ?? source.title ?? base.name ?? base.title);
-  const address = clean(source.address ?? source.location?.address ?? base.address ?? base.location?.address);
-  const mapsUrl = clean(source.mapsUrl ?? source.maps ?? source.location?.mapsUrl ?? base.mapsUrl ?? base.maps ?? base.location?.mapsUrl) || accommodationMapsUrl(name, address);
+  const initialAddress = clean(source.address ?? source.location?.address ?? base.address ?? base.location?.address);
+  const initialMapsUrl = clean(source.mapsUrl ?? source.maps ?? source.location?.mapsUrl ?? base.mapsUrl ?? base.maps ?? base.location?.mapsUrl) || accommodationMapsUrl(name, initialAddress);
+  const location = normalizeDraftLocation({ ...(base.location || {}), ...(source.location || {}), name, address: initialAddress, mapsUrl: initialMapsUrl }, name);
+  const address = clean(location.address || initialAddress), mapsUrl = clean(location.mapsUrl || initialMapsUrl) || accommodationMapsUrl(name, address);
+  location.name = clean(location.name || name); location.address = address; location.mapsUrl = mapsUrl;
   return {
     ...clonePlain(base), ...clonePlain(source),
     accommodationId: clean(source.accommodationId ?? base.accommodationId) || makeAccommodationId(),
@@ -313,7 +316,7 @@ function normalizeAccommodationRecord(input = {}, fallback = {}) {
     checkInDate: clean(source.checkInDate ?? base.checkInDate), checkInTime: clean(source.checkInTime ?? base.checkInTime),
     checkOutDate: clean(source.checkOutDate ?? base.checkOutDate), checkOutTime: clean(source.checkOutTime ?? base.checkOutTime),
     address, mapsUrl, bookingReference: clean(source.bookingReference ?? base.bookingReference), note: clean(source.note ?? base.note),
-    location: { name, address, mapsUrl }, sortOrder: normalizedSortOrder(source.sortOrder, normalizedSortOrder(base.sortOrder))
+    location, sortOrder: normalizedSortOrder(source.sortOrder, normalizedSortOrder(base.sortOrder))
   };
 }
 function normalizeAccommodationsForEdit(input = [], { hotels = {}, cities = {} } = {}) {
