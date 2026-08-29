@@ -31,10 +31,29 @@ service firebase.storage {
         && request.resource.contentType is string
         && request.resource.contentType.matches('image/.*');
     }
+    function validBookingDocumentUpload() {
+      return request.resource != null
+        && request.resource.size > 0
+        && request.resource.size <= 20 * 1024 * 1024
+        && request.resource.contentType is string
+        && (
+          request.resource.contentType == 'application/pdf'
+          || request.resource.contentType.matches('image/(jpeg|jpg|png|webp|heic|heif)')
+        );
+    }
 
     match /trips/{tripId}/media/{mediaPath=**} {
       allow get: if canReadTripMedia(tripId);
       allow create, update: if canWriteTripMedia(tripId) && validImageUpload();
+      allow delete: if canWriteTripMedia(tripId);
+    }
+
+    // v7.9.19.0 · Booking Documents. PDF / image reservation files are kept
+    // under the Trip prefix so Permanent Delete can remove them atomically with
+    // the rest of the Trip Storage lifecycle.
+    match /trips/{tripId}/documents/{documentPath=**} {
+      allow read: if canReadTripMedia(tripId);
+      allow create, update: if canWriteTripMedia(tripId) && validBookingDocumentUpload();
       allow delete: if canWriteTripMedia(tripId);
     }
 

@@ -1,5 +1,5 @@
 /* Travel WebApp Service Worker
- * v7.9.18.5 · Travel Details Centered Value Polish
+ * v7.9.19.0 · Booking Documents Foundation
  *
  * Keeps the v7.7.0.14 cold-start behaviour, while hardening installation:
  *  1. Critical shell assets are transactional. If any critical file cannot be
@@ -14,7 +14,7 @@
  *     explicit reload stays network-first.
  */
 
-const SW_VERSION = "travel-shell-v7.9.18.5";
+const SW_VERSION = "travel-shell-v7.9.19.0";
 const CORE_CACHE = SW_VERSION;
 
 // Required for a useful offline launch and remembered-Trip boot.
@@ -50,6 +50,7 @@ const OPTIONAL_ASSETS = [
   "./assets/js/trip-appearance-service.js",
   "./assets/js/trip-backup-service.js",
   "./assets/js/trip-backup-package-service.js",
+  "./assets/js/trip-document-service.js",
   "./assets/js/trip-destination-service.js",
   "./assets/js/trip-delete-service.js",
   "./assets/js/trip-creator-service.js",

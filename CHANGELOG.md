@@ -1,3 +1,31 @@
+## v7.9.19.0 — Booking Documents Foundation
+
+### Booking documents domain
+
+- Added first-class booking documents for Flights, Accommodations and Itinerary Items.
+- Supports PDF plus JPG / PNG / WEBP / HEIC / HEIF reservation images, up to 20MB per file.
+- Documents are stored under `trips/{tripId}/documents/{documentId}/...`; GitHub remains app-shell only.
+- Added a central `預訂與文件` card in Travel Details and document shortcuts inside Flight / Accommodation details and itinerary item details.
+- Added in-app PDF / image viewer while retaining read-only compatibility with legacy `booking.pdf` / `bookingPdf` links.
+
+### Edit Session + lifecycle
+
+- Document add/remove operations follow the existing Local Draft → one Global Save transaction model.
+- Global Cancel discards staged bytes; Global Save uploads new documents before the Firestore commit and deletes removed files only after a successful commit.
+- Partial upload recovery preserves successfully uploaded descriptors for retry, while deferred Storage cleanup is retained locally and retried later.
+- Deleting or moving linked Flights, Accommodations and Itinerary Items keeps document ownership/day metadata coherent.
+
+### Full Backup / Restore
+
+- Full Backup ZIP now packages booking document bytes with SHA-256 integrity metadata alongside existing media.
+- Full Restore and Restore-as-New restore PDF / image files and reconcile the Trip document Storage prefix.
+- Portable trip metadata now carries document references; Permanent Delete already removes the whole `trips/{tripId}/` Storage prefix, so no Function change is required.
+
+### Storage security
+
+- Added Storage Rules for Trip booking documents: members can read; Owner/Admin can create/update/delete while the Trip is unlocked and not deleting.
+- Shared Airline Registry rules are unchanged.
+
 ## v7.9.18.5 — Travel Details Centered Value Polish
 
 - Removed the decorative dot from Flight / Accommodation Team pills while retaining each Team's configured colour treatment.
