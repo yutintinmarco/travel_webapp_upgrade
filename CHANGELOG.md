@@ -1,3 +1,12 @@
+## v7.9.19.5 — Booking Documents Shared Chrome Surface Fix
+
+- Fixed the real iPhone transition root cause: Info/Profile snapshot surfaces are now clamped below the live compact-header / safe-area band instead of being allowed to paint over the shared top chrome.
+- Raised the existing shared `.ios-compact-header` above all snapshot transition surfaces while keeping it below the body-level bottom navigation.
+- Gave the short Booking Documents page enough minimum height to preserve the requested compact-header scroll position instead of WebKit clamping the destination close to scrollTop 0 and re-expanding the large Trip hero.
+- Froze scroll-linked collapse writes only while an Info push/pop or interactive edge swipe is actively transitioning, then resynchronised the live chrome once after the transition surfaces are cleared. A pending collapse animation frame is cancelled when the freeze begins.
+- Applied the same surface top-band clamp to the proven Profile surface creator as a latent-bug hardening only; Profile navigation behaviour and visual language are otherwise unchanged.
+- Targeted UI/compositor patch only. No Booking Documents schema, Global Save Once, Firebase Rules, Functions, Map, Transit, Location Picker, Day Bar interaction or other frozen-domain logic changes.
+
 ## v7.9.19.4 — Booking Documents Header Continuity / Viewer Edge Back
 
 - Kept the Booking Documents subpage in the existing compact `資料` header state instead of resetting the shared scroll shell to the large Trip hero during push / pop handoff, reducing the safe-area/header geometry change seen on iPhone real-device navigation.

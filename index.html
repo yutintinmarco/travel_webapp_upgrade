@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
   <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
   <link rel="dns-prefetch" href="https://api.open-meteo.com">
-  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?release=7.9.19.4">
+  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?release=7.9.19.5">
   <title id="page-title">行程</title>
   <script>
   // v7.7.5.0 · Performance Lite. Memory only: no Firebase reads/writes, no
@@ -3903,7 +3903,7 @@ body.expenses-view-active #app-version-note{
 #snacks-view::after,
 #info-view::after,
 #profile-view::after{
-  content:"v7.9.19.4" !important;
+  content:"v7.9.19.5" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3924,7 +3924,7 @@ body.expenses-view-active #app-version-note{
   display:none !important;
 }
 body.expenses-view-active .expenses-module .expenses-app::after{
-  content:"v7.9.19.4" !important;
+  content:"v7.9.19.5" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -4577,7 +4577,7 @@ html.theme-dark .snack-edit-tools,html:not(.theme-light):not(.theme-dark) .snack
 </style>
             <link rel="apple-touch-icon" href="assets/icon/trip_icon.png">
   <link rel="icon" type="image/png" href="assets/icon/trip_icon.png">
-  <link rel="manifest" href="manifest.json?release=7.9.19.4">
+  <link rel="manifest" href="manifest.json?release=7.9.19.5">
   <meta name="apple-mobile-web-app-title" content="關嘉露西生日之旅">
   <!-- v7.7.1.2: expenses.css is 144KB and every rule is scoped under
        .expenses-module, yet it used to block the very first paint of the
@@ -4585,8 +4585,8 @@ html.theme-dark .snack-edit-tools,html:not(.theme-light):not(.theme-dark) .snack
        priority without blocking paint; ensureExpensesStylesheet() flips it to
        media="all" before the 支出 view is ever mounted, so the styling is
        byte-for-byte identical by the time anything expenses-related renders. -->
-  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?release=7.9.19.4" media="print">
-  <noscript><link rel="stylesheet" href="assets/css/expenses.css?release=7.9.19.4"></noscript>
+  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?release=7.9.19.5" media="print">
+  <noscript><link rel="stylesheet" href="assets/css/expenses.css?release=7.9.19.5"></noscript>
 
 <style id="booking-documents-v79191-style">
 /* Phase 3E · Booking Documents native hierarchy / viewer hardening.
@@ -4801,6 +4801,16 @@ html.theme-dark .booking-document-viewer-bar .booking-document-viewer-back,html:
 }
 dialog.booking-document-viewer.is-edge-swiping{
   will-change:transform;
+}
+</style>
+<style id="booking-documents-v79195-style">
+/* v7.9.19.5 · Transition surfaces stay below the shared compact chrome.
+   Real-device root-cause fix: snapshot layers must never occlude the iOS
+   compact header / safe-area band, and the short Documents page must still
+   have enough scroll range to preserve the compact header state. */
+.ios-compact-header{z-index:1450}
+#info-page-booking-documents{
+  min-height:calc(100dvh - var(--compact-header-h) - env(safe-area-inset-top,0px) + 130px);
 }
 </style>
 </head>
@@ -8925,9 +8935,9 @@ function infoHostDocumentTop(){const host=document.getElementById("info-nav-host
 function infoClonePage(page){const clone=page.cloneNode(true);clone.hidden=false;clone.classList.remove("is-active","is-transition-layer");clone.classList.add("profile-nav-clone");[clone,...clone.querySelectorAll("[id]")].forEach(node=>node.removeAttribute?.("id"));return clone;}
 function infoCaptureSnapshot(key,scrollTop=infoScrollTop()){const page=infoPages[key];if(!page)return null;return{key,scrollTop:Number(scrollTop||0),hostTop:infoHostDocumentTop(),pageClone:infoClonePage(page)};}
 function infoClearAnimation(){if(infoNavAnimationFrame){cancelAnimationFrame(infoNavAnimationFrame);infoNavAnimationFrame=0;}}
-function infoClearSurfaces(){infoClearAnimation();infoNavSurfaces.forEach(surface=>surface.remove());infoNavSurfaces=[];document.getElementById("info-nav-host")?.classList.remove("is-snapshotting");document.body.classList.remove("info-navigation-active","info-edge-swipe-active");}
+function infoClearSurfaces(){infoClearAnimation();infoNavSurfaces.forEach(surface=>surface.remove());infoNavSurfaces=[];document.getElementById("info-nav-host")?.classList.remove("is-snapshotting");document.body.classList.remove("info-navigation-active","info-edge-swipe-active");chromeFrozen=false;updateCollapsingChrome();}
 function infoCreateSurface(snapshot,className=""){
-  if(!snapshot)return null;const surface=document.createElement("div");surface.className=`profile-nav-surface info-nav-surface ${className}`.trim();const liveTop=snapshot.hostTop-snapshot.scrollTop,top=Math.max(0,Math.round(liveTop)),clipped=Math.min(0,liveTop);surface.style.top=`${top}px`;surface.style.height=`${Math.max(1,window.innerHeight-top)}px`;surface.style.opacity="0";
+  if(!snapshot)return null;const surface=document.createElement("div");surface.className=`profile-nav-surface info-nav-surface ${className}`.trim();const band=Math.max(0,Math.round(document.getElementById("ios-compact-header")?.getBoundingClientRect?.().height||0)),liveTop=snapshot.hostTop-snapshot.scrollTop,top=Math.max(band,Math.round(liveTop)),clipped=Math.min(0,liveTop-top);surface.style.top=`${top}px`;surface.style.height=`${Math.max(1,window.innerHeight-top)}px`;surface.style.opacity="0";
   const bgSource=document.querySelector(".bg-fixed");if(bgSource){const bgRect=bgSource.getBoundingClientRect(),bgStyle=getComputedStyle(bgSource),bgLayer=document.createElement("div");bgLayer.className="profile-nav-surface-bg";bgLayer.style.left=`${bgRect.left}px`;bgLayer.style.top=`${bgRect.top-top}px`;bgLayer.style.width=`${bgRect.width}px`;bgLayer.style.height=`${bgRect.height}px`;bgLayer.style.backgroundColor=bgStyle.backgroundColor;bgLayer.style.backgroundImage=bgStyle.backgroundImage;bgLayer.style.backgroundSize=bgStyle.backgroundSize;bgLayer.style.backgroundPosition=bgStyle.backgroundPosition;bgLayer.style.backgroundRepeat=bgStyle.backgroundRepeat;surface.appendChild(bgLayer);surface.__profileBgLayer=bgLayer;}
   const frame=document.createElement("div");frame.className="profile-nav-surface-frame";const content=document.createElement("div");content.className="profile-nav-surface-content";if(clipped<0)content.style.transform=`translate3d(0,${Math.round(clipped)}px,0)`;content.appendChild(snapshot.pageClone.cloneNode(true));frame.appendChild(content);surface.appendChild(frame);document.body.appendChild(surface);infoNavSurfaces.push(surface);return surface;
 }
@@ -8949,14 +8959,14 @@ function infoCommitSnapshotToLive(activeKey,scrollTop,inSurface,{pop=false,push=
 }
 function infoRestoreLiveAfterCancel(outSurface,currentScroll){const host=document.getElementById("info-nav-host");if(scrollShell)scrollShell.scrollTo({top:Math.max(0,Number(currentScroll||0)),behavior:"auto"});if(!outSurface){host?.classList.remove("is-snapshotting");infoNavigationTransitioning=false;infoClearSurfaces();return;}outSurface.style.zIndex="1423";outSurface.style.opacity="1";outSurface.style.transform="translate3d(0,0,0)";if(outSurface.__profileBgLayer)outSurface.__profileBgLayer.style.transform="translate3d(0,0,0)";infoNextFrames(2,()=>{host?.classList.remove("is-snapshotting");outSurface.style.opacity="0";infoNextFrames(1,()=>{infoNavigationTransitioning=false;infoClearSurfaces();});});}
 function infoRunProgrammaticTransition({targetKey,targetScroll=0,direction=1,pop=false,push=false}={}){
-  const currentScroll=infoScrollTop(),currentEntry=infoNavStack[infoNavStack.length-1],fromSnapshot=infoCaptureSnapshot(infoCurrentPage,currentScroll),toEntry=pop?infoNavStack[infoNavStack.length-2]:null,toSnapshot=toEntry?.snapshot||infoCaptureSnapshot(targetKey,targetScroll);if(!fromSnapshot||!toSnapshot)return;if(currentEntry&&currentEntry.key===infoCurrentPage){currentEntry.scrollTop=currentScroll;currentEntry.snapshot=fromSnapshot;}const layers=infoPrepareSnapshotTransition(fromSnapshot,toSnapshot);if(!layers)return;const{fromSurface,toSurface,width}=layers;infoNavigationTransitioning=true;infoApplyFadeThrough(fromSurface,toSurface,0,direction,width);infoHandoffToSnapshot(fromSurface,()=>{infoAnimateFadeThrough(fromSurface,toSurface,{from:0,to:1,direction,width,duration:INFO_TRANSITION_DURATION,onDone:()=>infoCommitSnapshotToLive(targetKey,targetScroll,toSurface,{pop,push})});});
+  const currentScroll=infoScrollTop(),currentEntry=infoNavStack[infoNavStack.length-1],fromSnapshot=infoCaptureSnapshot(infoCurrentPage,currentScroll),toEntry=pop?infoNavStack[infoNavStack.length-2]:null,toSnapshot=toEntry?.snapshot||infoCaptureSnapshot(targetKey,targetScroll);if(!fromSnapshot||!toSnapshot)return;if(currentEntry&&currentEntry.key===infoCurrentPage){currentEntry.scrollTop=currentScroll;currentEntry.snapshot=fromSnapshot;}const layers=infoPrepareSnapshotTransition(fromSnapshot,toSnapshot);if(!layers)return;const{fromSurface,toSurface,width}=layers;chromeFrozen=true;if(collapseRaf){cancelAnimationFrame(collapseRaf);collapseRaf=0;}infoNavigationTransitioning=true;infoApplyFadeThrough(fromSurface,toSurface,0,direction,width);infoHandoffToSnapshot(fromSurface,()=>{infoAnimateFadeThrough(fromSurface,toSurface,{from:0,to:1,direction,width,duration:INFO_TRANSITION_DURATION,onDone:()=>infoCommitSnapshotToLive(targetKey,targetScroll,toSurface,{pop,push})});});
 }
 function tripOpenBookingDocumentsPage({ownerType="",ownerId=""}={}){
   infoDocumentFocusKey=ownerType&&ownerId?`${String(ownerType)}:${String(ownerId)}`:"";if(currentAppView!=="info"){setView("info",{restoreScroll:false});requestAnimationFrame(()=>requestAnimationFrame(()=>tripOpenBookingDocumentsPage({ownerType,ownerId})));return;}tripRenderBookingDocumentsPage(activeTripPresentationData(),{focusKey:infoDocumentFocusKey});if(infoNavigationTransitioning)return;if(infoCurrentPage==="booking-documents"){infoDocumentsPageOpen=true;infoFocusDocumentOwner();return;}infoDocumentsPageOpen=true;infoRunProgrammaticTransition({targetKey:"booking-documents",targetScroll:INFO_DOCUMENTS_COMPACT_SCROLL,direction:-1,push:true});
 }
 function tripCloseBookingDocumentsPage(){if(infoNavigationTransitioning||infoCurrentPage==="root"||infoNavStack.length<=1)return;const previous=infoNavStack[infoNavStack.length-2]||{key:"root",scrollTop:0,snapshot:null};infoRunProgrammaticTransition({targetKey:previous.key,targetScroll:previous.scrollTop||0,direction:1,pop:true});}
 function beginInfoEdgeSwipe(event){if(infoNavigationTransitioning||infoCurrentPage==="root"||infoNavStack.length<=1||currentAppView!=="info"||event.touches?.length!==1)return;if(document.body.classList.contains("booking-document-viewer-open"))return;const t=event.touches[0];if(t.clientX>30)return;if(event.target.closest?.("input,textarea,select,[contenteditable='true']"))return;const currentEntry=infoNavStack[infoNavStack.length-1];if(currentEntry&&currentEntry.key===infoCurrentPage)currentEntry.scrollTop=infoScrollTop();const previous=infoNavStack[infoNavStack.length-2]||{key:"root",scrollTop:0,snapshot:null};infoSwipe={tracking:true,active:false,handedOff:false,startX:t.clientX,startY:t.clientY,currentX:t.clientX,startedAt:performance.now(),width:Math.max(1,window.innerWidth),currentScroll:infoScrollTop(),previousKey:previous.key,previousScroll:Math.max(0,previous.scrollTop||0),previousSnapshot:previous.snapshot||null,currentSurface:null,previousSurface:null,progress:0,fadeProgress:0};}
-function moveInfoEdgeSwipe(event){if(!infoSwipe?.tracking||event.touches?.length!==1)return;const t=event.touches[0],dx=t.clientX-infoSwipe.startX,dy=t.clientY-infoSwipe.startY;if(!infoSwipe.active){if(dx<7)return;if(Math.abs(dy)>Math.abs(dx)*.72){infoSwipe=null;return;}const currentSnapshot=infoCaptureSnapshot(infoCurrentPage,infoSwipe.currentScroll),previousSnapshot=infoSwipe.previousSnapshot||infoCaptureSnapshot(infoSwipe.previousKey,infoSwipe.previousScroll);if(!currentSnapshot||!previousSnapshot){infoSwipe=null;return;}const currentEntry=infoNavStack[infoNavStack.length-1];if(currentEntry&&currentEntry.key===infoCurrentPage)currentEntry.snapshot=currentSnapshot;const layers=infoPrepareSnapshotTransition(currentSnapshot,previousSnapshot);if(!layers){infoSwipe=null;return;}infoSwipe.currentSurface=layers.fromSurface;infoSwipe.previousSurface=layers.toSurface;infoSwipe.width=layers.width;infoSwipe.active=true;infoSwipe.handedOff=false;infoNavigationTransitioning=true;document.body.classList.add("info-edge-swipe-active");infoApplyFadeThrough(layers.fromSurface,layers.toSurface,0,1,layers.width);infoHandoffToSnapshot(layers.fromSurface,()=>{if(!infoSwipe?.active)return;infoSwipe.handedOff=true;infoApplySwipeProgress();});}event.preventDefault();infoSwipe.currentX=t.clientX;if(!infoSwipe.handedOff)return;infoApplySwipeProgress();}
+function moveInfoEdgeSwipe(event){if(!infoSwipe?.tracking||event.touches?.length!==1)return;const t=event.touches[0],dx=t.clientX-infoSwipe.startX,dy=t.clientY-infoSwipe.startY;if(!infoSwipe.active){if(dx<7)return;if(Math.abs(dy)>Math.abs(dx)*.72){infoSwipe=null;return;}const currentSnapshot=infoCaptureSnapshot(infoCurrentPage,infoSwipe.currentScroll),previousSnapshot=infoSwipe.previousSnapshot||infoCaptureSnapshot(infoSwipe.previousKey,infoSwipe.previousScroll);if(!currentSnapshot||!previousSnapshot){infoSwipe=null;return;}const currentEntry=infoNavStack[infoNavStack.length-1];if(currentEntry&&currentEntry.key===infoCurrentPage)currentEntry.snapshot=currentSnapshot;const layers=infoPrepareSnapshotTransition(currentSnapshot,previousSnapshot);if(!layers){infoSwipe=null;return;}infoSwipe.currentSurface=layers.fromSurface;infoSwipe.previousSurface=layers.toSurface;infoSwipe.width=layers.width;infoSwipe.active=true;infoSwipe.handedOff=false;chromeFrozen=true;if(collapseRaf){cancelAnimationFrame(collapseRaf);collapseRaf=0;}infoNavigationTransitioning=true;document.body.classList.add("info-edge-swipe-active");infoApplyFadeThrough(layers.fromSurface,layers.toSurface,0,1,layers.width);infoHandoffToSnapshot(layers.fromSurface,()=>{if(!infoSwipe?.active)return;infoSwipe.handedOff=true;infoApplySwipeProgress();});}event.preventDefault();infoSwipe.currentX=t.clientX;if(!infoSwipe.handedOff)return;infoApplySwipeProgress();}
 function infoApplySwipeProgress(){if(!infoSwipe?.active||!infoSwipe.handedOff)return;const width=Math.max(1,infoSwipe.width),distance=clamp(infoSwipe.currentX-infoSwipe.startX,0,width),progress=distance/width;infoSwipe.progress=progress;infoSwipe.fadeProgress=progress;infoApplyFadeThrough(infoSwipe.currentSurface,infoSwipe.previousSurface,progress,1,width);}
 function endInfoEdgeSwipe(){if(!infoSwipe?.tracking)return;if(!infoSwipe.active){infoSwipe=null;return;}const swipe=infoSwipe;infoSwipe=null;const width=Math.max(1,swipe.width),distance=clamp(swipe.currentX-swipe.startX,0,width),elapsed=Math.max(1,performance.now()-swipe.startedAt),velocity=distance/elapsed,goBack=distance>width*.32||velocity>.55;if(!swipe.handedOff){document.getElementById("info-nav-host")?.classList.remove("is-snapshotting");infoNavigationTransitioning=false;infoClearSurfaces();return;}const currentSurface=swipe.currentSurface,previousSurface=swipe.previousSurface,fadeProgress=clamp(Number(swipe.fadeProgress)||0,0,1),target=goBack?1:0,remaining=Math.abs(target-fadeProgress),duration=Math.max(INFO_SWIPE_SETTLE_MIN,Math.min(INFO_SWIPE_SETTLE_MAX,INFO_SWIPE_SETTLE_MIN+remaining*230));infoAnimateFadeThrough(currentSurface,previousSurface,{from:fadeProgress,to:target,direction:1,width,duration,onDone:()=>{if(goBack){infoCommitSnapshotToLive(swipe.previousKey,swipe.previousScroll,previousSurface,{pop:true});}else{currentSurface.style.opacity="1";previousSurface.style.opacity="0";infoRestoreLiveAfterCancel(currentSurface,swipe.currentScroll);}}});}
 function cancelInfoEdgeSwipe(){if(!infoSwipe?.tracking)return;if(!infoSwipe.active){infoSwipe=null;return;}const swipe=infoSwipe;infoSwipe=null;if(!swipe.handedOff){document.getElementById("info-nav-host")?.classList.remove("is-snapshotting");infoNavigationTransitioning=false;infoClearSurfaces();return;}infoAnimateFadeThrough(swipe.currentSurface,swipe.previousSurface,{from:swipe.fadeProgress||0,to:0,direction:1,width:swipe.width,duration:220,onDone:()=>{swipe.currentSurface.style.opacity="1";swipe.previousSurface.style.opacity="0";infoRestoreLiveAfterCancel(swipe.currentSurface,swipe.currentScroll);}});}
@@ -9827,6 +9837,7 @@ const viewScrollPositions={itinerary:0,snacks:0,info:0,expenses:0,profile:0};
 let currentAppView="itinerary";
 let baseTripTitle="旅程";
 let collapseRaf=0;
+let chromeFrozen=false;
 
 const appVersionNote = null;
 function placeAppVersionNote(viewKey){
@@ -10019,7 +10030,7 @@ function updateCollapsingChrome(){
 }
 
 function scheduleCollapseUpdate(){
-  if(collapseRaf) return;
+  if(chromeFrozen||collapseRaf) return;
   collapseRaf=requestAnimationFrame(updateCollapsingChrome);
 }
 
@@ -14872,9 +14883,10 @@ function profileCreateSurface(snapshot,className=""){
   if(!snapshot)return null;
   const surface=document.createElement("div");
   surface.className=`profile-nav-surface ${className}`.trim();
+  const band=Math.max(0,Math.round(document.getElementById("ios-compact-header")?.getBoundingClientRect?.().height||0));
   const liveTop=snapshot.hostTop-snapshot.scrollTop;
-  const top=Math.max(0,Math.round(liveTop));
-  const clipped=Math.min(0,liveTop);
+  const top=Math.max(band,Math.round(liveTop));
+  const clipped=Math.min(0,liveTop-top);
   surface.style.top=`${top}px`;
   surface.style.height=`${Math.max(1,window.innerHeight-top)}px`;
   // Surfaces are inserted transparent. This prevents an iOS compositor frame
