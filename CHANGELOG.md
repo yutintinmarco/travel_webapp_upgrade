@@ -1,3 +1,11 @@
+## v7.9.19.4 — Booking Documents Header Continuity / Viewer Edge Back
+
+- Kept the Booking Documents subpage in the existing compact `資料` header state instead of resetting the shared scroll shell to the large Trip hero during push / pop handoff, reducing the safe-area/header geometry change seen on iPhone real-device navigation.
+- Preserved the previous Info-page scroll position on return, so the compact header does not collapse / re-expand merely because Documents was opened.
+- Added a dedicated 30 px iOS-style left-edge back gesture to the top-layer Document Viewer. It works above image and embedded PDF surfaces and uses the same activation, direction and settle thresholds as the proven Profile / Documents edge navigation.
+- Viewer gesture is edge-only, so normal PDF scrolling/zooming and image pan/pinch remain available across the rest of the document surface.
+- UI/navigation patch only. No Booking Documents schema, Global Save Once, Firebase Rules, Functions, Map, Transit, Location Picker or frozen-domain logic changes.
+
 ## v7.9.19.3 — Booking Documents Native Reuse / Viewer Gestures
 
 - Replaced the v7.9.19.2 body-level Day Bar backing plane with the same local sticky-material stacking pattern already proven by Edit Mode `新增地點 / 新增交通`, keeping Day pills, geometry, horizontal scrolling and switching logic unchanged.

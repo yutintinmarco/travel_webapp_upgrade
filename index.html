@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
   <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
   <link rel="dns-prefetch" href="https://api.open-meteo.com">
-  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?release=7.9.19.3">
+  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?release=7.9.19.4">
   <title id="page-title">行程</title>
   <script>
   // v7.7.5.0 · Performance Lite. Memory only: no Firebase reads/writes, no
@@ -3903,7 +3903,7 @@ body.expenses-view-active #app-version-note{
 #snacks-view::after,
 #info-view::after,
 #profile-view::after{
-  content:"v7.9.19.3" !important;
+  content:"v7.9.19.4" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3924,7 +3924,7 @@ body.expenses-view-active #app-version-note{
   display:none !important;
 }
 body.expenses-view-active .expenses-module .expenses-app::after{
-  content:"v7.9.19.3" !important;
+  content:"v7.9.19.4" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -4577,7 +4577,7 @@ html.theme-dark .snack-edit-tools,html:not(.theme-light):not(.theme-dark) .snack
 </style>
             <link rel="apple-touch-icon" href="assets/icon/trip_icon.png">
   <link rel="icon" type="image/png" href="assets/icon/trip_icon.png">
-  <link rel="manifest" href="manifest.json?release=7.9.19.3">
+  <link rel="manifest" href="manifest.json?release=7.9.19.4">
   <meta name="apple-mobile-web-app-title" content="關嘉露西生日之旅">
   <!-- v7.7.1.2: expenses.css is 144KB and every rule is scoped under
        .expenses-module, yet it used to block the very first paint of the
@@ -4585,8 +4585,8 @@ html.theme-dark .snack-edit-tools,html:not(.theme-light):not(.theme-dark) .snack
        priority without blocking paint; ensureExpensesStylesheet() flips it to
        media="all" before the 支出 view is ever mounted, so the styling is
        byte-for-byte identical by the time anything expenses-related renders. -->
-  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?release=7.9.19.3" media="print">
-  <noscript><link rel="stylesheet" href="assets/css/expenses.css?release=7.9.19.3"></noscript>
+  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?release=7.9.19.4" media="print">
+  <noscript><link rel="stylesheet" href="assets/css/expenses.css?release=7.9.19.4"></noscript>
 
 <style id="booking-documents-v79191-style">
 /* Phase 3E · Booking Documents native hierarchy / viewer hardening.
@@ -4781,6 +4781,27 @@ html.theme-dark .booking-document-viewer-bar .booking-document-viewer-back,html:
   touch-action:pan-x pan-y;
 }
 @media(prefers-reduced-motion:reduce){.day-tabs-sticky-shell::before{transition:none!important}}
+</style>
+
+<style id="booking-documents-v79194-style">
+/* v7.9.19.4 · Booking Documents header continuity / Viewer edge back.
+   The Documents subpage stays in the compact app-header state instead of
+   expanding the large Trip hero during handoff. Viewer edge-back mirrors the
+   proven iOS/Profile left-edge gesture without stealing PDF/image gestures. */
+.booking-document-viewer-edge-back{
+  position:absolute;
+  z-index:12;
+  left:0;
+  top:calc(env(safe-area-inset-top,0px) + 52px);
+  bottom:0;
+  width:30px;
+  background:transparent;
+  touch-action:none;
+  pointer-events:auto;
+}
+dialog.booking-document-viewer.is-edge-swiping{
+  will-change:transform;
+}
 </style>
 </head>
 <body class="app-entry-gated app-entry-pending">
@@ -5628,7 +5649,7 @@ html.theme-dark .booking-document-viewer-bar .booking-document-viewer-back,html:
         <span class="profile-detail-spacer"></span>
       </div>
       <section class="profile-card" aria-label="App 資訊">
-        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.9.19.3</strong></div>
+        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.9.19.4</strong></div>
         <div class="profile-meta-row"><span>資料架構</span><strong>Phase 2G.2</strong></div>
         <div class="profile-meta-row"><span>主要資料來源</span><strong id="app-data-source-label">Firebase / 本機快取</strong></div>
       </section>
@@ -5686,6 +5707,7 @@ html.theme-dark .booking-document-viewer-bar .booking-document-viewer-back,html:
     <div class="booking-document-viewer-title" id="booking-document-viewer-title">預訂文件</div>
     <span class="profile-detail-spacer booking-document-viewer-spacer" aria-hidden="true"></span>
   </div>
+  <div class="booking-document-viewer-edge-back" id="booking-document-viewer-edge-back" aria-hidden="true"></div>
   <div class="booking-document-viewer-body" id="booking-document-viewer-body"><div class="booking-document-viewer-state">正在載入…</div></div>
 </dialog>
 
@@ -6275,7 +6297,7 @@ html.theme-dark .booking-document-viewer-bar .booking-document-viewer-back,html:
 </div>
 
 <script>
-const APP_VERSION = "7.9.19.3";
+const APP_VERSION = "7.9.19.4";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 let tripMapServicePromise=null,transitRouteServicePromise=null,tripEditServicePromise=null,airlineLogoServicePromise=null,tripDocumentServicePromise=null,tripMapController=null,tripMapScope="day",tripMapRenderEpoch=0,tripMapSelectedPoint=null;
@@ -8570,7 +8592,7 @@ async function ensureTransitRoutePlanner(itemEl){
 
 
 // Phase 3E · Edit Session foundation
-let tripEditSession=null,tripEditItemTarget=null,tripEditItemPrefill=null,tripEditSaving=false,tripEditLocationSelection=null,tripEditOrderState=null,tripEditLocationSearchEpoch=0,tripEditLocationMapController=null,tripEditLocationMapEpoch=0,tripEditLocationReverseEpoch=0,tripEditTripTitleOriginalHtml="",tripEditTripTitleOriginalPlain="",tripEditTeamModalState=null,tripEditFlightModalState=null,tripEditFlightEditorId="",tripEditAccommodationModalState=null,tripEditAccommodationEditorId="",tripEditAccommodationLocationSelection=null,tripEditAccommodationLocationSearchEpoch=0,tripEditAccommodationLocationMapController=null,tripEditAccommodationLocationMapEpoch=0,tripEditAccommodationLocationReverseEpoch=0,tripEditAuthoritativeFence=null,tripEditUploadedMediaForSession=[],tripEditTravelDocumentModalState=null,tripEditOwnerDocumentState=null,tripEditUploadedDocumentsForSession=[],bookingDocumentViewerObjectUrl="",bookingDocumentViewerCurrent=null,bookingDocumentViewerEpoch=0,bookingDocumentImageCleanup=null,infoDocumentsPageOpen=false,infoNavigationTransitioning=false,infoDocumentFocusKey="",infoCurrentPage="root",infoSwipe=null,infoNavSurfaces=[],infoNavAnimationFrame=0,infoNavStack=[{key:"root",scrollTop:0,snapshot:null}];
+let tripEditSession=null,tripEditItemTarget=null,tripEditItemPrefill=null,tripEditSaving=false,tripEditLocationSelection=null,tripEditOrderState=null,tripEditLocationSearchEpoch=0,tripEditLocationMapController=null,tripEditLocationMapEpoch=0,tripEditLocationReverseEpoch=0,tripEditTripTitleOriginalHtml="",tripEditTripTitleOriginalPlain="",tripEditTeamModalState=null,tripEditFlightModalState=null,tripEditFlightEditorId="",tripEditAccommodationModalState=null,tripEditAccommodationEditorId="",tripEditAccommodationLocationSelection=null,tripEditAccommodationLocationSearchEpoch=0,tripEditAccommodationLocationMapController=null,tripEditAccommodationLocationMapEpoch=0,tripEditAccommodationLocationReverseEpoch=0,tripEditAuthoritativeFence=null,tripEditUploadedMediaForSession=[],tripEditTravelDocumentModalState=null,tripEditOwnerDocumentState=null,tripEditUploadedDocumentsForSession=[],bookingDocumentViewerObjectUrl="",bookingDocumentViewerCurrent=null,bookingDocumentViewerEpoch=0,bookingDocumentImageCleanup=null,bookingDocumentViewerSwipe=null,infoDocumentsPageOpen=false,infoNavigationTransitioning=false,infoDocumentFocusKey="",infoCurrentPage="root",infoSwipe=null,infoNavSurfaces=[],infoNavAnimationFrame=0,infoNavStack=[{key:"root",scrollTop:0,snapshot:null}];
 window.__tripEditPreviewData=null;
 function tripEditPresentationSignature(data){
   if(!data)return"";
@@ -8798,6 +8820,8 @@ function tripCloseBookingDocumentViewer(){
   bookingDocumentViewerEpoch+=1;
   if(typeof bookingDocumentImageCleanup==="function"){try{bookingDocumentImageCleanup();}catch(_){}bookingDocumentImageCleanup=null;}
   const viewer=document.getElementById("booking-document-viewer");
+  bookingDocumentViewerSwipe=null;
+  if(viewer){viewer.classList.remove("is-edge-swiping");viewer.style.transition="";viewer.style.transform="";viewer.style.opacity="";}
   if(viewer?.open){try{viewer.close();}catch(_){viewer.removeAttribute("open");}}
   document.body.classList.remove("booking-document-viewer-open");
   if(bookingDocumentViewerObjectUrl){try{URL.revokeObjectURL(bookingDocumentViewerObjectUrl);}catch(_){}bookingDocumentViewerObjectUrl="";}
@@ -8839,6 +8863,26 @@ function tripMountBookingDocumentImage(body,url,row={}){
   if(typeof ResizeObserver==="function"){resizeObserver=new ResizeObserver(()=>{if(naturalW&&scale<=minScale*1.02)fit();});resizeObserver.observe(scroller);}
   bookingDocumentImageCleanup=()=>{resizeObserver?.disconnect?.();scroller.removeEventListener("touchstart",onTouchStart);scroller.removeEventListener("touchmove",onTouchMove);scroller.removeEventListener("touchend",onTouchEnd);};
 }
+function beginBookingDocumentViewerEdgeSwipe(event){
+  const viewer=document.getElementById("booking-document-viewer");if(!viewer?.open||event.touches?.length!==1)return;
+  const t=event.touches[0];bookingDocumentViewerSwipe={tracking:true,active:false,startX:t.clientX,startY:t.clientY,currentX:t.clientX,startedAt:performance.now(),width:Math.max(1,window.innerWidth)};
+}
+function moveBookingDocumentViewerEdgeSwipe(event){
+  const swipe=bookingDocumentViewerSwipe,viewer=document.getElementById("booking-document-viewer");if(!swipe?.tracking||!viewer?.open||event.touches?.length!==1)return;
+  const t=event.touches[0],dx=t.clientX-swipe.startX,dy=t.clientY-swipe.startY;if(!swipe.active){if(dx<7)return;if(Math.abs(dy)>Math.abs(dx)*.72){bookingDocumentViewerSwipe=null;return;}swipe.active=true;viewer.classList.add("is-edge-swiping");viewer.style.transition="none";}
+  event.preventDefault();swipe.currentX=t.clientX;const distance=Math.max(0,Math.min(swipe.width,dx)),progress=distance/swipe.width;viewer.style.transform=`translate3d(${distance.toFixed(2)}px,0,0)`;viewer.style.opacity=String(1-progress*.06);
+}
+function finishBookingDocumentViewerEdgeSwipe(cancelled=false){
+  const swipe=bookingDocumentViewerSwipe,viewer=document.getElementById("booking-document-viewer");bookingDocumentViewerSwipe=null;if(!swipe?.tracking||!viewer?.open)return;if(!swipe.active){viewer.classList.remove("is-edge-swiping");return;}
+  const width=Math.max(1,swipe.width),distance=Math.max(0,Math.min(width,swipe.currentX-swipe.startX)),elapsed=Math.max(1,performance.now()-swipe.startedAt),velocity=distance/elapsed,goBack=!cancelled&&(distance>width*.32||velocity>.55);
+  viewer.style.transition=`transform ${goBack?190:220}ms cubic-bezier(.32,.72,0,1), opacity ${goBack?190:220}ms ease`;viewer.style.transform=goBack?`translate3d(${width}px,0,0)`:"translate3d(0,0,0)";viewer.style.opacity=goBack?".94":"1";
+  window.setTimeout(()=>{if(goBack){tripCloseBookingDocumentViewer();return;}viewer.classList.remove("is-edge-swiping");viewer.style.transition="";viewer.style.transform="";viewer.style.opacity="";},goBack?200:230);
+}
+function setupBookingDocumentViewerEdgeSwipe(){
+  const edge=document.getElementById("booking-document-viewer-edge-back");if(!edge||edge.dataset.bound==="true")return;edge.dataset.bound="true";edge.addEventListener("touchstart",beginBookingDocumentViewerEdgeSwipe,{passive:true});edge.addEventListener("touchmove",moveBookingDocumentViewerEdgeSwipe,{passive:false});edge.addEventListener("touchend",()=>finishBookingDocumentViewerEdgeSwipe(false),{passive:true});edge.addEventListener("touchcancel",()=>finishBookingDocumentViewerEdgeSwipe(true),{passive:true});
+}
+setupBookingDocumentViewerEdgeSwipe();
+
 async function tripOpenBookingDocument(rowInput={}){
   const row=rowInput||{},viewer=document.getElementById("booking-document-viewer"),body=document.getElementById("booking-document-viewer-body"),title=document.getElementById("booking-document-viewer-title");if(!viewer||!body)return;
   tripCloseBookingDocumentViewer();const epoch=++bookingDocumentViewerEpoch;bookingDocumentViewerCurrent=row;if(title)title.textContent=String(row.title||row.fileName||"預訂文件");
@@ -8875,6 +8919,7 @@ const INFO_TRANSITION_TRAVEL_RATIO=.075;
 const INFO_TRANSITION_DURATION=430;
 const INFO_SWIPE_SETTLE_MIN=170;
 const INFO_SWIPE_SETTLE_MAX=340;
+const INFO_DOCUMENTS_COMPACT_SCROLL=112;
 function infoScrollTop(){return Math.max(0,Number(scrollShell?.scrollTop||0));}
 function infoHostDocumentTop(){const host=document.getElementById("info-nav-host");if(!host)return 0;const rect=host.getBoundingClientRect();return rect.top+infoScrollTop();}
 function infoClonePage(page){const clone=page.cloneNode(true);clone.hidden=false;clone.classList.remove("is-active","is-transition-layer");clone.classList.add("profile-nav-clone");[clone,...clone.querySelectorAll("[id]")].forEach(node=>node.removeAttribute?.("id"));return clone;}
@@ -8907,7 +8952,7 @@ function infoRunProgrammaticTransition({targetKey,targetScroll=0,direction=1,pop
   const currentScroll=infoScrollTop(),currentEntry=infoNavStack[infoNavStack.length-1],fromSnapshot=infoCaptureSnapshot(infoCurrentPage,currentScroll),toEntry=pop?infoNavStack[infoNavStack.length-2]:null,toSnapshot=toEntry?.snapshot||infoCaptureSnapshot(targetKey,targetScroll);if(!fromSnapshot||!toSnapshot)return;if(currentEntry&&currentEntry.key===infoCurrentPage){currentEntry.scrollTop=currentScroll;currentEntry.snapshot=fromSnapshot;}const layers=infoPrepareSnapshotTransition(fromSnapshot,toSnapshot);if(!layers)return;const{fromSurface,toSurface,width}=layers;infoNavigationTransitioning=true;infoApplyFadeThrough(fromSurface,toSurface,0,direction,width);infoHandoffToSnapshot(fromSurface,()=>{infoAnimateFadeThrough(fromSurface,toSurface,{from:0,to:1,direction,width,duration:INFO_TRANSITION_DURATION,onDone:()=>infoCommitSnapshotToLive(targetKey,targetScroll,toSurface,{pop,push})});});
 }
 function tripOpenBookingDocumentsPage({ownerType="",ownerId=""}={}){
-  infoDocumentFocusKey=ownerType&&ownerId?`${String(ownerType)}:${String(ownerId)}`:"";if(currentAppView!=="info"){setView("info",{restoreScroll:false});requestAnimationFrame(()=>requestAnimationFrame(()=>tripOpenBookingDocumentsPage({ownerType,ownerId})));return;}tripRenderBookingDocumentsPage(activeTripPresentationData(),{focusKey:infoDocumentFocusKey});if(infoNavigationTransitioning)return;if(infoCurrentPage==="booking-documents"){infoDocumentsPageOpen=true;infoFocusDocumentOwner();return;}infoDocumentsPageOpen=true;infoRunProgrammaticTransition({targetKey:"booking-documents",targetScroll:0,direction:-1,push:true});
+  infoDocumentFocusKey=ownerType&&ownerId?`${String(ownerType)}:${String(ownerId)}`:"";if(currentAppView!=="info"){setView("info",{restoreScroll:false});requestAnimationFrame(()=>requestAnimationFrame(()=>tripOpenBookingDocumentsPage({ownerType,ownerId})));return;}tripRenderBookingDocumentsPage(activeTripPresentationData(),{focusKey:infoDocumentFocusKey});if(infoNavigationTransitioning)return;if(infoCurrentPage==="booking-documents"){infoDocumentsPageOpen=true;infoFocusDocumentOwner();return;}infoDocumentsPageOpen=true;infoRunProgrammaticTransition({targetKey:"booking-documents",targetScroll:INFO_DOCUMENTS_COMPACT_SCROLL,direction:-1,push:true});
 }
 function tripCloseBookingDocumentsPage(){if(infoNavigationTransitioning||infoCurrentPage==="root"||infoNavStack.length<=1)return;const previous=infoNavStack[infoNavStack.length-2]||{key:"root",scrollTop:0,snapshot:null};infoRunProgrammaticTransition({targetKey:previous.key,targetScroll:previous.scrollTop||0,direction:1,pop:true});}
 function beginInfoEdgeSwipe(event){if(infoNavigationTransitioning||infoCurrentPage==="root"||infoNavStack.length<=1||currentAppView!=="info"||event.touches?.length!==1)return;if(document.body.classList.contains("booking-document-viewer-open"))return;const t=event.touches[0];if(t.clientX>30)return;if(event.target.closest?.("input,textarea,select,[contenteditable='true']"))return;const currentEntry=infoNavStack[infoNavStack.length-1];if(currentEntry&&currentEntry.key===infoCurrentPage)currentEntry.scrollTop=infoScrollTop();const previous=infoNavStack[infoNavStack.length-2]||{key:"root",scrollTop:0,snapshot:null};infoSwipe={tracking:true,active:false,handedOff:false,startX:t.clientX,startY:t.clientY,currentX:t.clientX,startedAt:performance.now(),width:Math.max(1,window.innerWidth),currentScroll:infoScrollTop(),previousKey:previous.key,previousScroll:Math.max(0,previous.scrollTop||0),previousSnapshot:previous.snapshot||null,currentSurface:null,previousSurface:null,progress:0,fadeProgress:0};}
