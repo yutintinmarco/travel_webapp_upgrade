@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
   <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
   <link rel="dns-prefetch" href="https://api.open-meteo.com">
-  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?release=7.9.19.10">
+  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?release=7.9.20.1">
   <title id="page-title">行程</title>
   <script>
   // v7.7.5.0 · Performance Lite. Memory only: no Firebase reads/writes, no
@@ -3743,7 +3743,7 @@ html:not(.theme-light):not(.theme-dark) .cloud-safety-strip{
 #snacks-view::after,
 #info-view::after,
 #profile-view::after{
-  content:"v7.9.20.0" !important;
+  content:"v7.9.20.1" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3764,7 +3764,7 @@ html:not(.theme-light):not(.theme-dark) .cloud-safety-strip{
   display:none !important;
 }
 body.expenses-view-active .expenses-module .expenses-app::after{
-  content:"v7.9.20.0" !important;
+  content:"v7.9.20.1" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -4413,11 +4413,54 @@ html.theme-dark .trip-edit-disclosure-value i,html:not(.theme-light):not(.theme-
 .snack-edit-tools{display:flex;gap:7px;justify-content:flex-end;margin-top:9px;padding-top:9px;border-top:1px solid rgba(118,118,128,.11);}
 .snack-edit-action.is-primary{background:var(--saved-accent);color:white;}
 html.theme-dark .snack-edit-tools,html:not(.theme-light):not(.theme-dark) .snack-edit-tools{border-top-color:rgba(255,255,255,.09);}
+
+/* v7.9.20.1 · Phase 3E Harmony B — shared section heading grammar */
+.snacks-library-card{padding-top:15px;}
+.snacks-library-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px;}
+.snacks-library-heading>div:first-child{min-width:0;}
+.snacks-library-heading .trip-info-heading{margin:2px 0 0;font-size:calc(19px * var(--font-scale));}
+.snacks-library-count{flex:0 0 auto;min-height:27px;padding:0 9px;border-radius:999px;display:flex;align-items:center;justify-content:center;background:rgba(118,118,128,.10);color:var(--label-secondary);font-size:calc(9.5px * var(--font-scale));font-weight:760;white-space:nowrap;}
+html.theme-dark .snacks-library-count,html:not(.theme-light):not(.theme-dark) .snacks-library-count{background:rgba(255,255,255,.075);}
+
+/* Passive helper prose is intentionally removed from the product surface.
+   Keep live status, actual metadata, validation, hard limits and destructive warnings. */
+.app-entry-login-note,
+#profile-account-action-subtitle,
+#trip-edit-mode-entry-note,
+#trip-global-lock-menu-subtitle,
+#trip-global-lock-help,
+#trip-global-lock-action-copy,
+.profile-row-copy>small:not([id]),
+.profile-backup-note,
+.trip-member-role-help,
+.trip-info-sub,
+.info-hint,
+.booking-documents-page-sub,
+.trip-edit-local-note,
+.trip-edit-team-note,
+.trip-edit-saved-field-note,
+.trip-edit-location-link-note,
+.trip-edit-location-map-note,
+.trip-edit-delete-note,
+.trip-edit-info-row-copy>small,
+.trip-edit-travel-sync-copy>small,
+.trip-media-icon-preview-copy>small,
+.trip-media-background-preview-copy>small,
+.data-management-note,
+.itinerary-crop-hint{display:none!important;}
+
+/* Snapshot type is real historical metadata rather than helper copy. */
+#trip-backup-list .profile-row-copy>small{display:block!important;}
+
+/* Dynamic colour status copy is guidance, not state. Errors continue to use the
+   dedicated inline status/error components and remain visible. */
+.destination-color-status:not(.is-error){display:none!important;}
+
 .trip-edit-native-group[hidden]{display:none!important;}
 </style>
             <link rel="apple-touch-icon" href="assets/icon/trip_icon.png">
   <link rel="icon" type="image/png" href="assets/icon/trip_icon.png">
-  <link rel="manifest" href="manifest.json?release=7.9.19.10">
+  <link rel="manifest" href="manifest.json?release=7.9.20.1">
   <meta name="apple-mobile-web-app-title" content="關嘉露西生日之旅">
   <!-- v7.7.1.2: expenses.css is 144KB and every rule is scoped under
        .expenses-module, yet it used to block the very first paint of the
@@ -4425,8 +4468,8 @@ html.theme-dark .snack-edit-tools,html:not(.theme-light):not(.theme-dark) .snack
        priority without blocking paint; ensureExpensesStylesheet() flips it to
        media="all" before the 支出 view is ever mounted, so the styling is
        byte-for-byte identical by the time anything expenses-related renders. -->
-  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?release=7.9.19.10" media="print">
-  <noscript><link rel="stylesheet" href="assets/css/expenses.css?release=7.9.19.10"></noscript>
+  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?release=7.9.20.1" media="print">
+  <noscript><link rel="stylesheet" href="assets/css/expenses.css?release=7.9.20.1"></noscript>
 
 <style id="booking-documents-v79191-style">
 /* Phase 3E · Booking Documents native hierarchy / viewer hardening.
@@ -4941,14 +4984,16 @@ dialog.booking-document-viewer.is-edge-swiping{
 </div>
 
 <div id="snacks-view" class="app-view" style="display:none;">
-  <div class="card">
-    <div class="weather-header">
-      <div class="weather-title" id="snacks-title">小食清單</div>
-      <div class="weather-updated" id="snacks-count"></div>
+  <section class="trip-library-card trip-info-only-card snacks-library-card">
+    <div class="snacks-library-heading">
+      <div>
+        <div class="trip-library-eyebrow">Saved Places</div>
+        <h2 class="trip-info-heading" id="snacks-title">小食清單</h2>
+      </div>
+      <div class="snacks-library-count" id="snacks-count"></div>
     </div>
-    <div class="section-sub" id="snacks-subtitle" style="margin-bottom:10px;"></div>
     <div id="snacks-list"></div>
-  </div>
+  </section>
 </div>
 
 <div id="info-view" class="app-view" style="display:none;">
@@ -4982,7 +5027,6 @@ dialog.booking-document-viewer.is-edge-swiping{
         <section class="trip-library-card trip-info-only-card booking-doc-entry-card" id="booking-documents-card" aria-label="預訂與文件">
           <div class="trip-library-eyebrow">Travel Documents</div>
           <h2 class="trip-info-heading">預訂與文件</h2>
-          <p class="trip-info-sub">按旅程日子集中查看航班、住宿及行程預訂文件，點選文件即可直接預覽。</p>
           <button class="booking-doc-entry-row" id="booking-documents-open" type="button">
             <span class="booking-doc-entry-icon" aria-hidden="true">📄</span>
             <span class="booking-doc-entry-copy"><strong>查看預訂文件</strong><small id="booking-documents-summary">尚未有預訂文件</small></span>
@@ -4992,9 +5036,7 @@ dialog.booking-document-viewer.is-edge-swiping{
         <section class="trip-library-card trip-info-only-card" id="trip-info-card">
           <div class="trip-library-eyebrow">Travel Details</div>
           <h2 class="trip-info-heading">旅程資料</h2>
-          <p class="trip-info-sub">集中保存 Visit Japan Web、簽證、航班、住宿及同行旅客資料，方便出發前快速查閱及填表。</p>
           <div id="info-content"></div>
-          <div class="info-hint" id="info-hint">以上資料可用於填寫 Visit Japan Web / 電子簽證申請<br>請按實際情況核實所有資料</div>
         </section>
       </div>
     </div>
@@ -5004,7 +5046,6 @@ dialog.booking-document-viewer.is-edge-swiping{
         <h2>預訂與文件</h2>
         <span class="profile-detail-spacer" aria-hidden="true"></span>
       </div>
-      <div class="booking-documents-page-sub" id="booking-documents-page-sub">按旅程日子整理</div>
       <div class="booking-doc-day-list" id="booking-documents-day-list"></div>
     </div>
   </div>
@@ -6269,7 +6310,7 @@ dialog.booking-document-viewer.is-edge-swiping{
 </div>
 
 <script>
-const APP_VERSION = "7.9.20.0";
+const APP_VERSION = "7.9.20.1";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 let tripMapServicePromise=null,transitRouteServicePromise=null,tripEditServicePromise=null,airlineLogoServicePromise=null,tripDocumentServicePromise=null,tripMapController=null,tripMapScope="day",tripMapRenderEpoch=0,tripMapSelectedPoint=null;
@@ -7811,14 +7852,12 @@ function renderSnacks(data){
   if(!snackItems.length){
     listEl.innerHTML="";appendSavedEditToolbar(listEl);
     const count=document.getElementById("snacks-count");if(count)count.textContent=tripEditSession?"暫時未有收藏":"";
-    const subtitle=document.getElementById("snacks-subtitle");if(subtitle)subtitle.textContent=tripEditSession?"Edit Mode 可以新增第一個收藏。":"";
     if(snackTab)snackTab.style.display=tripEditSession?"flex":"none";
     requestAnimationFrame(updateBottomNavIndicator);
     return;
   }
   if(snackTab)snackTab.style.display="flex";requestAnimationFrame(updateBottomNavIndicator);
   if(snacks.title)document.getElementById("snacks-title").textContent=snacks.title;
-  if(snacks.subtitle)document.getElementById("snacks-subtitle").textContent=snacks.subtitle;
 
   const allItems=snackItems.map(normalizeSnackItem);
   const priorityOptions=savedPlaceOptionRows("priorityOptions",data),mealOptions=savedPlaceOptionRows("mealTypeOptions",data);

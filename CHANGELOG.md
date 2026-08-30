@@ -1,3 +1,12 @@
+## v7.9.20.1 — Phase 3E Harmony B
+
+1. Unified the top-level Saved Places and Expenses section headings with the established Travel Documents / Travel Details grammar: English eyebrow plus primary Chinese heading, with no passive descriptive paragraph beneath.
+2. Removed passive instructional microcopy across the main app surfaces and Expenses module. Live status, validation, transaction metadata, hard file limits and destructive-action warnings remain visible.
+3. Redesigned the Full Add Expense sheet with the same grouped-row visual grammar as the mature Trip editors: iOS-style Basic / Split / Other groups, right-aligned native controls, grouped participant selection and the existing bottom action dock. Data IDs and Firebase write logic are unchanged.
+4. Fixed the post-Cleanup-A smoothness regression caused by mixed release identities: static module preload, manifest and Expenses stylesheet URLs were still tagged v7.9.19.10 while runtime imports used v7.9.20.0. All release-bearing URLs now agree on v7.9.20.1, preventing duplicate fetch / parse paths for the same module.
+5. Reduced Expenses realtime render churn: hidden Details / Settlement / Analytics panels and closed Deleted / Activity modals are no longer rebuilt on every Firestore metadata update. The visible snapshot / recent rows remain live.
+6. No Firebase schema, Rules, Functions, Booking Documents lifecycle, PDF.js viewer, Day Bar, Map, Transit, Location Picker or Global Save Once changes.
+
 ## v7.9.20.0 — Phase 3E Harmony Cleanup A
 
 1. Removed superseded Phase 2 / v7.6 / v7.7 hotfix notes and demo notes from the production backup; CHANGELOG remains the single release-history source.
