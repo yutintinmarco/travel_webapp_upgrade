@@ -1,3 +1,10 @@
+## v7.9.19.11 — Booking PDF Preview Stability
+
+- Replaced authenticated Firebase PDF blob URLs with short-lived same-origin `.pdf` preview responses carrying explicit `application/pdf` and inline filename headers, avoiding iOS Home Screen Quick Look treating uploaded PDFs as `Unknown`.
+- Kept preview bytes private: no public Firebase download-token URL is created, and the ephemeral preview cache is deleted when the viewer closes.
+- Constrained the document Viewer navigation bar into equal bounded side slots so long document titles always ellipsize inside the centre column and can never overlap the Back control.
+- Preserved the existing image viewer, Booking Documents navigation, Global Save Once lifecycle and all frozen Map / Transit / Day Bar behaviour.
+
 ## v7.9.19.10 — Snapshot Team Accent Specificity Fix
 
 - Fixed the Info → Booking Documents snapshot handoff where a Team card's semantic left accent stripe briefly turned white.

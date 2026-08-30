@@ -3903,7 +3903,7 @@ body.expenses-view-active #app-version-note{
 #snacks-view::after,
 #info-view::after,
 #profile-view::after{
-  content:"v7.9.19.10" !important;
+  content:"v7.9.19.11" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3924,7 +3924,7 @@ body.expenses-view-active #app-version-note{
   display:none !important;
 }
 body.expenses-view-active .expenses-module .expenses-app::after{
-  content:"v7.9.19.10" !important;
+  content:"v7.9.19.11" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -4798,19 +4798,25 @@ dialog.booking-document-viewer{
   outline:none;
 }
 .booking-document-viewer-bar{
-  grid-template-columns:minmax(0,1fr) auto minmax(0,1fr)!important;
-  gap:8px;
+  /* Keep equal, bounded side slots so a long document title can never collide
+     with the native Back control. */
+  grid-template-columns:minmax(0,112px) minmax(0,1fr) minmax(0,112px)!important;
+  gap:6px;
   padding:env(safe-area-inset-top,0px) 12px 0;
 }
 .booking-document-viewer-bar .booking-document-viewer-back{
-  width:auto!important;min-width:44px!important;height:44px!important;
-  justify-self:start;
+  width:auto!important;min-width:44px!important;max-width:112px!important;height:44px!important;
+  justify-self:start;min-width:0;
   display:flex!important;align-items:center!important;gap:2px!important;
-  padding:0 10px 0 1px!important;
+  padding:0 8px 0 1px!important;
   border-radius:10px!important;
   background:transparent!important;
   color:#007aff!important;
   outline:none;
+  overflow:hidden;
+}
+.booking-document-viewer-bar .booking-document-viewer-back .profile-detail-back-label{
+  min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
 }
 .booking-document-viewer-bar .booking-document-viewer-back:active{background:transparent!important;opacity:.38!important}
 html.theme-dark .booking-document-viewer-bar .booking-document-viewer-back,html:not(.theme-light):not(.theme-dark) .booking-document-viewer-bar .booking-document-viewer-back{color:#4da3ff!important}
@@ -4820,7 +4826,7 @@ html.theme-dark .booking-document-viewer-bar .booking-document-viewer-back,html:
   letter-spacing:-.42px;
   padding:0 2px;
 }
-.booking-document-viewer-spacer{justify-self:end;width:24px!important;height:44px!important}
+.booking-document-viewer-spacer{justify-self:end;width:112px!important;max-width:100%!important;height:44px!important}
 
 /* PDF owns its native scroll/zoom surface. Image documents get a dedicated
    fit-width scroller with pinch and double-tap zoom handled by the app. */
@@ -8683,7 +8689,7 @@ async function ensureTransitRoutePlanner(itemEl){
 
 
 // Phase 3E · Edit Session foundation
-let tripEditSession=null,tripEditItemTarget=null,tripEditItemPrefill=null,tripEditSaving=false,tripEditLocationSelection=null,tripEditOrderState=null,tripEditLocationSearchEpoch=0,tripEditLocationMapController=null,tripEditLocationMapEpoch=0,tripEditLocationReverseEpoch=0,tripEditTripTitleOriginalHtml="",tripEditTripTitleOriginalPlain="",tripEditTeamModalState=null,tripEditFlightModalState=null,tripEditFlightEditorId="",tripEditAccommodationModalState=null,tripEditAccommodationEditorId="",tripEditAccommodationLocationSelection=null,tripEditAccommodationLocationSearchEpoch=0,tripEditAccommodationLocationMapController=null,tripEditAccommodationLocationMapEpoch=0,tripEditAccommodationLocationReverseEpoch=0,tripEditAuthoritativeFence=null,tripEditUploadedMediaForSession=[],tripEditTravelDocumentModalState=null,tripEditOwnerDocumentState=null,tripEditUploadedDocumentsForSession=[],bookingDocumentViewerObjectUrl="",bookingDocumentViewerCurrent=null,bookingDocumentViewerEpoch=0,bookingDocumentImageCleanup=null,bookingDocumentViewerSwipe=null,infoDocumentsPageOpen=false,infoNavigationTransitioning=false,infoDocumentFocusKey="",infoCurrentPage="root",infoSwipe=null,infoNavSurfaces=[],infoNavAnimationFrame=0,infoNavStack=[{key:"root",scrollTop:0,snapshot:null}];
+let tripEditSession=null,tripEditItemTarget=null,tripEditItemPrefill=null,tripEditSaving=false,tripEditLocationSelection=null,tripEditOrderState=null,tripEditLocationSearchEpoch=0,tripEditLocationMapController=null,tripEditLocationMapEpoch=0,tripEditLocationReverseEpoch=0,tripEditTripTitleOriginalHtml="",tripEditTripTitleOriginalPlain="",tripEditTeamModalState=null,tripEditFlightModalState=null,tripEditFlightEditorId="",tripEditAccommodationModalState=null,tripEditAccommodationEditorId="",tripEditAccommodationLocationSelection=null,tripEditAccommodationLocationSearchEpoch=0,tripEditAccommodationLocationMapController=null,tripEditAccommodationLocationMapEpoch=0,tripEditAccommodationLocationReverseEpoch=0,tripEditAuthoritativeFence=null,tripEditUploadedMediaForSession=[],tripEditTravelDocumentModalState=null,tripEditOwnerDocumentState=null,tripEditUploadedDocumentsForSession=[],bookingDocumentViewerObjectUrl="",bookingDocumentViewerPreviewUrl="",bookingDocumentViewerCurrent=null,bookingDocumentViewerEpoch=0,bookingDocumentImageCleanup=null,bookingDocumentViewerSwipe=null,infoDocumentsPageOpen=false,infoNavigationTransitioning=false,infoDocumentFocusKey="",infoCurrentPage="root",infoSwipe=null,infoNavSurfaces=[],infoNavAnimationFrame=0,infoNavStack=[{key:"root",scrollTop:0,snapshot:null}];
 window.__tripEditPreviewData=null;
 function tripEditPresentationSignature(data){
   if(!data)return"";
@@ -8907,6 +8913,49 @@ function tripBookingDocumentOwnerTime(row={},dataInput=activeTripPresentationDat
   return "99:99";
 }
 function tripBookingDocumentFileMeta(row={}){const bits=[];const file=String(row?.fileName||"").trim(),title=String(row?.title||"").trim();if(file&&file!==title)bits.push(file);if(Number(row?.byteSize))bits.push(`${Math.max(1,Math.round(Number(row.byteSize)/1024))} KB`);return bits.join(" · ")||"點選直接預覽";}
+const BOOKING_DOCUMENT_PREVIEW_CACHE="travel-booking-document-preview-v1";
+function tripBookingDocumentPreviewFileName(row={}){
+  const raw=String(row?.fileName||row?.title||"document.pdf").trim()||"document.pdf";
+  const safe=raw.replace(/[\\/:*?"<>|\u0000-\u001f]+/g,"-").slice(0,120)||"document.pdf";
+  return /\.pdf$/i.test(safe)?safe:`${safe}.pdf`;
+}
+async function tripReleaseBookingDocumentPdfPreview(){
+  const previewUrl=bookingDocumentViewerPreviewUrl;
+  bookingDocumentViewerPreviewUrl="";
+  if(!previewUrl)return;
+  try{if("caches" in window){const cache=await caches.open(BOOKING_DOCUMENT_PREVIEW_CACHE);await cache.delete(previewUrl);}}catch(_){}
+}
+async function tripCreateBookingDocumentPdfPreview(blob,row={}){
+  if(!(blob instanceof Blob))throw new Error("PDF bytes unavailable");
+  const pdfBlob=String(blob.type||"").toLowerCase().includes("pdf")?blob:blob.slice(0,blob.size,"application/pdf");
+  /* A blob: URL has neither a stable filename nor same-origin path on iOS.
+     Home Screen Safari can therefore hand it to Quick Look as an Unknown file.
+     Put the authenticated bytes into a short-lived same-origin CacheStorage
+     response instead. The existing Service Worker serves caches.match() before
+     network, so the native PDF surface receives a real .pdf URL plus MIME and
+     inline filename headers without creating a public Firebase download token. */
+  if(!("caches" in window)||!navigator.serviceWorker?.controller){
+    const fallback=URL.createObjectURL(pdfBlob);
+    bookingDocumentViewerObjectUrl=fallback;
+    return fallback;
+  }
+  await tripReleaseBookingDocumentPdfPreview();
+  const fileName=tripBookingDocumentPreviewFileName(row);
+  const nonce=`${Date.now().toString(36)}-${Math.random().toString(36).slice(2,10)}`;
+  const path=`./__booking_document_preview__/${encodeURIComponent(nonce)}/${encodeURIComponent(fileName)}`;
+  const previewUrl=new URL(path,window.location.href).href;
+  const cache=await caches.open(BOOKING_DOCUMENT_PREVIEW_CACHE);
+  const headers=new Headers({
+    "Content-Type":"application/pdf",
+    "Content-Disposition":`inline; filename="document.pdf"; filename*=UTF-8''${encodeURIComponent(fileName)}`,
+    "Content-Length":String(pdfBlob.size),
+    "Cache-Control":"no-store",
+    "X-Content-Type-Options":"nosniff"
+  });
+  await cache.put(previewUrl,new Response(pdfBlob,{status:200,headers}));
+  bookingDocumentViewerPreviewUrl=previewUrl;
+  return previewUrl;
+}
 function tripCloseBookingDocumentViewer(){
   bookingDocumentViewerEpoch+=1;
   if(typeof bookingDocumentImageCleanup==="function"){try{bookingDocumentImageCleanup();}catch(_){}bookingDocumentImageCleanup=null;}
@@ -8916,6 +8965,7 @@ function tripCloseBookingDocumentViewer(){
   if(viewer?.open){try{viewer.close();}catch(_){viewer.removeAttribute("open");}}
   document.body.classList.remove("booking-document-viewer-open");
   if(bookingDocumentViewerObjectUrl){try{URL.revokeObjectURL(bookingDocumentViewerObjectUrl);}catch(_){}bookingDocumentViewerObjectUrl="";}
+  void tripReleaseBookingDocumentPdfPreview();
   bookingDocumentViewerCurrent=null;const body=document.getElementById("booking-document-viewer-body");if(body)body.innerHTML='<div class="booking-document-viewer-state">正在載入…</div>';
 }
 function tripMountBookingDocumentImage(body,url,row={}){
@@ -8981,11 +9031,16 @@ async function tripOpenBookingDocument(rowInput={}){
   try{viewer.focus({preventScroll:true});}catch(_){viewer.focus?.();}
   document.body.classList.add("booking-document-viewer-open");body.innerHTML='<div class="booking-document-viewer-state">正在載入…</div>';
   try{
-    let url=String(row.legacyUrl||"").trim(),contentType=String(row.contentType||"").toLowerCase(),localObjectUrl="";
-    if(!url){const service=await tripDocumentService(),blob=await service.getTripDocumentBlob(row);contentType=String(blob.type||contentType).toLowerCase();localObjectUrl=URL.createObjectURL(blob);url=localObjectUrl;}
+    let url=String(row.legacyUrl||"").trim(),contentType=String(row.contentType||"").toLowerCase(),localObjectUrl="",downloadedBlob=null;
+    if(!url){const service=await tripDocumentService();downloadedBlob=await service.getTripDocumentBlob(row);contentType=String(downloadedBlob.type||contentType).toLowerCase();}
+    const isPdf=contentType.includes("pdf")||/\.pdf(?:$|\?)/i.test(String(row.fileName||url));
+    if(downloadedBlob){
+      if(isPdf)url=await tripCreateBookingDocumentPdfPreview(downloadedBlob,row);
+      else{localObjectUrl=URL.createObjectURL(downloadedBlob);url=localObjectUrl;}
+    }
     if(epoch!==bookingDocumentViewerEpoch){if(localObjectUrl)try{URL.revokeObjectURL(localObjectUrl);}catch(_){}return;}
     if(localObjectUrl)bookingDocumentViewerObjectUrl=localObjectUrl;if(!url)throw new Error("文件網址不存在");body.innerHTML="";
-    if(contentType.includes("pdf")||/\.pdf(?:$|\?)/i.test(String(row.fileName||url))){const frame=document.createElement("iframe");frame.className="booking-document-pdf-frame";frame.src=url;frame.title=String(row.title||"PDF");frame.setAttribute("loading","eager");frame.setAttribute("allow","fullscreen");body.appendChild(frame);}else{tripMountBookingDocumentImage(body,url,row);}
+    if(isPdf){const frame=document.createElement("iframe");frame.className="booking-document-pdf-frame";frame.src=url;frame.title=String(row.title||row.fileName||"PDF");frame.setAttribute("loading","eager");frame.setAttribute("allow","fullscreen");body.appendChild(frame);}else{tripMountBookingDocumentImage(body,url,row);}
   }catch(error){if(epoch!==bookingDocumentViewerEpoch)return;console.warn("Open booking document",error);body.innerHTML='<div class="booking-document-viewer-state">暫時未能載入文件。</div>';}
 }
 function tripRenderBookingDocumentsPage(dataInput=activeTripPresentationData(),{focusKey=infoDocumentFocusKey}={}){

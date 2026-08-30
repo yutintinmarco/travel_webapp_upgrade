@@ -1,5 +1,5 @@
 /* Travel WebApp Service Worker
- * v7.9.19.10 · Info Snapshot Material Parity
+ * v7.9.19.11 · Booking PDF Preview Stability
  *
  * Keeps the v7.7.0.14 cold-start behaviour, while hardening installation:
  *  1. Critical shell assets are transactional. If any critical file cannot be
@@ -14,7 +14,7 @@
  *     explicit reload stays network-first.
  */
 
-const SW_VERSION = "travel-shell-v7.9.19.10";
+const SW_VERSION = "travel-shell-v7.9.19.11";
 const CORE_CACHE = SW_VERSION;
 
 // Required for a useful offline launch and remembered-Trip boot.
