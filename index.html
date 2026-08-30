@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
   <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
   <link rel="dns-prefetch" href="https://api.open-meteo.com">
-  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?release=7.9.19.7">
+  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?release=7.9.19.8">
   <title id="page-title">行程</title>
   <script>
   // v7.7.5.0 · Performance Lite. Memory only: no Firebase reads/writes, no
@@ -3903,7 +3903,7 @@ body.expenses-view-active #app-version-note{
 #snacks-view::after,
 #info-view::after,
 #profile-view::after{
-  content:"v7.9.19.7" !important;
+  content:"v7.9.19.8" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3924,7 +3924,7 @@ body.expenses-view-active #app-version-note{
   display:none !important;
 }
 body.expenses-view-active .expenses-module .expenses-app::after{
-  content:"v7.9.19.7" !important;
+  content:"v7.9.19.8" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -4577,7 +4577,7 @@ html.theme-dark .snack-edit-tools,html:not(.theme-light):not(.theme-dark) .snack
 </style>
             <link rel="apple-touch-icon" href="assets/icon/trip_icon.png">
   <link rel="icon" type="image/png" href="assets/icon/trip_icon.png">
-  <link rel="manifest" href="manifest.json?release=7.9.19.7">
+  <link rel="manifest" href="manifest.json?release=7.9.19.8">
   <meta name="apple-mobile-web-app-title" content="關嘉露西生日之旅">
   <!-- v7.7.1.2: expenses.css is 144KB and every rule is scoped under
        .expenses-module, yet it used to block the very first paint of the
@@ -4585,8 +4585,8 @@ html.theme-dark .snack-edit-tools,html:not(.theme-light):not(.theme-dark) .snack
        priority without blocking paint; ensureExpensesStylesheet() flips it to
        media="all" before the 支出 view is ever mounted, so the styling is
        byte-for-byte identical by the time anything expenses-related renders. -->
-  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?release=7.9.19.7" media="print">
-  <noscript><link rel="stylesheet" href="assets/css/expenses.css?release=7.9.19.7"></noscript>
+  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?release=7.9.19.8" media="print">
+  <noscript><link rel="stylesheet" href="assets/css/expenses.css?release=7.9.19.8"></noscript>
 
 <style id="booking-documents-v79191-style">
 /* Phase 3E · Booking Documents native hierarchy / viewer hardening.
@@ -8962,8 +8962,13 @@ function infoRunProgrammaticTransition({targetKey,targetScroll=0,direction=1,pop
 function tripOpenBookingDocumentsPage({ownerType="",ownerId=""}={}){
   infoDocumentFocusKey=ownerType&&ownerId?`${String(ownerType)}:${String(ownerId)}`:"";if(currentAppView!=="info"){setView("info",{restoreScroll:false});requestAnimationFrame(()=>requestAnimationFrame(()=>tripOpenBookingDocumentsPage({ownerType,ownerId})));return;}tripRenderBookingDocumentsPage(activeTripPresentationData(),{focusKey:infoDocumentFocusKey});if(infoNavigationTransitioning)return;if(infoCurrentPage==="booking-documents"){infoDocumentsPageOpen=true;infoFocusDocumentOwner();return;}infoDocumentsPageOpen=true;infoRunProgrammaticTransition({targetKey:"booking-documents",targetScroll:INFO_DOCUMENTS_ENTRY_SCROLL,direction:-1,push:true});
 }
-function tripCloseBookingDocumentsPage(){if(infoNavigationTransitioning||infoCurrentPage==="root"||infoNavStack.length<=1)return;const previous=infoNavStack[infoNavStack.length-2]||{key:"root",scrollTop:0,snapshot:null};infoRunProgrammaticTransition({targetKey:previous.key,targetScroll:previous.scrollTop||0,direction:1,pop:true});}
-function beginInfoEdgeSwipe(event){if(infoNavigationTransitioning||infoCurrentPage==="root"||infoNavStack.length<=1||currentAppView!=="info"||event.touches?.length!==1)return;if(document.body.classList.contains("booking-document-viewer-open"))return;const t=event.touches[0];if(t.clientX>30)return;if(event.target.closest?.("input,textarea,select,[contenteditable='true']"))return;const currentEntry=infoNavStack[infoNavStack.length-1];if(currentEntry&&currentEntry.key===infoCurrentPage)currentEntry.scrollTop=infoScrollTop();const previous=infoNavStack[infoNavStack.length-2]||{key:"root",scrollTop:0,snapshot:null};infoSwipe={tracking:true,active:false,handedOff:false,startX:t.clientX,startY:t.clientY,currentX:t.clientX,startedAt:performance.now(),width:Math.max(1,window.innerWidth),currentScroll:infoScrollTop(),previousKey:previous.key,previousScroll:Math.max(0,previous.scrollTop||0),previousSnapshot:previous.snapshot||null,currentSurface:null,previousSurface:null,progress:0,fadeProgress:0};}
+function infoBookingDocumentsReturnTarget(previous){
+  const entry=previous||{key:"root",scrollTop:0,snapshot:null},forceRootTop=infoCurrentPage==="booking-documents"&&entry.key==="root";
+  if(!forceRootTop)return{key:entry.key,scrollTop:Math.max(0,Number(entry.scrollTop||0)),snapshot:entry.snapshot||null};
+  return{key:entry.key,scrollTop:0,snapshot:infoCaptureSnapshot(entry.key,0)};
+}
+function tripCloseBookingDocumentsPage(){if(infoNavigationTransitioning||infoCurrentPage==="root"||infoNavStack.length<=1)return;const previous=infoNavStack[infoNavStack.length-2]||{key:"root",scrollTop:0,snapshot:null},target=infoBookingDocumentsReturnTarget(previous);previous.scrollTop=target.scrollTop;previous.snapshot=target.snapshot;infoRunProgrammaticTransition({targetKey:target.key,targetScroll:target.scrollTop,direction:1,pop:true});}
+function beginInfoEdgeSwipe(event){if(infoNavigationTransitioning||infoCurrentPage==="root"||infoNavStack.length<=1||currentAppView!=="info"||event.touches?.length!==1)return;if(document.body.classList.contains("booking-document-viewer-open"))return;const t=event.touches[0];if(t.clientX>30)return;if(event.target.closest?.("input,textarea,select,[contenteditable='true']"))return;const currentEntry=infoNavStack[infoNavStack.length-1];if(currentEntry&&currentEntry.key===infoCurrentPage)currentEntry.scrollTop=infoScrollTop();const previous=infoNavStack[infoNavStack.length-2]||{key:"root",scrollTop:0,snapshot:null},target=infoBookingDocumentsReturnTarget(previous);if(infoCurrentPage==="booking-documents"&&target.key==="root"){previous.scrollTop=0;previous.snapshot=target.snapshot;}infoSwipe={tracking:true,active:false,handedOff:false,startX:t.clientX,startY:t.clientY,currentX:t.clientX,startedAt:performance.now(),width:Math.max(1,window.innerWidth),currentScroll:infoScrollTop(),previousKey:target.key,previousScroll:target.scrollTop,previousSnapshot:target.snapshot,currentSurface:null,previousSurface:null,progress:0,fadeProgress:0};}
 function moveInfoEdgeSwipe(event){if(!infoSwipe?.tracking||event.touches?.length!==1)return;const t=event.touches[0],dx=t.clientX-infoSwipe.startX,dy=t.clientY-infoSwipe.startY;if(!infoSwipe.active){if(dx<7)return;if(Math.abs(dy)>Math.abs(dx)*.72){infoSwipe=null;return;}const currentSnapshot=infoCaptureSnapshot(infoCurrentPage,infoSwipe.currentScroll),previousSnapshot=infoSwipe.previousSnapshot||infoCaptureSnapshot(infoSwipe.previousKey,infoSwipe.previousScroll);if(!currentSnapshot||!previousSnapshot){infoSwipe=null;return;}const currentEntry=infoNavStack[infoNavStack.length-1];if(currentEntry&&currentEntry.key===infoCurrentPage)currentEntry.snapshot=currentSnapshot;const layers=infoPrepareSnapshotTransition(currentSnapshot,previousSnapshot);if(!layers){infoSwipe=null;return;}infoSwipe.currentSurface=layers.fromSurface;infoSwipe.previousSurface=layers.toSurface;infoSwipe.width=layers.width;infoSwipe.active=true;infoSwipe.handedOff=false;chromeFrozen=true;if(collapseRaf){cancelAnimationFrame(collapseRaf);collapseRaf=0;}infoNavigationTransitioning=true;document.body.classList.add("info-edge-swipe-active");infoApplyFadeThrough(layers.fromSurface,layers.toSurface,0,1,layers.width);layers.toSurface.style.opacity="0";infoHandoffToSnapshot(layers.fromSurface,()=>{if(!infoSwipe?.active)return;infoApplyFadeThrough(layers.fromSurface,layers.toSurface,0,1,layers.width);infoSwipe.handedOff=true;infoApplySwipeProgress();});}event.preventDefault();infoSwipe.currentX=t.clientX;if(!infoSwipe.handedOff)return;infoApplySwipeProgress();}
 function infoApplySwipeProgress(){if(!infoSwipe?.active||!infoSwipe.handedOff)return;const width=Math.max(1,infoSwipe.width),distance=clamp(infoSwipe.currentX-infoSwipe.startX,0,width),progress=distance/width;infoSwipe.progress=progress;infoSwipe.fadeProgress=progress;infoApplyFadeThrough(infoSwipe.currentSurface,infoSwipe.previousSurface,progress,1,width);}
 function endInfoEdgeSwipe(){if(!infoSwipe?.tracking)return;if(!infoSwipe.active){infoSwipe=null;return;}const swipe=infoSwipe;infoSwipe=null;const width=Math.max(1,swipe.width),distance=clamp(swipe.currentX-swipe.startX,0,width),elapsed=Math.max(1,performance.now()-swipe.startedAt),velocity=distance/elapsed,goBack=distance>width*.32||velocity>.55;if(!swipe.handedOff){document.getElementById("info-nav-host")?.classList.remove("is-snapshotting");infoNavigationTransitioning=false;infoClearSurfaces();return;}const currentSurface=swipe.currentSurface,previousSurface=swipe.previousSurface,fadeProgress=clamp(Number(swipe.fadeProgress)||0,0,1),target=goBack?1:0,remaining=Math.abs(target-fadeProgress),duration=Math.max(INFO_SWIPE_SETTLE_MIN,Math.min(INFO_SWIPE_SETTLE_MAX,INFO_SWIPE_SETTLE_MIN+remaining*230));infoAnimateFadeThrough(currentSurface,previousSurface,{from:fadeProgress,to:target,direction:1,width,duration,onDone:()=>{if(goBack){infoCommitSnapshotToLive(swipe.previousKey,swipe.previousScroll,previousSurface,{pop:true});}else{currentSurface.style.opacity="1";previousSurface.style.opacity="0";infoRestoreLiveAfterCancel(currentSurface,swipe.currentScroll);}}});}

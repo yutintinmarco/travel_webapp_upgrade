@@ -1,3 +1,10 @@
+## v7.9.19.8 — Documents Return-to-Top Stability
+
+- Booking Documents now always returns to the top of the Info root page, whether using the Back button or interactive edge swipe.
+- Disabled remembered Info-page scroll restoration only for the Booking Documents → Info return path; all other navigation stacks keep their existing scroll restoration behaviour.
+- Rebuilds the return snapshot at scrollTop 0 so the transition and live handoff share the same expanded-header geometry instead of visually targeting an old saved scroll position.
+- Presentation/navigation-only patch; no Booking Documents data model, Viewer, Day Bar, Map, Transit, Location Picker or Firebase lifecycle changes.
+
 ## v7.9.19.7 — Documents Top-Entry Geometry Trial
 
 - Moved the Booking Documents entry back above Travel Details so the entry is available while the shared Trip header remains in its expanded top-of-page geometry.
