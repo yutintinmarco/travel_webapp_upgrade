@@ -25,6 +25,10 @@ function mountExpensesHtml(root) {
   root.innerHTML = `<div class="expenses-module">
 <main class="expenses-app">
   <div id="expensePrimaryContent" class="expense-primary-content">
+    <section class="expense-page-heading" aria-label="支出">
+      <div class="trip-library-eyebrow">Expenses</div>
+      <h2 class="trip-info-heading">支出</h2>
+    </section>
     <section class="expense-snapshot-card" id="expenseSnapshotCard">
       <div class="snapshot-layout">
         <div class="snapshot-left">
@@ -52,8 +56,6 @@ function mountExpensesHtml(root) {
           </div>
           <span class="quick-pill">全員平均分</span>
         </div>
-
-        <p class="hint">適合旅行現場即刻入數。參與人預設為所有 members，複雜分帳請用完整新增。</p>
 
         <div class="quick-grid">
           <label class="quick-label-full">
@@ -97,13 +99,10 @@ function mountExpensesHtml(root) {
 
           <button type="button" id="quickAddBtn" class="quick-add-main-btn quick-label-full">快速新增</button>
         </div>
-
-        <p id="quickAddHint" class="hint">輸入項目名稱後，系統會自動估分類；你仍可手動修改。</p>
       </section>
 
       <section class="card expense-actions-card">
         <h2>進階入數</h2>
-        <p class="hint">完整新增同 OCR 已收納成 popup，主畫面保持清爽。</p>
         <div class="expense-action-grid">
           <button type="button" id="openFullAddBtn" class="secondary-btn">＋ 完整新增</button>
           <button type="button" id="openOcrEntryBtn" class="secondary-btn">📷 OCR 入單</button>
@@ -126,7 +125,6 @@ function mountExpensesHtml(root) {
     <section class="expenses-panel" data-expenses-panel="details">
       <section class="card">
         <h2>支出明細</h2>
-        <p class="hint">列表只顯示重點資料。按入每筆支出可查看詳細資料、修改或刪除。</p>
         <div id="expenseList"></div>
       </section>
     </section>
@@ -141,7 +139,6 @@ function mountExpensesHtml(root) {
     <section class="expenses-panel" data-expenses-panel="analytics">
       <section class="card" id="analyticsCard">
         <h2>圖表分析</h2>
-        <p class="hint">以下分析以目前結算基準幣別計算，並已排除 Deleted Items。</p>
         <div id="analyticsSummary"></div>
       </section>
     </section>
@@ -164,12 +161,11 @@ function mountExpensesHtml(root) {
           <h2>支出設定</h2>
         </div>
       </div>
-      <p class="hint expense-inline-settings-hint">匯率、分帳成員、備份及支出資料管理。</p>
       <div class="settings-menu-grid expense-inline-settings-grid">
-        <button type="button" class="settings-menu-btn" data-settings-open="members"><span>👥</span><strong>成員管理</strong><small>新增或移除分帳成員</small></button>
-        <button type="button" class="settings-menu-btn" data-settings-open="rates" data-admin-only="true"><span>💱</span><strong>匯率設定</strong><small>基準貨幣及旅程匯率</small></button>
-        <button type="button" class="settings-menu-btn" data-settings-open="lock" data-admin-only="true"><span>🔒</span><strong>支出鎖定</strong><small>停止新增及修改支出</small></button>
-        <button type="button" class="settings-menu-btn" data-settings-open="deleted"><span>🗑️</span><strong>已刪除項目</strong><small>查看及還原支出</small></button>
+        <button type="button" class="settings-menu-btn" data-settings-open="members"><span>👥</span><strong>成員管理</strong></button>
+        <button type="button" class="settings-menu-btn" data-settings-open="rates" data-admin-only="true"><span>💱</span><strong>匯率設定</strong></button>
+        <button type="button" class="settings-menu-btn" data-settings-open="lock" data-admin-only="true"><span>🔒</span><strong>支出鎖定</strong></button>
+        <button type="button" class="settings-menu-btn" data-settings-open="deleted"><span>🗑️</span><strong>已刪除項目</strong></button>
       </div>
     </section>
   </section>
@@ -179,79 +175,44 @@ function mountExpensesHtml(root) {
 
   <div id="expenseFormModal" class="modal expense-presentation-sheet hidden" data-presentation="sheet" data-sheet-size="large">
     <div class="modal-card expense-form-modal-card">
-      <div class="modal-heading-row">
-        <h3 id="expenseFormModalTitle"><span class="modal-title-icon">➕</span><span>完整新增支出</span></h3>
+      <div class="modal-heading-row expense-native-sheet-heading">
+        <div>
+          <div class="trip-library-eyebrow">Expense</div>
+          <h3 id="expenseFormModalTitle">完整新增支出</h3>
+        </div>
       </div>
-      <form id="expenseForm" class="modal-body-scroll expense-form-body">
-          <label>
-            日期
-            <input type="date" id="date" required />
-          </label>
-
-          <label>
-            項目
-            <input type="text" id="title" placeholder="例如：Lunch / Taxi" required />
-          </label>
-
-          <div class="expense-form-two-col">
-            <label>
-              金額
-              <input type="number" id="amount" step="0.01" min="0" required />
-            </label>
-
-            <label>
-              貨幣
-              <select id="currency">
-                <option value="HKD">HKD</option>
-                <option value="JPY">JPY</option>
-                <option value="CNY">CNY</option>
-                <option value="TWD">TWD</option>
-                <option value="KRW">KRW</option>
-                <option value="USD">USD</option>
-              </select>
-            </label>
+      <form id="expenseForm" class="modal-body-scroll expense-form-body expense-native-form">
+        <section class="expense-native-section">
+          <div class="expense-native-section-label">基本資料</div>
+          <div class="expense-native-group">
+            <label class="expense-native-row"><span>日期</span><input type="date" id="date" required /></label>
+            <label class="expense-native-row"><span>項目</span><input type="text" id="title" placeholder="Lunch / Taxi" required /></label>
+            <label class="expense-native-row"><span>金額</span><input type="number" id="amount" step="0.01" min="0" inputmode="decimal" placeholder="0.00" required /></label>
+            <label class="expense-native-row"><span>貨幣</span><select id="currency"><option value="HKD">HKD</option><option value="JPY">JPY</option><option value="CNY">CNY</option><option value="TWD">TWD</option><option value="KRW">KRW</option><option value="USD">USD</option></select></label>
+            <label class="expense-native-row"><span>付款人</span><select id="paidBy"></select></label>
           </div>
+        </section>
 
-          <label>
-            付款人
-            <select id="paidBy"></select>
-          </label>
+        <section class="expense-native-section">
+          <div class="expense-native-section-label">分帳</div>
+          <div class="expense-native-group">
+            <div class="expense-native-stacked-row">
+              <div class="expense-native-stacked-title">分攤對象</div>
+              <div id="sharedByGroup" class="checkbox-grid"></div>
+            </div>
+            <label class="expense-native-row"><span>分帳方式</span><select id="splitMethod"><option value="equal">平均分</option><option value="amount">指定金額</option><option value="percentage">指定百分比</option></select></label>
+            <div id="splitConfig" class="split-config expense-native-split-config"></div>
+          </div>
+          <p id="splitValidationMessage" class="validation-message"></p>
+        </section>
 
-          <fieldset>
-            <legend>參與人 / 分攤對象</legend>
-            <div id="sharedByGroup" class="checkbox-grid"></div>
-            <p class="hint">付款人可以不在分攤名單內，例如 Marco 代 A、B 先付。</p>
-          </fieldset>
-
-          <section class="split-method-panel">
-            <label>
-              分帳方式
-              <select id="splitMethod">
-                <option value="equal">平均分</option>
-                <option value="amount">指定金額</option>
-                <option value="percentage">指定百分比</option>
-              </select>
-            </label>
-            <div id="splitConfig" class="split-config"></div>
-            <p id="splitValidationMessage" class="validation-message"></p>
-          </section>
-
-          <label>
-            分類
-            <select id="category">
-              <option value="Food">Food</option>
-              <option value="Transport">Transport</option>
-              <option value="Hotel">Hotel</option>
-              <option value="Shopping">Shopping</option>
-              <option value="Ticket">Ticket</option>
-              <option value="Other">Other</option>
-            </select>
-          </label>
-
-          <label>
-            備註
-            <textarea id="note" rows="2" placeholder="Optional"></textarea>
-          </label>
+        <section class="expense-native-section">
+          <div class="expense-native-section-label">其他</div>
+          <div class="expense-native-group">
+            <label class="expense-native-row"><span>分類</span><select id="category"><option value="Food">Food</option><option value="Transport">Transport</option><option value="Hotel">Hotel</option><option value="Shopping">Shopping</option><option value="Ticket">Ticket</option><option value="Other">Other</option></select></label>
+            <label class="expense-native-row expense-native-note-row"><span>備註</span><textarea id="note" rows="2" placeholder="Optional"></textarea></label>
+          </div>
+        </section>
       </form>
       <div class="modal-footer-actions">
         <button type="submit" id="submitBtn" form="expenseForm">新增</button>
@@ -271,7 +232,6 @@ function mountExpensesHtml(root) {
           收據圖片
           <input type="file" id="ocrReceiptInput" accept="image/*" />
         </label>
-        <p class="hint">本地 Tesseract OCR + 規則抽取（免費）。分析完成後可確認並填入完整新增表格。</p>
       </div>
       <div class="modal-footer-actions">
         <button type="button" id="ocrScanBtn" class="secondary-btn">掃描並分析</button>
@@ -322,7 +282,6 @@ function mountExpensesHtml(root) {
     <div class="modal-card">
       <div class="modal-heading-row"><h3><span class="modal-title-icon">📊</span><span>支出 Excel 報表</span></h3></div>
       <div class="modal-body-scroll">
-        <p class="hint">Excel 係主要支出報表，用於對數、報銷及保存。完整 JSON 備份已整合到「行程備份」。</p>
         <div class="backup-actions">
           <button type="button" id="exportExcelReportBtn" data-action="export-excel" class="secondary-btn">匯出 Excel Report</button>
         </div>
@@ -348,7 +307,6 @@ function mountExpensesHtml(root) {
       </label>
       <section class="active-currency-panel">
         <div class="setting-subtitle">本旅程使用幣值</div>
-        <p class="hint">勾選後才會在新增支出及 Quick Add 出現。結算基準幣別會自動保留。</p>
         <div id="activeCurrencyGroup" class="currency-check-grid"></div>
       </section>
       <div id="ratesContainer" class="rates-grid"></div>
@@ -378,7 +336,6 @@ function mountExpensesHtml(root) {
       <div class="modal-heading-row"><h3><span class="modal-title-icon">🔐</span><span>權限管理</span></h3></div>
       <div class="modal-body-scroll">
       <section class="hidden" id="adminPanel">
-        <p class="hint">Phase 2B 起旅程權限由 Owner、Admin、Member、Viewer member document 管理。舊 email 白名單只保留作 legacy 顯示。</p>
         <div class="setting-subtitle">可使用此旅程的 Google Email</div>
         <div id="allowedEmailList" class="member-list"></div>
         <div class="member-add-row" style="margin-top:12px">
@@ -386,7 +343,6 @@ function mountExpensesHtml(root) {
           <button type="button" id="addAllowedEmailBtn" class="secondary-btn">新增</button>
         </div>
         <div class="setting-subtitle" style="margin-top:16px">Admin Google Email</div>
-        <p class="hint">Admin 除了可登入，亦可管理權限、匯率及支出鎖定。Creator 不能被移除。</p>
         <div id="adminEmailList" class="member-list"></div>
         <div class="member-add-row" style="margin-top:12px">
           <input type="email" id="adminEmailInput" placeholder="admin@gmail.com" />
@@ -404,7 +360,6 @@ function mountExpensesHtml(root) {
       <div class="modal-heading-row"><h3><span class="modal-title-icon">🔒</span><span>支出鎖定</span></h3></div>
       <div class="modal-body-scroll">
       <section class="hidden" id="tripControlPanel">
-        <p class="hint">鎖定後不可再新增、修改或刪除支出，亦不可修改成員及匯率；仍可記錄找數及匯出 Excel。</p>
         <div class="form-actions">
           <button type="button" id="lockTripBtn">鎖定此旅程</button>
           <button type="button" id="unlockTripBtn" class="secondary-btn hidden">解除支出鎖定</button>
@@ -420,7 +375,6 @@ function mountExpensesHtml(root) {
     <div class="modal-card">
       <div class="modal-heading-row"><h3><span class="modal-title-icon">🗑️</span><span>已刪除項目</span></h3></div>
       <div class="modal-body-scroll">
-        <p class="hint">已刪除支出會保留作 audit trail，不會參與結算。</p>
         <div id="deletedExpenseList"></div>
       </div>
 
@@ -431,7 +385,6 @@ function mountExpensesHtml(root) {
     <div class="modal-card">
       <div class="modal-heading-row"><h3><span class="modal-title-icon">🧾</span><span>操作記錄</span></h3></div>
       <div class="modal-body-scroll">
-        <p class="hint">記錄新增、修改、刪除、找數、鎖定等主要動作。</p>
         <div id="activityLogList"></div>
       </div>
       <div class="modal-footer-actions"><button type="button" class="modal-close-btn" data-modal-close="activityLogModal">關閉</button></div>
@@ -449,7 +402,6 @@ function mountExpensesHtml(root) {
           <div class="about-app-row"><span>Trip ID</span><strong id="aboutTripIdText">載入中</strong></div>
           <div class="about-app-row"><span>Mode</span><strong>PWA / GitHub Pages</strong></div>
         </div>
-        <p class="hint">如手機仍顯示舊版，請重新整理或以網址參數 ?v=${window.APP_VERSION || "672"} 開啟一次。</p>
       </div>
       <div class="modal-footer-actions"><button type="button" class="modal-close-btn" data-modal-close="aboutAppModal">關閉</button></div>
     </div>
@@ -487,6 +439,7 @@ function mountExpensesHtml(root) {
 
 let expensesModuleStarted = false;
 let expensesModuleSuspendedForTripSwitch = false;
+let activeExpensesTab = "add";
 
 export function initExpensesModule(tripData) {
   if (expensesModuleStarted) return;
@@ -1496,15 +1449,8 @@ function renderSplitConfig() {
     splitValidationMessage.textContent = "";
   }
 
-  if (!selectedMembers.length) {
-    splitConfig.innerHTML = `<p class="hint">請先選擇至少一位參與人。</p>`;
-    return;
-  }
-
-  if (method === "equal") {
-    splitConfig.innerHTML = `
-      <p class="hint">目前選擇 ${selectedMembers.length} 位參與人，系統會按人數平均分。付款人可以不在參與人之內。</p>
-    `;
+  if (!selectedMembers.length || method === "equal") {
+    splitConfig.innerHTML = "";
     return;
   }
 
@@ -1532,7 +1478,6 @@ function renderSplitConfig() {
         </label>
       `).join("")}
     </div>
-    <p class="hint">${method === "amount" ? "各人金額總和必須等於支出金額，容許 0.01 尾差。" : "各人百分比總和必須等於 100%，容許 0.01% 尾差。"}</p>
   `;
 }
 
@@ -2024,6 +1969,7 @@ function getExpenseById(expenseId) {
 
 
 function activateExpensesTab(tabName) {
+  activeExpensesTab = tabName || "add";
   const tabs = Array.from(document.querySelectorAll('.expenses-module [data-expenses-tab]'));
   const panels = Array.from(document.querySelectorAll('.expenses-module [data-expenses-panel]'));
   tabs.forEach(tab => tab.classList.toggle('active', tab.dataset.expensesTab === tabName));
@@ -2455,9 +2401,8 @@ function listenToExpenses() {
     allExpenses = sortExpensesForDisplay(snap.docs.map(d => ({ id: d.id, ...d.data() })));
     expenses = getActiveExpenses();
     renderExpenses();
-    renderDeletedExpenses();
-    renderSummary();
-    renderAnalytics();
+    renderActiveExpensePanel();
+    if (expenseModalVisible("deletedItemsModal")) renderDeletedExpenses();
     setModuleStatus(`Synced (${tripId})`);
     tryRunPendingExcelExport();
   }, err => {
@@ -2478,8 +2423,8 @@ function listenToSettlements() {
     settlementsLiveReady = true;
     updateBackupSyncMeta("settlements", snap);
     settlements = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    renderSummary();
-    renderAnalytics();
+    if(activeExpensesTab === "settlement") renderSummary();
+    if(activeExpensesTab === "analytics") renderAnalytics();
     tryRunPendingExcelExport();
   }, err => {
     if (bindingEpoch !== expenseBindingEpoch) return;
@@ -2499,7 +2444,7 @@ function listenToActivityLogs() {
     activityLogsLiveReady = true;
     updateBackupSyncMeta("activityLogs", snap);
     activityLogs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    renderActivityLogs();
+    if(expenseModalVisible("activityLogModal")) renderActivityLogs();
     tryRunPendingExcelExport();
   }, err => {
     if (bindingEpoch !== expenseBindingEpoch) return;
@@ -2846,9 +2791,21 @@ function renderExpenseRows(targetEl, list, options = {}) {
 }
 
 function renderExpenses() {
-  renderExpenseRows(expenseList, expenses);
+  // Recent rows and the snapshot are always visible. The full Details list is
+  // rebuilt only while that panel is active, avoiding hidden-DOM churn on each
+  // Firestore metadata tick.
   renderExpenseRows(recentExpenseList, expenses, { limit: 5 });
+  if (activeExpensesTab === "details") renderExpenseRows(expenseList, expenses);
+  renderExpenseSnapshot();
   if (recentExpensesLiveReady) setRecentExpensesPending(false);
+}
+function expenseModalVisible(id){
+  const modal=document.getElementById(id);
+  return Boolean(modal && !modal.classList.contains("hidden"));
+}
+function renderActiveExpensePanel(){
+  if(activeExpensesTab === "settlement") renderSummary();
+  else if(activeExpensesTab === "analytics") renderAnalytics();
 }
 
 function openExpenseDetail(expenseId) {
@@ -3376,7 +3333,6 @@ function renderAnalytics() {
     <div class="analytics-filter-card">
       <div class="analytics-filter-title">
         <strong>分類篩選</strong>
-        <small>Pie chart 及按分類統計會即時更新</small>
       </div>
       <div class="analytics-filter-grid">
         <label class="analytics-filter-chip analytics-filter-all ${allChecked ? "is-selected" : ""}">
@@ -3449,11 +3405,9 @@ function renderSettlementModeControl() {
     <div class="settlement-mode-card" role="group" aria-label="結算顯示方式">
       <button type="button" class="settlement-mode-btn ${active === "base" ? "active" : ""}" data-settlement-view="base">
         <span>基準幣別</span>
-        <small>${safeEscape(tripSettings.baseCurrency || "HKD")} 統一換算</small>
       </button>
       <button type="button" class="settlement-mode-btn ${active === "original" ? "active" : ""}" data-settlement-view="original">
         <span>原幣分開</span>
-        <small>按付款幣值結算</small>
       </button>
     </div>
   `;
@@ -3600,7 +3554,6 @@ function renderSummary() {
 
   summary.innerHTML = `
     ${renderSettlementModeControl()}
-    <p class="hint settlement-mode-hint">${settlementViewMode === "original" ? "按原始付款幣值分開結算，適合有人用當地貨幣、有人用港幣找數。" : "所有支出統一換算成基準幣別結算，適合最後一次過對數。"}</p>
     ${summaryGroupsHtml}
     <button type="button" id="openSettlementActionBtn" class="secondary-btn settlement-popup-btn">找數 / 查看建議結算</button>
     <p class="hint">剩餘應找：${safeEscape(remainingText || "0.00")}，建議結算 ${totalSettlementCount} 項。</p>
