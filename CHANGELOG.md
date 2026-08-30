@@ -1,3 +1,11 @@
+## v7.9.19.9 — Info Snapshot Material Parity
+
+- Fixed the Info → Booking Documents transition handoff where the live Info page visibly brightened before movement.
+- Root cause: Info snapshot clones are mounted under `body`, outside `#info-view`, so `#info-view`-scoped glass rules were lost and cards fell back to the much more opaque generic `trip-library-card` material.
+- Mirrored the live Info material scope onto `.info-nav-surface` for Travel Documents / Travel Details grouping cards, Team cards, flight blocks and Team accent borders in light, dark and system themes.
+- Kept the v7.9.19.5 header protection, v7.9.19.6 no-dead-zone fade, and v7.9.19.8 return-to-top behaviour unchanged.
+- Presentation-only patch; no Documents data model, Firebase, Map, Transit, Day Bar, Location Picker or Edit Session changes.
+
 ## v7.9.19.8 — Documents Return-to-Top Stability
 
 - Booking Documents now always returns to the top of the Info root page, whether using the Back button or interactive edge swipe.
