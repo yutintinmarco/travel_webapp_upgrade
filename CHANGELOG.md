@@ -1,3 +1,10 @@
+## v7.9.19.10 — Snapshot Team Accent Specificity Fix
+
+- Fixed the Info → Booking Documents snapshot handoff where a Team card's semantic left accent stripe briefly turned white.
+- Root cause: the v7.9.19.9 snapshot parity rule used a higher-specificity `border-color: ... !important` shorthand for the Team card material, while the mirrored Team `border-left-color` rule had lower specificity. During the snapshot phase, the shorthand therefore overrode the Team accent.
+- Added theme-matched snapshot selectors with the same specificity contract already used by the mature live `#info-view` Team cards, so Light, Dark and System themes preserve `--info-team-color` throughout the transition.
+- No transition timing, navigation, Documents data model, Firebase, Map, Transit, Day Bar, Location Picker or Edit Session changes.
+
 ## v7.9.19.9 — Info Snapshot Material Parity
 
 - Fixed the Info → Booking Documents transition handoff where the live Info page visibly brightened before movement.

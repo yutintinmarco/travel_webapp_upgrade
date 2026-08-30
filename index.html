@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
   <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
   <link rel="dns-prefetch" href="https://api.open-meteo.com">
-  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?release=7.9.19.9">
+  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?release=7.9.19.10">
   <title id="page-title">行程</title>
   <script>
   // v7.7.5.0 · Performance Lite. Memory only: no Firebase reads/writes, no
@@ -3903,7 +3903,7 @@ body.expenses-view-active #app-version-note{
 #snacks-view::after,
 #info-view::after,
 #profile-view::after{
-  content:"v7.9.19.9" !important;
+  content:"v7.9.19.10" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3924,7 +3924,7 @@ body.expenses-view-active #app-version-note{
   display:none !important;
 }
 body.expenses-view-active .expenses-module .expenses-app::after{
-  content:"v7.9.19.9" !important;
+  content:"v7.9.19.10" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -4577,7 +4577,7 @@ html.theme-dark .snack-edit-tools,html:not(.theme-light):not(.theme-dark) .snack
 </style>
             <link rel="apple-touch-icon" href="assets/icon/trip_icon.png">
   <link rel="icon" type="image/png" href="assets/icon/trip_icon.png">
-  <link rel="manifest" href="manifest.json?release=7.9.19.9">
+  <link rel="manifest" href="manifest.json?release=7.9.19.10">
   <meta name="apple-mobile-web-app-title" content="關嘉露西生日之旅">
   <!-- v7.7.1.2: expenses.css is 144KB and every rule is scoped under
        .expenses-module, yet it used to block the very first paint of the
@@ -4585,8 +4585,8 @@ html.theme-dark .snack-edit-tools,html:not(.theme-light):not(.theme-dark) .snack
        priority without blocking paint; ensureExpensesStylesheet() flips it to
        media="all" before the 支出 view is ever mounted, so the styling is
        byte-for-byte identical by the time anything expenses-related renders. -->
-  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?release=7.9.19.9" media="print">
-  <noscript><link rel="stylesheet" href="assets/css/expenses.css?release=7.9.19.9"></noscript>
+  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?release=7.9.19.10" media="print">
+  <noscript><link rel="stylesheet" href="assets/css/expenses.css?release=7.9.19.10"></noscript>
 
 <style id="booking-documents-v79191-style">
 /* Phase 3E · Booking Documents native hierarchy / viewer hardening.
@@ -4613,7 +4613,7 @@ html.theme-dark .trip-edit-document-row,html:not(.theme-light):not(.theme-dark) 
    3) Day Bar backing is an independent viewport plane. Frozen Day pills, size,
       sticky position, horizontal scrolling and Day switching remain unchanged. */
 
-/* v7.9.19.9 · Info snapshot style-scope parity
+/* v7.9.19.10 · Info snapshot style-scope parity
    Info transition clones are mounted under body, outside #info-view. Any
    material rule scoped through #info-view therefore disappears on the clone
    unless we mirror that scope on the transition surface. Keep the snapshot
@@ -4668,6 +4668,29 @@ html.theme-dark .info-nav-surface .trip-info-only-card{
     background:rgba(20,20,28,0.16) !important;
     border-color:rgba(255,255,255,0.10) !important;
     box-shadow:0 8px 22px rgba(0,0,0,0.16) !important;
+  }
+}
+/* v7.9.19.10 · Snapshot Team accent specificity parity.
+   Match the live #info-view themed selectors exactly: higher-specificity
+   border-color shorthands must never overwrite the semantic Team stripe. */
+html.theme-light .info-nav-surface .info-team-card,
+html.theme-dark .info-nav-surface .info-team-card{
+  border-left-width:4px !important;
+  border-left-style:solid !important;
+  border-left-color:var(--info-team-color,#888) !important;
+}
+@media (prefers-color-scheme: light){
+  html:not(.theme-light):not(.theme-dark) .info-nav-surface .info-team-card{
+    border-left-width:4px !important;
+    border-left-style:solid !important;
+    border-left-color:var(--info-team-color,#888) !important;
+  }
+}
+@media (prefers-color-scheme: dark){
+  html:not(.theme-light):not(.theme-dark) .info-nav-surface .info-team-card{
+    border-left-width:4px !important;
+    border-left-style:solid !important;
+    border-left-color:var(--info-team-color,#888) !important;
   }
 }
 .info-nav-host.is-snapshotting{visibility:hidden}
