@@ -1,5 +1,5 @@
 /* Travel WebApp Service Worker
- * v7.9.19.11 · Booking PDF Preview Stability
+ * v7.9.19.12 · Booking PDF Preview Route Fix
  *
  * Keeps the v7.7.0.14 cold-start behaviour, while hardening installation:
  *  1. Critical shell assets are transactional. If any critical file cannot be
@@ -14,7 +14,7 @@
  *     explicit reload stays network-first.
  */
 
-const SW_VERSION = "travel-shell-v7.9.19.11";
+const SW_VERSION = "travel-shell-v7.9.19.12";
 const CORE_CACHE = SW_VERSION;
 
 // Required for a useful offline launch and remembered-Trip boot.
@@ -164,6 +164,20 @@ self.addEventListener("fetch", event => {
   // persistent IndexedDB cache remains responsible for offline cloud data.
   if (url.origin !== self.location.origin) {
     event.respondWith(fetch(request));
+    return;
+  }
+
+  // Booking Document PDF previews are short-lived same-origin CacheStorage
+  // responses created by the authenticated app. An iframe requests them as
+  // navigation requests, so they must be resolved before the SPA navigation
+  // fallback below; otherwise index.html is returned in place of the PDF.
+  if (url.pathname.includes("/__booking_document_preview__/")) {
+    event.respondWith(
+      caches.match(request).then(cached => {
+        if (cached) return cached;
+        return fetch(request);
+      })
+    );
     return;
   }
 

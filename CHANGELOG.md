@@ -1,3 +1,9 @@
+## v7.9.19.12 — Booking PDF Preview Route Fix
+
+- Fixed uploaded PDF previews being replaced by the Travel App shell on iOS because the Service Worker treated the iframe PDF request as a normal same-origin SPA navigation.
+- Added a dedicated `__booking_document_preview__` Service Worker route that resolves the authenticated ephemeral PDF response from CacheStorage before the generic navigation fallback.
+- Kept image previews, Booking Documents metadata, Global Save Once, Firebase Rules and all frozen Map / Transit / Day Bar behaviour unchanged.
+
 ## v7.9.19.11 — Booking PDF Preview Stability
 
 - Replaced authenticated Firebase PDF blob URLs with short-lived same-origin `.pdf` preview responses carrying explicit `application/pdf` and inline filename headers, avoiding iOS Home Screen Quick Look treating uploaded PDFs as `Unknown`.
