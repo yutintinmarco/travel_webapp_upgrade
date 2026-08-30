@@ -1,3 +1,11 @@
+## v7.9.20.0 — Phase 3E Harmony Cleanup A
+
+1. Removed superseded Phase 2 / v7.6 / v7.7 hotfix notes and demo notes from the production backup; CHANGELOG remains the single release-history source.
+2. Removed unreferenced root-level legacy media service copies and the obsolete `assets/js/trip-media-sync-service.js.bak`; runtime media modules remain under `assets/js/`.
+3. Removed the fully superseded v7.7.0.1 / v7.7.0.2 version-footer CSS implementations and two dead pre-v7.6.5.1 grouping substrate rules, preserving the current v7.7.0.3 footer and current grouping glass.
+4. Aligned `APP_VERSION` with the release version so dynamic module imports and Service Worker registration use the current cache-busting tag instead of the stale v7.9.19.4 tag.
+5. Cleanup-only release: no Booking Documents behaviour, PDF.js viewer, Day Bar, Map, Transit, Location Picker, Firebase schema, Rules or Functions changes.
+
 ## v7.9.19.14 — Booking PDF.js Fit Page Viewer
 
 - Replaced the iOS native embedded PDF surface as the primary Booking Document renderer with an app-controlled PDF.js canvas viewer because iOS ignored `view=Fit` / `page-fit` hints and enforced an enlarged minimum zoom.

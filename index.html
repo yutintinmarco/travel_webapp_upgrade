@@ -3409,27 +3409,6 @@ html:not(.theme-light):not(.theme-dark) .profile-nav-page .trip-library-status{
   background:transparent !important;
 }
 
-/* 3) Non-Profile pages share the itinerary visual language.
-      Avoid nested glass-on-glass shells, which visually increases opacity. */
-#snacks-view > .card{
-  background:transparent;
-  border:0;
-  box-shadow:none;
-  backdrop-filter:none;
-  -webkit-backdrop-filter:none;
-  padding-left:0;
-  padding-right:0;
-}
-#info-view .trip-info-only-card{
-  background:transparent;
-  border:0;
-  box-shadow:none;
-  backdrop-filter:none;
-  -webkit-backdrop-filter:none;
-  padding-left:0;
-  padding-right:0;
-}
-
 /* Explicit LIGHT theme: activity / saved / info / expense cards use the
    itinerary timeline-item glass values. */
 html.theme-light #snacks-view .snack-item,
@@ -3754,145 +3733,6 @@ html:not(.theme-light):not(.theme-dark) .cloud-safety-strip{
 
 
 /* ==========================================================================
-   v7.7.0.1 · Profile snapshot style parity + stable version footer
-   ========================================================================== */
-
-/* Legacy singleton stays in the DOM for compatibility with older code, but
-   never participates in layout or paint. */
-#app-version-note{
-  display:none !important;
-}
-
-/* Each normal view paints its own footer in its natural final position.
-   No visible DOM reparenting occurs when changing tabs. */
-#itinerary-view::after,
-#snacks-view::after,
-#info-view::after,
-#profile-view::after{
-  content:"v7.7.0.1";
-  display:block;
-  width:100%;
-  box-sizing:border-box;
-  margin:8px 0 0;
-  padding:0 8px;
-  color:rgba(63,63,63,.62);
-  font-size:calc(9px * var(--font-scale));
-  line-height:1.3;
-  font-weight:600;
-  text-align:center;
-  pointer-events:none;
-  user-select:none;
-  -webkit-user-select:none;
-}
-html.theme-dark #itinerary-view::after,
-html.theme-dark #snacks-view::after,
-html.theme-dark #info-view::after,
-html.theme-dark #profile-view::after,
-html:not(.theme-light):not(.theme-dark) #itinerary-view::after,
-html:not(.theme-light):not(.theme-dark) #snacks-view::after,
-html:not(.theme-light):not(.theme-dark) #info-view::after,
-html:not(.theme-light):not(.theme-dark) #profile-view::after{
-  color:rgba(220,220,232,.48);
-}
-
-/* During a protected Profile push/pop, page geometry is being swapped.
-   Keep the footer out of that animation and reveal it only at the settled
-   final position. */
-body.profile-navigation-active #profile-view::after,
-body.profile-edge-swipe-active #profile-view::after{
-  visibility:hidden;
-}
-
-/* Expenses keeps the v7.6.3.4 visual structure: version after the real
-   expense content, with bottom-nav clearance below it. */
-#expenses-view::after{
-  content:none !important;
-}
-body.expenses-view-active .expenses-module .expenses-app::after{
-  content:"v7.7.0.1";
-  display:block;
-  width:100%;
-  box-sizing:border-box;
-  margin:4px 0 0;
-  padding:0 8px;
-  color:rgba(63,63,63,.62);
-  font-size:calc(9px * var(--font-scale));
-  line-height:1.3;
-  font-weight:600;
-  text-align:center;
-  pointer-events:none;
-  user-select:none;
-  -webkit-user-select:none;
-}
-html.theme-dark body.expenses-view-active .expenses-module .expenses-app::after,
-html:not(.theme-light):not(.theme-dark) body.expenses-view-active .expenses-module .expenses-app::after{
-  color:rgba(220,220,232,.48);
-}
-
-
-/* ==========================================================================
-   v7.7.0.2 · Single stable global version renderer
-   ========================================================================== */
-
-/* v7.7.0.1 pseudo footers are fully retired. */
-#itinerary-view::after,
-#snacks-view::after,
-#info-view::after,
-#profile-view::after,
-#expenses-view::after,
-body.expenses-view-active .expenses-module .expenses-app::after{
-  content:none !important;
-  display:none !important;
-}
-
-/* Exactly one real DOM footer. It lives after all app views and never gets
-   reparented, so tab changes cannot animate or duplicate it. */
-#app-version-note{
-  display:block !important;
-  position:relative !important;
-  width:100% !important;
-  max-width:none !important;
-  clear:both !important;
-  box-sizing:border-box !important;
-  margin:8px 0 10px !important;
-  padding:0 8px !important;
-  color:rgba(63,63,63,.62) !important;
-  font-size:calc(9px * var(--font-scale)) !important;
-  line-height:1.3 !important;
-  font-weight:600 !important;
-  text-align:center !important;
-  opacity:.72 !important;
-  visibility:visible;
-  pointer-events:none !important;
-  user-select:none !important;
-  -webkit-user-select:none !important;
-  white-space:nowrap !important;
-  overflow:visible !important;
-  transform:none !important;
-  transition:none !important;
-}
-html.theme-dark #app-version-note,
-html:not(.theme-light):not(.theme-dark) #app-version-note{
-  color:rgba(220,220,232,.48) !important;
-}
-
-/* Profile page heights change during protected push/pop. The global version
-   does not participate in that geometry swap: it is simply withheld and
-   shown once at the settled final position. */
-body.profile-navigation-active #app-version-note,
-body.profile-edge-swipe-active #app-version-note{
-  visibility:hidden !important;
-}
-
-/* Expense view keeps enough bottom-nav clearance while the same global footer
-   remains outside the expense module. */
-body.expenses-view-active #app-version-note{
-  display:block !important;
-  margin:8px 0 calc(var(--tabbar-h) + env(safe-area-inset-bottom,0px) + 24px) !important;
-}
-
-
-/* ==========================================================================
    v7.7.0.3 · Stable per-view version footer
    ========================================================================== */
 #app-version-note,
@@ -3903,7 +3743,7 @@ body.expenses-view-active #app-version-note{
 #snacks-view::after,
 #info-view::after,
 #profile-view::after{
-  content:"v7.9.19.14" !important;
+  content:"v7.9.20.0" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3924,7 +3764,7 @@ body.expenses-view-active #app-version-note{
   display:none !important;
 }
 body.expenses-view-active .expenses-module .expenses-app::after{
-  content:"v7.9.19.14" !important;
+  content:"v7.9.20.0" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -6429,7 +6269,7 @@ dialog.booking-document-viewer.is-edge-swiping{
 </div>
 
 <script>
-const APP_VERSION = "7.9.19.4";
+const APP_VERSION = "7.9.20.0";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 let tripMapServicePromise=null,transitRouteServicePromise=null,tripEditServicePromise=null,airlineLogoServicePromise=null,tripDocumentServicePromise=null,tripMapController=null,tripMapScope="day",tripMapRenderEpoch=0,tripMapSelectedPoint=null;
