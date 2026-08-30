@@ -1,3 +1,11 @@
+## v7.9.19.14 — Booking PDF.js Fit Page Viewer
+
+- Replaced the iOS native embedded PDF surface as the primary Booking Document renderer with an app-controlled PDF.js canvas viewer because iOS ignored `view=Fit` / `page-fit` hints and enforced an enlarged minimum zoom.
+- PDF documents now open at a deterministic whole-page Fit Page scale: the complete first page is visible inside the phone viewport by default, with centred page presentation and multi-page vertical scrolling.
+- Added app-controlled two-finger pinch zoom from 65% to 400% of Fit Page; visible pages are re-rendered after zoom to retain document / QR clarity instead of permanently stretching a low-resolution canvas.
+- Loads Mozilla PDF.js 6.3.289 from pinned jsDelivr with unpkg fallback; PDF bytes remain local to the authenticated app and are passed to PDF.js as in-memory data. If PDF.js cannot load, the v7.9.19.13 native preview remains as a fallback.
+- Preserved Booking Documents navigation, image viewer, 20 MB file policy, Global Save Once, Firebase rules and all frozen Map / Transit / Day Bar behaviour.
+
 ## v7.9.19.13 — Booking PDF Initial Fit Page
 
 - Changed the Booking Document PDF viewer initial open state from the iOS native default zoom to a whole-page fit hint (`page=1`, `view=Fit`, `zoom=page-fit`), so an A4-style first page should open fully visible instead of starting enlarged.

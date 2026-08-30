@@ -3903,7 +3903,7 @@ body.expenses-view-active #app-version-note{
 #snacks-view::after,
 #info-view::after,
 #profile-view::after{
-  content:"v7.9.19.13" !important;
+  content:"v7.9.19.14" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3924,7 +3924,7 @@ body.expenses-view-active #app-version-note{
   display:none !important;
 }
 body.expenses-view-active .expenses-module .expenses-app::after{
-  content:"v7.9.19.13" !important;
+  content:"v7.9.19.14" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -4847,6 +4847,41 @@ html.theme-dark .booking-document-viewer-bar .booking-document-viewer-back,html:
   background:#fff;
   touch-action:auto;
 }
+.booking-document-pdf-scroll{
+  position:absolute;inset:0;
+  overflow:auto;
+  -webkit-overflow-scrolling:touch;
+  overscroll-behavior:contain;
+  touch-action:pan-x pan-y;
+  background:var(--surface-solid);
+}
+.booking-document-pdf-stage{
+  position:relative;
+  box-sizing:border-box;
+  min-width:100%;min-height:100%;
+  display:flex;flex-direction:column;align-items:stretch;
+  gap:12px;padding:0 12px 20px;
+}
+.booking-document-pdf-page-slot{
+  flex:0 0 auto;
+  width:100%;
+  display:flex;align-items:center;justify-content:center;
+  box-sizing:border-box;
+  padding:12px 0;
+}
+.booking-document-pdf-page{
+  display:block;
+  flex:0 0 auto;
+  background:#fff;
+  box-shadow:0 1px 3px rgba(0,0,0,.18),0 8px 24px rgba(0,0,0,.08);
+}
+.booking-document-pdf-page.is-rendering{opacity:.72}
+.booking-document-pdf-page-error{
+  display:grid;place-items:center;
+  min-height:160px;padding:20px;box-sizing:border-box;
+  color:var(--label-secondary);font-size:calc(11px * var(--font-scale));
+}
+
 .booking-document-image-scroll{
   position:absolute;inset:0;
   overflow:auto;
@@ -8689,7 +8724,7 @@ async function ensureTransitRoutePlanner(itemEl){
 
 
 // Phase 3E · Edit Session foundation
-let tripEditSession=null,tripEditItemTarget=null,tripEditItemPrefill=null,tripEditSaving=false,tripEditLocationSelection=null,tripEditOrderState=null,tripEditLocationSearchEpoch=0,tripEditLocationMapController=null,tripEditLocationMapEpoch=0,tripEditLocationReverseEpoch=0,tripEditTripTitleOriginalHtml="",tripEditTripTitleOriginalPlain="",tripEditTeamModalState=null,tripEditFlightModalState=null,tripEditFlightEditorId="",tripEditAccommodationModalState=null,tripEditAccommodationEditorId="",tripEditAccommodationLocationSelection=null,tripEditAccommodationLocationSearchEpoch=0,tripEditAccommodationLocationMapController=null,tripEditAccommodationLocationMapEpoch=0,tripEditAccommodationLocationReverseEpoch=0,tripEditAuthoritativeFence=null,tripEditUploadedMediaForSession=[],tripEditTravelDocumentModalState=null,tripEditOwnerDocumentState=null,tripEditUploadedDocumentsForSession=[],bookingDocumentViewerObjectUrl="",bookingDocumentViewerPreviewUrl="",bookingDocumentViewerCurrent=null,bookingDocumentViewerEpoch=0,bookingDocumentImageCleanup=null,bookingDocumentViewerSwipe=null,infoDocumentsPageOpen=false,infoNavigationTransitioning=false,infoDocumentFocusKey="",infoCurrentPage="root",infoSwipe=null,infoNavSurfaces=[],infoNavAnimationFrame=0,infoNavStack=[{key:"root",scrollTop:0,snapshot:null}];
+let tripEditSession=null,tripEditItemTarget=null,tripEditItemPrefill=null,tripEditSaving=false,tripEditLocationSelection=null,tripEditOrderState=null,tripEditLocationSearchEpoch=0,tripEditLocationMapController=null,tripEditLocationMapEpoch=0,tripEditLocationReverseEpoch=0,tripEditTripTitleOriginalHtml="",tripEditTripTitleOriginalPlain="",tripEditTeamModalState=null,tripEditFlightModalState=null,tripEditFlightEditorId="",tripEditAccommodationModalState=null,tripEditAccommodationEditorId="",tripEditAccommodationLocationSelection=null,tripEditAccommodationLocationSearchEpoch=0,tripEditAccommodationLocationMapController=null,tripEditAccommodationLocationMapEpoch=0,tripEditAccommodationLocationReverseEpoch=0,tripEditAuthoritativeFence=null,tripEditUploadedMediaForSession=[],tripEditTravelDocumentModalState=null,tripEditOwnerDocumentState=null,tripEditUploadedDocumentsForSession=[],bookingDocumentViewerObjectUrl="",bookingDocumentViewerPreviewUrl="",bookingDocumentViewerCurrent=null,bookingDocumentViewerEpoch=0,bookingDocumentImageCleanup=null,bookingDocumentPdfCleanup=null,bookingDocumentViewerSwipe=null,bookingPdfJsPromise=null,infoDocumentsPageOpen=false,infoNavigationTransitioning=false,infoDocumentFocusKey="",infoCurrentPage="root",infoSwipe=null,infoNavSurfaces=[],infoNavAnimationFrame=0,infoNavStack=[{key:"root",scrollTop:0,snapshot:null}];
 window.__tripEditPreviewData=null;
 function tripEditPresentationSignature(data){
   if(!data)return"";
@@ -8965,8 +9000,111 @@ async function tripCreateBookingDocumentPdfPreview(blob,row={}){
   bookingDocumentViewerPreviewUrl=previewUrl;
   return previewUrl;
 }
+const BOOKING_PDFJS_VERSION="6.3.289";
+const BOOKING_PDFJS_BASES=[
+  `https://cdn.jsdelivr.net/npm/pdfjs-dist@${BOOKING_PDFJS_VERSION}`,
+  `https://unpkg.com/pdfjs-dist@${BOOKING_PDFJS_VERSION}`
+];
+async function tripLoadBookingPdfJs(){
+  if(bookingPdfJsPromise)return bookingPdfJsPromise;
+  bookingPdfJsPromise=(async()=>{
+    let lastError=null;
+    for(const base of BOOKING_PDFJS_BASES){
+      try{
+        const lib=await import(`${base}/build/pdf.min.mjs`);
+        lib.GlobalWorkerOptions.workerSrc=`${base}/build/pdf.worker.min.mjs`;
+        return{lib,base};
+      }catch(error){lastError=error;}
+    }
+    throw lastError||new Error("PDF.js unavailable");
+  })().catch(error=>{bookingPdfJsPromise=null;throw error;});
+  return bookingPdfJsPromise;
+}
+function tripMountBookingDocumentPdf(body,blob,row={},epoch=bookingDocumentViewerEpoch){
+  return (async()=>{
+    const {lib,base}=await tripLoadBookingPdfJs();
+    if(epoch!==bookingDocumentViewerEpoch)throw new Error("PDF viewer superseded");
+    const bytes=new Uint8Array(await blob.arrayBuffer());
+    const loadingTask=lib.getDocument({
+      data:bytes,
+      cMapUrl:`${base}/cmaps/`,
+      cMapPacked:true,
+      standardFontDataUrl:`${base}/standard_fonts/`,
+      wasmUrl:`${base}/wasm/`
+    });
+    const pdf=await loadingTask.promise;
+    if(epoch!==bookingDocumentViewerEpoch){try{await pdf.destroy();}catch(_){}throw new Error("PDF viewer superseded");}
+    body.innerHTML="";
+    const scroller=document.createElement("div");scroller.className="booking-document-pdf-scroll";
+    const stage=document.createElement("div");stage.className="booking-document-pdf-stage";
+    scroller.appendChild(stage);body.appendChild(scroller);
+    const state={pdf,loadingTask,scroller,stage,models:[],visible:new Set(),zoom:1,minZoom:.65,maxZoom:4,pinch:null,observer:null,disposed:false,renderGeneration:0,resizeObserver:null};
+    const clampZoom=value=>Math.max(state.minZoom,Math.min(state.maxZoom,Number(value)||1));
+    const viewportSize=()=>({w:Math.max(1,scroller.clientWidth),h:Math.max(1,scroller.clientHeight)});
+    const applyModelSize=model=>{
+      const {h}=viewportSize(),scale=model.fitScale*state.zoom,w=Math.max(1,model.pageWidth*scale),pageH=Math.max(1,model.pageHeight*scale);
+      model.displayWidth=w;model.displayHeight=pageH;
+      model.slot.style.minHeight=`${Math.max(h,pageH+24)}px`;
+      model.canvas.style.width=`${w}px`;model.canvas.style.height=`${pageH}px`;
+    };
+    const applyLayout=(nextZoom,anchor=null)=>{
+      if(state.disposed)return;
+      const beforeW=Math.max(1,scroller.scrollWidth),beforeH=Math.max(1,scroller.scrollHeight),vw=Math.max(1,scroller.clientWidth),vh=Math.max(1,scroller.clientHeight),ax=anchor?.x??vw/2,ay=anchor?.y??vh/2,relX=(scroller.scrollLeft+ax)/beforeW,relY=(scroller.scrollTop+ay)/beforeH;
+      state.zoom=clampZoom(nextZoom);
+      let maxW=vw;
+      state.models.forEach(model=>{applyModelSize(model);maxW=Math.max(maxW,model.displayWidth+24);});
+      stage.style.minWidth=`${Math.ceil(maxW)}px`;
+      const afterW=Math.max(1,scroller.scrollWidth),afterH=Math.max(1,scroller.scrollHeight);
+      scroller.scrollLeft=Math.max(0,relX*afterW-ax);scroller.scrollTop=Math.max(0,relY*afterH-ay);
+    };
+    const renderModel=async(model,force=false)=>{
+      if(state.disposed||!model?.page)return;
+      const targetZoom=state.zoom;
+      if(!force&&Math.abs((model.renderedZoom||0)-targetZoom)<.015)return;
+      const generation=++model.renderGeneration;
+      try{model.renderTask?.cancel?.();}catch(_){}
+      const cssScale=model.fitScale*targetZoom;
+      const dpr=Math.max(1,Math.min(2,window.devicePixelRatio||1));
+      const maxCssDimension=Math.max(model.pageWidth*cssScale,model.pageHeight*cssScale,1);
+      const safeDpr=Math.max(1,Math.min(dpr,4096/maxCssDimension));
+      const renderScale=cssScale*safeDpr,viewport=model.page.getViewport({scale:renderScale});
+      model.canvas.classList.add("is-rendering");
+      model.canvas.width=Math.max(1,Math.ceil(viewport.width));model.canvas.height=Math.max(1,Math.ceil(viewport.height));
+      const context=model.canvas.getContext("2d",{alpha:false});
+      if(!context)throw new Error("Canvas unavailable");
+      context.save();context.fillStyle="#fff";context.fillRect(0,0,model.canvas.width,model.canvas.height);context.restore();
+      model.renderTask=model.page.render({canvasContext:context,viewport});
+      try{await model.renderTask.promise;}catch(error){if(state.disposed||error?.name==="RenderingCancelledException")return;model.canvas.classList.remove("is-rendering");throw error;}
+      if(state.disposed||generation!==model.renderGeneration)return;
+      model.renderedZoom=targetZoom;model.canvas.classList.remove("is-rendering");
+    };
+    const renderVisible=()=>{state.visible.forEach(model=>{void renderModel(model).catch(error=>console.warn("PDF page render",model.pageNumber,error));});};
+    const buildModel=async pageNumber=>{
+      const page=await pdf.getPage(pageNumber);if(state.disposed)return null;
+      const baseViewport=page.getViewport({scale:1}),{w,h}=viewportSize(),fitScale=Math.max(.05,Math.min((w-24)/Math.max(1,baseViewport.width),(h-24)/Math.max(1,baseViewport.height)));
+      const slot=document.createElement("div");slot.className="booking-document-pdf-page-slot";slot.dataset.page=String(pageNumber);
+      const canvas=document.createElement("canvas");canvas.className="booking-document-pdf-page";canvas.setAttribute("aria-label",`PDF 第 ${pageNumber} 頁`);slot.appendChild(canvas);stage.appendChild(slot);
+      const model={pageNumber,page,pageWidth:baseViewport.width,pageHeight:baseViewport.height,fitScale,slot,canvas,renderTask:null,renderedZoom:0,renderGeneration:0,displayWidth:0,displayHeight:0};state.models.push(model);applyModelSize(model);state.observer?.observe(slot);return model;
+    };
+    state.observer=new IntersectionObserver(entries=>{entries.forEach(entry=>{const model=state.models.find(item=>item.slot===entry.target);if(!model)return;if(entry.isIntersecting){state.visible.add(model);void renderModel(model).catch(error=>console.warn("PDF page render",model.pageNumber,error));}else state.visible.delete(model);});},{root:scroller,rootMargin:"75% 0px",threshold:.01});
+    const first=await buildModel(1);if(!first)throw new Error("PDF page unavailable");
+    applyLayout(1,{x:Math.max(1,scroller.clientWidth)/2,y:Math.max(1,scroller.clientHeight)/2});
+    state.visible.add(first);await renderModel(first,true);
+    if(epoch!==bookingDocumentViewerEpoch||state.disposed)throw new Error("PDF viewer superseded");
+    const touchPoint=(touches,index=0)=>{const t=touches[index],r=scroller.getBoundingClientRect();return{x:t.clientX-r.left,y:t.clientY-r.top};};
+    const touchDistance=(a,b)=>Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY);
+    const onTouchStart=event=>{if(event.touches?.length===2){const[a,b]=event.touches;state.pinch={distance:Math.max(1,touchDistance(a,b)),zoom:state.zoom,anchor:{x:(touchPoint(event.touches,0).x+touchPoint(event.touches,1).x)/2,y:(touchPoint(event.touches,0).y+touchPoint(event.touches,1).y)/2}};if(event.cancelable)event.preventDefault();}};
+    const onTouchMove=event=>{if(!state.pinch||event.touches?.length!==2)return;const[a,b]=event.touches,ratio=Math.max(.25,Math.min(4,touchDistance(a,b)/state.pinch.distance));applyLayout(state.pinch.zoom*ratio,state.pinch.anchor);if(event.cancelable)event.preventDefault();};
+    const onTouchEnd=event=>{if(state.pinch&&event.touches?.length<2){state.pinch=null;state.renderGeneration+=1;renderVisible();}};
+    scroller.addEventListener("touchstart",onTouchStart,{passive:false});scroller.addEventListener("touchmove",onTouchMove,{passive:false});scroller.addEventListener("touchend",onTouchEnd,{passive:true});scroller.addEventListener("touchcancel",onTouchEnd,{passive:true});
+    state.resizeObserver=new ResizeObserver(()=>{if(state.disposed)return;const{w,h}=viewportSize();state.models.forEach(model=>{model.fitScale=Math.max(.05,Math.min((w-24)/Math.max(1,model.pageWidth),(h-24)/Math.max(1,model.pageHeight)));});applyLayout(state.zoom);renderVisible();});state.resizeObserver.observe(scroller);
+    bookingDocumentPdfCleanup=()=>{if(state.disposed)return;state.disposed=true;state.observer?.disconnect?.();state.resizeObserver?.disconnect?.();scroller.removeEventListener("touchstart",onTouchStart);scroller.removeEventListener("touchmove",onTouchMove);scroller.removeEventListener("touchend",onTouchEnd);scroller.removeEventListener("touchcancel",onTouchEnd);state.models.forEach(model=>{try{model.renderTask?.cancel?.();}catch(_){}});try{loadingTask.destroy?.();}catch(_){}try{pdf.destroy?.();}catch(_){};bookingDocumentPdfCleanup=null;};
+    void (async()=>{for(let pageNumber=2;pageNumber<=pdf.numPages;pageNumber+=1){if(state.disposed||epoch!==bookingDocumentViewerEpoch)return;try{await buildModel(pageNumber);}catch(error){console.warn("PDF page",pageNumber,error);}}applyLayout(state.zoom);renderVisible();})();
+  })();
+}
 function tripCloseBookingDocumentViewer(){
   bookingDocumentViewerEpoch+=1;
+  if(typeof bookingDocumentPdfCleanup==="function"){try{bookingDocumentPdfCleanup();}catch(_){}bookingDocumentPdfCleanup=null;}
   if(typeof bookingDocumentImageCleanup==="function"){try{bookingDocumentImageCleanup();}catch(_){}bookingDocumentImageCleanup=null;}
   const viewer=document.getElementById("booking-document-viewer");
   bookingDocumentViewerSwipe=null;
@@ -9043,13 +9181,20 @@ async function tripOpenBookingDocument(rowInput={}){
     let url=String(row.legacyUrl||"").trim(),contentType=String(row.contentType||"").toLowerCase(),localObjectUrl="",downloadedBlob=null;
     if(!url){const service=await tripDocumentService();downloadedBlob=await service.getTripDocumentBlob(row);contentType=String(downloadedBlob.type||contentType).toLowerCase();}
     const isPdf=contentType.includes("pdf")||/\.pdf(?:$|\?)/i.test(String(row.fileName||url));
-    if(downloadedBlob){
-      if(isPdf)url=await tripCreateBookingDocumentPdfPreview(downloadedBlob,row);
-      else{localObjectUrl=URL.createObjectURL(downloadedBlob);url=localObjectUrl;}
-    }
+    if(downloadedBlob&&!isPdf){localObjectUrl=URL.createObjectURL(downloadedBlob);url=localObjectUrl;}
     if(epoch!==bookingDocumentViewerEpoch){if(localObjectUrl)try{URL.revokeObjectURL(localObjectUrl);}catch(_){}return;}
-    if(localObjectUrl)bookingDocumentViewerObjectUrl=localObjectUrl;if(!url)throw new Error("文件網址不存在");body.innerHTML="";
-    if(isPdf){const frame=document.createElement("iframe");frame.className="booking-document-pdf-frame";frame.src=tripBookingDocumentPdfViewUrl(url);frame.title=String(row.title||row.fileName||"PDF");frame.setAttribute("loading","eager");frame.setAttribute("allow","fullscreen");body.appendChild(frame);}else{tripMountBookingDocumentImage(body,url,row);}
+    if(localObjectUrl)bookingDocumentViewerObjectUrl=localObjectUrl;
+    if(isPdf){
+      let pdfBlob=downloadedBlob;
+      if(!pdfBlob&&url){try{const response=await fetch(url,{cache:"no-store"});if(response.ok)pdfBlob=await response.blob();}catch(_){} }
+      if(pdfBlob){
+        try{await tripMountBookingDocumentPdf(body,pdfBlob,row,epoch);return;}
+        catch(pdfError){if(epoch!==bookingDocumentViewerEpoch)return;console.warn("PDF.js preview fallback",pdfError);if(typeof bookingDocumentPdfCleanup==="function"){try{bookingDocumentPdfCleanup();}catch(_){}bookingDocumentPdfCleanup=null;}body.innerHTML='<div class="booking-document-viewer-state">正在載入…</div>';if(downloadedBlob)url=await tripCreateBookingDocumentPdfPreview(downloadedBlob,row);}
+      }
+      if(!url)throw new Error("PDF 網址不存在");
+      body.innerHTML="";const frame=document.createElement("iframe");frame.className="booking-document-pdf-frame";frame.src=tripBookingDocumentPdfViewUrl(url);frame.title=String(row.title||row.fileName||"PDF");frame.setAttribute("loading","eager");frame.setAttribute("allow","fullscreen");body.appendChild(frame);return;
+    }
+    if(!url)throw new Error("文件網址不存在");body.innerHTML="";tripMountBookingDocumentImage(body,url,row);
   }catch(error){if(epoch!==bookingDocumentViewerEpoch)return;console.warn("Open booking document",error);body.innerHTML='<div class="booking-document-viewer-state">暫時未能載入文件。</div>';}
 }
 function tripRenderBookingDocumentsPage(dataInput=activeTripPresentationData(),{focusKey=infoDocumentFocusKey}={}){
