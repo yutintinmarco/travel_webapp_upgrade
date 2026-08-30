@@ -175,11 +175,8 @@ function mountExpensesHtml(root) {
 
   <div id="expenseFormModal" class="modal expense-presentation-sheet hidden" data-presentation="sheet" data-sheet-size="large">
     <div class="modal-card expense-form-modal-card">
-      <div class="modal-heading-row expense-native-sheet-heading">
-        <div>
-          <div class="trip-library-eyebrow">Expense</div>
-          <h3 id="expenseFormModalTitle">完整新增支出</h3>
-        </div>
+      <div class="modal-heading-row expense-native-sheet-heading expense-form-manage-heading">
+        <h3><span class="expense-form-title-icon" aria-hidden="true">💸</span><span id="expenseFormModalTitle">完整新增支出</span></h3>
       </div>
       <form id="expenseForm" class="modal-body-scroll expense-form-body expense-native-form">
         <section class="expense-native-section">
@@ -214,10 +211,10 @@ function mountExpensesHtml(root) {
           </div>
         </section>
       </form>
-      <div class="modal-footer-actions">
+      <div class="modal-footer-actions expense-form-manage-actions">
+        <button type="button" id="closeExpenseFormModalBtn" class="expense-form-cancel-btn">取消</button>
         <button type="submit" id="submitBtn" form="expenseForm">新增</button>
-        <button type="button" id="cancelEditBtn" class="secondary-btn hidden">取消編輯</button>
-        <button type="button" id="closeExpenseFormModalBtn" class="modal-close-btn">關閉</button>
+        <button type="button" id="cancelEditBtn" class="secondary-btn hidden" aria-hidden="true" tabindex="-1">取消編輯</button>
       </div>
     </div>
   </div>
@@ -1709,6 +1706,7 @@ function harmonizeExpenseSheetActions(modal) {
   }
 
   mark("submitBtn", "primary");
+  mark("closeExpenseFormModalBtn", "secondary");
   mark("cancelEditBtn", "secondary");
   mark("ocrScanBtn", "primary");
   mark("saveRatesBtn", "primary");
@@ -1731,7 +1729,7 @@ function prepareExpenseModal(modal) {
       grabber.innerHTML = '<span class="expense-sheet-grabber"></span>';
       card.prepend(grabber);
     }
-    if (heading && !heading.querySelector(".expense-sheet-close")) {
+    if (heading && modal.id !== "expenseFormModal" && !heading.querySelector(".expense-sheet-close")) {
       const closeButton = document.createElement("button");
       closeButton.type = "button";
       closeButton.className = "expense-sheet-close";
@@ -2505,7 +2503,7 @@ function enterEditMode(expenseId) {
   }
 
   submitBtn.textContent = "儲存修改";
-  cancelEditBtn.classList.remove("hidden");
+  cancelEditBtn.classList.add("hidden");
   document.getElementById("editingNotice")?.remove();
 
   const notice = document.createElement("div");
