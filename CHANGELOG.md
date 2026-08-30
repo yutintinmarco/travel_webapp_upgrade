@@ -1,3 +1,9 @@
+## v7.9.19.7 — Documents Top-Entry Geometry Trial
+
+- Moved the Booking Documents entry back above Travel Details so the entry is available while the shared Trip header remains in its expanded top-of-page geometry.
+- Changed the Booking Documents push target from the forced compact 112px scroll position to the top position, keeping the parent and destination header geometry aligned during this real-device transition test.
+- Retained the v7.9.19.5 shared-header protection and v7.9.19.6 single-layer fade behaviour; no Documents data, Viewer, Day Bar, Map, Transit, Location Picker or Firebase lifecycle changes.
+
 ## v7.9.19.6 — Transition Dead-Zone Removal
 
 - Removed the fade-through opacity dead zone from the Info / Booking Documents transition: the incoming snapshot stays fully opaque underneath while only the outgoing snapshot fades away.
