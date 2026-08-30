@@ -1,3 +1,12 @@
+## v7.9.19.6 — Transition Dead-Zone Removal
+
+- Removed the fade-through opacity dead zone from the Info / Booking Documents transition: the incoming snapshot stays fully opaque underneath while only the outgoing snapshot fades away.
+- Applied the same no-dead-zone fade state to the existing Profile navigation so both mature internal navigation paths use the same surface-compositing rule.
+- Shortened the Booking Documents programmatic transition from 430 ms to 340 ms for a firmer iOS-like push / pop feel; the established Profile transition duration is otherwise unchanged.
+- Kept destination surfaces hidden only during the existing two-frame snapshot warm-up, then makes them opaque behind the outgoing surface before animation starts. This preserves the invisible live-DOM handoff while avoiding a destination pre-flash.
+- Retains v7.9.19.5 shared-header z-index, chrome-band clamping, destination scroll capacity and collapse-writer freeze fixes unchanged.
+- Animation-only patch. No Booking Documents schema, Global Save Once, Firebase Rules, Functions, Map, Transit, Location Picker, Day Bar, viewer or other frozen-domain changes.
+
 ## v7.9.19.5 — Booking Documents Shared Chrome Surface Fix
 
 - Fixed the real iPhone transition root cause: Info/Profile snapshot surfaces are now clamped below the live compact-header / safe-area band instead of being allowed to paint over the shared top chrome.
