@@ -1,3 +1,11 @@
+## v7.9.20.2 — Full Add Expense Sheet Alignment
+
+1. Aligned the Full Add / Edit Expense sheet header with the mature Trip Team management language: left-aligned circular emoji icon plus title instead of the centred eyebrow/title treatment.
+2. Removed the top-right close glyph from the Full Add / Edit Expense sheet only. Other Expense sheets retain their existing close controls.
+3. Rebuilt the Full Add / Edit Expense action dock to match Team management: persistent left Cancel and right primary action. New expenses show `取消 | 新增`; editing shows `取消 | 儲存修改`.
+4. Preserved all Expense form IDs, validation, split calculation, Firebase writes, sheet drag gesture and existing grouped-row form layout.
+5. No Firebase schema, Rules, Functions, Booking Documents, PDF.js viewer, Day Bar, Map, Transit, Location Picker or Global Save Once changes.
+
 ## v7.9.20.1 — Phase 3E Harmony B
 
 1. Unified the top-level Saved Places and Expenses section headings with the established Travel Documents / Travel Details grammar: English eyebrow plus primary Chinese heading, with no passive descriptive paragraph beneath.
