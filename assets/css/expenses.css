@@ -5529,3 +5529,106 @@ html:not(.theme-light):not(.theme-dark) .expenses-module #expenseFormModal .expe
 .expenses-module .settlement-mode-hint{
   display:none !important;
 }
+
+
+/* ==========================================================================
+   v7.9.20.2 · Full Add Expense sheet alignment
+   Reuse the mature Trip / Team management sheet grammar: left-aligned emoji
+   title and a persistent Cancel | Primary action dock. The top-right close
+   glyph is intentionally absent on this sheet.
+   ========================================================================== */
+.expenses-module #expenseFormModal .expense-form-manage-heading{
+  min-height:auto !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:flex-start !important;
+  padding:14px 18px 11px !important;
+  border-bottom:1px solid var(--expense-native-separator) !important;
+  text-align:left !important;
+}
+.expenses-module #expenseFormModal .expense-form-manage-heading h3{
+  width:100%;
+  max-width:100% !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:flex-start !important;
+  gap:9px !important;
+  margin:0 !important;
+  overflow:hidden;
+  color:var(--expense-text);
+  font-size:calc(18px * var(--font-scale)) !important;
+  font-weight:800 !important;
+  line-height:1.25 !important;
+  letter-spacing:-.2px !important;
+  text-align:left !important;
+}
+.expenses-module #expenseFormModal .expense-form-manage-heading h3>span:last-child{
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.expenses-module #expenseFormModal .expense-form-title-icon{
+  display:inline-flex !important;
+  align-items:center;
+  justify-content:center;
+  width:28px;
+  height:28px;
+  flex:0 0 28px;
+  border-radius:999px;
+  background:rgba(255,255,255,.72);
+  box-shadow:inset 0 0 0 1px rgba(0,0,0,.06);
+  font-size:16px;
+  line-height:1;
+}
+.expenses-module #expenseFormModal .expense-sheet-close{
+  display:none !important;
+}
+.expenses-module #expenseFormModal .expense-form-manage-actions{
+  grid-template-columns:minmax(0,.34fr) minmax(0,1fr) !important;
+  gap:8px !important;
+  padding:8px 16px max(10px,env(safe-area-inset-bottom,0px)) !important;
+  border-top:1px solid var(--expense-native-separator) !important;
+  background:linear-gradient(to bottom,rgba(255,255,255,.96),rgba(247,248,250,.98)) !important;
+}
+.expenses-module #expenseFormModal .expense-form-manage-actions #closeExpenseFormModalBtn{
+  order:1;
+  display:block !important;
+}
+.expenses-module #expenseFormModal .expense-form-manage-actions #submitBtn{
+  order:2;
+}
+.expenses-module #expenseFormModal .expense-form-manage-actions #cancelEditBtn{
+  display:none !important;
+}
+.expenses-module #expenseFormModal .expense-form-manage-actions button{
+  min-height:48px !important;
+  border-radius:14px !important;
+  font-size:calc(13px * var(--font-scale)) !important;
+  font-weight:760 !important;
+}
+.expenses-module #expenseFormModal .expense-form-manage-actions #closeExpenseFormModalBtn{
+  border:1px solid rgba(60,60,67,.15) !important;
+  background:rgba(255,255,255,.68) !important;
+  color:var(--expense-text) !important;
+}
+.expenses-module #expenseFormModal .expense-form-manage-actions #submitBtn{
+  border:1px solid var(--expense-primary) !important;
+  background:var(--expense-primary) !important;
+  color:var(--expense-primary-text) !important;
+}
+html.theme-dark .expenses-module #expenseFormModal .expense-form-title-icon,
+html:not(.theme-light):not(.theme-dark) .expenses-module #expenseFormModal .expense-form-title-icon{
+  background:rgba(255,255,255,.10);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.10);
+}
+html.theme-dark .expenses-module #expenseFormModal .expense-form-manage-actions,
+html:not(.theme-light):not(.theme-dark) .expenses-module #expenseFormModal .expense-form-manage-actions{
+  background:linear-gradient(to bottom,rgba(34,34,40,.98),rgba(25,25,30,.99)) !important;
+}
+html.theme-dark .expenses-module #expenseFormModal .expense-form-manage-actions #closeExpenseFormModalBtn,
+html:not(.theme-light):not(.theme-dark) .expenses-module #expenseFormModal .expense-form-manage-actions #closeExpenseFormModalBtn{
+  background:rgba(255,255,255,.075) !important;
+  border-color:rgba(255,255,255,.13) !important;
+  color:#f5f5f7 !important;
+}
