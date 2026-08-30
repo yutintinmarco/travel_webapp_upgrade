@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
   <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
   <link rel="dns-prefetch" href="https://api.open-meteo.com">
-  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?release=7.9.19.2">
+  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?release=7.9.19.3">
   <title id="page-title">行程</title>
   <script>
   // v7.7.5.0 · Performance Lite. Memory only: no Firebase reads/writes, no
@@ -3903,7 +3903,7 @@ body.expenses-view-active #app-version-note{
 #snacks-view::after,
 #info-view::after,
 #profile-view::after{
-  content:"v7.9.19.2" !important;
+  content:"v7.9.19.3" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3924,7 +3924,7 @@ body.expenses-view-active #app-version-note{
   display:none !important;
 }
 body.expenses-view-active .expenses-module .expenses-app::after{
-  content:"v7.9.19.2" !important;
+  content:"v7.9.19.3" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -4577,7 +4577,7 @@ html.theme-dark .snack-edit-tools,html:not(.theme-light):not(.theme-dark) .snack
 </style>
             <link rel="apple-touch-icon" href="assets/icon/trip_icon.png">
   <link rel="icon" type="image/png" href="assets/icon/trip_icon.png">
-  <link rel="manifest" href="manifest.json?release=7.9.19.2">
+  <link rel="manifest" href="manifest.json?release=7.9.19.3">
   <meta name="apple-mobile-web-app-title" content="關嘉露西生日之旅">
   <!-- v7.7.1.2: expenses.css is 144KB and every rule is scoped under
        .expenses-module, yet it used to block the very first paint of the
@@ -4585,8 +4585,8 @@ html.theme-dark .snack-edit-tools,html:not(.theme-light):not(.theme-dark) .snack
        priority without blocking paint; ensureExpensesStylesheet() flips it to
        media="all" before the 支出 view is ever mounted, so the styling is
        byte-for-byte identical by the time anything expenses-related renders. -->
-  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?release=7.9.19.2" media="print">
-  <noscript><link rel="stylesheet" href="assets/css/expenses.css?release=7.9.19.2"></noscript>
+  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?release=7.9.19.3" media="print">
+  <noscript><link rel="stylesheet" href="assets/css/expenses.css?release=7.9.19.3"></noscript>
 
 <style id="booking-documents-v79191-style">
 /* Phase 3E · Booking Documents native hierarchy / viewer hardening.
@@ -4654,10 +4654,137 @@ dialog.booking-document-viewer::backdrop{background:transparent}
 .booking-document-viewer-bar{pointer-events:auto}
 .booking-document-viewer-body{touch-action:pan-x pan-y}
 </style>
+<style id="booking-documents-v79193-style">
+/* v7.9.19.3 · Mature-component reuse pass.
+   Day Bar borrows the proven Edit Mode sticky-material stacking pattern.
+   Documents navigation mirrors 我的 push/pop/interactive edge swipe exactly.
+   Viewer uses the existing Profile back-control language and restores document gestures. */
+body.info-navigation-active .scroll-shell,body.info-edge-swipe-active .scroll-shell{overflow:hidden!important}
+
+/* Day Bar material is local to the same sticky stacking context, exactly like
+   .trip-edit-sticky-add. The scrollable Day pill plane itself is unchanged. */
+.day-tabs-sticky-shell{
+  position:sticky;
+  top:calc(var(--compact-header-h) + env(safe-area-inset-top,0px));
+  z-index:1200;
+  width:100vw;
+  box-sizing:border-box;
+  margin:14px 0 10px calc(50% - 50vw);
+  background:transparent;
+  isolation:isolate;
+}
+.day-tabs-sticky-shell::before{
+  content:"";
+  position:absolute;
+  z-index:-1;
+  left:50%;top:0;
+  width:100vw;height:100%;
+  transform:translateX(-50%);
+  background:transparent;
+  border-bottom:.5px solid transparent;
+  backdrop-filter:blur(0);
+  -webkit-backdrop-filter:blur(0);
+  transition:background .20s ease,border-color .20s ease,backdrop-filter .20s ease;
+  pointer-events:none;
+}
+.day-tabs-sticky-shell.is-stuck::before{
+  background:var(--sticky-material);
+  border-bottom-color:var(--separator);
+  backdrop-filter:blur(24px) saturate(155%);
+  -webkit-backdrop-filter:blur(24px) saturate(155%);
+}
+.day-tabs-sticky-shell .day-tabs{
+  position:relative!important;
+  top:auto!important;
+  z-index:1!important;
+  margin-top:0!important;
+  margin-bottom:0!important;
+}
+/* Old body plane and old fixed pseudo route are both retired. */
+.day-tabs::before,.day-tabs.is-scrollable-days.is-stuck::before{display:none!important;content:none!important}
+
+.trip-edit-document-limit{
+  margin:-2px 2px 0;
+  color:var(--label-secondary);
+  font-size:calc(8.8px * var(--font-scale));
+  line-height:1.35;
+  text-align:center;
+}
+
+/* Reuse the Profile navigation bar geometry. No independent circular back UI. */
+dialog.booking-document-viewer{
+  grid-template-rows:calc(env(safe-area-inset-top,0px) + 52px) minmax(0,1fr);
+  outline:none;
+}
+.booking-document-viewer-bar{
+  grid-template-columns:minmax(0,1fr) auto minmax(0,1fr)!important;
+  gap:8px;
+  padding:env(safe-area-inset-top,0px) 12px 0;
+}
+.booking-document-viewer-bar .booking-document-viewer-back{
+  width:auto!important;min-width:44px!important;height:44px!important;
+  justify-self:start;
+  display:flex!important;align-items:center!important;gap:2px!important;
+  padding:0 10px 0 1px!important;
+  border-radius:10px!important;
+  background:transparent!important;
+  color:#007aff!important;
+  outline:none;
+}
+.booking-document-viewer-bar .booking-document-viewer-back:active{background:transparent!important;opacity:.38!important}
+html.theme-dark .booking-document-viewer-bar .booking-document-viewer-back,html:not(.theme-light):not(.theme-dark) .booking-document-viewer-bar .booking-document-viewer-back{color:#4da3ff!important}
+.booking-document-viewer-title{
+  font-size:calc(16.5px * var(--font-scale));
+  font-weight:640;
+  letter-spacing:-.42px;
+  padding:0 2px;
+}
+.booking-document-viewer-spacer{justify-self:end;width:24px!important;height:44px!important}
+
+/* PDF owns its native scroll/zoom surface. Image documents get a dedicated
+   fit-width scroller with pinch and double-tap zoom handled by the app. */
+.booking-document-viewer-body{
+  display:block!important;
+  min-height:0;
+  overflow:hidden!important;
+  contain:none!important;
+  isolation:auto!important;
+  background:var(--surface-solid);
+}
+.booking-document-viewer-state{height:100%;display:grid;place-items:center;padding:24px;box-sizing:border-box}
+.booking-document-pdf-frame{
+  display:block;
+  width:100%;height:100%;
+  min-height:100%;
+  border:0;
+  background:#fff;
+  touch-action:auto;
+}
+.booking-document-image-scroll{
+  position:absolute;inset:0;
+  overflow:auto;
+  -webkit-overflow-scrolling:touch;
+  overscroll-behavior:contain;
+  touch-action:pan-x pan-y;
+  background:var(--surface-solid);
+}
+.booking-document-image-stage{position:relative;min-width:100%;min-height:100%}
+.booking-document-viewer img.booking-document-image{
+  position:absolute;
+  display:block;
+  max-width:none!important;
+  max-height:none!important;
+  object-fit:fill!important;
+  user-select:none;
+  -webkit-user-select:none;
+  -webkit-user-drag:none;
+  touch-action:pan-x pan-y;
+}
+@media(prefers-reduced-motion:reduce){.day-tabs-sticky-shell::before{transition:none!important}}
+</style>
 </head>
 <body class="app-entry-gated app-entry-pending">
 <div class="bg-fixed"></div>
-<div class="day-tabs-sticky-backdrop" id="day-tabs-sticky-backdrop" aria-hidden="true"></div>
 <div id="portrait-lock-overlay" class="portrait-lock-overlay" role="status" aria-live="polite">
   <div class="portrait-lock-card">
     <div class="portrait-lock-icon" aria-hidden="true">↻</div>
@@ -4809,7 +4936,9 @@ dialog.booking-document-viewer::backdrop{background:transparent}
     <div class="weather-days" id="weather-days"></div>
   </div>
 
-  <div class="day-tabs" id="day-tabs"></div>
+  <div class="day-tabs-sticky-shell" id="day-tabs-sticky-shell">
+    <div class="day-tabs" id="day-tabs"></div>
+  </div>
   <div class="trip-edit-sticky-add" id="trip-edit-sticky-add" hidden>
     <button class="day-tab" id="trip-edit-sticky-add-stop" type="button"><span aria-hidden="true">＋</span> 新增地點</button>
     <button class="day-tab" id="trip-edit-sticky-add-transit" type="button"><span aria-hidden="true">＋</span> 新增交通</button>
@@ -4878,7 +5007,7 @@ dialog.booking-document-viewer::backdrop{background:transparent}
     </div>
     <div class="info-nav-page booking-documents-page" id="info-page-booking-documents" data-info-page="booking-documents" hidden>
       <div class="profile-detail-bar">
-        <button class="profile-detail-back" id="booking-documents-back" type="button" aria-label="返回資料"><span class="profile-back-glyph">‹</span></button>
+        <button class="profile-detail-back" id="booking-documents-back" type="button" aria-label="返回資料"><span class="profile-back-glyph">‹</span><span class="profile-detail-back-label">資料</span></button>
         <h2>預訂與文件</h2>
         <span class="profile-detail-spacer" aria-hidden="true"></span>
       </div>
@@ -5499,7 +5628,7 @@ dialog.booking-document-viewer::backdrop{background:transparent}
         <span class="profile-detail-spacer"></span>
       </div>
       <section class="profile-card" aria-label="App 資訊">
-        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.9.19.2</strong></div>
+        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.9.19.3</strong></div>
         <div class="profile-meta-row"><span>資料架構</span><strong>Phase 2G.2</strong></div>
         <div class="profile-meta-row"><span>主要資料來源</span><strong id="app-data-source-label">Firebase / 本機快取</strong></div>
       </section>
@@ -5551,11 +5680,11 @@ dialog.booking-document-viewer::backdrop{background:transparent}
 </div>
 </div>
 
-<dialog class="booking-document-viewer" id="booking-document-viewer" aria-labelledby="booking-document-viewer-title">
+<dialog class="booking-document-viewer" id="booking-document-viewer" aria-labelledby="booking-document-viewer-title" tabindex="-1">
   <div class="booking-document-viewer-bar">
-    <button id="booking-document-viewer-close" type="button" aria-label="返回"><span class="booking-document-viewer-back-glyph" aria-hidden="true">‹</span></button>
+    <button class="profile-detail-back booking-document-viewer-back" id="booking-document-viewer-close" type="button" aria-label="返回預訂與文件"><span class="profile-back-glyph" aria-hidden="true">‹</span><span class="profile-detail-back-label">預訂與文件</span></button>
     <div class="booking-document-viewer-title" id="booking-document-viewer-title">預訂文件</div>
-    <span class="booking-document-viewer-spacer" aria-hidden="true"></span>
+    <span class="profile-detail-spacer booking-document-viewer-spacer" aria-hidden="true"></span>
   </div>
   <div class="booking-document-viewer-body" id="booking-document-viewer-body"><div class="booking-document-viewer-state">正在載入…</div></div>
 </dialog>
@@ -5819,7 +5948,7 @@ dialog.booking-document-viewer::backdrop{background:transparent}
           <div class="trip-edit-travel-sync-title">行程自動化</div>
           <label class="trip-edit-travel-sync-row"><input id="trip-edit-flight-itinerary-enabled" type="checkbox"><span class="trip-edit-travel-sync-copy"><strong>將此航班加入行程</strong><small>會按航班角色自動放到合適日子。行程項目可自行修改；手動修改後不會再被航班資料強行覆蓋。取消剔選可移除由此航班產生嘅項目。</small></span></label>
         </div>
-        <section class="trip-edit-native-group"><div class="trip-edit-native-section-title">預訂文件</div><div class="trip-edit-document-block"><div class="trip-edit-document-list" id="trip-edit-flight-documents"></div><button class="trip-edit-document-add" id="trip-edit-flight-document-add" type="button">＋ 加入 PDF／預訂圖片</button></div></section>
+        <section class="trip-edit-native-group"><div class="trip-edit-native-section-title">預訂文件</div><div class="trip-edit-document-block"><div class="trip-edit-document-list" id="trip-edit-flight-documents"></div><button class="trip-edit-document-add" id="trip-edit-flight-document-add" type="button">＋ 加入 PDF／預訂圖片</button><div class="trip-edit-document-limit">PDF／圖片保留原檔 · 每份最多 20 MB</div></div></section>
         <label class="trip-edit-field"><span>Booking Ref / PNR</span><input class="trip-edit-input" id="trip-edit-flight-booking-reference" type="text" maxlength="80" autocomplete="off"></label>
         <label class="trip-edit-field"><span>備註</span><textarea class="trip-edit-textarea" id="trip-edit-flight-note" rows="3" maxlength="500"></textarea></label>
       </div>
@@ -5931,7 +6060,7 @@ dialog.booking-document-viewer::backdrop{background:transparent}
           <label class="trip-edit-travel-sync-row"><input id="trip-edit-accommodation-checkin-itinerary" type="checkbox"><span class="trip-edit-travel-sync-copy"><strong>將入住加入行程</strong><small>按入住日期／時間自動建立酒店行程項目，並帶入Google Maps位置。</small></span></label>
           <label class="trip-edit-travel-sync-row"><input id="trip-edit-accommodation-checkout-itinerary" type="checkbox"><span class="trip-edit-travel-sync-copy"><strong>將退房加入行程</strong><small>如需要明確安排退房，可另外建立退房項目；取消剔選可移除。</small></span></label>
         </div>
-        <section class="trip-edit-native-group"><div class="trip-edit-native-section-title">預訂文件</div><div class="trip-edit-document-block"><div class="trip-edit-document-list" id="trip-edit-accommodation-documents"></div><button class="trip-edit-document-add" id="trip-edit-accommodation-document-add" type="button">＋ 加入 PDF／預訂圖片</button></div></section>
+        <section class="trip-edit-native-group"><div class="trip-edit-native-section-title">預訂文件</div><div class="trip-edit-document-block"><div class="trip-edit-document-list" id="trip-edit-accommodation-documents"></div><button class="trip-edit-document-add" id="trip-edit-accommodation-document-add" type="button">＋ 加入 PDF／預訂圖片</button><div class="trip-edit-document-limit">PDF／圖片保留原檔 · 每份最多 20 MB</div></div></section>
         <label class="trip-edit-field"><span>Booking Ref</span><input class="trip-edit-input" id="trip-edit-accommodation-booking-reference" type="text" maxlength="100" autocomplete="off"></label>
         <label class="trip-edit-field"><span>備註</span><textarea class="trip-edit-textarea" id="trip-edit-accommodation-note" rows="3" maxlength="500"></textarea></label>
       </div>
@@ -6097,7 +6226,7 @@ dialog.booking-document-viewer::backdrop{background:transparent}
           </div>
           <label class="trip-edit-field"><span id="trip-edit-note-label">備註</span><textarea class="trip-edit-textarea" id="trip-edit-item-note" maxlength="500"></textarea></label>
           <label class="trip-edit-field"><span>詳細描述</span><textarea class="trip-edit-textarea" id="trip-edit-item-detail" maxlength="1200" placeholder="展開項目後顯示嘅詳細內容"></textarea></label>
-          <div class="trip-edit-field" id="trip-edit-item-documents-field"><span>預訂文件</span><div class="trip-edit-document-block"><div class="trip-edit-document-list" id="trip-edit-item-documents"></div><button class="trip-edit-document-add" id="trip-edit-item-document-add" type="button">＋ 加入 PDF／預訂圖片</button></div></div>
+          <div class="trip-edit-field" id="trip-edit-item-documents-field"><span>預訂文件</span><div class="trip-edit-document-block"><div class="trip-edit-document-list" id="trip-edit-item-documents"></div><button class="trip-edit-document-add" id="trip-edit-item-document-add" type="button">＋ 加入 PDF／預訂圖片</button><div class="trip-edit-document-limit">PDF／圖片保留原檔 · 每份最多 20 MB</div></div></div>
           <div class="trip-edit-delete-block" id="trip-edit-delete-block" hidden>
             <button class="trip-edit-delete-btn" id="trip-edit-item-delete" type="button">刪除此項目</button>
             <div class="trip-edit-delete-note" id="trip-edit-delete-note">刪除只會先套用到今次 Local Draft；全局「取消」可以還原未儲存變更。</div>
@@ -6146,7 +6275,7 @@ dialog.booking-document-viewer::backdrop{background:transparent}
 </div>
 
 <script>
-const APP_VERSION = "7.9.19.2";
+const APP_VERSION = "7.9.19.3";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 let tripMapServicePromise=null,transitRouteServicePromise=null,tripEditServicePromise=null,airlineLogoServicePromise=null,tripDocumentServicePromise=null,tripMapController=null,tripMapScope="day",tripMapRenderEpoch=0,tripMapSelectedPoint=null;
@@ -6742,9 +6871,6 @@ document.getElementById("booking-documents-back")?.addEventListener("click",()=>
 document.getElementById("booking-document-viewer-close")?.addEventListener("click",tripCloseBookingDocumentViewer);
 document.getElementById("booking-document-viewer")?.addEventListener("cancel",event=>{event.preventDefault();tripCloseBookingDocumentViewer();});
 document.addEventListener("keydown",event=>{if(event.key==="Escape"&&document.getElementById("booking-document-viewer")?.open)tripCloseBookingDocumentViewer();});
-let bookingDocumentsSwipeStart=null;
-document.getElementById("info-page-booking-documents")?.addEventListener("touchstart",event=>{if(!infoDocumentsPageOpen||event.touches?.length!==1)return;const touch=event.touches[0];if(touch.clientX>28)return;bookingDocumentsSwipeStart={x:touch.clientX,y:touch.clientY};},{passive:true});
-document.getElementById("info-page-booking-documents")?.addEventListener("touchend",event=>{if(!bookingDocumentsSwipeStart||event.changedTouches?.length!==1)return;const touch=event.changedTouches[0],dx=touch.clientX-bookingDocumentsSwipeStart.x,dy=Math.abs(touch.clientY-bookingDocumentsSwipeStart.y);bookingDocumentsSwipeStart=null;if(dx>72&&dy<Math.abs(dx)*.72)void tripCloseBookingDocumentsPage();},{passive:true});
 document.getElementById("trip-edit-order-up")?.addEventListener("click",()=>tripEditMovePendingOrder(-1));
 document.getElementById("trip-edit-order-down")?.addEventListener("click",()=>tripEditMovePendingOrder(1));
 document.getElementById("trip-edit-item-delete")?.addEventListener("click",()=>void deleteTripEditItemFromSession());
@@ -8444,7 +8570,7 @@ async function ensureTransitRoutePlanner(itemEl){
 
 
 // Phase 3E · Edit Session foundation
-let tripEditSession=null,tripEditItemTarget=null,tripEditItemPrefill=null,tripEditSaving=false,tripEditLocationSelection=null,tripEditOrderState=null,tripEditLocationSearchEpoch=0,tripEditLocationMapController=null,tripEditLocationMapEpoch=0,tripEditLocationReverseEpoch=0,tripEditTripTitleOriginalHtml="",tripEditTripTitleOriginalPlain="",tripEditTeamModalState=null,tripEditFlightModalState=null,tripEditFlightEditorId="",tripEditAccommodationModalState=null,tripEditAccommodationEditorId="",tripEditAccommodationLocationSelection=null,tripEditAccommodationLocationSearchEpoch=0,tripEditAccommodationLocationMapController=null,tripEditAccommodationLocationMapEpoch=0,tripEditAccommodationLocationReverseEpoch=0,tripEditAuthoritativeFence=null,tripEditUploadedMediaForSession=[],tripEditTravelDocumentModalState=null,tripEditOwnerDocumentState=null,tripEditUploadedDocumentsForSession=[],bookingDocumentViewerObjectUrl="",bookingDocumentViewerCurrent=null,bookingDocumentViewerEpoch=0,infoDocumentsPageOpen=false,infoNavigationTransitioning=false,infoRootScrollTop=0,infoDocumentsScrollTop=0,infoDocumentFocusKey="";
+let tripEditSession=null,tripEditItemTarget=null,tripEditItemPrefill=null,tripEditSaving=false,tripEditLocationSelection=null,tripEditOrderState=null,tripEditLocationSearchEpoch=0,tripEditLocationMapController=null,tripEditLocationMapEpoch=0,tripEditLocationReverseEpoch=0,tripEditTripTitleOriginalHtml="",tripEditTripTitleOriginalPlain="",tripEditTeamModalState=null,tripEditFlightModalState=null,tripEditFlightEditorId="",tripEditAccommodationModalState=null,tripEditAccommodationEditorId="",tripEditAccommodationLocationSelection=null,tripEditAccommodationLocationSearchEpoch=0,tripEditAccommodationLocationMapController=null,tripEditAccommodationLocationMapEpoch=0,tripEditAccommodationLocationReverseEpoch=0,tripEditAuthoritativeFence=null,tripEditUploadedMediaForSession=[],tripEditTravelDocumentModalState=null,tripEditOwnerDocumentState=null,tripEditUploadedDocumentsForSession=[],bookingDocumentViewerObjectUrl="",bookingDocumentViewerCurrent=null,bookingDocumentViewerEpoch=0,bookingDocumentImageCleanup=null,infoDocumentsPageOpen=false,infoNavigationTransitioning=false,infoDocumentFocusKey="",infoCurrentPage="root",infoSwipe=null,infoNavSurfaces=[],infoNavAnimationFrame=0,infoNavStack=[{key:"root",scrollTop:0,snapshot:null}];
 window.__tripEditPreviewData=null;
 function tripEditPresentationSignature(data){
   if(!data)return"";
@@ -8670,23 +8796,61 @@ function tripBookingDocumentOwnerTime(row={},dataInput=activeTripPresentationDat
 function tripBookingDocumentFileMeta(row={}){const bits=[];const file=String(row?.fileName||"").trim(),title=String(row?.title||"").trim();if(file&&file!==title)bits.push(file);if(Number(row?.byteSize))bits.push(`${Math.max(1,Math.round(Number(row.byteSize)/1024))} KB`);return bits.join(" · ")||"點選直接預覽";}
 function tripCloseBookingDocumentViewer(){
   bookingDocumentViewerEpoch+=1;
+  if(typeof bookingDocumentImageCleanup==="function"){try{bookingDocumentImageCleanup();}catch(_){}bookingDocumentImageCleanup=null;}
   const viewer=document.getElementById("booking-document-viewer");
   if(viewer?.open){try{viewer.close();}catch(_){viewer.removeAttribute("open");}}
   document.body.classList.remove("booking-document-viewer-open");
   if(bookingDocumentViewerObjectUrl){try{URL.revokeObjectURL(bookingDocumentViewerObjectUrl);}catch(_){}bookingDocumentViewerObjectUrl="";}
   bookingDocumentViewerCurrent=null;const body=document.getElementById("booking-document-viewer-body");if(body)body.innerHTML='<div class="booking-document-viewer-state">正在載入…</div>';
 }
+function tripMountBookingDocumentImage(body,url,row={}){
+  const scroller=document.createElement("div");scroller.className="booking-document-image-scroll";
+  const stage=document.createElement("div");stage.className="booking-document-image-stage";
+  const img=document.createElement("img");img.className="booking-document-image";img.alt=String(row.title||"預訂圖片");img.draggable=false;
+  stage.appendChild(img);scroller.appendChild(stage);body.appendChild(scroller);
+  let naturalW=0,naturalH=0,scale=1,minScale=1,maxScale=4,pinch=null,lastTap=0,resizeObserver=null;
+  const clampScale=value=>Math.max(minScale,Math.min(maxScale,Number(value)||minScale));
+  const geometry=()=>{
+    const vw=Math.max(1,scroller.clientWidth),vh=Math.max(1,scroller.clientHeight),w=Math.max(1,naturalW*scale),h=Math.max(1,naturalH*scale),stageW=Math.max(vw,w),stageH=Math.max(vh,h);
+    const left=Math.max(0,(stageW-w)/2),top=Math.max(0,(stageH-h)/2);
+    return{vw,vh,w,h,stageW,stageH,left,top};
+  };
+  const applyScale=(nextScale,anchor=null)=>{
+    if(!naturalW||!naturalH)return;
+    const before=geometry(),ax=anchor?.x??before.vw/2,ay=anchor?.y??before.vh/2;
+    const relX=before.w?((scroller.scrollLeft+ax-before.left)/before.w):.5,relY=before.h?((scroller.scrollTop+ay-before.top)/before.h):.5;
+    scale=clampScale(nextScale);const after=geometry();stage.style.width=`${after.stageW}px`;stage.style.height=`${after.stageH}px`;img.style.width=`${after.w}px`;img.style.height=`${after.h}px`;img.style.left=`${after.left}px`;img.style.top=`${after.top}px`;
+    scroller.scrollLeft=Math.max(0,after.left+relX*after.w-ax);scroller.scrollTop=Math.max(0,after.top+relY*after.h-ay);
+  };
+  const fit=()=>{
+    if(!naturalW||!naturalH)return;const vw=Math.max(1,scroller.clientWidth);minScale=Math.min(1,vw/naturalW);maxScale=Math.max(1,minScale*4);scale=minScale;applyScale(scale,{x:vw/2,y:Math.max(1,scroller.clientHeight)/2});
+  };
+  const distance=(a,b)=>Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY);
+  const midpoint=(a,b)=>{const r=scroller.getBoundingClientRect();return{x:(a.clientX+b.clientX)/2-r.left,y:(a.clientY+b.clientY)/2-r.top};};
+  const onTouchStart=event=>{if(event.touches?.length===2){const [a,b]=event.touches;pinch={distance:Math.max(1,distance(a,b)),scale,anchor:midpoint(a,b)};}};
+  const onTouchMove=event=>{if(!pinch||event.touches?.length!==2)return;event.preventDefault();const [a,b]=event.touches;applyScale(pinch.scale*(distance(a,b)/pinch.distance),midpoint(a,b));};
+  const onTouchEnd=event=>{
+    if(event.touches?.length<2)pinch=null;
+    if(event.changedTouches?.length===1&&event.touches?.length===0){const now=performance.now();if(now-lastTap<285){event.preventDefault();const t=event.changedTouches[0],r=scroller.getBoundingClientRect(),anchor={x:t.clientX-r.left,y:t.clientY-r.top};const target=scale>minScale*1.12?minScale:Math.min(maxScale,Math.max(1,minScale*2));applyScale(target,anchor);lastTap=0;}else lastTap=now;}
+  };
+  scroller.addEventListener("touchstart",onTouchStart,{passive:true});scroller.addEventListener("touchmove",onTouchMove,{passive:false});scroller.addEventListener("touchend",onTouchEnd,{passive:false});scroller.addEventListener("touchcancel",()=>{pinch=null;},{passive:true});
+  img.addEventListener("load",()=>{naturalW=Math.max(1,img.naturalWidth||1);naturalH=Math.max(1,img.naturalHeight||1);fit();},{once:true});
+  img.src=url;
+  if(typeof ResizeObserver==="function"){resizeObserver=new ResizeObserver(()=>{if(naturalW&&scale<=minScale*1.02)fit();});resizeObserver.observe(scroller);}
+  bookingDocumentImageCleanup=()=>{resizeObserver?.disconnect?.();scroller.removeEventListener("touchstart",onTouchStart);scroller.removeEventListener("touchmove",onTouchMove);scroller.removeEventListener("touchend",onTouchEnd);};
+}
 async function tripOpenBookingDocument(rowInput={}){
   const row=rowInput||{},viewer=document.getElementById("booking-document-viewer"),body=document.getElementById("booking-document-viewer-body"),title=document.getElementById("booking-document-viewer-title");if(!viewer||!body)return;
   tripCloseBookingDocumentViewer();const epoch=++bookingDocumentViewerEpoch;bookingDocumentViewerCurrent=row;if(title)title.textContent=String(row.title||row.fileName||"預訂文件");
   try{if(typeof viewer.showModal==="function")viewer.showModal();else viewer.setAttribute("open","");}catch(_){viewer.setAttribute("open","");}
+  try{viewer.focus({preventScroll:true});}catch(_){viewer.focus?.();}
   document.body.classList.add("booking-document-viewer-open");body.innerHTML='<div class="booking-document-viewer-state">正在載入…</div>';
   try{
     let url=String(row.legacyUrl||"").trim(),contentType=String(row.contentType||"").toLowerCase(),localObjectUrl="";
     if(!url){const service=await tripDocumentService(),blob=await service.getTripDocumentBlob(row);contentType=String(blob.type||contentType).toLowerCase();localObjectUrl=URL.createObjectURL(blob);url=localObjectUrl;}
     if(epoch!==bookingDocumentViewerEpoch){if(localObjectUrl)try{URL.revokeObjectURL(localObjectUrl);}catch(_){}return;}
     if(localObjectUrl)bookingDocumentViewerObjectUrl=localObjectUrl;if(!url)throw new Error("文件網址不存在");body.innerHTML="";
-    if(contentType.includes("pdf")||/\.pdf(?:$|\?)/i.test(String(row.fileName||url))){const frame=document.createElement("iframe");frame.src=url;frame.title=String(row.title||"PDF");frame.setAttribute("loading","eager");body.appendChild(frame);}else{const img=document.createElement("img");img.src=url;img.alt=String(row.title||"預訂圖片");body.appendChild(img);}
+    if(contentType.includes("pdf")||/\.pdf(?:$|\?)/i.test(String(row.fileName||url))){const frame=document.createElement("iframe");frame.className="booking-document-pdf-frame";frame.src=url;frame.title=String(row.title||"PDF");frame.setAttribute("loading","eager");frame.setAttribute("allow","fullscreen");body.appendChild(frame);}else{tripMountBookingDocumentImage(body,url,row);}
   }catch(error){if(epoch!==bookingDocumentViewerEpoch)return;console.warn("Open booking document",error);body.innerHTML='<div class="booking-document-viewer-state">暫時未能載入文件。</div>';}
 }
 function tripRenderBookingDocumentsPage(dataInput=activeTripPresentationData(),{focusKey=infoDocumentFocusKey}={}){
@@ -8704,37 +8868,57 @@ function tripRenderBookingDocumentsPage(dataInput=activeTripPresentationData(),{
   if(other.length)appendGroup("其他旅程文件","未指定行程日子",other,true);
   if(!rows.length){const empty=document.createElement("section");empty.className="trip-library-card booking-doc-empty";empty.textContent="未有預訂文件。你可以喺 Edit Mode 嘅航班、住宿或行程項目加入 PDF 或預訂圖片。";host.appendChild(empty);}
 }
-let infoNavSurfaces=[];
-let infoNavAnimationFrame=0;
-function infoNavClearAnimation(){if(infoNavAnimationFrame){cancelAnimationFrame(infoNavAnimationFrame);infoNavAnimationFrame=0;}}
-function infoNavNextFrames(count,callback){infoNavClearAnimation();let left=Math.max(1,Number(count)||1);const step=()=>{left-=1;if(left<=0){infoNavAnimationFrame=0;callback?.();return;}infoNavAnimationFrame=requestAnimationFrame(step);};infoNavAnimationFrame=requestAnimationFrame(step);}
-function infoNavHostDocumentTop(){const host=document.getElementById("info-nav-host");if(!host)return 0;return host.getBoundingClientRect().top+Math.max(0,Number(scrollShell?.scrollTop||0));}
-function infoNavClonePage(page){const clone=page.cloneNode(true);clone.hidden=false;clone.classList.remove("is-active","is-transition-layer");[clone,...clone.querySelectorAll("[id]")].forEach(node=>node.removeAttribute?.("id"));return clone;}
-function infoNavCaptureSnapshot(page,scrollTop=0){if(!page)return null;return{scrollTop:Math.max(0,Number(scrollTop||0)),hostTop:infoNavHostDocumentTop(),pageClone:infoNavClonePage(page)};}
-function infoNavClearSurfaces(){infoNavClearAnimation();infoNavSurfaces.forEach(surface=>surface.remove());infoNavSurfaces=[];document.getElementById("info-nav-host")?.classList.remove("is-snapshotting");document.body.classList.remove("info-navigation-active");}
-function infoNavCreateSurface(snapshot,className=""){if(!snapshot)return null;const surface=document.createElement("div");surface.className=`profile-nav-surface info-nav-surface ${className}`.trim();const liveTop=snapshot.hostTop-snapshot.scrollTop,top=Math.max(0,Math.round(liveTop)),clipped=Math.min(0,liveTop);surface.style.top=`${top}px`;surface.style.height=`${Math.max(1,window.innerHeight-top)}px`;surface.style.opacity="0";const bgSource=document.querySelector(".bg-fixed");if(bgSource){const bgRect=bgSource.getBoundingClientRect(),bgStyle=getComputedStyle(bgSource),bgLayer=document.createElement("div");bgLayer.className="profile-nav-surface-bg";bgLayer.style.left=`${bgRect.left}px`;bgLayer.style.top=`${bgRect.top-top}px`;bgLayer.style.width=`${bgRect.width}px`;bgLayer.style.height=`${bgRect.height}px`;bgLayer.style.backgroundColor=bgStyle.backgroundColor;bgLayer.style.backgroundImage=bgStyle.backgroundImage;bgLayer.style.backgroundSize=bgStyle.backgroundSize;bgLayer.style.backgroundPosition=bgStyle.backgroundPosition;bgLayer.style.backgroundRepeat=bgStyle.backgroundRepeat;surface.appendChild(bgLayer);surface.__profileBgLayer=bgLayer;}const frame=document.createElement("div");frame.className="profile-nav-surface-frame";const content=document.createElement("div");content.className="profile-nav-surface-content";if(clipped<0)content.style.transform=`translate3d(0,${Math.round(clipped)}px,0)`;content.appendChild(snapshot.pageClone.cloneNode(true));frame.appendChild(content);surface.appendChild(frame);document.body.appendChild(surface);infoNavSurfaces.push(surface);return surface;}
-function infoNavSmooth01(value){const t=clamp(Number(value)||0,0,1);return t*t*t*(t*(t*6-15)+10);}
-function infoNavApplyFadeThrough(outSurface,inSurface,progress,direction,width){if(!outSurface||!inSurface)return;const p=clamp(Number(progress)||0,0,1),outT=infoNavSmooth01(p/.48),inT=infoNavSmooth01((p-.52)/.48),travel=Math.min(22,Math.max(12,width*.075)),outX=direction*travel*outT,inX=-direction*travel*(1-inT);outSurface.style.zIndex="1422";inSurface.style.zIndex="1421";outSurface.style.opacity=String(1-outT);inSurface.style.opacity=String(inT);outSurface.style.transform=`translate3d(${outX.toFixed(2)}px,0,0)`;inSurface.style.transform=`translate3d(${inX.toFixed(2)}px,0,0)`;if(outSurface.__profileBgLayer)outSurface.__profileBgLayer.style.transform=`translate3d(${(-outX).toFixed(2)}px,0,0)`;if(inSurface.__profileBgLayer)inSurface.__profileBgLayer.style.transform=`translate3d(${(-inX).toFixed(2)}px,0,0)`;}
-function infoNavAnimate({outSurface,inSurface,direction,width,duration=430,onDone}={}){infoNavClearAnimation();const reduced=window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;if(reduced){infoNavApplyFadeThrough(outSurface,inSurface,1,direction,width);onDone?.();return;}const started=performance.now();const tick=now=>{const t=clamp((now-started)/duration,0,1),eased=infoNavSmooth01(t);infoNavApplyFadeThrough(outSurface,inSurface,eased,direction,width);if(t<1){infoNavAnimationFrame=requestAnimationFrame(tick);return;}infoNavAnimationFrame=0;onDone?.();};infoNavApplyFadeThrough(outSurface,inSurface,0,direction,width);infoNavAnimationFrame=requestAnimationFrame(tick);}
-async function tripAnimateInfoPage(fromPage,toPage,{back=false,targetScroll=0}={}){
-  if(!fromPage||!toPage||infoNavigationTransitioning)return;const host=document.getElementById("info-nav-host"),currentScroll=Math.max(0,Number(scrollShell?.scrollTop||0)),target=Math.max(0,Number(targetScroll||0)),fromSnapshot=infoNavCaptureSnapshot(fromPage,currentScroll),toSnapshot=infoNavCaptureSnapshot(toPage,target);if(!host||!fromSnapshot||!toSnapshot){fromPage.hidden=true;toPage.hidden=false;if(scrollShell)scrollShell.scrollTo({top:target,behavior:"auto"});return;}
-  infoNavClearSurfaces();const outSurface=infoNavCreateSurface(fromSnapshot,"is-front"),inSurface=infoNavCreateSurface(toSnapshot,"is-previous");if(!outSurface||!inSurface){infoNavClearSurfaces();fromPage.hidden=true;toPage.hidden=false;if(scrollShell)scrollShell.scrollTo({top:target,behavior:"auto"});return;}
-  infoNavigationTransitioning=true;document.body.classList.add("info-navigation-active");const width=Math.max(1,window.innerWidth),direction=back?1:-1;outSurface.style.zIndex="1422";inSurface.style.zIndex="1421";infoNavApplyFadeThrough(outSurface,inSurface,0,direction,width);outSurface.style.opacity="0";void outSurface.offsetHeight;
-  await new Promise(resolve=>infoNavNextFrames(2,()=>{host.classList.add("is-snapshotting");outSurface.style.opacity="1";resolve();}));
-  await new Promise(resolve=>infoNavAnimate({outSurface,inSurface,direction,width,duration:430,onDone:resolve}));
-  fromPage.hidden=true;toPage.hidden=false;if(scrollShell)scrollShell.scrollTo({top:target,behavior:"auto"});inSurface.style.zIndex="1423";inSurface.style.opacity="1";inSurface.style.transform="translate3d(0,0,0)";if(inSurface.__profileBgLayer)inSurface.__profileBgLayer.style.transform="translate3d(0,0,0)";
-  await new Promise(resolve=>infoNavNextFrames(2,resolve));host.classList.remove("is-snapshotting");inSurface.style.opacity="0";await new Promise(resolve=>infoNavNextFrames(1,resolve));infoNavigationTransitioning=false;infoNavClearSurfaces();
+const infoPages=Object.fromEntries([...document.querySelectorAll("#info-view [data-info-page]")].map(page=>[page.dataset.infoPage,page]));
+const INFO_FADE_OUT_END=.48;
+const INFO_FADE_IN_START=.52;
+const INFO_TRANSITION_TRAVEL_RATIO=.075;
+const INFO_TRANSITION_DURATION=430;
+const INFO_SWIPE_SETTLE_MIN=170;
+const INFO_SWIPE_SETTLE_MAX=340;
+function infoScrollTop(){return Math.max(0,Number(scrollShell?.scrollTop||0));}
+function infoHostDocumentTop(){const host=document.getElementById("info-nav-host");if(!host)return 0;const rect=host.getBoundingClientRect();return rect.top+infoScrollTop();}
+function infoClonePage(page){const clone=page.cloneNode(true);clone.hidden=false;clone.classList.remove("is-active","is-transition-layer");clone.classList.add("profile-nav-clone");[clone,...clone.querySelectorAll("[id]")].forEach(node=>node.removeAttribute?.("id"));return clone;}
+function infoCaptureSnapshot(key,scrollTop=infoScrollTop()){const page=infoPages[key];if(!page)return null;return{key,scrollTop:Number(scrollTop||0),hostTop:infoHostDocumentTop(),pageClone:infoClonePage(page)};}
+function infoClearAnimation(){if(infoNavAnimationFrame){cancelAnimationFrame(infoNavAnimationFrame);infoNavAnimationFrame=0;}}
+function infoClearSurfaces(){infoClearAnimation();infoNavSurfaces.forEach(surface=>surface.remove());infoNavSurfaces=[];document.getElementById("info-nav-host")?.classList.remove("is-snapshotting");document.body.classList.remove("info-navigation-active","info-edge-swipe-active");}
+function infoCreateSurface(snapshot,className=""){
+  if(!snapshot)return null;const surface=document.createElement("div");surface.className=`profile-nav-surface info-nav-surface ${className}`.trim();const liveTop=snapshot.hostTop-snapshot.scrollTop,top=Math.max(0,Math.round(liveTop)),clipped=Math.min(0,liveTop);surface.style.top=`${top}px`;surface.style.height=`${Math.max(1,window.innerHeight-top)}px`;surface.style.opacity="0";
+  const bgSource=document.querySelector(".bg-fixed");if(bgSource){const bgRect=bgSource.getBoundingClientRect(),bgStyle=getComputedStyle(bgSource),bgLayer=document.createElement("div");bgLayer.className="profile-nav-surface-bg";bgLayer.style.left=`${bgRect.left}px`;bgLayer.style.top=`${bgRect.top-top}px`;bgLayer.style.width=`${bgRect.width}px`;bgLayer.style.height=`${bgRect.height}px`;bgLayer.style.backgroundColor=bgStyle.backgroundColor;bgLayer.style.backgroundImage=bgStyle.backgroundImage;bgLayer.style.backgroundSize=bgStyle.backgroundSize;bgLayer.style.backgroundPosition=bgStyle.backgroundPosition;bgLayer.style.backgroundRepeat=bgStyle.backgroundRepeat;surface.appendChild(bgLayer);surface.__profileBgLayer=bgLayer;}
+  const frame=document.createElement("div");frame.className="profile-nav-surface-frame";const content=document.createElement("div");content.className="profile-nav-surface-content";if(clipped<0)content.style.transform=`translate3d(0,${Math.round(clipped)}px,0)`;content.appendChild(snapshot.pageClone.cloneNode(true));frame.appendChild(content);surface.appendChild(frame);document.body.appendChild(surface);infoNavSurfaces.push(surface);return surface;
 }
-async function tripOpenBookingDocumentsPage({ownerType="",ownerId=""}={}){
-  infoDocumentFocusKey=ownerType&&ownerId?`${String(ownerType)}:${String(ownerId)}`:"";
-  if(currentAppView!=="info"){setView("info",{restoreScroll:false});await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));}
-  tripRenderBookingDocumentsPage(activeTripPresentationData(),{focusKey:infoDocumentFocusKey});
-  const root=document.getElementById("info-page-root"),page=document.getElementById("info-page-booking-documents");if(!root||!page)return;if(infoDocumentsPageOpen){requestAnimationFrame(()=>{const target=infoDocumentFocusKey?page.querySelector(`[data-booking-owner-key="${CSS.escape(infoDocumentFocusKey)}"]`):null;target?.scrollIntoView({behavior:"smooth",block:"center"});});return;}
-  infoRootScrollTop=scrollShell?.scrollTop||0;infoDocumentsPageOpen=true;await tripAnimateInfoPage(root,page,{back:false,targetScroll:0});requestAnimationFrame(()=>{const target=infoDocumentFocusKey?page.querySelector(`[data-booking-owner-key="${CSS.escape(infoDocumentFocusKey)}"]`):null;target?.scrollIntoView({behavior:"smooth",block:"center"});});
+function infoSetLivePage(activeKey,scrollTop=0,{keepSurfaces=false,keepHidden=false}={}){
+  Object.entries(infoPages).forEach(([key,page])=>{const active=key===activeKey;page.hidden=!active;page.classList.toggle("is-active",active);page.style.transform="";page.style.opacity="";page.style.transition="";page.style.boxShadow="";});infoCurrentPage=activeKey;infoDocumentsPageOpen=activeKey==="booking-documents";if(scrollShell)scrollShell.scrollTo({top:Math.max(0,Number(scrollTop||0)),behavior:"auto"});if(!keepHidden)document.getElementById("info-nav-host")?.classList.remove("is-snapshotting");if(!keepSurfaces){infoNavigationTransitioning=false;infoClearSurfaces();}
 }
-async function tripCloseBookingDocumentsPage(){
-  if(!infoDocumentsPageOpen||infoNavigationTransitioning)return;const root=document.getElementById("info-page-root"),page=document.getElementById("info-page-booking-documents");if(!root||!page)return;infoDocumentsScrollTop=scrollShell?.scrollTop||0;await tripAnimateInfoPage(page,root,{back:true,targetScroll:infoRootScrollTop||0});infoDocumentsPageOpen=false;infoDocumentFocusKey="";
+function infoPrepareSnapshotTransition(fromSnapshot,toSnapshot){infoClearSurfaces();const fromSurface=infoCreateSurface(fromSnapshot,"is-front"),toSurface=infoCreateSurface(toSnapshot,"is-previous");if(!fromSurface||!toSurface){infoClearSurfaces();return null;}document.body.classList.add("info-navigation-active");const width=Math.max(1,window.innerWidth);fromSurface.style.zIndex="1422";toSurface.style.zIndex="1421";return{fromSurface,toSurface,width};}
+function infoSmooth01(value){const t=clamp(Number(value)||0,0,1);return t*t*t*(t*(t*6-15)+10);}
+function infoFadeThroughState(progress){const p=clamp(Number(progress)||0,0,1),outT=infoSmooth01(p/INFO_FADE_OUT_END),inT=infoSmooth01((p-INFO_FADE_IN_START)/(1-INFO_FADE_IN_START));return{p,outT,inT,outOpacity:1-outT,inOpacity:inT};}
+function infoApplyFadeThrough(outSurface,inSurface,progress,direction,width){if(!outSurface||!inSurface)return;const state=infoFadeThroughState(progress),travel=Math.min(22,Math.max(12,width*INFO_TRANSITION_TRAVEL_RATIO)),outX=direction*travel*state.outT,inX=-direction*travel*(1-state.inT);outSurface.style.zIndex="1422";inSurface.style.zIndex="1421";outSurface.style.opacity=String(state.outOpacity);inSurface.style.opacity=String(state.inOpacity);outSurface.style.transform=`translate3d(${outX.toFixed(2)}px,0,0)`;inSurface.style.transform=`translate3d(${inX.toFixed(2)}px,0,0)`;if(outSurface.__profileBgLayer)outSurface.__profileBgLayer.style.transform=`translate3d(${(-outX).toFixed(2)}px,0,0)`;if(inSurface.__profileBgLayer)inSurface.__profileBgLayer.style.transform=`translate3d(${(-inX).toFixed(2)}px,0,0)`;outSurface.style.boxShadow="none";inSurface.style.boxShadow="none";}
+function infoAnimateValue({from=0,to=1,duration=300,apply,onDone}={}){infoClearAnimation();const reduced=window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;if(reduced||duration<=0){apply?.(to);onDone?.();return;}const started=performance.now();const tick=now=>{const t=clamp((now-started)/duration,0,1),eased=infoSmooth01(t);apply?.(from+(to-from)*eased);if(t<1){infoNavAnimationFrame=requestAnimationFrame(tick);return;}infoNavAnimationFrame=0;onDone?.();};apply?.(from);infoNavAnimationFrame=requestAnimationFrame(tick);}
+function infoNextFrames(count,callback){infoClearAnimation();let left=Math.max(1,Number(count)||1);const step=()=>{left-=1;if(left<=0){infoNavAnimationFrame=0;callback?.();return;}infoNavAnimationFrame=requestAnimationFrame(step);};infoNavAnimationFrame=requestAnimationFrame(step);}
+function infoHandoffToSnapshot(surface,onDone){const host=document.getElementById("info-nav-host");if(!surface){host?.classList.add("is-snapshotting");onDone?.();return;}surface.style.opacity="0";void surface.offsetHeight;infoNextFrames(2,()=>{host?.classList.add("is-snapshotting");surface.style.opacity="1";onDone?.();});}
+function infoAnimateFadeThrough(outSurface,inSurface,{from=0,to=1,direction=1,width=Math.max(1,window.innerWidth),duration=470,onDone}={}){infoAnimateValue({from,to,duration,apply:p=>infoApplyFadeThrough(outSurface,inSurface,p,direction,width),onDone});}
+function infoFocusDocumentOwner(){if(infoCurrentPage!=="booking-documents"||!infoDocumentFocusKey)return;requestAnimationFrame(()=>{const page=infoPages["booking-documents"],target=page?.querySelector(`[data-booking-owner-key="${CSS.escape(infoDocumentFocusKey)}"]`);target?.scrollIntoView({behavior:"smooth",block:"center"});});}
+function infoCommitSnapshotToLive(activeKey,scrollTop,inSurface,{pop=false,push=false}={}){
+  const host=document.getElementById("info-nav-host");infoSetLivePage(activeKey,scrollTop,{keepSurfaces:true,keepHidden:!!inSurface});if(pop&&infoNavStack.length>1)infoNavStack.pop();if(push)infoNavStack.push({key:activeKey,scrollTop:Math.max(0,Number(scrollTop||0)),snapshot:null});const topEntry=infoNavStack[infoNavStack.length-1];if(topEntry&&topEntry.key===activeKey)topEntry.scrollTop=Math.max(0,Number(scrollTop||0));if(!inSurface){infoNavigationTransitioning=false;infoClearSurfaces();infoFocusDocumentOwner();return;}
+  inSurface.style.zIndex="1423";inSurface.style.opacity="1";inSurface.style.transform="translate3d(0,0,0)";if(inSurface.__profileBgLayer)inSurface.__profileBgLayer.style.transform="translate3d(0,0,0)";infoNextFrames(2,()=>{host?.classList.remove("is-snapshotting");inSurface.style.opacity="0";infoNextFrames(1,()=>{infoNavigationTransitioning=false;infoClearSurfaces();infoFocusDocumentOwner();});});
 }
+function infoRestoreLiveAfterCancel(outSurface,currentScroll){const host=document.getElementById("info-nav-host");if(scrollShell)scrollShell.scrollTo({top:Math.max(0,Number(currentScroll||0)),behavior:"auto"});if(!outSurface){host?.classList.remove("is-snapshotting");infoNavigationTransitioning=false;infoClearSurfaces();return;}outSurface.style.zIndex="1423";outSurface.style.opacity="1";outSurface.style.transform="translate3d(0,0,0)";if(outSurface.__profileBgLayer)outSurface.__profileBgLayer.style.transform="translate3d(0,0,0)";infoNextFrames(2,()=>{host?.classList.remove("is-snapshotting");outSurface.style.opacity="0";infoNextFrames(1,()=>{infoNavigationTransitioning=false;infoClearSurfaces();});});}
+function infoRunProgrammaticTransition({targetKey,targetScroll=0,direction=1,pop=false,push=false}={}){
+  const currentScroll=infoScrollTop(),currentEntry=infoNavStack[infoNavStack.length-1],fromSnapshot=infoCaptureSnapshot(infoCurrentPage,currentScroll),toEntry=pop?infoNavStack[infoNavStack.length-2]:null,toSnapshot=toEntry?.snapshot||infoCaptureSnapshot(targetKey,targetScroll);if(!fromSnapshot||!toSnapshot)return;if(currentEntry&&currentEntry.key===infoCurrentPage){currentEntry.scrollTop=currentScroll;currentEntry.snapshot=fromSnapshot;}const layers=infoPrepareSnapshotTransition(fromSnapshot,toSnapshot);if(!layers)return;const{fromSurface,toSurface,width}=layers;infoNavigationTransitioning=true;infoApplyFadeThrough(fromSurface,toSurface,0,direction,width);infoHandoffToSnapshot(fromSurface,()=>{infoAnimateFadeThrough(fromSurface,toSurface,{from:0,to:1,direction,width,duration:INFO_TRANSITION_DURATION,onDone:()=>infoCommitSnapshotToLive(targetKey,targetScroll,toSurface,{pop,push})});});
+}
+function tripOpenBookingDocumentsPage({ownerType="",ownerId=""}={}){
+  infoDocumentFocusKey=ownerType&&ownerId?`${String(ownerType)}:${String(ownerId)}`:"";if(currentAppView!=="info"){setView("info",{restoreScroll:false});requestAnimationFrame(()=>requestAnimationFrame(()=>tripOpenBookingDocumentsPage({ownerType,ownerId})));return;}tripRenderBookingDocumentsPage(activeTripPresentationData(),{focusKey:infoDocumentFocusKey});if(infoNavigationTransitioning)return;if(infoCurrentPage==="booking-documents"){infoDocumentsPageOpen=true;infoFocusDocumentOwner();return;}infoDocumentsPageOpen=true;infoRunProgrammaticTransition({targetKey:"booking-documents",targetScroll:0,direction:-1,push:true});
+}
+function tripCloseBookingDocumentsPage(){if(infoNavigationTransitioning||infoCurrentPage==="root"||infoNavStack.length<=1)return;const previous=infoNavStack[infoNavStack.length-2]||{key:"root",scrollTop:0,snapshot:null};infoRunProgrammaticTransition({targetKey:previous.key,targetScroll:previous.scrollTop||0,direction:1,pop:true});}
+function beginInfoEdgeSwipe(event){if(infoNavigationTransitioning||infoCurrentPage==="root"||infoNavStack.length<=1||currentAppView!=="info"||event.touches?.length!==1)return;if(document.body.classList.contains("booking-document-viewer-open"))return;const t=event.touches[0];if(t.clientX>30)return;if(event.target.closest?.("input,textarea,select,[contenteditable='true']"))return;const currentEntry=infoNavStack[infoNavStack.length-1];if(currentEntry&&currentEntry.key===infoCurrentPage)currentEntry.scrollTop=infoScrollTop();const previous=infoNavStack[infoNavStack.length-2]||{key:"root",scrollTop:0,snapshot:null};infoSwipe={tracking:true,active:false,handedOff:false,startX:t.clientX,startY:t.clientY,currentX:t.clientX,startedAt:performance.now(),width:Math.max(1,window.innerWidth),currentScroll:infoScrollTop(),previousKey:previous.key,previousScroll:Math.max(0,previous.scrollTop||0),previousSnapshot:previous.snapshot||null,currentSurface:null,previousSurface:null,progress:0,fadeProgress:0};}
+function moveInfoEdgeSwipe(event){if(!infoSwipe?.tracking||event.touches?.length!==1)return;const t=event.touches[0],dx=t.clientX-infoSwipe.startX,dy=t.clientY-infoSwipe.startY;if(!infoSwipe.active){if(dx<7)return;if(Math.abs(dy)>Math.abs(dx)*.72){infoSwipe=null;return;}const currentSnapshot=infoCaptureSnapshot(infoCurrentPage,infoSwipe.currentScroll),previousSnapshot=infoSwipe.previousSnapshot||infoCaptureSnapshot(infoSwipe.previousKey,infoSwipe.previousScroll);if(!currentSnapshot||!previousSnapshot){infoSwipe=null;return;}const currentEntry=infoNavStack[infoNavStack.length-1];if(currentEntry&&currentEntry.key===infoCurrentPage)currentEntry.snapshot=currentSnapshot;const layers=infoPrepareSnapshotTransition(currentSnapshot,previousSnapshot);if(!layers){infoSwipe=null;return;}infoSwipe.currentSurface=layers.fromSurface;infoSwipe.previousSurface=layers.toSurface;infoSwipe.width=layers.width;infoSwipe.active=true;infoSwipe.handedOff=false;infoNavigationTransitioning=true;document.body.classList.add("info-edge-swipe-active");infoApplyFadeThrough(layers.fromSurface,layers.toSurface,0,1,layers.width);infoHandoffToSnapshot(layers.fromSurface,()=>{if(!infoSwipe?.active)return;infoSwipe.handedOff=true;infoApplySwipeProgress();});}event.preventDefault();infoSwipe.currentX=t.clientX;if(!infoSwipe.handedOff)return;infoApplySwipeProgress();}
+function infoApplySwipeProgress(){if(!infoSwipe?.active||!infoSwipe.handedOff)return;const width=Math.max(1,infoSwipe.width),distance=clamp(infoSwipe.currentX-infoSwipe.startX,0,width),progress=distance/width;infoSwipe.progress=progress;infoSwipe.fadeProgress=progress;infoApplyFadeThrough(infoSwipe.currentSurface,infoSwipe.previousSurface,progress,1,width);}
+function endInfoEdgeSwipe(){if(!infoSwipe?.tracking)return;if(!infoSwipe.active){infoSwipe=null;return;}const swipe=infoSwipe;infoSwipe=null;const width=Math.max(1,swipe.width),distance=clamp(swipe.currentX-swipe.startX,0,width),elapsed=Math.max(1,performance.now()-swipe.startedAt),velocity=distance/elapsed,goBack=distance>width*.32||velocity>.55;if(!swipe.handedOff){document.getElementById("info-nav-host")?.classList.remove("is-snapshotting");infoNavigationTransitioning=false;infoClearSurfaces();return;}const currentSurface=swipe.currentSurface,previousSurface=swipe.previousSurface,fadeProgress=clamp(Number(swipe.fadeProgress)||0,0,1),target=goBack?1:0,remaining=Math.abs(target-fadeProgress),duration=Math.max(INFO_SWIPE_SETTLE_MIN,Math.min(INFO_SWIPE_SETTLE_MAX,INFO_SWIPE_SETTLE_MIN+remaining*230));infoAnimateFadeThrough(currentSurface,previousSurface,{from:fadeProgress,to:target,direction:1,width,duration,onDone:()=>{if(goBack){infoCommitSnapshotToLive(swipe.previousKey,swipe.previousScroll,previousSurface,{pop:true});}else{currentSurface.style.opacity="1";previousSurface.style.opacity="0";infoRestoreLiveAfterCancel(currentSurface,swipe.currentScroll);}}});}
+function cancelInfoEdgeSwipe(){if(!infoSwipe?.tracking)return;if(!infoSwipe.active){infoSwipe=null;return;}const swipe=infoSwipe;infoSwipe=null;if(!swipe.handedOff){document.getElementById("info-nav-host")?.classList.remove("is-snapshotting");infoNavigationTransitioning=false;infoClearSurfaces();return;}infoAnimateFadeThrough(swipe.currentSurface,swipe.previousSurface,{from:swipe.fadeProgress||0,to:0,direction:1,width:swipe.width,duration:220,onDone:()=>{swipe.currentSurface.style.opacity="1";swipe.previousSurface.style.opacity="0";infoRestoreLiveAfterCancel(swipe.currentSurface,swipe.currentScroll);}});}
+document.addEventListener("touchstart",beginInfoEdgeSwipe,{passive:true});
+document.addEventListener("touchmove",moveInfoEdgeSwipe,{passive:false});
+document.addEventListener("touchend",endInfoEdgeSwipe,{passive:true});
+document.addEventListener("touchcancel",cancelInfoEdgeSwipe,{passive:true});
 function renderBookingDocumentsCard(dataInput=activeTripPresentationData()){
   const card=document.getElementById("booking-documents-card"),count=document.getElementById("booking-documents-count"),summary=document.getElementById("booking-documents-summary");if(!card)return;const rows=tripAllBookingDocuments(dataInput);card.hidden=false;if(count)count.textContent=String(rows.length);if(summary)summary.textContent=rows.length?`${rows.length} 份文件 · 按 Day 整理`:"尚未有預訂文件";if(infoDocumentsPageOpen)tripRenderBookingDocumentsPage(dataInput,{focusKey:infoDocumentFocusKey});
 }
@@ -9584,15 +9768,12 @@ const largeHeaderMainEl=largeHeaderEl?.querySelector(".header-title-main")||null
 const largeHeaderSmallEl=largeHeaderEl?.querySelector(".header-title-small")||null;
 const largeHeaderSubRowEl=largeHeaderEl?.querySelector(".header-sub-row")||null;
 const dayTabsChromeEl=document.getElementById("day-tabs");
-const dayTabsStickyBackdropEl=document.getElementById("day-tabs-sticky-backdrop");
+const dayTabsStickyShellEl=document.getElementById("day-tabs-sticky-shell");
 let collapseStickyTop=58;
 function refreshCollapseMetrics(){
-  if(!dayTabsChromeEl){collapseStickyTop=58;dayTabsStickyBackdropEl?.classList.remove("is-visible");return;}
-  const top=parseFloat(getComputedStyle(dayTabsChromeEl).top);
+  if(!dayTabsChromeEl){collapseStickyTop=58;dayTabsStickyShellEl?.classList.remove("is-stuck");return;}
+  const stickyNode=dayTabsStickyShellEl||dayTabsChromeEl,top=parseFloat(getComputedStyle(stickyNode).top);
   collapseStickyTop=Number.isFinite(top)?top:58;
-  const height=Math.max(1,Math.round(dayTabsChromeEl.getBoundingClientRect().height||49));
-  dayTabsChromeEl.style.setProperty("--day-tabs-stuck-height",`${height}px`);
-  dayTabsStickyBackdropEl?.style.setProperty("--day-tabs-stuck-height-global",`${height}px`);
 }
 const viewElements={itinerary:ivw,snacks:svw,info:infvw,expenses:expvw,profile:profilevw};
 const viewButtons={itinerary:bti,snacks:bts,info:btinfo,expenses:btexp,profile:btprofile};
@@ -9769,9 +9950,8 @@ function updateCollapsingChrome(){
   const start=18,end=106;
   const progress=clamp((y-start)/(end-start),0,1);
   const itineraryActive=currentAppView==="itinerary";
-  const dayTabsRect=dayTabsChromeEl?.getBoundingClientRect?.()||null;
-  const isStuck=!!(dayTabsChromeEl&&itineraryActive&&dayTabsRect&&dayTabsRect.top<=collapseStickyTop+4&&y>4);
-  if(dayTabsChromeEl&&dayTabsRect?.height){const dayBarHeight=Math.max(1,Math.round(dayTabsRect.height));dayTabsChromeEl.style.setProperty("--day-tabs-stuck-height",`${dayBarHeight}px`);dayTabsStickyBackdropEl?.style.setProperty("--day-tabs-stuck-height-global",`${dayBarHeight}px`);}
+  const stickyNode=dayTabsStickyShellEl||dayTabsChromeEl,dayTabsRect=stickyNode?.getBoundingClientRect?.()||null;
+  const isStuck=!!(stickyNode&&itineraryActive&&dayTabsRect&&dayTabsRect.top<=collapseStickyTop+4&&y>4);
   const eased=1-Math.pow(1-progress,2);
 
   // Write phase. --collapse-progress was unused anywhere in CSS, so Layer 2
@@ -9790,7 +9970,7 @@ function updateCollapsingChrome(){
   }
 
   if(dayTabsChromeEl)dayTabsChromeEl.classList.toggle("is-stuck",isStuck);
-  dayTabsStickyBackdropEl?.classList.toggle("is-visible",isStuck);
+  dayTabsStickyShellEl?.classList.toggle("is-stuck",isStuck);
 }
 
 function scheduleCollapseUpdate(){

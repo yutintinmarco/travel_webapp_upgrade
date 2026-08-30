@@ -1,3 +1,12 @@
+## v7.9.19.3 — Booking Documents Native Reuse / Viewer Gestures
+
+- Replaced the v7.9.19.2 body-level Day Bar backing plane with the same local sticky-material stacking pattern already proven by Edit Mode `新增地點 / 新增交通`, keeping Day pills, geometry, horizontal scrolling and switching logic unchanged.
+- Replaced the partial Booking Documents transition with the complete `我的` snapshot push / pop language, including interactive left-edge swipe, cancel / settle behaviour and scroll restoration.
+- Reused the existing `profile-detail-back` iOS back control for both the Booking Documents page and Document Viewer; removed the independent circular Viewer back treatment.
+- Restored document reading gestures: image documents open fit-to-width with vertical / horizontal scrolling, pinch zoom and double-tap zoom; PDF remains on the browser-native PDF surface for native scrolling / zooming.
+- Made the existing 20 MB per-document hard limit visible beside every Booking Document file picker. PDF and booking images remain stored as original files rather than being silently recompressed.
+- UI / navigation / viewer patch only. No Booking Documents schema, Global Save Once, Firebase Rules, Functions, Map, Transit, Location Picker or other frozen-domain changes.
+
 ## v7.9.19.2 — Booking Documents Real Device Stability Fix
 
 * Replaced the new Documents page cross-slide animation with the proven `我的` snapshot handoff language, eliminating iOS glass / backdrop-filter flashing when entering and returning from 預訂與文件.
