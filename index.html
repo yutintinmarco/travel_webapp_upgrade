@@ -3903,7 +3903,7 @@ body.expenses-view-active #app-version-note{
 #snacks-view::after,
 #info-view::after,
 #profile-view::after{
-  content:"v7.9.19.12" !important;
+  content:"v7.9.19.13" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3924,7 +3924,7 @@ body.expenses-view-active #app-version-note{
   display:none !important;
 }
 body.expenses-view-active .expenses-module .expenses-app::after{
-  content:"v7.9.19.12" !important;
+  content:"v7.9.19.13" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -8913,6 +8913,15 @@ function tripBookingDocumentOwnerTime(row={},dataInput=activeTripPresentationDat
   return "99:99";
 }
 function tripBookingDocumentFileMeta(row={}){const bits=[];const file=String(row?.fileName||"").trim(),title=String(row?.title||"").trim();if(file&&file!==title)bits.push(file);if(Number(row?.byteSize))bits.push(`${Math.max(1,Math.round(Number(row.byteSize)/1024))} KB`);return bits.join(" · ")||"點選直接預覽";}
+function tripBookingDocumentPdfViewUrl(urlInput=""){
+  const raw=String(urlInput||"").trim();
+  if(!raw)return "";
+  const clean=raw.split("#")[0];
+  /* Ask the native PDF surface to open on page 1 with the whole page fitted
+     inside the available phone viewport. These are initial-view hints only;
+     native pinch zoom and PDF scrolling remain available afterwards. */
+  return `${clean}#page=1&view=Fit&zoom=page-fit`;
+}
 const BOOKING_DOCUMENT_PREVIEW_CACHE="travel-booking-document-preview-v1";
 function tripBookingDocumentPreviewFileName(row={}){
   const raw=String(row?.fileName||row?.title||"document.pdf").trim()||"document.pdf";
@@ -9040,7 +9049,7 @@ async function tripOpenBookingDocument(rowInput={}){
     }
     if(epoch!==bookingDocumentViewerEpoch){if(localObjectUrl)try{URL.revokeObjectURL(localObjectUrl);}catch(_){}return;}
     if(localObjectUrl)bookingDocumentViewerObjectUrl=localObjectUrl;if(!url)throw new Error("文件網址不存在");body.innerHTML="";
-    if(isPdf){const frame=document.createElement("iframe");frame.className="booking-document-pdf-frame";frame.src=url;frame.title=String(row.title||row.fileName||"PDF");frame.setAttribute("loading","eager");frame.setAttribute("allow","fullscreen");body.appendChild(frame);}else{tripMountBookingDocumentImage(body,url,row);}
+    if(isPdf){const frame=document.createElement("iframe");frame.className="booking-document-pdf-frame";frame.src=tripBookingDocumentPdfViewUrl(url);frame.title=String(row.title||row.fileName||"PDF");frame.setAttribute("loading","eager");frame.setAttribute("allow","fullscreen");body.appendChild(frame);}else{tripMountBookingDocumentImage(body,url,row);}
   }catch(error){if(epoch!==bookingDocumentViewerEpoch)return;console.warn("Open booking document",error);body.innerHTML='<div class="booking-document-viewer-state">暫時未能載入文件。</div>';}
 }
 function tripRenderBookingDocumentsPage(dataInput=activeTripPresentationData(),{focusKey=infoDocumentFocusKey}={}){

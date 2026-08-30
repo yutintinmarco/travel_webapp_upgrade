@@ -1,3 +1,9 @@
+## v7.9.19.13 — Booking PDF Initial Fit Page
+
+- Changed the Booking Document PDF viewer initial open state from the iOS native default zoom to a whole-page fit hint (`page=1`, `view=Fit`, `zoom=page-fit`), so an A4-style first page should open fully visible instead of starting enlarged.
+- Kept native PDF pinch zoom, panning and multi-page scrolling unchanged after the initial fit request.
+- Preserved the v7.9.19.12 authenticated same-origin PDF preview route and all existing Booking Documents lifecycle, title truncation, navigation and image viewer behaviour.
+
 ## v7.9.19.12 — Booking PDF Preview Route Fix
 
 - Fixed uploaded PDF previews being replaced by the Travel App shell on iOS because the Service Worker treated the iframe PDF request as a normal same-origin SPA navigation.
