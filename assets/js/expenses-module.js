@@ -556,7 +556,9 @@ function releaseQuickAddTapGuardSoon() {
   quickAddTapGuardTimer = setTimeout(() => {
     quickAddTapGuardTimer = null;
     setQuickAddTapGuard(false);
-    if (quickTitleInput && !quickTitleInput.value) quickTitleInput.focus();
+    // Do not auto-refocus Quick Add after submit. On iOS, focusing an input
+    // without a visible keyboard still makes the shared keyboard manager hide
+    // the bottom navigation. The user can tap the next field when ready.
   }, QUICK_ADD_TAP_GUARD_MS);
 }
 
