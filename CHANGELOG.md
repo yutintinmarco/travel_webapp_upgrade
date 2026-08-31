@@ -1,3 +1,12 @@
+# v7.9.20.14 — Final Cleanup · Map route menu + system-anchor dedupe
+
+- Kept the existing 當日／收藏 segmented control in its original position and moved route preferences into a compact Apple-style `路線⌄` control on the right.
+- Promoted 顯示行程線、連接機場、連接住宿 to three equal checkmarked route-menu options; no extra permanent control row is added to the map.
+- Added resolved-location system-anchor dedupe: itinerary stops that resolve to the active flight airport or accommodation reuse the ✈️ / 🏨 system marker instead of receiving a duplicate numbered marker.
+- Corrected the resolved-coordinate return path in the shared map geocoder so newly resolved non-cached locations always return their actual coordinates rather than relying on stale/global identifiers.
+- Explicit mid-day hotel returns remain in the route sequence even when automatic hotel start/end connection is disabled. A stop merged with a flight anchor follows the flight connection preference, so turning off 連接機場 can still remove the long airport leg.
+- Marker visibility, Transit endpoint data, route composition and system-anchor display remain separate concerns. No Firebase schema / Rules / Functions changes.
+
 # v7.9.20.13 — Final Cleanup · Map presentation controls
 
 - Added per-itinerary Stop control `在行程地圖顯示標記`. It defaults ON; turning it OFF hides the numbered Map marker while keeping the Stop location available to Transit routing as the previous / next endpoint.

@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
   <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
   <link rel="dns-prefetch" href="https://api.open-meteo.com">
-  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?release=7.9.20.13">
+  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?release=7.9.20.14">
   <title id="page-title">行程</title>
   <script>
   // v7.7.5.0 · Performance Lite. Memory only: no Firebase reads/writes, no
@@ -3751,7 +3751,7 @@ html:not(.theme-light):not(.theme-dark) .cloud-safety-strip{
 #snacks-view::after,
 #info-view::after,
 #profile-view::after{
-  content:"v7.9.20.13" !important;
+  content:"v7.9.20.14" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3772,7 +3772,7 @@ html:not(.theme-light):not(.theme-dark) .cloud-safety-strip{
   display:none !important;
 }
 body.expenses-view-active .expenses-module .expenses-app::after{
-  content:"v7.9.20.13" !important;
+  content:"v7.9.20.14" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -4035,15 +4035,13 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
 .trip-map-filters .trip-activity-filter{padding:6px 12px;font-size:11px;border:0;box-shadow:none;}
 .trip-map-state{position:absolute;z-index:3;left:50%;bottom:max(24px,calc(env(safe-area-inset-bottom) + 18px));transform:translateX(-50%);max-width:min(86vw,360px);padding:9px 13px;border-radius:15px;background:rgba(248,248,250,.88);color:rgba(60,60,67,.78);font-size:11px;font-weight:600;line-height:1.35;text-align:center;box-shadow:0 4px 18px rgba(15,23,42,.12);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);}
 .trip-map-state[hidden]{display:none!important;}
-.trip-map-route-control{position:absolute;z-index:3;left:50%;top:max(198px,calc(env(safe-area-inset-top) + 192px));transform:translateX(-50%);display:flex;align-items:stretch;border:1px solid rgba(60,60,67,.14);border-radius:999px;background:rgba(255,255,255,.92);box-shadow:none;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);overflow:visible;}
-.trip-map-route-control.is-single-team{top:max(158px,calc(env(safe-area-inset-top) + 152px));}
+.trip-map-route-control{position:absolute;z-index:3;top:max(72px,calc(env(safe-area-inset-top) + 66px));left:calc(50% + min(105px,31vw) + 3px);display:block;padding:4px;border-radius:999px;background:rgba(248,248,250,.86);box-shadow:0 4px 18px rgba(15,23,42,.12);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);overflow:visible;}
 .trip-map-route-control[hidden]{display:none!important;}
-.trip-map-line-toggle,.trip-map-route-menu-trigger{appearance:none;-webkit-appearance:none;-webkit-tap-highlight-color:transparent;border:0;background:transparent;color:rgba(28,28,30,.84);font:650 11px/1 -apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,sans-serif;white-space:nowrap;}
-.trip-map-line-toggle{min-height:31px;padding:7px 9px 7px 13px;border-radius:999px 0 0 999px;}
-.trip-map-line-toggle.active{background:#111;color:#fff;}
-.trip-map-route-menu-trigger{width:31px;min-height:31px;padding:0;border-left:1px solid rgba(60,60,67,.12);border-radius:0 999px 999px 0;font-size:13px;color:rgba(60,60,67,.62);}
-.trip-map-line-toggle:focus-visible,.trip-map-route-menu-trigger:focus-visible{outline:2px solid rgba(0,122,255,.34);outline-offset:2px;}
-.trip-map-route-menu{position:absolute;z-index:5;left:50%;top:calc(100% + 8px);transform:translateX(-50%);width:184px;padding:5px;border:1px solid rgba(60,60,67,.12);border-radius:16px;background:rgba(248,248,250,.94);box-shadow:0 10px 28px rgba(15,23,42,.18),inset 0 1px 0 rgba(255,255,255,.72);backdrop-filter:blur(22px) saturate(160%);-webkit-backdrop-filter:blur(22px) saturate(160%);}
+.trip-map-route-menu-trigger{position:relative;appearance:none;-webkit-appearance:none;-webkit-tap-highlight-color:transparent;min-width:48px;min-height:34px;padding:6px 5px;border:0;border-radius:999px;background:transparent;color:rgba(28,28,30,.84);display:flex;align-items:center;justify-content:center;gap:2px;font:650 11px/1 -apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,sans-serif;white-space:nowrap;}
+.trip-map-route-menu-trigger::after{content:"";position:absolute;inset:-4px;border-radius:999px;}
+.trip-map-route-menu-trigger .trip-map-route-chevron{font-size:10px;color:rgba(60,60,67,.58);transform:translateY(-1px);}
+.trip-map-route-menu-trigger:focus-visible{outline:2px solid rgba(0,122,255,.34);outline-offset:2px;}
+.trip-map-route-menu{position:absolute;z-index:5;right:0;top:calc(100% + 8px);width:190px;padding:5px;border:1px solid rgba(60,60,67,.12);border-radius:16px;background:rgba(248,248,250,.94);box-shadow:0 10px 28px rgba(15,23,42,.18),inset 0 1px 0 rgba(255,255,255,.72);backdrop-filter:blur(22px) saturate(160%);-webkit-backdrop-filter:blur(22px) saturate(160%);}
 .trip-map-route-menu[hidden]{display:none!important;}
 .trip-map-route-option{width:100%;min-height:42px;border:0;border-radius:11px;background:transparent;color:#111;display:grid;grid-template-columns:26px minmax(0,1fr) 22px;align-items:center;gap:7px;padding:0 9px;text-align:left;font:650 12px/1 -apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,sans-serif;}
 .trip-map-route-option+.trip-map-route-option{border-top:1px solid rgba(60,60,67,.10);border-top-left-radius:0;border-top-right-radius:0;}
@@ -4096,9 +4094,8 @@ html.theme-dark .trip-map-place-meta,html.theme-dark .trip-map-place-detail,html
 html.theme-dark .trip-map-marker.is-transit,html:not(.theme-light):not(.theme-dark) .trip-map-marker.is-transit{background:rgba(42,42,46,.94);color:#64a9ff;border-color:rgba(255,255,255,.30);box-shadow:0 3px 10px rgba(0,0,0,.32),inset 0 0 0 1px rgba(255,255,255,.08);}
 html.theme-dark .trip-map-marker.is-anchor,html:not(.theme-light):not(.theme-dark) .trip-map-marker.is-anchor{background:rgba(42,42,46,.95);color:#fff;border-color:rgba(255,255,255,.30);box-shadow:0 3px 10px rgba(0,0,0,.34),inset 0 0 0 1px rgba(255,255,255,.08);}
 html.theme-dark .trip-map-heading,html.theme-dark .trip-map-close,html.theme-dark .trip-map-filters,html.theme-dark .trip-map-state,html.theme-dark .trip-map-route-control,html.theme-dark .trip-map-route-menu,html.theme-dark .trip-map-place-card,html:not(.theme-light):not(.theme-dark) .trip-map-heading,html:not(.theme-light):not(.theme-dark) .trip-map-close,html:not(.theme-light):not(.theme-dark) .trip-map-filters,html:not(.theme-light):not(.theme-dark) .trip-map-state,html:not(.theme-light):not(.theme-dark) .trip-map-route-control,html:not(.theme-light):not(.theme-dark) .trip-map-route-menu,html:not(.theme-light):not(.theme-dark) .trip-map-place-card{background:rgba(30,30,34,.88);color:rgba(245,245,247,.96);box-shadow:0 6px 24px rgba(0,0,0,.34),inset 0 1px 0 rgba(255,255,255,.08);}
-html.theme-dark .trip-map-heading small,html.theme-dark .trip-map-state,html.theme-dark .trip-map-line-toggle,html.theme-dark .trip-map-route-menu-trigger,html.theme-dark .trip-map-place-copy small,html:not(.theme-light):not(.theme-dark) .trip-map-heading small,html:not(.theme-light):not(.theme-dark) .trip-map-state,html:not(.theme-light):not(.theme-dark) .trip-map-line-toggle,html:not(.theme-light):not(.theme-dark) .trip-map-route-menu-trigger,html:not(.theme-light):not(.theme-dark) .trip-map-place-copy small{color:rgba(235,235,245,.62);}
-html.theme-dark .trip-map-line-toggle.active,html:not(.theme-light):not(.theme-dark) .trip-map-line-toggle.active{background:#f5f5f7;color:#111;box-shadow:none;}
-html.theme-dark .trip-map-route-menu-trigger,html:not(.theme-light):not(.theme-dark) .trip-map-route-menu-trigger{border-left-color:rgba(255,255,255,.10);}
+html.theme-dark .trip-map-heading small,html.theme-dark .trip-map-state,html.theme-dark .trip-map-route-menu-trigger,html.theme-dark .trip-map-place-copy small,html:not(.theme-light):not(.theme-dark) .trip-map-heading small,html:not(.theme-light):not(.theme-dark) .trip-map-state,html:not(.theme-light):not(.theme-dark) .trip-map-route-menu-trigger,html:not(.theme-light):not(.theme-dark) .trip-map-place-copy small{color:rgba(235,235,245,.72);}
+html.theme-dark .trip-map-route-menu-trigger .trip-map-route-chevron,html:not(.theme-light):not(.theme-dark) .trip-map-route-menu-trigger .trip-map-route-chevron{color:rgba(235,235,245,.55);}
 html.theme-dark .trip-map-route-option,html:not(.theme-light):not(.theme-dark) .trip-map-route-option{color:#f5f5f7;}
 html.theme-dark .trip-map-route-option+.trip-map-route-option,html:not(.theme-light):not(.theme-dark) .trip-map-route-option+.trip-map-route-option{border-top-color:rgba(255,255,255,.09);}
 html.theme-dark .trip-map-route-option-check,html:not(.theme-light):not(.theme-dark) .trip-map-route-option-check{color:#64a9ff;}
@@ -4484,7 +4481,7 @@ html.theme-dark .snacks-library-count,html:not(.theme-light):not(.theme-dark) .s
 </style>
             <link rel="apple-touch-icon" href="assets/icon/trip_icon.png">
   <link rel="icon" type="image/png" href="assets/icon/trip_icon.png">
-  <link rel="manifest" href="manifest.json?release=7.9.20.13">
+  <link rel="manifest" href="manifest.json?release=7.9.20.14">
   <meta name="apple-mobile-web-app-title" content="關嘉露西生日之旅">
   <!-- v7.7.1.2: expenses.css is 144KB and every rule is scoped under
        .expenses-module, yet it used to block the very first paint of the
@@ -4492,8 +4489,8 @@ html.theme-dark .snacks-library-count,html:not(.theme-light):not(.theme-dark) .s
        priority without blocking paint; ensureExpensesStylesheet() flips it to
        media="all" before the 支出 view is ever mounted, so the styling is
        byte-for-byte identical by the time anything expenses-related renders. -->
-  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?release=7.9.20.13" media="print">
-  <noscript><link rel="stylesheet" href="assets/css/expenses.css?release=7.9.20.13"></noscript>
+  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?release=7.9.20.14" media="print">
+  <noscript><link rel="stylesheet" href="assets/css/expenses.css?release=7.9.20.14"></noscript>
 
 <style id="booking-documents-v79191-style">
 /* Phase 3E · Booking Documents native hierarchy / viewer hardening.
@@ -5686,7 +5683,7 @@ dialog.booking-document-viewer.is-edge-swiping{
         <span class="profile-detail-spacer"></span>
       </div>
       <section class="profile-card" aria-label="App 資訊">
-        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.9.20.13</strong></div>
+        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.9.20.14</strong></div>
         <div class="profile-meta-row"><span>資料架構</span><strong>Phase 2G.2</strong></div>
         <div class="profile-meta-row"><span>主要資料來源</span><strong id="app-data-source-label">Firebase / 本機快取</strong></div>
       </section>
@@ -5763,9 +5760,9 @@ dialog.booking-document-viewer.is-edge-swiping{
   <div class="trip-map-team-filters" id="trip-map-team-filters" aria-label="行程隊伍" hidden></div>
   <div class="trip-map-region-filters" id="trip-map-region-filters" aria-label="收藏地區" hidden></div>
   <div class="trip-map-route-control" id="trip-map-route-control" hidden>
-    <button class="trip-map-line-toggle active" id="trip-map-line-toggle" type="button" aria-pressed="true">✓ 行程線</button>
-    <button class="trip-map-route-menu-trigger" id="trip-map-route-menu-trigger" type="button" aria-expanded="false" aria-controls="trip-map-route-menu" aria-label="行程線選項">⌄</button>
-    <div class="trip-map-route-menu" id="trip-map-route-menu" role="group" aria-label="行程線選項" hidden>
+    <button class="trip-map-route-menu-trigger" id="trip-map-route-menu-trigger" type="button" aria-expanded="false" aria-controls="trip-map-route-menu" aria-label="路線選項"><span>路線</span><span class="trip-map-route-chevron" aria-hidden="true">⌄</span></button>
+    <div class="trip-map-route-menu" id="trip-map-route-menu" role="group" aria-label="路線選項" hidden>
+      <button class="trip-map-route-option" type="button" data-map-route-option="line" aria-pressed="true"><span class="trip-map-route-option-icon" aria-hidden="true">↗︎</span><span>顯示行程線</span><span class="trip-map-route-option-check" aria-hidden="true">✓</span></button>
       <button class="trip-map-route-option" type="button" data-map-route-option="flight" aria-pressed="true"><span class="trip-map-route-option-icon" aria-hidden="true">✈️</span><span>連接機場</span><span class="trip-map-route-option-check" aria-hidden="true">✓</span></button>
       <button class="trip-map-route-option" type="button" data-map-route-option="hotel" aria-pressed="true"><span class="trip-map-route-option-icon" aria-hidden="true">🏨</span><span>連接住宿</span><span class="trip-map-route-option-check" aria-hidden="true">✓</span></button>
     </div>
@@ -6345,7 +6342,7 @@ dialog.booking-document-viewer.is-edge-swiping{
 </div>
 
 <script>
-const APP_VERSION = "7.9.20.13";
+const APP_VERSION = "7.9.20.14";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 let tripMapServicePromise=null,transitRouteServicePromise=null,tripEditServicePromise=null,airlineLogoServicePromise=null,tripDocumentServicePromise=null,tripMapController=null,tripMapScope="day",tripMapRenderEpoch=0,tripMapSelectedPoint=null;
@@ -6510,6 +6507,11 @@ function tripMapRenumberVisibleStops(points){let stopNo=0;return (Array.isArray(
 function tripMapDayPointSummary(points){const list=Array.isArray(points)?points:[],transit=list.filter(point=>String(point?.mapRole||"")==="transit").length,stops=list.filter(point=>String(point?.mapRole||"")==="stop").length;return transit?`${stops} 行程點 · ${transit} 交通`:`${stops} 個地點`;}
 function tripMapRouteConnectionPoints(points){
   return (Array.isArray(points)?points:[]).filter(point=>{
+    const mergedType=String(point?.mergedSystemAnchorType||"");
+    // A stop merged into the day's flight anchor follows the same connection
+    // preference as that flight anchor. Hotel returns remain explicit itinerary
+    // route visits even when automatic hotel start/end connection is disabled.
+    if(mergedType==="flight"&&!tripMapConnectFlightEnabled)return false;
     if(String(point?.mapRole||"")!=="anchor")return true;
     const type=String(point?.anchorType||"");
     if(type==="flight"&&!tripMapConnectFlightEnabled)return false;
@@ -6545,7 +6547,7 @@ function tripMapRouteGroups(points){
   return groups.length?groups:[makeGroup(list,"#007aff")];
 }
 function tripMapVisibleDayPoints(points){return tripMapTeam==="all"?(Array.isArray(points)?points:[]):(Array.isArray(points)?points:[]).filter(point=>tripMapPointMatchesTeam(point,tripMapTeam));}
-function tripMapVisibleMarkerPoints(points){return tripMapVisibleDayPoints(points).filter(point=>point?.mapMarkerVisible!==false);}
+function tripMapVisibleMarkerPoints(points){return tripMapVisibleDayPoints(points).filter(point=>point?.mapMarkerVisible!==false&&!point?.mergedSystemAnchorType);}
 function tripMapInitialFocusRows(routeContext,visibleMarkers){
   const routeRows=tripMapRouteGroups(routeContext).flatMap(group=>Array.isArray(group?.points)?group.points:[]).filter(point=>point?.position);
   const seen=new Set(),rows=[];
@@ -6555,15 +6557,18 @@ function tripMapInitialFocusRows(routeContext,visibleMarkers){
 function syncTripMapRouteMenu(){
   const menu=document.getElementById("trip-map-route-menu"),trigger=document.getElementById("trip-map-route-menu-trigger");
   if(!menu||!trigger)return;
-  menu.querySelectorAll("[data-map-route-option]").forEach(btn=>{const key=String(btn.dataset.mapRouteOption||""),active=key==="flight"?tripMapConnectFlightEnabled:tripMapConnectHotelEnabled;btn.classList.toggle("active",active);btn.setAttribute("aria-pressed",active?"true":"false");});
+  menu.querySelectorAll("[data-map-route-option]").forEach(btn=>{
+    const key=String(btn.dataset.mapRouteOption||"");
+    const active=key==="line"?tripMapSequenceLineEnabled:(key==="flight"?tripMapConnectFlightEnabled:tripMapConnectHotelEnabled);
+    btn.classList.toggle("active",active);btn.setAttribute("aria-pressed",active?"true":"false");
+  });
 }
 function setTripMapRouteMenuOpen(open){
   const menu=document.getElementById("trip-map-route-menu"),trigger=document.getElementById("trip-map-route-menu-trigger");if(!menu||!trigger)return;const next=Boolean(open);menu.hidden=!next;trigger.setAttribute("aria-expanded",next?"true":"false");if(next)syncTripMapRouteMenu();
 }
 function syncTripMapLineToggle(){
-  const control=document.getElementById("trip-map-route-control"),btn=document.getElementById("trip-map-line-toggle");if(!control||!btn)return;
-  const dayMode=tripMapScope==="day";control.hidden=!dayMode;control.classList.toggle("is-single-team",tripMapTravellerRows().length<2);
-  btn.classList.toggle("active",tripMapSequenceLineEnabled);btn.setAttribute("aria-pressed",tripMapSequenceLineEnabled?"true":"false");btn.textContent=tripMapSequenceLineEnabled?"✓ 行程線":"行程線";
+  const control=document.getElementById("trip-map-route-control");if(!control)return;
+  const dayMode=tripMapScope==="day";control.hidden=!dayMode;
   if(!dayMode)setTripMapRouteMenuOpen(false);else syncTripMapRouteMenu();
 }
 function setTripMapSequenceLineEnabled(value,{persist=true}={}){
@@ -6583,7 +6588,7 @@ function setTripMapConnectionEnabled(kind,value,{persist=true}={}){
   syncTripMapRouteMenu();refreshTripMapRoutePresentation();
 }
 
-function tripMapTopPadding(){const teamRows=tripMapTravellerRows();return tripMapScope==="day"?(teamRows.length>=2?236:194):170;}
+function tripMapTopPadding(){const teamRows=tripMapTravellerRows();return tripMapScope==="day"?(teamRows.length>=2?204:164):170;}
 async function renderTripMapScope(scope=tripMapScope){
   tripMapScope=scope==="saved"?"saved":"day";
   if(tripMapScope!=="saved")tripMapRegion="__all__";
@@ -6610,7 +6615,8 @@ async function renderTripMapScope(scope=tripMapScope){
     const result=await service.resolveMapPoints(rawPoints,{concurrency:3,onProgress:progress=>{if(epoch===tripMapRenderEpoch)state.textContent=`正在定位 ${progress.completed} / ${progress.total}…`;}});
     if(epoch!==tripMapRenderEpoch||!tripMapOverlayOpen())return;
     if(!result.resolved.length){state.textContent="暫時未能由現有 Google 地圖參照取得座標；資料冇被修改。";return;}
-    const resolved=hydrateTripMapPointPreviews(result.resolved);
+    const hydratedResolved=hydrateTripMapPointPreviews(result.resolved);
+    const resolved=tripMapScope==="day"&&typeof service.mergeSystemAnchorMarkers==="function"?service.mergeSystemAnchorMarkers(hydratedResolved):hydratedResolved;
     if(tripMapScope==="saved"){
       tripMapResolvedPoints=resolved.slice();
       tripMapController=await service.createTripMap(canvas,{points:tripMapResolvedPoints,onSelect:showTripMapSelection,onMapTap:clearTripMapSelection,focusPaddingTop:tripMapTopPadding()});
@@ -7760,9 +7766,8 @@ document.getElementById("trip-map-filters")?.addEventListener("click",event=>{co
 document.getElementById("trip-map-day-filters")?.addEventListener("click",event=>{const btn=event.target.closest("[data-map-day-id]");if(!btn)return;tripMapDayId=String(btn.dataset.mapDayId||"");void renderTripMapScope("day");});
 document.getElementById("trip-map-team-filters")?.addEventListener("click",event=>{const btn=event.target.closest("[data-map-team]");if(!btn)return;tripMapTeam=String(btn.dataset.mapTeam||"all");void renderTripMapScope("day");});
 document.getElementById("trip-map-region-filters")?.addEventListener("click",event=>{const btn=event.target.closest("[data-map-region]");if(!btn)return;applySavedMapRegion(btn.dataset.mapRegion,{focus:true});});
-document.getElementById("trip-map-line-toggle")?.addEventListener("click",()=>setTripMapSequenceLineEnabled(!tripMapSequenceLineEnabled));
 document.getElementById("trip-map-route-menu-trigger")?.addEventListener("click",event=>{event.stopPropagation();const trigger=event.currentTarget;setTripMapRouteMenuOpen(trigger?.getAttribute("aria-expanded")!=="true");});
-document.getElementById("trip-map-route-menu")?.addEventListener("click",event=>{const btn=event.target.closest("[data-map-route-option]");if(!btn)return;event.stopPropagation();const kind=String(btn.dataset.mapRouteOption||"");if(kind==="flight")setTripMapConnectionEnabled("flight",!tripMapConnectFlightEnabled);else if(kind==="hotel")setTripMapConnectionEnabled("hotel",!tripMapConnectHotelEnabled);});
+document.getElementById("trip-map-route-menu")?.addEventListener("click",event=>{const btn=event.target.closest("[data-map-route-option]");if(!btn)return;event.stopPropagation();const kind=String(btn.dataset.mapRouteOption||"");if(kind==="line")setTripMapSequenceLineEnabled(!tripMapSequenceLineEnabled);else if(kind==="flight")setTripMapConnectionEnabled("flight",!tripMapConnectFlightEnabled);else if(kind==="hotel")setTripMapConnectionEnabled("hotel",!tripMapConnectHotelEnabled);syncTripMapRouteMenu();});
 document.getElementById("trip-map-overlay")?.addEventListener("click",event=>{if(!event.target.closest?.("#trip-map-route-control"))setTripMapRouteMenuOpen(false);});
 document.getElementById("trip-map-overlay")?.addEventListener("keydown",event=>{if(event.key==="Escape"){if(document.getElementById("trip-map-route-menu")?.hidden===false){setTripMapRouteMenuOpen(false);return;}closeTripMap();}});
 
