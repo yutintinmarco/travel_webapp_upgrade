@@ -2626,6 +2626,17 @@ function enterEditMode(expenseId) {
 }
 
 
+function releaseQuickAddKeyboardFocus() {
+  const active = document.activeElement;
+  if (!(active instanceof HTMLElement) || !quickAddCard?.contains(active)) return;
+  const isEditable = active instanceof HTMLInputElement
+    || active instanceof HTMLTextAreaElement
+    || active instanceof HTMLSelectElement
+    || active.isContentEditable;
+  if (!isEditable) return;
+  active.blur();
+}
+
 async function saveQuickExpense() {
   if (quickAddTapGuard) return;
   if (!currentUser) return alert("請先登入。");
@@ -2703,6 +2714,12 @@ async function saveQuickExpense() {
   // clear the consumed draft synchronously, then let Firebase complete in the
   // background. Network latency must not block entry of the next expense.
   setQuickAddTapGuard(true);
+  // iOS may visually dismiss the keyboard after tapping the Quick Add button
+  // while keeping the originating input as document.activeElement. The shared
+  // keyboard-aware bottom navigation then remains hidden even though no
+  // keyboard is visible. Release only Quick Add field focus at the successful
+  // handoff so the existing focusout/visualViewport manager restores the bar.
+  releaseQuickAddKeyboardFocus();
   if (quickTitleInput) quickTitleInput.value = "";
   if (quickAmountInput) quickAmountInput.value = "";
   if (quickAddHint) quickAddHint.textContent = "已加入。下一筆可直接輸入。";
