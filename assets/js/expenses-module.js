@@ -537,15 +537,26 @@ const quickCategoryInput = document.getElementById("quickCategory");
 const quickAddBtn = document.getElementById("quickAddBtn");
 const quickAddHint = document.getElementById("quickAddHint");
 const quickAddFab = document.getElementById("quickAddFab");
-let quickAddSubmitting = false;
+let quickAddTapGuard = false;
+let quickAddTapGuardTimer = null;
+const QUICK_ADD_TAP_GUARD_MS = 360;
 
-function setQuickAddSubmitting(nextState) {
-  quickAddSubmitting = Boolean(nextState);
+function setQuickAddTapGuard(nextState) {
+  quickAddTapGuard = Boolean(nextState);
   if (quickAddBtn) {
-    quickAddBtn.setAttribute("aria-busy", quickAddSubmitting ? "true" : "false");
-    quickAddBtn.textContent = quickAddSubmitting ? "新增中…" : "快速新增";
+    quickAddBtn.setAttribute("aria-busy", quickAddTapGuard ? "true" : "false");
+    quickAddBtn.textContent = "快速新增";
   }
   updateTripStatusUi();
+}
+
+function releaseQuickAddTapGuardSoon() {
+  if (quickAddTapGuardTimer) clearTimeout(quickAddTapGuardTimer);
+  quickAddTapGuardTimer = setTimeout(() => {
+    quickAddTapGuardTimer = null;
+    setQuickAddTapGuard(false);
+    if (quickTitleInput && !quickTitleInput.value) quickTitleInput.focus();
+  }, QUICK_ADD_TAP_GUARD_MS);
 }
 
 const tripControlPanel = document.getElementById("tripControlPanel");
@@ -1098,7 +1109,7 @@ function updateTripStatusUi() {
   if (ocrFileInput) ocrFileInput.disabled = globallyLocked || locked || readOnly;
 
   [quickTitleInput, quickAmountInput, quickCurrencyInput, quickPaidByInput, quickCategoryInput, quickAddBtn].forEach(el => {
-    if (el) el.disabled = globallyLocked || locked || readOnly || quickAddSubmitting;
+    if (el) el.disabled = globallyLocked || locked || readOnly || quickAddTapGuard;
   });
   document.querySelectorAll("[data-admin-only]").forEach(btn => {
     btn.classList.toggle("hidden", !isAdmin());
@@ -2526,7 +2537,7 @@ function enterEditMode(expenseId) {
 
 
 async function saveQuickExpense() {
-  if (quickAddSubmitting) return;
+  if (quickAddTapGuard) return;
   if (!currentUser) return alert("請先登入。");
   if (!assertTripOpen()) return;
 
@@ -2598,36 +2609,49 @@ async function saveQuickExpense() {
     console.warn("Quick Add preferences save failed:", error);
   }
 
-  // Lock synchronously before the first network await. This prevents rapid
-  // repeated taps from creating multiple Firestore documents for one entry.
-  setQuickAddSubmitting(true);
+  // Quick Add is an optimistic interaction. Lock only the physical tap handoff,
+  // clear the consumed draft synchronously, then let Firebase complete in the
+  // background. Network latency must not block entry of the next expense.
+  setQuickAddTapGuard(true);
   if (quickTitleInput) quickTitleInput.value = "";
   if (quickAmountInput) quickAmountInput.value = "";
-  if (quickAddHint) quickAddHint.textContent = "新增中…";
+  if (quickAddHint) quickAddHint.textContent = "已加入。下一筆可直接輸入。";
+  releaseQuickAddTapGuardSoon();
 
-  let saved = false;
-  try {
-    const docRef = await addDoc(getExpensesCollection(), payload);
-    saved = true;
+  void (async () => {
+    try {
+      const docRef = await addDoc(getExpensesCollection(), payload);
 
-    await logActivity("expense_created", `${displayName} 快速新增 ${payload.title} ${payload.originalCurrency} ${payload.originalAmount.toFixed(2)}`, "expense", docRef.id, {
-      title: payload.title,
-      amount: payload.originalAmount,
-      currency: payload.originalCurrency,
-      quickAdd: true
-    });
+      // Activity logging is secondary to the expense write and must never keep
+      // the Quick Add UI busy. A log failure does not mean the expense failed.
+      try {
+        await logActivity("expense_created", `${displayName} 快速新增 ${payload.title} ${payload.originalCurrency} ${payload.originalAmount.toFixed(2)}`, "expense", docRef.id, {
+          title: payload.title,
+          amount: payload.originalAmount,
+          currency: payload.originalCurrency,
+          quickAdd: true
+        });
+      } catch (logError) {
+        console.warn("Quick Add activity log failed:", logError);
+      }
+    } catch (error) {
+      console.error("Quick Add failed:", error);
 
-    if (quickAddHint) quickAddHint.textContent = "已新增。下一筆可直接輸入項目及金額。";
-  } catch (error) {
-    console.error("Quick Add failed:", error);
-    if (quickTitleInput) quickTitleInput.value = pendingTitle;
-    if (quickAmountInput) quickAmountInput.value = pendingAmount;
-    if (quickAddHint) quickAddHint.textContent = "新增失敗，已保留原本資料。";
-    alert("新增支出失敗，請再試。");
-  } finally {
-    setQuickAddSubmitting(false);
-    if (saved && quickTitleInput) quickTitleInput.focus();
-  }
+      // Do not overwrite a newer draft the user may already be typing. Restore
+      // the failed entry only when the Quick Add fields are still untouched.
+      const currentTitle = quickTitleInput?.value ?? "";
+      const currentAmount = quickAmountInput?.value ?? "";
+      const canRestoreFailedDraft = !currentTitle.trim() && !currentAmount.trim();
+      if (canRestoreFailedDraft) {
+        if (quickTitleInput) quickTitleInput.value = pendingTitle;
+        if (quickAmountInput) quickAmountInput.value = pendingAmount;
+        if (quickAddHint) quickAddHint.textContent = "上一筆新增失敗，已還原原本資料。";
+      } else if (quickAddHint) {
+        quickAddHint.textContent = `上一筆「${title}」新增失敗，請稍後重試。`;
+      }
+      alert(`快速新增「${title}」失敗，請再試。`);
+    }
+  })();
 }
 
 async function saveExpense(event) {
