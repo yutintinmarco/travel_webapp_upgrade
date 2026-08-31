@@ -1,5 +1,5 @@
 /* Travel WebApp Service Worker
- * v7.9.20.10 · Final Cleanup · Release-aware precache bridge
+ * v7.9.20.11 · Final Cleanup · Release-aware precache bridge
  *
  * Keeps the v7.7.0.14 cold-start behaviour, while hardening installation:
  *  1. Critical shell assets are transactional. If any critical file cannot be
@@ -14,7 +14,7 @@
  *     explicit reload stays network-first.
  */
 
-const RELEASE_VERSION = "7.9.20.10";
+const RELEASE_VERSION = "7.9.20.11";
 const SW_VERSION = `travel-shell-v${RELEASE_VERSION}`;
 const CORE_CACHE = SW_VERSION;
 

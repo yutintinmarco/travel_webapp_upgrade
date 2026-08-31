@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
   <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
   <link rel="dns-prefetch" href="https://api.open-meteo.com">
-  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?release=7.9.20.10">
+  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?release=7.9.20.11">
   <title id="page-title">行程</title>
   <script>
   // v7.7.5.0 · Performance Lite. Memory only: no Firebase reads/writes, no
@@ -53,6 +53,7 @@
       var standalone=(window.matchMedia&&window.matchMedia("(display-mode: standalone)").matches)||window.navigator.standalone===true;
       root.classList.toggle("is-standalone",!!standalone);
       var savedTheme=localStorage.getItem("trip_theme")||"auto";
+      var savedResolvedTheme=localStorage.getItem("trip_theme_resolved")||"";
       root.classList.remove("theme-light","theme-dark");
       if(savedTheme==="dark")root.classList.add("theme-dark");
       else if(savedTheme==="light")root.classList.add("theme-light");
@@ -63,7 +64,8 @@
         if(sun&&sun.date===today&&sun.rise&&sun.set){
           var now=new Date(),rise=new Date(sun.rise),set=new Date(sun.set);
           root.classList.add((now>=rise&&now<set)?"theme-light":"theme-dark");
-        }else if(window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches)root.classList.add("theme-dark");
+        }else if(savedResolvedTheme==="dark"||savedResolvedTheme==="light")root.classList.add("theme-"+savedResolvedTheme);
+        else if(window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches)root.classList.add("theme-dark");
         else root.classList.add("theme-light");
       }
       var savedFont=parseFloat(localStorage.getItem("trip_font_scale")||"1");
@@ -1298,6 +1300,12 @@ html:not(.theme-light):not(.theme-dark) .itinerary-item.is-transit .icon {
 html.theme-dark .itinerary-item.is-transit.is-booked,
 html:not(.theme-light):not(.theme-dark) .itinerary-item.is-transit.is-booked {
   background: linear-gradient(180deg, rgba(39,39,47,0.88), rgba(27,61,39,0.70)) !important;
+}
+html.theme-dark .transit-kind-label,
+html:not(.theme-light):not(.theme-dark) .transit-kind-label {
+  color: color-mix(in srgb, var(--transit-accent) 52%, #ffffff);
+  background: color-mix(in srgb, var(--transit-accent) 18%, rgba(44,44,52,0.94));
+  border-color: color-mix(in srgb, var(--transit-accent) 34%, rgba(255,255,255,0.10));
 }
 
 /* v7.9.10.5 · Transit route summary sits above the route map and restores the
@@ -3743,7 +3751,7 @@ html:not(.theme-light):not(.theme-dark) .cloud-safety-strip{
 #snacks-view::after,
 #info-view::after,
 #profile-view::after{
-  content:"v7.9.20.10" !important;
+  content:"v7.9.20.11" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3764,7 +3772,7 @@ html:not(.theme-light):not(.theme-dark) .cloud-safety-strip{
   display:none !important;
 }
 body.expenses-view-active .expenses-module .expenses-app::after{
-  content:"v7.9.20.10" !important;
+  content:"v7.9.20.11" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -4460,7 +4468,7 @@ html.theme-dark .snacks-library-count,html:not(.theme-light):not(.theme-dark) .s
 </style>
             <link rel="apple-touch-icon" href="assets/icon/trip_icon.png">
   <link rel="icon" type="image/png" href="assets/icon/trip_icon.png">
-  <link rel="manifest" href="manifest.json?release=7.9.20.10">
+  <link rel="manifest" href="manifest.json?release=7.9.20.11">
   <meta name="apple-mobile-web-app-title" content="關嘉露西生日之旅">
   <!-- v7.7.1.2: expenses.css is 144KB and every rule is scoped under
        .expenses-module, yet it used to block the very first paint of the
@@ -4468,8 +4476,8 @@ html.theme-dark .snacks-library-count,html:not(.theme-light):not(.theme-dark) .s
        priority without blocking paint; ensureExpensesStylesheet() flips it to
        media="all" before the 支出 view is ever mounted, so the styling is
        byte-for-byte identical by the time anything expenses-related renders. -->
-  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?release=7.9.20.10" media="print">
-  <noscript><link rel="stylesheet" href="assets/css/expenses.css?release=7.9.20.10"></noscript>
+  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?release=7.9.20.11" media="print">
+  <noscript><link rel="stylesheet" href="assets/css/expenses.css?release=7.9.20.11"></noscript>
 
 <style id="booking-documents-v79191-style">
 /* Phase 3E · Booking Documents native hierarchy / viewer hardening.
@@ -5662,7 +5670,7 @@ dialog.booking-document-viewer.is-edge-swiping{
         <span class="profile-detail-spacer"></span>
       </div>
       <section class="profile-card" aria-label="App 資訊">
-        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.9.20.10</strong></div>
+        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.9.20.11</strong></div>
         <div class="profile-meta-row"><span>資料架構</span><strong>Phase 2G.2</strong></div>
         <div class="profile-meta-row"><span>主要資料來源</span><strong id="app-data-source-label">Firebase / 本機快取</strong></div>
       </section>
@@ -6310,7 +6318,7 @@ dialog.booking-document-viewer.is-edge-swiping{
 </div>
 
 <script>
-const APP_VERSION = "7.9.20.10";
+const APP_VERSION = "7.9.20.11";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 let tripMapServicePromise=null,transitRouteServicePromise=null,tripEditServicePromise=null,airlineLogoServicePromise=null,tripDocumentServicePromise=null,tripMapController=null,tripMapScope="day",tripMapRenderEpoch=0,tripMapSelectedPoint=null;
@@ -7034,6 +7042,7 @@ function applyTheme(t){
     });
     const isDark=document.documentElement.classList.contains("theme-dark") || (!document.documentElement.classList.contains("theme-light") && window.matchMedia?.("(prefers-color-scheme: dark)").matches);
     localStorage.setItem("trip_theme",t);
+    localStorage.setItem("trip_theme_resolved",isDark?"dark":"light");
   }catch(e){}
 }
 let currentTheme="auto";
@@ -9470,9 +9479,9 @@ function tripEditReadSavedPlaceFields(){
   return {area,category:val("trip-edit-saved-category"),priority:val("trip-edit-saved-priority"),mealType:val("trip-edit-saved-meal-type"),routeFit:val("trip-edit-saved-route-fit")||"any",priceLevel:val("trip-edit-saved-price"),queueLevel:val("trip-edit-saved-queue"),bestTime:val("trip-edit-saved-best-time"),must:val("trip-edit-saved-must"),opening:val("trip-edit-saved-opening"),tags:val("trip-edit-saved-tags").split(/[,，]/).map(v=>v.trim()).filter(Boolean)};
 }
 function tripEditConfigureEditorMode(kindInput="stop"){
-  const kind=String(kindInput||"stop"),saved=kind==="savedPlace";
-  const timeField=document.getElementById("trip-edit-time-field"),arrange=document.getElementById("trip-edit-arrangement-section"),savedSection=document.getElementById("trip-edit-saved-place-section"),savedPractical=document.getElementById("trip-edit-saved-practical-section"),documentsField=document.getElementById("trip-edit-item-documents-field");
-  if(timeField)timeField.hidden=saved;if(arrange)arrange.hidden=saved;if(savedSection)savedSection.hidden=!saved;if(savedPractical)savedPractical.hidden=!saved;if(documentsField)documentsField.style.display=saved?"none":"";
+  const kind=String(kindInput||"stop"),saved=kind==="savedPlace",transit=kind==="transit";
+  const timeField=document.getElementById("trip-edit-time-field"),arrange=document.getElementById("trip-edit-arrangement-section"),savedSection=document.getElementById("trip-edit-saved-place-section"),savedPractical=document.getElementById("trip-edit-saved-practical-section"),locationSection=document.getElementById("trip-edit-location-section"),documentsField=document.getElementById("trip-edit-item-documents-field");
+  if(timeField)timeField.hidden=saved;if(arrange)arrange.hidden=saved;if(savedSection)savedSection.hidden=!saved;if(savedPractical)savedPractical.hidden=!saved;if(locationSection)locationSection.hidden=transit;if(documentsField)documentsField.style.display=saved?"none":"";
 }
 async function tripEditCurrentSavedPlaceAreas(){
   const service=await tripEditService(),meta=service.getTripEditDraftSavedPlaceMeta?.(tripEditSession)||{},configured=Array.isArray(meta.areaFilters)?meta.areaFilters.map(v=>String(v||"").trim()).filter(Boolean):[];return configured.length?configured:savedPlaceAreaFilterValues(activeTripPresentationData());

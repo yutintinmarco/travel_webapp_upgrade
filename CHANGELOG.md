@@ -1,3 +1,11 @@
+# v7.9.20.11 — Final Cleanup Hotfix · Theme handoff / Transit contrast / Transit editor shell / Flight airport anchor
+
+- Dark / Auto theme warm reload now reuses the last resolved palette while async cloud or solar preference state reconciles, preventing the temporary Light palette handoff seen on iOS refresh.
+- Added a dedicated Dark Mode palette for the itinerary `交通` kind pill so the label remains readable on dark transit cards.
+- Removed the empty `位置 / 路線參照` shell from Transit item editing. Transit remains a semantic edge between the previous and next Stop, so its own location picker is intentionally not used.
+- Trip Map synthetic flight anchors now disambiguate bare three-letter IATA airport codes as `<IATA> Airport` for Google geocoding. Displayed airport text is unchanged; existing full airport names are untouched.
+- No Firebase schema, rules, Storage rules, Functions, Day Bar, Transit Gallery or Booking Documents changes. No Firebase deploy required.
+
 ## v7.9.20.10 — Final Cleanup · Theme / Entry / Keyboard smoothness
 
 - Unified Auto theme resolution with the synchronous boot path: when sunrise / sunset data is unavailable, Auto now explicitly resolves to `theme-light` or `theme-dark` from the system preference instead of leaving the document with no theme class.
