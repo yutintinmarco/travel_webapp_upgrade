@@ -365,6 +365,26 @@ function airportMapQuery(value = "") {
   const compact = raw.toUpperCase();
   return /^[A-Z]{3}$/.test(compact) ? `${compact} Airport` : raw;
 }
+function airportIataCode(value = "") {
+  const raw = clean(value);
+  if (!raw) return "";
+  const upper = raw.toUpperCase();
+  if (/^[A-Z]{3}$/.test(upper)) return upper;
+  const parenthesized = upper.match(/\(([A-Z]{3})\)/);
+  if (parenthesized?.[1]) return parenthesized[1];
+  const leading = upper.match(/^([A-Z]{3})(?:\s|[-–—·/]|$)/);
+  return leading?.[1] || "";
+}
+function airportResolveSpec(value = "") {
+  const raw = clean(value);
+  if (!raw) return { type: "none", key: "" };
+  const iata = airportIataCode(raw);
+  const query = iata ? `${iata} airport` : raw;
+  // Airport anchors use a dedicated cache namespace. This intentionally bypasses
+  // any older generic geocoder result (for example q:kix airport) that may have
+  // been cached before strict airport resolution was introduced.
+  return { type: "airport", value: query, raw, iata, key: `a:${(iata || raw).toLowerCase()}` };
+}
 function flightRowsForMap(meta = {}) {
   const source = Array.isArray(meta?.flights) ? meta.flights : [], out = [];
   source.forEach((row, index) => {
@@ -432,7 +452,8 @@ function flightAnchorsForDay(trip = {}, day = {}) {
     else return;
     if (!airport) return;
     const airportQuery = airportMapQuery(airport);
-    const mapsUrl = editableMapsUrl({ address: airportQuery, name: airport }), record = { location: { name: airport, address: airportQuery, mapsUrl } }, resolve = pointResolveSpec(record);
+    const mapsUrl = editableMapsUrl({ address: airportQuery, name: airport });
+    const resolve = airportResolveSpec(airport);
     if (resolve.type === "none") return;
     anchors.push({ kind: "itinerary", itemKind: ITINERARY_ITEM_KIND.TRANSIT, mapRole: "anchor", anchorType: "flight", routeEligible: true, routeMode: MAP_ROUTE_MODE.FLIGHT,
       identity: `anchor:flight:${clean(day?.dayId)}:${clean(flight.flightId)}:${role}`, dayId: clean(day?.dayId), itemId: "", order, displayOrder: null, who: clean(flight.teamKey) || "all", icon: "✈️",
@@ -549,20 +570,48 @@ async function geocodeOne(geocoder, point) {
     placeId: cached.placeId,
     resolveSource: cached.source
   };
-  let response;
-  if (spec.type === "placeId") response = await geocoder.geocode({ placeId: spec.value });
-  else if (spec.type === "query") response = await geocoder.geocode({ address: spec.value });
-  else return null;
-  const result = response?.results?.[0];
-  const lat = finiteNumber(result?.geometry?.location?.lat?.());
-  const lng = finiteNumber(result?.geometry?.location?.lng?.());
-  if (lat == null || lng == null) return null;
-  const resolved = {
-    lat,
-    lng,
-    formattedAddress: clean(result?.formatted_address),
-    placeId: clean(result?.place_id)
-  };
+  let resolved = null;
+  if (spec.type === "airport") {
+    try {
+      const { Place } = await loadGooglePlacesLibrary();
+      const response = await Place.searchByText({
+        textQuery: clean(spec.value),
+        fields: ["id", "displayName", "formattedAddress", "location"],
+        includedType: "airport",
+        useStrictTypeFiltering: true,
+        maxResultCount: 5
+      });
+      const place = Array.isArray(response?.places) ? response.places[0] : null;
+      const lat = finiteNumber(place?.location?.lat?.() ?? place?.location?.lat);
+      const lng = finiteNumber(place?.location?.lng?.() ?? place?.location?.lng);
+      if (lat != null && lng != null) {
+        resolved = {
+          lat,
+          lng,
+          formattedAddress: clean(place?.formattedAddress || place?.displayName),
+          placeId: clean(place?.id)
+        };
+      }
+    } catch (error) {
+      console.warn("Airport Places resolution unavailable; falling back to Geocoder", error);
+    }
+  }
+  if (!resolved) {
+    let response;
+    if (spec.type === "placeId") response = await geocoder.geocode({ placeId: spec.value });
+    else if (spec.type === "query" || spec.type === "airport") response = await geocoder.geocode({ address: spec.value });
+    else return null;
+    const result = response?.results?.[0];
+    const lat = finiteNumber(result?.geometry?.location?.lat?.());
+    const lng = finiteNumber(result?.geometry?.location?.lng?.());
+    if (lat == null || lng == null) return null;
+    resolved = {
+      lat,
+      lng,
+      formattedAddress: clean(result?.formatted_address),
+      placeId: clean(result?.place_id)
+    };
+  }
   cacheStore(spec.key, resolved);
   return {
     ...point,
