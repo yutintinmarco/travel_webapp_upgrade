@@ -1,3 +1,10 @@
+## v7.9.20.7 — Quick Add Bottom Navigation Focus Fix
+
+- Fixes iOS Quick Add leaving Bottom Navigation temporarily hidden after the keyboard visually closes.
+- Root cause: the originating Quick Add input could remain `document.activeElement`, so the shared keyboard-aware tab bar correctly believed an editable field was still focused.
+- A successful Quick Add now explicitly releases focus only from the active Quick Add field before the optimistic background Firebase write continues.
+- No Bottom Navigation CSS, global keyboard geometry, Firebase schema, Rules or Functions changes.
+
 v7.9.20.6 — Phase 3E Cleanup D · Expenses Realtime Flow
 
 1. Quick Add now reads pending Firestore server timestamps with `serverTimestamps: "estimate"`, so a newly-created expense can sort into Recent Expenses on the first latency-compensated listener snapshot instead of waiting for the server timestamp acknowledgement.
