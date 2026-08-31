@@ -1,5 +1,5 @@
 /* Travel WebApp Service Worker
- * v7.9.20.18 · Final Cleanup · UX polish / background efficiency / legacy cleanup
+ * v7.9.20.19 · Pre-use Hardening · immutable cache / preview cleanup / wording polish
  *
  * Keeps the v7.7.0.14 cold-start behaviour, while hardening installation:
  *  1. Critical shell assets are transactional. If any critical file cannot be
@@ -14,9 +14,10 @@
  *     explicit reload stays network-first.
  */
 
-const RELEASE_VERSION = "7.9.20.18";
+const RELEASE_VERSION = "7.9.20.19";
 const SW_VERSION = `travel-shell-v${RELEASE_VERSION}`;
 const CORE_CACHE = SW_VERSION;
+const BOOKING_DOCUMENT_PREVIEW_CACHE = "travel-booking-document-preview-v1";
 
 // Required for a useful offline launch and remembered-Trip boot.
 const CRITICAL_ASSETS = [
@@ -105,6 +106,12 @@ function matchingReleasePrecacheKey(request) {
   return url.href;
 }
 
+function isCurrentReleaseImmutableRequest(request) {
+  const url = new URL(request.url);
+  return url.origin === self.location.origin
+    && url.searchParams.get("release") === RELEASE_VERSION;
+}
+
 function isForcedReload(request) {
   return request.cache === "reload" || request.cache === "no-store";
 }
@@ -145,14 +152,17 @@ self.addEventListener("install", event => {
 });
 
 self.addEventListener("activate", event => {
-  event.waitUntil(
-    caches.keys()
-      .then(keys => Promise.all(
-        keys.filter(key => key.startsWith("travel-shell-") && key !== CORE_CACHE)
-            .map(key => caches.delete(key))
-      ))
-      .then(() => self.clients.claim())
-  );
+  event.waitUntil((async () => {
+    const keys = await caches.keys();
+    await Promise.all(
+      keys.filter(key => key.startsWith("travel-shell-") && key !== CORE_CACHE)
+          .map(key => caches.delete(key))
+    );
+    // PDF preview bytes are authenticated, short-lived responses. Purge any
+    // orphan left by an iOS force-quit / crash before the new worker takes over.
+    await caches.delete(BOOKING_DOCUMENT_PREVIEW_CACHE);
+    await self.clients.claim();
+  })());
 });
 
 function revalidate(request, key) {
@@ -220,7 +230,12 @@ self.addEventListener("fetch", event => {
   event.respondWith(
     caches.match(key).then(async cached => {
       if (cached) {
-        event.waitUntil(revalidate(request, key).catch(() => {}));
+        // A release-tagged URL is immutable for the lifetime of this worker.
+        // The next release gets a new query value, so a same-release cache hit
+        // never needs a background network round trip.
+        if (!isCurrentReleaseImmutableRequest(request)) {
+          event.waitUntil(revalidate(request, key).catch(() => {}));
+        }
         return cached;
       }
 
@@ -233,7 +248,13 @@ self.addEventListener("fetch", event => {
       if (precacheKey && precacheKey !== key) {
         const precached = await caches.match(precacheKey);
         if (precached) {
-          event.waitUntil(revalidate(request, precacheKey).catch(() => {}));
+          // Promote the canonical install-time response to the exact release URL
+          // once. Future imports then hit their primary key in a single lookup.
+          event.waitUntil(
+            caches.open(CORE_CACHE)
+              .then(cache => cache.put(key, precached.clone()))
+              .catch(() => {})
+          );
           return precached;
         }
       }

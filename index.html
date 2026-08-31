@@ -12,7 +12,7 @@
   <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
   <link rel="dns-prefetch" href="https://api.open-meteo.com">
   <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
-  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?release=7.9.20.18">
+  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?release=7.9.20.19">
   <title id="page-title">行程</title>
   <script>
   // v7.7.5.0 · Performance Lite. Memory only: no Firebase reads/writes, no
@@ -3752,7 +3752,7 @@ html:not(.theme-light):not(.theme-dark) .cloud-safety-strip{
 #snacks-view::after,
 #info-view::after,
 #profile-view::after{
-  content:"v7.9.20.18" !important;
+  content:"v7.9.20.19" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3773,7 +3773,7 @@ html:not(.theme-light):not(.theme-dark) .cloud-safety-strip{
   display:none !important;
 }
 body.expenses-view-active .expenses-module .expenses-app::after{
-  content:"v7.9.20.18" !important;
+  content:"v7.9.20.19" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -4487,7 +4487,7 @@ html.theme-dark .snacks-library-count,html:not(.theme-light):not(.theme-dark) .s
 </style>
             <link rel="apple-touch-icon" href="assets/icon/trip_icon.png">
   <link rel="icon" type="image/png" href="assets/icon/trip_icon.png">
-  <link rel="manifest" href="manifest.json?release=7.9.20.18">
+  <link rel="manifest" href="manifest.json?release=7.9.20.19">
   <meta name="apple-mobile-web-app-title" content="關嘉露西生日之旅">
   <!-- v7.7.1.2: expenses.css is 144KB and every rule is scoped under
        .expenses-module, yet it used to block the very first paint of the
@@ -4495,8 +4495,8 @@ html.theme-dark .snacks-library-count,html:not(.theme-light):not(.theme-dark) .s
        priority without blocking paint; ensureExpensesStylesheet() flips it to
        media="all" before the 支出 view is ever mounted, so the styling is
        byte-for-byte identical by the time anything expenses-related renders. -->
-  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?release=7.9.20.18" media="print">
-  <noscript><link rel="stylesheet" href="assets/css/expenses.css?release=7.9.20.18"></noscript>
+  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?release=7.9.20.19" media="print">
+  <noscript><link rel="stylesheet" href="assets/css/expenses.css?release=7.9.20.19"></noscript>
 
 <style id="booking-documents-v79191-style">
 /* Phase 3E · Booking Documents native hierarchy / viewer hardening.
@@ -5161,7 +5161,7 @@ dialog.booking-document-viewer.is-edge-swiping{
       <section class="profile-card profile-menu-card profile-trip-actions-card" aria-label="旅程管理">
         <button class="profile-row" id="trip-edit-mode-entry" type="button">
           <span class="profile-row-icon profile-icon-blue">✎</span>
-          <span class="profile-row-copy"><strong>進入編輯模式</strong><small id="trip-edit-mode-entry-note">變更先留喺本機 Edit Session，最後一次儲存</small></span>
+          <span class="profile-row-copy"><strong>進入編輯模式</strong><small id="trip-edit-mode-entry-note">變更會先保留為未儲存修改，最後一次儲存</small></span>
           <span class="profile-chevron">›</span>
         </button>
         <button class="profile-row" type="button" disabled>
@@ -5252,7 +5252,7 @@ dialog.booking-document-viewer.is-edge-swiping{
         <div class="trip-media-icon-preview trip-library-icon" id="trip-icon-media-preview"></div>
         <div class="trip-media-icon-preview-copy">
           <strong id="trip-icon-media-title">目前圖示</strong>
-          <small id="trip-icon-media-copy">相片會先喺裝置壓縮，再上載 Firebase Storage。</small>
+          <small id="trip-icon-media-copy">相片會先喺裝置壓縮，再上載到雲端。</small>
         </div>
       </section>
       <div class="profile-section-label">圖示管理</div>
@@ -5282,7 +5282,7 @@ dialog.booking-document-viewer.is-edge-swiping{
         <div class="trip-media-background-preview" id="trip-background-media-preview"></div>
         <div class="trip-media-background-preview-copy">
           <strong id="trip-background-media-title">目前背景</strong>
-          <small id="trip-background-media-copy">相片會先喺裝置壓縮，再上載 Firebase Storage。</small>
+          <small id="trip-background-media-copy">相片會先喺裝置壓縮，再上載到雲端。</small>
         </div>
       </section>
       <div class="profile-section-label">背景管理</div>
@@ -5689,7 +5689,7 @@ dialog.booking-document-viewer.is-edge-swiping{
         <span class="profile-detail-spacer"></span>
       </div>
       <section class="profile-card" aria-label="App 資訊">
-        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.9.20.18</strong></div>
+        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.9.20.19</strong></div>
         <div class="profile-meta-row"><span>資料架構</span><strong>Phase 2G.2</strong></div>
         <div class="profile-meta-row"><span>主要資料來源</span><strong id="app-data-source-label">Firebase / 本機快取</strong></div>
       </section>
@@ -5925,7 +5925,7 @@ dialog.booking-document-viewer.is-edge-swiping{
       <div class="trip-edit-travel-heading-meta" id="trip-edit-trip-details-meta">旅程名稱 · 日期 · 路線</div>
     </div>
     <div class="trip-edit-manage-scroll">
-      <p class="trip-edit-local-note">呢度嘅修改只會先放入今次 Edit Session；最下面「儲存」先一次寫入 Firebase。</p>
+      <p class="trip-edit-local-note">呢度嘅修改會先保留為未儲存變更；最下面「儲存」先一次同步到雲端。</p>
       <div class="trip-edit-form">
         <label class="trip-edit-field"><span>旅程名稱</span><input class="trip-edit-input" id="trip-edit-trip-title-main" type="text" maxlength="120" autocomplete="off"></label>
         <label class="trip-edit-field"><span>短標題</span><input class="trip-edit-input" id="trip-edit-trip-title-small" type="text" maxlength="80" autocomplete="off"></label>
@@ -6145,7 +6145,7 @@ dialog.booking-document-viewer.is-edge-swiping{
   <div class="modal trip-edit-manage-modal" role="dialog" aria-modal="true" aria-labelledby="trip-edit-area-title">
     <div class="trip-edit-manage-scroll">
       <div class="modal-title" id="trip-edit-area-title">管理收藏地區</div>
-      <p class="trip-edit-local-note">呢度管理收藏頁頂部嘅地區 Filter。新增／刪除只會先留喺今次 Local Draft；刪除 Filter 唔會刪除任何收藏。</p>
+      <p class="trip-edit-local-note">呢度管理收藏頁頂部嘅地區 Filter。新增／刪除只會先保留為未儲存變更；刪除 Filter 唔會刪除任何收藏。</p>
       <div class="trip-edit-area-manager-list" id="trip-edit-area-manager-list"></div>
       <div class="trip-edit-area-manager-add">
         <input class="trip-edit-input" id="trip-edit-area-manager-input" type="text" autocomplete="off" maxlength="40" placeholder="例如 東京">
@@ -6163,7 +6163,7 @@ dialog.booking-document-viewer.is-edge-swiping{
   <div class="modal trip-edit-manage-modal" role="dialog" aria-modal="true" aria-labelledby="trip-edit-taxonomy-title">
     <div class="trip-edit-manage-scroll">
       <div class="modal-title" id="trip-edit-taxonomy-title">管理收藏分類</div>
-      <p class="trip-edit-local-note">可自訂類型、細分類及優先度。改名會保留原有收藏關聯；仍有收藏使用嘅選項不可直接刪除。所有修改只會先留喺 Local Draft。</p>
+      <p class="trip-edit-local-note">可自訂類型、細分類及優先度。改名會保留原有收藏關聯；仍有收藏使用嘅選項不可直接刪除。所有修改會先保留為未儲存變更。</p>
       <section class="trip-edit-taxonomy-section">
         <div class="trip-edit-taxonomy-title">類型</div>
         <div class="trip-edit-taxonomy-list" id="trip-edit-taxonomy-meal-list"></div>
@@ -6191,10 +6191,10 @@ dialog.booking-document-viewer.is-edge-swiping{
   <div class="modal trip-edit-item-modal" role="dialog" aria-modal="true" aria-labelledby="trip-edit-item-title">
     <div class="trip-edit-item-heading-row">
       <h3><span class="trip-edit-title-icon" id="trip-edit-item-heading-icon">📍</span><span id="trip-edit-item-title">編輯行程項目</span></h3>
-      <div class="trip-edit-heading-meta" id="trip-edit-item-heading-meta">Local Draft</div>
+      <div class="trip-edit-heading-meta" id="trip-edit-item-heading-meta">未儲存</div>
     </div>
     <div class="trip-edit-item-scroll">
-      <p class="trip-edit-local-note trip-edit-item-local-note">修改只會先留喺今次 Edit Session；最下面全局「儲存」先一次寫入 Firebase。</p>
+      <p class="trip-edit-local-note trip-edit-item-local-note">修改會先保留為未儲存變更；最下面全局「儲存」先一次同步到雲端。</p>
       <div class="trip-edit-form trip-edit-native-form">
         <section class="trip-edit-native-group">
           <div class="trip-edit-native-section-title" id="trip-edit-primary-section-title">基本資料</div>
@@ -6302,7 +6302,7 @@ dialog.booking-document-viewer.is-edge-swiping{
           <div class="trip-edit-field" id="trip-edit-item-documents-field"><span>預訂文件</span><div class="trip-edit-document-block"><div class="trip-edit-document-list" id="trip-edit-item-documents"></div><button class="trip-edit-document-add" id="trip-edit-item-document-add" type="button">＋ 加入 PDF／預訂圖片</button><div class="trip-edit-document-limit">PDF／圖片保留原檔 · 每份最多 20 MB</div></div></div>
           <div class="trip-edit-delete-block" id="trip-edit-delete-block" hidden>
             <button class="trip-edit-delete-btn" id="trip-edit-item-delete" type="button">刪除此項目</button>
-            <div class="trip-edit-delete-note" id="trip-edit-delete-note">刪除只會先套用到今次 Local Draft；全局「取消」可以還原未儲存變更。</div>
+            <div class="trip-edit-delete-note" id="trip-edit-delete-note">刪除只會先套用到未儲存變更；全局「取消」可以還原。</div>
           </div>
         </section>
       </div>
@@ -6348,7 +6348,7 @@ dialog.booking-document-viewer.is-edge-swiping{
 </div>
 
 <script>
-const APP_VERSION = "7.9.20.18";
+const APP_VERSION = "7.9.20.19";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 let tripMapServicePromise=null,transitRouteServicePromise=null,tripEditServicePromise=null,airlineLogoServicePromise=null,tripDocumentServicePromise=null,tripMapController=null,tripMapScope="day",tripMapRenderEpoch=0,tripMapSelectedPoint=null;
@@ -6800,17 +6800,6 @@ function isManagedItineraryMedia(image,itemIdInput=""){
   if(ownerType&&ownerType!=="item")return false;
   if(ownerId&&itemId&&ownerId!==itemId)return false;
   return slot==="primary"||slot==="gallery"||slot.startsWith("gallery:");
-}
-function managedItineraryMediaList(item,dayId="",tripId=dataTripId(window.tripData)){
-  const itemId=String(item?.itemId||"").trim(),images=Array.isArray(item?.images)?item.images.filter(image=>isManagedItineraryMedia(image,itemId)):[ ];
-  const pending=pendingItineraryMediaOverlays(tripId,dayId,itemId).map(overlay=>overlay?.descriptor).filter(descriptor=>descriptor&&tripMediaHasStorage(descriptor));
-  const merged=[...images.map(image=>({...image}))];
-  pending.forEach(descriptor=>{
-    const mediaId=String(descriptor.mediaId||descriptor.imageId||"").trim(),index=merged.findIndex(image=>mediaId&&String(image?.mediaId||image?.imageId||"").trim()===mediaId);
-    const next={...descriptor,ownerType:"item",ownerId:itemId,slot:String(descriptor.slot||"gallery")};
-    if(index>=0)merged[index]={...merged[index],...next};else merged.push(next);
-  });
-  return merged.sort((a,b)=>(Number(a?.sortOrder)||0)-(Number(b?.sortOrder)||0));
 }
 function itineraryMediaCrop(input){
   const raw=input&&typeof input==="object"?input.crop:null;if(!raw||typeof raw!=="object")return null;
@@ -8792,7 +8781,7 @@ function tripEditCurrentRevision(){return Math.max(1,Number(window.tripData?.rev
 function tripEditSyncProfileEntry(){
   const entry=document.getElementById("trip-edit-mode-entry"),note=document.getElementById("trip-edit-mode-entry-note");if(!entry)return;
   const allowed=tripEditHasPermission(),active=tripEditIsActive();entry.disabled=!allowed||active;
-  if(note)note.textContent=active?"目前已進入 Edit Mode":(currentTripGlobalLocked()?"旅程已鎖定，目前只可查看":(allowed?"變更先留喺本機 Edit Session，最後一次儲存":"只有 Owner／Admin 可以編輯"));
+  if(note)note.textContent=active?"目前已進入 Edit Mode":(currentTripGlobalLocked()?"旅程已鎖定，目前只可查看":(allowed?"變更會先保留為未儲存修改，最後一次儲存":"只有 Owner／Admin 可以編輯"));
 }
 let tripEditStickyRaf=0,tripEditStickyTop=107;
 function tripEditRefreshStickyTop(){
@@ -8993,6 +8982,10 @@ async function tripCreateBookingDocumentPdfPreview(blob,row={}){
     return fallback;
   }
   await tripReleaseBookingDocumentPdfPreview();
+  // A force-quit can leave the previous preview URL unknown to this new page.
+  // Only one PDF preview is active at a time, so purge the short-lived cache
+  // before creating the next authenticated preview.
+  await caches.delete(BOOKING_DOCUMENT_PREVIEW_CACHE);
   const fileName=tripBookingDocumentPreviewFileName(row);
   const nonce=`${Date.now().toString(36)}-${Math.random().toString(36).slice(2,10)}`;
   const path=`./__booking_document_preview__/${encodeURIComponent(nonce)}/${encodeURIComponent(fileName)}`;
@@ -9431,7 +9424,7 @@ async function tripEditHandleMapPick(coords={}){
     if(reverseEpoch!==tripEditLocationReverseEpoch||!tripEditItemTarget)return;
     tripEditRenderLocationSelection(manual);
     if(query)query.value=manual.address||manual.name||`${lat.toFixed(5)}, ${lng.toFixed(5)}`;
-    if(status)status.textContent="已按地圖更新定位；可繼續點另一個位置，撳「完成」先寫入 Local Draft。";
+    if(status)status.textContent="已按地圖更新定位；可繼續點另一個位置，撳「完成」先更新未儲存變更。";
   }catch(error){
     console.warn("Trip edit reverse geocode",error);if(reverseEpoch!==tripEditLocationReverseEpoch)return;
     const fallback={name:String(tripEditLocationSelection?.name||titleInput?.value||"自訂位置").trim()||"自訂位置",placeId:"",latitude:lat,longitude:lng,address:"",mapsUrl:`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${lat},${lng}`)}`};
@@ -9465,7 +9458,7 @@ function tripEditRenderLocationSelection(value={}){
     address.textContent=[tripEditLocationSelection.address,coords].filter(Boolean).join(" · ")||tripEditLocationSelection.mapsUrl||"";
   }
   if(open)open.disabled=!tripEditLocationSelection.mapsUrl;
-  if(status)status.textContent=has?"已選定位；可用地圖再確認或微調，撳「完成」只會先更新今次 Local Draft。":"可選；未設定定位嘅地點唔會加入 Map route sequence。";
+  if(status)status.textContent=has?"已選定位；可用地圖再確認或微調，撳「完成」只會先更新未儲存變更。":"可選；未設定定位嘅地點唔會加入 Map route sequence。";
   if(has)void tripEditSyncLocationPreview(tripEditLocationSelection);else tripEditDestroyLocationPreview();
 }
 function tripEditConfigureLocation(kind,value={}){
@@ -9510,7 +9503,7 @@ async function tripEditSearchLocation(){
       });
       results.hidden=false;const attribution=document.getElementById("trip-edit-location-attribution");if(attribution)attribution.hidden=false;
     }
-    if(status)status.textContent=rows.some(row=>row.source==="places")?"請揀一個 Google Places 結果；名稱同地區會先幫你分辨同名地點。":"Places 暫時未能使用，現以 Google 地址結果 fallback；請揀一個結果。";
+    if(status)status.textContent=rows.some(row=>row.source==="places")?"請揀一個 Google Places 結果；名稱同地區會先幫你分辨同名地點。":"Places 暫時未能使用，現改用 Google 地址結果；請揀一個結果。";
   }catch(error){
     console.warn("Trip edit location search",error);if(epoch!==tripEditLocationSearchEpoch)return;
     if(status){
@@ -9676,7 +9669,7 @@ function tripEditConfigureOrder(position=null,{visible=false}={}){
   if(!visible||!position||Number(position.index)<0){tripEditOrderState=null;if(field)field.hidden=true;if(status)status.textContent="";return;}
   const count=Math.max(1,Number(position.count)||1),index=Math.max(0,Math.min(count-1,Number(position.index)||0));
   tripEditOrderState={index,count,touched:false};if(field)field.hidden=false;
-  const refresh=()=>{if(!tripEditOrderState)return;const i=tripEditOrderState.index,c=tripEditOrderState.count;if(up)up.disabled=i<=0;if(down)down.disabled=i>=c-1;if(status)status.textContent=`第 ${i+1} / ${c} 項 · 手動次序只留喺 Local Draft；之後再改時間會重新按時間排序。`;};
+  const refresh=()=>{if(!tripEditOrderState)return;const i=tripEditOrderState.index,c=tripEditOrderState.count;if(up)up.disabled=i<=0;if(down)down.disabled=i>=c-1;if(status)status.textContent=`第 ${i+1} / ${c} 項 · 手動次序只會保留為未儲存變更；之後再改時間會重新按時間排序。`;};
   tripEditOrderState.refresh=refresh;refresh();
 }
 function tripEditMovePendingOrder(direction){
@@ -9692,12 +9685,12 @@ function tripEditConfigureDelete(dayId,itemId,{visible=false}={}){
   const block=document.getElementById("trip-edit-delete-block"),button=document.getElementById("trip-edit-item-delete"),note=document.getElementById("trip-edit-delete-note");
   if(!visible){if(block)block.hidden=true;return;}
   if(block)block.hidden=false;if(button){button.disabled=false;button.textContent=tripEditTargetKind()==="savedPlace"?"刪除此收藏":"刪除此項目";}
-  if(note)note.textContent=tripEditItemHasManagedMedia(dayId,itemId)?"刪除會先留喺 Local Draft；全局『儲存』後先刪除 Firebase item，同步清理 Storage／Media Registry。取消編輯會完整保留。":"刪除只會先套用到今次 Local Draft；全局『取消』可以還原未儲存變更。";
+  if(note)note.textContent=tripEditItemHasManagedMedia(dayId,itemId)?"刪除會先保留為未儲存變更；全局『儲存』後先正式刪除項目及相關雲端媒體。取消編輯會完整保留。":"刪除只會先套用到未儲存變更；全局『取消』可以還原。";
 }
 async function deleteTripEditItemFromSession(){
   if(!tripEditSession||tripEditItemTarget?.mode!=="edit")return;
   const service=await tripEditService(),kind=tripEditTargetKind(),title=String(document.getElementById("trip-edit-item-title-input")?.value||(kind==="savedPlace"?"呢個收藏":"呢個行程項目")).trim()||(kind==="savedPlace"?"呢個收藏":"呢個行程項目");
-  if(!window.confirm(`刪除「${title}」？變更只會先留喺今次 Edit Session，未全局儲存前仍可用「取消」全部還原。`))return;
+  if(!window.confirm(`刪除「${title}」？變更只會先保留為未儲存變更，未全局儲存前仍可用「取消」全部還原。`))return;
   if(kind==="savedPlace"){
     const placeId=String(tripEditItemTarget.placeId||"").trim(),draft=service.getTripEditDraftSavedPlace?.(tripEditSession,placeId);
     const staged=(Array.isArray(draft?.images)?draft.images:[]).filter(row=>row?.editDraft===true);if(staged.length){try{const mediaService=await getTripMediaSyncService();await mediaService.discardTripEditItemMedia({descriptors:staged});}catch(error){console.warn("Discard unsaved saved-place media",error);}}
@@ -9773,7 +9766,7 @@ function tripEditRefreshEditorHeading(kindInput="",modeInput=""){
   if(noteLabel)noteLabel.textContent=kind==="savedPlace"?"備註 / 建議":(kind==="transit"?"路線 / 備註":"備註");
   if(locationTitle)locationTitle.textContent=kind==="transit"?"位置 / 路線參照":"地點";if(locationLabel)locationLabel.textContent=kind==="transit"?"Google Maps 參照":"Google Maps 地點";
   const itemName=String(document.getElementById("trip-edit-item-title-input")?.value||"").trim(),time=String(document.getElementById("trip-edit-item-time")?.value||"").trim();
-  if(meta){const parts=[];if(itemName)parts.push(itemName);if(kind==="savedPlace"){const area=String(document.getElementById("trip-edit-saved-area")?.value||"").trim(),categorySelect=document.getElementById("trip-edit-saved-category"),category=String(categorySelect?.selectedOptions?.[0]?.textContent||categorySelect?.value||"").trim();if(area)parts.push(area);if(category&&category!=="未設定")parts.push(category);}else{const days=Array.isArray(activeTripPresentationData()?.days)?activeTripPresentationData().days:[],idx=days.findIndex(day=>String(day?.dayId||"").trim()===String(tripEditDayValue||tripEditItemTarget?.dayId||"")),day=idx>=0?days[idx]:null;if(day)parts.push(String(day?.label||`Day ${idx+1}`));if(time)parts.push(time);}if(!parts.length)parts.push("Local Draft");meta.textContent=parts.join(" · ");}
+  if(meta){const parts=[];if(itemName)parts.push(itemName);if(kind==="savedPlace"){const area=String(document.getElementById("trip-edit-saved-area")?.value||"").trim(),categorySelect=document.getElementById("trip-edit-saved-category"),category=String(categorySelect?.selectedOptions?.[0]?.textContent||categorySelect?.value||"").trim();if(area)parts.push(area);if(category&&category!=="未設定")parts.push(category);}else{const days=Array.isArray(activeTripPresentationData()?.days)?activeTripPresentationData().days:[],idx=days.findIndex(day=>String(day?.dayId||"").trim()===String(tripEditDayValue||tripEditItemTarget?.dayId||"")),day=idx>=0?days[idx]:null;if(day)parts.push(String(day?.label||`Day ${idx+1}`));if(time)parts.push(time);}if(!parts.length)parts.push("未儲存");meta.textContent=parts.join(" · ");}
 }
 function openTripEditAddModal(dayId,kind,prefill={}){
   if(!tripEditSession)return;
@@ -13681,7 +13674,7 @@ function renderTripMemberPage(){
       return `<div class="trip-member-row${canManage?" is-manageable":""}">
         <span class="trip-member-avatar">${tripMemberAvatarMarkup(member)}</span>
         <span class="trip-member-copy">
-          <strong>${tripMemberEsc(member.displayName||member.email||member.uid)}</strong>
+          <strong>${tripMemberEsc(member.displayName||member.email||"未命名成員")}</strong>
           <small>${tripMemberEsc(member.email||member.uid)}</small>
           <span class="trip-member-meta">${isSelf?'<span class="trip-member-you-pill">你</span>':""}<span class="trip-library-pill">${tripMemberEsc(role==="owner"?"最高權限":role==="admin"?"管理旅程":role==="member"?"可使用支出":"唯讀")}</span></span>
         </span>
@@ -13763,7 +13756,7 @@ document.getElementById("trip-member-list")?.addEventListener("change",async eve
 document.getElementById("trip-member-list")?.addEventListener("click",async event=>{
   const button=event.target.closest?.("[data-member-remove-uid]");if(!button)return;
   const uid=button.dataset.memberRemoveUid,member=tripMemberRows.find(item=>item.uid===uid);
-  if(!window.confirm(`移除「${member?.displayName||member?.email||uid}」嘅旅程權限？`))return;
+  if(!window.confirm(`移除「${member?.displayName||member?.email||"未命名成員"}」嘅旅程權限？`))return;
   button.disabled=true;
   try{const service=await getTripMemberService();await service.removeTripMember(currentTripMemberId(),uid,{user:tripLibraryCurrentUser});}
   catch(error){alert(tripMemberFriendlyError(error));button.disabled=false;}
@@ -13804,8 +13797,8 @@ function renderAppAdminCreatorList(){
   }
   const currentUid=String(window.__appAuthUser?.uid||"");
   list.innerHTML=appAdminCreatorRows.map(creator=>{
-    const identity=creator.displayName||creator.email||creator.uid;
-    const secondary=creator.email||creator.uid;
+    const identity=creator.displayName||creator.email||"未命名成員";
+    const secondary=creator.email||"未提供電郵";
     const isSelf=String(creator.uid||"")===currentUid;
     return `<div class="trip-member-row is-manageable">
       <span class="trip-member-avatar">${tripMemberAvatarMarkup(creator)}</span>
@@ -13879,7 +13872,7 @@ document.getElementById("app-admin-add-creator")?.addEventListener("click",async
 document.getElementById("app-admin-creator-list")?.addEventListener("click",async event=>{
   const button=event.target.closest?.("[data-app-admin-revoke]");if(!button||appAdminBusy)return;
   const uid=String(button.dataset.appAdminRevoke||""),creator=appAdminCreatorRows.find(item=>String(item.uid||"")===uid);
-  if(!uid||!window.confirm(`移除「${creator?.displayName||creator?.email||uid}」嘅旅程建立權限？`))return;
+  if(!uid||!window.confirm(`移除「${creator?.displayName||creator?.email||"未命名成員"}」嘅旅程建立權限？`))return;
   appAdminBusy=true;button.disabled=true;
   const status=document.getElementById("app-admin-action-status");if(status){status.classList.remove("is-error");status.textContent="正在更新旅程建立權限…";}
   try{
@@ -13971,10 +13964,10 @@ function mediaQueueStateCopy(overlay,kind="媒體"){
   if(!overlay)return"";
   const state=String(overlay.state||"");
   if(state==="queued")return navigator.onLine===false?`${kind}已保存到本機，等待網絡恢復後同步。`:`${kind}已保存到本機，正在排隊背景同步…`;
-  if(state==="uploading")return`${kind}已保存到本機，正在背景上載 Firebase Storage…`;
-  if(state==="uploaded"||state==="attaching")return`Storage 已完成，正在同步${kind}資料…`;
+  if(state==="uploading")return`${kind}已保存到本機，正在背景上載到雲端…`;
+  if(state==="uploaded"||state==="attaching")return`上載已完成，正在同步${kind}資料…`;
   if(state==="cleanup")return`${kind}已同步，正在背景清理舊媒體…`;
-  if(state==="settled")return`${kind}已同步到 Firebase。`;
+  if(state==="settled")return`${kind}已同步到雲端。`;
   if(state==="failed")return`${kind}已保存在本機，雲端同步稍後會自動重試。`;
   return`${kind}已保存到本機，正在背景同步…`;
 }
@@ -14380,7 +14373,7 @@ function renderTripIconSettings(data=window.tripData,{preserveStatus=false}={}){
   if(nextPreviewImg&&previousPreviewSrc&&!nextPreviewImg.getAttribute("src"))nextPreviewImg.setAttribute("src",previousPreviewSrc);
   hydrateTripLibraryMediaImages(preview);
   if(title)title.textContent=pendingBlocking?"本機新圖示":(hasCustom?"自訂 Firebase 圖示":"旅程原有圖示");
-  if(copy)copy.textContent=pendingAny?mediaQueueStateCopy(pending,"圖示"):(hasCustom?"目前圖示已存放喺 Firebase Storage，其他裝置會同步顯示。":"選擇圖片後會先保存本機，再由 Firebase 背景同步。");
+  if(copy)copy.textContent=pendingAny?mediaQueueStateCopy(pending,"圖示"):(hasCustom?"目前圖示已存放喺雲端，其他裝置會同步顯示。":"選擇圖片後會先保存本機，再喺背景同步到雲端。");
   upload.disabled=tripIconMediaBusy||pendingBlocking||!canEdit||!tripId;
   upload.classList.toggle("profile-row-disabled",upload.disabled);
   upload.setAttribute("aria-disabled",upload.disabled?"true":"false");
@@ -14516,7 +14509,7 @@ function renderTripBackgroundSettings(data=window.tripData,{preserveStatus=false
   }else{preview.style.background=bootVisualBackgroundCss(data);}
   if(hasCustom||legacy)preview.style.removeProperty("background");
   if(title)title.textContent=pendingBlocking?"本機新背景":(hasCustom?"自訂 Firebase 背景":"旅程原有背景");
-  if(copy)copy.textContent=pendingAny?mediaQueueStateCopy(pending,"背景"):(hasCustom?"目前背景已存放喺 Firebase Storage；切換旅程時會先保留舊畫面，等新背景完成解碼先原子切換。":"選擇圖片後會先保存本機，再由 Firebase 背景同步。");
+  if(copy)copy.textContent=pendingAny?mediaQueueStateCopy(pending,"背景"):(hasCustom?"目前背景已存放喺雲端；切換旅程時會先保留舊畫面，等新背景完成解碼先順暢切換。":"選擇圖片後會先保存本機，再喺背景同步到雲端。");
   upload.disabled=tripBackgroundMediaBusy||pendingBlocking||!canEdit||!tripId;
   upload.classList.toggle("profile-row-disabled",upload.disabled);
   upload.setAttribute("aria-disabled",upload.disabled?"true":"false");
@@ -14715,7 +14708,7 @@ function renderDestinationSettingsPage(data=window.tripData){
       </div>
     </div>`;
   }).join("");
-  if(status){status.classList.remove("is-error");status.textContent=canEdit?"改色後會直接儲存到 Firebase，並同步更新 Day、跨城市漸變、天氣同城市標籤。":(currentTripGlobalLocked()?"旅程已全域鎖定，目前只可查看目的地顏色。":"目前為唯讀。只有 Owner 或 Admin 可以修改目的地顏色。");}
+  if(status){status.classList.remove("is-error");status.textContent=canEdit?"改色後會直接儲存到雲端，並同步更新 Day、跨城市漸變、天氣同城市標籤。":(currentTripGlobalLocked()?"旅程已全域鎖定，目前只可查看目的地顏色。":"目前為唯讀。只有 Owner 或 Admin 可以修改目的地顏色。");}
 }
 function applyDestinationCustomColourLocalUI(cityKey,color){
   if(!parseHexColour(color))return;
@@ -14864,7 +14857,7 @@ function renderTeamSettingsPage(data=window.tripData){
       </div>
     </div>`;
   }).join("");
-  if(status){status.classList.remove("is-error");status.textContent=canEdit?"改色後會直接儲存到 Firebase，並同步更新 Team selector、航班、行程標籤及資料卡。":(currentTripGlobalLocked()?"旅程已全域鎖定，目前只可查看 Team 顏色。":"目前為唯讀。只有 Owner 或 Admin 可以修改 Team 顏色。");}
+  if(status){status.classList.remove("is-error");status.textContent=canEdit?"改色後會直接儲存到雲端，並同步更新 Team selector、航班、行程標籤及資料卡。":(currentTripGlobalLocked()?"旅程已全域鎖定，目前只可查看 Team 顏色。":"目前為唯讀。只有 Owner 或 Admin 可以修改 Team 顏色。");}
 }
 function applyTeamCustomColourLocalUI(teamKey,color){
   if(!parseHexColour(color))return;

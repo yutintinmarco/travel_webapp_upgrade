@@ -1,3 +1,12 @@
+# v7.9.20.19 — Pre-use Hardening · immutable release cache + PDF preview cleanup
+
+- Service Worker：同版本 `?release=` 資產命中 cache 後不再做無意義 background revalidate；install-time canonical precache 首次 bridge 後會保存到 exact release URL，之後單次 lookup 命中。
+- Booking Documents：PDF preview cache 在新 preview 建立前整體清理，Service Worker activate 亦清理 orphan cache；iOS force-quit / crash 不會令完整 PDF bytes 長期累積。
+- Expenses：一般用戶狀態改為「可編輯／已鎖定／全旅程唯讀」，移除 Open / Locked / Trip Locked 英文漏出；settings metadata-only tick 先經 semantic signature gate，避免無謂 status DOM write。
+- 編輯／媒體文案：Firebase Storage、Local Draft、Edit Session、fallback 等內部詞彙改成一般用戶語言；罕見無姓名／電郵帳戶不再顯示 raw UID。
+- Cleanup：刪除確認為零引用的 `managedItineraryMediaList()`。
+- 無 Firebase Rules / Functions / schema 變更；不需 Firebase deploy。
+
 # v7.9.20.18 — Final Cleanup · UX polish / background efficiency / legacy cleanup
 
 - Paused the 350 ms Full Backup sync-gate DOM refresh while the document is backgrounded, preserving the existing foreground freshness gate without needless background work.
