@@ -940,7 +940,7 @@ function getCleanModuleStatus(message) {
 }
 function getCurrentUserDisplayName() {
   if (!currentUser) return "未知用戶";
-  return currentUser.displayName || currentUser.email || currentUser.uid.slice(0, 7) + "…";
+  return currentUser.displayName || currentUser.email || "未命名成員";
 }
 
 const categoryRules = {
@@ -1127,14 +1127,14 @@ function updateTripStatusUi() {
   const globallyLocked = isGlobalTripLocked();
   const lockInfo = locked
     ? `已鎖定${tripLockedByName ? ` · ${tripLockedByName}` : ""}${tripLockedAt ? ` · ${formatTimestamp(tripLockedAt)}` : ""}`
-    : "Open，仍可新增及修改支出";
+    : "仍可新增及修改支出";
 
   if (tripStatusText) {
     tripStatusText.innerHTML = globallyLocked
-      ? `<span class="locked-badge">Trip Locked</span> 全域唯讀；支出鎖定設定暫不可變更`
+      ? `<span class="locked-badge">全旅程唯讀</span> 支出鎖定設定暫不可變更`
       : (locked
-        ? `<span class="locked-badge">Locked</span> ${safeEscape(lockInfo)}`
-        : `<span class="open-badge">Open</span> ${safeEscape(lockInfo)}`);
+        ? `<span class="locked-badge">已鎖定</span> ${safeEscape(lockInfo)}`
+        : `<span class="open-badge">可編輯</span> ${safeEscape(lockInfo)}`);
   }
 
   if (tripControlPanel) {
@@ -2342,12 +2342,12 @@ function startExpenseSettingsListener() {
     expenseSettingsLiveReady = true;
     updateBackupSyncMeta("settings", snap);
     const data = snap.exists() ? snapshotDataWithServerEstimate(snap) : {};
+    const signature = semanticRecordSignature(data, ["updatedAt", "updatedBy"]);
+    if (signature === lastExpenseSettingsSignature) return;
+    lastExpenseSettingsSignature = signature;
     if (typeof data.expenseLocked === "boolean") applyExpenseLockState(data, { explicit:true });
     else applyExpenseLockState({}, { explicit:false });
     if (snap.exists()) {
-      const signature = semanticRecordSignature(data, ["updatedAt", "updatedBy"]);
-      if (signature === lastExpenseSettingsSignature) return;
-      lastExpenseSettingsSignature = signature;
       tripSettings = {
         ...tripSettings,
         ...data,
