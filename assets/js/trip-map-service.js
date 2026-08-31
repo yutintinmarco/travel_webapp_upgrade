@@ -359,6 +359,12 @@ function hotelPlain(value) {
   if (typeof value === "string") return { name: clean(value), address: "", mapsUrl: "" };
   return { name: clean(value?.name || value?.label), address: clean(value?.address), mapsUrl: clean(value?.mapsUrl || value?.maps) };
 }
+function airportMapQuery(value = "") {
+  const raw = clean(value);
+  if (!raw) return "";
+  const compact = raw.toUpperCase();
+  return /^[A-Z]{3}$/.test(compact) ? `${compact} Airport` : raw;
+}
 function flightRowsForMap(meta = {}) {
   const source = Array.isArray(meta?.flights) ? meta.flights : [], out = [];
   source.forEach((row, index) => {
@@ -425,7 +431,8 @@ function flightAnchorsForDay(trip = {}, day = {}) {
     else if (role === "exit" && clean(flight.departureDate) === dateIso) { airport = clean(flight.departureAirport); time = clean(flight.departureTime); order = 100000; label = "出發"; }
     else return;
     if (!airport) return;
-    const mapsUrl = editableMapsUrl({ address: airport, name: airport }), record = { location: { name: airport, address: airport, mapsUrl } }, resolve = pointResolveSpec(record);
+    const airportQuery = airportMapQuery(airport);
+    const mapsUrl = editableMapsUrl({ address: airportQuery, name: airport }), record = { location: { name: airport, address: airportQuery, mapsUrl } }, resolve = pointResolveSpec(record);
     if (resolve.type === "none") return;
     anchors.push({ kind: "itinerary", itemKind: ITINERARY_ITEM_KIND.TRANSIT, mapRole: "anchor", anchorType: "flight", routeEligible: true, routeMode: MAP_ROUTE_MODE.FLIGHT,
       identity: `anchor:flight:${clean(day?.dayId)}:${clean(flight.flightId)}:${role}`, dayId: clean(day?.dayId), itemId: "", order, displayOrder: null, who: clean(flight.teamKey) || "all", icon: "✈️",
