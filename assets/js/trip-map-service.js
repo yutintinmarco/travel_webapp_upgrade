@@ -435,9 +435,12 @@ function lodgingAnchorsForDay(trip = {}, day = {}) {
     const mapsUrl = selected.mapsUrl || editableMapsUrl({ address: selected.address, name: title });
     const record = { location: { name: title, address: selected.address, mapsUrl } }, resolve = pointResolveSpec(record);
     if (resolve.type === "none") return null;
+    const isCheckInDay = Boolean(dateIso && selected.checkInDate && selected.checkInDate === dateIso);
+    const isCheckOutDay = Boolean(dateIso && selected.checkOutDate && selected.checkOutDate === dateIso);
     return { kind: "itinerary", itemKind: ITINERARY_ITEM_KIND.STOP, mapRole: "anchor", anchorType: "hotel", routeEligible: true, routeMode: MAP_ROUTE_MODE.UNKNOWN,
       identity: `anchor:hotel:${clean(day?.dayId)}:${selected.accommodationId}`, dayId: clean(day?.dayId), itemId: "", order: 0, displayOrder: null, who: selected.teamKey || "all", icon: "🏨", title,
-      subtitle: [clean(cities?.[selected.cityKey]?.label), selected.address].filter(Boolean).join(" · "), meta: "住宿 · 行程起終點", detail: selected.address, previewImages: [], previewImage: null, mapsUrl, resolve, syntheticAnchor: true };
+      subtitle: [clean(cities?.[selected.cityKey]?.label), selected.address].filter(Boolean).join(" · "), meta: "住宿 · 行程起終點", detail: selected.address, previewImages: [], previewImage: null, mapsUrl, resolve, syntheticAnchor: true,
+      routeHotelStartEligible: !isCheckInDay, routeHotelEndEligible: !isCheckOutDay, accommodationCheckInDate: clean(selected.checkInDate), accommodationCheckOutDate: clean(selected.checkOutDate) };
   }).filter(Boolean);
 }
 function flightAnchorsForDay(trip = {}, day = {}) {
@@ -456,7 +459,7 @@ function flightAnchorsForDay(trip = {}, day = {}) {
     const resolve = airportResolveSpec(airport);
     if (resolve.type === "none") return;
     anchors.push({ kind: "itinerary", itemKind: ITINERARY_ITEM_KIND.TRANSIT, mapRole: "anchor", anchorType: "flight", routeEligible: true, routeMode: MAP_ROUTE_MODE.FLIGHT,
-      identity: `anchor:flight:${clean(day?.dayId)}:${clean(flight.flightId)}:${role}`, dayId: clean(day?.dayId), itemId: "", order, displayOrder: null, who: clean(flight.teamKey) || "all", icon: "✈️",
+      identity: `anchor:flight:${clean(day?.dayId)}:${clean(flight.flightId)}:${role}`, dayId: clean(day?.dayId), itemId: "", order, displayOrder: null, who: clean(flight.teamKey) || "all", icon: "✈️", journeyRole: role,
       title: clean(flight.flightNumber) || "航班", subtitle: [label, airport, time].filter(Boolean).join(" · "), meta: "航班 · 行程起終點", detail: [clean(flight.departureAirport), clean(flight.arrivalAirport)].filter(Boolean).join(" → "), previewImages: [], previewImage: null, mapsUrl, resolve, syntheticAnchor: true });
   });
   return anchors;
@@ -518,9 +521,12 @@ export function itineraryMapPoints(trip, activeDayId = "") {
   const hasAccommodationMaster = Array.isArray(meta?.accommodations) && meta.accommodations.length > 0;
   const hasFlightMaster = Array.isArray(meta?.flights) && meta.flights.some(row => row && typeof row === "object" && !(row.outbound || row.inbound) && (row.flightId || row.flightNumber || row.journeyRole));
   if (hasAccommodationMaster) {
-    candidates = candidates.filter(point => point.anchorType !== "hotel");
+    // Keep explicit itinerary hotel visits such as “返回酒店”. They carry
+    // chronological route meaning and must not be replaced by the synthetic
+    // accommodation endpoint. The synthetic anchor is added separately and
+    // is used only for automatic start / end connection semantics.
     candidates.unshift(...lodgingAnchorsForDay(trip, day));
-  } else if (!candidates.some(point => point.anchorType === "hotel")) {
+  } else if (!candidates.some(point => point.anchorType === "hotel" && point.syntheticAnchor === true)) {
     candidates.unshift(...lodgingAnchorsForDay(trip, day));
   }
   if (hasFlightMaster) {
@@ -547,33 +553,42 @@ function mapPointDistanceMeters(a = {}, b = {}) {
   const h = Math.sin(dLat / 2) ** 2 + Math.cos(p1) * Math.cos(p2) * Math.sin(dLng / 2) ** 2;
   return 6371000 * 2 * Math.atan2(Math.sqrt(h), Math.sqrt(Math.max(0, 1 - h)));
 }
-function mapPointTeamsCompatible(a = {}, b = {}) {
-  const one = clean(a?.who) || "all", two = clean(b?.who) || "all";
-  return one === "all" || two === "all" || one === two;
+function mapPointCanUseSystemAnchor(point = {}, anchor = {}) {
+  const pointTeam = clean(point?.who) || "all", anchorTeam = clean(anchor?.who) || "all";
+  // A Team-specific point may use its own or a shared system anchor. A shared
+  // itinerary point is allowed to match Team-specific anchors too, but marker
+  // suppression is decided later against the currently visible Team so a
+  // Team filter can never make the shared hotel disappear.
+  return pointTeam === "all" || anchorTeam === "all" || pointTeam === anchorTeam;
 }
 export function mergeSystemAnchorMarkers(points = [], { proximityMeters = 70 } = {}) {
   const list = Array.isArray(points) ? points : [];
-  const anchors = list.filter(point => point?.position && point?.mapRole === "anchor" && ["flight", "hotel"].includes(clean(point?.anchorType)));
+  const anchors = list.filter(point => point?.position && point?.mapRole === "anchor" && point?.syntheticAnchor === true && ["flight", "hotel"].includes(clean(point?.anchorType)));
   if (!anchors.length) return list.slice();
   return list.map(point => {
-    if (!point?.position || point?.mapRole !== "stop") return point;
-    const pointPlaceId = clean(point?.placeId), pointResolveKey = clean(point?.resolve?.key);
-    let best = null, bestScore = Number.POSITIVE_INFINITY;
+    if (!point?.position || point?.syntheticAnchor === true) return point;
+    if (point?.mapRole !== "stop" && point?.mapRole !== "anchor") return point;
+    const pointPlaceId = clean(point?.placeId), pointResolveKey = clean(point?.resolve?.key), matches = [];
     anchors.forEach(anchor => {
-      if (!mapPointTeamsCompatible(point, anchor)) return;
+      if (!mapPointCanUseSystemAnchor(point, anchor)) return;
+      const pointType = clean(point?.anchorType), anchorType = clean(anchor?.anchorType);
+      if (point?.mapRole === "anchor" && pointType && pointType !== anchorType) return;
       const anchorPlaceId = clean(anchor?.placeId), anchorResolveKey = clean(anchor?.resolve?.key);
       const exactPlace = Boolean(pointPlaceId && anchorPlaceId && pointPlaceId === anchorPlaceId);
       const exactResolve = Boolean(pointResolveKey && anchorResolveKey && pointResolveKey === anchorResolveKey);
       const distance = mapPointDistanceMeters(point, anchor);
       if (!exactPlace && !exactResolve && distance > Math.max(20, Number(proximityMeters) || 70)) return;
       const score = exactPlace ? -2000 : (exactResolve ? -1000 : distance);
-      if (score < bestScore) { bestScore = score; best = anchor; }
+      matches.push({ anchor, score });
     });
-    if (!best) return point;
+    if (!matches.length) return point;
+    matches.sort((a,b)=>a.score-b.score);
+    const best = matches[0].anchor;
     return {
       ...point,
       mergedSystemAnchorType: clean(best.anchorType),
-      mergedSystemAnchorIdentity: clean(best.identity)
+      mergedSystemAnchorIdentity: clean(best.identity),
+      matchingSystemAnchorIdentities: [...new Set(matches.map(row=>clean(row.anchor?.identity)).filter(Boolean))]
     };
   });
 }
