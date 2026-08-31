@@ -1,3 +1,11 @@
+## v7.9.20.9 — Final Cleanup · Release-aware precache bridge
+
+- Fix Service Worker install/runtime cache identity mismatch for release-tagged same-origin assets.
+- Keep release query strings as the primary runtime cache identity, but allow the current Service Worker to reuse its canonical install-time precache only when `?release=` exactly matches `RELEASE_VERSION`.
+- An older controlling Service Worker cannot use this fallback for a newer page release, preserving the stale-version safety boundary.
+- Dynamic entry modules, versioned Expenses CSS, modulepreload and manifest can now be served immediately from the current release precache instead of needlessly refetching the same bytes before warm cache is established.
+- No Firebase schema, Rules, Functions, UI, Day Bar, Maps, Transit, Booking Documents, PDF viewer or Expenses behaviour changes.
+
 ## v7.9.20.8 — Quick Add Bottom Navigation Refocus Fix
 
 - Fixed the remaining iOS Quick Add regression where Bottom Navigation could stay hidden after the keyboard had visually closed.

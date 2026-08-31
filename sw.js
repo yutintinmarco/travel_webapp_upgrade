@@ -1,5 +1,5 @@
 /* Travel WebApp Service Worker
- * v7.9.20.8 · Phase 3E Cleanup D · Expenses Realtime Flow
+ * v7.9.20.9 · Final Cleanup · Release-aware precache bridge
  *
  * Keeps the v7.7.0.14 cold-start behaviour, while hardening installation:
  *  1. Critical shell assets are transactional. If any critical file cannot be
@@ -14,7 +14,8 @@
  *     explicit reload stays network-first.
  */
 
-const SW_VERSION = "travel-shell-v7.9.20.8";
+const RELEASE_VERSION = "7.9.20.9";
+const SW_VERSION = `travel-shell-v${RELEASE_VERSION}`;
 const CORE_CACHE = SW_VERSION;
 
 // Required for a useful offline launch and remembered-Trip boot.
@@ -83,12 +84,23 @@ const OPTIONAL_ASSETS = [
 
 const SHELL_KEY = new URL("./index.html", self.location).href;
 
-/* Release-tagged assets deliberately keep their query string in the cache key.
- * This prevents an older controlling Service Worker from collapsing a newly
- * deployed module URL onto an older cached canonical path. */
+/* Release-tagged requests keep their query string as their primary cache key.
+ * A canonical precache entry may be used only when its release tag matches
+ * this exact Service Worker release. This lets the current worker reuse the
+ * install-time precache without allowing an older controlling worker to
+ * satisfy a newer release URL from stale canonical bytes. */
 function cacheKeyFor(request) {
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return request;
+  url.hash = "";
+  return url.href;
+}
+
+function matchingReleasePrecacheKey(request) {
+  const url = new URL(request.url);
+  if (url.origin !== self.location.origin) return null;
+  if (url.searchParams.get("release") !== RELEASE_VERSION) return null;
+  url.searchParams.delete("release");
   url.hash = "";
   return url.href;
 }
@@ -206,11 +218,26 @@ self.addEventListener("fetch", event => {
 
   const key = cacheKeyFor(request);
   event.respondWith(
-    caches.match(key).then(cached => {
+    caches.match(key).then(async cached => {
       if (cached) {
         event.waitUntil(revalidate(request, key).catch(() => {}));
         return cached;
       }
+
+      // Dynamic imports and release-tagged CSS/manifest requests use
+      // ?release=<version>, while their install-time precache entries are
+      // canonical URLs. Only bridge to that canonical entry when the request
+      // explicitly matches this worker's release. An older worker therefore
+      // cannot serve stale canonical bytes to a newer page release.
+      const precacheKey = matchingReleasePrecacheKey(request);
+      if (precacheKey && precacheKey !== key) {
+        const precached = await caches.match(precacheKey);
+        if (precached) {
+          event.waitUntil(revalidate(request, precacheKey).catch(() => {}));
+          return precached;
+        }
+      }
+
       // Preserve the real fetch failure when offline; never resolve a cache miss
       // to undefined / an opaque broken response.
       return revalidate(request, key);
