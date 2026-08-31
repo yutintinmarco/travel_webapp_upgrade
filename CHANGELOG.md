@@ -1,3 +1,10 @@
+## v7.9.20.8 — Quick Add Bottom Navigation Refocus Fix
+
+- Fixed the remaining iOS Quick Add regression where Bottom Navigation could stay hidden after the keyboard had visually closed.
+- Root cause: the Quick Add double-tap guard automatically focused the title field again 360 ms after submit, causing the shared keyboard manager to treat the keyboard as active even when iOS did not visibly reopen it.
+- Removed post-submit automatic refocus. Quick Add remains optimistic and duplicate-tap protected; users can tap the next field when ready.
+- No Firebase Rules, schema, Functions, Maps, Transit, Day Bar, Documents, PDF viewer or Global Save changes.
+
 ## v7.9.20.7 — Quick Add Bottom Navigation Focus Fix
 
 - Fixes iOS Quick Add leaving Bottom Navigation temporarily hidden after the keyboard visually closes.
