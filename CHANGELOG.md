@@ -1,3 +1,13 @@
+# v7.9.20.13 — Final Cleanup · Map presentation controls
+
+- Added per-itinerary Stop control `在行程地圖顯示標記`. It defaults ON; turning it OFF hides the numbered Map marker while keeping the Stop location available to Transit routing as the previous / next endpoint.
+- Hidden itinerary markers no longer participate in the Trip Overview sequence line, so route-reference-only Stops do not silently stretch the overview route.
+- Flight airport and active accommodation anchors remain automatic, unnumbered system anchors. No per-flight / per-hotel visibility setting was added.
+- Reworked the existing `行程線` control as a compact iOS-style split control: the primary capsule still toggles the route directly, while a small disclosure opens `連接機場` and `連接住宿` options without adding two permanent chips to the Map.
+- `連接機場` / `連接住宿` affect only overview route connection and initial route framing. Airport / hotel markers remain available on the Map and the underlying Flight / Accommodation data is unchanged.
+- Route presentation preferences are device-local Map view preferences. The itinerary marker visibility flag is saved with the itinerary item through the existing Global Save flow.
+- No Firestore Rules, Storage Rules, Functions, Day Bar, Transit Gallery, Booking Documents, PDF Viewer or data migration changes. No Firebase deploy required.
+
 # v7.9.20.12 — Final Cleanup Hotfix · Strict airport anchor resolution
 
 - Replaces generic flight-airport geocoding with an airport-specific resolver for Trip Map synthetic flight anchors.
