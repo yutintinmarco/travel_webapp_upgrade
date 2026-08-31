@@ -1,3 +1,11 @@
+# v7.9.20.12 — Final Cleanup Hotfix · Strict airport anchor resolution
+
+- Replaces generic flight-airport geocoding with an airport-specific resolver for Trip Map synthetic flight anchors.
+- Flight anchors now use Google Places Text Search with strict `airport` type filtering, so an IATA query such as `KIX` cannot resolve to a bus stop, office or other similarly named place.
+- Airport coordinates use a new `a:` cache namespace, deliberately bypassing any incorrect generic coordinate cached by v7.9.20.11 for up to 180 days.
+- Keeps a conservative Geocoder fallback if Places resolution is unavailable. Displayed flight / airport text and Travel Details data remain unchanged.
+- No Firebase schema, Rules, Storage Rules, Functions, Day Bar, Transit Gallery, Booking Documents or flight data model changes. No Firebase deploy required.
+
 # v7.9.20.11 — Final Cleanup Hotfix · Theme handoff / Transit contrast / Transit editor shell / Flight airport anchor
 
 - Dark / Auto theme warm reload now reuses the last resolved palette while async cloud or solar preference state reconciles, preventing the temporary Light palette handoff seen on iOS refresh.
