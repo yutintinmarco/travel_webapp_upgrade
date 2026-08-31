@@ -537,6 +537,47 @@ export function itineraryMapPoints(trip, activeDayId = "") {
   }));
 }
 
+function mapPointDistanceMeters(a = {}, b = {}) {
+  const lat1 = finiteNumber(a?.position?.lat), lng1 = finiteNumber(a?.position?.lng);
+  const lat2 = finiteNumber(b?.position?.lat), lng2 = finiteNumber(b?.position?.lng);
+  if (lat1 == null || lng1 == null || lat2 == null || lng2 == null) return Number.POSITIVE_INFINITY;
+  const toRad = value => value * Math.PI / 180;
+  const dLat = toRad(lat2 - lat1), dLng = toRad(lng2 - lng1);
+  const p1 = toRad(lat1), p2 = toRad(lat2);
+  const h = Math.sin(dLat / 2) ** 2 + Math.cos(p1) * Math.cos(p2) * Math.sin(dLng / 2) ** 2;
+  return 6371000 * 2 * Math.atan2(Math.sqrt(h), Math.sqrt(Math.max(0, 1 - h)));
+}
+function mapPointTeamsCompatible(a = {}, b = {}) {
+  const one = clean(a?.who) || "all", two = clean(b?.who) || "all";
+  return one === "all" || two === "all" || one === two;
+}
+export function mergeSystemAnchorMarkers(points = [], { proximityMeters = 70 } = {}) {
+  const list = Array.isArray(points) ? points : [];
+  const anchors = list.filter(point => point?.position && point?.mapRole === "anchor" && ["flight", "hotel"].includes(clean(point?.anchorType)));
+  if (!anchors.length) return list.slice();
+  return list.map(point => {
+    if (!point?.position || point?.mapRole !== "stop") return point;
+    const pointPlaceId = clean(point?.placeId), pointResolveKey = clean(point?.resolve?.key);
+    let best = null, bestScore = Number.POSITIVE_INFINITY;
+    anchors.forEach(anchor => {
+      if (!mapPointTeamsCompatible(point, anchor)) return;
+      const anchorPlaceId = clean(anchor?.placeId), anchorResolveKey = clean(anchor?.resolve?.key);
+      const exactPlace = Boolean(pointPlaceId && anchorPlaceId && pointPlaceId === anchorPlaceId);
+      const exactResolve = Boolean(pointResolveKey && anchorResolveKey && pointResolveKey === anchorResolveKey);
+      const distance = mapPointDistanceMeters(point, anchor);
+      if (!exactPlace && !exactResolve && distance > Math.max(20, Number(proximityMeters) || 70)) return;
+      const score = exactPlace ? -2000 : (exactResolve ? -1000 : distance);
+      if (score < bestScore) { bestScore = score; best = anchor; }
+    });
+    if (!best) return point;
+    return {
+      ...point,
+      mergedSystemAnchorType: clean(best.anchorType),
+      mergedSystemAnchorIdentity: clean(best.identity)
+    };
+  });
+}
+
 export function savedPlaceMapPoints(trip) {
   const raw = trip?.snacks;
   const rows = Array.isArray(raw) ? raw : (Array.isArray(raw?.items) ? raw.items : []);
@@ -620,10 +661,10 @@ async function geocodeOne(geocoder, point) {
   cacheStore(spec.key, resolved);
   return {
     ...point,
-    position: { lat, lng },
+    position: { lat: resolved.lat, lng: resolved.lng },
     formattedAddress: resolved.formattedAddress,
     placeId: resolved.placeId,
-    resolveSource: "geocoder"
+    resolveSource: spec.type === "airport" ? "airport-resolver" : "geocoder"
   };
 }
 
