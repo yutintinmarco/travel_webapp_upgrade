@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
   <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
   <link rel="dns-prefetch" href="https://api.open-meteo.com">
-  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?release=7.9.20.14">
+  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?release=7.9.20.15">
   <title id="page-title">行程</title>
   <script>
   // v7.7.5.0 · Performance Lite. Memory only: no Firebase reads/writes, no
@@ -3751,7 +3751,7 @@ html:not(.theme-light):not(.theme-dark) .cloud-safety-strip{
 #snacks-view::after,
 #info-view::after,
 #profile-view::after{
-  content:"v7.9.20.14" !important;
+  content:"v7.9.20.15" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3772,7 +3772,7 @@ html:not(.theme-light):not(.theme-dark) .cloud-safety-strip{
   display:none !important;
 }
 body.expenses-view-active .expenses-module .expenses-app::after{
-  content:"v7.9.20.14" !important;
+  content:"v7.9.20.15" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -4035,18 +4035,19 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
 .trip-map-filters .trip-activity-filter{padding:6px 12px;font-size:11px;border:0;box-shadow:none;}
 .trip-map-state{position:absolute;z-index:3;left:50%;bottom:max(24px,calc(env(safe-area-inset-bottom) + 18px));transform:translateX(-50%);max-width:min(86vw,360px);padding:9px 13px;border-radius:15px;background:rgba(248,248,250,.88);color:rgba(60,60,67,.78);font-size:11px;font-weight:600;line-height:1.35;text-align:center;box-shadow:0 4px 18px rgba(15,23,42,.12);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);}
 .trip-map-state[hidden]{display:none!important;}
-.trip-map-route-control{position:absolute;z-index:3;top:max(72px,calc(env(safe-area-inset-top) + 66px));left:calc(50% + min(105px,31vw) + 3px);display:block;padding:4px;border-radius:999px;background:rgba(248,248,250,.86);box-shadow:0 4px 18px rgba(15,23,42,.12);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);overflow:visible;}
+.trip-map-route-control{position:absolute;z-index:3;top:max(72px,calc(env(safe-area-inset-top) + 66px));left:calc(50% + min(105px,31vw) + 3px);display:block;padding:5px;border-radius:999px;background:rgba(248,248,250,.86);box-shadow:0 4px 18px rgba(15,23,42,.12);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);overflow:visible;}
 .trip-map-route-control[hidden]{display:none!important;}
-.trip-map-route-menu-trigger{position:relative;appearance:none;-webkit-appearance:none;-webkit-tap-highlight-color:transparent;min-width:48px;min-height:34px;padding:6px 5px;border:0;border-radius:999px;background:transparent;color:rgba(28,28,30,.84);display:flex;align-items:center;justify-content:center;gap:2px;font:650 11px/1 -apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,sans-serif;white-space:nowrap;}
-.trip-map-route-menu-trigger::after{content:"";position:absolute;inset:-4px;border-radius:999px;}
-.trip-map-route-menu-trigger .trip-map-route-chevron{font-size:10px;color:rgba(60,60,67,.58);transform:translateY(-1px);}
+.trip-map-route-menu-trigger{position:relative;appearance:none;-webkit-appearance:none;-webkit-tap-highlight-color:transparent;min-width:48px;padding:6px 7px;border:0;border-radius:999px;background:transparent;color:#555;display:flex;align-items:center;justify-content:center;gap:3px;font:inherit;font-size:11px;font-weight:500;white-space:nowrap;}
+.trip-map-route-menu-trigger::after{content:"";position:absolute;inset:-5px;border-radius:999px;}
+.trip-map-route-menu-trigger .trip-map-route-chevron{font-size:9px;color:rgba(60,60,67,.58);transform:translateY(-.5px);}
 .trip-map-route-menu-trigger:focus-visible{outline:2px solid rgba(0,122,255,.34);outline-offset:2px;}
-.trip-map-route-menu{position:absolute;z-index:5;right:0;top:calc(100% + 8px);width:190px;padding:5px;border:1px solid rgba(60,60,67,.12);border-radius:16px;background:rgba(248,248,250,.94);box-shadow:0 10px 28px rgba(15,23,42,.18),inset 0 1px 0 rgba(255,255,255,.72);backdrop-filter:blur(22px) saturate(160%);-webkit-backdrop-filter:blur(22px) saturate(160%);}
+.trip-map-route-menu{position:absolute;z-index:5;right:0;top:calc(100% + 8px);width:204px;padding:6px;border:1px solid rgba(60,60,67,.14);border-radius:18px;background:rgba(250,250,252,.985);box-shadow:0 18px 42px rgba(15,23,42,.24),0 3px 10px rgba(15,23,42,.10),inset 0 1px 0 rgba(255,255,255,.90);backdrop-filter:blur(28px) saturate(165%);-webkit-backdrop-filter:blur(28px) saturate(165%);overflow:hidden;}
 .trip-map-route-menu[hidden]{display:none!important;}
-.trip-map-route-option{width:100%;min-height:42px;border:0;border-radius:11px;background:transparent;color:#111;display:grid;grid-template-columns:26px minmax(0,1fr) 22px;align-items:center;gap:7px;padding:0 9px;text-align:left;font:650 12px/1 -apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,sans-serif;}
-.trip-map-route-option+.trip-map-route-option{border-top:1px solid rgba(60,60,67,.10);border-top-left-radius:0;border-top-right-radius:0;}
-.trip-map-route-option-icon{font-size:15px;text-align:center;}
-.trip-map-route-option-check{font-size:14px;font-weight:800;text-align:center;color:#007aff;opacity:0;}
+.trip-map-route-option{position:relative;width:100%;min-height:46px;border:0;border-radius:12px;background:transparent;color:#111;display:grid;grid-template-columns:28px minmax(0,1fr) 22px;align-items:center;gap:8px;padding:0 10px;text-align:left;font:600 13px/1.15 -apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,sans-serif;-webkit-tap-highlight-color:transparent;}
+.trip-map-route-option:active{background:rgba(118,118,128,.10);}
+.trip-map-route-option+.trip-map-route-option::before{content:"";position:absolute;left:46px;right:10px;top:0;height:.5px;background:rgba(60,60,67,.16);}
+.trip-map-route-option-icon{font-size:16px;text-align:center;line-height:1;}
+.trip-map-route-option-check{font-size:15px;font-weight:800;text-align:center;color:#007aff;opacity:0;}
 .trip-map-route-option.active .trip-map-route-option-check{opacity:1;}
 .trip-map-place-card{position:absolute;z-index:4;left:14px;right:14px;bottom:max(16px,calc(env(safe-area-inset-bottom) + 12px));display:grid;grid-template-columns:58px minmax(0,1fr) auto;align-items:center;gap:10px 12px;max-width:452px;margin:0 auto;padding:12px 12px 12px 14px;border-radius:20px;background:rgba(248,248,250,.94);box-shadow:0 8px 30px rgba(15,23,42,.20),inset 0 1px 0 rgba(255,255,255,.72);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);overflow:hidden;}
 .trip-map-place-card.has-media{grid-template-columns:minmax(0,1fr) auto;padding:10px 10px 12px;}
@@ -4093,11 +4094,14 @@ html.theme-dark .trip-map-place-media,html:not(.theme-light):not(.theme-dark) .t
 html.theme-dark .trip-map-place-meta,html.theme-dark .trip-map-place-detail,html:not(.theme-light):not(.theme-dark) .trip-map-place-meta,html:not(.theme-light):not(.theme-dark) .trip-map-place-detail{color:rgba(235,235,245,.62);}
 html.theme-dark .trip-map-marker.is-transit,html:not(.theme-light):not(.theme-dark) .trip-map-marker.is-transit{background:rgba(42,42,46,.94);color:#64a9ff;border-color:rgba(255,255,255,.30);box-shadow:0 3px 10px rgba(0,0,0,.32),inset 0 0 0 1px rgba(255,255,255,.08);}
 html.theme-dark .trip-map-marker.is-anchor,html:not(.theme-light):not(.theme-dark) .trip-map-marker.is-anchor{background:rgba(42,42,46,.95);color:#fff;border-color:rgba(255,255,255,.30);box-shadow:0 3px 10px rgba(0,0,0,.34),inset 0 0 0 1px rgba(255,255,255,.08);}
-html.theme-dark .trip-map-heading,html.theme-dark .trip-map-close,html.theme-dark .trip-map-filters,html.theme-dark .trip-map-state,html.theme-dark .trip-map-route-control,html.theme-dark .trip-map-route-menu,html.theme-dark .trip-map-place-card,html:not(.theme-light):not(.theme-dark) .trip-map-heading,html:not(.theme-light):not(.theme-dark) .trip-map-close,html:not(.theme-light):not(.theme-dark) .trip-map-filters,html:not(.theme-light):not(.theme-dark) .trip-map-state,html:not(.theme-light):not(.theme-dark) .trip-map-route-control,html:not(.theme-light):not(.theme-dark) .trip-map-route-menu,html:not(.theme-light):not(.theme-dark) .trip-map-place-card{background:rgba(30,30,34,.88);color:rgba(245,245,247,.96);box-shadow:0 6px 24px rgba(0,0,0,.34),inset 0 1px 0 rgba(255,255,255,.08);}
-html.theme-dark .trip-map-heading small,html.theme-dark .trip-map-state,html.theme-dark .trip-map-route-menu-trigger,html.theme-dark .trip-map-place-copy small,html:not(.theme-light):not(.theme-dark) .trip-map-heading small,html:not(.theme-light):not(.theme-dark) .trip-map-state,html:not(.theme-light):not(.theme-dark) .trip-map-route-menu-trigger,html:not(.theme-light):not(.theme-dark) .trip-map-place-copy small{color:rgba(235,235,245,.72);}
-html.theme-dark .trip-map-route-menu-trigger .trip-map-route-chevron,html:not(.theme-light):not(.theme-dark) .trip-map-route-menu-trigger .trip-map-route-chevron{color:rgba(235,235,245,.55);}
+html.theme-dark .trip-map-heading,html.theme-dark .trip-map-close,html.theme-dark .trip-map-filters,html.theme-dark .trip-map-state,html.theme-dark .trip-map-route-control,html.theme-dark .trip-map-place-card,html:not(.theme-light):not(.theme-dark) .trip-map-heading,html:not(.theme-light):not(.theme-dark) .trip-map-close,html:not(.theme-light):not(.theme-dark) .trip-map-filters,html:not(.theme-light):not(.theme-dark) .trip-map-state,html:not(.theme-light):not(.theme-dark) .trip-map-route-control,html:not(.theme-light):not(.theme-dark) .trip-map-place-card{background:rgba(30,30,34,.88);color:rgba(245,245,247,.96);box-shadow:0 6px 24px rgba(0,0,0,.34),inset 0 1px 0 rgba(255,255,255,.08);}
+html.theme-dark .trip-map-route-menu,html:not(.theme-light):not(.theme-dark) .trip-map-route-menu{background:rgba(36,36,40,.985);border-color:rgba(255,255,255,.13);color:rgba(245,245,247,.96);box-shadow:0 18px 42px rgba(0,0,0,.46),0 3px 10px rgba(0,0,0,.24),inset 0 1px 0 rgba(255,255,255,.10);}
+html.theme-dark .trip-map-heading small,html.theme-dark .trip-map-state,html.theme-dark .trip-map-place-copy small,html:not(.theme-light):not(.theme-dark) .trip-map-heading small,html:not(.theme-light):not(.theme-dark) .trip-map-state,html:not(.theme-light):not(.theme-dark) .trip-map-place-copy small{color:rgba(235,235,245,.72);}
+html.theme-dark .trip-map-route-menu-trigger,html:not(.theme-light):not(.theme-dark) .trip-map-route-menu-trigger{color:rgba(200,200,215,.78);}
+html.theme-dark .trip-map-route-menu-trigger .trip-map-route-chevron,html:not(.theme-light):not(.theme-dark) .trip-map-route-menu-trigger .trip-map-route-chevron{color:rgba(200,200,215,.62);}
 html.theme-dark .trip-map-route-option,html:not(.theme-light):not(.theme-dark) .trip-map-route-option{color:#f5f5f7;}
-html.theme-dark .trip-map-route-option+.trip-map-route-option,html:not(.theme-light):not(.theme-dark) .trip-map-route-option+.trip-map-route-option{border-top-color:rgba(255,255,255,.09);}
+html.theme-dark .trip-map-route-option:active,html:not(.theme-light):not(.theme-dark) .trip-map-route-option:active{background:rgba(255,255,255,.08);}
+html.theme-dark .trip-map-route-option+.trip-map-route-option::before,html:not(.theme-light):not(.theme-dark) .trip-map-route-option+.trip-map-route-option::before{background:rgba(255,255,255,.11);}
 html.theme-dark .trip-map-route-option-check,html:not(.theme-light):not(.theme-dark) .trip-map-route-option-check{color:#64a9ff;}
 html.theme-dark .trip-map-place-copy strong,html:not(.theme-light):not(.theme-dark) .trip-map-place-copy strong{color:#fff;}
 
@@ -4481,7 +4485,7 @@ html.theme-dark .snacks-library-count,html:not(.theme-light):not(.theme-dark) .s
 </style>
             <link rel="apple-touch-icon" href="assets/icon/trip_icon.png">
   <link rel="icon" type="image/png" href="assets/icon/trip_icon.png">
-  <link rel="manifest" href="manifest.json?release=7.9.20.14">
+  <link rel="manifest" href="manifest.json?release=7.9.20.15">
   <meta name="apple-mobile-web-app-title" content="關嘉露西生日之旅">
   <!-- v7.7.1.2: expenses.css is 144KB and every rule is scoped under
        .expenses-module, yet it used to block the very first paint of the
@@ -4489,8 +4493,8 @@ html.theme-dark .snacks-library-count,html:not(.theme-light):not(.theme-dark) .s
        priority without blocking paint; ensureExpensesStylesheet() flips it to
        media="all" before the 支出 view is ever mounted, so the styling is
        byte-for-byte identical by the time anything expenses-related renders. -->
-  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?release=7.9.20.14" media="print">
-  <noscript><link rel="stylesheet" href="assets/css/expenses.css?release=7.9.20.14"></noscript>
+  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?release=7.9.20.15" media="print">
+  <noscript><link rel="stylesheet" href="assets/css/expenses.css?release=7.9.20.15"></noscript>
 
 <style id="booking-documents-v79191-style">
 /* Phase 3E · Booking Documents native hierarchy / viewer hardening.
@@ -5683,7 +5687,7 @@ dialog.booking-document-viewer.is-edge-swiping{
         <span class="profile-detail-spacer"></span>
       </div>
       <section class="profile-card" aria-label="App 資訊">
-        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.9.20.14</strong></div>
+        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.9.20.15</strong></div>
         <div class="profile-meta-row"><span>資料架構</span><strong>Phase 2G.2</strong></div>
         <div class="profile-meta-row"><span>主要資料來源</span><strong id="app-data-source-label">Firebase / 本機快取</strong></div>
       </section>
@@ -6342,7 +6346,7 @@ dialog.booking-document-viewer.is-edge-swiping{
 </div>
 
 <script>
-const APP_VERSION = "7.9.20.14";
+const APP_VERSION = "7.9.20.15";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 let tripMapServicePromise=null,transitRouteServicePromise=null,tripEditServicePromise=null,airlineLogoServicePromise=null,tripDocumentServicePromise=null,tripMapController=null,tripMapScope="day",tripMapRenderEpoch=0,tripMapSelectedPoint=null;
@@ -6520,20 +6524,28 @@ function tripMapRouteConnectionPoints(points){
   });
 }
 function tripMapSemanticRouteSequence(points){
-  const list=tripMapRouteConnectionPoints(points).filter(point=>point?.routeEligible!==false&&point?.position).slice().sort((a,b)=>Number(a?.order||0)-Number(b?.order||0));
+  const source=Array.isArray(points)?points:[];
+  // Arrival / departure semantics remain known even when the user hides the
+  // airport connection. Turning off a long airport leg must not make the Map
+  // invent the hotel as that day's starting / ending point.
+  const hasArrivalFlight=source.some(point=>String(point?.mapRole||"")==="anchor"&&String(point?.anchorType||"")==="flight"&&String(point?.journeyRole||"")==="entry");
+  const hasDepartureFlight=source.some(point=>String(point?.mapRole||"")==="anchor"&&String(point?.anchorType||"")==="flight"&&String(point?.journeyRole||"")==="exit");
+  const list=tripMapRouteConnectionPoints(source).filter(point=>point?.routeEligible!==false&&point?.position).slice().sort((a,b)=>Number(a?.order||0)-Number(b?.order||0));
   const hotel=list.find(point=>String(point?.mapRole||"")==="anchor"&&String(point?.anchorType||"")==="hotel")||null;
   const terminals=list.filter(point=>String(point?.mapRole||"")==="anchor"&&String(point?.anchorType||"")!=="hotel");
   const stops=list.filter(point=>String(point?.mapRole||"")==="stop");
-  if(!stops.length){const routeOnly=[...(hotel?[hotel]:[]),...terminals].sort((a,b)=>Number(a?.order||0)-Number(b?.order||0));return routeOnly.map((point,index)=>({...point,routeOrder:index+1}));}
+  const hotelCanStart=Boolean(hotel)&&hotel?.routeHotelStartEligible!==false&&!hasArrivalFlight;
+  const hotelCanEnd=Boolean(hotel)&&hotel?.routeHotelEndEligible!==false&&!hasDepartureFlight;
+  if(!stops.length){const routeOnly=[...terminals,...((hotelCanStart||hotelCanEnd)?[hotel]:[])].sort((a,b)=>Number(a?.order||0)-Number(b?.order||0));return routeOnly.map((point,index)=>({...point,routeOrder:index+1}));}
   const firstOrder=Number(stops[0]?.order||0),lastOrder=Number(stops[stops.length-1]?.order||0);
   const before=terminals.filter(point=>Number(point?.order||0)<firstOrder);
   const after=terminals.filter(point=>Number(point?.order||0)>lastOrder);
   const middle=terminals.filter(point=>Number(point?.order||0)>=firstOrder&&Number(point?.order||0)<=lastOrder);
   const core=[...stops,...middle].sort((a,b)=>Number(a?.order||0)-Number(b?.order||0));
   const sequence=[];
-  if(before.length)sequence.push(...before);else if(hotel)sequence.push(hotel);
+  if(before.length)sequence.push(...before);else if(hotelCanStart)sequence.push(hotel);
   sequence.push(...core);
-  if(after.length)sequence.push(...after);else if(hotel)sequence.push(hotel);
+  if(after.length)sequence.push(...after);else if(hotelCanEnd)sequence.push(hotel);
   return sequence.map((point,index)=>({...point,routeOrder:index+1}));
 }
 function tripMapRouteGroups(points){

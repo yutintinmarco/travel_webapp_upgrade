@@ -1,3 +1,11 @@
+# v7.9.20.15 — Final Cleanup · Map route polish + day-aware accommodation endpoints
+
+- Matched the `路線⌄` control to the existing `當日／收藏` segmented-control material: identical vertical shell padding, glass surface, radius, shadow, blur and light/dark colour grammar while keeping the compact control on the right.
+- Refined the route popover into a more opaque iOS-style menu with a calmer 18 px material surface, stronger separation from the map, larger 46 px rows, inset separators and press feedback.
+- Made automatic accommodation endpoints day-aware. On check-in / arrival days the hotel is not invented as the route starting point; on check-out / departure days it is not invented as the route ending point. Middle stay days can still connect hotel → first stop and last stop → hotel.
+- Arrival / departure flight semantics remain authoritative even when `連接機場` is turned off: hiding the long airport line no longer causes the route to fall back to an illogical hotel start/end.
+- Explicit itinerary visits that merge into the hotel system anchor still remain in the middle of the route. No Firebase schema / Rules / Functions changes.
+
 # v7.9.20.14 — Final Cleanup · Map route menu + system-anchor dedupe
 
 - Kept the existing 當日／收藏 segmented control in its original position and moved route preferences into a compact Apple-style `路線⌄` control on the right.

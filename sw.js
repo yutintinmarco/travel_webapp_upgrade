@@ -1,5 +1,5 @@
 /* Travel WebApp Service Worker
- * v7.9.20.14 · Final Cleanup · Map route menu + system-anchor dedupe
+ * v7.9.20.15 · Final Cleanup · Map route polish + day-aware accommodation endpoints
  *
  * Keeps the v7.7.0.14 cold-start behaviour, while hardening installation:
  *  1. Critical shell assets are transactional. If any critical file cannot be
@@ -14,7 +14,7 @@
  *     explicit reload stays network-first.
  */
 
-const RELEASE_VERSION = "7.9.20.14";
+const RELEASE_VERSION = "7.9.20.15";
 const SW_VERSION = `travel-shell-v${RELEASE_VERSION}`;
 const CORE_CACHE = SW_VERSION;
 
