@@ -1,3 +1,12 @@
+v7.9.20.6 — Phase 3E Cleanup D · Expenses Realtime Flow
+
+1. Quick Add now reads pending Firestore server timestamps with `serverTimestamps: "estimate"`, so a newly-created expense can sort into Recent Expenses on the first latency-compensated listener snapshot instead of waiting for the server timestamp acknowledgement.
+2. Quick Add now pre-allocates the expense and activity-log document IDs and commits both documents in one Firestore write batch. The old serial Expense write followed by a second Activity Log round trip has been removed for Quick Add.
+3. Expense realtime rendering now uses a semantic content signature that ignores audit-only `createdAt` / `updatedAt` timestamp settlement. In-memory data and Backup freshness still update on every listener event, while ACK-only changes no longer rebuild Recent Expenses, Snapshot, Details, Settlement or Analytics DOM.
+4. Expense settings, legacy parent-trip settings, settlements and activity logs now use the same semantic-change gate. Metadata / server-timestamp acknowledgement events continue to drive freshness state without triggering redundant hidden-panel renders.
+5. Cached / realtime Expense, Settlement and Activity Log snapshot reads now request local server-timestamp estimates where supported, preserving responsive ordering during pending writes.
+6. No UI redesign, Firestore Rules, Storage Rules, Functions, Day Bar, Maps, Transit, Booking Documents, PDF Viewer or Global Save changes.
+
 v7.9.20.5 — Phase 3E Cleanup C Hotfix · Optimistic Quick Add
 
 - Quick Add no longer keeps the UI in「新增中…」while waiting for Firestore and the activity log. The consumed title / amount clear synchronously and the form becomes available again after a short 360 ms tap guard.
