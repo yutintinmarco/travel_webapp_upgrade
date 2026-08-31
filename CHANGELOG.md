@@ -1,3 +1,12 @@
+v7.9.20.4 — Phase 3E Cleanup C Hotfix · Quick Add duplicate-submit guard
+
+- Quick Add now acquires an in-flight submission lock synchronously before its first Firestore await. Rapid repeated taps during one submission are ignored instead of creating duplicate expense documents.
+- Quick Add title and amount clear immediately after a valid tap so the UI acknowledges the submission without waiting for Firestore/network latency.
+- While submitting, Quick Add controls are disabled and the primary action shows「新增中…」.
+- If the Firestore create fails, the original title and amount are restored and an error is shown, so the user does not lose the pending entry.
+- Currency, payer and category preferences remain unchanged. Full Add, split logic, calculations, listeners, Firebase Rules and other modules are unchanged.
+- No Firebase deployment is required.
+
 ## v7.9.20.3 — Phase 3E Cleanup C
 
 1. Removed 69 zero-reference legacy trip/gallery JPG / WEBP assets from the production repository, reducing the bundled source by about 6.17 MB while keeping the six active lightweight demo SVG fallbacks.
