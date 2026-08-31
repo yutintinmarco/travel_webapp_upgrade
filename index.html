@@ -12,7 +12,7 @@
   <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
   <link rel="dns-prefetch" href="https://api.open-meteo.com">
   <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
-  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?release=7.9.20.19">
+  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?release=7.9.20.20">
   <title id="page-title">行程</title>
   <script>
   // v7.7.5.0 · Performance Lite. Memory only: no Firebase reads/writes, no
@@ -500,7 +500,6 @@ html.theme-light .theme-btn { color: #111; }
   html:not(.theme-light):not(.theme-dark) .pass-jr { background: rgba(0,90,180,0.22); color: #7ab4f5; border-color: rgba(100,170,255,0.30); }
   html:not(.theme-light):not(.theme-dark) .pass-icoca { background: rgba(0,140,100,0.22); color: #6adbb8; border-color: rgba(80,200,150,0.30); }
   html:not(.theme-light):not(.theme-dark) .pass-metro { background: rgba(160,0,140,0.22); color: #d880d0; border-color: rgba(200,80,180,0.30); }
-  html:not(.theme-light):not(.theme-dark) .modal-backdrop { background: rgba(0,0,0,0.60); }
   html:not(.theme-light):not(.theme-dark) .modal { background: rgba(26,26,34,0.96); border: 1px solid rgba(255,255,255,0.10); box-shadow: 0 24px 56px rgba(0,0,0,0.60); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); }
   html:not(.theme-light):not(.theme-dark) .modal.is-booked::after { background: linear-gradient(to right, rgba(72,220,118,0.16), rgba(72,220,118,0.96), rgba(72,220,118,0.16)); box-shadow: 0 -2px 12px rgba(72,220,118,0.30); }
   html:not(.theme-light):not(.theme-dark) .modal-title { color: #f0f0f2; }
@@ -578,7 +577,6 @@ html.theme-dark .footer-note { color: rgba(220,220,232,0.84); font-weight: 600; 
 html.theme-dark .pass-jr { background: rgba(0,90,180,0.22); color: #7ab4f5; border-color: rgba(100,170,255,0.30); }
 html.theme-dark .pass-icoca { background: rgba(0,140,100,0.22); color: #6adbb8; border-color: rgba(80,200,150,0.30); }
 html.theme-dark .pass-metro { background: rgba(160,0,140,0.22); color: #d880d0; border-color: rgba(200,80,180,0.30); }
-html.theme-dark .modal-backdrop { background: rgba(0,0,0,0.60); }
 html.theme-dark .modal { background: rgba(26,26,34,0.96); border: 1px solid rgba(255,255,255,0.10); box-shadow: 0 24px 56px rgba(0,0,0,0.60); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); }
 html.theme-dark .modal.is-booked::after { background: linear-gradient(to right, rgba(72,220,118,0.16), rgba(72,220,118,0.96), rgba(72,220,118,0.16)); box-shadow: 0 -2px 12px rgba(72,220,118,0.30); }
 html.theme-dark .modal-title { color: #f0f0f2; }
@@ -3752,7 +3750,7 @@ html:not(.theme-light):not(.theme-dark) .cloud-safety-strip{
 #snacks-view::after,
 #info-view::after,
 #profile-view::after{
-  content:"v7.9.20.19" !important;
+  content:"v7.9.20.20" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3773,7 +3771,7 @@ html:not(.theme-light):not(.theme-dark) .cloud-safety-strip{
   display:none !important;
 }
 body.expenses-view-active .expenses-module .expenses-app::after{
-  content:"v7.9.20.19" !important;
+  content:"v7.9.20.20" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -4487,7 +4485,7 @@ html.theme-dark .snacks-library-count,html:not(.theme-light):not(.theme-dark) .s
 </style>
             <link rel="apple-touch-icon" href="assets/icon/trip_icon.png">
   <link rel="icon" type="image/png" href="assets/icon/trip_icon.png">
-  <link rel="manifest" href="manifest.json?release=7.9.20.19">
+  <link rel="manifest" href="manifest.json?release=7.9.20.20">
   <meta name="apple-mobile-web-app-title" content="關嘉露西生日之旅">
   <!-- v7.7.1.2: expenses.css is 144KB and every rule is scoped under
        .expenses-module, yet it used to block the very first paint of the
@@ -4495,8 +4493,8 @@ html.theme-dark .snacks-library-count,html:not(.theme-light):not(.theme-dark) .s
        priority without blocking paint; ensureExpensesStylesheet() flips it to
        media="all" before the 支出 view is ever mounted, so the styling is
        byte-for-byte identical by the time anything expenses-related renders. -->
-  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?release=7.9.20.19" media="print">
-  <noscript><link rel="stylesheet" href="assets/css/expenses.css?release=7.9.20.19"></noscript>
+  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?release=7.9.20.20" media="print">
+  <noscript><link rel="stylesheet" href="assets/css/expenses.css?release=7.9.20.20"></noscript>
 
 <style id="booking-documents-v79191-style">
 /* Phase 3E · Booking Documents native hierarchy / viewer hardening.
@@ -4667,7 +4665,9 @@ body.info-navigation-active .scroll-shell,body.info-edge-swipe-active .scroll-sh
 .day-tabs-sticky-shell::before{
   content:"";
   position:absolute;
-  z-index:-1;
+  /* Keep the local sticky material above scrolling itinerary content.
+     A negative child layer can slip behind the sticky stacking context on iOS Safari. */
+  z-index:0;
   left:50%;top:0;
   width:100vw;height:100%;
   transform:translateX(-50%);
@@ -5689,7 +5689,7 @@ dialog.booking-document-viewer.is-edge-swiping{
         <span class="profile-detail-spacer"></span>
       </div>
       <section class="profile-card" aria-label="App 資訊">
-        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.9.20.19</strong></div>
+        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.9.20.20</strong></div>
         <div class="profile-meta-row"><span>資料架構</span><strong>Phase 2G.2</strong></div>
         <div class="profile-meta-row"><span>主要資料來源</span><strong id="app-data-source-label">Firebase / 本機快取</strong></div>
       </section>
@@ -6348,7 +6348,7 @@ dialog.booking-document-viewer.is-edge-swiping{
 </div>
 
 <script>
-const APP_VERSION = "7.9.20.19";
+const APP_VERSION = "7.9.20.20";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 let tripMapServicePromise=null,transitRouteServicePromise=null,tripEditServicePromise=null,airlineLogoServicePromise=null,tripDocumentServicePromise=null,tripMapController=null,tripMapScope="day",tripMapRenderEpoch=0,tripMapSelectedPoint=null;

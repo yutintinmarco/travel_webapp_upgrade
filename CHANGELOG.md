@@ -1,3 +1,10 @@
+# v7.9.20.20 — Dark Sheet Close + Day Bar Layer Hotfix
+
+- Dark Mode sheet dismissal no longer inherits the legacy high-specificity `modal-backdrop` fill. The interactive backdrop can now fade from its active dim state back to transparent while the sheet closes, removing the brief all-page black frame seen on iPhone.
+- Day Bar keeps the existing local sticky-material architecture, but its backing plane now sits at local z-index 0 instead of a negative layer. Day pills remain at z-index 1. This prevents iOS Safari from compositing scrolling itinerary content above the sticky backing and reintroducing the previous bleed-through effect.
+- No Day Bar geometry, sticky top, Day switching logic, Firebase schema, Maps, Transit, Expenses, or Booking Documents behavior changed.
+- No Firebase deployment required.
+
 # v7.9.20.19 — Pre-use Hardening · immutable release cache + PDF preview cleanup
 
 - Service Worker：同版本 `?release=` 資產命中 cache 後不再做無意義 background revalidate；install-time canonical precache 首次 bridge 後會保存到 exact release URL，之後單次 lookup 命中。
