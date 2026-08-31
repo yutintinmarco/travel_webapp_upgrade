@@ -537,6 +537,16 @@ const quickCategoryInput = document.getElementById("quickCategory");
 const quickAddBtn = document.getElementById("quickAddBtn");
 const quickAddHint = document.getElementById("quickAddHint");
 const quickAddFab = document.getElementById("quickAddFab");
+let quickAddSubmitting = false;
+
+function setQuickAddSubmitting(nextState) {
+  quickAddSubmitting = Boolean(nextState);
+  if (quickAddBtn) {
+    quickAddBtn.setAttribute("aria-busy", quickAddSubmitting ? "true" : "false");
+    quickAddBtn.textContent = quickAddSubmitting ? "新增中…" : "快速新增";
+  }
+  updateTripStatusUi();
+}
 
 const tripControlPanel = document.getElementById("tripControlPanel");
 const tripStatusText = document.getElementById("tripStatusText");
@@ -1088,7 +1098,7 @@ function updateTripStatusUi() {
   if (ocrFileInput) ocrFileInput.disabled = globallyLocked || locked || readOnly;
 
   [quickTitleInput, quickAmountInput, quickCurrencyInput, quickPaidByInput, quickCategoryInput, quickAddBtn].forEach(el => {
-    if (el) el.disabled = globallyLocked || locked || readOnly;
+    if (el) el.disabled = globallyLocked || locked || readOnly || quickAddSubmitting;
   });
   document.querySelectorAll("[data-admin-only]").forEach(btn => {
     btn.classList.toggle("hidden", !isAdmin());
@@ -2516,6 +2526,7 @@ function enterEditMode(expenseId) {
 
 
 async function saveQuickExpense() {
+  if (quickAddSubmitting) return;
   if (!currentUser) return alert("請先登入。");
   if (!assertTripOpen()) return;
 
@@ -2578,21 +2589,45 @@ async function saveQuickExpense() {
     createdAt: serverTimestamp()
   };
 
-  const docRef = await addDoc(getExpensesCollection(), payload);
+  const pendingTitle = quickTitleInput?.value ?? "";
+  const pendingAmount = quickAmountInput?.value ?? "";
 
-  await logActivity("expense_created", `${displayName} 快速新增 ${payload.title} ${payload.originalCurrency} ${payload.originalAmount.toFixed(2)}`, "expense", docRef.id, {
-    title: payload.title,
-    amount: payload.originalAmount,
-    currency: payload.originalCurrency,
-    quickAdd: true
-  });
+  try {
+    saveQuickPrefs();
+  } catch (error) {
+    console.warn("Quick Add preferences save failed:", error);
+  }
 
-  saveQuickPrefs();
-
-  if (quickAmountInput) quickAmountInput.value = "";
+  // Lock synchronously before the first network await. This prevents rapid
+  // repeated taps from creating multiple Firestore documents for one entry.
+  setQuickAddSubmitting(true);
   if (quickTitleInput) quickTitleInput.value = "";
-  if (quickAddHint) quickAddHint.textContent = "已新增。下一筆可直接輸入項目及金額。";
-  if (quickTitleInput) quickTitleInput.focus();
+  if (quickAmountInput) quickAmountInput.value = "";
+  if (quickAddHint) quickAddHint.textContent = "新增中…";
+
+  let saved = false;
+  try {
+    const docRef = await addDoc(getExpensesCollection(), payload);
+    saved = true;
+
+    await logActivity("expense_created", `${displayName} 快速新增 ${payload.title} ${payload.originalCurrency} ${payload.originalAmount.toFixed(2)}`, "expense", docRef.id, {
+      title: payload.title,
+      amount: payload.originalAmount,
+      currency: payload.originalCurrency,
+      quickAdd: true
+    });
+
+    if (quickAddHint) quickAddHint.textContent = "已新增。下一筆可直接輸入項目及金額。";
+  } catch (error) {
+    console.error("Quick Add failed:", error);
+    if (quickTitleInput) quickTitleInput.value = pendingTitle;
+    if (quickAmountInput) quickAmountInput.value = pendingAmount;
+    if (quickAddHint) quickAddHint.textContent = "新增失敗，已保留原本資料。";
+    alert("新增支出失敗，請再試。");
+  } finally {
+    setQuickAddSubmitting(false);
+    if (saved && quickTitleInput) quickTitleInput.focus();
+  }
 }
 
 async function saveExpense(event) {
