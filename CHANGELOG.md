@@ -1,3 +1,9 @@
+# v7.9.20.17 — Trip Map route semantics + marker centre anchor
+
+- 「連接住宿」OFF 而家會排除所有住宿型 Overview route nodes，包括 synthetic accommodation、explicit「返回酒店」anchor，以及已 merge 到住宿 system anchor 嘅 itinerary node。住宿 marker、itinerary data、Transit routing endpoint 均保留。
+- Trip Overview circular markers 改用真正中心 anchor，Polyline 會穿過圓點正中央，而唔再落喺圓點底部。
+- 無 Firebase Rules、Storage Rules 或 Functions 變更。
+
 # v7.9.20.16 — Final Cleanup · Team-aware hotel route semantics + Map control spacing
 
 - Fixed the root cause of Day 1 hotel routes being pulled to the start: only the synthetic Travel Details accommodation anchor may act as an automatic day start/end. Explicit itinerary hotel visits such as 「返回酒店」 now stay strictly at their chronological itinerary order.
