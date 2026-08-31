@@ -11,7 +11,8 @@
   <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
   <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
   <link rel="dns-prefetch" href="https://api.open-meteo.com">
-  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?release=7.9.20.17">
+  <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?release=7.9.20.18">
   <title id="page-title">行程</title>
   <script>
   // v7.7.5.0 · Performance Lite. Memory only: no Firebase reads/writes, no
@@ -1611,7 +1612,7 @@ html:not(.theme-light):not(.theme-dark) .inline-gallery-dot.active { background:
 }
 .itinerary-crop-title {
   grid-column: 2;
-  font-size: 15px;
+  font-size:calc(15px * var(--font-scale));
   font-weight: 700;
   line-height: 1.2;
   color: rgba(255,255,255,.96);
@@ -1624,7 +1625,7 @@ html:not(.theme-light):not(.theme-dark) .inline-gallery-dot.active { background:
   background: transparent;
   color: #0a84ff;
   font: inherit;
-  font-size: 15px;
+  font-size:calc(15px * var(--font-scale));
   font-weight: 650;
   -webkit-appearance: none;
   appearance: none;
@@ -1698,7 +1699,7 @@ html:not(.theme-light):not(.theme-dark) .inline-gallery-dot.active { background:
   backdrop-filter: blur(14px) saturate(140%);
   color: rgba(255,255,255,.84);
   font: inherit;
-  font-size: 12px;
+  font-size: calc(12px * var(--font-scale));
   font-weight: 600;
   letter-spacing: .01em;
 }
@@ -2548,10 +2549,10 @@ body.expenses-view-active #trip-temporal-note { display: none !important; }
 .profile-row-copy strong,.profile-setting-label strong { color:var(--label-primary); font-size:calc(13px * var(--font-scale)); line-height:1.25; }
 .profile-row-copy small,.profile-setting-label small { color:var(--label-secondary); font-size:calc(10px * var(--font-scale)); line-height:1.35; }
 .profile-chevron { color:var(--label-tertiary); font-size:27px; font-weight:300; line-height:1; }
-.profile-status-pill { padding:4px 8px; border-radius:999px; background:rgba(120,120,128,.12); color:var(--label-secondary); font-size:10px; font-weight:700; }
+.profile-status-pill { padding:4px 8px; border-radius:999px; background:rgba(120,120,128,.12); color:var(--label-secondary); font-size:calc(10px * var(--font-scale)); font-weight:700; }
 .profile-row-disabled { opacity:.62; }
 .profile-stepper { display:flex; overflow:hidden; border:1px solid var(--separator); border-radius:10px; background:rgba(255,255,255,.36); }
-.profile-stepper-btn { min-width:45px; min-height:34px; padding:0 10px; border:0; background:transparent; color:#007aff; font-weight:740; font-size:12px; }
+.profile-stepper-btn { min-width:45px; min-height:34px; padding:0 10px; border:0; background:transparent; color:#007aff; font-weight:740; font-size:calc(12px * var(--font-scale)); }
 .profile-stepper-btn + .profile-stepper-btn { border-left:1px solid var(--separator); }
 .profile-setting-block { padding:11px 2px 2px; border-top:1px solid var(--separator); }
 .profile-setting-label { display:grid; grid-template-columns:36px 1fr; gap:10px; align-items:center; }
@@ -2567,7 +2568,7 @@ html.theme-dark .profile-avatar,html:not(.theme-light):not(.theme-dark) .profile
 html.theme-dark .profile-avatar.is-signed-in,html:not(.theme-light):not(.theme-dark) .profile-avatar.is-signed-in { background:rgba(255,255,255,.09); box-shadow:0 3px 12px rgba(0,0,0,.28),inset 0 0 0 .5px rgba(255,255,255,.12); }
 html.theme-dark .profile-stepper,html:not(.theme-light):not(.theme-dark) .profile-stepper { background:rgba(255,255,255,.05); }
 html.theme-dark .profile-theme-segment button.active,html:not(.theme-light):not(.theme-dark) .profile-theme-segment button.active { background:rgba(99,99,102,.78); color:#fff; box-shadow:0 1px 4px rgba(0,0,0,.34); }
-@media(max-width:370px){.profile-theme-segment{margin-left:0}.profile-row-copy small{font-size:9.5px}.bottom-nav-item span{font-size:calc(9px * var(--font-scale));}}
+@media(max-width:370px){.profile-theme-segment{margin-left:0}.profile-row-copy small{font-size:calc(9.5px * var(--font-scale))}.bottom-nav-item span{font-size:calc(9px * var(--font-scale));}}
 
 
 /* Phase 2B · Multi Trip library */
@@ -2586,7 +2587,7 @@ html.theme-dark .profile-theme-segment button.active,html:not(.theme-light):not(
 .trip-library-eyebrow { color:var(--label-secondary); font-size:calc(10px * var(--font-scale)); font-weight:760; letter-spacing:.04em; text-transform:uppercase; }
 .trip-library-heading h2 { margin:0; color:var(--label-primary); font-size:calc(19px * var(--font-scale)); line-height:1.18; }
 .trip-library-heading p { margin:0; color:var(--label-secondary); font-size:calc(10.5px * var(--font-scale)); line-height:1.42; }
-.trip-library-count { flex:0 0 auto; min-width:29px; height:29px; padding:0 9px; border-radius:999px; display:grid; place-items:center; background:rgba(0,122,255,.11); color:#1478d4; font-size:11px; font-weight:800; }
+.trip-library-count { flex:0 0 auto; min-width:29px; height:29px; padding:0 9px; border-radius:999px; display:grid; place-items:center; background:rgba(0,122,255,.11); color:#1478d4; font-size:calc(11px * var(--font-scale)); font-weight:800; }
 .trip-library-list { display:grid; gap:9px; }
 .trip-library-item {
   width:100%; min-height:86px; border:1px solid rgba(255,255,255,.34); border-radius:16px; background:rgba(118,118,128,.065); padding:11px 12px;
@@ -2598,21 +2599,21 @@ html.theme-dark .profile-theme-segment button.active,html:not(.theme-light):not(
 .trip-library-copy strong { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--label-primary); font-size:calc(13.5px * var(--font-scale)); }
 .trip-library-copy small { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--label-secondary); font-size:calc(10px * var(--font-scale)); }
 .trip-library-meta { display:flex; flex-wrap:wrap; gap:5px; margin-top:2px; }
-.trip-library-pill { padding:3px 7px; border-radius:999px; background:rgba(118,118,128,.11); color:var(--label-secondary); font-size:9.5px; font-weight:720; }
+.trip-library-pill { padding:3px 7px; border-radius:999px; background:rgba(118,118,128,.11); color:var(--label-secondary); font-size:calc(9.5px * var(--font-scale)); font-weight:720; }
 .trip-library-pill.is-current { background:rgba(52,199,89,.12); color:#238844; }
 .trip-library-pill.is-role { background:rgba(0,122,255,.10); color:#1478d4; }
 .trip-library-side { display:grid; justify-items:end; gap:4px; }
-.trip-library-side strong { color:var(--label-primary); font-size:10px; }
-.trip-library-side small { color:var(--label-tertiary); font-size:9px; }
+.trip-library-side strong { color:var(--label-primary); font-size:calc(10px * var(--font-scale)); }
+.trip-library-side small { color:var(--label-tertiary); font-size:calc(9px * var(--font-scale)); }
 .trip-library-status { margin-top:10px; padding:9px 10px; border-radius:12px; background:rgba(118,118,128,.075); color:var(--label-secondary); font-size:calc(10px * var(--font-scale)); line-height:1.4; }
 .trip-library-actions { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:10px; }
-.trip-library-action { min-height:47px; padding:7px 9px; border:0; border-radius:13px; background:rgba(118,118,128,.08); color:var(--label-primary); display:grid; gap:2px; place-items:center; font-size:11px; font-weight:750; }
-.trip-library-action small { color:var(--label-secondary); font-size:8.5px; font-weight:650; }
+.trip-library-action { min-height:47px; padding:7px 9px; border:0; border-radius:13px; background:rgba(118,118,128,.08); color:var(--label-primary); display:grid; gap:2px; place-items:center; font-size:calc(11px * var(--font-scale)); font-weight:750; }
+.trip-library-action small { color:var(--label-secondary); font-size:calc(8.5px * var(--font-scale)); font-weight:650; }
 .trip-library-action:disabled { opacity:.58; }
 .trip-library-schema { margin-top:10px; display:grid; grid-template-columns:repeat(3,1fr); gap:7px; }
 .trip-library-stat { padding:8px 7px; border-radius:11px; background:rgba(118,118,128,.065); text-align:center; }
-.trip-library-stat strong { display:block; color:var(--label-primary); font-size:13px; }
-.trip-library-stat span { display:block; margin-top:1px; color:var(--label-secondary); font-size:9px; }
+.trip-library-stat strong { display:block; color:var(--label-primary); font-size:calc(13px * var(--font-scale)); }
+.trip-library-stat span { display:block; margin-top:1px; color:var(--label-secondary); font-size:calc(9px * var(--font-scale)); }
 .trip-info-heading { margin:0 0 10px; color:var(--label-primary); font-size:calc(16px * var(--font-scale)); }
 .trip-info-sub { margin:-5px 0 11px; color:var(--label-secondary); font-size:calc(10px * var(--font-scale)); line-height:1.4; }
 html.theme-dark .trip-library-card, html:not(.theme-light):not(.theme-dark) .trip-library-card { background:rgba(24,24,31,.60); border-color:rgba(255,255,255,.09); box-shadow:0 10px 26px rgba(0,0,0,.32),inset 0 1px 0 rgba(255,255,255,.05); }
@@ -2701,7 +2702,7 @@ html.theme-dark .trip-library-stat, html:not(.theme-light):not(.theme-dark) .tri
 .trip-switch-row-copy strong { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:calc(12.5px * var(--font-scale)); }
 .trip-switch-row-copy small { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--label-secondary); font-size:calc(9.5px * var(--font-scale)); }
 .trip-switch-check { color:#34c759; font-size:17px; font-weight:800; }
-.trip-switch-manage { width:100%; min-height:44px; margin-top:10px; border:0; border-radius:13px; background:rgba(0,122,255,.10); color:#1478d4; font-size:12px; font-weight:760; }
+.trip-switch-manage { width:100%; min-height:44px; margin-top:10px; border:0; border-radius:13px; background:rgba(0,122,255,.10); color:#1478d4; font-size:calc(12px * var(--font-scale)); font-weight:760; }
 html.theme-dark .trip-archive-toggle,
 html:not(.theme-light):not(.theme-dark) .trip-archive-toggle,
 html.theme-dark .trip-switch-row,
@@ -3042,8 +3043,8 @@ html:not(.theme-light):not(.theme-dark) .profile-signout-btn:active{background:r
 .trip-import-id{color:var(--label-secondary);font-size:calc(10px * var(--font-scale));overflow-wrap:anywhere;}
 .trip-import-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;}
 .trip-import-stat{min-width:0;padding:8px 5px;border-radius:11px;text-align:center;background:rgba(118,118,128,.065);}
-.trip-import-stat strong{display:block;color:var(--label-primary);font-size:13px;}
-.trip-import-stat span{display:block;margin-top:2px;color:var(--label-secondary);font-size:8.5px;white-space:nowrap;}
+.trip-import-stat strong{display:block;color:var(--label-primary);font-size:calc(13px * var(--font-scale));}
+.trip-import-stat span{display:block;margin-top:2px;color:var(--label-secondary);font-size:calc(8.5px * var(--font-scale));white-space:nowrap;}
 .trip-import-mode{padding:10px 11px;border-radius:13px;background:rgba(0,122,255,.075);color:var(--label-secondary);font-size:calc(10.5px * var(--font-scale));line-height:1.45;}
 .trip-import-mode strong{color:var(--label-primary);}
 .trip-import-changes{display:grid;gap:7px;padding:10px 11px;border-radius:13px;background:rgba(52,199,89,.075);border:1px solid rgba(52,199,89,.10);}
@@ -3065,7 +3066,7 @@ html:not(.theme-light):not(.theme-dark) .profile-signout-btn:active{background:r
 .trip-import-cancel{background:rgba(118,118,128,.10);color:var(--label-primary);}
 .trip-import-confirm{background:#0a84ff;color:white;}
 .trip-import-confirm:disabled{opacity:.42;}
-.trip-library-mini-action{border:0;border-radius:9px;padding:5px 7px;background:rgba(118,118,128,.10);color:var(--label-secondary);font-size:9px;font-weight:750;}
+.trip-library-mini-action{border:0;border-radius:9px;padding:5px 7px;background:rgba(118,118,128,.10);color:var(--label-secondary);font-size:calc(9px * var(--font-scale));font-weight:750;}
 .trip-library-mini-action.is-restore{color:#1478d4;background:rgba(0,122,255,.10);}
 html.theme-dark .trip-import-preview,html.theme-dark .trip-import-stat,html.theme-dark .trip-import-cancel{background:rgba(255,255,255,.055);border-color:rgba(255,255,255,.06);}
 @media(max-width:380px){.trip-import-stats{grid-template-columns:repeat(2,minmax(0,1fr));}}
@@ -3114,8 +3115,8 @@ html.theme-dark .data-operation-option,html.theme-dark .data-operation-secondary
 .portrait-lock-overlay{position:fixed;inset:0;z-index:10000;display:none;align-items:center;justify-content:center;padding:max(24px,env(safe-area-inset-top,0px)) max(24px,env(safe-area-inset-right,0px)) max(24px,env(safe-area-inset-bottom,0px)) max(24px,env(safe-area-inset-left,0px));background:var(--page-bg,#f7f4f6);color:var(--label-primary,#1c1c1e);text-align:center;}
 .portrait-lock-card{width:min(360px,82vw);display:grid;justify-items:center;gap:9px;padding:22px 20px;border:1px solid rgba(118,118,128,.14);border-radius:24px;background:rgba(255,255,255,.72);box-shadow:0 18px 48px rgba(24,24,28,.12);-webkit-backdrop-filter:blur(24px) saturate(1.1);backdrop-filter:blur(24px) saturate(1.1);}
 .portrait-lock-icon{width:48px;height:48px;display:grid;place-items:center;border-radius:14px;background:rgba(10,132,255,.11);color:#0a84ff;font-size:27px;font-weight:760;}
-.portrait-lock-card strong{font-size:20px;line-height:1.25;}
-.portrait-lock-card span{color:var(--label-secondary,#6e6e73);font-size:14px;line-height:1.45;}
+.portrait-lock-card strong{font-size:calc(20px * var(--font-scale));line-height:1.25;}
+.portrait-lock-card span{color:var(--label-secondary,#6e6e73);font-size:calc(14px * var(--font-scale));line-height:1.45;}
 html.theme-dark .portrait-lock-overlay,html:not(.theme-light):not(.theme-dark) .portrait-lock-overlay{background:#1c1c22;}
 html.theme-dark .portrait-lock-card,html:not(.theme-light):not(.theme-dark) .portrait-lock-card{background:rgba(44,44,50,.88);border-color:rgba(255,255,255,.09);}
 @media (orientation:landscape) and (hover:none) and (pointer:coarse){.portrait-lock-overlay{display:flex!important;}}
@@ -3124,19 +3125,19 @@ html.theme-dark .portrait-lock-card,html:not(.theme-light):not(.theme-dark) .por
 .app-progress-backdrop{position:fixed;inset:0;z-index:3900;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(13,18,28,.28);-webkit-backdrop-filter:blur(8px) saturate(1.05);backdrop-filter:blur(8px) saturate(1.05);opacity:0;visibility:hidden;pointer-events:none;transition:opacity .22s ease,visibility .22s step-end;}
 .app-progress-backdrop.active{opacity:1;visibility:visible;pointer-events:auto;transition:opacity .22s ease,visibility 0s;}
 .app-progress-card{width:min(360px,calc(100vw - 40px));border-radius:26px;padding:22px 22px 20px;background:rgba(248,249,252,.88);border:1px solid rgba(255,255,255,.76);box-shadow:0 18px 55px rgba(24,31,42,.22);-webkit-backdrop-filter:blur(28px) saturate(1.18);backdrop-filter:blur(28px) saturate(1.18);}
-.app-progress-kicker{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:rgba(60,60,67,.56);margin-bottom:5px;}
-.app-progress-title{font-size:24px;font-weight:760;letter-spacing:-.02em;color:#17171a;margin:0;}
-.app-progress-subtitle{font-size:14px;color:rgba(60,60,67,.72);line-height:1.45;margin:7px 0 18px;}
+.app-progress-kicker{font-size:calc(12px * var(--font-scale));font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:rgba(60,60,67,.56);margin-bottom:5px;}
+.app-progress-title{font-size:calc(24px * var(--font-scale));font-weight:760;letter-spacing:-.02em;color:#17171a;margin:0;}
+.app-progress-subtitle{font-size:calc(14px * var(--font-scale));color:rgba(60,60,67,.72);line-height:1.45;margin:7px 0 18px;}
 .app-progress-meter-row{display:flex;align-items:center;gap:12px;}
 .app-progress-meter{height:9px;flex:1;border-radius:999px;overflow:hidden;background:rgba(118,118,128,.15);}
 .app-progress-meter span{display:block;height:100%;width:0;border-radius:inherit;background:#0a84ff;transition:width .26s cubic-bezier(.22,.61,.36,1);}
-.app-progress-percent{width:44px;text-align:right;font-variant-numeric:tabular-nums;font-weight:700;color:#1c1c1e;font-size:14px;}
+.app-progress-percent{width:44px;text-align:right;font-variant-numeric:tabular-nums;font-weight:700;color:#1c1c1e;font-size:calc(14px * var(--font-scale));}
 .app-progress-stage{margin-top:16px;padding-top:15px;border-top:1px solid rgba(60,60,67,.12);display:flex;align-items:flex-start;gap:11px;}
 .app-progress-stage-icon{width:26px;height:26px;flex:0 0 26px;border-radius:50%;display:grid;place-items:center;background:rgba(10,132,255,.11);color:#0a84ff;font-size:13px;font-weight:800;}
 .app-progress-stage-copy{min-width:0;}
-.app-progress-stage-copy strong{display:block;font-size:15px;color:#1c1c1e;line-height:1.25;}
-.app-progress-stage-copy small{display:block;margin-top:3px;font-size:13px;line-height:1.35;color:rgba(60,60,67,.66);font-variant-numeric:tabular-nums;}
-.app-progress-done{width:100%;min-height:46px;margin-top:18px;border:0;border-radius:14px;background:#0a84ff;color:#fff;font:inherit;font-size:15px;font-weight:720;box-shadow:inset 0 1px 0 rgba(255,255,255,.22);}
+.app-progress-stage-copy strong{display:block;font-size:calc(15px * var(--font-scale));color:#1c1c1e;line-height:1.25;}
+.app-progress-stage-copy small{display:block;margin-top:3px;font-size:calc(13px * var(--font-scale));line-height:1.35;color:rgba(60,60,67,.66);font-variant-numeric:tabular-nums;}
+.app-progress-done{width:100%;min-height:46px;margin-top:18px;border:0;border-radius:14px;background:#0a84ff;color:#fff;font:inherit;font-size:calc(15px * var(--font-scale));font-weight:720;box-shadow:inset 0 1px 0 rgba(255,255,255,.22);}
 .app-progress-done:active{opacity:.72;}
 .app-progress-done[hidden]{display:none!important;}
 .app-progress-backdrop.is-success .app-progress-done{background:#30b35a;}
@@ -3161,12 +3162,12 @@ html.theme-dark .app-progress-kicker,html:not(.theme-light):not(.theme-dark) .ap
 .trip-activity-item:first-child{border-top:0;}
 .trip-activity-icon{width:36px;height:36px;flex:0 0 36px;border-radius:11px;display:grid;place-items:center;font-size:17px;background:rgba(118,118,128,.10);}
 .trip-activity-copy{min-width:0;flex:1;}
-.trip-activity-copy strong{display:block;font-size:16px;line-height:1.25;color:#1c1c1e;}
-.trip-activity-summary{margin-top:4px;font-size:13px;line-height:1.38;color:rgba(60,60,67,.72);overflow-wrap:anywhere;}
-.trip-activity-meta{margin-top:6px;font-size:12px;color:rgba(60,60,67,.52);display:flex;gap:6px;flex-wrap:wrap;}
+.trip-activity-copy strong{display:block;font-size:calc(16px * var(--font-scale));line-height:1.25;color:#1c1c1e;}
+.trip-activity-summary{margin-top:4px;font-size:calc(13px * var(--font-scale));line-height:1.38;color:rgba(60,60,67,.72);overflow-wrap:anywhere;}
+.trip-activity-meta{margin-top:6px;font-size:calc(12px * var(--font-scale));color:rgba(60,60,67,.52);display:flex;gap:6px;flex-wrap:wrap;}
 .trip-activity-category{font-weight:700;}
-.trip-activity-empty{padding:30px 18px;text-align:center;color:rgba(60,60,67,.6);font-size:14px;}
-.trip-activity-status{padding:12px 16px 15px;border-top:1px solid rgba(60,60,67,.10);font-size:12px;color:rgba(60,60,67,.54);}
+.trip-activity-empty{padding:30px 18px;text-align:center;color:rgba(60,60,67,.6);font-size:calc(14px * var(--font-scale));}
+.trip-activity-status{padding:12px 16px 15px;border-top:1px solid rgba(60,60,67,.10);font-size:calc(12px * var(--font-scale));color:rgba(60,60,67,.54);}
 html.theme-dark .trip-activity-filter,html:not(.theme-light):not(.theme-dark) .trip-activity-filter{background:rgba(36,36,44,.70);border-color:rgba(255,255,255,.12);color:rgba(200,200,215,.78);}
 html.theme-dark .trip-activity-filter.active,html:not(.theme-light):not(.theme-dark) .trip-activity-filter.active{background:#f5f5f7;border-color:#f5f5f7;color:#151517;box-shadow:0 4px 12px rgba(0,0,0,.24);}
 html.theme-dark .trip-activity-copy strong,html:not(.theme-light):not(.theme-dark) .trip-activity-copy strong{color:#f5f5f7;}
@@ -3264,7 +3265,7 @@ body.expenses-view-active #expenses-root{
 }
 .profile-section-label{
   margin:14px 14px 7px;
-  font-size:12px;
+  font-size:calc(12px * var(--font-scale));
   font-weight:650;
   color:var(--muted);
 }
@@ -3282,7 +3283,7 @@ body.expenses-view-active #expenses-root{
 .trip-member-avatar{
   width:42px;height:42px;border-radius:13px;overflow:hidden;display:grid;place-items:center;
   background:linear-gradient(145deg,rgba(0,122,255,.18),rgba(52,199,89,.12));
-  color:var(--label-primary);font-size:13px;font-weight:800;
+  color:var(--label-primary);font-size:calc(13px * var(--font-scale));font-weight:800;
 }
 .trip-member-avatar img{width:100%;height:100%;display:block;object-fit:cover;}
 .trip-member-copy{min-width:0;display:grid;gap:3px;}
@@ -3291,18 +3292,18 @@ body.expenses-view-active #expenses-root{
 .trip-member-copy .trip-member-meta{display:flex;flex-wrap:wrap;gap:5px;margin-top:2px;}
 .trip-member-role-pill,.trip-member-you-pill{
   display:inline-flex;align-items:center;min-height:20px;padding:2px 7px;border-radius:999px;
-  background:rgba(0,122,255,.10);color:#1478d4;font-size:9px;font-weight:780;
+  background:rgba(0,122,255,.10);color:#1478d4;font-size:calc(9px * var(--font-scale));font-weight:780;
 }
 .trip-member-you-pill{background:rgba(52,199,89,.12);color:#238844;}
 .trip-member-side{display:grid;justify-items:end;gap:6px;min-width:76px;}
 .trip-member-role-select{
   max-width:104px;height:31px;padding:0 24px 0 9px;border:0;border-radius:999px;
   background:rgba(118,118,128,.10);color:var(--label-primary);font:inherit;
-  font-size:10px;font-weight:760;text-align-last:center;
+  font-size:calc(10px * var(--font-scale));font-weight:760;text-align-last:center;
 }
 .trip-member-role-select:disabled{opacity:.62;}
 .trip-member-remove,.trip-member-cancel,.trip-invite-action{
-  border:0;border-radius:10px;min-height:29px;padding:5px 9px;font-size:9.5px;font-weight:780;
+  border:0;border-radius:10px;min-height:29px;padding:5px 9px;font-size:calc(9.5px * var(--font-scale));font-weight:780;
 }
 .trip-member-remove,.trip-member-cancel{background:rgba(255,59,48,.10);color:#c8352d;}
 .trip-member-card-title{display:grid;gap:3px;margin-bottom:12px;}
@@ -3311,17 +3312,17 @@ body.expenses-view-active #expenses-root{
   color:var(--label-secondary);font-size:calc(9.5px * var(--font-scale));line-height:1.45;
 }
 .trip-member-role-help{margin-top:8px;padding-top:8px;border-top:1px solid var(--separator);}
-.trip-member-field{display:grid;gap:6px;margin-top:10px;color:var(--label-secondary);font-size:10px;font-weight:720;}
+.trip-member-field{display:grid;gap:6px;margin-top:10px;color:var(--label-secondary);font-size:calc(10px * var(--font-scale));font-weight:720;}
 .trip-member-field input{
   width:100%;height:44px;box-sizing:border-box;border:0;border-radius:13px;padding:0 13px;
-  background:rgba(118,118,128,.08);color:var(--label-primary);font:inherit;font-size:14px;
+  background:rgba(118,118,128,.08);color:var(--label-primary);font:inherit;font-size:calc(14px * var(--font-scale));
   outline:none;box-shadow:inset 0 0 0 1px rgba(118,118,128,.07);
 }
 .trip-member-field input:focus{box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--accent-color,#0a84ff) 72%,transparent);}
 .trip-member-role-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;}
 .trip-member-role-tabs button{
   min-width:0;height:34px;border:1px solid rgba(255,255,255,.58);border-radius:999px;
-  background:rgba(248,248,250,.82);color:var(--label-secondary);font-size:10px;font-weight:760;
+  background:rgba(248,248,250,.82);color:var(--label-secondary);font-size:calc(10px * var(--font-scale));font-weight:760;
   box-shadow:0 2px 8px rgba(15,23,42,.06),inset 0 1px 0 rgba(255,255,255,.72);
 }
 .trip-member-role-tabs button.active{
@@ -3332,7 +3333,7 @@ body.expenses-view-active #expenses-root{
 .trip-member-role-tabs button:disabled{display:none;}
 .trip-member-primary-action{
   width:100%;height:44px;margin-top:12px;border:0;border-radius:13px;
-  background:var(--accent-color,#0a84ff);color:#fff;font-size:12px;font-weight:800;
+  background:var(--accent-color,#0a84ff);color:#fff;font-size:calc(12px * var(--font-scale));font-weight:800;
   box-shadow:0 7px 18px color-mix(in srgb,var(--accent-color,#0a84ff) 28%,transparent);
 }
 .trip-member-primary-action:disabled{opacity:.54;}
@@ -3556,7 +3557,7 @@ html.theme-dark #info-view .trip-info-only-card{
   border-radius:999px;
   background:rgba(118,118,128,.10);
   box-shadow:inset 0 0 0 1px rgba(118,118,128,.06);
-  font-size:9.5px;
+  font-size:calc(9.5px * var(--font-scale));
 }
 .trip-member-row.is-manageable .trip-member-remove{
   min-height:29px;
@@ -3617,7 +3618,7 @@ html:not(.theme-light):not(.theme-dark) .trip-member-row.is-manageable .trip-mem
   height:31px !important;
   padding:0 22px 0 9px !important;
   border-radius:999px !important;
-  font-size:9.5px !important;
+  font-size:calc(9.5px * var(--font-scale)) !important;
 }
 .trip-member-row.is-manageable .trip-member-remove{
   min-width:46px !important;
@@ -3751,7 +3752,7 @@ html:not(.theme-light):not(.theme-dark) .cloud-safety-strip{
 #snacks-view::after,
 #info-view::after,
 #profile-view::after{
-  content:"v7.9.20.17" !important;
+  content:"v7.9.20.18" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3772,7 +3773,7 @@ html:not(.theme-light):not(.theme-dark) .cloud-safety-strip{
   display:none !important;
 }
 body.expenses-view-active .expenses-module .expenses-app::after{
-  content:"v7.9.20.17" !important;
+  content:"v7.9.20.18" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -4032,7 +4033,7 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
 .trip-map-heading strong{display:block;font-size:14px;font-weight:720;line-height:1.15;}
 .trip-map-heading small{display:block;margin-top:2px;font-size:10.5px;font-weight:520;color:rgba(60,60,67,.72);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .trip-map-filters{position:absolute;z-index:3;top:max(72px,calc(env(safe-area-inset-top) + 66px));left:50%;transform:translateX(-50%);display:grid;grid-template-columns:repeat(2,minmax(74px,1fr));gap:5px;width:min(210px,62vw);padding:5px;border-radius:999px;background:rgba(248,248,250,.86);box-shadow:0 4px 18px rgba(15,23,42,.12);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);}
-.trip-map-filters .trip-activity-filter{padding:6px 12px;font-size:11px;border:0;box-shadow:none;}
+.trip-map-filters .trip-activity-filter{padding:6px 12px;font-size:calc(11px * var(--font-scale));border:0;box-shadow:none;}
 .trip-map-state{position:absolute;z-index:3;left:50%;bottom:max(24px,calc(env(safe-area-inset-bottom) + 18px));transform:translateX(-50%);max-width:min(86vw,360px);padding:9px 13px;border-radius:15px;background:rgba(248,248,250,.88);color:rgba(60,60,67,.78);font-size:11px;font-weight:600;line-height:1.35;text-align:center;box-shadow:0 4px 18px rgba(15,23,42,.12);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);}
 .trip-map-state[hidden]{display:none!important;}
 .trip-map-route-control{position:absolute;z-index:3;top:max(72px,calc(env(safe-area-inset-top) + 66px));left:calc(50% + min(105px,31vw) + 10px);display:block;padding:5px;border-radius:999px;background:rgba(248,248,250,.86);box-shadow:0 4px 18px rgba(15,23,42,.12);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);overflow:visible;}
@@ -4486,7 +4487,7 @@ html.theme-dark .snacks-library-count,html:not(.theme-light):not(.theme-dark) .s
 </style>
             <link rel="apple-touch-icon" href="assets/icon/trip_icon.png">
   <link rel="icon" type="image/png" href="assets/icon/trip_icon.png">
-  <link rel="manifest" href="manifest.json?release=7.9.20.17">
+  <link rel="manifest" href="manifest.json?release=7.9.20.18">
   <meta name="apple-mobile-web-app-title" content="關嘉露西生日之旅">
   <!-- v7.7.1.2: expenses.css is 144KB and every rule is scoped under
        .expenses-module, yet it used to block the very first paint of the
@@ -4494,8 +4495,8 @@ html.theme-dark .snacks-library-count,html:not(.theme-light):not(.theme-dark) .s
        priority without blocking paint; ensureExpensesStylesheet() flips it to
        media="all" before the 支出 view is ever mounted, so the styling is
        byte-for-byte identical by the time anything expenses-related renders. -->
-  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?release=7.9.20.17" media="print">
-  <noscript><link rel="stylesheet" href="assets/css/expenses.css?release=7.9.20.17"></noscript>
+  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?release=7.9.20.18" media="print">
+  <noscript><link rel="stylesheet" href="assets/css/expenses.css?release=7.9.20.18"></noscript>
 
 <style id="booking-documents-v79191-style">
 /* Phase 3E · Booking Documents native hierarchy / viewer hardening.
@@ -4879,7 +4880,7 @@ dialog.booking-document-viewer.is-edge-swiping{
         </span>
         <span class="profile-user-main">
           <span class="profile-user-name" id="entry-user-name">正在確認帳戶…</span>
-          <span class="profile-user-email" id="entry-user-email">Firebase Authentication</span>
+          <span class="profile-user-email" id="entry-user-email">正在確認帳戶</span>
         </span>
         <span class="profile-status-pill profile-auth-status" id="entry-auth-status">確認中</span>
       </div>
@@ -5688,7 +5689,7 @@ dialog.booking-document-viewer.is-edge-swiping{
         <span class="profile-detail-spacer"></span>
       </div>
       <section class="profile-card" aria-label="App 資訊">
-        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.9.20.17</strong></div>
+        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.9.20.18</strong></div>
         <div class="profile-meta-row"><span>資料架構</span><strong>Phase 2G.2</strong></div>
         <div class="profile-meta-row"><span>主要資料來源</span><strong id="app-data-source-label">Firebase / 本機快取</strong></div>
       </section>
@@ -6347,7 +6348,7 @@ dialog.booking-document-viewer.is-edge-swiping{
 </div>
 
 <script>
-const APP_VERSION = "7.9.20.17";
+const APP_VERSION = "7.9.20.18";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 let tripMapServicePromise=null,transitRouteServicePromise=null,tripEditServicePromise=null,airlineLogoServicePromise=null,tripDocumentServicePromise=null,tripMapController=null,tripMapScope="day",tripMapRenderEpoch=0,tripMapSelectedPoint=null;
@@ -6418,7 +6419,6 @@ function tripMapGalleryForPoint(point){
   if(fallback.length)return fallback;
   return point?.previewImage?[point.previewImage]:[];
 }
-function tripMapHydratedPreview(point){return tripMapGalleryForPoint(point)[0]||null;}
 function hydrateTripMapPointPreviews(points){return (Array.isArray(points)?points:[]).map(point=>{const previewGallery=tripMapGalleryForPoint(point);return {...point,previewGallery,previewImages:previewGallery,previewImage:previewGallery[0]||point?.previewImage||null};});}
 function renderTripMapPreviewMedia(point){
   const host=document.getElementById("trip-map-place-media"),card=document.getElementById("trip-map-place-card");if(!host)return false;
@@ -6811,9 +6811,6 @@ function managedItineraryMediaList(item,dayId="",tripId=dataTripId(window.tripDa
     if(index>=0)merged[index]={...merged[index],...next};else merged.push(next);
   });
   return merged.sort((a,b)=>(Number(a?.sortOrder)||0)-(Number(b?.sortOrder)||0));
-}
-function managedItineraryMedia(item,dayId="",tripId=dataTripId(window.tripData)){
-  return managedItineraryMediaList(item,dayId,tripId)[0]||null;
 }
 function itineraryMediaCrop(input){
   const raw=input&&typeof input==="object"?input.crop:null;if(!raw||typeof raw!=="object")return null;
@@ -8139,7 +8136,6 @@ function tripFlightRoleLabel(role){return role==="entry"?"旅程去程":role==="
 function tripFlightDateLabel(iso=""){const m=String(iso||"").match(/^\d{4}-(\d{2})-(\d{2})$/);return m?`${Number(m[1])}/${Number(m[2])}`:String(iso||"");}
 function tripFlightRouteLabel(f={}){return [f.departureAirport,f.arrivalAirport].filter(Boolean).join(" → ");}
 function tripFlightTimeLabel(f={}){return [f.departureTime,f.arrivalTime].filter(Boolean).join(" – ");}
-function tripTeamFlights(meta={},teamKey="all"){return tripPresentationFlights(meta).filter(f=>String(f.teamKey||"all")==="all"||String(f.teamKey||"all")===String(teamKey||"all"));}
 function tripEntryExitFlights(rows=[]){const sorted=[...rows];const entries=sorted.filter(f=>f.journeyRole==="entry"),exits=sorted.filter(f=>f.journeyRole==="exit");return {entry:entries[0]||sorted[0]||null,exit:exits[exits.length-1]||sorted[sorted.length-1]||null};}
 function tripPresentationAccommodations(meta={}){
   if(Array.isArray(meta?.accommodations)&&meta.accommodations.length)return [...meta.accommodations].sort((a,b)=>String(a?.checkInDate||"").localeCompare(String(b?.checkInDate||""))||String(a?.checkInTime||"").localeCompare(String(b?.checkInTime||"")));
@@ -8191,8 +8187,6 @@ function renderInfo(data){
 
   function fmtDate(iso){if(!iso)return"";const[y,m,d]=iso.split("-");return`${y}年${parseInt(m)}月${parseInt(d)}日`;}
   const cityKeys=orderedCityKeys(data,cities);
-  function hotelDates(cKey){const c=cities[cKey];if(!c)return{in:"",out:""};return{in:fmtDate(c.startIso),out:fmtDate(c.endIso)};}
-  function hotelObj(val){if(!val)return{name:"",address:""};if(typeof val==="string")return{name:val,address:""};return{name:val.name||"",address:val.address||""};}
   function addRow(sec,label,val){if(!val)return;const r=document.createElement("div");r.className="info-row";r.innerHTML=`<span class="info-row-label">${label}</span><span class="info-row-value">${val}</span>`;sec.appendChild(r);}
 
   const teamKeys=orderedTravellerKeys(travellers);if(!teamKeys.length)teamKeys.push("all");
@@ -9325,7 +9319,6 @@ async function openTripEditAirlinePicker(){
 async function tripEditRenderAirlineSheet(query=""){
   const host=document.getElementById("trip-edit-airline-sheet-results");if(!host)return;const needle=String(query||"").trim().toUpperCase(),rows=await tripEditAirlineDirectoryRows(needle);host.replaceChildren();const exact=rows.some(row=>String(row.code||"").toUpperCase()===needle),custom=/^[A-Z0-9]{2,3}$/.test(needle)&&!exact?[{code:needle,name:"使用自訂航空公司代碼"}]:[];const all=[...custom,...rows];if(!all.length){const empty=document.createElement("div");empty.className="trip-edit-airline-sheet-empty";empty.textContent="搵唔到航空公司。可輸入2–3位代碼使用自訂值。";host.appendChild(empty);return;}all.forEach(row=>{const button=document.createElement("button");button.type="button";button.className="trip-edit-airline-option";const code=document.createElement("strong");code.textContent=String(row.code||"");const name=document.createElement("span");name.textContent=String(row.name||"");button.append(code,name);button.addEventListener("click",()=>{const input=document.getElementById("trip-edit-flight-airline-code");if(input)input.value=String(row.code||"").toUpperCase();closeTripEditAirlinePicker();tripEditRefreshFlightEditorHeading();void tripEditRefreshAirlinePickerValue();});host.appendChild(button);});
 }
-async function tripEditRenderAirlineResults(query=""){return tripEditRenderAirlineSheet(query);}
 function closeTripEditFlightManager(){void tripEditCancelDocumentOwner();void tripEditDiscardTravelModalDocuments();tripEditFlightModalState=null;tripEditTravelDocumentModalState=null;tripEditFlightEditorId="";tripEditCloseBackdrop("trip-edit-flight-manager-backdrop");tripEditCloseBackdrop("trip-edit-flight-editor-backdrop");}
 async function openTripEditFlightManager(){if(!tripEditSession)return;const service=await tripEditService(),state=service.getTripEditDraftTravelState(tripEditSession);tripEditFlightModalState=tripEditClonePlain(state.flights||[]);tripEditTravelDocumentModalState=tripEditClonePlain(state.bookingDocuments||[]);tripEditRenderFlightManager();tripEditOpenBackdrop("trip-edit-flight-manager-backdrop");}
 function tripEditRenderFlightManager(){const host=document.getElementById("trip-edit-flight-list");if(!host||!Array.isArray(tripEditFlightModalState))return;host.innerHTML="";const rows=tripEditFlightSort(tripEditFlightModalState),managerMeta=document.getElementById("trip-edit-flight-manager-meta");if(managerMeta)managerMeta.textContent=`${rows.length} 班航班 · 按日期排列`;if(!rows.length){const empty=document.createElement("div");empty.className="trip-edit-team-note";empty.textContent="未有航班。可新增第一班航班。";host.appendChild(empty);return;}
@@ -10732,7 +10725,7 @@ function applyAppEntryState(nextState){
   if(openingText)openingText.textContent=appEntryLoginHandoff&&appEntryState==="resolving"?"正在開啟旅程…":"正在開啟 Travel App…";
   const gated=appEntryState!=="workspace";
   document.body.classList.toggle("app-entry-gated",gated);document.body.classList.toggle("app-entry-workspace",!gated);document.body.classList.toggle("app-entry-pending",["pending","resolving"].includes(appEntryState));
-  if(appEntryState==="pending"){if(title)title.textContent="正在確認帳戶";if(subtitle)subtitle.textContent="正在讀取 Firebase Authentication 狀態。";if(pill)pill.textContent="確認中";}
+  if(appEntryState==="pending"){if(title)title.textContent="正在確認帳戶";if(subtitle)subtitle.textContent="正在確認登入狀態。";if(pill)pill.textContent="確認中";}
   else if(appEntryState==="resolving"){if(title)title.textContent="正在確認旅程存取權";if(subtitle)subtitle.textContent="安全確認完成後會直接進入你上次使用嘅旅程。";if(pill)pill.textContent=navigator.onLine===false?"離線確認":"確認中";}
   else if(appEntryState==="lobby"){
     const targeted=!!appEntryTargetInviteId&&tripMyPendingInvites.some(invite=>invite.inviteId===appEntryTargetInviteId);
@@ -10741,7 +10734,7 @@ function applyAppEntryState(nextState){
     if(subtitle)subtitle.textContent=targeted?"確認邀請後會直接進入指定旅程。":(archivedCount?"你仍然保留旅程存取權；由下方還原後可以重新進入 Workspace。":"收到旅程邀請後可以喺呢度加入；未獲授權前唔會顯示 Trip workspace。");
     if(pill)pill.textContent=targeted?"待確認":(archivedCount?"個人封存":"等待邀請");
   }
-  else if(appEntryState==="error"){if(title)title.textContent="暫時未能確認旅程";if(subtitle)subtitle.textContent=tripLibraryCloudState.status==="index-required"?"Firestore index 尚未完成，請先部署今版所需設定。":"Firebase 存取檢查未完成；現有資料冇被修改。";if(pill)pill.textContent="需處理";}
+  else if(appEntryState==="error"){if(title)title.textContent="暫時未能確認旅程";if(subtitle)subtitle.textContent=tripLibraryCloudState.status==="index-required"?"旅程資料暫時未準備完成，請稍後再試或聯絡管理員。":"雲端存取檢查未完成；現有資料冇被修改。";if(pill)pill.textContent="需處理";}
   if(icon){
     const iconMode=["pending","resolving"].includes(appEntryState)?"spinner":(appEntryState==="lobby"?"lobby":appEntryState==="error"?"error":"workspace");
     if(icon.dataset.entryIconMode!==iconMode){
@@ -10894,7 +10887,7 @@ function currentTripLibraryRow(){
     <span class="trip-library-copy">
       <strong>${tripLibraryEsc(tripLibrarySummary.title||currentId)}</strong>
       <small>${tripLibraryEsc(tripLibrarySummary.dateRange||[tripLibrarySummary.startDate,tripLibrarySummary.endDate].filter(Boolean).join(" → ")||currentId)}</small>
-      <span class="trip-library-meta"><span class="trip-library-pill is-current">目前</span><span class="trip-library-pill">${tripLoaderState.status==="ready"&&tripLoaderState.tripId===currentId?(tripLoaderState.source==="instant-cache"?"即時快取":(tripLoaderState.source==="cache"?"Firebase 快取":"Firebase")):"本機 JSON"}</span>${statusLabel?`<span class="trip-library-pill">${statusLabel}</span>`:""}${lockPill}${importPill}${currentRole?`<span class="trip-library-pill is-role">${currentRole}</span>`:""}</span>
+      <span class="trip-library-meta"><span class="trip-library-pill is-current">目前</span><span class="trip-library-pill">${tripLoaderState.status==="ready"&&tripLoaderState.tripId===currentId?(tripLoaderState.source==="instant-cache"?"即時快取":(tripLoaderState.source==="cache"?"雲端快取":"雲端")):"本機 JSON"}</span>${statusLabel?`<span class="trip-library-pill">${statusLabel}</span>`:""}${lockPill}${importPill}${currentRole?`<span class="trip-library-pill is-role">${currentRole}</span>`:""}</span>
     </span>
     <span class="trip-library-side"><strong>${tripLibrarySummary.dayCount} 日</strong><small>${tripLibrarySummary.itemCount} 項</small>${archiveAction}</span>
   </div>`;
@@ -10913,7 +10906,7 @@ function cloudTripLibraryRow(trip,{archived=false}={}){
     <span class="trip-library-copy">
       <strong>${tripLibraryEsc(trip.title||trip.tripId)}</strong>
       <small>${tripLibraryEsc(tripLibraryDateText(trip))}</small>
-      <span class="trip-library-meta">${archived?'<span class="trip-library-pill is-archived">已封存</span>':'<span class="trip-library-pill">Firebase</span>'}${statusLabel?`<span class="trip-library-pill">${statusLabel}</span>`:""}${lockPill}${importPill}${role?`<span class="trip-library-pill is-role">${role}</span>`:""}</span>
+      <span class="trip-library-meta">${archived?'<span class="trip-library-pill is-archived">已封存</span>':'<span class="trip-library-pill">雲端</span>'}${statusLabel?`<span class="trip-library-pill">${statusLabel}</span>`:""}${lockPill}${importPill}${role?`<span class="trip-library-pill is-role">${role}</span>`:""}</span>
     </span>
     <span class="trip-library-side"><strong>${archived?"個人封存":"已加入"}</strong><small>${archived?"只影響你":"2G 切換"}</small>${action}</span>
   </div>`;
@@ -10990,10 +10983,10 @@ function renderTripLibrary(){
     const state=tripLibraryCloudState.status;
     if(state==="signed-out") status.textContent="目前使用本機 trip.json。登入 Google 後會顯示你有權使用嘅 Active Trips。";
     else if(state==="loading") status.textContent="已登入 Google，正在讀取未封存旅程…";
-    else if(state==="rules-pending") status.textContent="Google 登入正常。請先部署 ZIP 內 firestore.rules，Phase 2G.1 Entry & Access 權限先可以安全寫入 Firebase。";
-    else if(state==="index-required") status.textContent="Firestore 欠 Trip catalog composite index；按 Console error 提供嘅連結建立一次就得。";
+    else if(state==="rules-pending") status.textContent="Google 登入正常，但旅程權限設定暫時未準備完成。";
+    else if(state==="index-required") status.textContent="旅程清單索引暫時未準備完成，請稍後再試或聯絡管理員。";
     else if(state==="ready"&&cloudTrips.length===0) status.textContent=appEntryCreatorState.enabled?"暫時未有雲端旅程。你已獲授權，可用「匯入 trip.json」建立新 Trip；亦可以等待旅程邀請。":"暫時未有雲端旅程。收到旅程邀請後會自動顯示喺呢度。";
-    else if(state==="ready") status.textContent=`已讀取 ${cloudTrips.length} 個未封存雲端旅程。Firebase Loader 已連接，可直接切換。`;
+    else if(state==="ready") status.textContent=`已讀取 ${cloudTrips.length} 個未封存雲端旅程，可以直接切換。`;
     else status.textContent="旅程清單暫時未能同步，但目前本機行程不受影響。";
   }
   renderTripSwitcher();
@@ -11325,13 +11318,13 @@ function refreshAppDataDiagnostics(){
   if(loader.status==="ready"){
     if(loader.serverConfirmed===true&&loader.hasPendingWrites!==true)syncLabel="已同步";
     else if(loader.hasPendingWrites===true)syncLabel="同步中 · 尚有待寫入資料";
-    else syncLabel=loader.source==="instant-cache"?"同步中 · 即時旅程快取已載入":(loader.source==="cache"?"同步中 · Firebase 快取已載入":"同步中 · 等待完整 Server confirmation");
+    else syncLabel=loader.source==="instant-cache"?"同步中 · 即時旅程快取已載入":(loader.source==="cache"?"同步中 · 雲端快取已載入":"同步中 · 等待雲端確認");
   }
-  else if(loader.status==="loading") syncLabel="正在連接 Firebase…";
+  else if(loader.status==="loading") syncLabel="正在連接雲端…";
   else if(loader.status==="syncing") syncLabel="正在同步…";
   else if(loader.status==="local") syncLabel="使用本機資料";
   else if(loader.status==="permission-denied") syncLabel="權限不足";
-  else if(loader.status==="not-found") syncLabel="Firebase 找不到旅程";
+  else if(loader.status==="not-found") syncLabel="雲端找不到旅程";
   else if(loader.status==="recovery-needed") syncLabel="更新未完成 · 需重新匯入／還原";
   else if(loader.status==="error") syncLabel="同步錯誤";
 
@@ -12915,6 +12908,7 @@ function startFullBackupSyncGateWatch(){
   refreshFullBackupSyncGate();
   fullBackupSyncGateWatchTimer=setInterval(()=>{
     if(!fullBackupGatePageVisible()){stopFullBackupSyncGateWatch();return;}
+    if(document.visibilityState==="hidden")return;
     refreshFullBackupSyncGate();
   },350);
 }
@@ -13973,7 +13967,6 @@ function getTripMediaSyncService(){
   if(!tripMediaSyncServicePromise)tripMediaSyncServicePromise=import(`./assets/js/trip-media-sync-service.js?release=${APP_VERSION}`).catch(error=>{tripMediaSyncServicePromise=null;throw error;});
   return tripMediaSyncServicePromise;
 }
-function mediaQueueOverlayForCurrent(slot){return pendingTripMediaOverlay(appearanceSettingsTripId(),slot);}
 function mediaQueueStateCopy(overlay,kind="媒體"){
   if(!overlay)return"";
   const state=String(overlay.state||"");
@@ -14285,7 +14278,6 @@ function pendingSavedPlaceMediaOverlays(tripIdInput,placeIdInput){
   return matches.sort((a,b)=>(Number(a?.createdAt)||0)-(Number(b?.createdAt)||0));
 }
 function pendingSavedPlaceMediaOverlay(tripIdInput,placeIdInput){const rows=pendingSavedPlaceMediaOverlays(tripIdInput,placeIdInput);return rows.find(row=>row?.blocking===true)||rows[rows.length-1]||null;}
-function isManagedSavedPlaceMedia(image,placeIdInput=""){if(!image||typeof image!=="object"||!tripMediaHasStorage(image))return false;const placeId=String(placeIdInput||"").trim(),ownerType=String(image.ownerType||"").trim(),ownerId=String(image.ownerId||"").trim(),slot=String(image.slot||"").trim();if(ownerType&&ownerType!=="savedPlace")return false;if(ownerId&&placeId&&ownerId!==placeId)return false;return slot==="gallery"||slot.startsWith("gallery:");}
 function savedPlaceLegacyImageId(srcInput,index=0){const text=`${String(srcInput||"").trim()}|${Number(index)||0}`;let hash=2166136261;for(let i=0;i<text.length;i+=1)hash=Math.imul(hash^text.charCodeAt(i),16777619);return `legacy_saved_${(hash>>>0).toString(16)}`;}
 function savedPlaceBaseImages(place){if(Array.isArray(place?.images)&&place.images.length)return place.images.filter(Boolean).map(image=>image&&typeof image==="object"?{...image}:image);return normGallery(place?.gallery).map((value,index)=>value&&typeof value==="object"?{...value,sortOrder:Number.isFinite(Number(value.sortOrder))?Number(value.sortOrder):index}:{imageId:savedPlaceLegacyImageId(value,index),source:String(value||"").startsWith("assets/")?"static":"remote",src:String(value||""),sortOrder:index}).filter(Boolean);}
 function storageGalleryForSavedPlace(place){
@@ -14371,14 +14363,6 @@ function setTripIconMediaProgress(progress,{show=true}={}){
   if(!root||!bar)return;
   root.hidden=!show;
   bar.style.width=`${Math.round(clamp(Number(progress)||0,0,1)*100)}%`;
-}
-function tripIconProgressCopy(progress={}){
-  const stage=String(progress?.stage||"");
-  if(stage==="registry-pending")return"正在建立 Firebase Media Registry…";
-  if(stage==="upload")return`正在上載旅程圖示… ${Math.round(clamp(Number(progress?.progress)||0,0,1)*100)}%`;
-  if(stage==="registry-ready")return"Storage 已完成，正在確認媒體資料…";
-  if(stage==="ready")return"旅程圖示已上載。";
-  return"正在準備及壓縮圖片…";
 }
 function renderTripIconSettings(data=window.tripData,{preserveStatus=false}={}){
   const preview=document.getElementById("trip-icon-media-preview"),title=document.getElementById("trip-icon-media-title"),copy=document.getElementById("trip-icon-media-copy");
@@ -14512,14 +14496,6 @@ function setTripBackgroundMediaStatus(text,{error=false}={}){
 function setTripBackgroundMediaProgress(progress,{show=true}={}){
   const root=document.getElementById("trip-background-media-progress"),bar=root?.querySelector("span");if(!root||!bar)return;
   root.hidden=!show;bar.style.width=`${Math.round(clamp(Number(progress)||0,0,1)*100)}%`;
-}
-function tripBackgroundProgressCopy(progress={}){
-  const stage=String(progress?.stage||"");
-  if(stage==="registry-pending")return"正在建立 Firebase Media Registry…";
-  if(stage==="upload")return`正在上載旅程背景… ${Math.round(clamp(Number(progress?.progress)||0,0,1)*100)}%`;
-  if(stage==="registry-ready")return"Storage 已完成，正在確認媒體資料…";
-  if(stage==="ready")return"旅程背景已上載。";
-  return"正在準備及壓縮圖片…";
 }
 function renderTripBackgroundSettings(data=window.tripData,{preserveStatus=false}={}){
   const preview=document.getElementById("trip-background-media-preview"),title=document.getElementById("trip-background-media-title"),copy=document.getElementById("trip-background-media-copy");

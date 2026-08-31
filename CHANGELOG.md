@@ -1,3 +1,13 @@
+# v7.9.20.18 — Final Cleanup · UX polish / background efficiency / legacy cleanup
+
+- Paused the 350 ms Full Backup sync-gate DOM refresh while the document is backgrounded, preserving the existing foreground freshness gate without needless background work.
+- Completed Expenses module status localisation: known sync/export/OCR/init failures now render professional Traditional Chinese copy, and unknown internal English statuses fall back to a safe user-facing message instead of leaking debug text.
+- Cleaned general Entry / Trip Library cloud-state copy so normal users no longer see Firebase Authentication, Firestore index or Server confirmation implementation wording; diagnostic and explicit Backup sync surfaces intentionally remain technical.
+- Removed 10 zero-reference legacy helper functions confirmed unused across the complete source. No compatibility reader, schema path or runtime service was removed.
+- Added a low-cost dns-prefetch for the on-demand jsDelivr PDF.js source; Booking Documents / PDF Viewer loading logic is unchanged.
+- Extended the existing `--font-scale` setting to legacy text-bearing Trip Library, Profile, App Progress, Trip Activity, Trip Member, Import, Portrait Lock and crop UI rules while leaving icon/glyph sizes unscaled.
+- No Firebase schema / Rules / Storage Rules / Functions, Map routing, Day Bar, Transit Gallery, Booking Documents, PDF Viewer or Expenses data-flow changes. No Firebase deployment required.
+
 # v7.9.20.17 — Trip Map route semantics + marker centre anchor
 
 - 「連接住宿」OFF 而家會排除所有住宿型 Overview route nodes，包括 synthetic accommodation、explicit「返回酒店」anchor，以及已 merge 到住宿 system anchor 嘅 itinerary node。住宿 marker、itinerary data、Transit routing endpoint 均保留。
