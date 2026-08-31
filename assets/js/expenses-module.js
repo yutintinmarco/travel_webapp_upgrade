@@ -18,7 +18,8 @@ import {
   orderBy,
   limit,
   getDoc,
-  setDoc
+  setDoc,
+  writeBatch
 } from "./firestore-observed-service.js";
 
 function mountExpensesHtml(root) {
@@ -575,6 +576,10 @@ let recentExpensesLiveReady = false;
 let settlementsLiveReady = false;
 let activityLogsLiveReady = false;
 let expenseSettingsLiveReady = false;
+let lastExpenseSettingsSignature = "";
+let lastLegacyTripSettingsSignature = "";
+let lastSettlementRenderSignature = "";
+let lastActivityLogRenderSignature = "";
 const backupSyncMeta = {
   settings: { seen:false, fromCache:true, hasPendingWrites:false },
   expenses: { seen:false, fromCache:true, hasPendingWrites:false },
@@ -584,6 +589,11 @@ const backupSyncMeta = {
 function resetBackupSyncMeta(){
   Object.keys(backupSyncMeta).forEach(key=>{backupSyncMeta[key]={seen:false,fromCache:true,hasPendingWrites:false};});
   expenseSettingsLiveReady=false;
+  lastExpenseSettingsSignature="";
+  lastLegacyTripSettingsSignature="";
+  lastSettlementRenderSignature="";
+  lastActivityLogRenderSignature="";
+  lastExpenseRenderSignature="";
 }
 function updateBackupSyncMeta(key,snapshot){
   backupSyncMeta[key]={
@@ -684,6 +694,7 @@ let expenseRealtimeRetryTimer = null;
 let expenseRealtimeRetryAttempt = 0;
 let allExpenses = [];
 let expenses = [];
+let lastExpenseRenderSignature = "";
 let settlements = [];
 let activityLogs = [];
 let tripStatus = "open";
@@ -724,6 +735,7 @@ function scheduleExpenseRealtimeRetry(bindingEpochAtError){
     expenseBindingEpoch += 1;
     cloudExpenseStarted=false;
     recentExpensesLiveReady=false;
+    lastExpenseRenderSignature="";
     settlementsLiveReady=false;
     activityLogsLiveReady=false;
     resetBackupSyncMeta();
@@ -770,6 +782,35 @@ function timestampMillis(value) {
   if (typeof value.toDate === "function") return value.toDate().getTime();
   const n = new Date(value).getTime();
   return Number.isFinite(n) ? n : 0;
+}
+function snapshotDataWithServerEstimate(snapshot) {
+  if (!snapshot || typeof snapshot.data !== "function") return {};
+  try {
+    return snapshot.data({ serverTimestamps: "estimate" }) || {};
+  } catch (error) {
+    return snapshot.data() || {};
+  }
+}
+function semanticRecordSignature(value, ignoredKeys = []) {
+  const ignored = new Set(ignoredKeys);
+  const normalize = input => {
+    if (Array.isArray(input)) return input.map(normalize);
+    if (!input || typeof input !== "object") return input;
+    if (typeof input.toMillis === "function") return input.toMillis();
+    const output = {};
+    Object.keys(input).sort().forEach(key => {
+      if (!ignored.has(key)) output[key] = normalize(input[key]);
+    });
+    return output;
+  };
+  try { return JSON.stringify(normalize(value)); }
+  catch (error) { return String(value ?? ""); }
+}
+function expenseRenderSignature(list) {
+  const rows = [...(list || [])];
+  const displayOrder = rows.map(item => String(item?.id || "")).join("|");
+  const ordered = [...rows].sort((a, b) => String(a?.id || "").localeCompare(String(b?.id || "")));
+  return `${displayOrder}::${semanticRecordSignature(ordered, ["createdAt", "updatedAt"])}`;
 }
 function sortExpensesForDisplay(list) {
   return [...(list || [])].sort((a, b) => {
@@ -1135,25 +1176,30 @@ function expenseActivityDescriptor(action, message = "") {
   return { title, category, summary: String(message || title) };
 }
 
-async function logActivity(action, message, targetType = "trip", targetId = tripId, details = {}) {
-  if (!currentUser) return;
+function buildActivityLogPayload(action, message, targetType = "trip", targetId = tripId, details = {}) {
+  if (!currentUser) return null;
   const descriptor = expenseActivityDescriptor(action, message);
+  return {
+    action,
+    actionType: action,
+    category: descriptor.category,
+    title: descriptor.title,
+    summary: descriptor.summary,
+    message,
+    actorUid: currentUser.uid,
+    actorName: getCurrentUserDisplayName(),
+    targetType,
+    targetId: String(targetId || ""),
+    details,
+    createdAt: serverTimestamp()
+  };
+}
 
+async function logActivity(action, message, targetType = "trip", targetId = tripId, details = {}) {
+  const payload = buildActivityLogPayload(action, message, targetType, targetId, details);
+  if (!payload) return;
   try {
-    await addDoc(getActivityLogsCollection(), {
-      action,
-      actionType: action,
-      category: descriptor.category,
-      title: descriptor.title,
-      summary: descriptor.summary,
-      message,
-      actorUid: currentUser.uid,
-      actorName: getCurrentUserDisplayName(),
-      targetType,
-      targetId: String(targetId || ""),
-      details,
-      createdAt: serverTimestamp()
-    });
+    await addDoc(getActivityLogsCollection(), payload);
   } catch (error) {
     console.warn("Activity log failed:", error);
   }
@@ -2280,16 +2326,22 @@ function startExpenseSettingsListener() {
     if (bindingEpoch !== expenseBindingEpoch) return;
     expenseSettingsLiveReady = true;
     updateBackupSyncMeta("settings", snap);
-    const data = snap.exists() ? (snap.data() || {}) : {};
+    const data = snap.exists() ? snapshotDataWithServerEstimate(snap) : {};
     if (typeof data.expenseLocked === "boolean") applyExpenseLockState(data, { explicit:true });
     else applyExpenseLockState({}, { explicit:false });
     if (snap.exists()) {
+      const signature = semanticRecordSignature(data, ["updatedAt", "updatedBy"]);
+      if (signature === lastExpenseSettingsSignature) return;
+      lastExpenseSettingsSignature = signature;
       tripSettings = {
         ...tripSettings,
         ...data,
         exchangeRates: { ...tripSettings.exchangeRates, ...(data.exchangeRates || data.defaultExchangeRates || {}) }
       };
-      updateCurrencySelectOptions(); renderRateEditor(); renderSummary(); renderAnalytics(); renderExpenses();
+      updateCurrencySelectOptions();
+      renderRateEditor();
+      renderExpenses();
+      renderActiveExpensePanel();
     }
   }, error => {
     if (bindingEpoch !== expenseBindingEpoch) return;
@@ -2342,12 +2394,20 @@ function startTripListener() {
     }
 
     if (data.settings) {
-      tripSettings = {
-        ...tripSettings,
-        ...data.settings,
-        exchangeRates: { ...tripSettings.exchangeRates, ...(data.settings.exchangeRates || {}) }
-      };
-      updateCurrencySelectOptions(); renderRateEditor(); updateTripStatusUi(); renderSummary(); renderAnalytics(); renderExpenses();
+      const legacySettingsSignature = semanticRecordSignature(data.settings, ["updatedAt", "updatedBy"]);
+      if (legacySettingsSignature !== lastLegacyTripSettingsSignature) {
+        lastLegacyTripSettingsSignature = legacySettingsSignature;
+        tripSettings = {
+          ...tripSettings,
+          ...data.settings,
+          exchangeRates: { ...tripSettings.exchangeRates, ...(data.settings.exchangeRates || {}) }
+        };
+        updateCurrencySelectOptions();
+        renderRateEditor();
+        updateTripStatusUi();
+        renderExpenses();
+        renderActiveExpensePanel();
+      }
     }
   }, err => {
     if (bindingEpoch !== expenseBindingEpoch) return;
@@ -2400,7 +2460,7 @@ async function hydrateRecentExpensesFromLocalFirestoreCache() {
     const q = query(getExpensesCollection(), orderBy("date", "desc"), limit(5));
     const snap = await getDocsFromCache(q);
     if (recentExpensesLiveReady) return;
-    const cachedRows = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    const cachedRows = snap.docs.map(d => ({ id: d.id, ...snapshotDataWithServerEstimate(d) }));
     renderWarmRecentExpenseRows(cachedRows);
   } catch (error) {
     // Cache-only hydration is best-effort. The live listener below remains the source of truth.
@@ -2417,11 +2477,27 @@ function listenToExpenses() {
     updateBackupSyncMeta("expenses", snap);
     if (recentExpenseList) recentExpenseList.classList.remove("is-warm-cache");
     setRecentExpensesPending(false);
-    allExpenses = sortExpensesForDisplay(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+
+    // Use the local estimate for pending serverTimestamp() values. Firestore
+    // listeners then place a newly-created Quick Add row correctly on the
+    // first latency-compensated snapshot instead of waiting for server ACK.
+    const nextAllExpenses = sortExpensesForDisplay(
+      snap.docs.map(d => ({ id: d.id, ...snapshotDataWithServerEstimate(d) }))
+    );
+    const nextSignature = expenseRenderSignature(nextAllExpenses);
+    const meaningfulContentChanged = nextSignature !== lastExpenseRenderSignature;
+
+    // Keep the in-memory objects fresh even on an ACK-only timestamp change,
+    // but avoid rebuilding visible DOM when the semantic expense content did
+    // not change. Metadata freshness still updates above for Backup gating.
+    allExpenses = nextAllExpenses;
     expenses = getActiveExpenses();
-    renderExpenses();
-    renderActiveExpensePanel();
-    if (expenseModalVisible("deletedItemsModal")) renderDeletedExpenses();
+    if (meaningfulContentChanged) {
+      lastExpenseRenderSignature = nextSignature;
+      renderExpenses();
+      renderActiveExpensePanel();
+      if (expenseModalVisible("deletedItemsModal")) renderDeletedExpenses();
+    }
     setModuleStatus(`Synced (${tripId})`);
     tryRunPendingExcelExport();
   }, err => {
@@ -2441,9 +2517,16 @@ function listenToSettlements() {
     if (bindingEpoch !== expenseBindingEpoch) return;
     settlementsLiveReady = true;
     updateBackupSyncMeta("settlements", snap);
-    settlements = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    if(activeExpensesTab === "settlement") renderSummary();
-    if(activeExpensesTab === "analytics") renderAnalytics();
+    settlements = snap.docs.map(d => ({ id: d.id, ...snapshotDataWithServerEstimate(d) }));
+    const settlementSignature = semanticRecordSignature(
+      [...settlements].sort((a, b) => String(a?.id || "").localeCompare(String(b?.id || ""))),
+      ["paidAt"]
+    );
+    if (settlementSignature !== lastSettlementRenderSignature) {
+      lastSettlementRenderSignature = settlementSignature;
+      if(activeExpensesTab === "settlement") renderSummary();
+      if(activeExpensesTab === "analytics") renderAnalytics();
+    }
     tryRunPendingExcelExport();
   }, err => {
     if (bindingEpoch !== expenseBindingEpoch) return;
@@ -2462,8 +2545,15 @@ function listenToActivityLogs() {
     if (bindingEpoch !== expenseBindingEpoch) return;
     activityLogsLiveReady = true;
     updateBackupSyncMeta("activityLogs", snap);
-    activityLogs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    if(expenseModalVisible("activityLogModal")) renderActivityLogs();
+    activityLogs = snap.docs.map(d => ({ id: d.id, ...snapshotDataWithServerEstimate(d) }));
+    const activitySignature = semanticRecordSignature(
+      [...activityLogs].sort((a, b) => String(a?.id || "").localeCompare(String(b?.id || ""))),
+      ["createdAt"]
+    );
+    if (activitySignature !== lastActivityLogRenderSignature) {
+      lastActivityLogRenderSignature = activitySignature;
+      if(expenseModalVisible("activityLogModal")) renderActivityLogs();
+    }
     tryRunPendingExcelExport();
   }, err => {
     if (bindingEpoch !== expenseBindingEpoch) return;
@@ -2620,20 +2710,27 @@ async function saveQuickExpense() {
 
   void (async () => {
     try {
-      const docRef = await addDoc(getExpensesCollection(), payload);
-
-      // Activity logging is secondary to the expense write and must never keep
-      // the Quick Add UI busy. A log failure does not mean the expense failed.
-      try {
-        await logActivity("expense_created", `${displayName} 快速新增 ${payload.title} ${payload.originalCurrency} ${payload.originalAmount.toFixed(2)}`, "expense", docRef.id, {
+      // Pre-allocate both IDs and commit Expense + Activity Log atomically.
+      // This removes the old serial addDoc -> logActivity network chain while
+      // preserving Firestore latency compensation for both realtime listeners.
+      const expenseRef = doc(getExpensesCollection());
+      const activityRef = doc(getActivityLogsCollection());
+      const activityPayload = buildActivityLogPayload(
+        "expense_created",
+        `${displayName} 快速新增 ${payload.title} ${payload.originalCurrency} ${payload.originalAmount.toFixed(2)}`,
+        "expense",
+        expenseRef.id,
+        {
           title: payload.title,
           amount: payload.originalAmount,
           currency: payload.originalCurrency,
           quickAdd: true
-        });
-      } catch (logError) {
-        console.warn("Quick Add activity log failed:", logError);
-      }
+        }
+      );
+      const batch = writeBatch(db);
+      batch.set(expenseRef, payload);
+      if (activityPayload) batch.set(activityRef, activityPayload);
+      await batch.commit();
     } catch (error) {
       console.error("Quick Add failed:", error);
 
@@ -4713,6 +4810,7 @@ subscribeAuthState(async (user) => {
     if (stopActivityLogsListener) stopActivityLogsListener();
     allExpenses = [];
     expenses = [];
+    lastExpenseRenderSignature = "";
     recentExpenseCacheHydrationStarted = false;
     recentExpensesLiveReady = false;
     settlementsLiveReady = false;
@@ -4786,6 +4884,7 @@ window.__rebindExpensesForTrip = async function rebindExpensesModuleForTrip(next
   members = [];
   allExpenses = [];
   expenses = [];
+  lastExpenseRenderSignature = "";
   settlements = [];
   activityLogs = [];
   recentExpenseCacheHydrationStarted = false;
