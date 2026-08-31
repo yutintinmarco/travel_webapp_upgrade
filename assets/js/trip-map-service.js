@@ -1286,6 +1286,11 @@ export async function createTripMap(container, { points = [], onSelect = null, o
       position: point.position,
       title: point.title,
       content: markerElement(point),
+      // AdvancedMarker defaults to bottom-centre anchoring. Trip Overview
+      // routes use the same geographic point, so centre-anchor the circular
+      // marker to make the polyline pass through its visual centre.
+      anchorLeft: "-50%",
+      anchorTop: "-50%",
       gmpClickable: true,
       zIndex: 100 + Number(point.order || 0)
     });
