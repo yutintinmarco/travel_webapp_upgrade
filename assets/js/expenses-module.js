@@ -645,6 +645,27 @@ let activeExpenseDrag = null;
 
 
 let lastModuleStatus = "Connecting";
+const MODULE_STATUS_COPY = Object.freeze({
+    "No access to settlements": "找數資料暫時未能同步",
+    "No access to expenses": "支出資料暫時未能同步",
+    "No access to activity logs": "操作記錄暫時未能同步",
+    "Waiting for Firestore Rules": "雲端權限設定尚未完成",
+    "Confirming Trip access": "正在確認旅程權限…",
+    "No Trip access": "目前帳戶沒有此旅程的支出寫入權限",
+    "Connecting": "正在同步支出資料…",
+    "Sync error": "支出資料同步失敗，請稍後再試",
+    "Settlement sync error": "找數資料同步失敗，請稍後再試",
+    "Activity log sync error": "操作記錄同步失敗，請稍後再試",
+    "Preparing Excel...": "正在準備 Excel…",
+    "Preparing Excel data...": "正在整理 Excel 資料…",
+    "Export error": "Excel 匯出失敗，請再試",
+    "Preparing JSON backup...": "正在準備 JSON Backup…",
+    "JSON export error": "JSON Backup 匯出失敗，請再試",
+    "OCR error": "OCR 辨識失敗，請再試",
+    "Init error": "支出功能暫時未能載入",
+    "Please sign in": "請先登入 Google 帳戶"
+  });
+
 
 function renderCompactModuleStatus(message = lastModuleStatus) {
   lastModuleStatus = message || lastModuleStatus || "Ready";
@@ -662,15 +683,7 @@ function renderCompactModuleStatus(message = lastModuleStatus) {
     return;
   }
 
-  const friendly =
-    raw === "No access to settlements" ? "找數資料暫時未能同步" :
-    raw === "No access to expenses" ? "支出資料暫時未能同步" :
-    raw === "No access to activity logs" ? "操作記錄暫時未能同步" :
-    raw === "Waiting for Firestore Rules" ? "Firebase 權限設定尚未完成" :
-    raw === "Confirming Trip access" ? "正在確認旅程權限…" :
-    raw === "No Trip access" ? "目前帳戶沒有此旅程的支出寫入權限" :
-    raw === "Connecting" ? "正在同步支出資料…" :
-    getCleanModuleStatus(raw);
+  const friendly = MODULE_STATUS_COPY[raw] || getCleanModuleStatus(raw);
 
   syncStatus.textContent = friendly;
   if (footer) {
@@ -919,12 +932,12 @@ function updateCurrencySelectOptions() {
 
 function getCleanModuleStatus(message) {
   const raw = String(message || "Ready");
-  if (!tripId) return raw;
-  return raw
-    .replace(new RegExp(`\\s*\\(${escapeRegExp(tripId)}\\)`, "g"), "")
-    .replace(/\\s+$/g, "");
+  const cleaned = (tripId ? raw.replace(new RegExp(`\\s*\\(${escapeRegExp(tripId)}\\)`, "g"), "") : raw).replace(/\s+$/g, "");
+  if (/[\u3400-\u9FFF]/.test(cleaned)) return cleaned;
+  if (/Preparing|Connecting|Confirming/i.test(cleaned)) return "正在處理支出資料…";
+  if (/error|failed|denied|Rules/i.test(cleaned)) return "支出功能暫時未能完成，請稍後再試";
+  return "支出資料正在處理…";
 }
-
 function getCurrentUserDisplayName() {
   if (!currentUser) return "未知用戶";
   return currentUser.displayName || currentUser.email || currentUser.uid.slice(0, 7) + "…";
