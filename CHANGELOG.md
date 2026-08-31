@@ -1,3 +1,11 @@
+# v7.9.20.21 — Flight Overview Source-of-Truth Fix
+
+- Fixed the itinerary homepage flight summary so it only presents flights explicitly marked as `journeyRole: entry` or `journeyRole: exit` in Flight Manager.
+- Internal flights are no longer promoted to outbound / return summary slots when an entry or exit flight is missing.
+- A Team with only internal flights no longer creates a homepage flight summary row; if no Team has an entry or exit flight, the flight overview card hides automatically.
+- Flight Manager remains the only editable source of flight data; the homepage card is now strictly a derived summary.
+- No Firebase schema, rules, Storage rules or Functions changes.
+
 # v7.9.20.20 — Dark Sheet Close + Day Bar Layer Hotfix
 
 - Dark Mode sheet dismissal no longer inherits the legacy high-specificity `modal-backdrop` fill. The interactive backdrop can now fade from its active dim state back to transparent while the sheet closes, removing the brief all-page black frame seen on iPhone.
