@@ -477,12 +477,17 @@ export function itineraryMapPoints(trip, activeDayId = "") {
     const anchorType = routeAnchorTypeFromItem(item, itemKind);
     const mapRole = anchorType ? "anchor" : (itemKind === ITINERARY_ITEM_KIND.TRANSIT ? "transit" : "stop");
     const routeMode = itemKind === ITINERARY_ITEM_KIND.TRANSIT || anchorType ? routeModeFromItineraryItem(item) : MAP_ROUTE_MODE.UNKNOWN;
+    const mapMarkerVisible = item?.mapMarkerVisible !== false;
     return {
       kind: "itinerary",
       itemKind,
       mapRole,
       anchorType,
-      routeEligible: mapRole === "anchor" || itemKind === ITINERARY_ITEM_KIND.STOP,
+      mapMarkerVisible,
+      // Map presentation is intentionally separate from Transit endpoint semantics.
+      // A hidden Stop remains in itinerary data for Transit routing, but does not
+      // become an invisible bend / endpoint in the Trip Overview sequence line.
+      routeEligible: mapRole === "anchor" || (itemKind === ITINERARY_ITEM_KIND.STOP && mapMarkerVisible),
       routeMode,
       identity: `item:${clean(day.dayId)}:${clean(item?.itemId) || index}`,
       dayId: clean(day.dayId),
@@ -1130,7 +1135,7 @@ export async function createTransitRoutePreview(container, { route = null, origi
   };
 }
 
-export async function createTripMap(container, { points = [], onSelect = null, onMapTap = null, connectSequence = false, routeGroups = [], focusPaddingTop = 122, showSequenceLine = true } = {}) {
+export async function createTripMap(container, { points = [], onSelect = null, onMapTap = null, connectSequence = false, routeGroups = [], initialFocusPoints = null, focusPaddingTop = 122, showSequenceLine = true } = {}) {
   if (!container) throw new Error("Map container is required");
   const { maps, marker, core } = await loadGoogleMapsLibraries();
   const map = new maps.Map(container, {
@@ -1162,54 +1167,61 @@ export async function createTripMap(container, { points = [], onSelect = null, o
     core.event.addListenerOnce(map, "idle", () => { if (map.getZoom() > maxZoom) map.setZoom(maxZoom); });
   };
 
-  const effectiveRouteGroups = Array.isArray(routeGroups) && routeGroups.length
-    ? routeGroups
-    : (connectSequence ? [{ points, color: "#007aff" }] : []);
-  effectiveRouteGroups.forEach((group, groupIndex) => {
-    const rows = (Array.isArray(group?.points) ? group.points : []).slice().sort((a, b) => Number(a.routeOrder ?? a.order ?? 0) - Number(b.routeOrder ?? b.order ?? 0));
-    const paths = [];
-    let current = [];
-    rows.forEach(point => {
-      if (point?.routeEligible === false) return;
-      if (point?.itemKind === ITINERARY_ITEM_KIND.TRANSIT && point?.mapRole !== "anchor") return;
-      if (!point?.position) {
-        if (current.length > 1) paths.push(current);
-        current = [];
-        return;
-      }
-      current.push(point.position);
-    });
-    if (current.length > 1) paths.push(current);
-    const color = clean(group?.color) || "#007aff";
-    paths.forEach((path, pathIndex) => {
-      if (!maps.Polyline) return;
-      const zBase = 1 + groupIndex * 20 + pathIndex * 2;
-      const halo = new maps.Polyline({
-        map: showSequenceLine ? map : null, path, clickable: false, geodesic: false,
-        strokeColor: "#ffffff", strokeOpacity: effectiveRouteGroups.length > 1 ? 0.72 : 0.88, strokeWeight: 8, zIndex: zBase
+  const clearRouteOverlays = () => {
+    routeOverlays.splice(0).forEach(line => { try { line.setMap(null); } catch (_) {} });
+  };
+  const renderRouteGroups = (groupsInput = [], visible = true) => {
+    clearRouteOverlays();
+    const effectiveRouteGroups = Array.isArray(groupsInput) && groupsInput.length
+      ? groupsInput
+      : (connectSequence ? [{ points, color: "#007aff" }] : []);
+    effectiveRouteGroups.forEach((group, groupIndex) => {
+      const rows = (Array.isArray(group?.points) ? group.points : []).slice().sort((a, b) => Number(a.routeOrder ?? a.order ?? 0) - Number(b.routeOrder ?? b.order ?? 0));
+      const paths = [];
+      let current = [];
+      rows.forEach(point => {
+        if (point?.routeEligible === false) return;
+        if (point?.itemKind === ITINERARY_ITEM_KIND.TRANSIT && point?.mapRole !== "anchor") return;
+        if (!point?.position) {
+          if (current.length > 1) paths.push(current);
+          current = [];
+          return;
+        }
+        current.push(point.position);
       });
-      const arrowPath = window.google?.maps?.SymbolPath?.FORWARD_CLOSED_ARROW;
-      const icons = arrowPath ? [{
-        icon: {
-          path: arrowPath,
-          scale: 4.15,
-          fillColor: color,
-          fillOpacity: 1,
-          strokeColor: "#ffffff",
-          strokeOpacity: 0.92,
-          strokeWeight: 1.15
-        },
-        offset: "58px",
-        repeat: "132px"
-      }] : undefined;
-      const route = new maps.Polyline({
-        map: showSequenceLine ? map : null, path, clickable: false, geodesic: false,
-        strokeColor: color, strokeOpacity: effectiveRouteGroups.length > 1 ? 0.84 : 0.92, strokeWeight: 4,
-        icons, zIndex: zBase + 1
+      if (current.length > 1) paths.push(current);
+      const color = clean(group?.color) || "#007aff";
+      paths.forEach((path, pathIndex) => {
+        if (!maps.Polyline) return;
+        const zBase = 1 + groupIndex * 20 + pathIndex * 2;
+        const halo = new maps.Polyline({
+          map: visible ? map : null, path, clickable: false, geodesic: false,
+          strokeColor: "#ffffff", strokeOpacity: effectiveRouteGroups.length > 1 ? 0.72 : 0.88, strokeWeight: 8, zIndex: zBase
+        });
+        const arrowPath = window.google?.maps?.SymbolPath?.FORWARD_CLOSED_ARROW;
+        const icons = arrowPath ? [{
+          icon: {
+            path: arrowPath,
+            scale: 4.15,
+            fillColor: color,
+            fillOpacity: 1,
+            strokeColor: "#ffffff",
+            strokeOpacity: 0.92,
+            strokeWeight: 1.15
+          },
+          offset: "58px",
+          repeat: "132px"
+        }] : undefined;
+        const route = new maps.Polyline({
+          map: visible ? map : null, path, clickable: false, geodesic: false,
+          strokeColor: color, strokeOpacity: effectiveRouteGroups.length > 1 ? 0.84 : 0.92, strokeWeight: 4,
+          icons, zIndex: zBase + 1
+        });
+        routeOverlays.push(halo, route);
       });
-      routeOverlays.push(halo, route);
     });
-  });
+  };
+  renderRouteGroups(routeGroups, showSequenceLine);
 
   points.forEach(point => {
     if (!point?.position) return;
@@ -1225,7 +1237,8 @@ export async function createTripMap(container, { points = [], onSelect = null, o
     markerRows.push({ point, marker: advanced, content: advanced.content, baseZIndex: 100 + Number(point.order || 0) });
   });
 
-  focusPoints(points, { maxZoom: 15, padding: { top: Math.max(122, Number(focusPaddingTop) || 122), right: 34, bottom: 188, left: 34 } });
+  const initialRows = Array.isArray(initialFocusPoints) && initialFocusPoints.length ? initialFocusPoints : points;
+  focusPoints(initialRows, { maxZoom: 15, padding: { top: Math.max(122, Number(focusPaddingTop) || 122), right: 34, bottom: 188, left: 34 } });
   map.addListener("click", () => { try { onMapTap?.(); } catch (_) {} });
 
   return {
@@ -1256,6 +1269,9 @@ export async function createTripMap(container, { points = [], onSelect = null, o
     setRouteVisible(visible = true) {
       const show = Boolean(visible);
       routeOverlays.forEach(line => { try { line.setMap(show ? map : null); } catch (_) {} });
+    },
+    setRouteGroups(nextGroups = [], { visible = true } = {}) {
+      renderRouteGroups(nextGroups, Boolean(visible));
     },
     point(identity) { return pointByIdentity.get(identity) || null; },
     destroy() {

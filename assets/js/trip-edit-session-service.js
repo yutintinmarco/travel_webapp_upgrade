@@ -7,7 +7,7 @@ import {
 } from "./firestore-observed-service.js";
 
 const USER_EDITABLE_ITEM_FIELDS = ["time", "title", "note", "who", "icon", "detail"];
-const PERSISTED_ITEM_FIELDS = ["time", "title", "note", "who", "icon", "detail", "booked", "sortOrder"];
+const PERSISTED_ITEM_FIELDS = ["time", "title", "note", "who", "icon", "detail", "booked", "mapMarkerVisible", "sortOrder"];
 const TRAVEL_SOURCE_LINK_TYPES = new Set(["flight", "accommodation-checkin", "accommodation-checkout"]);
 const VALID_ITEM_KINDS = new Set(["stop", "transit"]);
 const VALID_ROLES = new Set(["owner", "admin"]);
@@ -523,6 +523,7 @@ function newDraftRecord(dayId, kindInput, fields = {}) {
     who: clean(fields.who) || "all",
     popup: false,
     booked: Boolean(fields.booked),
+    mapMarkerVisible: fields.mapMarkerVisible !== false,
     detail: clean(fields.detail),
     maps: clean(fields.location?.mapsUrl),
     gallery: Array.isArray(fields.gallery) ? clonePlain(fields.gallery) : [],
@@ -546,6 +547,7 @@ function draftToNewItem(draft = {}) {
     who: clean(draft.who) || "all",
     popup: Boolean(draft.popup),
     booked: Boolean(draft.booked),
+    mapMarkerVisible: draft.mapMarkerVisible !== false,
     detail: clean(draft.detail),
     maps: clean(draft.location?.mapsUrl || draft.maps),
     gallery: Array.isArray(draft.gallery) ? clonePlain(draft.gallery) : [],
@@ -568,6 +570,7 @@ function itemSnapshot(item = {}, fallbackSortOrder = 999999) {
     note: clean(item?.note),
     who: clean(item?.who) || "all",
     booked: Boolean(item?.booked),
+    mapMarkerVisible: item?.mapMarkerVisible !== false,
     icon: clean(item?.icon),
     detail: clean(item?.detail),
     sortOrder: normalizedSortOrder(item?.sortOrder, fallbackSortOrder),
@@ -582,8 +585,8 @@ function itemSnapshot(item = {}, fallbackSortOrder = 999999) {
 function samePersisted(a = {}, b = {}) {
   return PERSISTED_ITEM_FIELDS.every(field => field === "sortOrder"
     ? normalizedSortOrder(a?.[field]) === normalizedSortOrder(b?.[field])
-    : field === "booked"
-      ? Boolean(a?.[field]) === Boolean(b?.[field])
+    : field === "booked" || field === "mapMarkerVisible"
+      ? (field === "mapMarkerVisible" ? a?.[field] !== false : Boolean(a?.[field])) === (field === "mapMarkerVisible" ? b?.[field] !== false : Boolean(b?.[field]))
       : clean(a?.[field]) === clean(b?.[field])) && sameLocation(a?.location, b?.location);
 }
 function parseClockMinutes(value) {
@@ -1141,6 +1144,7 @@ export function updateTripEditDraftItem(session, dayIdInput, itemIdInput, patchI
   });
   if (!clean(next.who)) next.who = "all";
   if (Object.prototype.hasOwnProperty.call(patchInput || {}, "booked")) next.booked = Boolean(patchInput.booked);
+  if (Object.prototype.hasOwnProperty.call(patchInput || {}, "mapMarkerVisible")) next.mapMarkerVisible = patchInput.mapMarkerVisible !== false;
   if (Object.prototype.hasOwnProperty.call(patchInput || {}, "gallery")) next.gallery = Array.isArray(patchInput.gallery) ? clonePlain(patchInput.gallery) : [];
   if (Object.prototype.hasOwnProperty.call(patchInput || {}, "images")) next.images = Array.isArray(patchInput.images) ? clonePlain(patchInput.images) : [];
   if (Object.prototype.hasOwnProperty.call(patchInput || {}, "plannedTransit")) next.plannedTransit = patchInput.plannedTransit && typeof patchInput.plannedTransit === "object" ? clonePlain(patchInput.plannedTransit) : null;
@@ -1273,8 +1277,10 @@ export function tripEditChanges(session) {
     PERSISTED_ITEM_FIELDS.forEach(field => {
       if (field === "sortOrder") {
         if (normalizedSortOrder(base[field]) !== normalizedSortOrder(draft[field])) patch[field] = normalizedSortOrder(draft[field]);
-      } else if (field === "booked") {
-        if (Boolean(base[field]) !== Boolean(draft[field])) patch[field] = Boolean(draft[field]);
+      } else if (field === "booked" || field === "mapMarkerVisible") {
+        const baseValue = field === "mapMarkerVisible" ? base[field] !== false : Boolean(base[field]);
+        const draftValue = field === "mapMarkerVisible" ? draft[field] !== false : Boolean(draft[field]);
+        if (baseValue !== draftValue) patch[field] = draftValue;
       } else if (clean(base[field]) !== clean(draft[field])) {
         patch[field] = field === "who" ? (clean(draft[field]) || "all") : clean(draft[field]);
       }
@@ -1455,7 +1461,7 @@ export function applyTripEditDraftToTrip(session, tripInput, { revision = null }
         ...clonePlain(item),
         time: clean(draft.time), title: clean(draft.title), note: clean(draft.note),
         icon: clean(draft.icon), detail: clean(draft.detail), who: clean(draft.who) || "all",
-        booked: Boolean(draft.booked), sortOrder: normalizedSortOrder(draft.sortOrder, index),
+        booked: Boolean(draft.booked), mapMarkerVisible: draft.mapMarkerVisible !== false, sortOrder: normalizedSortOrder(draft.sortOrder, index),
         gallery: clonePlain(Array.isArray(draft.gallery) ? draft.gallery : []),
         images: clonePlain(Array.isArray(draft.images) ? draft.images : []),
         plannedTransit: draft.plannedTransit && typeof draft.plannedTransit === "object" ? clonePlain(draft.plannedTransit) : null,
@@ -1476,7 +1482,7 @@ export function applyTripEditDraftToTrip(session, tripInput, { revision = null }
         ...clonePlain(sourcePayload || {}), itemId: clean(draft.itemId),
         time: clean(draft.time), title: clean(draft.title), note: clean(draft.note),
         icon: clean(draft.icon), detail: clean(draft.detail), who: clean(draft.who) || "all",
-        booked: Boolean(draft.booked), sortOrder: normalizedSortOrder(draft.sortOrder),
+        booked: Boolean(draft.booked), mapMarkerVisible: draft.mapMarkerVisible !== false, sortOrder: normalizedSortOrder(draft.sortOrder),
         gallery: clonePlain(Array.isArray(draft.gallery) ? draft.gallery : []),
         images: clonePlain(Array.isArray(draft.images) ? draft.images : []),
         plannedTransit: draft.plannedTransit && typeof draft.plannedTransit === "object" ? clonePlain(draft.plannedTransit) : null,
@@ -1616,7 +1622,7 @@ export async function commitTripEditSession(session, { user: userInput = null } 
               itemId: change.itemId,
               time: clean(draft?.time), title: clean(draft?.title), note: clean(draft?.note),
               icon: clean(draft?.icon), detail: clean(draft?.detail), who: clean(draft?.who) || "all",
-              booked: Boolean(draft?.booked), sortOrder: normalizedSortOrder(draft?.sortOrder),
+              booked: Boolean(draft?.booked), mapMarkerVisible: draft?.mapMarkerVisible !== false, sortOrder: normalizedSortOrder(draft?.sortOrder),
               gallery: clonePlain(Array.isArray(draft?.gallery) ? draft.gallery : []),
               images: clonePlain(Array.isArray(draft?.images) ? draft.images : []),
               plannedTransit: draft?.plannedTransit && typeof draft.plannedTransit === "object" ? clonePlain(draft.plannedTransit) : null,
