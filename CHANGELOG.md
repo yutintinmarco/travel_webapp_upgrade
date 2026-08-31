@@ -1,3 +1,12 @@
+## v7.9.20.10 — Final Cleanup · Theme / Entry / Keyboard smoothness
+
+- Unified Auto theme resolution with the synchronous boot path: when sunrise / sunset data is unavailable, Auto now explicitly resolves to `theme-light` or `theme-dark` from the system preference instead of leaving the document with no theme class.
+- Auto theme now follows a live system colour-scheme change while no current sunrise / sunset data is available, and the duplicate initial `applyTheme()` pass was removed.
+- Stopped rebuilding the Entry Gateway spinner node when repeated state refreshes keep the same icon mode, so the CSS spinner animation no longer restarts on metadata / auth refresh churn.
+- Cached the Bottom Navigation element and keyboard open state, avoiding repeated `querySelector` / class writes on `visualViewport` scroll and resize events.
+- Kept existing keyboard semantics unchanged, including the current `<select>` behaviour.
+- No Firebase schema, Rules, Functions, Day Bar, Maps, Transit, Booking Documents, PDF Viewer, or Expenses data-flow changes. No Firebase deployment required.
+
 ## v7.9.20.9 — Final Cleanup · Release-aware precache bridge
 
 - Fix Service Worker install/runtime cache identity mismatch for release-tagged same-origin assets.
