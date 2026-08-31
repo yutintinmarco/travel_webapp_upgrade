@@ -1,5 +1,5 @@
 /* Travel WebApp Service Worker
- * v7.9.20.2 · Phase 3E Harmony B · Expense sheet alignment
+ * v7.9.20.3 · Phase 3E Cleanup C · Repository media hygiene
  *
  * Keeps the v7.7.0.14 cold-start behaviour, while hardening installation:
  *  1. Critical shell assets are transactional. If any critical file cannot be
@@ -14,7 +14,7 @@
  *     explicit reload stays network-first.
  */
 
-const SW_VERSION = "travel-shell-v7.9.20.2";
+const SW_VERSION = "travel-shell-v7.9.20.3";
 const CORE_CACHE = SW_VERSION;
 
 // Required for a useful offline launch and remembered-Trip boot.

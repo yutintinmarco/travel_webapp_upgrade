@@ -748,9 +748,6 @@
           "detail": "已預約 Nintendo Museum。請按門票入場時段到場，建議預早抵達及準備門票資料。",
           "maps": "https://www.google.com/maps/search/?api=1&query=Nintendo+Museum+Uji+Kyoto",
           "booked": true,
-          "booking": {
-            "pdf": "assets/pdf/nintendo_museum_ticket.png"
-          },
           "gallery": [
             "assets/gallery/demo_shop.svg",
             "assets/gallery/demo_food.svg",

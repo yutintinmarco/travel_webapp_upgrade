@@ -1,3 +1,11 @@
+## v7.9.20.3 — Phase 3E Cleanup C
+
+1. Removed 69 zero-reference legacy trip/gallery JPG / WEBP assets from the production repository, reducing the bundled source by about 6.17 MB while keeping the six active lightweight demo SVG fallbacks.
+2. Removed the unreferenced developer-only `assets/js/maps-config.example.js`; the active `maps-config.js` runtime configuration is unchanged.
+3. Removed the old bundled Nintendo Museum ticket PNG and its single sample `booking.pdf` pointer from local fallback `trip.json`. Legacy `booking.pdf` / `bookingPdf` read compatibility remains in code for older imported trips; Firebase Booking Documents are unchanged.
+4. Corrected the stale static App & Data version row from v7.9.19.4 to v7.9.20.3 and aligned all active release/cache identities to v7.9.20.3.
+5. Cleanup-only release: no UI geometry, Expense behaviour, Booking Documents viewer, Day Bar, Map, Transit, Location Picker, Firebase Rules or Functions changes.
+
 ## v7.9.20.2 — Full Add Expense Sheet Alignment
 
 1. Aligned the Full Add / Edit Expense sheet header with the mature Trip Team management language: left-aligned circular emoji icon plus title instead of the centred eyebrow/title treatment.
