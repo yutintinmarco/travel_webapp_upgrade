@@ -1,3 +1,11 @@
+v7.9.20.5 — Phase 3E Cleanup C Hotfix · Optimistic Quick Add
+
+- Quick Add no longer keeps the UI in「新增中…」while waiting for Firestore and the activity log. The consumed title / amount clear synchronously and the form becomes available again after a short 360 ms tap guard.
+- The 360 ms guard blocks rapid duplicate taps for the same consumed draft, while Firebase persistence continues in the background so the next expense can be entered immediately.
+- Activity logging is now secondary background work. A log failure no longer extends or changes the Quick Add interaction.
+- If the expense write itself fails, the original draft is restored only when the user has not started typing the next expense; a newer draft is never overwritten.
+- Full Add, split logic, calculations, listeners, Firebase Rules and other modules are unchanged. No Firebase deployment is required.
+
 v7.9.20.4 — Phase 3E Cleanup C Hotfix · Quick Add duplicate-submit guard
 
 - Quick Add now acquires an in-flight submission lock synchronously before its first Firestore await. Rapid repeated taps during one submission are ignored instead of creating duplicate expense documents.
