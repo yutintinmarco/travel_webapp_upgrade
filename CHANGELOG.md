@@ -1,3 +1,12 @@
+# v7.9.20.16 — Final Cleanup · Team-aware hotel route semantics + Map control spacing
+
+- Fixed the root cause of Day 1 hotel routes being pulled to the start: only the synthetic Travel Details accommodation anchor may act as an automatic day start/end. Explicit itinerary hotel visits such as 「返回酒店」 now stay strictly at their chronological itinerary order.
+- Preserved explicit itinerary hotel anchors even when the new Accommodation master exists. This keeps mid-day / end-of-day hotel visits meaningful instead of replacing them with a synthetic endpoint.
+- Made system-anchor marker dedupe Team-aware at render time. A shared hotel itinerary marker is suppressed only when the matching synthetic hotel is actually visible for the selected Team, preventing another Team's hotel from disappearing.
+- Prevented duplicate hotel route endpoints when an explicit hotel visit already represents the same synthetic accommodation at the start or end of the route.
+- Moved the compact 「路線」 control further right while leaving the existing 「當日／收藏」 segmented control completely unchanged. Narrow-screen spacing remains protected by a dedicated fallback.
+- No Firebase schema / Rules / Functions changes. No deployment required.
+
 # v7.9.20.15 — Final Cleanup · Map route polish + day-aware accommodation endpoints
 
 - Matched the `路線⌄` control to the existing `當日／收藏` segmented-control material: identical vertical shell padding, glass surface, radius, shadow, blur and light/dark colour grammar while keeping the compact control on the right.

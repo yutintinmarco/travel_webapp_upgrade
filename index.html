@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
   <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
   <link rel="dns-prefetch" href="https://api.open-meteo.com">
-  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?release=7.9.20.15">
+  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?release=7.9.20.16">
   <title id="page-title">行程</title>
   <script>
   // v7.7.5.0 · Performance Lite. Memory only: no Firebase reads/writes, no
@@ -3751,7 +3751,7 @@ html:not(.theme-light):not(.theme-dark) .cloud-safety-strip{
 #snacks-view::after,
 #info-view::after,
 #profile-view::after{
-  content:"v7.9.20.15" !important;
+  content:"v7.9.20.16" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3772,7 +3772,7 @@ html:not(.theme-light):not(.theme-dark) .cloud-safety-strip{
   display:none !important;
 }
 body.expenses-view-active .expenses-module .expenses-app::after{
-  content:"v7.9.20.15" !important;
+  content:"v7.9.20.16" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -4035,7 +4035,8 @@ body.app-admin-modal-open .app-entry-gateway{overflow:hidden;}
 .trip-map-filters .trip-activity-filter{padding:6px 12px;font-size:11px;border:0;box-shadow:none;}
 .trip-map-state{position:absolute;z-index:3;left:50%;bottom:max(24px,calc(env(safe-area-inset-bottom) + 18px));transform:translateX(-50%);max-width:min(86vw,360px);padding:9px 13px;border-radius:15px;background:rgba(248,248,250,.88);color:rgba(60,60,67,.78);font-size:11px;font-weight:600;line-height:1.35;text-align:center;box-shadow:0 4px 18px rgba(15,23,42,.12);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);}
 .trip-map-state[hidden]{display:none!important;}
-.trip-map-route-control{position:absolute;z-index:3;top:max(72px,calc(env(safe-area-inset-top) + 66px));left:calc(50% + min(105px,31vw) + 3px);display:block;padding:5px;border-radius:999px;background:rgba(248,248,250,.86);box-shadow:0 4px 18px rgba(15,23,42,.12);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);overflow:visible;}
+.trip-map-route-control{position:absolute;z-index:3;top:max(72px,calc(env(safe-area-inset-top) + 66px));left:calc(50% + min(105px,31vw) + 10px);display:block;padding:5px;border-radius:999px;background:rgba(248,248,250,.86);box-shadow:0 4px 18px rgba(15,23,42,.12);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);overflow:visible;}
+@media(max-width:350px){.trip-map-route-control{left:calc(50% + min(105px,31vw) + 4px)}.trip-map-route-menu-trigger{min-width:44px;padding-left:5px;padding-right:5px}}
 .trip-map-route-control[hidden]{display:none!important;}
 .trip-map-route-menu-trigger{position:relative;appearance:none;-webkit-appearance:none;-webkit-tap-highlight-color:transparent;min-width:48px;padding:6px 7px;border:0;border-radius:999px;background:transparent;color:#555;display:flex;align-items:center;justify-content:center;gap:3px;font:inherit;font-size:11px;font-weight:500;white-space:nowrap;}
 .trip-map-route-menu-trigger::after{content:"";position:absolute;inset:-5px;border-radius:999px;}
@@ -4485,7 +4486,7 @@ html.theme-dark .snacks-library-count,html:not(.theme-light):not(.theme-dark) .s
 </style>
             <link rel="apple-touch-icon" href="assets/icon/trip_icon.png">
   <link rel="icon" type="image/png" href="assets/icon/trip_icon.png">
-  <link rel="manifest" href="manifest.json?release=7.9.20.15">
+  <link rel="manifest" href="manifest.json?release=7.9.20.16">
   <meta name="apple-mobile-web-app-title" content="關嘉露西生日之旅">
   <!-- v7.7.1.2: expenses.css is 144KB and every rule is scoped under
        .expenses-module, yet it used to block the very first paint of the
@@ -4493,8 +4494,8 @@ html.theme-dark .snacks-library-count,html:not(.theme-light):not(.theme-dark) .s
        priority without blocking paint; ensureExpensesStylesheet() flips it to
        media="all" before the 支出 view is ever mounted, so the styling is
        byte-for-byte identical by the time anything expenses-related renders. -->
-  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?release=7.9.20.15" media="print">
-  <noscript><link rel="stylesheet" href="assets/css/expenses.css?release=7.9.20.15"></noscript>
+  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?release=7.9.20.16" media="print">
+  <noscript><link rel="stylesheet" href="assets/css/expenses.css?release=7.9.20.16"></noscript>
 
 <style id="booking-documents-v79191-style">
 /* Phase 3E · Booking Documents native hierarchy / viewer hardening.
@@ -5687,7 +5688,7 @@ dialog.booking-document-viewer.is-edge-swiping{
         <span class="profile-detail-spacer"></span>
       </div>
       <section class="profile-card" aria-label="App 資訊">
-        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.9.20.15</strong></div>
+        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.9.20.16</strong></div>
         <div class="profile-meta-row"><span>資料架構</span><strong>Phase 2G.2</strong></div>
         <div class="profile-meta-row"><span>主要資料來源</span><strong id="app-data-source-label">Firebase / 本機快取</strong></div>
       </section>
@@ -6346,7 +6347,7 @@ dialog.booking-document-viewer.is-edge-swiping{
 </div>
 
 <script>
-const APP_VERSION = "7.9.20.15";
+const APP_VERSION = "7.9.20.16";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 let tripMapServicePromise=null,transitRouteServicePromise=null,tripEditServicePromise=null,airlineLogoServicePromise=null,tripDocumentServicePromise=null,tripMapController=null,tripMapScope="day",tripMapRenderEpoch=0,tripMapSelectedPoint=null;
@@ -6512,16 +6513,23 @@ function tripMapDayPointSummary(points){const list=Array.isArray(points)?points:
 function tripMapRouteConnectionPoints(points){
   return (Array.isArray(points)?points:[]).filter(point=>{
     const mergedType=String(point?.mergedSystemAnchorType||"");
-    // A stop merged into the day's flight anchor follows the same connection
-    // preference as that flight anchor. Hotel returns remain explicit itinerary
-    // route visits even when automatic hotel start/end connection is disabled.
+    // A numbered stop merged into the day's flight anchor follows the airport
+    // connection preference. Explicit hotel visits are different: they are
+    // itinerary chronology and must remain even when automatic hotel start /
+    // end connection is disabled.
     if(mergedType==="flight"&&!tripMapConnectFlightEnabled)return false;
     if(String(point?.mapRole||"")!=="anchor")return true;
     const type=String(point?.anchorType||"");
+    if(point?.syntheticAnchor!==true)return type==="flight"?tripMapConnectFlightEnabled:true;
     if(type==="flight"&&!tripMapConnectFlightEnabled)return false;
     if(type==="hotel"&&!tripMapConnectHotelEnabled)return false;
     return true;
   });
+}
+function tripMapPointMatchesSyntheticAnchor(point,anchor){
+  const anchorId=String(anchor?.identity||"");if(!anchorId)return false;
+  if(String(point?.mergedSystemAnchorIdentity||"")===anchorId)return true;
+  return Array.isArray(point?.matchingSystemAnchorIdentities)&&point.matchingSystemAnchorIdentities.some(id=>String(id||"")===anchorId);
 }
 function tripMapSemanticRouteSequence(points){
   const source=Array.isArray(points)?points:[];
@@ -6531,21 +6539,28 @@ function tripMapSemanticRouteSequence(points){
   const hasArrivalFlight=source.some(point=>String(point?.mapRole||"")==="anchor"&&String(point?.anchorType||"")==="flight"&&String(point?.journeyRole||"")==="entry");
   const hasDepartureFlight=source.some(point=>String(point?.mapRole||"")==="anchor"&&String(point?.anchorType||"")==="flight"&&String(point?.journeyRole||"")==="exit");
   const list=tripMapRouteConnectionPoints(source).filter(point=>point?.routeEligible!==false&&point?.position).slice().sort((a,b)=>Number(a?.order||0)-Number(b?.order||0));
-  const hotel=list.find(point=>String(point?.mapRole||"")==="anchor"&&String(point?.anchorType||"")==="hotel")||null;
+  // Only the synthetic Travel Details accommodation is allowed to become an
+  // automatic day start / end. An explicit itinerary row such as “返回酒店”
+  // stays at its real chronological order and can never be pulled to 06:00.
+  const hotel=list.find(point=>String(point?.mapRole||"")==="anchor"&&String(point?.anchorType||"")==="hotel"&&point?.syntheticAnchor===true)||null;
+  const explicitHotels=list.filter(point=>String(point?.mapRole||"")==="anchor"&&String(point?.anchorType||"")==="hotel"&&point?.syntheticAnchor!==true);
   const terminals=list.filter(point=>String(point?.mapRole||"")==="anchor"&&String(point?.anchorType||"")!=="hotel");
   const stops=list.filter(point=>String(point?.mapRole||"")==="stop");
+  const visits=[...stops,...explicitHotels].sort((a,b)=>Number(a?.order||0)-Number(b?.order||0));
   const hotelCanStart=Boolean(hotel)&&hotel?.routeHotelStartEligible!==false&&!hasArrivalFlight;
   const hotelCanEnd=Boolean(hotel)&&hotel?.routeHotelEndEligible!==false&&!hasDepartureFlight;
-  if(!stops.length){const routeOnly=[...terminals,...((hotelCanStart||hotelCanEnd)?[hotel]:[])].sort((a,b)=>Number(a?.order||0)-Number(b?.order||0));return routeOnly.map((point,index)=>({...point,routeOrder:index+1}));}
-  const firstOrder=Number(stops[0]?.order||0),lastOrder=Number(stops[stops.length-1]?.order||0);
+  if(!visits.length){const routeOnly=[...terminals,...((hotelCanStart||hotelCanEnd)?[hotel]:[])].sort((a,b)=>Number(a?.order||0)-Number(b?.order||0));return routeOnly.map((point,index)=>({...point,routeOrder:index+1}));}
+  const firstOrder=Number(visits[0]?.order||0),lastOrder=Number(visits[visits.length-1]?.order||0);
   const before=terminals.filter(point=>Number(point?.order||0)<firstOrder);
   const after=terminals.filter(point=>Number(point?.order||0)>lastOrder);
   const middle=terminals.filter(point=>Number(point?.order||0)>=firstOrder&&Number(point?.order||0)<=lastOrder);
-  const core=[...stops,...middle].sort((a,b)=>Number(a?.order||0)-Number(b?.order||0));
+  const core=[...visits,...middle].sort((a,b)=>Number(a?.order||0)-Number(b?.order||0));
   const sequence=[];
-  if(before.length)sequence.push(...before);else if(hotelCanStart)sequence.push(hotel);
+  const coreStartsAtHotel=Boolean(hotel&&core.length&&tripMapPointMatchesSyntheticAnchor(core[0],hotel));
+  const coreEndsAtHotel=Boolean(hotel&&core.length&&tripMapPointMatchesSyntheticAnchor(core[core.length-1],hotel));
+  if(before.length)sequence.push(...before);else if(hotelCanStart&&!coreStartsAtHotel)sequence.push(hotel);
   sequence.push(...core);
-  if(after.length)sequence.push(...after);else if(hotelCanEnd)sequence.push(hotel);
+  if(after.length)sequence.push(...after);else if(hotelCanEnd&&!coreEndsAtHotel)sequence.push(hotel);
   return sequence.map((point,index)=>({...point,routeOrder:index+1}));
 }
 function tripMapRouteGroups(points){
@@ -6559,7 +6574,18 @@ function tripMapRouteGroups(points){
   return groups.length?groups:[makeGroup(list,"#007aff")];
 }
 function tripMapVisibleDayPoints(points){return tripMapTeam==="all"?(Array.isArray(points)?points:[]):(Array.isArray(points)?points:[]).filter(point=>tripMapPointMatchesTeam(point,tripMapTeam));}
-function tripMapVisibleMarkerPoints(points){return tripMapVisibleDayPoints(points).filter(point=>point?.mapMarkerVisible!==false&&!point?.mergedSystemAnchorType);}
+function tripMapVisibleMarkerPoints(points){
+  const visible=tripMapVisibleDayPoints(points),visibleSystemIds=new Set(visible.filter(point=>point?.syntheticAnchor===true&&["flight","hotel"].includes(String(point?.anchorType||""))).map(point=>String(point?.identity||"")).filter(Boolean));
+  return visible.filter(point=>{
+    if(point?.mapMarkerVisible===false)return false;
+    if(point?.syntheticAnchor===true)return true;
+    const matches=Array.isArray(point?.matchingSystemAnchorIdentities)?point.matchingSystemAnchorIdentities.map(id=>String(id||"")):[];
+    // Suppress a duplicate itinerary marker only when the matching system anchor
+    // is actually visible for the current Team. This prevents a shared “返回酒店”
+    // marker from disappearing merely because it matched another Team's hotel.
+    return !matches.some(id=>visibleSystemIds.has(id));
+  });
+}
 function tripMapInitialFocusRows(routeContext,visibleMarkers){
   const routeRows=tripMapRouteGroups(routeContext).flatMap(group=>Array.isArray(group?.points)?group.points:[]).filter(point=>point?.position);
   const seen=new Set(),rows=[];
