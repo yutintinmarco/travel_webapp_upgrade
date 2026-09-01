@@ -1,3 +1,10 @@
+# v7.9.20.22 — Final Cleanup · Trip Edit Font Scale
+
+- Completed the remaining Trip Edit text migration to the existing `--font-scale` system.
+- Trip Edit labels, inputs, date/time displays, location results, travel cards, management rows, taxonomy controls and document text now respect 0.85 / 1.0 / 1.25 font scaling.
+- Kept icon, emoji, chevron and other visual glyph geometry at fixed sizes so text scaling does not inflate control chrome.
+- No Firebase schema, rules, Functions, Map, Transit, Booking Document viewer, Day Bar or Expenses behavior changes.
+
 # v7.9.20.21 — Flight Overview Source-of-Truth Fix
 
 - Fixed the itinerary homepage flight summary so it only presents flights explicitly marked as `journeyRole: entry` or `journeyRole: exit` in Flight Manager.
