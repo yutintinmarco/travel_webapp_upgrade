@@ -24,7 +24,7 @@ import {
   deleteTripMedia,
   prepareTripImageLocalAsset,
   uploadPreparedTripImage
-} from "./trip-media-service.js?release=7.9.5.0";
+} from "./trip-media-service.js";
 
 const MEDIA_SYNC_DB = "travel-trip-media-sync-v1";
 const MEDIA_SYNC_STORE = "jobs";
