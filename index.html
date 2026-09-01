@@ -12,7 +12,7 @@
   <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
   <link rel="dns-prefetch" href="https://api.open-meteo.com">
   <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
-  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?release=7.9.20.23">
+  <link rel="modulepreload" href="assets/js/trip-render-cache-service.js?release=7.9.20.24">
   <title id="page-title">行程</title>
   <script>
   // v7.7.5.0 · Performance Lite. Memory only: no Firebase reads/writes, no
@@ -3750,7 +3750,7 @@ html:not(.theme-light):not(.theme-dark) .cloud-safety-strip{
 #snacks-view::after,
 #info-view::after,
 #profile-view::after{
-  content:"v7.9.20.23" !important;
+  content:"v7.9.20.24" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -3771,7 +3771,7 @@ html:not(.theme-light):not(.theme-dark) .cloud-safety-strip{
   display:none !important;
 }
 body.expenses-view-active .expenses-module .expenses-app::after{
-  content:"v7.9.20.23" !important;
+  content:"v7.9.20.24" !important;
   display:block !important;
   width:100%;
   box-sizing:border-box;
@@ -4485,7 +4485,7 @@ html.theme-dark .snacks-library-count,html:not(.theme-light):not(.theme-dark) .s
 </style>
             <link rel="apple-touch-icon" href="assets/icon/trip_icon.png">
   <link rel="icon" type="image/png" href="assets/icon/trip_icon.png">
-  <link rel="manifest" href="manifest.json?release=7.9.20.23">
+  <link rel="manifest" href="manifest.json?release=7.9.20.24">
   <meta name="apple-mobile-web-app-title" content="關嘉露西生日之旅">
   <!-- v7.7.1.2: expenses.css is 144KB and every rule is scoped under
        .expenses-module, yet it used to block the very first paint of the
@@ -4493,8 +4493,8 @@ html.theme-dark .snacks-library-count,html:not(.theme-light):not(.theme-dark) .s
        priority without blocking paint; ensureExpensesStylesheet() flips it to
        media="all" before the 支出 view is ever mounted, so the styling is
        byte-for-byte identical by the time anything expenses-related renders. -->
-  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?release=7.9.20.23" media="print">
-  <noscript><link rel="stylesheet" href="assets/css/expenses.css?release=7.9.20.23"></noscript>
+  <link id="expenses-stylesheet" rel="stylesheet" href="assets/css/expenses.css?release=7.9.20.24" media="print">
+  <noscript><link rel="stylesheet" href="assets/css/expenses.css?release=7.9.20.24"></noscript>
 
 <style id="booking-documents-v79191-style">
 /* Phase 3E · Booking Documents native hierarchy / viewer hardening.
@@ -4650,8 +4650,10 @@ dialog.booking-document-viewer::backdrop{background:transparent}
    Viewer uses the existing Profile back-control language and restores document gestures. */
 body.info-navigation-active .scroll-shell,body.info-edge-swipe-active .scroll-shell{overflow:hidden!important}
 
-/* Day Bar material is local to the same sticky stacking context, exactly like
-   .trip-edit-sticky-add. The scrollable Day pill plane itself is unchanged. */
+/* Day Bar material belongs to the sticky shell itself. Painting the material
+   on a pseudo-element repeatedly exposed an iOS Safari compositing bug where
+   scrolling itinerary content could appear above/through the Day Bar. Keep the
+   proven geometry and sticky position unchanged; only the backing owner changes. */
 .day-tabs-sticky-shell{
   position:sticky;
   top:calc(var(--compact-header-h) + env(safe-area-inset-top,0px));
@@ -4660,25 +4662,14 @@ body.info-navigation-active .scroll-shell,body.info-edge-swipe-active .scroll-sh
   box-sizing:border-box;
   margin:14px 0 10px calc(50% - 50vw);
   background:transparent;
+  border-bottom:.5px solid transparent;
+  backdrop-filter:none;
+  -webkit-backdrop-filter:none;
+  transition:background .20s ease,border-color .20s ease,backdrop-filter .20s ease;
   isolation:isolate;
 }
-.day-tabs-sticky-shell::before{
-  content:"";
-  position:absolute;
-  /* Keep the local sticky material above scrolling itinerary content.
-     A negative child layer can slip behind the sticky stacking context on iOS Safari. */
-  z-index:0;
-  left:50%;top:0;
-  width:100vw;height:100%;
-  transform:translateX(-50%);
-  background:transparent;
-  border-bottom:.5px solid transparent;
-  backdrop-filter:blur(0);
-  -webkit-backdrop-filter:blur(0);
-  transition:background .20s ease,border-color .20s ease,backdrop-filter .20s ease;
-  pointer-events:none;
-}
-.day-tabs-sticky-shell.is-stuck::before{
+.day-tabs-sticky-shell::before{display:none!important;content:none!important}
+.day-tabs-sticky-shell.is-stuck{
   background:var(--sticky-material);
   border-bottom-color:var(--separator);
   backdrop-filter:blur(24px) saturate(155%);
@@ -4812,7 +4803,7 @@ html.theme-dark .booking-document-viewer-bar .booking-document-viewer-back,html:
   -webkit-user-drag:none;
   touch-action:pan-x pan-y;
 }
-@media(prefers-reduced-motion:reduce){.day-tabs-sticky-shell::before{transition:none!important}}
+@media(prefers-reduced-motion:reduce){.day-tabs-sticky-shell{transition:none!important}}
 </style>
 
 <style id="booking-documents-v79194-style">
@@ -5689,7 +5680,7 @@ dialog.booking-document-viewer.is-edge-swiping{
         <span class="profile-detail-spacer"></span>
       </div>
       <section class="profile-card" aria-label="App 資訊">
-        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.9.20.23</strong></div>
+        <div class="profile-meta-row" style="border-top:0;padding-top:2px;"><span>目前版本</span><strong>v7.9.20.24</strong></div>
         <div class="profile-meta-row"><span>資料架構</span><strong>Phase 2G.2</strong></div>
         <div class="profile-meta-row"><span>主要資料來源</span><strong id="app-data-source-label">Firebase / 本機快取</strong></div>
       </section>
@@ -6348,7 +6339,7 @@ dialog.booking-document-viewer.is-edge-swiping{
 </div>
 
 <script>
-const APP_VERSION = "7.9.20.23";
+const APP_VERSION = "7.9.20.24";
 const EXPENSES_MODULE_VERSION = APP_VERSION;
 window.APP_VERSION = APP_VERSION;
 let tripMapServicePromise=null,transitRouteServicePromise=null,tripEditServicePromise=null,airlineLogoServicePromise=null,tripDocumentServicePromise=null,tripMapController=null,tripMapScope="day",tripMapRenderEpoch=0,tripMapSelectedPoint=null;

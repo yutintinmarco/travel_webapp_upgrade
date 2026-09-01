@@ -1,3 +1,10 @@
+# v7.9.20.24 — Phase 3E Regression Hotfix · Day Bar native sticky backing
+
+- Replaced the recurring Day Bar pseudo-element/backdrop-filter backing with material painted directly on the existing local sticky shell.
+- Preserves the frozen Day Bar geometry, sticky top, pill layout, scrolling and day-switching behavior.
+- Removes the iOS Safari compositing path that could allow scrolling itinerary content to appear above or through the sticky Day Bar.
+- No Firebase rules, Functions or schema changes.
+
 # v7.9.20.23 — Phase 3E Regression Gate · stale media module release fix
 
 - Regression Gate found one stale static module import in `trip-media-sync-service.js`: `trip-media-service.js?release=7.9.5.0`.
