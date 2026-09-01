@@ -1,3 +1,9 @@
+# v7.9.20.23 — Phase 3E Regression Gate · stale media module release fix
+
+- Regression Gate found one stale static module import in `trip-media-sync-service.js`: `trip-media-service.js?release=7.9.5.0`.
+- Replaced it with the canonical static import `./trip-media-service.js`, so the current Service Worker precache can satisfy Media Sync offline / under poor network instead of forcing an obsolete release-tagged network request.
+- No UI, schema, Firebase Rules, Functions, Map, Transit, Booking Document, Expenses, Day Bar, or data-model changes.
+
 # v7.9.20.22 — Final Cleanup · Trip Edit Font Scale
 
 - Completed the remaining Trip Edit text migration to the existing `--font-scale` system.
